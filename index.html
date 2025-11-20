@@ -1,24 +1,65 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portal Administrativo Académico</title>
-    <meta name="description" content="Sistema completo de gestão académica e administrativa" />
-    <meta name="author" content="Portal Académico" />
+<html lang="pt">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/webp" href="/logo_uma.webp" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Gestão Academica - Universidade Metodista de Angola</title>
+        <meta
+            name="description"
+            content="Gestão Academica - Universidade Metodista de Angola"
+        />
+        <meta
+            name="keywords"
+            content="portal, uma, universidade metodista de angola"
+        />
 
-    <meta property="og:title" content="Portal Administrativo Académico" />
-    <meta property="og:description" content="Sistema completo de gestão académica e administrativa" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+        <!-- Fontes Poppins -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet"
+        />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+        <!-- ==================== FORÇA RECARREGAR VERSÃO NOVA (ADEUS CACHE!) ==================== -->
+        <script>
+            const BUILD_VERSION = "2025-11-07-v4"; // <--- MUDA ESTA LINHA EM CADA DEPLOY!!!
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+            if (localStorage.getItem("appVersion") !== BUILD_VERSION) {
+                localStorage.setItem("appVersion", BUILD_VERSION);
+
+                // Limpa todo o cache do browser
+                if ("caches" in window) {
+                    caches.keys().then((names) => {
+                        names.forEach((name) => caches.delete(name));
+                    });
+                }
+
+                // Desregista service workers (se existirem)
+                if ("serviceWorker" in navigator) {
+                    navigator.serviceWorker
+                        .getRegistrations()
+                        .then((registrations) => {
+                            registrations.forEach((reg) => reg.unregister());
+                        });
+                }
+
+                // Hard reload sem cache
+                window.location.reload(true);
+            }
+        </script>
+
+        <!-- ==================== CABEÇALHOS ANTI-CACHE (obrigatório) ==================== -->
+        <meta
+            http-equiv="Cache-Control"
+            content="no-cache, no-store, must-revalidate"
+        />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/src/main.tsx"></script>
+    </body>
 </html>
