@@ -10,16 +10,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Breadcrumbs } from "./Breadcrumbs";
+import { ThemeSwitcher } from "../theme-switcher";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
       <div className="flex h-16 items-center gap-4 px-4 md:px-6">
-        <SidebarTrigger className="text-foreground" />
-
-        <Breadcrumbs />
+        <SidebarTrigger className="-ml-1" />
 
         <div className="ml-auto flex items-center gap-2 md:gap-4">
           <div className="hidden md:flex items-center gap-2 w-full max-w-sm">
@@ -34,7 +33,7 @@ export function Header() {
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
@@ -48,27 +47,33 @@ export function Header() {
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">Nova avaliação disponível</p>
+                  <p className="text-sm font-medium">
+                    Nova avaliação disponível
+                  </p>
                   <p className="text-xs text-muted-foreground">Há 2 horas</p>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">Prazo de lançamento de notas</p>
+                  <p className="text-sm font-medium">
+                    Prazo de lançamento de notas
+                  </p>
                   <p className="text-xs text-muted-foreground">Há 5 horas</p>
                 </div>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">Novo utilizador registado</p>
+                  <p className="text-sm font-medium">
+                    Novo utilizador registado
+                  </p>
                   <p className="text-xs text-muted-foreground">Há 1 dia</p>
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
+          <ThemeSwitcher />
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger>
               <Button variant="ghost" className="gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg" alt="Utilizador" />
@@ -76,7 +81,9 @@ export function Header() {
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start text-sm">
                   <span className="font-medium">Admin</span>
-                  <span className="text-xs text-muted-foreground">Administrador</span>
+                  <span className="text-xs text-muted-foreground">
+                    Administrador
+                  </span>
                 </div>
               </Button>
             </DropdownMenuTrigger>
@@ -89,8 +96,8 @@ export function Header() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={(e) => {
-                  e.preventDefault();        
-                  window.location.href = '/login';
+                  e.preventDefault();
+                  window.location.href = "/login";
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />

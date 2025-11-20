@@ -1,299 +1,460 @@
-import { 
-  Shield, Users, ClipboardCheck, Wallet, Calendar, 
-  MessageSquare, UserCheck, FileCheck, GraduationCap,
-  FileText, BookOpen, Clock, BookMarked, Search,
-  Building, MapPin, Settings, FolderOpen, FileBarChart
+import {
+  Shield,
+  Users,
+  ClipboardCheck,
+  Wallet,
+  Calendar,
+  MessageSquare,
+  UserCheck,
+  FileCheck,
+  GraduationCap,
+  FileText,
+  BookOpen,
+  Clock,
+  BookMarked,
+  Search,
+  Building,
+  MapPin,
+  Settings,
+  FolderOpen,
+  FileBarChart,
 } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
-export interface MenuItem {
-  title: string;
-  icon: any;
-  path?: string;
-  children?: MenuItem[];
-}
+export const menuStructure: {
+  items: {
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: {
+      title: string;
+      url: string;
+      isActive?: boolean;
+    }[];
+  }[];
+} = {
+  items: [
+    // ----------------------------------------------------
+    // ACESSOS
+    // ----------------------------------------------------
+    {
+      title: "Acessos",
+      url: "/acessos",
+      icon: Shield,
+      items: [
+        { title: "Acesso por utilizador", url: "/acessos/utilizador" },
+        { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo" },
+        {
+          title: "Funcionalidade por utilizador",
+          url: "/acessos/funcionalidade-utilizador",
+        },
+        { title: "Acessos (todos) + novos", url: "/acessos/todos" },
+        { title: "Bloquear acesso", url: "/acessos/bloquear" },
+        { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
+        { title: "Logs de acessos", url: "/acessos/logs" },
+        { title: "Utilizadores logados", url: "/acessos/logados" },
+      ],
+    },
 
-export const menuStructure: MenuItem[] = [
-  {
-    title: "Acessos",
-    icon: Shield,
-    children: [
-      { title: "Acesso por utilizador", icon: Users, path: "/acessos/utilizador" },
-      { title: "Acesso funcionalidade por grupo", icon: Shield, path: "/acessos/grupo" },
-      { title: "Funcionalidade por utilizador", icon: UserCheck, path: "/acessos/funcionalidade-utilizador" },
-      { title: "Acessos (todos) + novos", icon: Shield, path: "/acessos/todos" },
-      { title: "Bloquear acesso", icon: Shield, path: "/acessos/bloquear" },
-      { title: "Cargos Reitoria administrativo", icon: Building, path: "/acessos/cargos" },
-      { title: "Logs de acessos", icon: FileText, path: "/acessos/logs" },
-      { title: "Utilizadores logados", icon: Users, path: "/acessos/logados" },
-    ],
-  },
-  {
-    title: "Assiduidade",
-    icon: ClipboardCheck,
-    children: [
-      { title: "Controle de assiduidade", icon: ClipboardCheck, path: "/assiduidade/controle" },
-      { title: "Assiduidade por docente", icon: UserCheck, path: "/assiduidade/docente" },
-      { title: "Assiduidade + sumário", icon: FileText, path: "/assiduidade/sumario" },
-      { title: "Assiduidade aulas de campo", icon: MapPin, path: "/assiduidade/campo" },
-      { title: "Marcar assiduidade", icon: ClipboardCheck, path: "/assiduidade/marcar" },
-      { title: "Marcar assiduidade prova", icon: FileCheck, path: "/assiduidade/prova" },
-    ],
-  },
-  {
-    title: "Avaliações",
-    icon: FileCheck,
-    children: [
-      { title: "Controle de lançamento de notas", icon: FileCheck, path: "/avaliacoes/controle" },
-      { title: "Fórmula por unidade curricular", icon: FileText, path: "/avaliacoes/formula-uc" },
-      { title: "Fórmula para grade com oral", icon: FileText, path: "/avaliacoes/formula-oral" },
-      { title: "Estatísticas", icon: FileBarChart, path: "/avaliacoes/estatisticas" },
-      { title: "Estudantes inscritos", icon: Users, path: "/avaliacoes/estudantes" },
-      { title: "Histórico de lançamentos", icon: Clock, path: "/avaliacoes/historico" },
-      { title: "Lançamento de pauta", icon: FileCheck, path: "/avaliacoes/pauta" },
-      { title: "Lançamento de notas", icon: FileCheck, path: "/avaliacoes/notas" },
-      { title: "Lista de presença", icon: ClipboardCheck, path: "/avaliacoes/presenca" },
-      { title: "Parâmetros", icon: Settings, path: "/avaliacoes/parametros" },
-      { title: "Pauta geral", icon: FileText, path: "/avaliacoes/pauta-geral" },
-      { title: "Pauta por UC", icon: FileText, path: "/avaliacoes/pauta-uc" },
-      { title: "Permissão fora do prazo", icon: Shield, path: "/avaliacoes/permissao" },
-      { title: "Validação", icon: FileCheck, path: "/avaliacoes/validacao" },
-      { title: "Visualizar notas", icon: Search, path: "/avaliacoes/visualizar" },
-    ],
-  },
-  {
-    title: "Bolsa e Desconto",
-    icon: Wallet,
-    children: [
-      { title: "Atribuição", icon: Wallet, path: "/bolsa/atribuicao" },
-      { title: "Estatísticas", icon: FileBarChart, path: "/bolsa/estatisticas" },
-      { title: "Histórico", icon: Clock, path: "/bolsa/historico" },
-      { title: "Instituições", icon: Building, path: "/bolsa/instituicoes" },
-      { title: "Inserção de pagamentos", icon: Wallet, path: "/bolsa/pagamentos" },
-      { title: "Bolseiros", icon: Users, path: "/bolsa/bolseiros" },
-      { title: "Pagamentos bolseiros", icon: Wallet, path: "/bolsa/pagamentos-bolseiros" },
-      { title: "Percentagem de aproveitamento", icon: FileBarChart, path: "/bolsa/aproveitamento" },
-    ],
-  },
-  {
-    title: "Calendário Académico (Lic.)",
-    icon: Calendar,
-    children: [
-      { title: "Atividades letivas", icon: Calendar, path: "/calendario-lic/atividades" },
-      { title: "Calendário de provas", icon: Calendar, path: "/calendario-lic/provas" },
-      { title: "Dias isentos", icon: Calendar, path: "/calendario-lic/dias-isentos" },
-      { title: "Parâmetros", icon: Settings, path: "/calendario-lic/parametros" },
-      { title: "Prazos de provas + notas", icon: Clock, path: "/calendario-lic/prazos" },
-      { title: "Criar horário", icon: Calendar, path: "/calendario-lic/criar-horario" },
-    ],
-  },
-  {
-    title: "Calendário Académico (Pós)",
-    icon: Calendar,
-    children: [
-      { title: "Atividades letivas", icon: Calendar, path: "/calendario-pos/atividades" },
-      { title: "Calendário de provas", icon: Calendar, path: "/calendario-pos/provas" },
-      { title: "Prazos", icon: Clock, path: "/calendario-pos/prazos" },
-    ],
-  },
-  {
-    title: "Comunicação",
-    icon: MessageSquare,
-    children: [
-      { title: "Avisos", icon: MessageSquare, path: "/comunicacao/avisos" },
-      { title: "Imagens de abertura", icon: FileText, path: "/comunicacao/imagens" },
-      { title: "Solicitações", icon: MessageSquare, path: "/comunicacao/solicitacoes" },
-    ],
-  },
-  {
-    title: "Criar / Editar Utilizadores",
-    icon: Users,
-    children: [
-      { title: "Alterar senha", icon: Shield, path: "/utilizadores/alterar-senha" },
-      { title: "Criar utilizador", icon: Users, path: "/utilizadores/criar" },
-    ],
-  },
-  {
-    title: "Docente",
-    icon: GraduationCap,
-    children: [
-      { title: "Calendário de aulas", icon: Calendar, path: "/docente/calendario" },
-      { title: "Horas de vigilância", icon: Clock, path: "/docente/vigilancia" },
-      { title: "Programa da UC", icon: BookOpen, path: "/docente/programa" },
-      { title: "Validação do programa", icon: FileCheck, path: "/docente/validacao" },
-      { title: "Assiduidade", icon: ClipboardCheck, path: "/docente/assiduidade" },
-    ],
-  },
-  {
-    title: "Exame de Acesso",
-    icon: FileCheck,
-    children: [
-      { title: "Candidatos do preparatório", icon: Users, path: "/exame/candidatos-prep" },
-      { title: "Admitir candidatura", icon: FileCheck, path: "/exame/admitir" },
-      { title: "Alterar senha", icon: Shield, path: "/exame/alterar-senha" },
-      { title: "Alterar tipo", icon: Settings, path: "/exame/alterar-tipo" },
-      { title: "Atribuir prova", icon: FileCheck, path: "/exame/atribuir-prova" },
-      { title: "Consultar prova", icon: Search, path: "/exame/consultar-prova" },
-      { title: "Estatísticas", icon: FileBarChart, path: "/exame/estatisticas" },
-      { title: "Estatísticas diária", icon: FileBarChart, path: "/exame/estatisticas-diaria" },
-      { title: "Inscrição época especial", icon: FileCheck, path: "/exame/epoca-especial" },
-      { title: "Lançar nota (Arq/Urbanismo)", icon: FileCheck, path: "/exame/lancar-nota" },
-      { title: "Lista de candidatos", icon: Users, path: "/exame/lista-candidatos" },
-      { title: "Admitidos", icon: Users, path: "/exame/admitidos" },
-      { title: "Admitidos sem matrícula", icon: Users, path: "/exame/sem-matricula" },
-      { title: "Sem prova marcada", icon: Users, path: "/exame/sem-prova" },
-      { title: "Provas por candidato", icon: FileCheck, path: "/exame/provas-candidato" },
-      { title: "Resultados finais", icon: FileBarChart, path: "/exame/resultados" },
-      { title: "Horários por curso", icon: Calendar, path: "/exame/horarios" },
-      { title: "Pauta geral", icon: FileText, path: "/exame/pauta-geral" },
-      { title: "Resetar prova", icon: Settings, path: "/exame/resetar" },
-      { title: "Lista de presença", icon: ClipboardCheck, path: "/exame/presenca" },
-    ],
-  },
-  {
-    title: "Gestão de Defesas e TFC",
-    icon: BookMarked,
-    children: [
-      { title: "Finalistas", icon: Users, path: "/tfc/finalistas" },
-      { title: "Orientadores", icon: GraduationCap, path: "/tfc/orientadores" },
-      { title: "Pagamentos TFC", icon: Wallet, path: "/tfc/pagamentos" },
-    ],
-  },
-  {
-    title: "Gestão de Docentes",
-    icon: GraduationCap,
-    children: [
-      { title: "Atualização de dados", icon: UserCheck, path: "/gestao-docentes/atualizacao" },
-      { title: "Alterar senha", icon: Shield, path: "/gestao-docentes/senha" },
-      { title: "Sem afetação", icon: Users, path: "/gestao-docentes/sem-afetacao" },
-      { title: "Afetações", icon: UserCheck, path: "/gestao-docentes/afetacoes" },
-      { title: "Contratos", icon: FileText, path: "/gestao-docentes/contratos" },
-      { title: "Listagem geral", icon: Users, path: "/gestao-docentes/listagem" },
-      { title: "Regentes", icon: GraduationCap, path: "/gestao-docentes/regentes" },
-      { title: "Afetados", icon: UserCheck, path: "/gestao-docentes/afetados" },
-      { title: "UC sem docentes", icon: BookOpen, path: "/gestao-docentes/uc-sem-docentes" },
-      { title: "Candidaturas", icon: FileCheck, path: "/gestao-docentes/candidaturas" },
-      { title: "Parâmetros", icon: Settings, path: "/gestao-docentes/parametros" },
-      { title: "Salário", icon: Wallet, path: "/gestao-docentes/salario" },
-      { title: "Validação docente", icon: FileCheck, path: "/gestao-docentes/validacao" },
-    ],
-  },
-  {
-    title: "Inscrições e Matrícula",
-    icon: FileCheck,
-    children: [
-      { title: "Atribuição de turma", icon: Users, path: "/inscricoes/turma" },
-      { title: "Estatísticas", icon: FileBarChart, path: "/inscricoes/estatisticas" },
-      { title: "Inserir colisão", icon: Settings, path: "/inscricoes/colisao" },
-      { title: "Diplomandos", icon: GraduationCap, path: "/inscricoes/diplomandos" },
-      { title: "Lista personalizada", icon: FileText, path: "/inscricoes/personalizada" },
-      { title: "Mensalidades (mensal)", icon: Wallet, path: "/inscricoes/mensalidades" },
-      { title: "Lista geral", icon: Users, path: "/inscricoes/lista-geral" },
-      { title: "Estado por horário", icon: Calendar, path: "/inscricoes/estado-horario" },
-      { title: "Matriculados", icon: Users, path: "/inscricoes/matriculados" },
-      { title: "Estado da matrícula", icon: FileCheck, path: "/inscricoes/estado-matricula" },
-      { title: "Sem inscrição em UC", icon: Users, path: "/inscricoes/sem-uc" },
-      { title: "Sem inscrição no curso", icon: Users, path: "/inscricoes/sem-curso" },
-      { title: "Inscritos em UC", icon: Users, path: "/inscricoes/inscritos-uc" },
-      { title: "Mensalidades por curso", icon: Wallet, path: "/inscricoes/mensalidades-curso" },
-    ],
-  },
-  {
-    title: "Plano de Estudo",
-    icon: BookOpen,
-    children: [
-      { title: "Disciplinas sem siglas", icon: BookOpen, path: "/plano/sem-siglas" },
-      { title: "Gestão de disciplinas", icon: BookOpen, path: "/plano/disciplinas" },
-      { title: "Gestão de UC por departamento", icon: Building, path: "/plano/uc-departamento" },
-      { title: "Gestão de UC no plano", icon: BookOpen, path: "/plano/uc-plano" },
-    ],
-  },
-  {
-    title: "Pós-Graduação",
-    icon: GraduationCap,
-    children: [
-      { title: "Candidatos", icon: Users, path: "/pos-graduacao/candidatos" },
-      { title: "Propinas pagas", icon: Wallet, path: "/pos-graduacao/propinas" },
-      { title: "Devedores", icon: Wallet, path: "/pos-graduacao/devedores" },
-      { title: "Matriculados", icon: Users, path: "/pos-graduacao/matriculados" },
-      { title: "Estudantes por UC", icon: Users, path: "/pos-graduacao/estudantes-uc" },
-      { title: "Inscrição em grade", icon: FileCheck, path: "/pos-graduacao/inscricao" },
-      { title: "Lançamento de notas", icon: FileCheck, path: "/pos-graduacao/notas" },
-      { title: "Lista de estudantes", icon: Users, path: "/pos-graduacao/lista-estudantes" },
-      { title: "Lista de matriculados", icon: Users, path: "/pos-graduacao/lista-matriculados" },
-      { title: "Lista de presença", icon: ClipboardCheck, path: "/pos-graduacao/presenca" },
-      { title: "TFC", icon: BookMarked, path: "/pos-graduacao/tfc" },
-    ],
-  },
-  {
-    title: "Sumário",
-    icon: FileText,
-    children: [
-      { title: "Parâmetros", icon: Settings, path: "/sumario/parametros" },
-    ],
-  },
-  {
-    title: "Ver Utilizadores",
-    icon: Users,
-    children: [
-      { title: "Lista geral", icon: Users, path: "/ver-utilizadores/geral" },
-      { title: "Lista por grupos", icon: Users, path: "/ver-utilizadores/grupos" },
-    ],
-  },
-  {
-    title: "Controle de Acesso",
-    icon: Shield,
-    children: [
-      { title: "Documentos", icon: FileText, path: "/controle-acesso/documentos" },
-      { title: "Módulos", icon: FolderOpen, path: "/controle-acesso/modulos" },
-      { title: "Solicitações encaminhadas", icon: MessageSquare, path: "/controle-acesso/solicitacoes" },
-      { title: "Aplicação", icon: Settings, path: "/controle-acesso/aplicacao" },
-      { title: "Páginas", icon: FileText, path: "/controle-acesso/paginas" },
-      { title: "Diretor do curso", icon: GraduationCap, path: "/controle-acesso/diretor" },
-      { title: "Grupos", icon: Users, path: "/controle-acesso/grupos" },
-    ],
-  },
-  {
-    title: "Documentos para o Ministério",
-    icon: FileText,
-    children: [
-      { title: "Mapa finalistas", icon: FileBarChart, path: "/ministerio/mapa-finalistas" },
-      { title: "Registro pós-graduação", icon: FileText, path: "/ministerio/registro-pos" },
-      { title: "Registro exame de acesso", icon: FileText, path: "/ministerio/registro-exame" },
-      { title: "Registro matrícula", icon: FileText, path: "/ministerio/registro-matricula" },
-    ],
-  },
-  {
-    title: "Gestão de Salas",
-    icon: Building,
-    children: [
-      { title: "Listar salas", icon: Building, path: "/salas/listar" },
-    ],
-  },
-  {
-    title: "Horários",
-    icon: Calendar,
-    children: [
-      { title: "Criar horário", icon: Calendar, path: "/horarios/criar" },
-      { title: "Horários semanais", icon: Calendar, path: "/horarios/semanais" },
-      { title: "Substitutos", icon: Users, path: "/horarios/substitutos" },
-      { title: "Horários com/sem sala", icon: Building, path: "/horarios/salas" },
-      { title: "Movimentar estudantes", icon: Users, path: "/horarios/movimentar" },
-      { title: "Permissão editar", icon: Shield, path: "/horarios/permissao" },
-      { title: "Horários por docente", icon: GraduationCap, path: "/horarios/docente" },
-      { title: "Inscrições por horário", icon: FileCheck, path: "/horarios/inscricoes" },
-      { title: "Listar horário", icon: Calendar, path: "/horarios/listar" },
-      { title: "Eliminados", icon: FileText, path: "/horarios/eliminados" },
-      { title: "Horários por sala", icon: Building, path: "/horarios/sala" },
-      { title: "Horários por UC", icon: BookOpen, path: "/horarios/uc" },
-      { title: "Parâmetros", icon: Settings, path: "/horarios/parametros" },
-    ],
-  },
-  {
-    title: "Marcação de Provas",
-    icon: FileCheck,
-    children: [
-      { title: "Controle", icon: FileCheck, path: "/marcacao-provas/controle" },
-      { title: "Marcação", icon: Calendar, path: "/marcacao-provas/marcacao" },
-    ],
-  },
-];
+    // ----------------------------------------------------
+    // ASSIDUIDADE
+    // ----------------------------------------------------
+    {
+      title: "Assiduidade",
+      url: "/assiduidade",
+      icon: ClipboardCheck,
+      items: [
+        { title: "Controle de assiduidade", url: "/assiduidade/controle" },
+        { title: "Assiduidade por docente", url: "/assiduidade/docente" },
+        { title: "Assiduidade + sumário", url: "/assiduidade/sumario" },
+        { title: "Assiduidade aulas de campo", url: "/assiduidade/campo" },
+        { title: "Marcar assiduidade", url: "/assiduidade/marcar" },
+        { title: "Marcar assiduidade prova", url: "/assiduidade/prova" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // AVALIAÇÕES
+    // ----------------------------------------------------
+    {
+      title: "Avaliações",
+      url: "/avaliacoes",
+      icon: FileCheck,
+      items: [
+        {
+          title: "Controle de lançamento de notas",
+          url: "/avaliacoes/controle",
+        },
+        {
+          title: "Fórmula por unidade curricular",
+          url: "/avaliacoes/formula-uc",
+        },
+        {
+          title: "Fórmula para grade com oral",
+          url: "/avaliacoes/formula-oral",
+        },
+        { title: "Estatísticas", url: "/avaliacoes/estatisticas" },
+        { title: "Estudantes inscritos", url: "/avaliacoes/estudantes" },
+        { title: "Histórico de lançamentos", url: "/avaliacoes/historico" },
+        { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
+        { title: "Lançamento de notas", url: "/avaliacoes/notas" },
+        { title: "Lista de presença", url: "/avaliacoes/presenca" },
+        { title: "Parâmetros", url: "/avaliacoes/parametros" },
+        { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
+        { title: "Pauta por UC", url: "/avaliacoes/pauta-uc" },
+        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
+        { title: "Validação", url: "/avaliacoes/validacao" },
+        { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // BOLSA
+    // ----------------------------------------------------
+    {
+      title: "Bolsa e Desconto",
+      url: "/bolsa",
+      icon: Wallet,
+      items: [
+        { title: "Atribuição", url: "/bolsa/atribuicao" },
+        { title: "Estatísticas", url: "/bolsa/estatisticas" },
+        { title: "Histórico", url: "/bolsa/historico" },
+        { title: "Instituições", url: "/bolsa/instituicoes" },
+        { title: "Inserção de pagamentos", url: "/bolsa/pagamentos" },
+        { title: "Bolseiros", url: "/bolsa/bolseiros" },
+        { title: "Pagamentos bolseiros", url: "/bolsa/pagamentos-bolseiros" },
+        {
+          title: "Percentagem de aproveitamento",
+          url: "/bolsa/aproveitamento",
+        },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // CALENDÁRIO LIC
+    // ----------------------------------------------------
+    {
+      title: "Cale Académico (Lic.)",
+      url: "/calendario-lic",
+      icon: Calendar,
+      items: [
+        { title: "Atividades letivas", url: "/calendario-lic/atividades" },
+        { title: "Calendário de provas", url: "/calendario-lic/provas" },
+        { title: "Dias isentos", url: "/calendario-lic/dias-isentos" },
+        { title: "Parâmetros", url: "/calendario-lic/parametros" },
+        { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
+        { title: "Criar horário", url: "/calendario-lic/criar-horario" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // CALENDÁRIO PÓS
+    // ----------------------------------------------------
+    {
+      title: "Cale Académico (Pós)",
+      url: "/calendario-pos",
+      icon: Calendar,
+      items: [
+        { title: "Atividades letivas", url: "/calendario-pos/atividades" },
+        { title: "Calendário de provas", url: "/calendario-pos/provas" },
+        { title: "Prazos", url: "/calendario-pos/prazos" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // COMUNICAÇÃO
+    // ----------------------------------------------------
+    {
+      title: "Comunicação",
+      url: "/comunicacao",
+      icon: MessageSquare,
+      items: [
+        { title: "Avisos", url: "/comunicacao/avisos" },
+        { title: "Imagens de abertura", url: "/comunicacao/imagens" },
+        { title: "Solicitações", url: "/comunicacao/solicitacoes" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // CRIAR UTILIZADORES
+    // ----------------------------------------------------
+    {
+      title: "Criar / Editar Utilizadores",
+      url: "/utilizadores",
+      icon: Users,
+      items: [
+        { title: "Alterar senha", url: "/utilizadores/alterar-senha" },
+        { title: "Criar utilizador", url: "/utilizadores/criar" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // DOCENTE
+    // ----------------------------------------------------
+    {
+      title: "Docente",
+      url: "/docente",
+      icon: GraduationCap,
+      items: [
+        { title: "Calendário de aulas", url: "/docente/calendario" },
+        { title: "Horas de vigilância", url: "/docente/vigilancia" },
+        { title: "Programa da UC", url: "/docente/programa" },
+        { title: "Validação do programa", url: "/docente/validacao" },
+        { title: "Assiduidade", url: "/docente/assiduidade" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // EXAME DE ACESSO
+    // ----------------------------------------------------
+    {
+      title: "Exame de Acesso",
+      url: "/exame",
+      icon: FileCheck,
+      items: [
+        { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
+        { title: "Admitir candidatura", url: "/exame/admitir" },
+        { title: "Alterar senha", url: "/exame/alterar-senha" },
+        { title: "Alterar tipo", url: "/exame/alterar-tipo" },
+        { title: "Atribuir prova", url: "/exame/atribuir-prova" },
+        { title: "Consultar prova", url: "/exame/consultar-prova" },
+        { title: "Estatísticas", url: "/exame/estatisticas" },
+        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+        { title: "Inscrição época especial", url: "/exame/epoca-especial" },
+        { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
+        { title: "Lista de candidatos", url: "/exame/lista-candidatos" },
+        { title: "Admitidos", url: "/exame/admitidos" },
+        { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
+        { title: "Sem prova marcada", url: "/exame/sem-prova" },
+        { title: "Provas por candidato", url: "/exame/provas-candidato" },
+        { title: "Resultados finais", url: "/exame/resultados" },
+        { title: "Horários por curso", url: "/exame/horarios" },
+        { title: "Pauta geral", url: "/exame/pauta-geral" },
+        { title: "Resetar prova", url: "/exame/resetar" },
+        { title: "Lista de presença", url: "/exame/presenca" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // TFC
+    // ----------------------------------------------------
+    {
+      title: "Gestão de Defesas e TFC",
+      url: "/tfc",
+      icon: BookMarked,
+      items: [
+        { title: "Finalistas", url: "/tfc/finalistas" },
+        { title: "Orientadores", url: "/tfc/orientadores" },
+        { title: "Pagamentos TFC", url: "/tfc/pagamentos" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // GESTÃO DE DOCENTES
+    // ----------------------------------------------------
+    {
+      title: "Gestão de Docentes",
+      url: "/gestao-docentes",
+      icon: GraduationCap,
+      items: [
+        { title: "Atualização de dados", url: "/gestao-docentes/atualizacao" },
+        { title: "Alterar senha", url: "/gestao-docentes/senha" },
+        { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
+        { title: "Afetações", url: "/gestao-docentes/afetacoes" },
+        { title: "Contratos", url: "/gestao-docentes/contratos" },
+        { title: "Listagem geral", url: "/gestao-docentes/listagem" },
+        { title: "Regentes", url: "/gestao-docentes/regentes" },
+        { title: "Afetados", url: "/gestao-docentes/afetados" },
+        { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
+        { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
+        { title: "Parâmetros", url: "/gestao-docentes/parametros" },
+        { title: "Salário", url: "/gestao-docentes/salario" },
+        { title: "Validação docente", url: "/gestao-docentes/validacao" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // INSCRIÇÕES E MATRÍCULA
+    // ----------------------------------------------------
+    {
+      title: "Inscrições e Matrícula",
+      url: "/inscricoes",
+      icon: FileCheck,
+      items: [
+        { title: "Atribuição de turma", url: "/inscricoes/turma" },
+        { title: "Estatísticas", url: "/inscricoes/estatisticas" },
+        { title: "Inserir colisão", url: "/inscricoes/colisao" },
+        { title: "Diplomandos", url: "/inscricoes/diplomandos" },
+        { title: "Lista personalizada", url: "/inscricoes/personalizada" },
+        { title: "Mensalidades (mensal)", url: "/inscricoes/mensalidades" },
+        { title: "Lista geral", url: "/inscricoes/lista-geral" },
+        { title: "Estado por horário", url: "/inscricoes/estado-horario" },
+        { title: "Matriculados", url: "/inscricoes/matriculados" },
+        { title: "Estado da matrícula", url: "/inscricoes/estado-matricula" },
+        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc" },
+        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso" },
+        { title: "Inscritos em UC", url: "/inscricoes/inscritos-uc" },
+        {
+          title: "Mensalidades por curso",
+          url: "/inscricoes/mensalidades-curso",
+        },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // PLANO DE ESTUDO
+    // ----------------------------------------------------
+    {
+      title: "Plano de Estudo",
+      url: "/plano",
+      icon: BookOpen,
+      items: [
+        { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
+        { title: "Gestão de disciplinas", url: "/plano/disciplinas" },
+        {
+          title: "Gestão de UC por departamento",
+          url: "/plano/uc-departamento",
+        },
+        { title: "Gestão de UC no plano", url: "/plano/uc-plano" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // PÓS-GRADUAÇÃO
+    // ----------------------------------------------------
+    {
+      title: "Pós-Graduação",
+      url: "/pos-graduacao",
+      icon: GraduationCap,
+      items: [
+        { title: "Candidatos", url: "/pos-graduacao/candidatos" },
+        { title: "Propinas pagas", url: "/pos-graduacao/propinas" },
+        { title: "Devedores", url: "/pos-graduacao/devedores" },
+        { title: "Matriculados", url: "/pos-graduacao/matriculados" },
+        { title: "Estudantes por UC", url: "/pos-graduacao/estudantes-uc" },
+        { title: "Inscrição em grade", url: "/pos-graduacao/inscricao" },
+        { title: "Lançamento de notas", url: "/pos-graduacao/notas" },
+        {
+          title: "Lista de estudantes",
+          url: "/pos-graduacao/lista-estudantes",
+        },
+        {
+          title: "Lista de matriculados",
+          url: "/pos-graduacao/lista-matriculados",
+        },
+        { title: "Lista de presença", url: "/pos-graduacao/presenca" },
+        { title: "TFC", url: "/pos-graduacao/tfc" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // SUMÁRIO
+    // ----------------------------------------------------
+    {
+      title: "Sumário",
+      url: "/sumario",
+      icon: FileText,
+      items: [{ title: "Parâmetros", url: "/sumario/parametros" }],
+    },
+
+    // ----------------------------------------------------
+    // VER UTILIZADORES
+    // ----------------------------------------------------
+    {
+      title: "Ver Utilizadores",
+      url: "/ver-utilizadores",
+      icon: Users,
+      items: [
+        { title: "Lista geral", url: "/ver-utilizadores/geral" },
+        { title: "Lista por grupos", url: "/ver-utilizadores/grupos" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // CONTROLE DE ACESSO
+    // ----------------------------------------------------
+    {
+      title: "Controle de Acesso",
+      url: "/controle-acesso",
+      icon: Shield,
+      items: [
+        { title: "Documentos", url: "/controle-acesso/documentos" },
+        { title: "Módulos", url: "/controle-acesso/modulos" },
+        {
+          title: "Solicitações encaminhadas",
+          url: "/controle-acesso/solicitacoes",
+        },
+        { title: "Aplicação", url: "/controle-acesso/aplicacao" },
+        { title: "Páginas", url: "/controle-acesso/paginas" },
+        { title: "Diretor do curso", url: "/controle-acesso/diretor" },
+        { title: "Grupos", url: "/controle-acesso/grupos" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // DOCUMENTOS MINISTÉRIO
+    // ----------------------------------------------------
+    {
+      title: "Documentos para o Ministério",
+      url: "/ministerio",
+      icon: FileText,
+      items: [
+        { title: "Mapa finalistas", url: "/ministerio/mapa-finalistas" },
+        { title: "Registro pós-graduação", url: "/ministerio/registro-pos" },
+        {
+          title: "Registro exame de acesso",
+          url: "/ministerio/registro-exame",
+        },
+        { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // SALAS
+    // ----------------------------------------------------
+    {
+      title: "Gestão de Salas",
+      url: "/salas",
+      icon: Building,
+      items: [{ title: "Listar salas", url: "/salas/listar" }],
+    },
+
+    // ----------------------------------------------------
+    // HORÁRIOS
+    // ----------------------------------------------------
+    {
+      title: "Horários",
+      url: "/horarios",
+      icon: Calendar,
+      items: [
+        { title: "Criar horário", url: "/horarios/criar" },
+        { title: "Horários semanais", url: "/horarios/semanais" },
+        { title: "Substitutos", url: "/horarios/substitutos" },
+        { title: "Horários com/sem sala", url: "/horarios/salas" },
+        { title: "Movimentar estudantes", url: "/horarios/movimentar" },
+        { title: "Permissão editar", url: "/horarios/permissao" },
+        { title: "Horários por docente", url: "/horarios/docente" },
+        { title: "Inscrições por horário", url: "/horarios/inscricoes" },
+        { title: "Listar horário", url: "/horarios/listar" },
+        { title: "Eliminados", url: "/horarios/eliminados" },
+        { title: "Horários por sala", url: "/horarios/sala" },
+        { title: "Horários por UC", url: "/horarios/uc" },
+        { title: "Parâmetros", url: "/horarios/parametros" },
+      ],
+    },
+
+    // ----------------------------------------------------
+    // MARCAÇÃO DE PROVAS
+    // ----------------------------------------------------
+    {
+      title: "Marcação de Provas",
+      url: "/marcacao-provas",
+      icon: FileCheck,
+      items: [
+        { title: "Controle", url: "/marcacao-provas/controle" },
+        { title: "Marcação", url: "/marcacao-provas/marcacao" },
+      ],
+    },
+  ],
+};
