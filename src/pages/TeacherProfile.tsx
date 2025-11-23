@@ -1,0 +1,293 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Briefcase,
+  GraduationCap,
+  Clock,
+  Edit,
+  FileText,
+  CalendarDays,
+  Users,
+  Building,
+} from "lucide-react";
+
+const TeacherProfile = () => {
+  const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [teacherInfo, setTeacherInfo] = useState({
+    name: "Maria Oliveira Santos",
+    employeeId: "DOC202312",
+    email: "maria.oliveira@uma.ao",
+    phone: "+244 912 345 678",
+    department: "Departamento de Informática",
+    category: "Professor Auxiliar",
+    office: "Gabinete 204 – Edifício B",
+    hireDate: "2018-09-01",
+    birthDate: "12/07/1985",
+    address: "Talatona, Luanda",
+  });
+
+  const currentClasses = [
+    { code: "INF301", name: "Programação Web", students: 38, semester: "5º" },
+    { code: "BD201", name: "Bases de Dados", students: 42, semester: "3º" },
+    { code: "ARQ101", name: "Arquitetura de Computadores", students: 35, semester: "2º" },
+  ];
+
+  const upcomingEvents = [
+    { title: "Reunião de Departamento", date: "2025-11-28", time: "14:30", type: "reuniao" },
+    { title: "Prazo de Lançamento de Notas P1", date: "2025-12-05", time: "23:59", type: "prazo" },
+    { title: "Formação Pedagógica", date: "2025-12-10", time: "09:00–17:00", type: "formacao" },
+    { title: "Avaliação por Pares", date: "2026-01-15", time: "", type: "avaliacao" },
+  ];
+
+  const handleSave = () => {
+    toast({
+      title: "Alterações guardadas!",
+      description: "Os dados do docente foram atualizados com sucesso.",
+    });
+    setIsEditing(false);
+  };
+
+  const getEventBadge = (type: string) => {
+    switch (type) {
+      case "reuniao":   return <Badge variant="default">Reunião</Badge>;
+      case "prazo":     return <Badge variant="destructive">Prazo</Badge>;
+      case "formacao":  return <Badge variant="secondary">Formação</Badge>;
+      case "avaliacao": return <Badge variant="outline">Avaliação</Badge>;
+      default:          return <Badge>Evento</Badge>;
+    }
+  };
+
+  const initials = teacherInfo.name
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase();
+
+  return (
+    <div className="space-y-6">
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Perfil do Docente</h1>
+          <p className="text-muted-foreground">Gerencie as suas informações profissionais</p>
+        </div>
+        <Button
+          variant={isEditing ? "default" : "outline"}
+          onClick={() => setIsEditing(!isEditing)}
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          {isEditing ? "Cancelar" : "Editar Dados"}
+        </Button>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Card da Foto + Info rápida */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle>Foto do Perfil</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex justify-center">
+              <Avatar className="h-40 w-40 border-4 border-background">
+                <AvatarImage src="" />
+                <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+
+            <div className="text-center space-y-2">
+              <h3 className="text-xl font-semibold">{teacherInfo.name}</h3>
+              <p className="text-sm text-muted-foreground">{teacherInfo.employeeId}</p>
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <Briefcase className="h-4 w-4" />
+                <span>{teacherInfo.category}</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Building className="h-4 w-4" />
+                <span>{teacherInfo.department}</span>
+              </div>
+            </div>
+
+            <Button className="w-full" variant="outline" disabled={!isEditing}>
+              Alterar Foto
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Informações detalhadas */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Informações Profissionais</CardTitle>
+            {isEditing && <CardDescription>Campos editáveis estão ativos.</CardDescription>}
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="personal" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="personal">Pessoal</TabsTrigger>
+                <TabsTrigger value="professional">Profissional</TabsTrigger>
+                <TabsTrigger value="classes">Turmas Atuais</TabsTrigger>
+              </TabsList>
+
+              {/* Dados Pessoais */}
+              <TabsContent value="personal" className="space-y-4 pt-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Nome Completo</Label>
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <Input value={teacherInfo.name} disabled={!isEditing}
+                        onChange={e => setTeacherInfo({ ...teacherInfo, name: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email Institucional</Label>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <Input type="email" value={teacherInfo.email} disabled={!isEditing}
+                        onChange={e => setTeacherInfo({ ...teacherInfo, email: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Telefone</Label>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <Input value={teacherInfo.phone} disabled={!isEditing}
+                        onChange={e => setTeacherInfo({ ...teacherInfo, phone: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Data de Nascimento</Label>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <Input value={teacherInfo.birthDate} disabled={!isEditing}
+                        onChange={e => setTeacherInfo({ ...teacherInfo, birthDate: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Endereço</Label>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <Input value={teacherInfo.address} disabled={!isEditing}
+                        onChange={e => setTeacherInfo({ ...teacherInfo, address: e.target.value })} />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Dados Profissionais */}
+              <TabsContent value="professional" className="space-y-4 pt-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>Nº de Funcionário</Label>
+                    <Input value={teacherInfo.employeeId} disabled />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Categoria</Label>
+                    <Input value={teacherInfo.category} disabled={!isEditing}
+                      onChange={e => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Departamento</Label>
+                    <Input value={teacherInfo.department} disabled />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Gabinete</Label>
+                    <Input value={teacherInfo.office} disabled={!isEditing}
+                      onChange={e => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Data de Admissão</Label>
+                    <Input value={new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO")} disabled />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Turmas Atuais */}
+              <TabsContent value="classes" className="pt-4">
+                <div className="space-y-3">
+                  {currentClasses.map(cls => (
+                    <div key={cls.code} className="flex items-center justify-between rounded-lg border bg-card p-4">
+                      <div className="flex items-center gap-4">
+                        <GraduationCap className="h-10 w-10 text-primary" />
+                        <div>
+                          <p className="font-semibold">{cls.code} – {cls.name}</p>
+                          <p className="text-sm text-muted-foreground">{cls.semester} • {cls.students} alunos</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <Users className="mr-2 h-4 w-4" />
+                        Ver Turma
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {isEditing && (
+              <div className="mt-6 flex gap-3">
+                <Button onClick={handleSave} className="flex-1">
+                  Guardar Alterações
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Próximos Eventos */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <CalendarDays className="h-6 w-6 text-primary" />
+            <div>
+              <CardTitle>Próximos Compromissos</CardTitle>
+              <CardDescription>Agenda académica e institucional</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {upcomingEvents.map((event, i) => (
+              <div key={i} className="flex items-start justify-between rounded-lg border bg-card p-4">
+                <div className="flex-1">
+                  <p className="font-medium">{event.title}</p>
+                  {event.time && <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                    <Clock className="h-3.5 w-3.5" />
+                    {event.time}
+                  </p>}
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium">
+                    {new Date(event.date).toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })}
+                  </p>
+                  {getEventBadge(event.type)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default TeacherProfile;

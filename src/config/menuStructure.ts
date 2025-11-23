@@ -150,7 +150,7 @@ export const menuStructure: {
         { title: "Dias isentos", url: "/calendario-lic/dias-isentos" },
         { title: "Parâmetros", url: "/calendario-lic/parametros" },
         { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
-        { title: "Criar horário", url: "/calendario-lic/criar-horario" },
+        //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
     },
 
