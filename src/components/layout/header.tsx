@@ -97,7 +97,7 @@ export function Header() {
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  window.location.href = "/login";
+                  window.location.href = "/";
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />

@@ -11,6 +11,7 @@ import { menuStructure } from "./config/menuStructure";
 
 import { ThemeProvider } from "./hooks/thme-provider";
 import { MainLayout } from "./pages/App";
+import UnderConstruction from "./pages/UnderConstruction";
 
 const queryClient = new QueryClient();
 
@@ -25,12 +26,14 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Login />} />
 
               <Route element={<MainLayout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/acessos/utilizador" element={<Index />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/dashboard" element={<Index />} />
+
+                <Route path="/alunos/novo" element={<UnderConstruction />} />
+               {/* <Route path="*" element={<NotFound />} />*/}
+                 <Route path="*" element={<UnderConstruction />} />
               </Route>
             </Routes>
           </BrowserRouter>

@@ -25,7 +25,7 @@ const Login = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo ao Portal Académico",
         });
-        navigate("/");
+        navigate("/dashboard");
       } else {
         toast({
           title: "Erro ao fazer login",

@@ -18,6 +18,7 @@ import {
   Settings,
   FolderOpen,
   FileBarChart,
+  HomeIcon,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -35,6 +36,11 @@ export const menuStructure: {
   }[];
 } = {
   items: [
+      {
+    title: "Início",
+    url: "/dashboard",
+    icon: HomeIcon, // substitua pelo ícone que desejar
+  },
     // ----------------------------------------------------
     // ACESSOS
     // ----------------------------------------------------
