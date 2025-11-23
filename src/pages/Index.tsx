@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, GraduationCap, BookOpen, FileCheck, TrendingUp, Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -124,26 +125,27 @@ const Index = () => {
           <CardDescription>Módulos mais utilizados</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { name: "Avaliações", icon: FileCheck, path: "/avaliacoes/controle" },
-              { name: "Assiduidade", icon: BookOpen, path: "/assiduidade/controle" },
-              { name: "Horários", icon: Calendar, path: "/horarios/listar" },
-              { name: "Estudantes", icon: Users, path: "/inscricoes/lista-geral" },
-            ].map((module) => {
-              const Icon = module.icon;
-              return (
-                <a
-                  key={module.name}
-                  href={module.path}
-                  className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent transition-colors"
-                >
-                  <Icon className="h-6 w-6 text-primary" />
-                  <span className="text-sm font-medium">{module.name}</span>
-                </a>
-              );
-            })}
-          </div>
+         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+  {[
+    { name: "Avaliações", icon: FileCheck, path: "/avaliacoes/controle" },
+    { name: "Assiduidade", icon: BookOpen, path: "/assiduidade/controle" },
+    { name: "Horários", icon: Calendar, path: "/horarios/listar" },
+    { name: "Estudantes", icon: Users, path: "/inscricoes/lista-geral" },
+  ].map((module) => {
+    const Icon = module.icon;
+
+    return (
+      <Link
+        key={module.name}
+        to={module.path}
+        className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+      >
+        <Icon className="h-8 w-8 text-primary" />
+        <span className="text-sm font-medium">{module.name}</span>
+      </Link>
+    );
+  })}
+</div>
         </CardContent>
       </Card>
     </div>

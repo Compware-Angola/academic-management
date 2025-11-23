@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Home, RefreshCw, SearchSlash } from "lucide-react";
@@ -65,13 +65,10 @@ const NotFound = () => {
           className="mt-12 flex flex-col gap-4 sm:flex-row sm:justify-center"
         >
           {/* Botão primário - Dashboard */}
-          <a
-            href="/dashboard"
-            className="inline-flex items-center justify-center gap-3 rounded-lg bg-primary px-8 py-4 font-medium text-primary-foreground transition-all hover:bg-primary/90 focus-visible:ring-4 focus-visible:ring-primary/30"
-          >
-            <Home size={20} />
-            Voltar ao Dashboard
-          </a>
+          <Link to="/dashboard" className="inline-flex items-center justify-center gap-3 rounded-lg bg-primary px-8 py-4 font-medium text-primary-foreground transition-all hover:bg-primary/90 focus-visible:ring-4 focus-visible:ring-primary/30"
+                             >
+                                 <span>  Ir para o Dashboard</span>
+                             </Link>
 
           {/* Botão secundário - Recarregar */}
           <button

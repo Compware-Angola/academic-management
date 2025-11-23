@@ -12,6 +12,26 @@ import { menuStructure } from "./config/menuStructure";
 import { ThemeProvider } from "./hooks/thme-provider";
 import { MainLayout } from "./pages/App";
 import UnderConstruction from "./pages/UnderConstruction";
+import CreateSchedule from "./pages/schedules/CreateSchedule";
+import ScheduleList from "./pages/schedules/ScheduleList";
+import ClassromList from "./pages/classroom/ClassromList";
+import DisciplineManagementList from "./pages/disciplinemanagement/DisciplineManagementList";
+import EnrolledList from "./pages/registrations/EnrolledList";
+import GeneralListing from "./pages/facultymanagement/GeneralListing";
+import CandidateList from "./pages/exam/CandidateList";
+import ScholarshipHoldersList from "./pages/bolsa/ScholarshipHoldersList";
+import LaunchNotes from "./pages/rating(avaliation)/LaunchNotes";
+import TeacherAttendance from "./pages/attendance/TeacherAttendance";
+import AttendanceControl from "./pages/attendance/AttendanceControl";
+import MarkAttendance from "./pages/attendance/MarkAttendance";
+import UserAccess from "./pages/access/UserAccess";
+import LoggedInUsers from "./pages/access/LoggedInUsers";
+import AccessLogs from "./pages/access/AccessLogs";
+import UserFunctionality from "./pages/access/UserFunctionality";
+import RectoratePositions from "./pages/access/RectoratePositions";
+import BlockAccess from "./pages/access/BlockAccess";
+import AllAccesses from "./pages/access/AllAccesses";
+import AcessGrup from "./pages/access/AccessGroup";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +50,31 @@ const App = () => {
 
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Index />} />
+                <Route path="/horarios/criar" element={<CreateSchedule />} />
+                <Route path="/horarios/listar" element={<ScheduleList />} />
+                <Route path="/salas/listar" element={<ClassromList />} />
+                <Route path="/plano/disciplinas" element={<DisciplineManagementList />} />
+                <Route path="/inscricoes/matriculados" element={<EnrolledList />} />
+                <Route path="/gestao-docentes/listagem" element={<GeneralListing />} />
+                <Route path="/exame/lista-candidatos" element={<CandidateList />} /> 
+                <Route path="/avaliacoes/notas" element={<LaunchNotes />} /> 
+
+                  <Route path="/bolsa/bolseiros" element={<ScholarshipHoldersList />} />
+
+
+                  <Route path="/assiduidade/docente" element={<TeacherAttendance />} />
+                  <Route path="/assiduidade/controle" element={<AttendanceControl />} />
+                  <Route path="/assiduidade/marcar" element={<MarkAttendance />} />
+
+
+                  <Route path="/acessos/utilizador" element={<UserAccess />} />
+                  <Route path="/acessos/funcionalidade-utilizador" element={<UserFunctionality />} />
+                  <Route path="/acessos/cargos" element={<RectoratePositions />} />
+                  <Route path="/acessos/logados" element={<LoggedInUsers />} />
+                  <Route path="/acessos/bloquear" element={<BlockAccess />} />
+                  <Route path="/acessos/todos" element={<AllAccesses />} />
+                  <Route path="/acessos/logs" element={<AccessLogs />} />
+                  <Route path="/acessos/grupo" element={<AcessGrup />} />
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                {/* <Route path="*" element={<NotFound />} />*/}
