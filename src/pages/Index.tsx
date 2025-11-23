@@ -7,10 +7,10 @@ import { Link } from "react-router-dom";
 const Index = () => {
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Bem-vindo ao Portal Académico"
-        subtitle="Visão geral do sistema de gestão académica"
-      />
+     <PageHeader
+  title={`Olá,Isaac Isvaldo Bunga`}
+ subtitle="Sistema de Gestão Académica da Universidade • Ano letivo 2025/2026" 
+/>
 
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

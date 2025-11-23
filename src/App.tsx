@@ -32,6 +32,7 @@ import RectoratePositions from "./pages/access/RectoratePositions";
 import BlockAccess from "./pages/access/BlockAccess";
 import AllAccesses from "./pages/access/AllAccesses";
 import AcessGrup from "./pages/access/AccessGroup";
+import TeacherProfile from "./pages/TeacherProfile";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => {
                   <Route path="/acessos/todos" element={<AllAccesses />} />
                   <Route path="/acessos/logs" element={<AccessLogs />} />
                   <Route path="/acessos/grupo" element={<AcessGrup />} />
+                  <Route path="/profile" element={<TeacherProfile />} />
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                {/* <Route path="*" element={<NotFound />} />*/}

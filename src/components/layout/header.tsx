@@ -13,8 +13,10 @@ import {
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeSwitcher } from "../theme-switcher";
+import { useNavigate } from "react-router-dom";
 
 export function Header() {
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
       <div className="flex h-16 items-center gap-4 px-4 md:px-6">
@@ -90,9 +92,14 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-56 bg-popover">
               <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  navigate("/profile");
+                }}
+              >
                 <User className="mr-2 h-4 w-4" />
-                Perfil
+                <span>Perfil</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={(e) => {
