@@ -104,7 +104,7 @@ export function Header() {
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  window.location.href = "/";
+                  navigate("/");
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />
