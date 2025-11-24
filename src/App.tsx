@@ -33,6 +33,14 @@ import BlockAccess from "./pages/access/BlockAccess";
 import AllAccesses from "./pages/access/AllAccesses";
 import AcessGrup from "./pages/access/AccessGroup";
 import TeacherProfile from "./pages/TeacherProfile";
+import ActivitiesLecturesLic from "./pages/calendar-lic/ActivitiesLectures";
+import ExamCalendarLic from "./pages/calendar-lic/ExamCalendar";
+import ExemptDays from "./pages/calendar-lic/ExemptDays";
+import Parameters from "./pages/calendar-lic/Parameters";
+import ProofDeadlines from "./pages/calendar-lic/ProofDeadlines";
+import ActivitiesLecturesPos from "./pages/calendar-pos/ActivitiesLectures";
+import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
+import DeadlinesPos from "./pages/calendar-pos/Deadlines";
 
 const queryClient = new QueryClient();
 
@@ -67,7 +75,6 @@ const App = () => {
                   <Route path="/assiduidade/controle" element={<AttendanceControl />} />
                   <Route path="/assiduidade/marcar" element={<MarkAttendance />} />
 
-
                   <Route path="/acessos/utilizador" element={<UserAccess />} />
                   <Route path="/acessos/funcionalidade-utilizador" element={<UserFunctionality />} />
                   <Route path="/acessos/cargos" element={<RectoratePositions />} />
@@ -77,6 +84,20 @@ const App = () => {
                   <Route path="/acessos/logs" element={<AccessLogs />} />
                   <Route path="/acessos/grupo" element={<AcessGrup />} />
                   <Route path="/profile" element={<TeacherProfile />} />
+
+
+                  {/*LIC*/}  
+                   <Route path="/calendario-lic/atividades" element={<ActivitiesLecturesLic />} />
+                   <Route path="/calendario-lic/provas" element={<ExamCalendarLic />} />
+                   <Route path="/calendario-lic/dias-isentos" element={<ExemptDays />} />
+                   <Route path="/calendario-lic/parametros" element={<Parameters />} />
+                   <Route path="/calendario-lic/prazos" element={<ProofDeadlines />} />
+                
+       
+                  {/*POS*/}
+                     <Route path="/calendario-pos/atividades" element={<ActivitiesLecturesPos />} />
+                     <Route path="/calendario-pos/provas" element={<ExamCalendarPos />} />
+                     <Route path="/calendario-pos/prazos" element={<DeadlinesPos />} />
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                {/* <Route path="*" element={<NotFound />} />*/}
