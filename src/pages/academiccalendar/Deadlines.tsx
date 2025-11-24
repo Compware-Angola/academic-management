@@ -67,18 +67,19 @@ interface TipoAvaliacao {
   sigla: string;
 }
 
+interface Semestre {
+  codigo: number;
+  designacao: string;
+}
+
 // ROTAS REAIS
 const API_ANOS_LETIVOS = "http://34.202.163.85:8080/ords/cmpdev/academic-year/all";
 const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
 const API_TIPOS_PRAZO = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-prazo/all";
 const API_TIPOS_AVALIACAO = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-avaliacao/all";
+const API_SEMESTRES = "http://34.202.163.85:8080/ords/cmpdev/uma/semestre/all"; // NOVA ROTA
 const API_PRAZOS = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
 const API_CRIAR_PRAZO = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
-
-const SEMESTRES = [
-  { id: 1, nome: "1º Semestre" },
-  { id: 2, nome: "2º Semestre" },
-];
 
 export default function Deadlines() {
   const { toast } = useToast();
@@ -90,6 +91,7 @@ export default function Deadlines() {
   const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
   const [tiposPrazo, setTiposPrazo] = useState<TipoPrazo[]>([]);
   const [tiposAvaliacao, setTiposAvaliacao] = useState<TipoAvaliacao[]>([]);
+  const [semestres, setSemestres] = useState<Semestre[]>([]); // NOVO
 
   // Filtros
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -101,7 +103,7 @@ export default function Deadlines() {
   const [form, setForm] = useState({
     fk_tipo_prazo: "",
     fk_tipo_avaliacao: "",
-    fk_semestre: "1",
+    fk_semestre: "",
     data_inicio: "",
     data_fim: "",
     observacao: "",
@@ -110,25 +112,18 @@ export default function Deadlines() {
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
 
-  // Carregar anos letivos (TODOS, ordenados do mais recente para o mais antigo)
+  // Carregar anos letivos (todos, ordenados do mais recente)
   const fetchAnosLetivos = async () => {
     try {
       const res = await axios.get(API_ANOS_LETIVOS);
       const todos = res.data.anolectivos || [];
-
-      // Ordenar do mais recente para o mais antigo
       const ordenados = todos.sort((a: AnoLetivo, b: AnoLetivo) =>
         Number(b.codigo) - Number(a.codigo)
       );
-
       setAnosLetivos(ordenados);
-
-      // Selecionar automaticamente o mais recente
-      if (ordenados.length > 0) {
-        setAnoLetivoId(ordenados[0].codigo);
-      }
+      if (ordenados.length > 0) setAnoLetivoId(ordenados[0].codigo);
     } catch {
       toast({ title: "Erro ao carregar anos letivos", variant: "destructive" });
     }
@@ -171,9 +166,22 @@ export default function Deadlines() {
     }
   };
 
+  // NOVA FUNÇÃO: carregar semestres da API
+  const fetchSemestres = async () => {
+    try {
+      const res = await axios.get(API_SEMESTRES);
+      const data = res.data.semestres || [];
+      setSemestres(data);
+      if (data.length > 0) {
+        setForm(prev => ({ ...prev, fk_semestre: data[0].codigo.toString() })); // preenche com o 1º semestre por padrão
+      }
+    } catch {
+      toast({ title: "Erro ao carregar semestres", variant: "destructive" });
+    }
+  };
+
   const fetchPrazos = async () => {
     if (!anoLetivoId || !tipoPrazoId || !tipoCandidaturaId) return;
-
     setLoading(true);
     try {
       const url = `${API_PRAZOS}/${anoLetivoId}/${tipoPrazoId}/${tipoCandidaturaId}`;
@@ -196,7 +204,7 @@ export default function Deadlines() {
 
   // Criar prazo
   const handleCriarPrazo = async () => {
-    if (!form.fk_tipo_prazo || !form.fk_tipo_avaliacao || !form.data_inicio || !form.data_fim) {
+    if (!form.fk_tipo_prazo || !form.fk_tipo_avaliacao || !form.fk_semestre || !form.data_inicio || !form.data_fim) {
       toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
       return;
     }
@@ -218,7 +226,7 @@ export default function Deadlines() {
       setForm({
         fk_tipo_prazo: tipoPrazoId,
         fk_tipo_avaliacao: "",
-        fk_semestre: "1",
+        fk_semestre: semestres[0]?.codigo.toString() || "1",
         data_inicio: "",
         data_fim: "",
         observacao: "",
@@ -240,6 +248,7 @@ export default function Deadlines() {
     fetchTiposCandidatura();
     fetchTiposPrazo();
     fetchTiposAvaliacao();
+    fetchSemestres(); // CARREGA SEMESTRES DA API
   }, []);
 
   useEffect(() => {
@@ -260,10 +269,10 @@ export default function Deadlines() {
         actions={
           <>
             <Button variant="outline" size="sm" onClick={fetchPrazos}>
-              <RefreshCw className="h-4 w-4 mr-2" /> Atualizar
+              Atualizar
             </Button>
             <Button size="sm" onClick={() => setOpenModal(true)}>
-              <Plus className="h-4 w-4 mr-2" /> Novo Prazo
+              Novo Prazo
             </Button>
           </>
         }
@@ -273,7 +282,7 @@ export default function Deadlines() {
       <div className="bg-card rounded-lg border p-6 space-y-4">
         <h3 className="text-sm font-semibold">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Ano Letivo - TODOS os anos + (Ativo) correto */}
+          {/* Ano Letivo */}
           <div className="space-y-2">
             <Label>Ano Letivo</Label>
             <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
@@ -331,7 +340,7 @@ export default function Deadlines() {
 
           <div className="flex items-end">
             <Button variant="outline" className="w-full" onClick={fetchPrazos}>
-              <RefreshCw className="h-4 w-4 mr-2" /> Aplicar Filtros
+              Aplicar Filtros
             </Button>
           </div>
         </div>
@@ -428,15 +437,17 @@ export default function Deadlines() {
               </Select>
             </div>
 
-            {/* Semestre */}
+            {/* Semestre - AGORA DA API */}
             <div className="space-y-2">
               <Label>Semestre *</Label>
               <Select value={form.fk_semestre} onValueChange={(v) => setForm({ ...form, fk_semestre: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder={semestres.length === 0 ? "Carregando..." : "Selecione"} />
+                </SelectTrigger>
                 <SelectContent>
-                  {SEMESTRES.map((s) => (
-                    <SelectItem key={s.id} value={s.id.toString()}>
-                      {s.nome}
+                  {semestres.map((s) => (
+                    <SelectItem key={s.codigo} value={s.codigo.toString()}>
+                      {s.designacao}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -480,11 +491,11 @@ export default function Deadlines() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
-              <ChevronLeft className="h-4 w-4" /> Anterior
+              Anterior
             </Button>
             <span className="text-sm">Página {currentPage} de {totalPages}</span>
             <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
-              Próxima <ChevronRight className="h-4 w-4" />
+              Próxima
             </Button>
           </div>
         </div>
