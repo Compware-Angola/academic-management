@@ -1,12 +1,12 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import GenericPage from "./pages/GenericPage";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import { menuStructure } from "./config/menuStructure";
 
 import { ThemeProvider } from "./hooks/thme-provider";
 import { MainLayout } from "./pages/App";
@@ -40,8 +40,6 @@ import ProofDeadlines from "./pages/academiccalendar/ProofDeadlines";
 import ActivitiesLecturesPos from "./pages/calendar-pos/ActivitiesLectures";
 import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
 import DeadlinesPos from "./pages/calendar-pos/Deadlines";
-import ExamCalendar from "./pages/academiccalendar/Deadlines";
-import Deadlines from "./pages/academiccalendar/Deadlines";
 
 const queryClient = new QueryClient();
 
@@ -49,11 +47,11 @@ const App = () => {
   // Generate all routes from menu structure
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
+    <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <ReactQueryProvider>
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Login />} />
@@ -63,52 +61,80 @@ const App = () => {
                 <Route path="/horarios/criar" element={<CreateSchedule />} />
                 <Route path="/horarios/listar" element={<ScheduleList />} />
                 <Route path="/salas/listar" element={<ClassromList />} />
-                <Route path="/plano/disciplinas" element={<DisciplineManagementList />} />
-                <Route path="/inscricoes/matriculados" element={<EnrolledList />} />
-                <Route path="/gestao-docentes/listagem" element={<GeneralListing />} />
-                <Route path="/exame/lista-candidatos" element={<CandidateList />} /> 
-                <Route path="/avaliacoes/notas" element={<LaunchNotes />} /> 
+                <Route
+                  path="/plano/disciplinas"
+                  element={<DisciplineManagementList />}
+                />
+                <Route
+                  path="/inscricoes/matriculados"
+                  element={<EnrolledList />}
+                />
+                <Route
+                  path="/gestao-docentes/listagem"
+                  element={<GeneralListing />}
+                />
+                <Route
+                  path="/exame/lista-candidatos"
+                  element={<CandidateList />}
+                />
+                <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
 
-                  <Route path="/bolsa/bolseiros" element={<ScholarshipHoldersList />} />
+                <Route
+                  path="/bolsa/bolseiros"
+                  element={<ScholarshipHoldersList />}
+                />
 
+                <Route
+                  path="/assiduidade/docente"
+                  element={<TeacherAttendance />}
+                />
+                <Route
+                  path="/assiduidade/controle"
+                  element={<AttendanceControl />}
+                />
+                <Route
+                  path="/assiduidade/marcar"
+                  element={<MarkAttendance />}
+                />
 
-                  <Route path="/assiduidade/docente" element={<TeacherAttendance />} />
-                  <Route path="/assiduidade/controle" element={<AttendanceControl />} />
-                  <Route path="/assiduidade/marcar" element={<MarkAttendance />} />
-
-                  <Route path="/acessos/utilizador" element={<UserAccess />} />
-                  <Route path="/acessos/funcionalidade-utilizador" element={<UserFunctionality />} />
-                  <Route path="/acessos/cargos" element={<RectoratePositions />} />
-                  <Route path="/acessos/logados" element={<LoggedInUsers />} />
-                  <Route path="/acessos/bloquear" element={<BlockAccess />} />
-                  <Route path="/acessos/todos" element={<AllAccesses />} />
-                  <Route path="/acessos/logs" element={<AccessLogs />} />
-                  <Route path="/acessos/grupo" element={<AcessGrup />} />
-                  <Route path="/profile" element={<TeacherProfile />} />
-
+                <Route path="/acessos/utilizador" element={<UserAccess />} />
+                <Route
+                  path="/acessos/funcionalidade-utilizador"
+                  element={<UserFunctionality />}
+                />
+                <Route
+                  path="/acessos/cargos"
+                  element={<RectoratePositions />}
+                />
+                <Route path="/acessos/logados" element={<LoggedInUsers />} />
+                <Route path="/acessos/bloquear" element={<BlockAccess />} />
+                <Route path="/acessos/todos" element={<AllAccesses />} />
+                <Route path="/acessos/logs" element={<AccessLogs />} />
+                <Route path="/acessos/grupo" element={<AcessGrup />} />
+                <Route path="/profile" element={<TeacherProfile />} />
 
                   {/*LIC*/}  
                    <Route path="/calendario/atividades" element={<ActivitiesLecturesLic />} />
-                   <Route path="/calendario/prazos" element={<Deadlines />} />
+                   <Route path="/calendario/provas" element={<ExamCalendarLic />} />
                    <Route path="/calendario/dias-isentos" element={<ExemptDays />} />
                    <Route path="/calendario/parametros" element={<Parameters />} />
-                 
+                   <Route path="/calendario/prazos" element={<ProofDeadlines />} />
                 
        
                   {/*POS*/}
                      <Route path="/calendario-pos/atividades" element={<ActivitiesLecturesPos />} />
                      <Route path="/calendario-pos/provas" element={<ExamCalendarPos />} />
-                  
+                     <Route path="/calendario/prazos" element={<DeadlinesPos />} />
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
-               {/* <Route path="*" element={<NotFound />} />*/}
-                 <Route path="*" element={<UnderConstruction />} />
+                {/* <Route path="*" element={<NotFound />} />*/}
+                <Route path="*" element={<UnderConstruction />} />
               </Route>
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+        </ReactQueryProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   );
 };
 
