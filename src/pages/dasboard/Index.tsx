@@ -1,0 +1,125 @@
+import { PageHeader } from "@/components/common/PageHeader";
+import { StatCard } from "@/components/common/StatCard";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, GraduationCap, BookOpen, FileCheck, TrendingUp, Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
+import UpcomingEventsCard from "./components/UpcomingEventsCard";
+import SemesterStatsCard from "./components/SemesterStatsCard";
+import QuickActionsCard from "./components/QuickActionsCard";
+
+const Index = () => {
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title={`Olá,Isaac Isvaldo Bunga`}
+        subtitle="Sistema de Gestão Académica da Universidade • Ano letivo 2025/2026"
+      />
+
+      {/* Statistics Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total de Estudantes"
+          value="2,845"
+          icon={Users}
+          description="Matriculados ativos"
+          trend={{ value: 12, isPositive: true }}
+        />
+        <StatCard
+          title="Docentes"
+          value="156"
+          icon={GraduationCap}
+          description="Corpo docente ativo"
+          trend={{ value: 5, isPositive: true }}
+        />
+        <StatCard
+          title="Unidades Curriculares"
+          value="342"
+          icon={BookOpen}
+          description="Distribuídas por curso"
+        />
+        <StatCard
+          title="Avaliações Pendentes"
+          value="28"
+          icon={FileCheck}
+          description="Aguardando validação"
+          trend={{ value: 8, isPositive: false }}
+        />
+      </div>
+
+      {/* Recent Activity Section */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <UpcomingEventsCard />
+
+
+        <SemesterStatsCard
+          title="Desempenho Académico 2024/2025"
+          description="Licenciatura em Engenharia Informática"
+          stats={[
+            { label: "Taxa de Aprovação", value: "89%", isPositive: true },
+            { label: "Assiduidade Média", value: "94%", isPositive: true },
+            { label: "Média Final", value: "14.8", isPositive: true },
+            { label: "Estudantes Ativos", value: "342" },
+          ]}
+        />
+
+      <QuickActionsCard
+  title="Tarefas Urgentes"
+  description="Ações que requerem atenção"
+  actions={[
+    {
+      title: "Certificados pendentes",
+      description: "Emissão de diplomas",
+      count: 5,
+      variant: "warning",
+    },
+    {
+      title: "Recursos de notas",
+      description: "2º época",
+      count: 7,
+      variant: "primary",
+    },
+    {
+      title: "Inscrições em atraso",
+      description: "Propinas",
+      count: 19,
+      variant: "default",
+    },
+  ]}
+/>
+      </div>
+
+      {/* Quick Access Links */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Acesso Rápido aos Módulos</CardTitle>
+          <CardDescription>Módulos mais utilizados</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { name: "Avaliações", icon: FileCheck, path: "/avaliacoes/controle" },
+              { name: "Assiduidade", icon: BookOpen, path: "/assiduidade/controle" },
+              { name: "Horários", icon: Calendar, path: "/horarios/listar" },
+              { name: "Estudantes", icon: Users, path: "/inscricoes/lista-geral" },
+            ].map((module) => {
+              const Icon = module.icon;
+
+              return (
+                <Link
+                  key={module.name}
+                  to={module.path}
+                  className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                >
+                  <Icon className="h-8 w-8 text-primary" />
+                  <span className="text-sm font-medium">{module.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default Index;
