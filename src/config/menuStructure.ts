@@ -141,22 +141,23 @@ export const menuStructure: {
     // CALENDÁRIO LIC
     // ----------------------------------------------------
     {
-      title: "Cale Académico (Lic.)",
-      url: "/calendario-lic",
+      title: "Calendário Académico ",
+      url: "/calendario",
       icon: Calendar,
       items: [
-        { title: "Atividades letivas", url: "/calendario-lic/atividades" },
-        { title: "Calendário de provas", url: "/calendario-lic/provas" },
-        { title: "Dias isentos", url: "/calendario-lic/dias-isentos" },
-        { title: "Parâmetros", url: "/calendario-lic/parametros" },
+        { title: "Atividades letivas", url: "/calendario/atividades" },
+        { title: "Calendário de provas", url: "/calendario/provas" },
+        { title: "Dias isentos", url: "/calendario/dias-isentos" },
+        { title: "Parâmetros", url: "/calendario/parametros" },
         { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
+        { title: "Prazos", url: "/calendario/prazos" },
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
     },
 
     // ----------------------------------------------------
     // CALENDÁRIO PÓS
-    // ----------------------------------------------------
+    /* ----------------------------------------------------
     {
       title: "Cale Académico (Pós)",
       url: "/calendario-pos",
@@ -164,9 +165,10 @@ export const menuStructure: {
       items: [
         { title: "Atividades letivas", url: "/calendario-pos/atividades" },
         { title: "Calendário de provas", url: "/calendario-pos/provas" },
-        { title: "Prazos", url: "/calendario-pos/prazos" },
+     
       ],
     },
+    */
 
     // ----------------------------------------------------
     // COMUNICAÇÃO

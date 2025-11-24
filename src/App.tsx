@@ -33,11 +33,11 @@ import BlockAccess from "./pages/access/BlockAccess";
 import AllAccesses from "./pages/access/AllAccesses";
 import AcessGrup from "./pages/access/AccessGroup";
 import TeacherProfile from "./pages/TeacherProfile";
-import ActivitiesLecturesLic from "./pages/calendar-lic/ActivitiesLectures";
-import ExamCalendarLic from "./pages/calendar-lic/ExamCalendar";
-import ExemptDays from "./pages/calendar-lic/ExemptDays";
-import Parameters from "./pages/calendar-lic/Parameters";
-import ProofDeadlines from "./pages/calendar-lic/ProofDeadlines";
+import ActivitiesLecturesLic from "./pages/academiccalendar/ActivitiesLectures";
+import ExamCalendarLic from "./pages/academiccalendar/ExamCalendar";
+import ExemptDays from "./pages/academiccalendar/ExemptDays";
+import Parameters from "./pages/academiccalendar/Parameters";
+import ProofDeadlines from "./pages/academiccalendar/ProofDeadlines";
 import ActivitiesLecturesPos from "./pages/calendar-pos/ActivitiesLectures";
 import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
 import DeadlinesPos from "./pages/calendar-pos/Deadlines";
@@ -87,17 +87,17 @@ const App = () => {
 
 
                   {/*LIC*/}  
-                   <Route path="/calendario-lic/atividades" element={<ActivitiesLecturesLic />} />
-                   <Route path="/calendario-lic/provas" element={<ExamCalendarLic />} />
-                   <Route path="/calendario-lic/dias-isentos" element={<ExemptDays />} />
-                   <Route path="/calendario-lic/parametros" element={<Parameters />} />
-                   <Route path="/calendario-lic/prazos" element={<ProofDeadlines />} />
+                   <Route path="/calendario/atividades" element={<ActivitiesLecturesLic />} />
+                   <Route path="/calendario/provas" element={<ExamCalendarLic />} />
+                   <Route path="/calendario/dias-isentos" element={<ExemptDays />} />
+                   <Route path="/calendario/parametros" element={<Parameters />} />
+                   <Route path="/calendario/prazos" element={<ProofDeadlines />} />
                 
        
                   {/*POS*/}
                      <Route path="/calendario-pos/atividades" element={<ActivitiesLecturesPos />} />
                      <Route path="/calendario-pos/provas" element={<ExamCalendarPos />} />
-                     <Route path="/calendario-pos/prazos" element={<DeadlinesPos />} />
+                     <Route path="/calendario/prazos" element={<DeadlinesPos />} />
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                {/* <Route path="*" element={<NotFound />} />*/}
