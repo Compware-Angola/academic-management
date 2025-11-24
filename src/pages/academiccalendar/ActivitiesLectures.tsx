@@ -50,10 +50,18 @@ interface Atividade {
   ano_lectivo: string;
   tipo_candidatura: string;
   tipo_calendario: string;
-  codigo_utilizador?: string;
-  descricao_utilizador?: string;
 }
 
+interface TipoCandidatura {
+  codigo: number;
+  designacao: string;
+}
+
+// ROTAS REAIS
+const API_ATIVIDADES = "https://dev2.sistema.unisaude.co.ao/ords/compware/ga/academic-calendar/academic-activities";
+const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
+
+// Mock de anos letivos (até teres a rota real)
 const ANOS_LETIVOS_MOCK = [
   { id: "23", descricao: "2025/2026" },
   { id: "22", descricao: "2024/2025" },
@@ -61,25 +69,17 @@ const ANOS_LETIVOS_MOCK = [
   { id: "20", descricao: "2022/2023" },
 ];
 
-const TIPOS_CANDIDATURA_MOCK = [
-  { id: "1", nome: "Licenciatura" },
-  { id: "2", nome: "Mestrado" },
-  { id: "3", nome: "Pos-graduação" },
-];
-
-const API_BASE =
-  "https://dev2.sistema.unisaude.co.ao/ords/compware/ga/academic-calendar/academic-activities";
-
 export default function ActivitiesLecturesLic() {
   const { toast } = useToast();
 
   // Estados
   const [loading, setLoading] = useState(true);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
+  const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
 
   // Filtros
-  const [anoLetivoId, setAnoLetivoId] = useState("23"); // padrão: 2025/2026
-  const [tipoCandidaturaId, setTipoCandidaturaId] = useState("1"); // padrão: Licenciatura
+  const [anoLetivoId, setAnoLetivoId] = useState("23");
+  const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1"); // padrão: Licenciatura
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,21 +95,45 @@ export default function ActivitiesLecturesLic() {
     tipo_calendario: "",
   });
 
-  // Buscar atividades com base nos filtros
+  // Carregar tipos de candidatura
+  const fetchTiposCandidatura = async () => {
+    try {
+      const res = await axios.get(API_TIPOS_CANDIDATURA);
+      const data = res.data.tipo_candidaturas || [];
+      setTiposCandidatura(data);
+
+      // Definir Licenciatura como padrão (código 1)
+      const licenciatura = data.find((t: TipoCandidatura) => t.codigo === 1);
+      if (licenciatura) {
+        setTipoCandidaturaId("1");
+      }
+    } catch (err) {
+      console.error("Erro ao carregar tipos de candidatura", err);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os tipos de candidatura",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Carregar atividades
   const fetchAtividades = async () => {
+    if (!tipoCandidaturaId) return;
+
     setLoading(true);
     try {
-      const url = `${API_BASE}/${anoLetivoId}/${tipoCandidaturaId}`;
-      const response = await axios.get(url);
-      const data: Atividade[] = response.data.actividades || [];
+      const url = `${API_ATIVIDADES}/${anoLetivoId}/${tipoCandidaturaId}`;
+      const res = await axios.get(url);
+      const data: Atividade[] = res.data.actividades || [];
       setAtividades(data);
       setCurrentPage(1);
       toast({ title: `Carregadas ${data.length} atividades` });
     } catch (err: any) {
-      console.error("Erro na API:", err);
+      console.error("Erro na API de atividades:", err);
       toast({
-        title: "Erro ao carregar atividades",
-        description: "Verifique a conexão ou tente novamente mais tarde.",
+        title: "Erro",
+        description: "Não foi possível carregar as atividades",
         variant: "destructive",
       });
       setAtividades([]);
@@ -118,9 +142,16 @@ export default function ActivitiesLecturesLic() {
     }
   };
 
-  // Carregar ao mudar qualquer filtro
+  // Carregar dados na montagem
   useEffect(() => {
-    fetchAtividades();
+    fetchTiposCandidatura();
+  }, []);
+
+  // Recarregar atividades quando mudar filtro
+  useEffect(() => {
+    if (tiposCandidatura.length > 0) {
+      fetchAtividades();
+    }
   }, [anoLetivoId, tipoCandidaturaId]);
 
   // Paginação
@@ -150,7 +181,7 @@ export default function ActivitiesLecturesLic() {
       ano_lectivo: "2025/2026",
       tipo_calendario: "",
     });
-    // Aqui vai o POST real quando tiveres
+    fetchAtividades();
   };
 
   return (
@@ -160,12 +191,11 @@ export default function ActivitiesLecturesLic() {
         subtitle="Home / Calendário Académico / Atividades Letivas"
         actions={
           <>
-
             <Button variant="outline" size="sm" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Atualizar
             </Button>
-    {/*       
+            {/*
             <Button variant="outline" size="sm">
               <Printer className="h-4 w-4 mr-2" />
               Imprimir
@@ -174,8 +204,7 @@ export default function ActivitiesLecturesLic() {
               <Download className="h-4 w-4 mr-2" />
               Exportar Excel
             </Button>
-  */}
-
+            */}
             <Button size="sm" onClick={() => setOpenModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Nova Atividade
@@ -208,24 +237,23 @@ export default function ActivitiesLecturesLic() {
             <Label>Tipo de Candidatura</Label>
             <Select value={tipoCandidaturaId} onValueChange={setTipoCandidaturaId}>
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder={tiposCandidatura.length === 0 ? "Carregando..." : undefined} />
               </SelectTrigger>
               <SelectContent>
-                {TIPOS_CANDIDATURA_MOCK.map((tipo) => (
-                  <SelectItem key={tipo.id} value={tipo.id}>
-                    {tipo.nome}
+                {tiposCandidatura.map((tipo) => (
+                  <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
+                    {tipo.designacao}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-         {/* 
+          {/*
           <div className="space-y-2">
             <Label>Pesquisar</Label>
             <Input placeholder="Buscar por descrição..." />
           </div>
-          */}
-
+*/}
           <div className="flex items-end">
             <Button variant="outline" className="w-full" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -242,10 +270,10 @@ export default function ActivitiesLecturesLic() {
             <TableRow>
               <TableHead className="w-20">Código</TableHead>
               <TableHead>Descrição</TableHead>
-              <TableHead className="w-32">Data Início</TableHead>
-              <TableHead className="w-32">Data Fim</TableHead>
+              <TableHead className="w-32">Início</TableHead>
+              <TableHead className="w-32">Fim</TableHead>
               <TableHead className="w-32">Ano Letivo</TableHead>
-              <TableHead>Tipo Calendário</TableHead>
+              <TableHead className="max-w-md">Tipo Calendário</TableHead>
               <TableHead className="w-24 text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -253,11 +281,9 @@ export default function ActivitiesLecturesLic() {
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <TableRow key={i}>
-                  {Array.from({ length: 7 }).map((_, j) => (
-                    <TableCell key={j}>
-                      <Skeleton className="h-8 w-full" />
-                    </TableCell>
-                  ))}
+                  <TableCell colSpan={7}>
+                    <Skeleton className="h-12 w-full" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : paginatedData.length === 0 ? (
@@ -364,19 +390,11 @@ export default function ActivitiesLecturesLic() {
             </div>
             <div className="space-y-2">
               <Label>Data Início *</Label>
-              <Input
-                type="date"
-                value={form.data_inicio}
-                onChange={(e) => setForm({ ...form, data_inicio: e.target.value })}
-              />
+              <Input type="date" value={form.data_inicio} onChange={(e) => setForm({ ...form, data_inicio: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>Data Fim *</Label>
-              <Input
-                type="date"
-                value={form.data_termino}
-                onChange={(e) => setForm({ ...form, data_termino: e.target.value })}
-              />
+              <Input type="date" value={form.data_termino} onChange={(e) => setForm({ ...form, data_termino: e.target.value })} />
             </div>
             <div className="space-y-2 col-span-2">
               <Label>Tipo de Calendário *</Label>
@@ -389,9 +407,7 @@ export default function ActivitiesLecturesLic() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenModal(false)}>
-              Cancelar
-            </Button>
+            <Button variant="outline" onClick={() => setOpenModal(false)}>Cancelar</Button>
             <Button onClick={handleSubmitNew}>Criar Atividade</Button>
           </DialogFooter>
         </DialogContent>
