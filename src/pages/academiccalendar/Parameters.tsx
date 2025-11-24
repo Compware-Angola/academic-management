@@ -1,114 +1,143 @@
+// src/pages/parameters/Parameters.tsx
 import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Users, CreditCard, CheckCircle, Clock, Save, RefreshCw } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  Calendar,
+  Users,
+  CreditCard,
+  CheckCircle,
+  Clock,
+  Save,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
 
-// Interfaces
-interface AnoLetivo {
-  id: string;
-  designacao: string;
-  inicio_1_semestre: string;
-  fim_1_semestre: string;
-  inicio_2_semestre: string;
-  fim_2_semestre: string;
-  estado: string;
-}
-
-interface TipoCandidatura {
-  codigo: string;
-  designacao: string;
-}
+// Hooks
+import { useQueryAcademicYearParams } from "@/hooks/academiccalendar/use-query-academic-years-params";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQueryAcademicYearVacancies } from "@/hooks/academiccalendar/use-query-academic-year-vacancies";
+import { useQueryAcademicYearMonthlyFees } from "@/hooks/academiccalendar/use-query-academic-year-monthly-fees";
+import { ParametersEditModal } from "./components/modals/ParametersEditModal";
+import { formatarData } from "@/util/date-formate";
 
 export default function Parameters() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
-  // Filtros
+  // Filtros e paginação
   const [anoLetivoSelecionado, setAnoLetivoSelecionado] = useState<string>("");
-  const [tipoCandidaturaSelecionado, setTipoCandidaturaSelecionado] = useState<string>("1");
+  const [tipoCandidaturaSelecionado, setTipoCandidaturaSelecionado] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPageMonthly, setCurrentPageMonthly] = useState(1);
+  const [itemsPerPageMonthly, setItemsPerPageMonthly] = useState(6);
 
-  // Dados da API
-  const [anosLetivos, setAnosLetivos] = useState<AnoLetivo[]>([]);
-  const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const {
+    data: academicYears = [],
+    isLoading: isLoadingYears,
+    refetch: refetchYears,
+  } = useQueryAnoAcademico();
 
-  // APIs reais
-  const API_ANOS_LETIVOS = "http://34.202.163.85:8080/ords/cmpdev/academic-year/all";
-  const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
+  const {
+    data: tiposCandidatura = [],
+    isLoading: isLoadingTipos,
+  } = useQueryTipoCandidatura();
 
-  // Carregar anos letivos
-  const fetchAnosLetivos = async () => {
-    try {
-      const res = await axios.get(API_ANOS_LETIVOS);
-      const data = res.data.anolectivos || [];
+  // Cálculo seguro do código do ano selecionado
+  const selectedCodigo = useMemo(() => {
+    if (!anoLetivoSelecionado || academicYears.length === 0) return undefined;
+    const ano = academicYears.find((a) => a.designacao === anoLetivoSelecionado);
+    return ano?.codigo ?? undefined;
+  }, [anoLetivoSelecionado, academicYears]);
 
-      // Mapear para a estrutura correta
-      const mapped: AnoLetivo[] = data.map((item: any) => ({
-        id: item.codigo,
-        designacao: item.designacao,
-        inicio_1_semestre: item.inicio_1_semestre || "2025-09-08",
-        fim_1_semestre: item.fim_1_semestre || "2026-01-24",
-        inicio_2_semestre: item.inicio_2_semestre || "2026-02-17",
-        fim_2_semestre: item.fim_2_semestre || "2026-07-04",
-        estado: item.estado,
-      }));
+  // Parâmetros do ano selecionado
+  const {
+    academicYearParams: currentYearParams,
+    isLoading: isLoadingParams,
+    isFetching: isFetchingParams,
+  } = useQueryAcademicYearParams(selectedCodigo, {
+    enabled: !!selectedCodigo,
+  });
+  const {
+    monthlyFees,
+    isLoading: isLoadingMonthlyFees,
+    isFetching: isFetchingMonthlyFees,
+  } = useQueryAcademicYearMonthlyFees({
+    codigoAno: selectedCodigo,
+    enabled: !!selectedCodigo,
+  });
 
-      // Ordenar do mais recente para o mais antigo
-      const ordenados = mapped.sort((a, b) => Number(b.id) - Number(a.id));
-      setAnosLetivos(ordenados);
+  // Vagas
+  const tipoCandidaturaId = Number(tipoCandidaturaSelecionado);
+  const {
+    vacancies,
+    isLoading: isLoadingVacancies,
+    isFetching: isFetchingVacancies,
+  } = useQueryAcademicYearVacancies({
+    codigoAno: selectedCodigo,
+    tipoCandidatura: tipoCandidaturaId,
+    enabled: !!selectedCodigo && !!tipoCandidaturaId,
+  });
 
-      // Selecionar o mais recente ou o ativo
-      const ativoOuRecente = ordenados.find(a => !a.estado.toLowerCase().includes("desactiv")) || ordenados[0];
-      if (ativoOuRecente) setAnoLetivoSelecionado(ativoOuRecente.designacao);
-    } catch (err) {
-      toast({ title: "Erro ao carregar anos letivos", variant: "destructive" });
-    }
-  };
-
-  // Carregar tipos de candidatura
-  const fetchTiposCandidatura = async () => {
-    try {
-      const res = await axios.get(API_TIPOS_CANDIDATURA);
-      const data = res.data.tipo_candidaturas || [];
-      setTiposCandidatura(data);
-      // Default: Licenciatura
-      const licenciatura = data.find((t: any) => t.codigo === 1);
-      if (licenciatura) setTipoCandidaturaSelecionado("1");
-    } catch (err) {
-      toast({ title: "Erro ao carregar tipos de candidatura", variant: "destructive" });
-    }
-  };
-
-  // Inicialização
+  // Auto-selecionar ano ativo + tipo padrão
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      await Promise.all([fetchAnosLetivos(), fetchTiposCandidatura()]);
-      setLoading(false);
-    };
-    load();
-  }, []);
+    if (academicYears.length > 0 && !anoLetivoSelecionado) {
+      const anoAtivo = academicYears.find((a) =>
+        a.estado?.toLowerCase().includes("activo") ||
+        a.estado?.toLowerCase().includes("ativo")
+      );
+      if (anoAtivo) setAnoLetivoSelecionado(anoAtivo.designacao);
+    }
 
-  const handleSave = () => {
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      toast({ title: "Parâmetros salvos com sucesso!" });
-    }, 1000);
-  };
+    if (tiposCandidatura.length > 0 && !tipoCandidaturaSelecionado) {
+      setTipoCandidaturaSelecionado(String(tiposCandidatura[0].codigo));
+    }
+  }, [academicYears, tiposCandidatura, anoLetivoSelecionado, tipoCandidaturaSelecionado]);
 
-  const formatarData = (data: string) => {
-    return new Date(data).toLocaleDateString("pt-AO");
-  };
+  // Resetar página ao mudar filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCodigo, tipoCandidaturaSelecionado]);
+
+  // Paginação das vagas
+  const filteredVacancies = vacancies;
+  const totalPages = Math.ceil(filteredVacancies.length / itemsPerPage);
+  const paginatedVacancies = filteredVacancies.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  // Paginação das mensalidades
+  const totalPagesMonthly = Math.ceil(monthlyFees.length / itemsPerPageMonthly);
+  const paginatedMonthlyFees = monthlyFees.slice(
+    (currentPageMonthly - 1) * itemsPerPageMonthly,
+    currentPageMonthly * itemsPerPageMonthly
+  );
+
+  // Resetar página ao mudar de ano
+  useEffect(() => {
+    setCurrentPageMonthly(1);
+  }, [selectedCodigo]);
+  // Helpers
+
 
   const calcularDias = (inicio: string, fim: string) => {
     const diff = new Date(fim).getTime() - new Date(inicio).getTime();
@@ -117,48 +146,49 @@ export default function Parameters() {
 
   const getEstadoBadge = (estado: string) => {
     const lower = estado.toLowerCase();
+    if (!lower.includes("desactiv") || lower.includes("active")) {
+      return (
+        <Badge className="bg-primary/10 text-primary">
+          <Clock className="w-3 h-3 mr-1" />
+          Ativo
+        </Badge>
+      );
+    }
     if (lower.includes("pago") || lower.includes("paid")) {
-      return <Badge className="bg-success/10 text-success"><CheckCircle className="w-3 h-3 mr-1" /> Pago</Badge>;
-    }
-    if (lower.includes("ativo") || lower.includes("active")) {
-      return <Badge className="bg-primary/10 text-primary"><Clock className="w-3 h-3 mr-1" /> Ativo</Badge>;
-    }
-    if (lower.includes("vencer")) {
-      return <Badge variant="outline"><Calendar className="w-3 h-3 mr-1" /> A Vencer</Badge>;
+      return (
+        <Badge className="bg-green-500/10 text-green-600">
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Pago
+        </Badge>
+      );
     }
     return <Badge variant="secondary">{estado}</Badge>;
   };
 
-  // Dados simulados de vagas e mensalidades (depois virão da API)
-  const vagas = [
-    { curso: "Engenharia Informática", periodo: "1º Semestre", vagas: 120 },
-    { curso: "Engenharia Informática", periodo: "2º Semestre", vagas: 115 },
-    { curso: "Gestão", periodo: "1º Semestre", vagas: 80 },
-    { curso: "Direito", periodo: "1º Semestre", vagas: 90 },
-  ];
+  const tipoCandidaturaNome =
+    tiposCandidatura.find((t) => t.codigo === Number(tipoCandidaturaSelecionado))?.designacao ||
+    "Licenciatura";
 
-  const mensalidades = [
-    { tipo: "Mensalidade", prestacao: "Janeiro 2026", dataLimite: "2026-01-20", estado: "active" },
-    { tipo: "Mensalidade", prestacao: "Fevereiro 2026", dataLimite: "2026-02-20", estado: "active" },
-    { tipo: "Propina Completa", prestacao: "Anual 2025-2026", dataLimite: "2025-10-15", estado: "paid" },
-  ];
+  const isLoadingGlobal = isLoadingYears || isLoadingTipos;
 
-  const anoAtual = anosLetivos.find(a => a.designacao === anoLetivoSelecionado);
-  const tipoCandidaturaNome = tiposCandidatura.find(t => t.codigo === tipoCandidaturaSelecionado)?.designacao || "Licenciatura";
+
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-10">
+      {/* Header */}
       <PageHeader
         title="Parâmetros do Calendário Académico"
         subtitle="Home / Calendário Académico / Parâmetros"
         actions={
           <>
-            <Button variant="outline" size="sm" onClick={() => { fetchAnosLetivos(); fetchTiposCandidatura(); }}>
-              <RefreshCw className="h-4 w-4 mr-2" /> Atualizar
-            </Button>
-            <Button size="sm" onClick={handleSave} disabled={saving}>
+        
+            <Button
+              size="sm"
+              onClick={() => setIsEditModalOpen(true)}
+              disabled={!currentYearParams}
+            >
               <Save className="h-4 w-4 mr-2" />
-              {saving ? "Salvando..." : "Novo Ano"}
+              Novo Parâmetro 
             </Button>
           </>
         }
@@ -171,16 +201,17 @@ export default function Parameters() {
             <Calendar className="h-5 w-5" />
             Filtros
           </CardTitle>
-          <CardDescription>Selecione o ano letivo e tipo de candidatura</CardDescription>
+          <CardDescription>Selecione o ano letivo e o tipo de candidatura</CardDescription>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isLoadingGlobal ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Ano Letivo */}
               <div className="space-y-2">
                 <Label>Ano Letivo</Label>
                 <Select value={anoLetivoSelecionado} onValueChange={setAnoLetivoSelecionado}>
@@ -188,12 +219,12 @@ export default function Parameters() {
                     <SelectValue placeholder="Selecione o ano letivo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {anosLetivos.map((ano) => (
-                      <SelectItem key={ano.id} value={ano.designacao}>
+                    {academicYears.map((ano) => (
+                      <SelectItem key={ano.codigo} value={ano.designacao}>
                         <div className="flex items-center justify-between w-full">
                           <span>{ano.designacao}</span>
-                          {!ano.estado.toLowerCase().includes("desactiv") && (
-                            <Badge variant="outline" className="ml-2 text-xs">Ativo</Badge>
+                          {!ano.estado?.toLowerCase().includes("desactiv") && (
+                            <span className="text-xs text-green-600 font-medium ml-2">(Ativo)</span>
                           )}
                         </div>
                       </SelectItem>
@@ -202,15 +233,16 @@ export default function Parameters() {
                 </Select>
               </div>
 
+              {/* Tipo de Candidatura */}
               <div className="space-y-2">
                 <Label>Tipo de Candidatura</Label>
                 <Select value={tipoCandidaturaSelecionado} onValueChange={setTipoCandidaturaSelecionado}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
                     {tiposCandidatura.map((t) => (
-                      <SelectItem key={t.codigo} value={t.codigo}>
+                      <SelectItem key={t.codigo} value={String(t.codigo)}>
                         {t.designacao}
                       </SelectItem>
                     ))}
@@ -223,56 +255,84 @@ export default function Parameters() {
       </Card>
 
       {/* Título dinâmico */}
-      {!loading && anoAtual && (
+      {currentYearParams && (
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-primary">
-            {tipoCandidaturaNome} — {anoAtual.designacao}
+          <h2 className="text-3xl font-bold text-primary">
+            {tipoCandidaturaNome} — {currentYearParams.designacao}
           </h2>
-          <p className="text-muted-foreground">Parâmetros académicos e financeiros</p>
+          <p className="text-muted-foreground text-lg mt-2">
+            Parâmetros académicos e financeiros do ano letivo
+          </p>
         </div>
       )}
 
+      {/* Tabs */}
       <Tabs defaultValue="anoLetivo" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="anoLetivo">Calendário</TabsTrigger>
-          <TabsTrigger value="vagas">Vagas</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="anoLetivo">Calendário Académico</TabsTrigger>
+          <TabsTrigger value="vagas">Vagas por Curso</TabsTrigger>
           <TabsTrigger value="mensalidade">Mensalidades</TabsTrigger>
         </TabsList>
 
-        {/* ABA 1: Calendário */}
-        <TabsContent value="anoLetivo" className="mt-6">
+        {/* ABA 1: Calendário Académico */}
+        <TabsContent value="anoLetivo" className="mt-6 relative">
           <Card>
             <CardHeader>
-              <CardTitle>Períodos Letivos — {anoAtual?.designacao}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Períodos Letivos — {currentYearParams?.designacao || "Carregando..."}
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              {loading || !anoAtual ? (
-                <Skeleton className="h-32 w-full" />
+            <CardContent className="pt-6">
+              {(isLoadingParams || isFetchingParams) ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ) : !currentYearParams ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                  <p className="text-lg">Selecione um ano letivo para visualizar os parâmetros</p>
+                </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Período</TableHead>
-                      <TableHead>Início</TableHead>
-                      <TableHead>Fim</TableHead>
-                      <TableHead>Duração</TableHead>
+                      <TableHead className="w-52">Ano Letivo</TableHead>
+                      <TableHead>Início 1º Semestre</TableHead>
+                      <TableHead>Fim 1º Semestre</TableHead>
+                      <TableHead>Início 2º Semestre</TableHead>
+                      <TableHead>Fim 2º Semestre</TableHead>
+                      <TableHead className="text-center">Duração Total</TableHead>
+                      <TableHead className="text-center w-32">Estado</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">1º Semestre</TableCell>
-                      <TableCell>{formatarData(anoAtual.inicio_1_semestre)}</TableCell>
-                      <TableCell>{formatarData(anoAtual.fim_1_semestre)}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {calcularDias(anoAtual.inicio_1_semestre, anoAtual.fim_1_semestre)} dias
+                    <TableRow className="hover:bg-muted/50 transition-colors">
+                      <TableCell className="font-bold text-lg text-primary">
+                        {currentYearParams.designacao}
                       </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">2º Semestre</TableCell>
-                      <TableCell>{formatarData(anoAtual.inicio_2_semestre)}</TableCell>
-                      <TableCell>{formatarData(anoAtual.fim_2_semestre)}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {calcularDias(anoAtual.inicio_2_semestre, anoAtual.fim_2_semestre)} dias
+                      <TableCell className="font-medium">
+                        {formatarData(currentYearParams.dataInicioPrimeiroSemestre)}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatarData(currentYearParams.dataFimPrimeiroSemestre)}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatarData(currentYearParams.dataInicioSegundoSemestre)}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatarData(currentYearParams.dataFimSegundoSemestre)}
+                      </TableCell>
+                      <TableCell className="text-center font-medium">
+                        {calcularDias(currentYearParams.dataInicioPrimeiroSemestre, currentYearParams.dataFimSegundoSemestre)} dias
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {currentYearParams.estado ? (
+                          getEstadoBadge(currentYearParams.estado)
+                        ) : (
+                          <Badge variant="outline">Indefinido</Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -280,74 +340,302 @@ export default function Parameters() {
               )}
             </CardContent>
           </Card>
+
+          {isFetchingParams && !isLoadingParams && (
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10">
+              <RefreshCw className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          )}
         </TabsContent>
 
-        {/* ABA 2: Vagas */}
+        {/* ABA 2: Vagas por Curso com Paginação */}
+
         <TabsContent value="vagas" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Vagas Disponíveis
+                Vagas Disponíveis — {tipoCandidaturaNome} ({currentYearParams?.designacao})
               </CardTitle>
+              <CardDescription>
+                Total de vagas: {vacancies.reduce((acc, v) => acc + v.numeroVagas, 0).toLocaleString()} •
+                Cursos com vagas: {vacancies.filter(v => v.numeroVagas > 0).length}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Curso</TableHead>
-                    <TableHead>Período</TableHead>
-                    <TableHead className="text-right">Vagas</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {vagas.map((v, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{v.curso}</TableCell>
-                      <TableCell>{v.periodo}</TableCell>
-                      <TableCell className="text-right font-bold text-primary">{v.vagas}</TableCell>
-                    </TableRow>
+              {/* Enquanto carrega ou está trocando de tipo/ano → mostra loading */}
+              {isLoadingVacancies || isFetchingVacancies ? (
+                <div className="space-y-3">
+                  {[...Array(8)].map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              ) : vacancies.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                  <p className="text-lg">Nenhuma vaga encontrada para este ano e tipo de candidatura.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Força mostrar a tabela mesmo com poucas vagas */}
+                  <div className="space-y-6">
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Curso</TableHead>
+                            <TableHead>Período</TableHead>
+                            <TableHead className="text-right">Vagas</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedVacancies.length > 0 ? (
+                            paginatedVacancies.map((vaga, i) => (
+                              <TableRow key={`${vaga.codigoCurso}-${vaga.periodoDescricao}`} className="hover:bg-muted/50">
+                                <TableCell className="font-medium">{vaga.cursoDescricao}</TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant={vaga.periodoDescricao === "Diurno" ? "default" : "secondary"}
+                                    className="text-xs"
+                                  >
+                                    {vaga.periodoDescricao}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {vaga.numeroVagas > 0 ? (
+                                    <span className="font-bold text-primary">{vaga.numeroVagas.toLocaleString()}</span>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">
+                                      Esgotado
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                                Não há vagas com mais de 0 para exibir nesta página.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Paginação */}
+                    {filteredVacancies.length > 0 && (
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <span>Itens por página:</span>
+                          <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(Number(v))}>
+                            <SelectTrigger className="w-20">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {[10, 20, 50].map((size) => (
+                                <SelectItem key={size} value={size.toString()}>
+                                  {size}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="text-sm text-muted-foreground">
+                          Mostrando {(currentPage - 1) * itemsPerPage + 1}–
+                          {Math.min(currentPage * itemsPerPage, filteredVacancies.length)} de {filteredVacancies.length} cursos
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                            <ChevronsLeft className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                            <ChevronLeft className="h-4 w-4" />
+                            Anterior
+                          </Button>
+
+                          <span className="px-3 text-sm font-medium">
+                            {currentPage} / {totalPages || 1}
+                          </span>
+
+                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages || 1, p + 1))} disabled={currentPage === totalPages}>
+                            Próximo
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(totalPages || 1)} disabled={currentPage === totalPages}>
+                            <ChevronsRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* ABA 3: Mensalidades */}
+        {/* ABA 3: Calendário de Mensalidades com Paginação */}
         <TabsContent value="mensalidade" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
-                Mensalidades
+                Calendário de Mensalidades — {currentYearParams?.designacao}
               </CardTitle>
+              <CardDescription>
+                Total de prestações: {monthlyFees.length} •
+                Vencidas: {monthlyFees.filter(f => new Date(f.dataLimite) < new Date()).length}
+              </CardDescription>
             </CardHeader>
+
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Prestação</TableHead>
-                    <TableHead>Data Limite</TableHead>
-                    <TableHead>Estado</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mensalidades.map((m, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{m.tipo}</TableCell>
-                      <TableCell>{m.prestacao}</TableCell>
-                      <TableCell>{formatarData(m.dataLimite)}</TableCell>
-                      <TableCell>{getEstadoBadge(m.estado)}</TableCell>
-                    </TableRow>
+              {isLoadingMonthlyFees || isFetchingMonthlyFees ? (
+                <div className="space-y-3">
+                  {[...Array(10)].map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              ) : monthlyFees.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                  <p className="text-lg">Nenhum calendário de mensalidades encontrado para este ano letivo.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Tabela */}
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-32">Mês</TableHead>
+                          <TableHead>Prestação</TableHead>
+                          <TableHead>Semestre</TableHead>
+                          <TableHead>Data Limite</TableHead>
+                          <TableHead className="text-center w-32">Estado</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {paginatedMonthlyFees.length > 0 ? (
+                          paginatedMonthlyFees.map((fee, i) => {
+                            const isOverdue = new Date(fee.dataLimite) < new Date();
+                            return (
+                              <TableRow
+                                key={i}
+                                className={`hover:bg-muted/50 transition-colors ${isOverdue ? "opacity-70" : ""}`}
+                              >
+                                <TableCell className="font-medium">{fee.designacao}</TableCell>
+                                <TableCell>{fee.prestacao}ª Prestação</TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="text-xs">
+                                    {fee.semestre}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {formatarData(fee.dataLimite.split("T")[0])}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {isOverdue ? (
+                                    <Badge variant="destructive">Vencido</Badge>
+                                  ) : (
+                                    <Badge className="bg-primary/10 text-primary">Pendente</Badge>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                              Nenhuma prestação nesta página.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Paginação */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>Itens por página:</span>
+                      <Select value={itemsPerPageMonthly.toString()} onValueChange={(v) => setItemsPerPageMonthly(Number(v))}>
+                        <SelectTrigger className="w-20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[6, 12, 24].map((size) => (
+                            <SelectItem key={size} value={size.toString()}>
+                              {size}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="text-sm text-muted-foreground">
+                      Mostrando {(currentPageMonthly - 1) * itemsPerPageMonthly + 1}–
+                      {Math.min(currentPageMonthly * itemsPerPageMonthly, monthlyFees.length)} de {monthlyFees.length} prestações
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPageMonthly(1)}
+                        disabled={currentPageMonthly === 1}
+                      >
+                        <ChevronsLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPageMonthly(p => Math.max(1, p - 1))}
+                        disabled={currentPageMonthly === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Anterior
+                      </Button>
+
+                      <span className="px-3 text-sm font-medium">
+                        {currentPageMonthly} / {totalPagesMonthly || 1}
+                      </span>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPageMonthly(p => Math.min(totalPagesMonthly || 1, p + 1))}
+                        disabled={currentPageMonthly === totalPagesMonthly}
+                      >
+                        Próximo
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPageMonthly(totalPagesMonthly || 1)}
+                        disabled={currentPageMonthly === totalPagesMonthly}
+                      >
+                        <ChevronsRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+      {/* Modal Multi-Step */}
+      <ParametersEditModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        anoLetivo={currentYearParams?.designacao || ""}
+      />
     </div>
+
   );
 }
