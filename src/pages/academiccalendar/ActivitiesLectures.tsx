@@ -42,6 +42,8 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
 import { useQuery } from "@tanstack/react-query";
+import { fetchAnosAcademicos } from "@/services/fetch-anos-academico";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 // --------------------- Tipos -------------------------
 interface Atividade {
@@ -59,12 +61,6 @@ interface TipoCandidatura {
   designacao: string;
 }
 
-interface AnoAcademico {
-  codigo: number;
-  designacao: string;
-  estado: string; // "Activo", "Activado", "Desactivo"
-}
-
 // --------------------- Rotas -------------------------
 const API_ATIVIDADES =
   "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/academic-activities";
@@ -80,10 +76,7 @@ const ANOS_LETIVOS_MOCK = [
   { id: "21", descricao: "2023/2024" },
   { id: "20", descricao: "2022/2023" },
 ];
-async function fetchAnosAcademicos(): Promise<AnoAcademico[]> {
-  const { data } = await axios.get(API_ANOS_ACADEMICOS);
-  return data.anolectivos ?? [];
-}
+
 // --------------------- Componente -------------------------
 export default function ActivitiesLecturesLic() {
   const { toast } = useToast();
@@ -127,13 +120,8 @@ export default function ActivitiesLecturesLic() {
     const padrao = tiposCandidatura.find((t) => t.codigo === 1);
     if (padrao) setTipoCandidaturaId("1");
   }, [tiposCandidatura]);
-  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } = useQuery<
-    AnoAcademico[]
-  >({
-    queryKey: ["anosLetivos"],
-    queryFn: fetchAnosAcademicos,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } =
+    useQueryAnoAcademico();
   useEffect(() => {
     if (loadingAnosLetivos || anosLetivos.length === 0) return;
 
@@ -260,17 +248,11 @@ export default function ActivitiesLecturesLic() {
               </SelectTrigger>
 
               <SelectContent>
-                {anosLetivos
-                  .filter(
-                    (a) =>
-                      !a.designacao.toLowerCase().includes("doutoramento") &&
-                      !a.designacao.toLowerCase().includes("mestrado"),
-                  )
-                  .map((ano) => (
-                    <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-                      {ano.designacao}
-                    </SelectItem>
-                  ))}
+                {anosLetivos.map((ano) => (
+                  <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
+                    {ano.designacao}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -447,14 +429,20 @@ export default function ActivitiesLecturesLic() {
               <Select
                 value={form.ano_lectivo}
                 onValueChange={(v) => setForm({ ...form, ano_lectivo: v })}
+                disabled={loadingAnosLetivos}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue
+                    placeholder={
+                      loadingAnosLetivos ? "Carregando anos..." : "Selecione"
+                    }
+                  />
                 </SelectTrigger>
+
                 <SelectContent>
-                  {ANOS_LETIVOS_MOCK.map((ano) => (
-                    <SelectItem key={ano.id} value={ano.descricao}>
-                      {ano.descricao}
+                  {anosLetivos.map((ano) => (
+                    <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
+                      {ano.designacao}
                     </SelectItem>
                   ))}
                 </SelectContent>
