@@ -72,15 +72,27 @@ interface Semestre {
   designacao: string;
 }
 
-// ROTAS REAIS
-const API_ANOS_LETIVOS = "http://34.202.163.85:8080/ords/cmpdev/academic-year/all";
-const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
-const API_TIPOS_PRAZO = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-prazo/all";
-const API_TIPOS_AVALIACAO = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-avaliacao/all";
-const API_SEMESTRES = "http://34.202.163.85:8080/ords/cmpdev/uma/semestre/all"; // NOVA ROTA
-const API_PRAZOS = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
-const API_CRIAR_PRAZO = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
+interface TipoEpocaAvaliacao {
+  codigo: number;
+  descricao: string;
+}
 
+// ROTAS REAIS
+const API_ANOS_LETIVOS =
+  "http://34.202.163.85:8080/ords/cmpdev/academic-year/all";
+const API_TIPOS_CANDIDATURA =
+  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
+const API_TIPOS_PRAZO =
+  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-prazo/all";
+const API_TIPOS_AVALIACAO =
+  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-avaliacao/all";
+const API_SEMESTRES = "http://34.202.163.85:8080/ords/cmpdev/uma/semestre/all"; // NOVA ROTA
+const API_PRAZOS =
+  "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
+const API_CRIAR_PRAZO =
+  "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
+const API_TIPO_DE_EPOCA_AVALIACAO =
+  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-epoca-avaliacao/all";
 export default function Deadlines() {
   const { toast } = useToast();
 
@@ -88,10 +100,15 @@ export default function Deadlines() {
   const [loading, setLoading] = useState(true);
   const [prazos, setPrazos] = useState<Prazo[]>([]);
   const [anosLetivos, setAnosLetivos] = useState<AnoLetivo[]>([]);
-  const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
+  const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>(
+    [],
+  );
   const [tiposPrazo, setTiposPrazo] = useState<TipoPrazo[]>([]);
   const [tiposAvaliacao, setTiposAvaliacao] = useState<TipoAvaliacao[]>([]);
   const [semestres, setSemestres] = useState<Semestre[]>([]); // NOVO
+  const [tiposEpocaAvaliacao, setTiposEpocaAvaliacao] = useState<
+    TipoEpocaAvaliacao[]
+  >([]);
 
   // Filtros
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -108,6 +125,8 @@ export default function Deadlines() {
     data_fim: "",
     observacao: "",
     fk_created_by: "1397",
+    anoletivo: "",
+    tipoCandidaturaId: "",
   });
 
   // Paginação
@@ -119,13 +138,31 @@ export default function Deadlines() {
     try {
       const res = await axios.get(API_ANOS_LETIVOS);
       const todos = res.data.anolectivos || [];
-      const ordenados = todos.sort((a: AnoLetivo, b: AnoLetivo) =>
-        Number(b.codigo) - Number(a.codigo)
+      const ordenados = todos.sort(
+        (a: AnoLetivo, b: AnoLetivo) => Number(b.codigo) - Number(a.codigo),
       );
       setAnosLetivos(ordenados);
       if (ordenados.length > 0) setAnoLetivoId(ordenados[0].codigo);
     } catch {
       toast({ title: "Erro ao carregar anos letivos", variant: "destructive" });
+    }
+  };
+
+  const fetchTipoEpocaAvaliacoes = async () => {
+    try {
+      const res = await axios.get(API_TIPO_DE_EPOCA_AVALIACAO);
+      const data =
+        res.data.tipo_epoca_avaliacoes || ([] as TipoEpocaAvaliacao[]);
+      const filteredData = data.filter(
+        (item) => typeof item.descricao === "string",
+      );
+      console.log(filteredData, data, res.data);
+      setTiposEpocaAvaliacao(filteredData);
+    } catch {
+      toast({
+        title: "Erro ao carregar tipos de época de avaliação",
+        variant: "destructive",
+      });
     }
   };
 
@@ -137,7 +174,10 @@ export default function Deadlines() {
       const licenciatura = data.find((t: any) => t.codigo === 1);
       if (licenciatura) setTipoCandidaturaId("1");
     } catch {
-      toast({ title: "Erro ao carregar tipos de candidatura", variant: "destructive" });
+      toast({
+        title: "Erro ao carregar tipos de candidatura",
+        variant: "destructive",
+      });
     }
   };
 
@@ -149,10 +189,13 @@ export default function Deadlines() {
       const marcacaoProvas = data.find((t: TipoPrazo) => t.pk_tipo_prazo === 4);
       if (marcacaoProvas) {
         setTipoPrazoId("4");
-        setForm(prev => ({ ...prev, fk_tipo_prazo: "4" }));
+        setForm((prev) => ({ ...prev, fk_tipo_prazo: "4" }));
       }
     } catch {
-      toast({ title: "Erro ao carregar tipos de prazo", variant: "destructive" });
+      toast({
+        title: "Erro ao carregar tipos de prazo",
+        variant: "destructive",
+      });
     }
   };
 
@@ -162,7 +205,10 @@ export default function Deadlines() {
       const data = res.data.tipo_avaliacoes || [];
       setTiposAvaliacao(data);
     } catch {
-      toast({ title: "Erro ao carregar tipos de avaliação", variant: "destructive" });
+      toast({
+        title: "Erro ao carregar tipos de avaliação",
+        variant: "destructive",
+      });
     }
   };
 
@@ -173,7 +219,10 @@ export default function Deadlines() {
       const data = res.data.semestres || [];
       setSemestres(data);
       if (data.length > 0) {
-        setForm(prev => ({ ...prev, fk_semestre: data[0].codigo.toString() })); // preenche com o 1º semestre por padrão
+        setForm((prev) => ({
+          ...prev,
+          fk_semestre: data[0].codigo.toString(),
+        })); // preenche com o 1º semestre por padrão
       }
     } catch {
       toast({ title: "Erro ao carregar semestres", variant: "destructive" });
@@ -204,14 +253,25 @@ export default function Deadlines() {
 
   // Criar prazo
   const handleCriarPrazo = async () => {
-    if (!form.fk_tipo_prazo || !form.fk_tipo_avaliacao || !form.fk_semestre || !form.data_inicio || !form.data_fim) {
-      toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
+    if (
+      !form.fk_tipo_prazo ||
+      !form.fk_semestre ||
+      !form.data_inicio ||
+      !form.data_fim
+    ) {
+      toast({
+        title: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      });
       return;
     }
 
     const payload = {
       fk_tipo_prazo: Number(form.fk_tipo_prazo),
-      fk_tipo_avaliacao: Number(form.fk_tipo_avaliacao),
+      fk_tipo_avaliacao:
+        Number(form.fk_tipo_prazo) === 5
+          ? null
+          : Number(form.fk_tipo_avaliacao),
       fk_semestre: Number(form.fk_semestre),
       data_inicio: `${form.data_inicio}T00:00:00`,
       data_fim: `${form.data_fim}T00:00:00`,
@@ -220,7 +280,10 @@ export default function Deadlines() {
     };
 
     try {
-      await axios.post(API_CRIAR_PRAZO, payload);
+      await axios.post(
+        `${API_CRIAR_PRAZO}/${form.anoletivo}/${form.fk_tipo_prazo}/${form.tipoCandidaturaId}`,
+        payload,
+      );
       toast({ title: "Prazo criado com sucesso!" });
       setOpenModal(false);
       setForm({
@@ -231,6 +294,8 @@ export default function Deadlines() {
         data_fim: "",
         observacao: "",
         fk_created_by: "1397",
+        anoletivo: "",
+        tipoCandidaturaId: "",
       });
       fetchPrazos();
     } catch (err: any) {
@@ -249,6 +314,7 @@ export default function Deadlines() {
     fetchTiposPrazo();
     fetchTiposAvaliacao();
     fetchSemestres(); // CARREGA SEMESTRES DA API
+    fetchTipoEpocaAvaliacoes();
   }, []);
 
   useEffect(() => {
@@ -259,8 +325,11 @@ export default function Deadlines() {
 
   // Paginação
   const totalPages = Math.ceil(prazos.length / itemsPerPage);
-  const paginated = prazos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
+  const paginated = prazos.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+  console.log(form.fk_tipo_prazo.toString());
   return (
     <div className="space-y-6">
       <PageHeader
@@ -287,7 +356,11 @@ export default function Deadlines() {
             <Label>Ano Letivo</Label>
             <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
               <SelectTrigger>
-                <SelectValue placeholder={anosLetivos.length === 0 ? "Carregando..." : "Selecione"} />
+                <SelectValue
+                  placeholder={
+                    anosLetivos.length === 0 ? "Carregando..." : "Selecione"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {anosLetivos.map((a) => (
@@ -295,7 +368,9 @@ export default function Deadlines() {
                     <div className="flex items-center justify-between w-full">
                       <span>{a.designacao}</span>
                       {!a.estado.toLowerCase().includes("desactiv") && (
-                        <span className="text-xs text-green-600 font-medium ml-4">(Ativo)</span>
+                        <span className="text-xs text-green-600 font-medium ml-4">
+                          (Ativo)
+                        </span>
                       )}
                     </div>
                   </SelectItem>
@@ -309,11 +384,18 @@ export default function Deadlines() {
             <Label>Tipo de Prazo</Label>
             <Select value={tipoPrazoId} onValueChange={setTipoPrazoId}>
               <SelectTrigger>
-                <SelectValue placeholder={tiposPrazo.length === 0 ? "Carregando..." : "Selecione"} />
+                <SelectValue
+                  placeholder={
+                    tiposPrazo.length === 0 ? "Carregando..." : "Selecione"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {tiposPrazo.map((t) => (
-                  <SelectItem key={t.pk_tipo_prazo} value={t.pk_tipo_prazo.toString()}>
+                  <SelectItem
+                    key={t.pk_tipo_prazo}
+                    value={t.pk_tipo_prazo.toString()}
+                  >
                     {t.designacao}
                   </SelectItem>
                 ))}
@@ -324,9 +406,18 @@ export default function Deadlines() {
           {/* Tipo de Candidatura */}
           <div className="space-y-2">
             <Label>Tipo de Candidatura</Label>
-            <Select value={tipoCandidaturaId} onValueChange={setTipoCandidaturaId}>
+            <Select
+              value={tipoCandidaturaId}
+              onValueChange={setTipoCandidaturaId}
+            >
               <SelectTrigger>
-                <SelectValue placeholder={tiposCandidatura.length === 0 ? "Carregando..." : "Selecione"} />
+                <SelectValue
+                  placeholder={
+                    tiposCandidatura.length === 0
+                      ? "Carregando..."
+                      : "Selecione"
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
                 {tiposCandidatura.map((t) => (
@@ -361,15 +452,26 @@ export default function Deadlines() {
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-8 w-48" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-64" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-8 w-40" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-48" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-64" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-40" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : paginated.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-16 text-muted-foreground">
+                <TableCell
+                  colSpan={4}
+                  className="text-center py-16 text-muted-foreground"
+                >
                   Nenhum prazo encontrado para os filtros selecionados
                 </TableCell>
               </TableRow>
@@ -382,11 +484,17 @@ export default function Deadlines() {
                   <TableCell>
                     <div className="text-sm leading-tight">
                       <div>{formatarData(p.data_inicio)}</div>
-                      <div className="text-muted-foreground">até {formatarData(p.data_fim)}</div>
+                      <div className="text-muted-foreground">
+                        até {formatarData(p.data_fim)}
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{p.observacao || "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{p.criado_por_nome}</TableCell>
+                  <TableCell className="text-sm">
+                    {p.observacao || "—"}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {p.criado_por_nome}
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -399,20 +507,28 @@ export default function Deadlines() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Novo Prazo</DialogTitle>
-            <DialogDescription>Defina o período para o tipo de prazo selecionado.</DialogDescription>
+            <DialogDescription>
+              Defina o período para o tipo de prazo selecionado.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             {/* Tipo de Prazo */}
             <div className="space-y-2">
               <Label>Tipo de Prazo *</Label>
-              <Select value={form.fk_tipo_prazo} onValueChange={(v) => setForm({ ...form, fk_tipo_prazo: v })}>
+              <Select
+                value={form.fk_tipo_prazo}
+                onValueChange={(v) => setForm({ ...form, fk_tipo_prazo: v })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo de prazo" />
                 </SelectTrigger>
                 <SelectContent>
                   {tiposPrazo.map((t) => (
-                    <SelectItem key={t.pk_tipo_prazo} value={t.pk_tipo_prazo.toString()}>
+                    <SelectItem
+                      key={t.pk_tipo_prazo}
+                      value={t.pk_tipo_prazo.toString()}
+                    >
                       {t.designacao}
                     </SelectItem>
                   ))}
@@ -421,16 +537,99 @@ export default function Deadlines() {
             </div>
 
             {/* Tipo de Avaliação */}
+            {form.fk_tipo_prazo.toString() === "3" && (
+              <div className="space-y-2">
+                <Label>Tipo de Avaliação *</Label>
+                <Select
+                  value={form.fk_tipo_avaliacao}
+                  onValueChange={(v) =>
+                    setForm({ ...form, fk_tipo_avaliacao: v })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tiposAvaliacao.map((t) => (
+                      <SelectItem key={t.codigo} value={t.codigo.toString()}>
+                        {t.designacao} ({t.sigla})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/*Tipo epoca avalicaoes */}
+            {form.fk_tipo_prazo.toString() === "4" && (
+              <div className="space-y-2">
+                <Label>Tipo epoca avalicaoes *</Label>
+                <Select
+                  value={form.fk_tipo_avaliacao}
+                  onValueChange={(v) =>
+                    setForm({ ...form, fk_tipo_avaliacao: v })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tiposEpocaAvaliacao.map((t) => (
+                      <SelectItem key={t.codigo} value={t.codigo.toString()}>
+                        {t.descricao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Ano Letivo */}
             <div className="space-y-2">
-              <Label>Tipo de Avaliação *</Label>
-              <Select value={form.fk_tipo_avaliacao} onValueChange={(v) => setForm({ ...form, fk_tipo_avaliacao: v })}>
+              <Label>Ano Lectivo *</Label>
+              <Select
+                value={form.anoletivo}
+                onValueChange={(v) => setForm({ ...form, anoletivo: v })}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
+                  <SelectValue
+                    placeholder={
+                      semestres.length === 0 ? "Carregando..." : "Selecione"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {tiposAvaliacao.map((t) => (
+                  {anosLetivos.map((s) => (
+                    <SelectItem key={s.codigo} value={s.codigo.toString()}>
+                      {s.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Tipo de Candidatura */}
+            <div className="space-y-2">
+              <Label>Tipo de Candidatura</Label>
+              <Select
+                value={form.tipoCandidaturaId}
+                onValueChange={(v) =>
+                  setForm({ ...form, tipoCandidaturaId: v })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      tiposCandidatura.length === 0
+                        ? "Carregando..."
+                        : "Selecione"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {tiposCandidatura.map((t) => (
                     <SelectItem key={t.codigo} value={t.codigo.toString()}>
-                      {t.designacao} ({t.sigla})
+                      {t.designacao}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -440,9 +639,16 @@ export default function Deadlines() {
             {/* Semestre - AGORA DA API */}
             <div className="space-y-2">
               <Label>Semestre *</Label>
-              <Select value={form.fk_semestre} onValueChange={(v) => setForm({ ...form, fk_semestre: v })}>
+              <Select
+                value={form.fk_semestre}
+                onValueChange={(v) => setForm({ ...form, fk_semestre: v })}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder={semestres.length === 0 ? "Carregando..." : "Selecione"} />
+                  <SelectValue
+                    placeholder={
+                      semestres.length === 0 ? "Carregando..." : "Selecione"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {semestres.map((s) => (
@@ -458,11 +664,23 @@ export default function Deadlines() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Data Início *</Label>
-                <Input type="date" value={form.data_inicio} onChange={(e) => setForm({ ...form, data_inicio: e.target.value })} />
+                <Input
+                  type="date"
+                  value={form.data_inicio}
+                  onChange={(e) =>
+                    setForm({ ...form, data_inicio: e.target.value })
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label>Data Fim *</Label>
-                <Input type="date" value={form.data_fim} onChange={(e) => setForm({ ...form, data_fim: e.target.value })} />
+                <Input
+                  type="date"
+                  value={form.data_fim}
+                  onChange={(e) =>
+                    setForm({ ...form, data_fim: e.target.value })
+                  }
+                />
               </div>
             </div>
 
@@ -471,13 +689,17 @@ export default function Deadlines() {
               <Textarea
                 placeholder="Ex: Período alargado devido a feriados..."
                 value={form.observacao}
-                onChange={(e) => setForm({ ...form, observacao: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, observacao: e.target.value })
+                }
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenModal(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setOpenModal(false)}>
+              Cancelar
+            </Button>
             <Button onClick={handleCriarPrazo}>Criar Prazo</Button>
           </DialogFooter>
         </DialogContent>
@@ -487,14 +709,28 @@ export default function Deadlines() {
       {!loading && prazos.length > 0 && (
         <div className="flex items-center justify-between py-4">
           <div className="text-sm text-muted-foreground">
-            Mostrando {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, prazos.length)} de {prazos.length} prazos
+            Mostrando {(currentPage - 1) * itemsPerPage + 1}–
+            {Math.min(currentPage * itemsPerPage, prazos.length)} de{" "}
+            {prazos.length} prazos
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
               Anterior
             </Button>
-            <span className="text-sm">Página {currentPage} de {totalPages}</span>
-            <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+            <span className="text-sm">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
               Próxima
             </Button>
           </div>
