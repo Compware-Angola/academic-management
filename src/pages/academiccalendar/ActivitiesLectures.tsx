@@ -36,11 +36,14 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
+import { useQuery } from "@tanstack/react-query";
 
+// --------------------- Tipos -------------------------
 interface Atividade {
   codigo: string;
   descricao: string;
@@ -56,37 +59,44 @@ interface TipoCandidatura {
   designacao: string;
 }
 
-// ROTAS REAIS
+interface AnoAcademico {
+  codigo: number;
+  designacao: string;
+  estado: string; // "Activo", "Activado", "Desactivo"
+}
+
+// --------------------- Rotas -------------------------
 const API_ATIVIDADES =
   "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/academic-activities";
+
 const API_TIPOS_CANDIDATURA =
   "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
+const API_ANOS_ACADEMICOS =
+  "http://34.202.163.85:8080/ords/cmpdev/academic-year/all";
 
-// Mock anos letivos (até teres a rota real)
 const ANOS_LETIVOS_MOCK = [
   { id: "23", descricao: "2025/2026" },
   { id: "22", descricao: "2024/2025" },
   { id: "21", descricao: "2023/2024" },
   { id: "20", descricao: "2022/2023" },
 ];
-
+async function fetchAnosAcademicos(): Promise<AnoAcademico[]> {
+  const { data } = await axios.get(API_ANOS_ACADEMICOS);
+  return data.anolectivos ?? [];
+}
+// --------------------- Componente -------------------------
 export default function ActivitiesLecturesLic() {
   const { toast } = useToast();
 
-  // Estados
-  const [loading, setLoading] = useState(true);
-  const [atividades, setAtividades] = useState<Atividade[]>([]);
-  const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
-
   // Filtros
-  const [anoLetivoId, setAnoLetivoId] = useState("23");        // padrão 2025/2026
-  const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>(""); // será preenchido após carregar os tipos
+  const [anoLetivoId, setAnoLetivoId] = useState("23");
+  const [tipoCandidaturaId, setTipoCandidaturaId] = useState("");
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Modal Nova Atividade
+  // Modal criação
   const [openModal, setOpenModal] = useState(false);
   const [form, setForm] = useState({
     descricao: "",
@@ -96,77 +106,95 @@ export default function ActivitiesLecturesLic() {
     tipo_calendario: "",
   });
 
-  // 1. Carregar tipos de candidatura
-  const fetchTiposCandidatura = async () => {
-    try {
-      const res = await axios.get(API_TIPOS_CANDIDATURA);
-      const data = res.data.tipo_candidaturas || [];
-      setTiposCandidatura(data);
+  // ------------------------------------------------------
+  // ★ QUERY: TIPOS DE CANDIDATURA
+  // ------------------------------------------------------
+  const { data: tiposCandidatura = [], isLoading: loadingTipos } = useQuery<
+    TipoCandidatura[]
+  >({
+    queryKey: ["tiposCandidatura"],
+    queryFn: async () => {
+      const r = await axios.get(API_TIPOS_CANDIDATURA);
+      return r.data.tipo_candidaturas ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-      // Definir Licenciatura (código 1) como padrão
-      const licenciatura = data.find((t: TipoCandidatura) => t.codigo === 1);
-      if (licenciatura) {
-        setTipoCandidaturaId("1");
-      }
-    } catch (err) {
-      console.error(err);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os tipos de candidatura",
-        variant: "destructive",
-      });
-    }
-  };
+  // Efeito colateral após load: selecionar licenciatura como padrão
+  useEffect(() => {
+    if (tiposCandidatura.length === 0) return;
 
-  // 2. Carregar atividades
-  const fetchAtividades = async () => {
-    if (!tipoCandidaturaId) return;
+    const padrao = tiposCandidatura.find((t) => t.codigo === 1);
+    if (padrao) setTipoCandidaturaId("1");
+  }, [tiposCandidatura]);
+  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } = useQuery<
+    AnoAcademico[]
+  >({
+    queryKey: ["anosLetivos"],
+    queryFn: fetchAnosAcademicos,
+    staleTime: 5 * 60 * 1000,
+  });
+  useEffect(() => {
+    if (loadingAnosLetivos || anosLetivos.length === 0) return;
 
-    setLoading(true);
-    try {
+    const anosFiltrados = anosLetivos.filter(
+      (a) =>
+        !a.designacao.toLowerCase().includes("doutoramento") &&
+        !a.designacao.toLowerCase().includes("mestrado"),
+    );
+
+    const ativo =
+      anosFiltrados.find((a) => a.estado.toLowerCase().includes("activ")) ??
+      anosFiltrados[0];
+
+    setAnoLetivoId(ativo.codigo.toString());
+  }, [anosLetivos, loadingAnosLetivos]);
+  // ------------------------------------------------------
+  // ★ QUERY: ATIVIDADES LETIVAS
+  // ------------------------------------------------------
+  const {
+    data: atividades = [],
+    isLoading: loadingAtividades,
+    refetch: refetchAtividades,
+  } = useQuery<Atividade[]>({
+    queryKey: ["atividades", anoLetivoId, tipoCandidaturaId],
+    queryFn: async () => {
+      if (!tipoCandidaturaId) return [];
+
       const url = `${API_ATIVIDADES}/${anoLetivoId}/${tipoCandidaturaId}`;
-      const res = await axios.get(url);
-      const data: Atividade[] = res.data.actividades || [];
-      setAtividades(data);
-      setCurrentPage(1);
-      toast({ title: `Carregadas ${data.length} atividades` });
-    } catch (err: any) {
-      console.error(err);
+      const r = await axios.get(url);
+      return r.data.actividades ?? [];
+    },
+    enabled: !!tipoCandidaturaId,
+  });
+
+  // Aviso e reset da página quando os dados chegam
+  useEffect(() => {
+    if (atividades.length === 0) return;
+
+    setCurrentPage(1);
+    toast({ title: `Carregadas ${atividades.length} atividades` });
+  }, [atividades]);
+
+  // ------------------------------------------------------
+  // Handlers
+  // ------------------------------------------------------
+  const handleRefresh = () => refetchAtividades();
+
+  const handleSubmitNew = () => {
+    if (
+      !form.descricao ||
+      !form.data_inicio ||
+      !form.data_termino ||
+      !form.tipo_calendario
+    ) {
       toast({
-        title: "Erro",
-        description: "Não foi possível carregar as atividades",
+        title: "Preencha todos os campos obrigatórios",
         variant: "destructive",
       });
-      setAtividades([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Carregar tipos de candidatura ao montar o componente
-  useEffect(() => {
-    fetchTiposCandidatura();
-  }, []);
-
-  // Quando já tivermos o tipo de candidatura (ou mudar algum filtro), carregar atividades
-  useEffect(() => {
-    if (tipoCandidaturaId) {
-      fetchAtividades();
-    }
-  }, [anoLetivoId, tipoCandidaturaId]);
-
-  // Função de refresh manual
-  const handleRefresh = () => {
-    toast({ title: "Atualizando..." });
-    fetchAtividades();
-  };
-
-  // Criação (simulada)
-  const handleSubmitNew = () => {
-    if (!form.descricao || !form.data_inicio || !form.data_termino || !form.tipo_calendario) {
-      toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
       return;
     }
+
     toast({ title: "Atividade cadastrada com sucesso!" });
     setOpenModal(false);
     setForm({
@@ -176,16 +204,20 @@ export default function ActivitiesLecturesLic() {
       ano_lectivo: "2025/2026",
       tipo_calendario: "",
     });
-    fetchAtividades();
+
+    refetchAtividades();
   };
 
   // Paginação
   const totalPages = Math.ceil(atividades.length / itemsPerPage);
   const paginatedData = atividades.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
+  // ------------------------------------------------------
+  // UI
+  // ------------------------------------------------------
   return (
     <div className="space-y-6">
       <PageHeader
@@ -197,6 +229,7 @@ export default function ActivitiesLecturesLic() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Atualizar
             </Button>
+
             <Button size="sm" onClick={() => setOpenModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Nova Atividade
@@ -205,34 +238,56 @@ export default function ActivitiesLecturesLic() {
         }
       />
 
-      {/* Filtros */}
+      {/* -------------------- FILTROS -------------------- */}
       <div className="bg-card rounded-lg border p-6 space-y-4">
         <h3 className="text-sm font-semibold">Filtros</h3>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Ano letivo */}
           <div className="space-y-2">
             <Label>Ano Letivo</Label>
-            <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
+            <Select
+              value={anoLetivoId}
+              onValueChange={setAnoLetivoId}
+              disabled={loadingAnosLetivos}
+            >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue
+                  placeholder={
+                    loadingAnosLetivos ? "Carregando anos..." : "Selecione"
+                  }
+                />
               </SelectTrigger>
+
               <SelectContent>
-                {ANOS_LETIVOS_MOCK.map((ano) => (
-                  <SelectItem key={ano.id} value={ano.id}>
-                    {ano.descricao}
-                  </SelectItem>
-                ))}
+                {anosLetivos
+                  .filter(
+                    (a) =>
+                      !a.designacao.toLowerCase().includes("doutoramento") &&
+                      !a.designacao.toLowerCase().includes("mestrado"),
+                  )
+                  .map((ano) => (
+                    <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
+                      {ano.designacao}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
 
+          {/* Tipo de candidatura */}
           <div className="space-y-2">
             <Label>Tipo de Candidatura</Label>
-            <Select value={tipoCandidaturaId} onValueChange={setTipoCandidaturaId}>
+            <Select
+              value={tipoCandidaturaId}
+              onValueChange={setTipoCandidaturaId}
+            >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={tiposCandidatura.length === 0 ? "Carregando..." : "Selecione"}
+                  placeholder={loadingTipos ? "Carregando..." : "Selecione"}
                 />
               </SelectTrigger>
+
               <SelectContent>
                 {tiposCandidatura.map((tipo) => (
                   <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
@@ -243,8 +298,13 @@ export default function ActivitiesLecturesLic() {
             </Select>
           </div>
 
+          {/* Botão aplicar */}
           <div className="flex items-end">
-            <Button variant="outline" className="w-full" onClick={handleRefresh}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleRefresh}
+            >
               <RefreshCw className="h-4 w-4 mr-2" />
               Aplicar Filtros
             </Button>
@@ -252,7 +312,7 @@ export default function ActivitiesLecturesLic() {
         </div>
       </div>
 
-      {/* Tabela */}
+      {/* -------------------- TABELA -------------------- */}
       <div className="bg-card rounded-lg border overflow-hidden">
         <Table>
           <TableHeader>
@@ -262,12 +322,14 @@ export default function ActivitiesLecturesLic() {
               <TableHead className="w-32">Início</TableHead>
               <TableHead className="w-32">Fim</TableHead>
               <TableHead className="w-32">Ano Letivo</TableHead>
-              <TableHead className="max-w-md">Tipo Calendário</TableHead>
+              <TableHead>Tipo Calendário</TableHead>
               <TableHead className="w-24 text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {loading ? (
+            {loadingAtividades ? (
+              // ← Skeletons
               Array.from({ length: 8 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell colSpan={7}>
@@ -276,29 +338,39 @@ export default function ActivitiesLecturesLic() {
                 </TableRow>
               ))
             ) : paginatedData.length === 0 ? (
+              // ← Nenhum resultado
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground">
-                  Nenhuma atividade encontrada para os filtros selecionados
+                <TableCell
+                  colSpan={7}
+                  className="text-center py-16 text-muted-foreground"
+                >
+                  Nenhuma atividade encontrada
                 </TableCell>
               </TableRow>
             ) : (
+              // ← Dados reais
               paginatedData.map((item) => (
                 <TableRow key={item.codigo}>
-                  <TableCell className="font-medium">{item.codigo}</TableCell>
+                  <TableCell>{item.codigo}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs whitespace-normal">
+                    <Badge
+                      variant="outline"
+                      className="text-xs whitespace-normal"
+                    >
                       {item.descricao}
                     </Badge>
                   </TableCell>
                   <TableCell>{formatarData(item.data_inicio)}</TableCell>
                   <TableCell>{formatarData(item.data_termino)}</TableCell>
                   <TableCell>{item.ano_lectivo}</TableCell>
-                  <TableCell className="text-xs">{item.tipo_calendario}</TableCell>
+                  <TableCell>{item.tipo_calendario}</TableCell>
+
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon">
                         <Edit className="h-4 w-4" />
                       </Button>
+
                       <Button variant="ghost" size="icon">
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -311,14 +383,15 @@ export default function ActivitiesLecturesLic() {
         </Table>
       </div>
 
-      {/* Paginação */}
-      {!loading && atividades.length > 0 && (
+      {/* -------------------- PAGINAÇÃO -------------------- */}
+      {!loadingAtividades && atividades.length > 0 && (
         <div className="flex items-center justify-between py-4">
           <div className="text-sm text-muted-foreground">
-            Mostrando {(currentPage - 1) * itemsPerPage + 1} -{" "}
-            {Math.min(currentPage * itemsPerPage, atividades.length)} de {atividades.length}{" "}
-            atividades
+            Mostrando {(currentPage - 1) * itemsPerPage + 1} –{" "}
+            {Math.min(currentPage * itemsPerPage, atividades.length)} de{" "}
+            {atividades.length} atividades
           </div>
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -329,9 +402,12 @@ export default function ActivitiesLecturesLic() {
               <ChevronLeft className="h-4 w-4" />
               Anterior
             </Button>
-            <span className="text-sm px-3">
-              Página <strong>{currentPage}</strong> de <strong>{totalPages}</strong>
+
+            <span className="px-3 text-sm">
+              Página <strong>{currentPage}</strong> de{" "}
+              <strong>{totalPages}</strong>
             </span>
+
             <Button
               variant="outline"
               size="sm"
@@ -345,25 +421,33 @@ export default function ActivitiesLecturesLic() {
         </div>
       )}
 
-      {/* Modal Nova Atividade */}
+      {/* -------------------- MODAL CRIAR -------------------- */}
       <Dialog open={openModal} onOpenChange={setOpenModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Nova Atividade Letiva</DialogTitle>
-            <DialogDescription>Adicione uma nova atividade ao calendário académico.</DialogDescription>
+            <DialogDescription>
+              Adicione uma nova atividade ao calendário acadêmico.
+            </DialogDescription>
           </DialogHeader>
+
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
               <Label>Descrição *</Label>
               <Input
                 value={form.descricao}
-                onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-                placeholder="Ex: Início das Aulas"
+                onChange={(e) =>
+                  setForm({ ...form, descricao: e.target.value })
+                }
               />
             </div>
+
             <div className="space-y-2">
               <Label>Ano Letivo *</Label>
-              <Select value={form.ano_lectivo} onValueChange={(v) => setForm({ ...form, ano_lectivo: v })}>
+              <Select
+                value={form.ano_lectivo}
+                onValueChange={(v) => setForm({ ...form, ano_lectivo: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -376,24 +460,41 @@ export default function ActivitiesLecturesLic() {
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-2">
               <Label>Data Início *</Label>
-              <Input type="date" value={form.data_inicio} onChange={(e) => setForm({ ...form, data_inicio: e.target.value })} />
+              <Input
+                type="date"
+                value={form.data_inicio}
+                onChange={(e) =>
+                  setForm({ ...form, data_inicio: e.target.value })
+                }
+              />
             </div>
+
             <div className="space-y-2">
               <Label>Data Fim *</Label>
-              <Input type="date" value={form.data_termino} onChange={(e) => setForm({ ...form, data_termino: e.target.value })} />
+              <Input
+                type="date"
+                value={form.data_termino}
+                onChange={(e) =>
+                  setForm({ ...form, data_termino: e.target.value })
+                }
+              />
             </div>
+
             <div className="space-y-2 col-span-2">
               <Label>Tipo de Calendário *</Label>
               <Textarea
                 value={form.tipo_calendario}
-                onChange={(e) => setForm({ ...form, tipo_calendario: e.target.value })}
-                placeholder="Ex: Período letivo regular do 1º semestre"
+                onChange={(e) =>
+                  setForm({ ...form, tipo_calendario: e.target.value })
+                }
                 rows={3}
               />
             </div>
           </div>
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenModal(false)}>
               Cancelar
