@@ -146,11 +146,12 @@ export const menuStructure: {
       icon: Calendar,
       items: [
         { title: "Atividades letivas", url: "/calendario/atividades" },
-        { title: "Calendário de provas", url: "/calendario/provas" },
+        { title: "Prazos", url: "/calendario/prazos" },
+        //{ title: "Calendário de provas", url: "/calendario/provas" },
         { title: "Dias isentos", url: "/calendario/dias-isentos" },
         { title: "Parâmetros", url: "/calendario/parametros" },
-        { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
-        { title: "Prazos", url: "/calendario/prazos" },
+       // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
+    
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
     },
