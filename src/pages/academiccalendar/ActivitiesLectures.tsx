@@ -30,8 +30,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Plus,
-  Download,
-  Printer,
   RefreshCw,
   Edit,
   Trash2,
@@ -41,6 +39,7 @@ import {
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { formatarData } from "@/util/date-formate";
 
 interface Atividade {
   codigo: string;
@@ -58,10 +57,12 @@ interface TipoCandidatura {
 }
 
 // ROTAS REAIS
-const API_ATIVIDADES = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/academic-activities";
-const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
+const API_ATIVIDADES =
+  "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/academic-activities";
+const API_TIPOS_CANDIDATURA =
+  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
 
-// Mock de anos letivos (até teres a rota real)
+// Mock anos letivos (até teres a rota real)
 const ANOS_LETIVOS_MOCK = [
   { id: "23", descricao: "2025/2026" },
   { id: "22", descricao: "2024/2025" },
@@ -78,8 +79,8 @@ export default function ActivitiesLecturesLic() {
   const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
 
   // Filtros
-  const [anoLetivoId, setAnoLetivoId] = useState("23");
-  const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1"); // padrão: Licenciatura
+  const [anoLetivoId, setAnoLetivoId] = useState("23");        // padrão 2025/2026
+  const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>(""); // será preenchido após carregar os tipos
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,20 +96,20 @@ export default function ActivitiesLecturesLic() {
     tipo_calendario: "",
   });
 
-  // Carregar tipos de candidatura
+  // 1. Carregar tipos de candidatura
   const fetchTiposCandidatura = async () => {
     try {
       const res = await axios.get(API_TIPOS_CANDIDATURA);
       const data = res.data.tipo_candidaturas || [];
       setTiposCandidatura(data);
 
-      // Definir Licenciatura como padrão (código 1)
+      // Definir Licenciatura (código 1) como padrão
       const licenciatura = data.find((t: TipoCandidatura) => t.codigo === 1);
       if (licenciatura) {
         setTipoCandidaturaId("1");
       }
     } catch (err) {
-      console.error("Erro ao carregar tipos de candidatura", err);
+      console.error(err);
       toast({
         title: "Erro",
         description: "Não foi possível carregar os tipos de candidatura",
@@ -117,7 +118,7 @@ export default function ActivitiesLecturesLic() {
     }
   };
 
-  // Carregar atividades
+  // 2. Carregar atividades
   const fetchAtividades = async () => {
     if (!tipoCandidaturaId) return;
 
@@ -130,7 +131,7 @@ export default function ActivitiesLecturesLic() {
       setCurrentPage(1);
       toast({ title: `Carregadas ${data.length} atividades` });
     } catch (err: any) {
-      console.error("Erro na API de atividades:", err);
+      console.error(err);
       toast({
         title: "Erro",
         description: "Não foi possível carregar as atividades",
@@ -142,36 +143,30 @@ export default function ActivitiesLecturesLic() {
     }
   };
 
-  // Carregar dados na montagem
+  // Carregar tipos de candidatura ao montar o componente
   useEffect(() => {
     fetchTiposCandidatura();
   }, []);
 
-  // Recarregar atividades quando mudar filtro
+  // Quando já tivermos o tipo de candidatura (ou mudar algum filtro), carregar atividades
   useEffect(() => {
-    if (tiposCandidatura.length > 0) {
+    if (tipoCandidaturaId) {
       fetchAtividades();
     }
   }, [anoLetivoId, tipoCandidaturaId]);
 
-  // Paginação
-  const totalPages = Math.ceil(atividades.length / itemsPerPage);
-  const paginatedData = atividades.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
+  // Função de refresh manual
   const handleRefresh = () => {
     toast({ title: "Atualizando..." });
     fetchAtividades();
   };
 
+  // Criação (simulada)
   const handleSubmitNew = () => {
     if (!form.descricao || !form.data_inicio || !form.data_termino || !form.tipo_calendario) {
       toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
       return;
     }
-
     toast({ title: "Atividade cadastrada com sucesso!" });
     setOpenModal(false);
     setForm({
@@ -184,6 +179,13 @@ export default function ActivitiesLecturesLic() {
     fetchAtividades();
   };
 
+  // Paginação
+  const totalPages = Math.ceil(atividades.length / itemsPerPage);
+  const paginatedData = atividades.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -195,16 +197,6 @@ export default function ActivitiesLecturesLic() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Atualizar
             </Button>
-            {/*
-            <Button variant="outline" size="sm">
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar Excel
-            </Button>
-            */}
             <Button size="sm" onClick={() => setOpenModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Nova Atividade
@@ -237,7 +229,9 @@ export default function ActivitiesLecturesLic() {
             <Label>Tipo de Candidatura</Label>
             <Select value={tipoCandidaturaId} onValueChange={setTipoCandidaturaId}>
               <SelectTrigger>
-                <SelectValue placeholder={tiposCandidatura.length === 0 ? "Carregando..." : undefined} />
+                <SelectValue
+                  placeholder={tiposCandidatura.length === 0 ? "Carregando..." : "Selecione"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {tiposCandidatura.map((tipo) => (
@@ -248,12 +242,7 @@ export default function ActivitiesLecturesLic() {
               </SelectContent>
             </Select>
           </div>
-          {/*
-          <div className="space-y-2">
-            <Label>Pesquisar</Label>
-            <Input placeholder="Buscar por descrição..." />
-          </div>
-*/}
+
           <div className="flex items-end">
             <Button variant="outline" className="w-full" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -301,8 +290,8 @@ export default function ActivitiesLecturesLic() {
                       {item.descricao}
                     </Badge>
                   </TableCell>
-                  <TableCell>{item.data_inicio}</TableCell>
-                  <TableCell>{item.data_termino}</TableCell>
+                  <TableCell>{formatarData(item.data_inicio)}</TableCell>
+                  <TableCell>{formatarData(item.data_termino)}</TableCell>
                   <TableCell>{item.ano_lectivo}</TableCell>
                   <TableCell className="text-xs">{item.tipo_calendario}</TableCell>
                   <TableCell className="text-right">
@@ -327,14 +316,15 @@ export default function ActivitiesLecturesLic() {
         <div className="flex items-center justify-between py-4">
           <div className="text-sm text-muted-foreground">
             Mostrando {(currentPage - 1) * itemsPerPage + 1} -{" "}
-            {Math.min(currentPage * itemsPerPage, atividades.length)} de {atividades.length} atividades
+            {Math.min(currentPage * itemsPerPage, atividades.length)} de {atividades.length}{" "}
+            atividades
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => p - 1)}
+              onClick={() => setCurrentPage((p) => p - 1)}
             >
               <ChevronLeft className="h-4 w-4" />
               Anterior
@@ -346,7 +336,7 @@ export default function ActivitiesLecturesLic() {
               variant="outline"
               size="sm"
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(p => p + 1)}
+              onClick={() => setCurrentPage((p) => p + 1)}
             >
               Próxima
               <ChevronRight className="h-4 w-4" />
@@ -360,9 +350,7 @@ export default function ActivitiesLecturesLic() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Nova Atividade Letiva</DialogTitle>
-            <DialogDescription>
-              Adicione uma nova atividade ao calendário académico.
-            </DialogDescription>
+            <DialogDescription>Adicione uma nova atividade ao calendário académico.</DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
@@ -407,7 +395,9 @@ export default function ActivitiesLecturesLic() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenModal(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setOpenModal(false)}>
+              Cancelar
+            </Button>
             <Button onClick={handleSubmitNew}>Criar Atividade</Button>
           </DialogFooter>
         </DialogContent>
