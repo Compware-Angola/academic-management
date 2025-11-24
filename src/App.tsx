@@ -40,8 +40,9 @@ import ProofDeadlines from "./pages/academiccalendar/ProofDeadlines";
 import ActivitiesLecturesPos from "./pages/calendar-pos/ActivitiesLectures";
 import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
 import DeadlinesPos from "./pages/calendar-pos/Deadlines";
+import { ReactQueryProvider } from "./providers/react-query.provider";
+import Deadlines from "./pages/academiccalendar/Deadlines";
 
-const queryClient = new QueryClient();
 
 const App = () => {
   // Generate all routes from menu structure
@@ -113,18 +114,17 @@ const App = () => {
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
                 <Route path="/profile" element={<TeacherProfile />} />
 
-                  {/*LIC*/}  
+              
                    <Route path="/calendario/atividades" element={<ActivitiesLecturesLic />} />
-                   <Route path="/calendario/provas" element={<ExamCalendarLic />} />
+                  
                    <Route path="/calendario/dias-isentos" element={<ExemptDays />} />
                    <Route path="/calendario/parametros" element={<Parameters />} />
-                   <Route path="/calendario/prazos" element={<ProofDeadlines />} />
+                   <Route path="/calendario/prazos" element={<Deadlines />} />
                 
        
-                  {/*POS*/}
                      <Route path="/calendario-pos/atividades" element={<ActivitiesLecturesPos />} />
                      <Route path="/calendario-pos/provas" element={<ExamCalendarPos />} />
-                     <Route path="/calendario/prazos" element={<DeadlinesPos />} />
+                  
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
