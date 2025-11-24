@@ -58,7 +58,7 @@ interface TipoCandidatura {
 }
 
 // ROTAS REAIS
-const API_ATIVIDADES = "https://dev2.sistema.unisaude.co.ao/ords/compware/ga/academic-calendar/academic-activities";
+const API_ATIVIDADES = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/academic-activities";
 const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
 
 // Mock de anos letivos (até teres a rota real)
