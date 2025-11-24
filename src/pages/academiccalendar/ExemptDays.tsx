@@ -1,37 +1,131 @@
 import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Download, Printer, RefreshCw, Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon, Plus, Download, Printer, RefreshCw, Edit, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+import { format } from "date-fns";
+import { formatarData } from "@/util/date-formate";
+
+interface DiaIsento {
+  codigo: number;
+  designacao: string;
+  data_inicio: string;
+  data_fim: string;
+  estado: number;
+}
+
+const API_URL = "http://34.202.163.85:8080/ords/cmpdev/ga/exempt-days";
 
 export default function ExemptDays() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [diasIsentos, setDiasIsentos] = useState<DiaIsento[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const mockData = [
-    { id: 1, data: "2024-12-25", tipo: "Feriado Nacional", descricao: "Natal", anoLetivo: "2024/2025", aplicaA: "Todos" },
-    { id: 2, data: "2025-01-01", tipo: "Feriado Nacional", descricao: "Ano Novo", anoLetivo: "2024/2025", aplicaA: "Todos" },
-    { id: 3, data: "2025-02-04", tipo: "Feriado Nacional", descricao: "Dia do Início da Luta Armada", anoLetivo: "2024/2025", aplicaA: "Todos" },
-    { id: 4, data: "2025-03-08", tipo: "Feriado Nacional", descricao: "Dia Internacional da Mulher", anoLetivo: "2024/2025", aplicaA: "Todos" },
-    { id: 5, data: "2025-04-04", tipo: "Feriado Nacional", descricao: "Dia da Paz", anoLetivo: "2024/2025", aplicaA: "Todos" },
-    { id: 6, data: "2025-09-17", tipo: "Feriado Nacional", descricao: "Dia do Herói Nacional", anoLetivo: "2024/2025", aplicaA: "Todos" },
-  ];
+  // Modal states
+  const [openModal, setOpenModal] = useState(false);
+  const [novaData, setNovaData] = useState<Date | undefined>(new Date());
+  const [novaDescricao, setNovaDescricao] = useState("");
+  const [novoEstado, setNovoEstado] = useState<"1" | "0">("1");
+  const [saving, setSaving] = useState(false);
 
-  const handleRefresh = () => {
+  const fetchDiasIsentos = async () => {
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await axios.get(API_URL);
+      const data = response.data.dias_isentos || [];
+      setDiasIsentos(data);
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar dias isentos",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-      toast({ title: "Lista atualizada com sucesso" });
-    }, 1000);
+    }
   };
+
+  useEffect(() => {
+    fetchDiasIsentos();
+  }, []);
+
+  const handleNovoDia = async () => {
+    if (!novaData || !novaDescricao.trim()) {
+      toast({ title: "Preencha todos os campos", variant: "destructive" });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        designacao: novaDescricao,
+        data_inicio: format(novaData, "yyyy-MM-dd") + "T00:00:00Z",
+        data_fim: format(novaData, "yyyy-MM-dd") + "T00:00:00Z",
+        estado: Number(novoEstado),
+      };
+
+      await axios.post(API_URL, payload);
+
+      toast({ title: "Dia isento cadastrado com sucesso!" });
+      setOpenModal(false);
+      setNovaDescricao("");
+      setNovaData(new Date());
+      setNovoEstado("1");
+      fetchDiasIsentos();
+    } catch (error) {
+      toast({
+        title: "Erro ao cadastrar",
+        description: "Verifique os dados e tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  
+
+  const getBadgeEstado = (estado: number) => {
+    return estado === 1 ? (
+      <Badge className="bg-success/10 text-success">Ativo</Badge>
+    ) : (
+      <Badge variant="secondary">Inativo</Badge>
+    );
+  };
+
+  const totalPages = Math.ceil(diasIsentos.length / itemsPerPage);
+  const paginatedData = diasIsentos.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <div className="space-y-6">
@@ -40,23 +134,12 @@ export default function ExemptDays() {
         subtitle="Home / Calendário Académico (Lic.) / Dias Isentos"
         actions={
           <>
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={fetchDiasIsentos} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               Atualizar
             </Button>
-            <Button variant="outline" size="sm">
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar Excel
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar PDF
-            </Button>
-            <Button size="sm">
+        
+            <Button size="sm" onClick={() => setOpenModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Novo Dia Isento
             </Button>
@@ -64,104 +147,59 @@ export default function ExemptDays() {
         }
       />
 
-      <div className="bg-card rounded-lg border p-4 space-y-4">
-        <h3 className="text-sm font-semibold">Filtros</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="anoLetivo">Ano Letivo</Label>
-            <Select>
-              <SelectTrigger id="anoLetivo">
-                <SelectValue placeholder="Todos os anos" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover">
-                <SelectItem value="all">Todos os anos</SelectItem>
-                <SelectItem value="2024-2025">2024/2025</SelectItem>
-                <SelectItem value="2023-2024">2023/2024</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tipo">Tipo</Label>
-            <Select>
-              <SelectTrigger id="tipo">
-                <SelectValue placeholder="Todos os tipos" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover">
-                <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="feriado">Feriado Nacional</SelectItem>
-                <SelectItem value="evento">Evento Institucional</SelectItem>
-                <SelectItem value="outro">Outro</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="mes">Mês</Label>
-            <Select>
-              <SelectTrigger id="mes">
-                <SelectValue placeholder="Todos os meses" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover">
-                <SelectItem value="all">Todos os meses</SelectItem>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <SelectItem key={i + 1} value={(i + 1).toString()}>
-                    {new Date(2024, i).toLocaleString('pt-PT', { month: 'long' })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="search">Pesquisar</Label>
-            <Input id="search" placeholder="Descrição..." />
-          </div>
-        </div>
+      {/* Card vazio de filtros (apenas título) */}
+      <div className="bg-card rounded-lg border p-6">
+        <h3 className="text-lg font-semibold">Filtros</h3>
+        {/* Sem conteúdo */}
       </div>
 
-      <div className="bg-card rounded-lg border">
+      {/* Tabela */}
+      <div className="bg-card rounded-lg border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Tipo</TableHead>
+              
               <TableHead>Descrição</TableHead>
-              <TableHead>Ano Letivo</TableHead>
-              <TableHead>Aplica-se a</TableHead>
+              <TableHead>Data Inicio</TableHead>
+              <TableHead>Data Fim</TableHead>
+              <TableHead>Estado</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
+              Array.from({ length: 8 }).map((_, i) => (
                 <TableRow key={i}>
-                  {Array.from({ length: 7 }).map((_, j) => (
-                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
-                  ))}
+                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-64" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                 </TableRow>
               ))
-            ) : mockData.length === 0 ? (
+            ) : diasIsentos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                   Nenhum dia isento registado
                 </TableCell>
               </TableRow>
             ) : (
-              mockData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.id}</TableCell>
-                  <TableCell>{item.data}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{item.tipo}</Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">{item.descricao}</TableCell>
-                  <TableCell>{item.anoLetivo}</TableCell>
-                  <TableCell>{item.aplicaA}</TableCell>
+              paginatedData.map((item) => (
+                <TableRow key={item.codigo}>
+                  <TableCell className="font-medium">{item.codigo}</TableCell>
+                     <TableCell className="font-medium">{item.designacao}</TableCell>
+                  <TableCell>{formatarData(item.data_inicio)}</TableCell>
+               
+                  <TableCell>{formatarData(item.data_inicio)}</TableCell>
+                  <TableCell>{getBadgeEstado(item.estado)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="ghost" size="icon">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="ghost" size="icon">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -173,27 +211,143 @@ export default function ExemptDays() {
         </Table>
       </div>
 
+      {/* Paginação */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Label htmlFor="perPage">Itens por página:</Label>
-          <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(Number(v))}>
-            <SelectTrigger id="perPage" className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover">
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
+          <span className="text-sm text-muted-foreground">Itens por página:</span>
+          <select
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            {[10, 25, 50, 100].map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </select>
         </div>
+
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={currentPage === 1}>Anterior</Button>
-          <span className="text-sm">Página {currentPage} de 1</span>
-          <Button variant="outline" size="sm" disabled>Próxima</Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => p - 1)}
+          >
+            Anterior
+          </Button>
+          <span className="text-sm">Página {currentPage} de {totalPages || 1}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => p + 1)}
+          >
+            Próxima
+          </Button>
         </div>
       </div>
+
+      {/* Modal de Novo Dia Isento */}
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Novo Dia Isento</DialogTitle>
+            <DialogDescription>
+              Adicione um novo feriado ou dia sem aulas
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Descrição</Label>
+              <Input
+                placeholder="Ex: Natal, Páscoa..."
+                value={novaDescricao}
+                onChange={(e) => setNovaDescricao(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Data Inicio</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {novaData ? format(novaData, "dd/MM/yyyy") : "Selecionar data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={novaData}
+                    onSelect={setNovaData}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+              <div className="space-y-2">
+              <Label>Data Fim</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {novaData ? format(novaData, "dd/MM/yyyy") : "Selecionar data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={novaData}
+                    onSelect={setNovaData}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Estado</Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="estado"
+                    value="1"
+                    checked={novoEstado === "1"}
+                    onChange={(e) => setNovoEstado(e.target.value as "1")}
+                    className="radio"
+                  />
+                  <span>Ativo</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="estado"
+                    value="0"
+                    checked={novoEstado === "0"}
+                    onChange={(e) => setNovoEstado(e.target.value as "0")}
+                    className="radio"
+                  />
+                  <span>Inativo</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenModal(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleNovoDia} disabled={saving}>
+              {saving ? "Salvando..." : "Cadastrar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

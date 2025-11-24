@@ -136,7 +136,7 @@ export default function CreateSchedule() {
       <div>
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem><BreadcrumbLink href="/dasboard">Home</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem><BreadcrumbLink href="/horarios/criar">Horários</BreadcrumbLink></BreadcrumbItem>
             <BreadcrumbSeparator />
