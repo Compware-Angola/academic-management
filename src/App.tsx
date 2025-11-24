@@ -32,7 +32,7 @@ import BlockAccess from "./pages/access/BlockAccess";
 import AllAccesses from "./pages/access/AllAccesses";
 import AcessGrup from "./pages/access/AccessGroup";
 import TeacherProfile from "./pages/TeacherProfile";
-import ActivitiesLecturesLic from "./pages/academiccalendar/ActivitiesLectures";
+import ActivitiesLecturesLic from "./pages/academiccalendar/activities-lectures";
 
 import ExemptDays from "./pages/academiccalendar/ExemptDays";
 import Parameters from "./pages/academiccalendar/Parameters";
@@ -42,7 +42,6 @@ import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
 import DeadlinesPos from "./pages/calendar-pos/Deadlines";
 import { ReactQueryProvider } from "./providers/react-query.provider";
 import Deadlines from "./pages/academiccalendar/Deadlines";
-
 
 const App = () => {
   // Generate all routes from menu structure
@@ -114,17 +113,26 @@ const App = () => {
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
                 <Route path="/profile" element={<TeacherProfile />} />
 
-              
-                   <Route path="/calendario/atividades" element={<ActivitiesLecturesLic />} />
-                  
-                   <Route path="/calendario/dias-isentos" element={<ExemptDays />} />
-                   <Route path="/calendario/parametros" element={<Parameters />} />
-                   <Route path="/calendario/prazos" element={<Deadlines />} />
-                
-       
-                     <Route path="/calendario-pos/atividades" element={<ActivitiesLecturesPos />} />
-                     <Route path="/calendario-pos/provas" element={<ExamCalendarPos />} />
-                  
+                <Route
+                  path="/calendario/atividades"
+                  element={<ActivitiesLecturesLic />}
+                />
+
+                <Route
+                  path="/calendario/dias-isentos"
+                  element={<ExemptDays />}
+                />
+                <Route path="/calendario/parametros" element={<Parameters />} />
+                <Route path="/calendario/prazos" element={<Deadlines />} />
+
+                <Route
+                  path="/calendario-pos/atividades"
+                  element={<ActivitiesLecturesPos />}
+                />
+                <Route
+                  path="/calendario-pos/provas"
+                  element={<ExamCalendarPos />}
+                />
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
