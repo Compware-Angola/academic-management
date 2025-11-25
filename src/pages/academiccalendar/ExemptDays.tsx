@@ -26,7 +26,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Plus, Download, Printer, RefreshCw, Edit, Trash2 } from "lucide-react";
+import {
+  CalendarIcon,
+  Plus,
+  Download,
+  Printer,
+  RefreshCw,
+  Edit,
+  Trash2,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
@@ -52,10 +60,12 @@ export default function ExemptDays() {
 
   // Modal states
   const [openModal, setOpenModal] = useState(false);
-  const [novaData, setNovaData] = useState<Date | undefined>(new Date());
+
   const [novaDescricao, setNovaDescricao] = useState("");
   const [novoEstado, setNovoEstado] = useState<"1" | "0">("1");
   const [saving, setSaving] = useState(false);
+  const [dataInicio, setDataInicio] = useState<Date | undefined>();
+  const [dataFim, setDataFim] = useState<Date | undefined>();
 
   const fetchDiasIsentos = async () => {
     setLoading(true);
@@ -78,7 +88,7 @@ export default function ExemptDays() {
   }, []);
 
   const handleNovoDia = async () => {
-    if (!novaData || !novaDescricao.trim()) {
+    if (!dataInicio || !dataFim || !novaDescricao.trim()) {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
     }
@@ -87,8 +97,8 @@ export default function ExemptDays() {
     try {
       const payload = {
         designacao: novaDescricao,
-        data_inicio: format(novaData, "yyyy-MM-dd") + "T00:00:00Z",
-        data_fim: format(novaData, "yyyy-MM-dd") + "T00:00:00Z",
+        data_inicio: format(dataInicio, "yyyy-MM-dd"),
+        data_fim: format(dataFim, "yyyy-MM-dd"),
         estado: Number(novoEstado),
       };
 
@@ -97,7 +107,8 @@ export default function ExemptDays() {
       toast({ title: "Dia isento cadastrado com sucesso!" });
       setOpenModal(false);
       setNovaDescricao("");
-      setNovaData(new Date());
+      setDataInicio(undefined);
+      setDataFim(undefined);
       setNovoEstado("1");
       fetchDiasIsentos();
     } catch (error) {
@@ -111,8 +122,6 @@ export default function ExemptDays() {
     }
   };
 
-  
-
   const getBadgeEstado = (estado: number) => {
     return estado === 1 ? (
       <Badge className="bg-success/10 text-success">Ativo</Badge>
@@ -124,7 +133,7 @@ export default function ExemptDays() {
   const totalPages = Math.ceil(diasIsentos.length / itemsPerPage);
   const paginatedData = diasIsentos.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   return (
@@ -134,11 +143,18 @@ export default function ExemptDays() {
         subtitle="Home / Calendário Académico (Lic.) / Dias Isentos"
         actions={
           <>
-            <Button variant="outline" size="sm" onClick={fetchDiasIsentos} disabled={loading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchDiasIsentos}
+              disabled={loading}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              />
               Atualizar
             </Button>
-        
+
             <Button size="sm" onClick={() => setOpenModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Novo Dia Isento
@@ -159,7 +175,7 @@ export default function ExemptDays() {
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              
+
               <TableHead>Descrição</TableHead>
               <TableHead>Data Inicio</TableHead>
               <TableHead>Data Fim</TableHead>
@@ -171,17 +187,32 @@ export default function ExemptDays() {
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-64" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-8" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-64" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-16" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-8 w-20 ml-auto" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : diasIsentos.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-12 text-muted-foreground"
+                >
                   Nenhum dia isento registado
                 </TableCell>
               </TableRow>
@@ -189,9 +220,11 @@ export default function ExemptDays() {
               paginatedData.map((item) => (
                 <TableRow key={item.codigo}>
                   <TableCell className="font-medium">{item.codigo}</TableCell>
-                     <TableCell className="font-medium">{item.designacao}</TableCell>
+                  <TableCell className="font-medium">
+                    {item.designacao}
+                  </TableCell>
                   <TableCell>{formatarData(item.data_inicio)}</TableCell>
-               
+
                   <TableCell>{formatarData(item.data_inicio)}</TableCell>
                   <TableCell>{getBadgeEstado(item.estado)}</TableCell>
                   <TableCell className="text-right">
@@ -214,7 +247,9 @@ export default function ExemptDays() {
       {/* Paginação */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Itens por página:</span>
+          <span className="text-sm text-muted-foreground">
+            Itens por página:
+          </span>
           <select
             className="h-9 rounded-md border border-input bg-background px-3 text-sm"
             value={itemsPerPage}
@@ -224,7 +259,9 @@ export default function ExemptDays() {
             }}
           >
             {[10, 25, 50, 100].map((n) => (
-              <option key={n} value={n}>{n}</option>
+              <option key={n} value={n}>
+                {n}
+              </option>
             ))}
           </select>
         </div>
@@ -234,16 +271,18 @@ export default function ExemptDays() {
             variant="outline"
             size="sm"
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage(p => p - 1)}
+            onClick={() => setCurrentPage((p) => p - 1)}
           >
             Anterior
           </Button>
-          <span className="text-sm">Página {currentPage} de {totalPages || 1}</span>
+          <span className="text-sm">
+            Página {currentPage} de {totalPages || 1}
+          </span>
           <Button
             variant="outline"
             size="sm"
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(p => p + 1)}
+            onClick={() => setCurrentPage((p) => p + 1)}
           >
             Próxima
           </Button>
@@ -261,6 +300,7 @@ export default function ExemptDays() {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {/* Descrição */}
             <div className="space-y-2">
               <Label>Descrição</Label>
               <Input
@@ -270,45 +310,63 @@ export default function ExemptDays() {
               />
             </div>
 
+            {/* Data Início */}
             <div className="space-y-2">
-              <Label>Data Inicio</Label>
-              <Popover>
+              <Label>Data Início</Label>
+
+              <Popover modal={false}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {novaData ? format(novaData, "dd/MM/yyyy") : "Selecionar data"}
-                  </Button>
+                  <button
+                    type="button"
+                    className="w-full flex items-center gap-2 rounded-md border px-3 py-2 text-left text-sm"
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                    {dataInicio
+                      ? format(dataInicio, "dd/MM/yyyy")
+                      : "Selecionar data"}
+                  </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+
+                <PopoverContent className="w-auto p-0 pointer-events-auto">
                   <Calendar
                     mode="single"
-                    selected={novaData}
-                    onSelect={setNovaData}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-              <div className="space-y-2">
-              <Label>Data Fim</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {novaData ? format(novaData, "dd/MM/yyyy") : "Selecionar data"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={novaData}
-                    onSelect={setNovaData}
+                    selected={dataInicio}
+                    onSelect={setDataInicio}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
             </div>
 
+            {/* Data Fim */}
+            <div className="space-y-2">
+              <Label>Data Fim</Label>
+
+              <Popover modal={false}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center gap-2 rounded-md border px-3 py-2 text-left text-sm"
+                  >
+                    <CalendarIcon className="h-4 w-4" />
+                    {dataFim
+                      ? format(dataFim, "dd/MM/yyyy")
+                      : "Selecionar data"}
+                  </button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-auto p-0 pointer-events-auto">
+                  <Calendar
+                    mode="single"
+                    selected={dataFim}
+                    onSelect={setDataFim}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Estado */}
             <div className="space-y-2">
               <Label>Estado</Label>
               <div className="flex gap-4">
@@ -318,19 +376,18 @@ export default function ExemptDays() {
                     name="estado"
                     value="1"
                     checked={novoEstado === "1"}
-                    onChange={(e) => setNovoEstado(e.target.value as "1")}
-                    className="radio"
+                    onChange={() => setNovoEstado("1")}
                   />
                   <span>Ativo</span>
                 </label>
+
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="estado"
                     value="0"
                     checked={novoEstado === "0"}
-                    onChange={(e) => setNovoEstado(e.target.value as "0")}
-                    className="radio"
+                    onChange={() => setNovoEstado("0")}
                   />
                   <span>Inativo</span>
                 </label>
