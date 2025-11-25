@@ -1,4 +1,3 @@
-// src/components/modals/ParametersEditModal.tsx
 
 import { useState, useEffect } from "react";
 import {
