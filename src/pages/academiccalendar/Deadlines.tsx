@@ -313,7 +313,7 @@ export default function Deadlines() {
     fetchTiposCandidatura();
     fetchTiposPrazo();
     fetchTiposAvaliacao();
-    fetchSemestres(); // CARREGA SEMESTRES DA API
+    fetchSemestres(); 
     fetchTipoEpocaAvaliacoes();
   }, []);
 
@@ -329,7 +329,7 @@ export default function Deadlines() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  console.log(form.fk_tipo_prazo.toString());
+
   return (
     <div className="space-y-6">
       <PageHeader
