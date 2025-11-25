@@ -14,10 +14,12 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeSwitcher } from "../theme-switcher";
 import { useAuth } from "@/hooks/use-auth";
+import { useNavigate } from "react-router-dom";
 
 export function Header() {
-  const { logout } = useAuth();
-
+  const { logout,user } = useAuth();
+    
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
       <div className="flex h-16 items-center gap-4 px-4 md:px-6">
@@ -83,7 +85,7 @@ export function Header() {
                   <AvatarFallback>AD</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start text-sm">
-                  <span className="font-medium">Admin</span>
+                  <span className="font-medium">{user?.username || 'N/A'}</span>
                   <span className="text-xs text-muted-foreground">
                     Administrador
                   </span>

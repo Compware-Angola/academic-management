@@ -27,4 +27,9 @@ export async function fetchGroupAccesses(groupId: number): Promise<Access[]> {
     console.error(`Erro ao carregar acessos do grupo ${groupId}:`, error);
     return [];
   }
+  
+}
+
+export async function deleteGroupAccess(acessoCodigo: number): Promise<void> {
+  await axiosApexGa.delete(`/uma/deletaracesso/${acessoCodigo}`);
 }

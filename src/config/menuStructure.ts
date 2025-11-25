@@ -58,6 +58,7 @@ export const menuStructure: {
           title: "Funcionalidade por utilizador",
           url: "/acessos/funcionalidade-utilizador",
         },
+        { title: "Listar grupos", url: "/grupos" },
 
 
         { title: "Acessos (todos) + novos", url: "/acessos/todos" },
@@ -315,8 +316,10 @@ export const menuStructure: {
       url: "/plano",
       icon: BookOpen,
       items: [
-        { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
+        { title: "Gestão de Curso", url: "/plano/disciplinas" },
         { title: "Gestão de disciplinas", url: "/plano/disciplinas" },
+        { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
+
         {
           title: "Gestão de UC por departamento",
           url: "/plano/uc-departamento",
