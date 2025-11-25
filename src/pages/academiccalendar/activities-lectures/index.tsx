@@ -48,8 +48,10 @@ export default function ActivitiesLecturesLic() {
     tipoCandidaturaId,
     setTipoCandidaturaId,
     tiposCandidatura,
-    loadingTipos,
+    tiposCalendario,
+    loadingTiposCandidatura,
     anosLetivos,
+    isSubmitting,
     loadingAnosLetivos,
     loadingAtividades,
   } = useActivitiesLectures();
@@ -112,7 +114,7 @@ export default function ActivitiesLecturesLic() {
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={loadingTipos ? "Carregando..." : "Selecione"}
+                  placeholder={loadingTiposCandidatura ? "Carregando..." : "Selecione"}
                 />
               </SelectTrigger>
 
@@ -248,6 +250,11 @@ export default function ActivitiesLecturesLic() {
         handleSubmitNew={handleSubmitNew}
         loadingAnosLetivos={loadingAnosLetivos}
         anosLetivos={anosLetivos}
+        loadingTiposCandidatura={loadingTiposCandidatura}
+        loadingTiposCalendario={loadingTiposCandidatura}
+        tiposCalendario={tiposCalendario}
+        isSubmitting={isSubmitting}
+        tiposCandidatura={tiposCandidatura}
       />
     </div>
   );
