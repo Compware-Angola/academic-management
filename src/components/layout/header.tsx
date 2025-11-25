@@ -14,8 +14,10 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeSwitcher } from "../theme-switcher";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Header() {
+  const { logout } = useAuth();
   const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
@@ -95,6 +97,7 @@ export function Header() {
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
+                  logout();
                   navigate("/profile");
                 }}
               >

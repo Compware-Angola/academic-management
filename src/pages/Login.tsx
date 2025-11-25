@@ -3,38 +3,74 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { GraduationCap, Lock, Mail } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useMutationLogin } from "@/hooks/mutations/use-mutation-login";
 
+const loginSchema = z.object({
+  username: z
+    .string()
+    .min(3, "O username deve ter pelo menos 3 caracteres")
+    .max(60, "Username muito longo"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
+type LoginFormData = z.infer<typeof loginSchema>;
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const loginMutation = useMutationLogin();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
 
-    // Simular autenticação (substituir por lógica real)
-    setTimeout(() => {
-      if (email && password) {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao Portal Académico",
-        });
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Erro ao fazer login",
-          description: "Por favor, preencha todos os campos",
-          variant: "destructive",
-        });
-      }
-      setIsLoading(false);
-    }, 1000);
+  const onSubmit = (values: LoginFormData) => {
+    const { username, password } = values;
+    loginMutation.mutate(
+      { username, password },
+      {
+        onSuccess: (data) => {
+          toast({
+            title: "Login realizado com sucesso",
+            description: `Bem-vindo, ${data.username ?? "Utilizador"}`,
+          });
+          if (data.token) {
+            localStorage.setItem("token", data.token);
+          }
+          navigate("/dashboard");
+        },
+        onError: (err: Error) => {
+          const message = "Erro ao autenticar. Verifique credenciais.";
+          toast({
+            title: "Erro ao fazer login",
+            description: message,
+            variant: "destructive",
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -44,7 +80,9 @@ const Login = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-2xl mb-4 shadow-lg">
             <GraduationCap className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Portal Académico</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Portal Académico
+          </h1>
           <p className="text-muted-foreground">Sistema de Gestão Académica</p>
         </div>
 
@@ -56,67 +94,72 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu.email@exemplo.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Senha</Label>
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="px-0 text-xs text-primary hover:text-primary/80"
-                  >
-                    Esqueceu a senha?
-                  </Button>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
               >
-                {isLoading ? "Entrando..." : "Entrar"}
-              </Button>
-            </form>
+                {/* Campo Username */}
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="seu.usuario" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                {/* Campo Password */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Senha</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Botão de Submit */}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    form.formState.isSubmitting || loginMutation.isPending
+                  }
+                >
+                  {form.formState.isSubmitting || loginMutation.isPending
+                    ? "Entrando..."
+                    : "Entrar"}
+                </Button>
+              </form>
+            </Form>
             <div className="mt-6 text-center text-sm">
               <span className="text-muted-foreground">Não tem uma conta? </span>
               <Button
                 type="button"
                 variant="link"
                 className="px-0 text-primary hover:text-primary/80"
-                onClick={() => toast({
-                  title: "Registro",
-                  description: "Entre em contato com a administração para criar uma conta",
-                })}
+                onClick={() =>
+                  toast({
+                    title: "Registro",
+                    description:
+                      "Entre em contato com a administração para criar uma conta",
+                  })
+                }
               >
                 Solicitar acesso
               </Button>
