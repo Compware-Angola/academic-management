@@ -16,24 +16,50 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Dispatch, SetStateAction } from "react";
-import { AnoAcademico } from "@/services/fetch-anos-academico";
-interface FormActivity {
-  descricao: string;
-  data_inicio: string;
-  data_termino: string;
-  ano_lectivo: string;
-  tipo_calendario: string;
+
+// Tipos esperados pela API
+interface AnoAcademico {
+  codigo: number;
+  designacao: string;
 }
+
+interface TipoCandidatura {
+  codigo: number;
+  designacao: string;
+}
+
+interface TipoCalendario {
+  codigo: number;
+  designacao: string;
+}
+
+interface FormActivity {
+  designacao: string;
+  codigo_ano_lectivo: number | string;
+  codigo_tipo_candidatura: number | string;
+  codigo_tipo_calendario: number | string;
+  codigo_utilizador?: number; // opcional se vier do contexto/auth
+  data_inicio: string;
+  data_fim: string;
+}
+
 interface ActivityModalProps {
   open: boolean;
   setOpen: (v: boolean) => void;
   form: FormActivity;
   setForm: Dispatch<SetStateAction<FormActivity>>;
   handleSubmitNew: () => void;
+
+  // Dados para os selects
   loadingAnosLetivos: boolean;
   anosLetivos: AnoAcademico[];
+isSubmitting:boolean;
+  loadingTiposCandidatura: boolean;
+  tiposCandidatura: TipoCandidatura[];
+
+  loadingTiposCalendario: boolean;
+  tiposCalendario: TipoCalendario[];
 }
 
 export function ActivityModal({
@@ -44,43 +70,50 @@ export function ActivityModal({
   handleSubmitNew,
   loadingAnosLetivos,
   anosLetivos,
+  loadingTiposCandidatura,
+  tiposCandidatura,
+  isSubmitting,
+  loadingTiposCalendario,
+  tiposCalendario,
 }: ActivityModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Nova Atividade Letiva</DialogTitle>
           <DialogDescription>
-            Adicione uma nova atividade ao calendário acadêmico.
+            Preencha os dados para cadastrar uma nova atividade no calendário acadêmico.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 py-4">
-          <div className="space-y-2">
-            <Label>Descrição *</Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+          {/* Descrição / Nome da Atividade */}
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="designacao">Descrição da Atividade *</Label>
             <Input
-              value={form.descricao}
-              onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+              id="designacao"
+              value={form.designacao}
+              onChange={(e) => setForm({ ...form, designacao: e.target.value })}
+              placeholder="Ex: Início do 1º Semestre, Férias de Natal, Exames..."
             />
           </div>
 
+          {/* Ano Letivo */}
           <div className="space-y-2">
             <Label>Ano Letivo *</Label>
             <Select
-              value={form.ano_lectivo}
-              onValueChange={(v) => setForm({ ...form, ano_lectivo: v })}
+              value={form.codigo_ano_lectivo?.toString() || ""}
+              onValueChange={(v) => setForm({ ...form, codigo_ano_lectivo: Number(v) })}
               disabled={loadingAnosLetivos}
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={
-                    loadingAnosLetivos ? "Carregando..." : "Selecione"
-                  }
+                  placeholder={loadingAnosLetivos ? "Carregando anos..." : "Selecione o ano letivo"}
                 />
               </SelectTrigger>
               <SelectContent>
                 {anosLetivos.map((ano) => (
-                  <SelectItem key={ano.codigo} value={ano.designacao}>
+                  <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
                     {ano.designacao}
                   </SelectItem>
                 ))}
@@ -88,46 +121,95 @@ export function ActivityModal({
             </Select>
           </div>
 
+          {/* Tipo de Candidatura */}
           <div className="space-y-2">
-            <Label>Data Início *</Label>
+            <Label>Tipo de Candidatura *</Label>
+            <Select
+              value={form.codigo_tipo_candidatura?.toString() || ""}
+              onValueChange={(v) => setForm({ ...form, codigo_tipo_candidatura: Number(v) })}
+              disabled={loadingTiposCandidatura}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={loadingTiposCandidatura ? "Carregando..." : "Selecione"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {tiposCandidatura?.map((tipo) => (
+                  <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
+                    {tipo.designacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Tipo de Calendário */}
+          <div className="space-y-2">
+            <Label>Tipo de Calendário *</Label>
+            <Select
+              value={form.codigo_tipo_calendario?.toString() || ""}
+              onValueChange={(v) => setForm({ ...form, codigo_tipo_calendario: Number(v) })}
+              disabled={loadingTiposCalendario}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={loadingTiposCalendario ? "Carregando..." : "Selecione"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {tiposCalendario?.map((tipo) => (
+                  <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
+                    {tipo.designacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Data Início */}
+          <div className="space-y-2">
+            <Label>Data de Início *</Label>
             <Input
               type="date"
               value={form.data_inicio}
-              onChange={(e) =>
-                setForm({ ...form, data_inicio: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, data_inicio: e.target.value })}
             />
           </div>
 
+          {/* Data Fim */}
           <div className="space-y-2">
-            <Label>Data Fim *</Label>
+            <Label>Data de Fim *</Label>
             <Input
               type="date"
-              value={form.data_termino}
-              onChange={(e) =>
-                setForm({ ...form, data_termino: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-2 col-span-2">
-            <Label>Tipo de Calendário *</Label>
-            <Textarea
-              value={form.tipo_calendario}
-              onChange={(e) =>
-                setForm({ ...form, tipo_calendario: e.target.value })
-              }
-              rows={3}
+              value={form.data_fim}
+              onChange={(e) => setForm({ ...form, data_fim: e.target.value })}
             />
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmitNew}>Criar Atividade</Button>
-        </DialogFooter>
+      <DialogFooter className="gap-3">
+  <Button variant="outline" onClick={() => setOpen(false)}>
+    Cancelar
+  </Button>
+<Button 
+  onClick={handleSubmitNew} 
+  disabled={isSubmitting}
+  className="min-w-40"
+>
+  {isSubmitting ? (
+    <>
+      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Criando...
+    </>
+  ) : (
+    "Criar Atividade"
+  )}
+</Button>
+</DialogFooter>
       </DialogContent>
     </Dialog>
   );

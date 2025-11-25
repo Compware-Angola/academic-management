@@ -1,44 +1,50 @@
+// useActivitiesLectures.ts (versão final com loading no cadastro)
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryAtividades } from "@/hooks/queries/use-query-atividades";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { useMutationfetchCreateActivity } from "@/hooks/academiccalendar/use-mutation-create-activity";
+import { useQueryTypeCalendar } from "@/hooks/academiccalendar/use-query-type-calendar";
 
 interface FormActivity {
-  descricao: string;
+  designacao: string;
+  codigo_ano_lectivo: number | string;
+  codigo_tipo_candidatura: number | string;
+  codigo_tipo_calendario: number | string;
   data_inicio: string;
-  data_termino: string;
-  ano_lectivo: string;
-  tipo_calendario: string;
+  data_fim: string;
 }
 
 export function useActivitiesLectures() {
   const { toast } = useToast();
 
   // Filtros
-  const [anoLetivoId, setAnoLetivoId] = useState("");
-  const [tipoCandidaturaId, setTipoCandidaturaId] = useState("");
+  const [anoLetivoId, setAnoLetivoId] = useState<string>("");
+  const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("");
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  // Modal criação
+  const itemsPerPage = 10;
+const [isSubmitting, setIsSubmitting] = useState(false);
+  // Modal
   const [openModal, setOpenModal] = useState(false);
+
+  // Formulário
   const [form, setForm] = useState<FormActivity>({
-    descricao: "",
+    designacao: "",
+    codigo_ano_lectivo: "",
+    codigo_tipo_candidatura: "",
+    codigo_tipo_calendario: "",
     data_inicio: "",
-    data_termino: "",
-    ano_lectivo: "",
-    tipo_calendario: "",
+    data_fim: "",
   });
 
   // Queries
-  const { data: tiposCandidatura = [], isLoading: loadingTipos } =
-    useQueryTipoCandidatura();
-
-  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } =
-    useQueryAnoAcademico();
+  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } = useQueryAnoAcademico();
+  const { data: tiposCandidatura = [], isLoading: loadingTiposCandidatura } = useQueryTipoCandidatura();
+  const { data: tiposCalendario = [], isLoading: loadingTiposCalendario } = useQueryTypeCalendar();
 
   const {
     data: atividades = [],
@@ -46,107 +52,147 @@ export function useActivitiesLectures() {
     refetch: refetchAtividades,
   } = useQueryAtividades({ anoLetivoId, tipoCandidaturaId });
 
-  // ---------------------- Efeitos ----------------------
+  // Mutation com loading state
+  const criarAtividadeMutation = useMutationfetchCreateActivity();
+
+  // ==================== EFEITOS ====================
   useEffect(() => {
     if (!anosLetivos.length) return;
 
-    const anosFiltrados = anosLetivos.filter(
+    const filtrados = anosLetivos.filter(
       (a) =>
         !a.designacao.toLowerCase().includes("doutoramento") &&
-        !a.designacao.toLowerCase().includes("mestrado"),
+        !a.designacao.toLowerCase().includes("mestrado")
     );
 
-    const ativo =
-      anosFiltrados.find((a) => a.estado.toLowerCase().includes("activ")) ??
-      anosFiltrados[0];
-
-    setAnoLetivoId(ativo.codigo.toString());
-    setForm((f) => ({ ...f, ano_lectivo: ativo.designacao }));
+    const ativo = filtrados.find((a) => a.estado?.toLowerCase().includes("activ")) ?? filtrados[0];
+    if (ativo) {
+      const id = ativo.codigo.toString();
+      setAnoLetivoId(id);
+      setForm((prev) => ({ ...prev, codigo_ano_lectivo: ativo.codigo }));
+    }
   }, [anosLetivos]);
 
   useEffect(() => {
     if (!tiposCandidatura.length) return;
-
-    const padrao = tiposCandidatura.find((t) => t.codigo === 1);
-    if (padrao) setTipoCandidaturaId(padrao.codigo.toString());
+    const padrao = tiposCandidatura.find((t) => t.codigo === 1) ?? tiposCandidatura[0];
+    if (padrao) {
+      setTipoCandidaturaId(padrao.codigo.toString());
+      setForm((prev) => ({ ...prev, codigo_tipo_candidatura: padrao.codigo }));
+    }
   }, [tiposCandidatura]);
 
   useEffect(() => {
-    if (!atividades.length) return;
-    setCurrentPage(1);
-    toast({ title: `Carregadas ${atividades.length} atividades` });
-  }, [atividades]);
+    if (atividades.length > 0) {
+      toast({ title: `Carregadas ${atividades.length} atividades` });
+      setCurrentPage(1);
+    }
+  }, [atividades, toast]);
 
-  // ---------------------- Handlers ----------------------
+  // ==================== HANDLERS ====================
   const handleRefresh = () => refetchAtividades();
 
-  const handleSubmitNew = () => {
-    if (
-      !form.descricao ||
-      !form.data_inicio ||
-      !form.data_termino ||
-      !form.tipo_calendario
-    ) {
+  const handleSubmitNew = async () => {
+    const camposObrigatorios = [
+      form.designacao,
+      form.codigo_ano_lectivo,
+      form.codigo_tipo_candidatura,
+      form.codigo_tipo_calendario,
+      form.data_inicio,
+      form.data_fim,
+    ];
+
+    if (camposObrigatorios.some((campo) => !campo || campo === "")) {
       toast({
-        title: "Preencha todos os campos obrigatórios",
+        title: "Campos obrigatórios",
+        description: "Preencha todos os campos para continuar.",
         variant: "destructive",
       });
       return;
     }
+setIsSubmitting(true);
+    const payload = {
+      designacao: form.designacao.trim(),
+      codigo_ano_lectivo: Number(form.codigo_ano_lectivo),
+      codigo_tipo_candidatura: Number(form.codigo_tipo_candidatura),
+      codigo_tipo_calendario: Number(form.codigo_tipo_calendario),
+      codigo_utilizador: 2110, // depois substitua por useAuth().user.id
+      data_inicio: form.data_inicio,
+      data_fim: form.data_fim,
+    };
 
-    toast({ title: "Atividade cadastrada com sucesso!" });
-    setOpenModal(false);
-    setForm({
-      descricao: "",
-      data_inicio: "",
-      data_termino: "",
-      ano_lectivo:
-        anosLetivos.find((a) => a.codigo.toString() === anoLetivoId)
-          ?.designacao || "",
-      tipo_calendario: "",
-    });
+    try {
+      await criarAtividadeMutation.mutateAsync(payload);
 
-    refetchAtividades();
+      toast({ title: "Sucesso!", description: "Atividade criada com sucesso." });
+      setOpenModal(false);
+      resetForm();
+      refetchAtividades();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao criar atividade",
+        description: error?.message || "Verifique os dados e tente novamente.",
+        variant: "destructive",
+      });
+    }finally {
+   
+    setIsSubmitting(false);
+  }
   };
 
-  // ---------------------- Paginação ----------------------
+  const resetForm = () => {
+    setForm((prev) => ({
+      ...prev,
+      designacao: "",
+      codigo_tipo_calendario: "",
+      data_inicio: "",
+      data_fim: "",
+    }));
+  };
+
+  // ==================== PAGINAÇÃO ====================
   const totalPages = Math.ceil(atividades.length / itemsPerPage);
   const paginatedData = atividades.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const nextPage = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
   const prevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
 
+  // ==================== RETORNO ====================
   return {
-    // Dados
+    // Dados da tabela
     atividades: paginatedData,
     totalPages,
     currentPage,
     setCurrentPage,
     nextPage,
     prevPage,
+    loadingAtividades,
 
-    // Form
+    // Form e modal
     form,
     setForm,
     openModal,
     setOpenModal,
+    handleSubmitNew,
+    isSubmitting,
 
-    // Filtros
+    // Filtros e selects
     anoLetivoId,
     setAnoLetivoId,
     tipoCandidaturaId,
     setTipoCandidaturaId,
-    tiposCandidatura,
-    loadingTipos,
+
     anosLetivos,
     loadingAnosLetivos,
+    tiposCandidatura,
+    loadingTiposCandidatura,
+    tiposCalendario,
+    loadingTiposCalendario,
 
     // Ações
     handleRefresh,
-    handleSubmitNew,
-    loadingAtividades,
   };
 }

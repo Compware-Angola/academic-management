@@ -20,5 +20,5 @@ export async function fetchAcademicYearMonthlyFees(codigoAno: number): Promise<M
   const { data } = await axiosApexGa.get<MonthlyFeesResponse>(
     `/ga/teaching-parameters/monthly-fees/${codigoAno}`
   );
-  return data; // { meses: [...] }
+  return data; 
 }
