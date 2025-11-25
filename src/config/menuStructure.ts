@@ -36,11 +36,11 @@ export const menuStructure: {
   }[];
 } = {
   items: [
-      {
-    title: "Início",
-    url: "/dashboard",
-    icon: HomeIcon, // substitua pelo ícone que desejar
-  },
+    {
+      title: "Início",
+      url: "/dashboard",
+      icon: HomeIcon, // substitua pelo ícone que desejar
+    },
     // ----------------------------------------------------
     // ACESSOS
     // ----------------------------------------------------
@@ -49,12 +49,17 @@ export const menuStructure: {
       url: "/acessos",
       icon: Shield,
       items: [
-        { title: "Acesso por utilizador", url: "/acessos/utilizador" },
+        { title: "Lista  utilizador", url: "/acessos/utilizador" },
+        { title: "Lista por grupos", url: "/ver-utilizadores/grupos" },
+        { title: "Alterar senha", url: "/utilizadores/alterar-senha" },
+        { title: "Criar utilizador", url: "/utilizadores/criar" },
         { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo" },
         {
           title: "Funcionalidade por utilizador",
           url: "/acessos/funcionalidade-utilizador",
         },
+
+
         { title: "Acessos (todos) + novos", url: "/acessos/todos" },
         { title: "Bloquear acesso", url: "/acessos/bloquear" },
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
@@ -150,8 +155,8 @@ export const menuStructure: {
         //{ title: "Calendário de provas", url: "/calendario/provas" },
         { title: "Dias isentos", url: "/calendario/dias-isentos" },
         { title: "Parâmetros", url: "/calendario/parametros" },
-       // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
-    
+        // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
+
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
     },
@@ -188,15 +193,6 @@ export const menuStructure: {
     // ----------------------------------------------------
     // CRIAR UTILIZADORES
     // ----------------------------------------------------
-    {
-      title: "Criar / Editar Utilizadores",
-      url: "/utilizadores",
-      icon: Users,
-      items: [
-        { title: "Alterar senha", url: "/utilizadores/alterar-senha" },
-        { title: "Criar utilizador", url: "/utilizadores/criar" },
-      ],
-    },
 
     // ----------------------------------------------------
     // DOCENTE
@@ -370,15 +366,7 @@ export const menuStructure: {
     // ----------------------------------------------------
     // VER UTILIZADORES
     // ----------------------------------------------------
-    {
-      title: "Ver Utilizadores",
-      url: "/ver-utilizadores",
-      icon: Users,
-      items: [
-        { title: "Lista geral", url: "/ver-utilizadores/geral" },
-        { title: "Lista por grupos", url: "/ver-utilizadores/grupos" },
-      ],
-    },
+
 
     // ----------------------------------------------------
     // CONTROLE DE ACESSO

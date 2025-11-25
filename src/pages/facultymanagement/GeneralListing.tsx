@@ -81,19 +81,19 @@ export default function GeneralListing() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Total Docentes</p>
-          <p className="text-3xl font-bold">{mockTeachersData.length}</p>
+          <p className="text-3xl font-bold"> N/A</p>
         </div>
         <div className="bg-success/10 border border-success/20 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Tempo Integral</p>
-          <p className="text-3xl font-bold text-success">{mockTeachersData.filter(d => d.regime === "Tempo Integral").length}</p>
+          <p className="text-3xl font-bold text-success"> N/A</p>
         </div>
         <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Tempo Parcial</p>
-          <p className="text-3xl font-bold text-warning">{mockTeachersData.filter(d => d.regime === "Tempo Parcial").length}</p>
+          <p className="text-3xl font-bold text-warning"> N/A</p>
         </div>
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Com Doutorado</p>
-          <p className="text-3xl font-bold text-primary">{mockTeachersData.filter(d => d.grauAcademico === "Doutorado").length}</p>
+          <p className="text-3xl font-bold text-primary"> N/A</p>
         </div>
       </div>
 
