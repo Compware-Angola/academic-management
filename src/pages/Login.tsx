@@ -56,9 +56,6 @@ const Login = () => {
             title: "Login realizado com sucesso",
             description: `Bem-vindo, ${data.username ?? "Utilizador"}`,
           });
-          if (data.token) {
-            localStorage.setItem("token", data.token);
-          }
           navigate("/dashboard");
         },
         onError: (err: Error) => {
