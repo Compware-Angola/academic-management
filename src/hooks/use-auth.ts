@@ -1,10 +1,19 @@
 import { AuthStorage } from "@/util/auth-storage";
+import { useNavigate } from "react-router-dom";
 
 export const useAuth = () => {
+  const navigate = useNavigate();
+  const logout = () => {
+    AuthStorage.logout();
+    navigate("/");
+  };
+  const isAuthenticated = AuthStorage.isAuthenticated();
+  const user = AuthStorage.getUser();
+  const token = AuthStorage.getToken();
   return {
-    user: AuthStorage.getUser(),
-    token: AuthStorage.getToken(),
-    isAuthenticated: AuthStorage.isAuthenticated(),
-    logout: AuthStorage.logout,
+    user,
+    token,
+    isAuthenticated,
+    logout,
   };
 };
