@@ -1,17 +1,32 @@
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, GraduationCap, BookOpen, FileCheck, TrendingUp, Calendar } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Users,
+  GraduationCap,
+  BookOpen,
+  FileCheck,
+  TrendingUp,
+  Calendar,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import UpcomingEventsCard from "./components/UpcomingEventsCard";
 import SemesterStatsCard from "./components/SemesterStatsCard";
 import QuickActionsCard from "./components/QuickActionsCard";
+import { useAuth } from "@/hooks/use-auth";
 
 const Index = () => {
+  const { user } = useAuth();
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Olá,Isaac Isvaldo Bunga`}
+        title={`Olá, ${user?.username}`}
         subtitle="Sistema de Gestão Académica da Universidade • Ano letivo 2025/2026"
       />
 
@@ -50,7 +65,6 @@ const Index = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <UpcomingEventsCard />
 
-
         <SemesterStatsCard
           title="Desempenho Académico 2024/2025"
           description="Licenciatura em Engenharia Informática"
@@ -62,30 +76,30 @@ const Index = () => {
           ]}
         />
 
-      <QuickActionsCard
-  title="Tarefas Urgentes"
-  description="Ações que requerem atenção"
-  actions={[
-    {
-      title: "Certificados pendentes",
-      description: "Emissão de diplomas",
-      count: 5,
-      variant: "warning",
-    },
-    {
-      title: "Recursos de notas",
-      description: "2º época",
-      count: 7,
-      variant: "primary",
-    },
-    {
-      title: "Inscrições em atraso",
-      description: "Propinas",
-      count: 19,
-      variant: "default",
-    },
-  ]}
-/>
+        <QuickActionsCard
+          title="Tarefas Urgentes"
+          description="Ações que requerem atenção"
+          actions={[
+            {
+              title: "Certificados pendentes",
+              description: "Emissão de diplomas",
+              count: 5,
+              variant: "warning",
+            },
+            {
+              title: "Recursos de notas",
+              description: "2º época",
+              count: 7,
+              variant: "primary",
+            },
+            {
+              title: "Inscrições em atraso",
+              description: "Propinas",
+              count: 19,
+              variant: "default",
+            },
+          ]}
+        />
       </div>
 
       {/* Quick Access Links */}
@@ -97,10 +111,22 @@ const Index = () => {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { name: "Avaliações", icon: FileCheck, path: "/avaliacoes/controle" },
-              { name: "Assiduidade", icon: BookOpen, path: "/assiduidade/controle" },
+              {
+                name: "Avaliações",
+                icon: FileCheck,
+                path: "/avaliacoes/controle",
+              },
+              {
+                name: "Assiduidade",
+                icon: BookOpen,
+                path: "/assiduidade/controle",
+              },
               { name: "Horários", icon: Calendar, path: "/horarios/listar" },
-              { name: "Estudantes", icon: Users, path: "/inscricoes/lista-geral" },
+              {
+                name: "Estudantes",
+                icon: Users,
+                path: "/inscricoes/lista-geral",
+              },
             ].map((module) => {
               const Icon = module.icon;
 
