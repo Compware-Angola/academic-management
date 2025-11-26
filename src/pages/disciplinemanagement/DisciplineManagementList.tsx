@@ -6,38 +6,67 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Download, Printer, Plus, Eye, Edit, Trash2, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { RefreshCw, Plus, Eye, Edit, Trash2, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
+import { CreateDisciplineModal } from "./components/CreateDisciplineModal";
 
 export default function DisciplineManagementList() {
-  const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [naturezaFilter, setNaturezaFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const {
+    data: disciplines = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useDisciplines();
 
-  // Mock data específico para disciplinas
-  const mockSubjectsData = [
-    { id: "DISC001", codigo: "UC001", sigla: "PROG3", nome: "Programação III", departamento: "Engenharia Informática", curso: "Engenharia Informática", ano: "3º Ano", semestre: "1º Semestre", creditos: 6, horasSemanais: 6, tipo: "Obrigatória", estado: "Ativa" },
-    { id: "DISC002", codigo: "UC002", sigla: "BD", nome: "Bases de Dados", departamento: "Engenharia Informática", curso: "Engenharia Informática", ano: "2º Ano", semestre: "2º Semestre", creditos: 6, horasSemanais: 6, tipo: "Obrigatória", estado: "Ativa" },
-    { id: "DISC003", codigo: "UC003", sigla: "IA", nome: "Inteligência Artificial", departamento: "Engenharia Informática", curso: "Engenharia Informática", ano: "4º Ano", semestre: "1º Semestre", creditos: 6, horasSemanais: 4, tipo: "Optativa", estado: "Ativa" },
-    { id: "DISC004", codigo: "UC004", sigla: "MKT1", nome: "Marketing I", departamento: "Gestão", curso: "Gestão de Empresas", ano: "2º Ano", semestre: "1º Semestre", creditos: 5, horasSemanais: 4, tipo: "Obrigatória", estado: "Ativa" },
-    { id: "DISC005", codigo: "UC005", sigla: "URB", nome: "Urbanismo", departamento: "Arquitetura", curso: "Arquitetura", ano: "3º Ano", semestre: "2º Semestre", creditos: 6, horasSemanais: 5, tipo: "Obrigatória", estado: "Inativa" },
-  ];
+  // Normaliza os dados
+  const normalizedDisciplines = disciplines.map((d) => ({
+    codigo: d.codigo,
+    designacao: d.desginacao || "Disciplina sem nome",
+    tipo: d.tipo_unidade_curricular === "S" ? "Semestral" : "Anual",
+    naturezaCodigo: d.natureza_unidade_curricular || "",
+    natureza:
+      d.natureza_unidade_curricular === "TP"
+        ? "Teórico-Prática"
+        : d.natureza_unidade_curricular === "T"
+          ? "Teórica"
+          : d.natureza_unidade_curricular === "P"
+            ? "Prática"
+            : "Não definida",
+  }));
 
-  const filteredData = mockSubjectsData.filter(item =>
-    item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.sigla.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtros combinados
+  const filteredData = normalizedDisciplines.filter((item) => {
+    const matchesSearch =
+      item.designacao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.codigo.toString().includes(searchTerm);
 
+    const matchesNatureza =
+      naturezaFilter === "all" || item.naturezaCodigo === naturezaFilter;
+
+    return matchesSearch && matchesNatureza;
+  });
+
+  // Paginação
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, filteredData.length);
+
+  // Reset página ao mudar filtros
+  const handleFilterChange = () => setCurrentPage(1);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link to="/" className="hover:text-foreground">Início</Link>
@@ -51,26 +80,13 @@ export default function DisciplineManagementList() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Gestão de disciplinas</h1>
-          <p className="text-muted-foreground mt-1">Gestão completa de disciplinas e unidades curriculares</p>
+          <p className="text-muted-foreground mt-1">
+            Gestão completa de disciplinas e unidades curriculares
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setIsLoading(true)}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar lista
-          </Button>
-          <Button variant="outline" size="sm">
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimir
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar Excel
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF
-          </Button>
-          <Button size="sm">
+          
+          <Button size="sm" onClick={() => setCreateModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova disciplina
           </Button>
@@ -81,140 +97,92 @@ export default function DisciplineManagementList() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Total Disciplinas</p>
-          <p className="text-3xl font-bold">{mockSubjectsData.length}</p>
+          <p className="text-3xl font-bold">{normalizedDisciplines.length}</p>
         </div>
-        <div className="bg-success/10 border border-success/20 rounded-lg p-4">
+        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Ativas</p>
-          <p className="text-3xl font-bold text-success">{mockSubjectsData.filter(d => d.estado === "Ativa").length}</p>
+          <p className="text-3xl font-bold text-green-600">{normalizedDisciplines.length}</p>
         </div>
-        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <p className="text-sm text-muted-foreground mb-1">Obrigatórias</p>
-          <p className="text-3xl font-bold text-primary">{mockSubjectsData.filter(d => d.tipo === "Obrigatória").length}</p>
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+          <p className="text-sm text-muted-foreground mb-1">Semestrais</p>
+          <p className="text-3xl font-bold text-blue-600">
+            {normalizedDisciplines.filter((d) => d.tipo === "Semestral").length}
+          </p>
         </div>
-        <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-          <p className="text-sm text-muted-foreground mb-1">Optativas</p>
-          <p className="text-3xl font-bold text-warning">{mockSubjectsData.filter(d => d.tipo === "Optativa").length}</p>
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+          <p className="text-sm text-muted-foreground mb-1">Teórico-Práticas</p>
+          <p className="text-3xl font-bold text-amber-600">
+            {normalizedDisciplines.filter((d) => d.natureza === "Teórico-Prática").length}
+          </p>
         </div>
       </div>
 
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Pesquisa */}
           <div className="space-y-2">
             <Label htmlFor="search">Pesquisar</Label>
             <Input
               id="search"
-              placeholder="Código, sigla, nome..."
+              placeholder="Código ou nome..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                handleFilterChange();
+              }}
             />
           </div>
 
+          {/* Filtro por Natureza */}
           <div className="space-y-2">
-            <Label htmlFor="departamento">Departamento</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="departamento">
-                <SelectValue />
+            <Label htmlFor="natureza">Natureza da UC</Label>
+            <Select value={naturezaFilter} onValueChange={(v) => {
+              setNaturezaFilter(v);
+              handleFilterChange();
+            }}>
+              <SelectTrigger id="natureza">
+                <SelectValue placeholder="Todas as naturezas" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os departamentos</SelectItem>
-                <SelectItem value="eng-info">Engenharia Informática</SelectItem>
-                <SelectItem value="gestao">Gestão</SelectItem>
-                <SelectItem value="arquitetura">Arquitetura</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="curso">Curso</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="curso">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os cursos</SelectItem>
-                <SelectItem value="eng-info">Engenharia Informática</SelectItem>
-                <SelectItem value="gestao">Gestão de Empresas</SelectItem>
-                <SelectItem value="arquitetura">Arquitetura</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="ano">Ano</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="ano">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os anos</SelectItem>
-                <SelectItem value="1">1º Ano</SelectItem>
-                <SelectItem value="2">2º Ano</SelectItem>
-                <SelectItem value="3">3º Ano</SelectItem>
-                <SelectItem value="4">4º Ano</SelectItem>
-                <SelectItem value="5">5º Ano</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="semestre">Semestre</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="semestre">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os semestres</SelectItem>
-                <SelectItem value="1">1º Semestre</SelectItem>
-                <SelectItem value="2">2º Semestre</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tipo">Tipo</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="tipo">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="obrigatoria">Obrigatória</SelectItem>
-                <SelectItem value="optativa">Optativa</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="estado">Estado</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="estado">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os estados</SelectItem>
-                <SelectItem value="ativa">Ativa</SelectItem>
-                <SelectItem value="inativa">Inativa</SelectItem>
+                <SelectItem value="all">Todas as naturezas</SelectItem>
+                <SelectItem value="TP">Teórico-Prática (TP)</SelectItem>
+                <SelectItem value="T">Teórica (T)</SelectItem>
+                <SelectItem value="P">Prática (P)</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
       </div>
 
-      {/* Tabela */}
+      {/* Tabela + Estados */}
       {isLoading ? (
         <div className="space-y-3">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
+          {[...Array(10)].map((_, i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : isError ? (
+        <div className="text-center py-20 bg-card border rounded-lg">
+          <BookOpen className="h-16 w-16 mx-auto text-destructive mb-4" />
+          <p className="text-lg font-medium text-destructive mb-2">
+            Erro ao carregar as disciplinas
+          </p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Tentar novamente
+          </Button>
         </div>
       ) : paginatedData.length === 0 ? (
-        <div className="text-center py-12 bg-card border rounded-lg">
-          <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-4">Nenhum registo encontrado</p>
-          <p className="text-sm text-muted-foreground mb-4">Não foram encontradas disciplinas com os critérios selecionados</p>
-          <Button size="sm">
+        <div className="text-center py-20 bg-card border rounded-lg">
+          <BookOpen className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+          <p className="text-lg font-medium text-muted-foreground mb-2">
+            Nenhuma disciplina encontrada
+          </p>
+          <p className="text-sm text-muted-foreground mb-6">
+            Tente ajustar os filtros ou criar uma nova disciplina.
+          </p>
+          <Button size="sm" onClick={() => setCreateModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Criar nova disciplina
           </Button>
@@ -225,64 +193,48 @@ export default function DisciplineManagementList() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Sigla</TableHead>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Departamento</TableHead>
-                    <TableHead>Curso</TableHead>
-                    <TableHead>Ano/Semestre</TableHead>
-                    <TableHead className="text-center">Créditos</TableHead>
-                    <TableHead className="text-center">H/Semana</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-24">Código</TableHead>
+                    <TableHead className="min-w-96">Nome da Disciplina</TableHead>
+                    <TableHead className="w-32">Tipo</TableHead>
+                    <TableHead className="w-40">Natureza</TableHead>
+                    <TableHead className="text-right w-36">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedData.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-mono text-sm">{item.codigo}</TableCell>
-                      <TableCell className="font-semibold">{item.sigla}</TableCell>
-                      <TableCell className="font-medium">{item.nome}</TableCell>
-                      <TableCell className="text-sm">{item.departamento}</TableCell>
-                      <TableCell className="text-sm">{item.curso}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <Badge variant="outline" className="w-fit">{item.ano}</Badge>
-                          <span className="text-xs text-muted-foreground">{item.semestre}</span>
-                        </div>
+                    <TableRow key={item.codigo} className="hover:bg-muted/50">
+                      <TableCell className="font-mono text-sm font-semibold">
+                        {item.codigo}
                       </TableCell>
-                      <TableCell className="text-center font-semibold">{item.creditos}</TableCell>
-                      <TableCell className="text-center">{item.horasSemanais}h</TableCell>
+                      <TableCell className="font-medium">{item.designacao}</TableCell>
                       <TableCell>
-                        <Badge 
-                          variant={item.tipo === "Obrigatória" ? "default" : "secondary"}
-                        >
-                          {item.tipo}
-                        </Badge>
+                        <Badge variant="outline">{item.tipo}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge 
-                          variant="outline"
-                          className={
-                            item.estado === "Ativa"
-                              ? "bg-success/10 text-success border-success/20"
-                              : "bg-muted"
+                        <Badge
+                          variant={
+                            item.natureza === "Teórico-Prática"
+                              ? "default"
+                              : item.natureza === "Teórica"
+                                ? "secondary"
+                                : item.natureza === "Prática"
+                                  ? "outline"
+                                  : "outline"
                           }
                         >
-                          {item.estado}
+                          {item.natureza}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="ghost" size="icon">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="ghost" size="icon">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -295,22 +247,30 @@ export default function DisciplineManagementList() {
           </div>
 
           {/* Paginação */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
-              <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-                <SelectTrigger id="items-per-page" className="w-[80px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-muted-foreground ml-4">
-                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredData.length)} de {filteredData.length} registos
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Label>Itens por página:</Label>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(v) => {
+                    setItemsPerPage(Number(v));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-20 h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <span>
+                Mostrando {startItem}–{endItem} de {filteredData.length} disciplinas
               </span>
             </div>
 
@@ -318,19 +278,19 @@ export default function DisciplineManagementList() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
                 Anterior
               </Button>
-              <span className="text-sm">
+              <span className="text-sm font-medium">
                 Página {currentPage} de {totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 Seguinte
@@ -340,6 +300,11 @@ export default function DisciplineManagementList() {
           </div>
         </>
       )}
+      <CreateDisciplineModal
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 }
