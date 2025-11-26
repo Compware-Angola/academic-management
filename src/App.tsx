@@ -43,6 +43,7 @@ import DeadlinesPos from "./pages/calendar-pos/Deadlines";
 import { ReactQueryProvider } from "./providers/react-query.provider";
 import Deadlines from "./pages/academiccalendar/Deadlines";
 import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
+import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentManagement";
 
 const App = () => {
   // Generate all routes from menu structure
@@ -115,6 +116,7 @@ const App = () => {
                 <Route path="/profile" element={<TeacherProfile />} />
 
                   <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
+                  <Route path="/plano/uc-departamento" element={<UcDepartmentManagement />} />
 
                 <Route
                   path="/calendario/atividades"

@@ -62,7 +62,7 @@ export default function UCManagementPlan() {
 
   useEffect(() => {
     setClasseId("");
-    setCurrentPage(1); // resetar página ao mudar filtros
+    setCurrentPage(1); 
   }, [cursoId, anoLetivoId]);
 
   // Cálculo da paginação

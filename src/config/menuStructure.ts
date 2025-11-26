@@ -316,7 +316,7 @@ export const menuStructure: {
       url: "/plano",
       icon: BookOpen,
       items: [
-        { title: "Gestão de Curso", url: "/plano/cursos" },
+       // { title: "Gestão de Curso", url: "/plano/cursos" },
         { title: "Gestão de disciplinas", url: "/plano/disciplinas" },
         { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
 
