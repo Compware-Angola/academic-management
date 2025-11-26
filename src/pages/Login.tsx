@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useMutationLogin } from "@/hooks/mutations/use-mutation-login";
+import {  useAuth } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
   username: z
@@ -37,7 +38,13 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const loginMutation = useMutationLogin();
+const {isAuthenticated}= useAuth()
 
+useEffect(()=>{
+  if(isAuthenticated) {
+    navigate("/dashboard");
+  }
+},[isAuthenticated])
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {

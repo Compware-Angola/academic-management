@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,35 +6,61 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Download, Printer, Plus, Eye, Edit, Trash2, Phone, Mail, ChevronLeft, ChevronRight } from "lucide-react";
+import { RefreshCw, Download, Printer, Plus, Eye, Edit, Trash2, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+// Assumindo que o seu hook está neste caminho
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher"; 
 
 export default function GeneralListing() {
-  const [isLoading, setIsLoading] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Mock data específico para docentes
-  const mockTeachersData = [
-    { id: "DOC001", codigo: "DOC-2023-001", nome: "Prof. Dr. António Sousa", departamento: "Engenharia Informática", categoria: "Professor Auxiliar", grauAcademico: "Doutorado", especialidade: "Inteligência Artificial", regime: "Tempo Integral", estado: "Ativo", email: "antonio.sousa@uni.ao", telefone: "+244 923 456 789" },
-    { id: "DOC002", codigo: "DOC-2022-045", nome: "Prof. Dra. Isabel Gonçalves", departamento: "Gestão de Empresas", categoria: "Professora Associada", grauAcademico: "Doutorado", especialidade: "Marketing", regime: "Tempo Integral", estado: "Ativo", email: "isabel.goncalves@uni.ao", telefone: "+244 923 456 790" },
-    { id: "DOC003", codigo: "DOC-2021-023", nome: "Prof. Dr. Manuel Costa", departamento: "Arquitetura", categoria: "Professor Catedrático", grauAcademico: "Doutorado", especialidade: "Urbanismo", regime: "Tempo Integral", estado: "Ativo", email: "manuel.costa@uni.ao", telefone: "+244 923 456 791" },
-    { id: "DOC004", codigo: "DOC-2023-012", nome: "Eng. Carlos Silva", departamento: "Engenharia Civil", categoria: "Assistente", grauAcademico: "Mestrado", especialidade: "Estruturas", regime: "Tempo Parcial", estado: "Ativo", email: "carlos.silva@uni.ao", telefone: "+244 923 456 792" },
-    { id: "DOC005", codigo: "DOC-2020-089", nome: "Prof. Dra. Ana Santos", departamento: "Matemática", categoria: "Professora Auxiliar", grauAcademico: "Doutorado", especialidade: "Análise Matemática", regime: "Tempo Integral", estado: "Em Licença", email: "ana.santos@uni.ao", telefone: "+244 923 456 793" },
-  ];
+  const [filterCategoria, setFilterCategoria] = useState("all");
+  const [filterGrau, setFilterGrau] = useState("all");
+  const [filterEscalao, setFilterEscalao] = useState("all");
+  
+  // CORREÇÃO 1: Inicializa data com array vazio [] para evitar o erro .map (Uncaught TypeError: Cannot read properties of undefined (reading 'map'))
+  const { data: teachersData = [], isLoading, refetch, error } = useQueryTeacther();
 
-  const filteredData = mockTeachersData.filter(item =>
-    item.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.departamento.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Aplicar filtros
+  const filteredData = teachersData.filter(item => {
+    // CORREÇÃO 2: Usa (item.propriedade ?? "").toLowerCase() para evitar o erro .toLowerCase
+    // (Uncaught TypeError: Cannot read properties of undefined (reading 'toLowerCase'))
+    const matchSearch = 
+      (item.nome ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.n_mecanografico ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.username ?? "").toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchCategoria = filterCategoria === "all" || item.descricao_categoria === filterCategoria;
+    const matchGrau = filterGrau === "all" || item.descricao_grau_academico === filterGrau;
+    const matchEscalao = filterEscalao === "all" || item.descricao_escalao === filterEscalao;
+    
+    return matchSearch && matchCategoria && matchGrau && matchEscalao;
+  });
+
+  // Extrair valores únicos para os filtros
+  const categorias = [...new Set(teachersData.map(t => t.descricao_categoria))].sort();
+  const grausAcademicos = [...new Set(teachersData.map(t => t.descricao_grau_academico))].sort();
+  const escaloes = [...new Set(teachersData.map(t => t.descricao_escalao))].sort();
+
+  // Calcular estatísticas
+  const totalDocentes = teachersData.length;
+  const totalMestres = teachersData.filter(t => t.descricao_grau_academico === "Mestre").length;
+  const totalDoutores = teachersData.filter(t => t.descricao_grau_academico === "Doutor").length;
+  const totalLicenciados = teachersData.filter(t => t.descricao_grau_academico === "Licenciado").length;
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // Reset página quando mudar filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterCategoria, filterGrau, filterEscalao]);
 
   return (
     <div className="space-y-6">
@@ -54,8 +80,10 @@ export default function GeneralListing() {
           <p className="text-muted-foreground mt-1">Gestão completa do corpo docente</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setIsLoading(true)}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" 
+          onClick={()=> refetch()} 
+          disabled={isLoading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Atualizar lista
           </Button>
           <Button variant="outline" size="sm">
@@ -81,19 +109,19 @@ export default function GeneralListing() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Total Docentes</p>
-          <p className="text-3xl font-bold"> N/A</p>
+          <p className="text-3xl font-bold">{isLoading ? '...' : totalDocentes}</p>
         </div>
         <div className="bg-success/10 border border-success/20 rounded-lg p-4">
-          <p className="text-sm text-muted-foreground mb-1">Tempo Integral</p>
-          <p className="text-3xl font-bold text-success"> N/A</p>
+          <p className="text-sm text-muted-foreground mb-1">Doutores</p>
+          <p className="text-3xl font-bold text-success">{isLoading ? '...' : totalDoutores}</p>
         </div>
         <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
-          <p className="text-sm text-muted-foreground mb-1">Tempo Parcial</p>
-          <p className="text-3xl font-bold text-warning"> N/A</p>
+          <p className="text-sm text-muted-foreground mb-1">Mestres</p>
+          <p className="text-3xl font-bold text-warning">{isLoading ? '...' : totalMestres}</p>
         </div>
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-          <p className="text-sm text-muted-foreground mb-1">Com Doutorado</p>
-          <p className="text-3xl font-bold text-primary"> N/A</p>
+          <p className="text-sm text-muted-foreground mb-1">Licenciados</p>
+          <p className="text-3xl font-bold text-primary">{isLoading ? '...' : totalLicenciados}</p>
         </div>
       </div>
 
@@ -105,94 +133,95 @@ export default function GeneralListing() {
             <Label htmlFor="search">Pesquisar</Label>
             <Input
               id="search"
-              placeholder="Nome, código..."
+              placeholder="Nome, nº mecanográfico, username..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="departamento">Departamento</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="departamento">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os departamentos</SelectItem>
-                <SelectItem value="eng-info">Engenharia Informática</SelectItem>
-                <SelectItem value="gestao">Gestão de Empresas</SelectItem>
-                <SelectItem value="arquitetura">Arquitetura</SelectItem>
-                <SelectItem value="eng-civil">Engenharia Civil</SelectItem>
-                <SelectItem value="matematica">Matemática</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="categoria">Categoria</Label>
-            <Select defaultValue="all">
+            <Select value={filterCategoria} onValueChange={setFilterCategoria}>
               <SelectTrigger id="categoria">
-                <SelectValue />
+                <SelectValue placeholder="Todas as categorias" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
-                <SelectItem value="catedratico">Professor Catedrático</SelectItem>
-                <SelectItem value="associado">Professor Associado</SelectItem>
-                <SelectItem value="auxiliar">Professor Auxiliar</SelectItem>
-                <SelectItem value="assistente">Assistente</SelectItem>
+                {categorias.map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="grau">Grau Académico</Label>
-            <Select defaultValue="all">
+            <Select value={filterGrau} onValueChange={setFilterGrau}>
               <SelectTrigger id="grau">
-                <SelectValue />
+                <SelectValue placeholder="Todos os graus" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os graus</SelectItem>
-                <SelectItem value="doutorado">Doutorado</SelectItem>
-                <SelectItem value="mestrado">Mestrado</SelectItem>
-                <SelectItem value="licenciatura">Licenciatura</SelectItem>
+                {grausAcademicos.map(grau => (
+                  <SelectItem key={grau} value={grau}>{grau}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="regime">Regime</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="regime">
-                <SelectValue />
+            <Label htmlFor="escalao">Escalão</Label>
+            <Select value={filterEscalao} onValueChange={setFilterEscalao}>
+              <SelectTrigger id="escalao">
+                <SelectValue placeholder="Todos os escalões" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os regimes</SelectItem>
-                <SelectItem value="integral">Tempo Integral</SelectItem>
-                <SelectItem value="parcial">Tempo Parcial</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="estado">Estado</Label>
-            <Select defaultValue="all">
-              <SelectTrigger id="estado">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os estados</SelectItem>
-                <SelectItem value="ativo">Ativo</SelectItem>
-                <SelectItem value="licenca">Em Licença</SelectItem>
-                <SelectItem value="inativo">Inativo</SelectItem>
+                <SelectItem value="all">Todos os escalões</SelectItem>
+                {escaloes.map(esc => (
+                  <SelectItem key={esc} value={esc}>{esc}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
+
+        {/* Botão para limpar filtros */}
+        {(searchTerm || filterCategoria !== "all" || filterGrau !== "all" || filterEscalao !== "all") && (
+          <div className="mt-4">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                setSearchTerm("");
+                setFilterCategoria("all");
+                setFilterGrau("all");
+                setFilterEscalao("all");
+              }}
+            >
+              Limpar filtros
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Tabela */}
-      {isLoading ? (
+      {error ? (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 text-center">
+          <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+          <p className="text-destructive font-semibold mb-2">Erro ao carregar dados</p>
+          {/* Exibir a mensagem de erro de forma segura */}
+          <p className="text-sm text-muted-foreground mb-4">{error.message || "Erro desconhecido"}</p>
+          <Button 
+          onClick={()=> refetch()} 
+          variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Tentar novamente
+          </Button>
+        </div>
+      ) : isLoading ? (
         <div className="space-y-3">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
@@ -213,65 +242,51 @@ export default function GeneralListing() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Código</TableHead>
+                    <TableHead>Nº Mecanográfico</TableHead>
                     <TableHead>Nome</TableHead>
-                    <TableHead>Departamento</TableHead>
+                    <TableHead>Username</TableHead>
                     <TableHead>Categoria</TableHead>
-                    <TableHead>Grau</TableHead>
-                    <TableHead>Regime</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Contactos</TableHead>
+                    <TableHead>Grau Académico</TableHead>
+                    <TableHead>Escalão</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedData.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-mono text-sm">{item.codigo}</TableCell>
+                    <TableRow key={item.codigo}>
+                      <TableCell className="font-mono text-sm font-medium">{item.n_mecanografico}</TableCell>
                       <TableCell className="font-medium">{item.nome}</TableCell>
-                      <TableCell className="text-sm">{item.departamento}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.username}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{item.categoria}</Badge>
-                      </TableCell>
-                      <TableCell>{item.grauAcademico}</TableCell>
-                      <TableCell>
-                        <Badge variant={item.regime === "Tempo Integral" ? "default" : "secondary"}>
-                          {item.regime}
-                        </Badge>
+                        <Badge variant="outline">{item.descricao_categoria}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge 
-                          variant="outline"
-                          className={
-                            item.estado === "Ativo" 
-                              ? "bg-success/10 text-success border-success/20" 
-                              : "bg-warning/10 text-warning border-warning/20"
+                          variant={
+                            item.descricao_grau_academico === "Doutor" 
+                              ? "default" 
+                              : item.descricao_grau_academico === "Mestre"
+                              ? "secondary"
+                              : "outline"
                           }
                         >
-                          {item.estado}
+                          {item.descricao_grau_academico}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col gap-1 text-xs">
-                          <span className="flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            {item.email}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Phone className="h-3 w-3" />
-                            {item.telefone}
-                          </span>
-                        </div>
+                        <Badge variant="outline" className="font-mono">
+                          {item.descricao_escalao}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" title="Ver detalhes">
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" title="Editar">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" title="Eliminar">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -284,10 +299,13 @@ export default function GeneralListing() {
           </div>
 
           {/* Paginação */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
-              <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+              <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }}>
                 <SelectTrigger id="items-per-page" className="w-[80px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -314,13 +332,13 @@ export default function GeneralListing() {
                 Anterior
               </Button>
               <span className="text-sm">
-                Página {currentPage} de {totalPages}
+                Página {currentPage} de {totalPages || 1}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === totalPages || totalPages === 0}
               >
                 Seguinte
                 <ChevronRight className="h-4 w-4" />
