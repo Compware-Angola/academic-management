@@ -20,3 +20,18 @@ export async function fetchDisciplines(): Promise<Discipline[]> {
     return [];
   }
 }
+export interface CreateDisciplinePayload {
+  designacao: string;
+  pk_utilizador: number;
+  tipo_unidade_curricular: "S" | "MIC" | string;
+  natureza_unidade_curricular: "TP" | "T" | "P";
+  codigo_disciplina: string;
+  cAbbr: string;
+}
+
+export async function createDiscipline(
+  payload: CreateDisciplinePayload
+): Promise<any> {
+  const response = await axiosApexGa.post("/ga/disciplines", payload);
+  return response.data;
+}
