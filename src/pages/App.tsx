@@ -15,7 +15,7 @@ export function MainLayout() {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <div className="mt-20 mx-auto max-w-7xl w-full px-4">
+        <div className="my-20 mx-auto max-w-480 w-full px-4">
           <Outlet />
         </div>
       </SidebarInset>

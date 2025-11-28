@@ -20,9 +20,13 @@ import UpcomingEventsCard from "./components/UpcomingEventsCard";
 import SemesterStatsCard from "./components/SemesterStatsCard";
 import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
+import { useQueryDashboard } from "@/hooks/dashboard/use-query-dashboard";
+import { formatNumber } from "@/util/format-number";
 
 const Index = () => {
   const { user } = useAuth();
+  const { data: dashboard, isLoading: isLoadingDashboard } =
+    useQueryDashboard();
   return (
     <div className="space-y-6">
       <PageHeader
@@ -34,30 +38,24 @@ const Index = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total de Estudantes"
-          value="2,845"
+          value={formatNumber(dashboard?.total_estudantes ?? 0)}
           icon={Users}
           description="Matriculados ativos"
-          trend={{ value: 12, isPositive: true }}
         />
         <StatCard
           title="Docentes"
-          value="156"
+          value={formatNumber(dashboard?.total_docentes ?? 0)}
           icon={GraduationCap}
-          description="Corpo docente ativo"
-          trend={{ value: 5, isPositive: true }}
         />
         <StatCard
           title="Unidades Curriculares"
-          value="342"
+          value={formatNumber(dashboard?.total_uc ?? 0)}
           icon={BookOpen}
-          description="Distribuídas por curso"
         />
         <StatCard
           title="Avaliações Pendentes"
-          value="28"
+          value={formatNumber(dashboard?.aval_pendentes ?? 0)}
           icon={FileCheck}
-          description="Aguardando validação"
-          trend={{ value: 8, isPositive: false }}
         />
       </div>
 

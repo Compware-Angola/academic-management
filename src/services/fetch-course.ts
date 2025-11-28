@@ -3,8 +3,8 @@ import { axiosApexGa } from "@/lib/axios-apex-ga";
 
 export interface Curso {
   codigo: number;
-  designacao: string;    
-  duracao: number;       
+  designacao: string;
+  duracao: number;
 }
 
 export interface CursoResponse {
@@ -13,5 +13,5 @@ export interface CursoResponse {
 
 export async function getCursosDropdown(): Promise<Curso[]> {
   const response = await axiosApexGa.get<CursoResponse>("/uma/course/all");
-  return response.data.cursos;
+  return response.data.cursos ?? [];
 }

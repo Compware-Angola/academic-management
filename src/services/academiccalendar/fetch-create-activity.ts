@@ -18,5 +18,5 @@ export interface CriarAtividadePayload {
  */
 export async function fetchCreateActivity(payload: CriarAtividadePayload): Promise<any> {
   const { data } = await axiosApexGa.post("/ga/academic-calendar/academic-activities", payload);
-  return data; 
+  return data;
 }
