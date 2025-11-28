@@ -1,12 +1,33 @@
-
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, RefreshCw, FileSpreadsheet, FileText, Printer, Search, Edit, Trash2, File } from "lucide-react";
+import {
+  Plus,
+  RefreshCw,
+  FileSpreadsheet,
+  FileText,
+  Printer,
+  Search,
+  Edit,
+  Trash2,
+  File,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -146,11 +167,30 @@ export default function ScheduleList() {
   const anosLetivos = ["Todos", "2024/2025", "2023/2024"];
   const semestres = ["Todos", "1º Semestre", "2º Semestre"];
   const periodos = ["Todos", "Manhã", "Tarde", "Noite"];
-  const cursos = ["Todos", "Engenharia Informática", "Engenharia Civil", "Arquitetura", "Gestão de Empresas"];
+  const cursos = [
+    "Todos",
+    "Engenharia Informática",
+    "Engenharia Civil",
+    "Arquitetura",
+    "Gestão de Empresas",
+  ];
   const turmas = ["Todos", "Turma A", "Turma B", "Turma C"];
-  const docentes = ["Todos", "Prof. Dr. João Silva", "Prof. Dra. Maria Santos", "Prof. Dr. Pedro Gomes"];
+  const docentes = [
+    "Todos",
+    "Prof. Dr. João Silva",
+    "Prof. Dra. Maria Santos",
+    "Prof. Dr. Pedro Gomes",
+  ];
   const salas = ["Todos", "Lab A", "Lab B", "Sala 101", "Sala 102"];
-  const diasSemana = ["Todos", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+  const diasSemana = [
+    "Todos",
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+  ];
 
   const handleSort = (field: keyof Schedule) => {
     if (sortField === field) {
@@ -175,14 +215,16 @@ export default function ScheduleList() {
   const handleExportExcel = () => {
     toast({
       title: "Exportar para Excel",
-      description: "A exportação foi iniciada. O ficheiro será descarregado em breve.",
+      description:
+        "A exportação foi iniciada. O ficheiro será descarregado em breve.",
     });
   };
 
   const handleExportPDF = () => {
     toast({
       title: "Exportar para PDF",
-      description: "A exportação foi iniciada. O ficheiro será descarregado em breve.",
+      description:
+        "A exportação foi iniciada. O ficheiro será descarregado em breve.",
     });
   };
 
@@ -237,8 +279,12 @@ export default function ScheduleList() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Listar Horário</h1>
-          <p className="text-muted-foreground">Gestão e visualização de horários letivos</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Listar Horário
+          </h1>
+          <p className="text-muted-foreground">
+            Gestão e visualização de horários letivos
+          </p>
         </div>
         <Button onClick={() => navigate("/horarios/criar")}>
           <Plus className="mr-2 h-4 w-4" />
@@ -254,42 +300,69 @@ export default function ScheduleList() {
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Ano Letivo</label>
-            <Select value={filters.anoLetivo} onValueChange={(value) => setFilters(prev => ({ ...prev, anoLetivo: value }))}>
+            <label className="text-sm font-medium text-foreground">
+              Ano Letivo
+            </label>
+            <Select
+              value={filters.anoLetivo}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, anoLetivo: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {anosLetivos.map(ano => (
-                  <SelectItem key={ano} value={ano}>{ano}</SelectItem>
+                {anosLetivos.map((ano) => (
+                  <SelectItem key={ano} value={ano}>
+                    {ano}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Semestre</label>
-            <Select value={filters.semestre} onValueChange={(value) => setFilters(prev => ({ ...prev, semestre: value }))}>
+            <label className="text-sm font-medium text-foreground">
+              Semestre
+            </label>
+            <Select
+              value={filters.semestre}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, semestre: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {semestres.map(sem => (
-                  <SelectItem key={sem} value={sem}>{sem}</SelectItem>
+                {semestres.map((sem) => (
+                  <SelectItem key={sem} value={sem}>
+                    {sem}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Período</label>
-            <Select value={filters.periodo} onValueChange={(value) => setFilters(prev => ({ ...prev, periodo: value }))}>
+            <label className="text-sm font-medium text-foreground">
+              Período
+            </label>
+            <Select
+              value={filters.periodo}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, periodo: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {periodos.map(per => (
-                  <SelectItem key={per} value={per}>{per}</SelectItem>
+                {periodos.map((per) => (
+                  <SelectItem key={per} value={per}>
+                    {per}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -297,13 +370,20 @@ export default function ScheduleList() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Curso</label>
-            <Select value={filters.curso} onValueChange={(value) => setFilters(prev => ({ ...prev, curso: value }))}>
+            <Select
+              value={filters.curso}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, curso: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {cursos.map(curso => (
-                  <SelectItem key={curso} value={curso}>{curso}</SelectItem>
+                {cursos.map((curso) => (
+                  <SelectItem key={curso} value={curso}>
+                    {curso}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -311,27 +391,43 @@ export default function ScheduleList() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Turma</label>
-            <Select value={filters.turma} onValueChange={(value) => setFilters(prev => ({ ...prev, turma: value }))}>
+            <Select
+              value={filters.turma}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, turma: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {turmas.map(turma => (
-                  <SelectItem key={turma} value={turma}>{turma}</SelectItem>
+                {turmas.map((turma) => (
+                  <SelectItem key={turma} value={turma}>
+                    {turma}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Docente</label>
-            <Select value={filters.docente} onValueChange={(value) => setFilters(prev => ({ ...prev, docente: value }))}>
+            <label className="text-sm font-medium text-foreground">
+              Docente
+            </label>
+            <Select
+              value={filters.docente}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, docente: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {docentes.map(doc => (
-                  <SelectItem key={doc} value={doc}>{doc}</SelectItem>
+                {docentes.map((doc) => (
+                  <SelectItem key={doc} value={doc}>
+                    {doc}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -339,27 +435,43 @@ export default function ScheduleList() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Sala</label>
-            <Select value={filters.sala} onValueChange={(value) => setFilters(prev => ({ ...prev, sala: value }))}>
+            <Select
+              value={filters.sala}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, sala: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {salas.map(sala => (
-                  <SelectItem key={sala} value={sala}>{sala}</SelectItem>
+                {salas.map((sala) => (
+                  <SelectItem key={sala} value={sala}>
+                    {sala}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Dia da Semana</label>
-            <Select value={filters.dia} onValueChange={(value) => setFilters(prev => ({ ...prev, dia: value }))}>
+            <label className="text-sm font-medium text-foreground">
+              Dia da Semana
+            </label>
+            <Select
+              value={filters.dia}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, dia: value }))
+              }
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Selecionar" />
               </SelectTrigger>
               <SelectContent>
-                {diasSemana.map(dia => (
-                  <SelectItem key={dia} value={dia}>{dia}</SelectItem>
+                {diasSemana.map((dia) => (
+                  <SelectItem key={dia} value={dia}>
+                    {dia}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -370,7 +482,9 @@ export default function ScheduleList() {
           <Input
             placeholder="Pesquisar por curso, turma, UC, docente ou sala..."
             value={filters.search}
-            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, search: e.target.value }))
+            }
             className="bg-background"
           />
         </div>
@@ -410,8 +524,12 @@ export default function ScheduleList() {
             <div className="rounded-full bg-muted p-4 mb-4">
               <Search className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum registo encontrado</h3>
-            <p className="text-muted-foreground mb-4">Não foram encontrados horários com os filtros aplicados.</p>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Nenhum registo encontrado
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              Não foram encontrados horários com os filtros aplicados.
+            </p>
             <Button onClick={() => navigate("/horarios/criar")}>
               <Plus className="mr-2 h-4 w-4" />
               Criar Primeiro Horário
@@ -423,31 +541,71 @@ export default function ScheduleList() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead onClick={() => handleSort("curso")} className="cursor-pointer hover:bg-muted">
-                      Curso {sortField === "curso" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("curso")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      Curso{" "}
+                      {sortField === "curso" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead onClick={() => handleSort("turma")} className="cursor-pointer hover:bg-muted">
-                      Turma {sortField === "turma" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("turma")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      Turma{" "}
+                      {sortField === "turma" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead onClick={() => handleSort("ucNome")} className="cursor-pointer hover:bg-muted">
-                      UC {sortField === "ucNome" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("ucNome")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      UC{" "}
+                      {sortField === "ucNome" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead onClick={() => handleSort("docente")} className="cursor-pointer hover:bg-muted">
-                      Docente {sortField === "docente" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("docente")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      Docente{" "}
+                      {sortField === "docente" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead onClick={() => handleSort("sala")} className="cursor-pointer hover:bg-muted">
-                      Sala {sortField === "sala" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("sala")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      Sala{" "}
+                      {sortField === "sala" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead onClick={() => handleSort("dia")} className="cursor-pointer hover:bg-muted">
-                      Dia {sortField === "dia" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("dia")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      Dia{" "}
+                      {sortField === "dia" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
                     <TableHead>Início</TableHead>
                     <TableHead>Fim</TableHead>
-                    <TableHead onClick={() => handleSort("tipo")} className="cursor-pointer hover:bg-muted">
-                      Tipo {sortField === "tipo" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("tipo")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      Tipo{" "}
+                      {sortField === "tipo" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
-                    <TableHead onClick={() => handleSort("estado")} className="cursor-pointer hover:bg-muted">
-                      Estado {sortField === "estado" && (sortDirection === "asc" ? "↑" : "↓")}
+                    <TableHead
+                      onClick={() => handleSort("estado")}
+                      className="cursor-pointer hover:bg-muted"
+                    >
+                      Estado{" "}
+                      {sortField === "estado" &&
+                        (sortDirection === "asc" ? "↑" : "↓")}
                     </TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
@@ -455,12 +613,18 @@ export default function ScheduleList() {
                 <TableBody>
                   {currentSchedules.map((schedule) => (
                     <TableRow key={schedule.id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium">{schedule.curso}</TableCell>
+                      <TableCell className="font-medium">
+                        {schedule.curso}
+                      </TableCell>
                       <TableCell>{schedule.turma}</TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-semibold">{schedule.ucSigla}</div>
-                          <div className="text-xs text-muted-foreground">{schedule.ucNome}</div>
+                          <div className="font-semibold">
+                            {schedule.ucSigla}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {schedule.ucNome}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>{schedule.docente}</TableCell>
@@ -469,12 +633,24 @@ export default function ScheduleList() {
                       <TableCell>{schedule.inicio}</TableCell>
                       <TableCell>{schedule.fim}</TableCell>
                       <TableCell>
-                        <Badge variant={schedule.tipo === "Teórica" ? "default" : "secondary"}>
+                        <Badge
+                          variant={
+                            schedule.tipo === "Teórica"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
                           {schedule.tipo}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={schedule.estado === "Ativo" ? "default" : "secondary"}>
+                        <Badge
+                          variant={
+                            schedule.estado === "Ativo"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
                           {schedule.estado}
                         </Badge>
                       </TableCell>
@@ -512,7 +688,9 @@ export default function ScheduleList() {
             {/* Paginação */}
             <div className="flex items-center justify-between border-t border-border p-4">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Itens por página:</span>
+                <span className="text-sm text-muted-foreground">
+                  Itens por página:
+                </span>
                 <Select
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => {
@@ -531,14 +709,18 @@ export default function ScheduleList() {
                   </SelectContent>
                 </Select>
                 <span className="text-sm text-muted-foreground">
-                  Mostrando {startIndex + 1}-{Math.min(endIndex, schedules.length)} de {schedules.length} registos
+                  Mostrando {startIndex + 1}-
+                  {Math.min(endIndex, schedules.length)} de {schedules.length}{" "}
+                  registos
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
                   disabled={currentPage === 1}
                 >
                   Anterior
@@ -549,7 +731,9 @@ export default function ScheduleList() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
                   disabled={currentPage === totalPages}
                 >
                   Próxima
