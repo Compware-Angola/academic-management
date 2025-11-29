@@ -43,10 +43,9 @@ export function NavMain({
           const hasSubItems = item.items && item.items.length > 0;
           const isActive = !!matchPath(
             { path: item.url, end: item.url === "/" },
-            location.pathname,
+            location.pathname
           );
 
-          // ✅ ITEM COM SUBMENU
           if (hasSubItems) {
             return (
               <Collapsible
@@ -62,7 +61,7 @@ export function NavMain({
                       className={clsx(
                         "transition-colors",
                         isActive &&
-                          "bg-primary text-primary-foreground hover:bg-primary/90",
+                          "bg-primary text-primary-foreground hover:bg-primary/90"
                       )}
                     >
                       {item.icon && <item.icon />}
@@ -82,7 +81,7 @@ export function NavMain({
                               asChild
                               className={clsx(
                                 subActive &&
-                                  "bg-primary text-primary-foreground hover:bg-primary/90",
+                                  "bg-primary text-primary-foreground hover:bg-primary/90"
                               )}
                             >
                               <Link to={subItem.url}>
@@ -99,7 +98,6 @@ export function NavMain({
             );
           }
 
-          // ✅ ITEM SEM SUBMENU
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
@@ -108,7 +106,7 @@ export function NavMain({
                 className={clsx(
                   "transition-colors",
                   isActive &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90",
+                    "bg-primary text-primary-foreground hover:bg-primary/90"
                 )}
               >
                 {item.icon && <item.icon />}

@@ -1,0 +1,408 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Save, X, RefreshCw, AlertCircle, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+
+import { useToast } from "@/hooks/use-toast";
+
+import ScheduleGrid, { AulaPayload } from "./ScheduleGrid";
+
+import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
+
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useCursos } from "@/hooks/use-cursos";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-disponiveis";
+import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { FormSelect } from "./FormSelect";
+import { useSaveHorario } from "@/hooks/horario/use-save-horario";
+
+/* -----------------------------------
+   CONSTANTES E UTILS
+----------------------------------- */
+
+const requiredFields = [
+  { key: "anoLetivo", label: "Ano Letivo" },
+  { key: "semestre", label: "Semestre" },
+  { key: "periodo", label: "Período" },
+  { key: "curso", label: "Curso" },
+  { key: "unidadeCurricular", label: "Unidade Curricular" },
+  { key: "docente", label: "Docente" },
+  { key: "modalidade", label: "Modalidade" },
+];
+
+const isEmpty = (v: unknown) => v === null || v === undefined || v === "";
+
+/* -----------------------------------
+   MODALIDADES
+----------------------------------- */
+
+const MODALIDADES = [
+  { pk: 1, label: "Presencial" },
+  { pk: 2, label: "Virtual" },
+];
+
+/* -----------------------------------
+   COMPONENTE
+----------------------------------- */
+
+export default function CreateSchedule() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  /* ---------- STATES ----------- */
+  const [formData, setFormData] = useState({
+    anoLetivo: "",
+    semestre: "",
+    periodo: "",
+    curso: "",
+    unidadeCurricular: "",
+    docente: "",
+    modalidade: "",
+  });
+
+  const [aulas, setAulas] = useState<AulaPayload[]>([]);
+
+  const [isChecking, setIsChecking] = useState(false);
+  const [hasCheckedCollisions, setHasCheckedCollisions] = useState(false);
+  const [collisionMessage, setCollisionMessage] = useState("");
+
+  /* ---------- QUERIES ----------- */
+  const { data: academicYear } = useQueryAnoAcademico();
+  const { data: semestres } = useQuerySemestres();
+  const { data: cursos } = useCursos();
+  const { data: periodos } = useQueryPeriod();
+
+  const { data: temposDisponiveis = [] } = useQueryTemposDisponiveis({
+    anoLectivo: Number(formData.anoLetivo),
+    periodo: Number(formData.periodo),
+  });
+
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: "3",
+      curso: formData.curso,
+      semestre: formData.semestre,
+    });
+
+  const { data: teachers = [], isLoading: isLoadingTeacher } =
+    useQueryTeacherByUC(formData.unidadeCurricular);
+
+  /* ---------- COLISÃO ----------- */
+  const verifyCollision = useVerifyCollision();
+  const { mutate: salvarHorario, isPending } = useSaveHorario();
+  useEffect(() => {
+    setHasCheckedCollisions(false);
+    setCollisionMessage("");
+  }, [formData, aulas]);
+
+  /* ---------- VALIDAR FORM ----------- */
+  const validateForm = () => {
+    for (const field of requiredFields) {
+      if (isEmpty(formData[field.key as keyof typeof formData])) {
+        toast({
+          variant: "destructive",
+          title: "Campo obrigatório",
+          description: `Preencha: ${field.label}`,
+        });
+        return false;
+      }
+    }
+
+    if (!aulas.length) {
+      toast({
+        variant: "destructive",
+        title: "Horário vazio",
+        description: "Selecione pelo menos uma aula.",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const isFormComplete =
+    requiredFields.every(
+      (f) => !isEmpty(formData[f.key as keyof typeof formData])
+    ) && aulas.length > 0;
+
+  /* ---------- VERIFICAR COLISÕES ----------- */
+  const handleCheckCollisions = async () => {
+    if (!validateForm()) return;
+
+    setIsChecking(true);
+    setCollisionMessage("");
+
+    try {
+      const results = await Promise.all(
+        aulas.map((aula) =>
+          verifyCollision.mutateAsync({
+            ano_lectivo: Number(formData.anoLetivo),
+            semestre: Number(formData.semestre),
+            periodo: Number(formData.periodo),
+            unidade_curricular: Number(formData.unidadeCurricular),
+            docente: Number(formData.docente),
+            sala: aula.sala,
+            dia_semana: aula.diaSemana,
+            ordem_tempo: aula.ordemTempo,
+            horario_id: null,
+          })
+        )
+      );
+
+      const collision = results.find((r) => r.temColisao === 1);
+
+      if (collision) {
+        setCollisionMessage(
+          `${collision.mensagem} (${collision.horarioConflito} - ${collision.horaConflito})`
+        );
+
+        toast({
+          variant: "destructive",
+          title: "Colisão encontrada",
+          description: collision.mensagem,
+        });
+
+        return;
+      }
+
+      toast({
+        description: `${aulas.length} aulas sem colisão.`,
+      });
+
+      setHasCheckedCollisions(true);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Falha ao verificar colisões.",
+      });
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  /* ---------- SUBMIT ----------- */
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+    if (!hasCheckedCollisions) {
+      toast({
+        variant: "destructive",
+        title: "Validação pendente",
+        description: "Verifique colisões primeiro.",
+      });
+      return;
+    }
+
+    const payload = {
+      anoLectivo: Number(formData.anoLetivo),
+      semestre: Number(formData.semestre),
+      periodo: Number(formData.periodo),
+      curso: Number(formData.curso),
+      unidadeCurricular: Number(formData.unidadeCurricular),
+      docente: Number(formData.docente),
+      modalidade: Number(formData.modalidade),
+      tipoAula: aulas[0].tipoAula,
+      aulas,
+    };
+
+    salvarHorario(payload);
+  };
+
+  /* ---------- UI ----------- */
+  return (
+    <div className="flex-1 space-y-6 p-8">
+      {/* BREADCRUMB */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/horarios">Horários</BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+
+          <BreadcrumbItem>
+            <BreadcrumbPage>Criar Horário</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* ALERTA DE COLISÃO */}
+      {!!collisionMessage && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{collisionMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* FORM */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* GRID DE CAMPOS */}
+        <div className="grid md:grid-cols-4 gap-4">
+          {/* ANO */}
+          <FormSelect
+            label="Ano Letivo"
+            value={formData.anoLetivo}
+            onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+            options={academicYear?.filter(
+              (ay) => ay.estado.toLowerCase() === "activo"
+            )}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+            })}
+          />
+
+          {/* SEMESTRE */}
+          <FormSelect
+            label="Semestre"
+            value={formData.semestre}
+            onChange={(v) => setFormData({ ...formData, semestre: v })}
+            options={semestres}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+            })}
+          />
+
+          {/* CURSO */}
+          <FormSelect
+            label="Curso"
+            value={formData.curso}
+            onChange={(v) => setFormData({ ...formData, curso: v })}
+            options={cursos}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+            })}
+          />
+
+          {/* PERÍODO */}
+          <FormSelect
+            label="Período"
+            value={formData.periodo}
+            onChange={(v) => setFormData({ ...formData, periodo: v })}
+            options={periodos}
+            map={(p) => ({
+              key: p.codigo,
+              label: p.designacao,
+            })}
+          />
+
+          {/* UC */}
+          <FormSelect
+            label="Unidade Curricular"
+            value={formData.unidadeCurricular}
+            disabled={isLoadingUC || !formData.semestre || !formData.curso}
+            onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
+            options={unidadesCurriculares}
+            map={(u) => ({
+              key: u.pk,
+              label: u.descricao,
+            })}
+            loading={isLoadingUC}
+          />
+
+          {/* DOCENTE */}
+          <FormSelect
+            label="Docente"
+            value={formData.docente}
+            disabled={isLoadingTeacher || !formData.unidadeCurricular}
+            onChange={(v) => setFormData({ ...formData, docente: v })}
+            options={teachers}
+            map={(t) => ({
+              key: t.pk,
+              label: t.nomeCompleto,
+            })}
+            loading={isLoadingTeacher}
+          />
+
+          {/* MODALIDADE */}
+          <FormSelect
+            label="Modalidade"
+            value={formData.modalidade}
+            onChange={(v) => setFormData({ ...formData, modalidade: v })}
+            options={MODALIDADES}
+            map={(m) => ({
+              key: m.pk,
+              label: m.label,
+            })}
+          />
+        </div>
+
+        {/* GRID DE HORÁRIOS */}
+        {temposDisponiveis.length > 0 && (
+          <ScheduleGrid scheduleData={temposDisponiveis} onChange={setAulas} />
+        )}
+
+        {/* BOTÕES */}
+        <div className="flex justify-end gap-3 pt-6 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate("/horarios")}
+          >
+            <X className="mr-2 h-4 w-4" />
+            Cancelar
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCheckCollisions}
+            disabled={isChecking}
+          >
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isChecking ? "animate-spin" : ""}`}
+            />
+            Verificar Colisões
+          </Button>
+
+          <Button
+            type="submit"
+            disabled={!isFormComplete || !hasCheckedCollisions || isPending}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" /> Guardar Horário
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}

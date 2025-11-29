@@ -34,6 +34,6 @@ export async function fetchTemposDisponiveis(
       },
     }
   );
-console.log({data});
+
   return data.items ?? [];
 }

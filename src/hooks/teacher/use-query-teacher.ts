@@ -1,5 +1,5 @@
 import { Discipline, fetchDisciplines } from "@/services/study_plan/fect-discipline.serice";
-import { fetchTeacher, Teacher } from "@/services/teacthers/fecth-teacher";
+import { fetchTeacher, Teacher } from "@/services/teachers/fecth-teacher";
 import { useQuery } from "@tanstack/react-query";
 
 export function useQueryTeacther() {
@@ -7,6 +7,6 @@ export function useQueryTeacther() {
     queryKey: ["teachers"],
     queryFn: fetchTeacher,
    staleTime: 5 * 60 * 1000,
-   
+
   });
 }

@@ -11,7 +11,7 @@ import { menuStructure } from "./config/menuStructure";
 import { ThemeProvider } from "./hooks/thme-provider";
 import { MainLayout } from "./pages/App";
 import UnderConstruction from "./pages/UnderConstruction";
-import CreateSchedule from "./pages/schedules/CreateSchedule";
+import CreateSchedule from "./pages/schedules/CreateSchedule/CreateSchedule";
 import ScheduleList from "./pages/schedules/ScheduleList";
 import ClassromList from "./pages/classroom/ClassromList";
 import DisciplineManagementList from "./pages/disciplinemanagement/DisciplineManagementList";
@@ -115,8 +115,11 @@ const App = () => {
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
                 <Route path="/profile" element={<TeacherProfile />} />
 
-                  <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
-                  <Route path="/plano/uc-departamento" element={<UcDepartmentManagement />} />
+                <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
+                <Route
+                  path="/plano/uc-departamento"
+                  element={<UcDepartmentManagement />}
+                />
 
                 <Route
                   path="/calendario/atividades"
