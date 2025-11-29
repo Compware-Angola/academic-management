@@ -38,18 +38,14 @@ export function FormSelect<T>({
 
       <Select value={value} disabled={disabled} onValueChange={onChange}>
         <SelectTrigger>
-          <SelectValue
-            placeholder={
-              loading ? (
-                <span className="flex items-center gap-2">
-                  Carregando
-                  <Loader2 className="animate-spin h-4 w-4" />
-                </span>
-              ) : (
-                "Selecionar"
-              )
-            }
-          />
+          {loading ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              Carregando
+              <Loader2 className="h-4 w-4 animate-spin" />
+            </div>
+          ) : (
+            <SelectValue placeholder="Selecionar" />
+          )}
         </SelectTrigger>
 
         <SelectContent>

@@ -29,6 +29,8 @@ import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { FormSelect } from "./FormSelect";
 import { useSaveHorario } from "@/hooks/horario/use-save-horario";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -46,19 +48,6 @@ const requiredFields = [
 
 const isEmpty = (v: unknown) => v === null || v === undefined || v === "";
 
-/* -----------------------------------
-   MODALIDADES
------------------------------------ */
-
-const MODALIDADES = [
-  { pk: 1, label: "Presencial" },
-  { pk: 2, label: "Virtual" },
-];
-
-/* -----------------------------------
-   COMPONENTE
------------------------------------ */
-
 export default function CreateSchedule() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -72,6 +61,7 @@ export default function CreateSchedule() {
     unidadeCurricular: "",
     docente: "",
     modalidade: "",
+    classes: "",
   });
 
   const [aulas, setAulas] = useState<AulaPayload[]>([]);
@@ -81,10 +71,12 @@ export default function CreateSchedule() {
   const [collisionMessage, setCollisionMessage] = useState("");
 
   /* ---------- QUERIES ----------- */
-  const { data: academicYear } = useQueryAnoAcademico();
-  const { data: semestres } = useQuerySemestres();
-  const { data: cursos } = useCursos();
-  const { data: periodos } = useQueryPeriod();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const { data: temposDisponiveis = [] } = useQueryTemposDisponiveis({
     anoLectivo: Number(formData.anoLetivo),
@@ -93,14 +85,17 @@ export default function CreateSchedule() {
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
-      classe: "3",
+      classe: formData.classes,
       curso: formData.curso,
       semestre: formData.semestre,
     });
 
   const { data: teachers = [], isLoading: isLoadingTeacher } =
     useQueryTeacherByUC(formData.unidadeCurricular);
-
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: modalidade = [], isLoading: isLoadingModalidade } =
+    useQueryModalidade();
   /* ---------- COLISÃO ----------- */
   const verifyCollision = useVerifyCollision();
   const { mutate: salvarHorario, isPending } = useSaveHorario();
@@ -232,6 +227,7 @@ export default function CreateSchedule() {
       unidadeCurricular: "",
       docente: "",
       modalidade: "",
+      classes: "",
     });
     setAulas([]);
     setHasCheckedCollisions(false);
@@ -276,6 +272,8 @@ export default function CreateSchedule() {
         <div className="grid md:grid-cols-4 gap-4">
           {/* ANO */}
           <FormSelect
+            disabled={isLoadingAcademicYear}
+            loading={isLoadingAcademicYear}
             label="Ano Letivo"
             value={formData.anoLetivo}
             onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
@@ -290,6 +288,8 @@ export default function CreateSchedule() {
 
           {/* SEMESTRE */}
           <FormSelect
+            disabled={isLoadingSemestres}
+            loading={isLoadingSemestres}
             label="Semestre"
             value={formData.semestre}
             onChange={(v) => setFormData({ ...formData, semestre: v })}
@@ -302,6 +302,8 @@ export default function CreateSchedule() {
 
           {/* CURSO */}
           <FormSelect
+            disabled={isLoadingCurso}
+            loading={isLoadingCurso}
             label="Curso"
             value={formData.curso}
             onChange={(v) => setFormData({ ...formData, curso: v })}
@@ -311,24 +313,31 @@ export default function CreateSchedule() {
               label: c.designacao,
             })}
           />
+          <FormSelect
+            label="Ano Curricular"
+            value={formData.classes}
+            disabled={isLoadingClasses || !formData.curso}
+            onChange={(v) => setFormData({ ...formData, classes: v })}
+            options={classes}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+            })}
+            loading={isLoadingClasses}
+          />
 
           {/* PERÍODO */}
-          <FormSelect
-            label="Período"
-            value={formData.periodo}
-            onChange={(v) => setFormData({ ...formData, periodo: v })}
-            options={periodos}
-            map={(p) => ({
-              key: p.codigo,
-              label: p.designacao,
-            })}
-          />
 
           {/* UC */}
           <FormSelect
             label="Unidade Curricular"
             value={formData.unidadeCurricular}
-            disabled={isLoadingUC || !formData.semestre || !formData.curso}
+            disabled={
+              isLoadingUC ||
+              !formData.semestre ||
+              !formData.curso ||
+              !formData.classes
+            }
             onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
             options={unidadesCurriculares}
             map={(u) => ({
@@ -356,11 +365,25 @@ export default function CreateSchedule() {
           <FormSelect
             label="Modalidade"
             value={formData.modalidade}
+            disabled={isLoadingModalidade}
             onChange={(v) => setFormData({ ...formData, modalidade: v })}
-            options={MODALIDADES}
+            options={modalidade}
             map={(m) => ({
-              key: m.pk,
-              label: m.label,
+              key: m.pkModalidade,
+              label: m.designacao,
+            })}
+            loading={isLoadingModalidade}
+          />
+          <FormSelect
+            disabled={isLoadingPeriodos}
+            loading={isLoadingPeriodos}
+            label="Período"
+            value={formData.periodo}
+            onChange={(v) => setFormData({ ...formData, periodo: v })}
+            options={periodos}
+            map={(p) => ({
+              key: p.codigo,
+              label: p.designacao,
             })}
           />
         </div>
