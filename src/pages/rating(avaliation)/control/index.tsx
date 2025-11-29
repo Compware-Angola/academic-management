@@ -95,7 +95,7 @@ export default function ControlNotes() {
   // =======================================
   const totalPages = Math.ceil(disciplinasProva.length / itemsPerPage);
 
-  const paginatedDisciplinas = disciplinasProva.slice(
+  const paginatedDisciplinas = disciplinasProva?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -248,7 +248,7 @@ export default function ControlNotes() {
             <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
-      ) : paginatedDisciplinas.length === 0 ? (
+      ) : paginatedDisciplinas?.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
           <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <p className="text-lg font-medium">Nenhuma disciplina encontrada</p>
@@ -270,7 +270,7 @@ export default function ControlNotes() {
               </TableHeader>
 
               <TableBody>
-                {paginatedDisciplinas.map((item) => (
+                {paginatedDisciplinas?.map((item) => (
                   <TableRow key={item.codigoTurmaHorario}>
                     <TableCell>{item.disciplina}</TableCell>
 

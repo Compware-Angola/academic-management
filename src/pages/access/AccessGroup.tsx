@@ -45,7 +45,7 @@ export default function AccessGroup() {
     setCurrentPage(1);
   };
 
-  const sortedGroups = [...groups].sort((a, b) => a.descricao.localeCompare(b.descricao));
+  const sortedGroups = [...groups].sort((a, b) => a.descricao?.localeCompare(b?.descricao));
   const selectedGroup = groups.find((g) => g.codigo === Number(selectedGroupId));
 
   // Filtrar apenas permissões ativas
