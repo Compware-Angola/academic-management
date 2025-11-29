@@ -44,6 +44,7 @@ import { ReactQueryProvider } from "./providers/react-query.provider";
 import Deadlines from "./pages/academiccalendar/Deadlines";
 import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
 import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentManagement";
+import ControlNotes from "./pages/rating(avaliation)/control";
 
 const App = () => {
   // Generate all routes from menu structure
@@ -80,6 +81,7 @@ const App = () => {
                   element={<CandidateList />}
                 />
                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
+                <Route path="/avaliacoes/controle" element={<ControlNotes />} />
 
                 <Route
                   path="/bolsa/bolseiros"

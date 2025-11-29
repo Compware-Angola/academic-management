@@ -1,0 +1,39 @@
+import { DisciplinaProva, fetchDisciplinasProva, FilterDisciplinaProvaParams } from "@/services/disciplina/fetch-disciplinas-prova";
+import { useQuery } from "@tanstack/react-query";
+
+
+export function useQueryDisciplinasProva(
+  params: FilterDisciplinaProvaParams = {}
+) {
+
+  const enabled =
+    !!params.gradeSelecionada &&
+    !!params.cursoSelecionado &&
+    !!params.anoCurricularSelecionado &&
+    !!params.semestreSelecionado &&
+    !!params.anoLectivoSelecionado &&
+    !!params.tipoProvaSelecionada &&
+    !!params.tipoAvaliacaoSelecionada;
+
+  return useQuery<DisciplinaProva[], Error>({
+    queryKey: [
+      "disciplinas-prova",
+      params.verHorario,
+      params.gradeSelecionada,
+      params.cursoSelecionado,
+      params.anoCurricularSelecionado,
+      params.semestreSelecionado,
+      params.anoLectivoSelecionado,
+      params.tipoProvaSelecionada,
+      params.tipoAvaliacaoSelecionada,
+    ],
+
+    queryFn: async () => {
+      if (!enabled) return [];
+      return fetchDisciplinasProva(params);
+    },
+
+    enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+}

@@ -3,14 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Save, X, RefreshCw, AlertCircle, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import {
@@ -149,6 +141,8 @@ export default function CreateSchedule() {
 
   /* ---------- VERIFICAR COLISÕES ----------- */
   const handleCheckCollisions = async () => {
+    setHasCheckedCollisions(false);
+    setCollisionMessage("");
     if (!validateForm()) return;
 
     setIsChecking(true);
@@ -230,6 +224,18 @@ export default function CreateSchedule() {
     };
 
     salvarHorario(payload);
+    setFormData({
+      anoLetivo: "",
+      semestre: "",
+      periodo: "",
+      curso: "",
+      unidadeCurricular: "",
+      docente: "",
+      modalidade: "",
+    });
+    setAulas([]);
+    setHasCheckedCollisions(false);
+    setCollisionMessage("");
   };
 
   /* ---------- UI ----------- */
