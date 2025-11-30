@@ -1,0 +1,218 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import { ChevronLeft, ChevronRight, RefreshCw, Shield } from "lucide-react";
+
+import { FormSelect } from "@/components/common/FormSelect";
+
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useCursos } from "@/hooks/use-cursos";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+
+import { useQueryDefinirOral } from "@/hooks/avaliacao/use-query-definir-oral";
+
+import { ModalDefinirOral } from "./modal-definir-oral";
+import { DefinirOral } from "@/services/avaliacao/fetch-oral";
+
+export default function FormulaOral() {
+  const [filters, setFilters] = useState({
+    anoLetivo: "",
+    semestre: "",
+    curso: "",
+    classes: "",
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const [selected, setSelected] = useState<DefinirOral | null>(null);
+  const [openModal, setOpenModal] = useState(false);
+
+  const { data: semestres } = useQuerySemestres();
+  const { data: cursos } = useCursos();
+
+  const { data: classes = [] } = useQueryClassFilterByCurso({
+    curso: filters.curso,
+  });
+
+  const {
+    data = [],
+    isLoading,
+    refetch,
+  } = useQueryDefinirOral({
+    cursoId: filters.curso ? Number(filters.curso) : undefined,
+    anoCurricular: filters.classes ? Number(filters.classes) : undefined,
+    semestre: filters.semestre ? Number(filters.semestre) : undefined,
+  });
+
+  // PAGINAÇÃO
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+
+  const paginated = data.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  return (
+    <div className="space-y-6">
+      <nav className="text-sm text-muted-foreground flex gap-2">
+        <Link to="/">Início</Link>
+        <span>/</span>
+        <span className="text-foreground">Definir Prova Oral</span>
+      </nav>
+
+      <header className="flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Definir Oral</h1>
+          <p className="text-muted-foreground">Ativação por disciplina</p>
+        </div>
+
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => refetch()}
+          disabled={isLoading}
+        >
+          <RefreshCw
+            className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+          />
+          Atualizar
+        </Button>
+      </header>
+
+      {/* ========== FILTROS ========== */}
+      <div className="bg-card border rounded-lg p-6">
+        <div className="grid grid-cols-4 gap-4">
+          <FormSelect
+            label="Semestre"
+            value={filters.semestre}
+            onChange={(v) => setFilters({ ...filters, semestre: v })}
+            options={semestres}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+            })}
+          />
+
+          <FormSelect
+            label="Curso"
+            value={filters.curso}
+            onChange={(v) => setFilters({ ...filters, curso: v })}
+            options={cursos}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+            })}
+          />
+
+          <FormSelect
+            label="Ano curricular"
+            disabled={!filters.curso}
+            value={filters.classes}
+            onChange={(v) => setFilters({ ...filters, classes: v })}
+            options={classes}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+            })}
+          />
+        </div>
+      </div>
+
+      {/* ========== TABELA ========== */}
+      {isLoading ? (
+        [...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full" />
+        ))
+      ) : paginated.length === 0 ? (
+        <div className="bg-card border rounded-lg text-center py-10">
+          <Shield className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
+          <p>Nenhum registro encontrado</p>
+        </div>
+      ) : (
+        <div className="bg-card border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Código</TableHead>
+                <TableHead>Disciplina</TableHead>
+                <TableHead className="text-center">Oral</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {paginated.map((item) => (
+                <TableRow key={item.codigoGrade}>
+                  <TableCell>{item.codigoGrade}</TableCell>
+
+                  <TableCell>{item.disciplina}</TableCell>
+
+                  <TableCell className="text-center">
+                    {item.habilitar ? "✅" : "❌"}
+                  </TableCell>
+
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelected(item);
+                        setOpenModal(true);
+                      }}
+                    >
+                      Alterar
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {/* ========== PAGINAÇÃO ========== */}
+      <div className="flex justify-end gap-3 items-center">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((p) => p - 1)}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
+
+        <span className="text-sm">
+          Página {currentPage} de {totalPages}
+        </span>
+
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((p) => p + 1)}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+
+      <ModalDefinirOral
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        data={selected}
+      />
+    </div>
+  );
+}

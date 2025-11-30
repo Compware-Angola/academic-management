@@ -46,6 +46,7 @@ import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
 import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentManagement";
 import ControlNotes from "./pages/rating(avaliation)/control";
 import FormulaUC from "./pages/rating(avaliation)/formula-uc";
+import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 
 const App = () => {
   // Generate all routes from menu structure
@@ -84,12 +85,16 @@ const App = () => {
                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
+                <Route
+                  path="/avaliacoes/formula-oral"
+                  element={<FormulaOral />}
+                />
 
                 <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
                 />
- {/*
+                {/*
                 <Route
                   path="/assiduidade/docente"
                   element={<TeacherAttendance />}
@@ -104,16 +109,15 @@ const App = () => {
                 />
 */}
 
-
                 <Route path="/acessos/utilizador" element={<UserAccess />} />
 
                 <Route
                   path="/acessos/funcionalidade-utilizador"
                   element={<UserFunctionality />}
                 />
-              
+
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
-                 {/*
+                {/*
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
                 <Route path="/acessos/bloquear" element={<BlockAccess />} />
                 <Route path="/acessos/todos" element={<AllAccesses />} />
