@@ -108,15 +108,15 @@ export default function ScheduleList() {
             </BreadcrumbList>
           </Breadcrumb>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Turmas Criadas
+          Listar  Horários Criadas
           </h1>
           <p className="text-muted-foreground">
-            Visualize todas as turmas já criadas para o ano, semestre, período e curso selecionados.
+            Visualize todas os Horários já criadas para o ano, semestre, período e curso selecionados.
           </p>
         </div>
         <Button onClick={() => navigate("/horarios/criar")}>
           <Plus className="mr-2 h-4 w-4" />
-          Criar Nova Turma
+          Criar Novo Horário
         </Button>
       </div>
 
@@ -243,7 +243,7 @@ export default function ScheduleList() {
         ) : error ? (
           <Alert variant="destructive" className="m-6">
             <AlertDescription>
-              Erro ao carregar turmas. Tente novamente.
+              Erro ao carregar Horário. Tente novamente.
             </AlertDescription>
           </Alert>
         ) : filteredHorarios.length === 0 ? (
@@ -251,15 +251,15 @@ export default function ScheduleList() {
             <div className="rounded-full bg-muted p-6 mb-4">
               <File className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Nenhuma turma encontrada</h3>
+            <h3 className="text-xl font-semibold mb-2">Nenhum Horário encontrada</h3>
             <p className="text-muted-foreground max-w-md mb-6">
               {filters.anoLetivo && filters.semestre && filters.periodo && filters.curso
-                ? "Não existem turmas criadas com os filtros aplicados."
-                : "Selecione todos os filtros para ver as turmas criadas."}
+                ? "Não existem Horários criadas com os filtros aplicados."
+                : "Selecione todos os filtros para ver as Horário criadas."}
             </p>
             <Button onClick={() => navigate("/horarios/criar")}>
               <Plus className="mr-2 h-4 w-4" />
-              Criar Primeira Turma
+              Criar Horário 
             </Button>
           </div>
         ) : (
@@ -267,9 +267,10 @@ export default function ScheduleList() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead>Turma</TableHead>
+                  <TableHead>Designação</TableHead>
+                    <TableHead>Curso</TableHead>
                   <TableHead>Unidade Curricular</TableHead>
-                  <TableHead>Curso</TableHead>
+                
                   <TableHead>Ano</TableHead>
                   <TableHead>Capacidade</TableHead>
                   <TableHead>Estado</TableHead>
@@ -283,8 +284,9 @@ export default function ScheduleList() {
                     <TableCell className="font-semibold text-primary">
                       {h.designacao}
                     </TableCell>
+                     <TableCell>{h.curso}</TableCell>
                     <TableCell>{h.unidadeCurricular}</TableCell>
-                    <TableCell>{h.curso}</TableCell>
+                   
                     <TableCell>{h.ano}</TableCell>
                     <TableCell>{h.capacidade}</TableCell>
                     <TableCell>
