@@ -103,22 +103,27 @@ const App = () => {
                   element={<MarkAttendance />}
                 />
 */}
+
+
                 <Route path="/acessos/utilizador" element={<UserAccess />} />
+
                 <Route
                   path="/acessos/funcionalidade-utilizador"
                   element={<UserFunctionality />}
                 />
-                <Route
-                  path="/acessos/cargos"
-                  element={<RectoratePositions />}
-                />
+              
+                <Route path="/acessos/grupo" element={<AcessGrup />} />
+                 {/*
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
                 <Route path="/acessos/bloquear" element={<BlockAccess />} />
                 <Route path="/acessos/todos" element={<AllAccesses />} />
                 <Route path="/acessos/logs" element={<AccessLogs />} />
-                <Route path="/acessos/grupo" element={<AcessGrup />} />
+                  <Route
+                  path="/acessos/cargos"
+                  element={<RectoratePositions />}
+                />
                 <Route path="/profile" element={<TeacherProfile />} />
-
+*/}
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
                   path="/plano/uc-departamento"
