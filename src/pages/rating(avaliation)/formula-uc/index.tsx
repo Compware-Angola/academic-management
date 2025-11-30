@@ -33,7 +33,7 @@ import {
 import { Link } from "react-router-dom";
 
 import { useQueryDisciplinasProva } from "@/hooks/avaliacao/use-query-disciplinas-prova";
-import { ModalNotasDisciplina } from "./modal-notas-disciplina";
+import { ModalNotasDisciplina } from "../control/modal-notas-disciplina";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
@@ -42,6 +42,7 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
+import { useQueryFormulaUC } from "@/hooks/avaliacao/use-queries-formula-uc";
 
 type SelectedNotas = {
   turmaOuHorarioId: number;
@@ -53,7 +54,7 @@ const VER_HORARIO = [
   { codigo: "NÃO", designacao: "NÃO" },
 ];
 
-export default function ControlNotes() {
+export default function FormulaUC() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -104,7 +105,13 @@ export default function ControlNotes() {
       ? Number(formData.tipoAvaliacao)
       : undefined,
   });
+  const {} = useQueryFormulaUC({
+    anoCurricular: formData.classes ? Number(formData.classes) : undefined,
 
+    semestre: formData.semestre ? Number(formData.semestre) : undefined,
+    anoLectivoId: formData.anoLetivo ? Number(formData.anoLetivo) : undefined,
+    cursoId: formData.curso ? Number(formData.curso) : undefined,
+  });
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
   const { data: semestres, isLoading: isLoadingSemestres } =

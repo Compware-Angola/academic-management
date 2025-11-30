@@ -1,8 +1,8 @@
-import { fetchTipoProva, TipoProva } from "@/services/avaliacao/tipo-prova";
+import { fetchTipoProva, TipoProva } from "@/services/avaliacao/fetch-tipo-prova";
 import { useQuery } from "@tanstack/react-query";
 
 
-export function useQueryTipoAvaliacao() {
+export function useQueryTipoProva() {
   return useQuery<TipoProva[], Error>({
     queryKey: ["tipo-prova"],
     queryFn: fetchTipoProva,

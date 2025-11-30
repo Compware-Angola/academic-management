@@ -23,6 +23,7 @@ export type FilterDisciplinaProvaParams = {
   anoLectivoSelecionado?: number;
   tipoProvaSelecionada?: number;
   tipoAvaliacaoSelecionada?: number;
+  filtro?:number
 };
 
 

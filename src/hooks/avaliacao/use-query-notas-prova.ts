@@ -1,4 +1,4 @@
-import { fetchNotasProva, NotaAlunoApi } from "@/services/disciplina/fetch-notas-prova";
+import { fetchNotasProva, NotaAlunoApi } from "@/services/avaliacao/fetch-notas-prova";
 import { useQuery } from "@tanstack/react-query";
 
 
