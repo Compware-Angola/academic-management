@@ -1,4 +1,4 @@
-import { DisciplinaProva, fetchDisciplinasProva, FilterDisciplinaProvaParams } from "@/services/disciplina/fetch-disciplinas-prova";
+import { DisciplinaProva, fetchDisciplinasProva, FilterDisciplinaProvaParams } from "@/services/avaliacao/fetch-disciplinas-prova";
 import { useQuery } from "@tanstack/react-query";
 
 

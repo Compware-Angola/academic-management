@@ -1,4 +1,4 @@
-import { fetchTipoAvaliacao,TipoAvaliacao } from "@/services/avaliacao/tipo-avaliacao";
+import { fetchTipoAvaliacao,TipoAvaliacao } from "@/services/avaliacao/fetch-tipo-avaliacao";
 import { useQuery } from "@tanstack/react-query";
 
 

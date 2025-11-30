@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 import { format } from "date-fns";
-import { useQueryNotasProva } from "@/hooks/discplina/use-query-notas-prova";
+import { useQueryNotasProva } from "@/hooks/avaliacao/use-query-notas-prova";
 
 type Props = {
   open: boolean;

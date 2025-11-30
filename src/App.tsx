@@ -45,6 +45,7 @@ import Deadlines from "./pages/academiccalendar/Deadlines";
 import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
 import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentManagement";
 import ControlNotes from "./pages/rating(avaliation)/control";
+import FormulaUC from "./pages/rating(avaliation)/formula-uc";
 
 const App = () => {
   // Generate all routes from menu structure
@@ -82,6 +83,7 @@ const App = () => {
                 />
                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
+                <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
 
                 <Route
                   path="/bolsa/bolseiros"
