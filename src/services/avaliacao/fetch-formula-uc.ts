@@ -1,7 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 
-export type FOrmulaUC = {
+export type FormulaUC = {
     "codigo": number,
     "disciplina": string,
     "notaMinPratica": null | number,
@@ -23,7 +23,7 @@ export type FilterFormulaUCParams = {
 
 export async function fetchDFormulaUC(
   params: FilterFormulaUCParams
-): Promise<FOrmulaUC[]> {
+): Promise<FormulaUC[]> {
   const { data } = await axiosNestGa.get(
     "assessment/unidades-curriculares",
     {
