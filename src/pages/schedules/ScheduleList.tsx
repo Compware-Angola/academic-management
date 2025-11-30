@@ -1,11 +1,15 @@
 // src/pages/horarios/ScheduleList.tsx
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
   RefreshCw,
   Search,
   File,
+  ChevronFirst,
+  ChevronLast,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -54,9 +58,13 @@ export default function ScheduleList() {
     semestre: "",
     periodo: "",
     curso: "",
-    anoCurricular: "", // será "" ou um código (string)
+    anoCurricular: "",
     search: "",
   });
+
+  // Paginação
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 15;
 
   // Queries dos filtros
   const { data: anosAcademicos, isLoading: loadingAnos } = useQueryAnoAcademico();
@@ -64,11 +72,9 @@ export default function ScheduleList() {
   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
   const { data: cursos, isLoading: loadingCursos } = useCursos();
 
-  // Ano Curricular (depende do curso)
   const { data: anosCurriculares = [], isLoading: loadingAnosCurriculares } =
     useQueryClassFilterByCurso({ curso: filters.curso });
 
-  // Lista de turmas criadas
   const {
     data: horarios = [],
     isLoading: isLoadingHorarios,
@@ -94,10 +100,27 @@ export default function ScheduleList() {
     h.ano.toLowerCase().includes(filters.search.toLowerCase())
   );
 
+  // Paginação lógica
+  const totalItems = filteredHorarios.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredHorarios.slice(startIndex, endIndex);
+
   const handleRefresh = () => {
     refetch();
     toast({ description: "Lista atualizada com sucesso." });
   };
+
+  // Resetar página ao mudar filtros
+  const resetPageOnFilterChange = () => {
+    setPage(1);
+  };
+
+  // Monitora mudanças nos filtros para resetar a página
+  React.useEffect(() => {
+    resetPageOnFilterChange();
+  }, [filters]);
 
   return (
     <div className="flex-1 space-y-6 p-8">
@@ -115,20 +138,20 @@ export default function ScheduleList() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Listar Turmas</BreadcrumbPage>
+                <BreadcrumbPage>Listar</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Turmas Criadas
+            Horário Criadas
           </h1>
           <p className="text-muted-foreground">
-            Visualize todas as turmas criadas por ano letivo, semestre, período, curso e ano curricular.
+            Visualize todos os Horário criadas por ano letivo, semestre, período, curso e ano curricular.
           </p>
         </div>
         <Button onClick={() => navigate("/horarios/criar")}>
           <Plus className="mr-2 h-4 w-4" />
-          Criar Nova Turma
+          Criar Horário
         </Button>
       </div>
 
@@ -154,13 +177,11 @@ export default function ScheduleList() {
                 <SelectValue placeholder={loadingAnos ? "A carregar..." : "Selecionar"} />
               </SelectTrigger>
               <SelectContent>
-                {anosAcademicos
-                 
-                  .map((ano) => (
-                    <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-                      {ano.designacao}
-                    </SelectItem>
-                  ))}
+                {anosAcademicos?.map((ano) => (
+                  <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
+                    {ano.designacao}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -226,16 +247,15 @@ export default function ScheduleList() {
                     {c.designacao}
                   </SelectItem>
                 ))}
- Breakthrough
               </SelectContent>
             </Select>
           </div>
 
-          {/* Ano Curricular - CORRIGIDO: sem value="" */}
+          {/* Ano Curricular */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Ano Curricular</label>
             <Select
-              value={filters.anoCurricular || "todos"} // mostra "todos" quando vazio
+              value={filters.anoCurricular || "todos"}
               onValueChange={(v) =>
                 setFilters({
                   ...filters,
@@ -267,7 +287,6 @@ export default function ScheduleList() {
           </div>
         </div>
 
-        {/* Pesquisa geral */}
         <div className="mt-6">
           <Input
             placeholder="Pesquisar por turma, UC, curso ou ano..."
@@ -278,8 +297,8 @@ export default function ScheduleList() {
         </div>
       </div>
 
-      {/* Botão Atualizar */}
-      <div className="flex gap-3">
+      {/* Ações */}
+      <div className="flex items-center justify-between">
         <Button
           onClick={handleRefresh}
           variant="outline"
@@ -290,9 +309,15 @@ export default function ScheduleList() {
           />
           Atualizar Lista
         </Button>
+
+        {totalItems > 0 && (
+          <p className="text-sm text-muted-foreground">
+            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} turmas
+          </p>
+        )}
       </div>
 
-      {/* Resultados */}
+      {/* Tabela + Paginação */}
       <div className="rounded-lg border bg-card shadow-sm">
         {isLoadingHorarios ? (
           <div className="p-8 space-y-4">
@@ -303,7 +328,7 @@ export default function ScheduleList() {
         ) : error ? (
           <Alert variant="destructive" className="m-6">
             <AlertDescription>
-              Erro ao carregar turmas. Tente novamente.
+              Erro ao carregar Horário. Tente novamente.
             </AlertDescription>
           </Alert>
         ) : filteredHorarios.length === 0 ? (
@@ -311,7 +336,7 @@ export default function ScheduleList() {
             <div className="rounded-full bg-muted p-6 mb-4">
               <File className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Nenhuma turma encontrada</h3>
+            <h3 className="text-xl font-semibold mb-2">Nenhum Horário encontrado</h3>
             <p className="text-muted-foreground max-w-md mb-6">
               {filters.anoLetivo && filters.curso
                 ? "Não existem turmas criadas com os filtros aplicados."
@@ -319,61 +344,112 @@ export default function ScheduleList() {
             </p>
             <Button onClick={() => navigate("/horarios/criar")}>
               <Plus className="mr-2 h-4 w-4" />
-              Criar Primeira Turma
+              Criar Horário
             </Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead>Turma</TableHead>
-                  <TableHead>Curso</TableHead>
-                  <TableHead>Unidade Curricular</TableHead>
-                  <TableHead>Ano Curricular</TableHead>
-                  <TableHead>Capacidade</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Disponibilidade</TableHead>
-                  <TableHead>Criado em</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredHorarios.map((h) => (
-                  <TableRow key={h.codigo} className="hover:bg-muted/50">
-                    <TableCell className="font-semibold text-primary">
-                      {h.designacao}
-                    </TableCell>
-                    <TableCell>{h.curso}</TableCell>
-                    <TableCell>{h.unidadeCurricular}</TableCell>
-                    <TableCell className="font-medium">{h.ano}</TableCell>
-                    <TableCell>{h.capacidade}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          h.estado.toLowerCase().includes("pendente") ||
-                          h.estado.toLowerCase().includes("distribuição")
-                            ? "secondary"
-                            : "default"
-                        }
-                      >
-                        {h.estado}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={h.disponibilidade === "Fechado" ? "destructive" : "default"}
-                      >
-                        {h.disponibilidade}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(h.dataCriacao).toLocaleDateString("pt-AO")}
-                    </TableCell>
+          <>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>Turma</TableHead>
+                    <TableHead>Curso</TableHead>
+                    <TableHead>Unidade Curricular</TableHead>
+                    <TableHead>Ano Curricular</TableHead>
+                    <TableHead>Capacidade</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Disponibilidade</TableHead>
+                    <TableHead>Criado em</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {currentItems.map((h) => (
+                    <TableRow
+                      key={h.codigo}
+                      className="hover:bg-muted/50 cursor-pointer"
+                      onClick={() => navigate(`/horarios/detalhes/${h.codigo}`)} // opcional: navegar ao clicar
+                    >
+                      <TableCell className="font-semibold text-primary">
+                        {h.designacao}
+                      </TableCell>
+                      <TableCell>{h.curso}</TableCell>
+                      <TableCell>{h.unidadeCurricular}</TableCell>
+                      <TableCell className="font-medium">{h.ano}</TableCell>
+                      <TableCell>{h.capacidade}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            h.estado.toLowerCase().includes("pendente") ||
+                            h.estado.toLowerCase().includes("distribuição")
+                              ? "secondary"
+                              : "default"
+                          }
+                        >
+                          {h.estado}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={h.disponibilidade === "Fechado" ? "destructive" : "default"}
+                        >
+                          {h.disponibilidade}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(h.dataCriacao).toLocaleDateString("pt-AO")}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Paginação */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t bg-muted/20 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage(1)}
+                    disabled={page === 1}
+                  >
+                    <ChevronFirst className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+
+                  <span className="text-sm text-muted-foreground px-4">
+                    Página <strong>{page}</strong> de <strong>{totalPages}</strong>
+                  </span>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPage(totalPages)}
+                    disabled={page === totalPages}
+                  >
+                    <ChevronLast className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
