@@ -35,7 +35,7 @@ const Index = () => {
       />
 
       {/* Statistics Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Total de Estudantes"
           value={formatNumber(dashboard?.total_estudantes ?? 0)}
@@ -52,11 +52,11 @@ const Index = () => {
           value={formatNumber(dashboard?.total_uc ?? 0)}
           icon={BookOpen}
         />
-        <StatCard
+        {/* <StatCard
           title="Avaliações Pendentes"
           value={formatNumber(dashboard?.aval_pendentes ?? 0)}
           icon={FileCheck}
-        />
+        /> */}
       </div>
 
       {/* Recent Activity Section */}
