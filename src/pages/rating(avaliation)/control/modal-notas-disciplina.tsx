@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,8 @@ import {
 } from "@/components/ui/table";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 import { format } from "date-fns";
 import { useQueryNotasProva } from "@/hooks/discplina/use-query-notas-prova";
@@ -35,56 +38,95 @@ export function ModalNotasDisciplina({
   tipoAvaliacaoId,
   anoLectivoId,
 }: Props) {
+  const [search, setSearch] = useState("");
+
   const { data = [], isLoading } = useQueryNotasProva({
     turmaOuHorarioId,
     tipoAvaliacaoId,
     anoLectivoId,
   });
 
+  // 🔍 Filtragem por nome ou nº do aluno
+  const alunosFiltrados = useMemo(() => {
+    const termo = search.toLowerCase().trim();
+
+    if (!termo) return data;
+
+    return data.filter(
+      (aluno) =>
+        aluno.alunoNome.toLowerCase().includes(termo) ||
+        String(aluno.numeroAluno).includes(termo)
+    );
+  }, [search, data]);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Notas lançadas — alunos</DialogTitle>
+          <DialogTitle>
+            Notas lançadas — {alunosFiltrados.length} aluno(s)
+          </DialogTitle>
         </DialogHeader>
 
+        {/* 🔎 Campo de pesquisa */}
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar por número ou nome do aluno..."
+            className="pl-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
         {isLoading ? (
-          <div className="space-y-3">
+          <div className="space-y-3 mt-4">
             {[...Array(5)].map((_, i) => (
               <Skeleton key={i} className="h-10 w-full" />
             ))}
           </div>
+        ) : alunosFiltrados.length === 0 ? (
+          <p className="text-center py-10 text-muted-foreground">
+            Nenhum aluno encontrado com esse filtro.
+          </p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nº</TableHead>
-                <TableHead>Aluno</TableHead>
-                <TableHead className="text-center">Nota</TableHead>
-                <TableHead className="text-center">Data Lançamento</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {data.map((aluno) => (
-                <TableRow key={aluno.alunoId}>
-                  <TableCell>{aluno.numeroAluno}</TableCell>
-
-                  <TableCell className="font-medium">
-                    {aluno.alunoNome}
-                  </TableCell>
-
-                  <TableCell className="text-center font-semibold">
-                    {aluno.nota}
-                  </TableCell>
-
-                  <TableCell className="text-center">
-                    {format(new Date(aluno.dataLancamento), "dd/MM/yyyy")}
-                  </TableCell>
+          <div className="max-h-120 overflow-y-auto rounded-md border mt-4">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
+                <TableRow>
+                  <TableHead className="w-12">Nº</TableHead>
+                  <TableHead>Aluno</TableHead>
+                  <TableHead className="text-center w-20">Nota</TableHead>
+                  <TableHead className="text-center w-36">
+                    Data Lançamento
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+
+              <TableBody>
+                {alunosFiltrados.map((aluno, index) => (
+                  <TableRow
+                    key={aluno.alunoId}
+                    className={index % 2 === 0 ? "bg-muted/40" : ""}
+                  >
+                    <TableCell>{aluno.numeroAluno}</TableCell>
+
+                    <TableCell className="font-medium">
+                      {aluno.alunoNome}
+                    </TableCell>
+
+                    <TableCell className="text-center font-semibold">
+                      {aluno.nota}
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      {format(new Date(aluno.dataLancamento), "dd/MM/yyyy")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </DialogContent>
     </Dialog>

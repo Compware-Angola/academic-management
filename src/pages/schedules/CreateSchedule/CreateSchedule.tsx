@@ -27,7 +27,7 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-disponiveis";
 import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { FormSelect } from "./FormSelect";
+import { FormSelect } from "../../../components/common/FormSelect";
 import { useSaveHorario } from "@/hooks/horario/use-save-horario";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
@@ -285,6 +285,22 @@ export default function CreateSchedule() {
               label: a.designacao,
             })}
           />
+          <FormSelect
+            disabled={
+              isLoadingPeriodos ||
+              isLoadingAcademicYear ||
+              formData.anoLetivo === ""
+            }
+            loading={isLoadingPeriodos}
+            label="Período"
+            value={formData.periodo}
+            onChange={(v) => setFormData({ ...formData, periodo: v })}
+            options={periodos}
+            map={(p) => ({
+              key: p.codigo,
+              label: p.designacao,
+            })}
+          />
 
           {/* SEMESTRE */}
           <FormSelect
@@ -373,18 +389,6 @@ export default function CreateSchedule() {
               label: m.designacao,
             })}
             loading={isLoadingModalidade}
-          />
-          <FormSelect
-            disabled={isLoadingPeriodos}
-            loading={isLoadingPeriodos}
-            label="Período"
-            value={formData.periodo}
-            onChange={(v) => setFormData({ ...formData, periodo: v })}
-            options={periodos}
-            map={(p) => ({
-              key: p.codigo,
-              label: p.designacao,
-            })}
           />
         </div>
 

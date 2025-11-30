@@ -17,7 +17,7 @@ type Params = {
 export async function fetchNotasProva(params: Params): Promise<NotaAlunoApi[]> {
 
   const { data } = await axiosNestGa.get(
-    "/api/assessment/notas",
+    "/assessment/notas",
     { params }
   );
 

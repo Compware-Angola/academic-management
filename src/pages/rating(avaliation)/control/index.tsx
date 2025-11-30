@@ -22,25 +22,26 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { RefreshCw, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  RefreshCw,
+  Shield,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+} from "lucide-react";
 
 import { Link } from "react-router-dom";
 
 import { useQueryDisciplinasProva } from "@/hooks/discplina/use-query-disciplinas-prova";
 import { ModalNotasDisciplina } from "./modal-notas-disciplina";
-
-// ========================
-// MOCK DOS SELECTS
-// ========================
-const MOCK_OPTIONS = {
-  grades: [{ label: "Grade 98", value: "98" }],
-  cursos: [{ label: "Arquitetura", value: "78" }],
-  anosCurriculares: [{ label: "2º Ano", value: "2" }],
-  semestres: [{ label: "1º Semestre", value: "1" }],
-  anosLectivos: [{ label: "2022", value: "22" }],
-  tiposProva: [{ label: "Teste", value: "2" }],
-  tiposAvaliacao: [{ label: "Recurso", value: "2" }],
-};
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useCursos } from "@/hooks/use-cursos";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 
 type SelectedNotas = {
   turmaOuHorarioId: number;
@@ -49,20 +50,6 @@ type SelectedNotas = {
 };
 
 export default function ControlNotes() {
-  // =======================================
-  // FILTROS
-  // =======================================
-  const [grade, setGrade] = useState<string>();
-  const [curso, setCurso] = useState<string>();
-  const [anoCurricular, setAnoCurricular] = useState<string>();
-  const [semestre, setSemestre] = useState<string>();
-  const [anoLectivo, setAnoLectivo] = useState<string>();
-  const [tipoProva, setTipoProva] = useState<string>();
-  const [tipoAvaliacao, setTipoAvaliacao] = useState<string>();
-
-  // =======================================
-  // PAGINAÇÃO
-  // =======================================
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -71,7 +58,16 @@ export default function ControlNotes() {
   // =======================================
   const [openNotasModal, setOpenNotasModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<SelectedNotas | null>(null);
-
+  const [formData, setFormData] = useState({
+    anoLetivo: "",
+    semestre: "",
+    periodo: "",
+    curso: "",
+    unidadeCurricular: "",
+    classes: "",
+    tipoAvaliacao: "",
+    tipoProva: "",
+  });
   // =======================================
   // API — DISCIPLINAS PROVA
   // =======================================
@@ -81,14 +77,46 @@ export default function ControlNotes() {
     refetch,
   } = useQueryDisciplinasProva({
     verHorario: true,
-    gradeSelecionada: grade ? Number(grade) : undefined,
-    cursoSelecionado: curso ? Number(curso) : undefined,
-    anoCurricularSelecionado: anoCurricular ? Number(anoCurricular) : undefined,
-    semestreSelecionado: semestre ? Number(semestre) : undefined,
-    anoLectivoSelecionado: anoLectivo ? Number(anoLectivo) : undefined,
-    tipoProvaSelecionada: tipoProva ? Number(tipoProva) : undefined,
-    tipoAvaliacaoSelecionada: tipoAvaliacao ? Number(tipoAvaliacao) : undefined,
+    gradeSelecionada: formData.unidadeCurricular
+      ? Number(formData.unidadeCurricular)
+      : undefined,
+    cursoSelecionado: formData.curso ? Number(formData.curso) : undefined,
+    anoCurricularSelecionado: formData.classes
+      ? Number(formData.classes)
+      : undefined,
+    semestreSelecionado: formData.semestre
+      ? Number(formData.semestre)
+      : undefined,
+    anoLectivoSelecionado: formData.anoLetivo
+      ? Number(formData.anoLetivo)
+      : undefined,
+    tipoProvaSelecionada: formData.tipoProva
+      ? Number(formData.tipoProva)
+      : undefined,
+    tipoAvaliacaoSelecionada: formData.tipoAvaliacao
+      ? Number(formData.tipoAvaliacao)
+      : undefined,
   });
+
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: formData.classes,
+      curso: formData.curso,
+      semestre: formData.semestre,
+    });
+
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
+    useQueryTipoAvaliacao();
 
   // =======================================
   // PAGINAÇÃO LOCAL
@@ -146,96 +174,103 @@ export default function ControlNotes() {
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Select value={grade} onValueChange={setGrade}>
-            <SelectTrigger>
-              <SelectValue placeholder="Grade" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_OPTIONS.grades.map((g) => (
-                <SelectItem key={g.value} value={g.value}>
-                  {g.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <FormSelect
+            disabled={isLoadingAcademicYear}
+            loading={isLoadingAcademicYear}
+            label="Ano Letivo"
+            value={formData.anoLetivo}
+            onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+            options={academicYear}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+            })}
+          />
 
-          <Select value={curso} onValueChange={setCurso}>
-            <SelectTrigger>
-              <SelectValue placeholder="Curso" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_OPTIONS.cursos.map((c) => (
-                <SelectItem key={c.value} value={c.value}>
-                  {c.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* SEMESTRE */}
+          <FormSelect
+            disabled={isLoadingSemestres}
+            loading={isLoadingSemestres}
+            label="Semestre"
+            value={formData.semestre}
+            onChange={(v) => setFormData({ ...formData, semestre: v })}
+            options={semestres}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+            })}
+          />
 
-          <Select value={anoCurricular} onValueChange={setAnoCurricular}>
-            <SelectTrigger>
-              <SelectValue placeholder="Ano curricular" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_OPTIONS.anosCurriculares.map((a) => (
-                <SelectItem key={a.value} value={a.value}>
-                  {a.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* CURSO */}
+          <FormSelect
+            disabled={isLoadingCurso}
+            loading={isLoadingCurso}
+            label="Curso"
+            value={formData.curso}
+            onChange={(v) => setFormData({ ...formData, curso: v })}
+            options={cursos}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+            })}
+          />
+          <FormSelect
+            label="Ano Curricular"
+            value={formData.classes}
+            disabled={isLoadingClasses || !formData.curso}
+            onChange={(v) => setFormData({ ...formData, classes: v })}
+            options={classes}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+            })}
+            loading={isLoadingClasses}
+          />
 
-          <Select value={semestre} onValueChange={setSemestre}>
-            <SelectTrigger>
-              <SelectValue placeholder="Semestre" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_OPTIONS.semestres.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* PERÍODO */}
 
-          <Select value={anoLectivo} onValueChange={setAnoLectivo}>
-            <SelectTrigger>
-              <SelectValue placeholder="Ano lectivo" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_OPTIONS.anosLectivos.map((a) => (
-                <SelectItem key={a.value} value={a.value}>
-                  {a.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={tipoProva} onValueChange={setTipoProva}>
-            <SelectTrigger>
-              <SelectValue placeholder="Tipo da prova" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_OPTIONS.tiposProva.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={tipoAvaliacao} onValueChange={setTipoAvaliacao}>
-            <SelectTrigger>
-              <SelectValue placeholder="Tipo de avaliação" />
-            </SelectTrigger>
-            <SelectContent>
-              {MOCK_OPTIONS.tiposAvaliacao.map((t) => (
-                <SelectItem key={t.value} value={t.value}>
-                  {t.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* UC */}
+          <FormSelect
+            label="Unidade Curricular"
+            value={formData.unidadeCurricular}
+            disabled={
+              isLoadingUC ||
+              !formData.semestre ||
+              !formData.curso ||
+              !formData.classes
+            }
+            onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
+            options={unidadesCurriculares}
+            map={(u) => ({
+              key: u.pk,
+              label: u.descricao,
+            })}
+            loading={isLoadingUC}
+          />
+          <FormSelect
+            label="Tipo de Prova"
+            value={formData.tipoProva}
+            disabled={isLoadingTipoProva}
+            onChange={(v) => setFormData({ ...formData, tipoProva: v })}
+            options={tipoProva}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+            })}
+            loading={isLoadingTipoProva}
+          />
+          <FormSelect
+            label="Tipo de Avaliação"
+            value={formData.tipoAvaliacao}
+            disabled={isLoadingTipoAvaliacao}
+            onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
+            options={tipoAvaliacao}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+            })}
+            loading={isLoadingTipoAvaliacao}
+          />
         </div>
       </div>
 
@@ -309,14 +344,15 @@ export default function ControlNotes() {
                         onClick={() => {
                           setSelectedRow({
                             turmaOuHorarioId: item.codigoTurmaHorario,
-                            tipoAvaliacaoId: Number(tipoAvaliacao),
-                            anoLectivoId: Number(anoLectivo),
+                            tipoAvaliacaoId: Number(formData.tipoAvaliacao),
+                            anoLectivoId: Number(formData.anoLetivo),
                           });
 
                           setOpenNotasModal(true);
                         }}
                       >
-                        Lançar notas
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Notas
                       </Button>
                     </TableCell>
                   </TableRow>
