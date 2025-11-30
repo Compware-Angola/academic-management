@@ -26,6 +26,7 @@ import {
   Edit,
   Trash2,
   Users,
+  Shield,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -42,6 +43,9 @@ import { useCursos } from "@/hooks/use-cursos";
 import { useClasses } from "@/hooks/use-classes";
 import { useQueryDepartamento } from "@/hooks/depatamento/use-query-depardamento";
 import { FormSelect } from "@/components/common/FormSelect";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-quer-departamento-uc";
 
 interface UnidadeCurricular {
   id: number;
@@ -58,110 +62,30 @@ interface UnidadeCurricular {
 }
 
 export default function UcDepartmentManagement() {
-  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [anoLetivoId, setAnoLetivoId] = useState<string>("");
-  const [cursoId, setCursoId] = useState<string>("");
-  const [classeId, setClasseId] = useState<string>("");
-  const { data: anosLetivos = [], isLoading: loadingAnos } =
-    useQueryAnoAcademico();
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
-  const { data: classes = [], isLoading: loadingClasses } = useClasses();
+
   const [formData, setFormData] = useState({
     departamento: "",
     curso: "",
+    semestre: "",
+    classes: "",
   });
   const { data: departamento = [], isLoading: isLoadingDepartamento } =
     useQueryDepartamento();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
 
-  // Mock data - unidades curriculares organizadas por departamento
-  const mockData: UnidadeCurricular[] = [
-    {
-      id: 1,
-      sigla: "PROG1",
-      nome: "Programação I",
-      departamento: "Ciências da Computação",
-      coordenador: "Prof. Dr. João Silva",
-      creditos: 6,
-      semestre: "1º Semestre",
-      cargaHoraria: 90,
-      docentesAlocados: 3,
-      capacidade: 60,
-      status: "Ativa",
-    },
-    {
-      id: 2,
-      sigla: "CALC1",
-      nome: "Cálculo Diferencial e Integral I",
-      departamento: "Matemática",
-      coordenador: "Prof. Dr. Maria Santos",
-      creditos: 8,
-      semestre: "1º Semestre",
-      cargaHoraria: 120,
-      docentesAlocados: 4,
-      capacidade: 80,
-      status: "Ativa",
-    },
-    {
-      id: 3,
-      sigla: "GEST1",
-      nome: "Fundamentos de Gestão",
-      departamento: "Gestão",
-      coordenador: "Prof. Dr. Carlos Mendes",
-      creditos: 4,
-      semestre: "2º Semestre",
-      cargaHoraria: 60,
-      docentesAlocados: 2,
-      capacidade: 50,
-      status: "Em Revisão",
-    },
-    {
-      id: 4,
-      sigla: "QUIM1",
-      nome: "Química Geral",
-      departamento: "Química",
-      coordenador: "Prof. Dra. Ana Costa",
-      creditos: 7,
-      semestre: "1º Semestre",
-      cargaHoraria: 105,
-      docentesAlocados: 3,
-      capacidade: 45,
-      status: "Ativa",
-    },
-    {
-      id: 5,
-      sigla: "DIR1",
-      nome: "Introdução ao Direito",
-      departamento: "Direito",
-      coordenador: "Prof. Dr. Pedro Alves",
-      creditos: 5,
-      semestre: "1º Semestre",
-      cargaHoraria: 75,
-      docentesAlocados: 2,
-      capacidade: 70,
-      status: "Ativa",
-    },
-    {
-      id: 6,
-      sigla: "BD1",
-      nome: "Bases de Dados",
-      departamento: "Ciências da Computação",
-      coordenador: "Prof. Dra. Luísa Fernandes",
-      creditos: 6,
-      semestre: "2º Semestre",
-      cargaHoraria: 90,
-      docentesAlocados: 0,
-      capacidade: 55,
-      status: "Inativa",
-    },
-  ];
-
-  const [filters, setFilters] = useState({
-    departamento: "all",
-    semestre: "all",
-    status: "all",
-  });
+  const { data: departamentoUC = [], isLoading: isLoadingDepartamentoUC } =
+    useQueryDepartamentoUC({
+      classe: formData.classes,
+      departamento: formData.departamento,
+      semestre: formData.semestre,
+    });
+  const mockData: UnidadeCurricular[] = [];
 
   const handleCreate = () => {
     toast.info("A abrir formulário de criação...");
@@ -192,10 +116,12 @@ export default function UcDepartmentManagement() {
     }
   };
 
-  const totalPages = Math.ceil(mockData.length / itemsPerPage);
+  const totalPages = Math.ceil(departamentoUC.length / itemsPerPage);
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentData = mockData.slice(startIndex, endIndex);
+
+  const currentData = departamentoUC.slice(startIndex, endIndex);
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -253,134 +179,102 @@ export default function UcDepartmentManagement() {
             label: a.designacao,
           })}
         />
-
-        <div>
-          <label className="text-sm font-medium mb-2 block">Semestre</label>
-          {loadingClasses ? (
-            <Skeleton className="h-10 w-full rounded-md" />
-          ) : (
-            <Select
-              value={classeId}
-              onValueChange={setClasseId}
-              disabled={!anoLetivoId || !cursoId}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione a classe..." />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map((classe) => (
-                  <SelectItem key={classe.codigo} value={String(classe.codigo)}>
-                    {classe.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-
-        <div>
-          <label className="text-sm font-medium mb-2 block">Status</label>
-          <Select
-            value={filters.status}
-            onValueChange={(value) => setFilters({ ...filters, status: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Todos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="ativa">Ativa</SelectItem>
-              <SelectItem value="inativa">Inativa</SelectItem>
-              <SelectItem value="revisao">Em Revisão</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <FormSelect
+          label="Ano Curricular"
+          value={formData.classes}
+          disabled={isLoadingClasses || !formData.curso}
+          onChange={(v) => setFormData({ ...formData, classes: v })}
+          options={classes}
+          map={(c) => ({
+            key: c.codigo,
+            label: c.designacao,
+          })}
+          loading={isLoadingClasses}
+        />
+        <FormSelect
+          disabled={isLoadingSemestres}
+          loading={isLoadingSemestres}
+          label="Semestre"
+          value={formData.semestre}
+          onChange={(v) => setFormData({ ...formData, semestre: v })}
+          options={semestres}
+          map={(s) => ({
+            key: s.codigo,
+            label: s.designacao,
+          })}
+        />
       </FilterBar>
 
       <div className="rounded-md border">
-        {isLoading ? (
-          <div className="p-8 space-y-4">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
+        {isLoadingDepartamentoUC ? (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
           </div>
         ) : currentData.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            <p className="text-lg font-semibold mb-2">
-              Nenhum registo encontrado
-            </p>
-            <p className="text-sm">
-              Não existem unidades curriculares registadas para os filtros
-              selecionados.
+          <div className="text-center py-12 bg-card border rounded-lg">
+            <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-lg font-medium">
+              {" "}
+              <p className="text-lg font-medium">
+                Nenhuma disciplina encontrada
+              </p>
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Sigla</TableHead>
-                <TableHead>Nome da UC</TableHead>
-                <TableHead>Departamento</TableHead>
-                <TableHead>Coordenador</TableHead>
-                <TableHead>Créditos</TableHead>
+                <TableHead>Código</TableHead>
+                <TableHead>Disciplina</TableHead>
+                <TableHead>Ano Curricular</TableHead>
                 <TableHead>Semestre</TableHead>
-                <TableHead>Carga Horária</TableHead>
-                <TableHead>Docentes</TableHead>
-                <TableHead>Capacidade</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+
+                {/* <TableHead className="text-right">Ações</TableHead> */}
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {currentData.map((uc) => (
-                <TableRow key={uc.id}>
-                  <TableCell className="font-medium">{uc.sigla}</TableCell>
-                  <TableCell>{uc.nome}</TableCell>
-                  <TableCell>{uc.departamento}</TableCell>
-                  <TableCell>{uc.coordenador}</TableCell>
-                  <TableCell>{uc.creditos} ECTS</TableCell>
+                <TableRow key={uc.codigo_grade}>
+                  <TableCell className="font-medium">
+                    {uc.codigo_grade}
+                  </TableCell>
+
+                  <TableCell>{uc.disciplina}</TableCell>
+
+                  <TableCell>{uc.classe}</TableCell>
+
                   <TableCell>{uc.semestre}</TableCell>
-                  <TableCell>{uc.cargaHoraria}h</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        uc.docentesAlocados > 0 ? "default" : "destructive"
-                      }
-                    >
-                      {uc.docentesAlocados}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{uc.capacidade}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusColor(uc.status)}>
-                      {uc.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
+
+                  {/* <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleViewDocentes(uc.id)}
+                        onClick={() => handleViewDocentes(uc.codigo_grade)}
                       >
                         <Users className="h-4 w-4" />
                       </Button>
+
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleEdit(uc.id)}
+                        onClick={() => handleEdit(uc.codigo_grade)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(uc.id)}
+                        onClick={() => handleDelete(uc.codigo_grade)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               ))}
             </TableBody>
@@ -388,7 +282,7 @@ export default function UcDepartmentManagement() {
         )}
       </div>
 
-      {!isLoading && currentData.length > 0 && (
+      {!isLoadingDepartamentoUC && currentData.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Mostrar</span>
