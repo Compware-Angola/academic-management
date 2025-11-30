@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryVacancies } from "@/hooks/queries/use-query-vacancies";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { useAuth } from "@/hooks/use-auth";
 
 type Step = "periodos" | "vagas" | "mensalidades";
 
@@ -41,7 +42,7 @@ export function ParametersEditModal({
   const [currentStep, setCurrentStep] = useState<Step>("periodos");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
+ const {user} = useAuth();
   // Dados guardados em memória até o final
   const [periodosForm, setPeriodosForm] = useState({
     designacao: "",
@@ -99,7 +100,7 @@ export function ParametersEditModal({
         data_fim_primeiro_semestre: periodosForm.dataFimPrimeiroSemestre,
         data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
         data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
-        codigo_utilizador: 16,
+        codigo_utilizador: user.user_id??16,
       };
 
       const periodoRes = await axiosApexGa.post("/ga/teaching-parameters/academic-year", periodoPayload);
