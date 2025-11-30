@@ -40,6 +40,8 @@ import { toast } from "sonner";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useCursos } from "@/hooks/use-cursos";
 import { useClasses } from "@/hooks/use-classes";
+import { useQueryDepartamento } from "@/hooks/depatamento/use-query-depardamento";
+import { FormSelect } from "@/components/common/FormSelect";
 
 interface UnidadeCurricular {
   id: number;
@@ -59,12 +61,20 @@ export default function UcDepartmentManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [anoLetivoId, setAnoLetivoId] = useState<string>("");
-    const [cursoId, setCursoId] = useState<string>("");
-    const [classeId, setClasseId] = useState<string>("");
-  const { data: anosLetivos = [], isLoading: loadingAnos } = useQueryAnoAcademico();
+  const [anoLetivoId, setAnoLetivoId] = useState<string>("");
+  const [cursoId, setCursoId] = useState<string>("");
+  const [classeId, setClasseId] = useState<string>("");
+  const { data: anosLetivos = [], isLoading: loadingAnos } =
+    useQueryAnoAcademico();
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
   const { data: classes = [], isLoading: loadingClasses } = useClasses();
+  const [formData, setFormData] = useState({
+    departamento: "",
+    curso: "",
+  });
+  const { data: departamento = [], isLoading: isLoadingDepartamento } =
+    useQueryDepartamento();
+
   // Mock data - unidades curriculares organizadas por departamento
   const mockData: UnidadeCurricular[] = [
     {
@@ -153,7 +163,6 @@ export default function UcDepartmentManagement() {
     status: "all",
   });
 
-
   const handleCreate = () => {
     toast.info("A abrir formulário de criação...");
   };
@@ -215,56 +224,58 @@ export default function UcDepartmentManagement() {
               <Plus className="h-4 w-4 mr-2" />
               Nova UC
             </Button>
-          
           </>
         }
       />
 
       <FilterBar>
-        <div>
-         
-                <label className="text-sm font-medium text-foreground">Ano Letivo</label>
-                    {loadingAnos ? (
-                      <Skeleton className="h-10 w-full rounded-md" />
-                    ) : (
-                      <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione o ano letivo..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {anosLetivos.map((ano) => (
-                            <SelectItem key={ano.codigo} value={String(ano.codigo)}>
-                              {ano.designacao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-        </div>
-         
+        <FormSelect
+          disabled={isLoadingDepartamento}
+          loading={isLoadingDepartamento}
+          label="Departamento"
+          value={formData.departamento}
+          onChange={(v) => setFormData({ ...formData, departamento: v })}
+          options={departamento}
+          map={(a) => ({
+            key: a.codigo,
+            label: a.designacao,
+          })}
+        />
+        <FormSelect
+          disabled={loadingCursos}
+          loading={loadingCursos}
+          label="Curso"
+          value={formData.curso}
+          onChange={(v) => setFormData({ ...formData, curso: v })}
+          options={cursos}
+          map={(a) => ({
+            key: a.codigo,
+            label: a.designacao,
+          })}
+        />
 
         <div>
           <label className="text-sm font-medium mb-2 block">Semestre</label>
-           {loadingClasses ? (
-              <Skeleton className="h-10 w-full rounded-md" />
-            ) : (
-              <Select
-                value={classeId}
-                onValueChange={setClasseId}
-                disabled={!anoLetivoId || !cursoId}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione a classe..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.map((classe) => (
-                    <SelectItem key={classe.codigo} value={String(classe.codigo)}>
-                      {classe.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+          {loadingClasses ? (
+            <Skeleton className="h-10 w-full rounded-md" />
+          ) : (
+            <Select
+              value={classeId}
+              onValueChange={setClasseId}
+              disabled={!anoLetivoId || !cursoId}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione a classe..." />
+              </SelectTrigger>
+              <SelectContent>
+                {classes.map((classe) => (
+                  <SelectItem key={classe.codigo} value={String(classe.codigo)}>
+                    {classe.designacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <div>
@@ -299,7 +310,8 @@ export default function UcDepartmentManagement() {
               Nenhum registo encontrado
             </p>
             <p className="text-sm">
-              Não existem unidades curriculares registadas para os filtros selecionados.
+              Não existem unidades curriculares registadas para os filtros
+              selecionados.
             </p>
           </div>
         ) : (
@@ -330,7 +342,11 @@ export default function UcDepartmentManagement() {
                   <TableCell>{uc.semestre}</TableCell>
                   <TableCell>{uc.cargaHoraria}h</TableCell>
                   <TableCell>
-                    <Badge variant={uc.docentesAlocados > 0 ? "default" : "destructive"}>
+                    <Badge
+                      variant={
+                        uc.docentesAlocados > 0 ? "default" : "destructive"
+                      }
+                    >
                       {uc.docentesAlocados}
                     </Badge>
                   </TableCell>
@@ -375,9 +391,7 @@ export default function UcDepartmentManagement() {
       {!isLoading && currentData.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              Mostrar
-            </span>
+            <span className="text-sm text-muted-foreground">Mostrar</span>
             <Select
               value={itemsPerPage.toString()}
               onValueChange={(value) => {

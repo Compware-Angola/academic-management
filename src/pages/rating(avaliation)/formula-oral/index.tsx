@@ -24,8 +24,9 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 
 import { useQueryDefinirOral } from "@/hooks/avaliacao/use-query-definir-oral";
 
-import { ModalDefinirOral } from "./modal-definir-oral";
 import { DefinirOral } from "@/services/avaliacao/fetch-oral";
+import { Switch } from "@/components/ui/switch";
+import { useMutationUpdateDefinirOral } from "@/hooks/avaliacao/use-mutation-update-definir-oral";
 
 export default function FormulaOral() {
   const [filters, setFilters] = useState({
@@ -47,6 +48,7 @@ export default function FormulaOral() {
   const { data: classes = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
+  const mutation = useMutationUpdateDefinirOral();
 
   const {
     data = [],
@@ -150,7 +152,6 @@ export default function FormulaOral() {
                 <TableHead>Código</TableHead>
                 <TableHead>Disciplina</TableHead>
                 <TableHead className="text-center">Oral</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -161,20 +162,18 @@ export default function FormulaOral() {
 
                   <TableCell>{item.disciplina}</TableCell>
 
-                  <TableCell className="text-center">
-                    {item.habilitar ? "✅" : "❌"}
-                  </TableCell>
-
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setSelected(item);
-                        setOpenModal(true);
+                  {/* STATUS + SWITCH */}
+                  <TableCell className="flex justify-center">
+                    <Switch
+                      checked={item.habilitar}
+                      disabled={mutation.isPending}
+                      onCheckedChange={(checked) => {
+                        mutation.mutate({
+                          codigoGrade: item.codigoGrade,
+                          habilitar: checked,
+                        });
                       }}
-                    >
-                      Alterar
-                    </Button>
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -207,12 +206,6 @@ export default function FormulaOral() {
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
-
-      <ModalDefinirOral
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        data={selected}
-      />
     </div>
   );
 }

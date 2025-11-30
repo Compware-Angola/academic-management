@@ -22,10 +22,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
-import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { Link } from "react-router-dom";
 
 export default function FormulaUC() {
