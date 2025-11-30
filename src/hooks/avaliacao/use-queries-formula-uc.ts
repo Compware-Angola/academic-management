@@ -1,4 +1,4 @@
-import { fetchDFormulaUC,FOrmulaUC } from "@/services/avaliacao/fetch-formula-uc";
+import { fetchDFormulaUC,FormulaUC } from "@/services/avaliacao/fetch-formula-uc";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -11,7 +11,7 @@ type Params = {
 };
 
 export function useQueryFormulaUC(params: Params) {
-  return useQuery<FOrmulaUC[], Error>({
+  return useQuery<FormulaUC[], Error>({
     queryKey: ["formula-uc", params],
 
     enabled:
