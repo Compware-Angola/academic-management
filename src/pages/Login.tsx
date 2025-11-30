@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useMutationLogin } from "@/hooks/mutations/use-mutation-login";
-import {  useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
   username: z
@@ -38,13 +38,13 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const loginMutation = useMutationLogin();
-const {isAuthenticated}= useAuth()
+  const { isAuthenticated } = useAuth()
 
-useEffect(()=>{
-  if(isAuthenticated) {
-    navigate("/dashboard");
-  }
-},[isAuthenticated])
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated])
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -56,17 +56,19 @@ useEffect(()=>{
   const onSubmit = (values: LoginFormData) => {
     const { username, password } = values;
     loginMutation.mutate(
-      { username, password },
+      { username, password, platform: 'GA' },
       {
         onSuccess: (data) => {
           toast({
-            title: "Login realizado com sucesso",
-            description: `Bem-vindo, ${data.username ?? "Utilizador"}`,
+            title: data.mensagem || "Login realizado com sucesso",
+            description: `Bem-vindo, ${data.user.username ?? "Utilizador"}`,
           });
           navigate("/dashboard");
         },
         onError: (err: Error) => {
-          const message = "Erro ao autenticar. Verifique credenciais.";
+          console.log(err);
+          
+          const message = err.message || "Erro ao autenticar. Verifique credenciais.";
           toast({
             title: "Erro ao fazer login",
             description: message,

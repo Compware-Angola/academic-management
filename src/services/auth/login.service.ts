@@ -1,21 +1,42 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestAuth } from "@/lib/axios-nest-auth";
 
-export type LoginPayload = {
+export class LoginPayload {
   username: string;
   password: string;
-};
+  platform?: string = 'GA';
+}
 
-export type LoginResponse = {
-  codresposta: number;
-  msgresposta: string;
-  token: string;
-  user_id: string;
-  hash: string;
+
+export interface AuthResponse {
+  access_token: string;
+  expires_in: number;
+  user: User;
+  mensagem: string;
+}
+
+export interface User {
+  codigo_importado: number;
+  nome: string;
   username: string;
-};
+  codigo: number | null;
+  email: string | null;
+  obs: string | null;
+  user_pertence: string | null;
+  created_by: number;
+  last_updated_by: number;
+  created_at: string;             // ou Date se você for converter
+  updated_at: string;             // idem
+  last_password_change: string | null;
+  active_state: number;
+  fotoname: string | null;
+  primeiro_log: number;
+  numeromaximotentativas: number;
+  pk_utilizador: number;
+}
+
 export async function loginService(
   payload: LoginPayload,
-): Promise<LoginResponse> {
-  const { data } = await axiosApexGa.post("/ga/autentication/login", payload);
+): Promise<AuthResponse> {
+  const { data } = await axiosNestAuth.post("/auth/login", payload);
   return data;
 }
