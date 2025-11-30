@@ -36,7 +36,7 @@ export function Header() {
               />
             </div>
           </div>
-
+{/*
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="ghost" size="icon" className="relative">
@@ -76,6 +76,7 @@ export function Header() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          */}
           <ThemeSwitcher />
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -95,7 +96,7 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-56 bg-popover">
               <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {/*
+            
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
@@ -106,7 +107,7 @@ export function Header() {
                 <User className="mr-2 h-4 w-4" />
                 <span>Perfil</span>
               </DropdownMenuItem>
-              */}
+             
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
