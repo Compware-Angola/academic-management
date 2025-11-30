@@ -92,10 +92,16 @@ const Index = () => {
               },
               { name: "Horários", icon: Calendar, path: "/horarios/listar" },
               {
+                name: "Avaliações",
+                icon: FileCheck,
+                path: "/avaliacoes/controle",
+              },
+              /* {
                 name: "Estudantes",
                 icon: Users,
                 path: "/inscricoes/lista-geral",
-              },
+              },*/
+             
             ].map((module) => {
               const Icon = module.icon;
 
