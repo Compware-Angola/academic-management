@@ -143,7 +143,7 @@ export default function ScheduleList() {
             </BreadcrumbList>
           </Breadcrumb>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Horário Criadas
+            Horário Existentes
           </h1>
           <p className="text-muted-foreground">
             Visualize todos os Horário criadas por ano letivo, semestre, período, curso e ano curricular.
@@ -340,7 +340,7 @@ export default function ScheduleList() {
             <p className="text-muted-foreground max-w-md mb-6">
               {filters.anoLetivo && filters.curso
                 ? "Não existem turmas criadas com os filtros aplicados."
-                : "Preencha os filtros para visualizar as turmas."}
+                : "Preencha os filtros para visualizar os Horários."}
             </p>
             <Button onClick={() => navigate("/horarios/criar")}>
               <Plus className="mr-2 h-4 w-4" />
