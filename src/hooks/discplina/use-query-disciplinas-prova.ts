@@ -26,6 +26,7 @@ export function useQueryDisciplinasProva(
       params.anoLectivoSelecionado,
       params.tipoProvaSelecionada,
       params.tipoAvaliacaoSelecionada,
+      params.filtro
     ],
 
     queryFn: async () => {

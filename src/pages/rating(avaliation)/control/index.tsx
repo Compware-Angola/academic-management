@@ -39,15 +39,19 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
+import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 
 type SelectedNotas = {
   turmaOuHorarioId: number;
   tipoAvaliacaoId: number;
   anoLectivoId: number;
 };
+const VER_HORARIO = [
+  { codigo: "SIM", designacao: "SIM" },
+  { codigo: "NÃO", designacao: "NÃO" },
+];
 
 export default function ControlNotes() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,6 +71,8 @@ export default function ControlNotes() {
     classes: "",
     tipoAvaliacao: "",
     tipoProva: "",
+    verHoario: "",
+    filtro: "",
   });
   // =======================================
   // API — DISCIPLINAS PROVA
@@ -76,7 +82,8 @@ export default function ControlNotes() {
     isLoading: loadingDisciplinas,
     refetch,
   } = useQueryDisciplinasProva({
-    verHorario: true,
+    verHorario: formData.verHoario === "SIM",
+    filtro: 0,
     gradeSelecionada: formData.unidadeCurricular
       ? Number(formData.unidadeCurricular)
       : undefined,
@@ -116,7 +123,7 @@ export default function ControlNotes() {
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
-    useQueryTipoAvaliacao();
+    useQueryTipoProva();
 
   // =======================================
   // PAGINAÇÃO LOCAL
@@ -270,6 +277,16 @@ export default function ControlNotes() {
               label: u.designacao,
             })}
             loading={isLoadingTipoAvaliacao}
+          />
+          <FormSelect
+            label="Ver Horário"
+            value={formData.verHoario}
+            onChange={(v) => setFormData({ ...formData, verHoario: v })}
+            options={VER_HORARIO}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+            })}
           />
         </div>
       </div>
