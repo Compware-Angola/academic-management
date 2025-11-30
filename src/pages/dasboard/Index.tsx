@@ -35,7 +35,7 @@ const Index = () => {
       />
 
       {/* Statistics Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total de Estudantes"
           value={formatNumber(dashboard?.total_estudantes ?? 0)}
@@ -52,11 +52,11 @@ const Index = () => {
           value={formatNumber(dashboard?.total_uc ?? 0)}
           icon={BookOpen}
         />
-        {/* <StatCard
+        <StatCard
           title="Avaliações Pendentes"
           value={formatNumber(dashboard?.aval_pendentes ?? 0)}
           icon={FileCheck}
-        /> */}
+        />
       </div>
 
       {/* Recent Activity Section */}
@@ -66,13 +66,37 @@ const Index = () => {
         <SemesterStatsCard
           title="Desempenho Académico 2024/2025"
           description="Licenciatura em Engenharia Informática"
-          
+          stats={[
+            { label: "Taxa de Aprovação", value: "89%", isPositive: true },
+            { label: "Assiduidade Média", value: "94%", isPositive: true },
+            { label: "Média Final", value: "14.8", isPositive: true },
+            { label: "Estudantes Ativos", value: "342" },
+          ]}
         />
 
         <QuickActionsCard
           title="Tarefas Urgentes"
           description="Ações que requerem atenção"
-      
+          actions={[
+            {
+              title: "Certificados pendentes",
+              description: "Emissão de diplomas",
+              count: 5,
+              variant: "warning",
+            },
+            {
+              title: "Recursos de notas",
+              description: "2º época",
+              count: 7,
+              variant: "primary",
+            },
+            {
+              title: "Inscrições em atraso",
+              description: "Propinas",
+              count: 19,
+              variant: "default",
+            },
+          ]}
         />
       </div>
 
@@ -83,13 +107,8 @@ const Index = () => {
           <CardDescription>Módulos mais utilizados</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
-              {
-                name: "Avaliações",
-                icon: FileCheck,
-                path: "/avaliacoes/controle",
-              },
               {
                 name: "Assiduidade",
                 icon: BookOpen,
