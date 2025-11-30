@@ -112,7 +112,7 @@ export const menuStructure: {
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
         { title: "Lançamento de notas", url: "/avaliacoes/notas" },
         { title: "Lista de presença", url: "/avaliacoes/presenca" },
-        { title: "Parâmetros", url: "/avaliacoes/parametros" },
+     
         { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
         { title: "Pauta por UC", url: "/avaliacoes/pauta-uc" },
         { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
