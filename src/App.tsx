@@ -89,7 +89,7 @@ const App = () => {
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
                 />
-
+ {/*
                 <Route
                   path="/assiduidade/docente"
                   element={<TeacherAttendance />}
@@ -102,7 +102,7 @@ const App = () => {
                   path="/assiduidade/marcar"
                   element={<MarkAttendance />}
                 />
-
+*/}
                 <Route path="/acessos/utilizador" element={<UserAccess />} />
                 <Route
                   path="/acessos/funcionalidade-utilizador"
