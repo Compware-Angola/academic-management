@@ -28,7 +28,7 @@ export const useMutationDeletarHorario = () => {
         title: "Erro ao excluir",
         description:
           error?.response?.data?.message ||
-          "Ocorreu um problema ao tentar excluir o horário.",
+          "Ocorreu um problema ao tentar excluir o horário. Tem Alunos Incritos",
         variant: "destructive",
       });
     },
