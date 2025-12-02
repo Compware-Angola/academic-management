@@ -40,6 +40,8 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { format } from "date-fns";
 import { formatarData } from "@/util/date-formate";
+import { useMutationUpdateExemptDay } from "@/hooks/exempt-day/use-mutation-update-exempt-day";
+import { useMutationDeleteExemptDay } from "@/hooks/exempt-day/use-mutation-delete-exempt-day";
 
 interface DiaIsento {
   codigo: number;
@@ -60,13 +62,16 @@ export default function ExemptDays() {
 
   // Modal states
   const [openModal, setOpenModal] = useState(false);
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [codigoEdicao, setCodigoEdicao] = useState<number | null>(null);
 
   const [novaDescricao, setNovaDescricao] = useState("");
   const [novoEstado, setNovoEstado] = useState<"1" | "0">("1");
   const [saving, setSaving] = useState(false);
   const [dataInicio, setDataInicio] = useState<Date | undefined>();
   const [dataFim, setDataFim] = useState<Date | undefined>();
-
+  const { mutateAsync: updateExemptDay } = useMutationUpdateExemptDay();
+  const { mutateAsync: deleteExemptDay } = useMutationDeleteExemptDay();
   const fetchDiasIsentos = async () => {
     setLoading(true);
     try {
@@ -87,34 +92,49 @@ export default function ExemptDays() {
     fetchDiasIsentos();
   }, []);
 
-  const handleNovoDia = async () => {
+  const handleSalvar = async () => {
     if (!dataInicio || !dataFim || !novaDescricao.trim()) {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
       return;
     }
 
     setSaving(true);
+
+    const payload = {
+      designacao: novaDescricao,
+      data_inicio: format(dataInicio, "yyyy-MM-dd"),
+      data_fim: format(dataFim, "yyyy-MM-dd"),
+      estado: Number(novoEstado),
+    };
+
     try {
-      const payload = {
-        designacao: novaDescricao,
-        data_inicio: format(dataInicio, "yyyy-MM-dd"),
-        data_fim: format(dataFim, "yyyy-MM-dd"),
-        estado: Number(novoEstado),
-      };
+      if (modoEdicao && codigoEdicao) {
+        await updateExemptDay({
+          codigo: codigoEdicao,
+          data_fim: payload.data_fim,
+          data_inicio: payload.data_inicio,
+          observacao: payload.designacao,
+          estado: payload.estado,
+        });
+      } else {
+        await axios.post(API_URL, payload);
 
-      await axios.post(API_URL, payload);
+        toast({ title: "Dia isento cadastrado com sucesso!" });
+      }
 
-      toast({ title: "Dia isento cadastrado com sucesso!" });
+      // Reset do modal
       setOpenModal(false);
+      setModoEdicao(false);
+      setCodigoEdicao(null);
       setNovaDescricao("");
       setDataInicio(undefined);
       setDataFim(undefined);
       setNovoEstado("1");
+
       fetchDiasIsentos();
-    } catch (error) {
+    } catch {
       toast({
-        title: "Erro ao cadastrar",
-        description: "Verifique os dados e tente novamente.",
+        title: "Erro ao salvar",
         variant: "destructive",
       });
     } finally {
@@ -129,13 +149,37 @@ export default function ExemptDays() {
       <Badge variant="secondary">Inativo</Badge>
     );
   };
+  const resetForm = () => {
+    setModoEdicao(false);
+    setCodigoEdicao(null);
 
+    setNovaDescricao("");
+    setNovoEstado("1");
+
+    setDataInicio(undefined);
+    setDataFim(undefined);
+  };
   const totalPages = Math.ceil(diasIsentos.length / itemsPerPage);
   const paginatedData = diasIsentos.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+    currentPage * itemsPerPage
   );
+  const abrirEdicao = (item: DiaIsento) => {
+    setModoEdicao(true);
+    setCodigoEdicao(item.codigo);
 
+    setNovaDescricao(item.designacao);
+    setNovoEstado(item.estado === 1 ? "1" : "0");
+
+    setDataInicio(new Date(item.data_inicio));
+    setDataFim(new Date(item.data_fim));
+
+    setOpenModal(true);
+  };
+  const handleDelete = async (id: number) => {
+    deleteExemptDay(id);
+    fetchDiasIsentos();
+  };
   return (
     <div className="space-y-6">
       <PageHeader
@@ -229,10 +273,19 @@ export default function ExemptDays() {
                   <TableCell>{getBadgeEstado(item.estado)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => abrirEdicao(item)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(item.codigo)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -290,10 +343,21 @@ export default function ExemptDays() {
       </div>
 
       {/* Modal de Novo Dia Isento */}
-      <Dialog open={openModal} onOpenChange={setOpenModal}>
+      <Dialog
+        open={openModal}
+        onOpenChange={(open) => {
+          setOpenModal(open);
+
+          if (!open) {
+            resetForm(); // limpa tudo quando fechar
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Novo Dia Isento</DialogTitle>
+            <DialogTitle>
+              {modoEdicao ? "Editar Dia Isento" : "Novo Dia Isento"}
+            </DialogTitle>
             <DialogDescription>
               Adicione um novo feriado ou dia sem aulas
             </DialogDescription>
@@ -399,8 +463,8 @@ export default function ExemptDays() {
             <Button variant="outline" onClick={() => setOpenModal(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleNovoDia} disabled={saving}>
-              {saving ? "Salvando..." : "Cadastrar"}
+            <Button onClick={handleSalvar} disabled={saving}>
+              {saving ? "Salvando..." : modoEdicao ? "Atualizar" : "Cadastrar"}
             </Button>
           </DialogFooter>
         </DialogContent>
