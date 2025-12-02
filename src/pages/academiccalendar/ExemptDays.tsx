@@ -177,8 +177,8 @@ export default function ExemptDays() {
     setOpenModal(true);
   };
   const handleDelete = async (id: number) => {
-    deleteExemptDay(id);
-    fetchDiasIsentos();
+    await deleteExemptDay(id);
+    await fetchDiasIsentos();
   };
   return (
     <div className="space-y-6">
