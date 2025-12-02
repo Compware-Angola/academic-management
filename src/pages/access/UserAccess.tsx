@@ -3,11 +3,30 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableRow, TableCell, TableHead, TableHeader } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+  TableHeader,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Plus, Shield, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  RefreshCw,
+  Plus,
+  Shield,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUsers } from "@/hooks/acess/use-query-users";
 import { User } from "@/services/access/fect-users.service";
@@ -17,15 +36,16 @@ export default function UserAccess() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null); 
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const { data: users = [], isLoading, refetch } = useUsers();
 
   // Filtrar
-  const filteredUsers = users.filter(user =>
-    user.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (user.email?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    user.codigo.toString().includes(searchTerm)
+  const filteredUsers = users.filter(
+    (user) =>
+      user.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.codigo.toString().includes(searchTerm)
   );
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -38,25 +58,38 @@ export default function UserAccess() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Início</Link>
+        <Link to="/" className="hover:text-foreground">
+          Início
+        </Link>
         <span>/</span>
         <span className="text-foreground">Acessos por utilizador</span>
       </nav>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Acessos por utilizador</h1>
-          <p className="text-muted-foreground mt-1">Gestão de permissões por utilizador</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Acessos por utilizador
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gestão de permissões por utilizador
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
             Atualizar
           </Button>
-          <Button size="sm">
+          {/* <Button size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Novo utilizador
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -113,7 +146,7 @@ export default function UserAccess() {
                       <TableCell className="text-sm text-muted-foreground">
                         {user.email || "N/A"}
                       </TableCell>
-                       <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-muted-foreground">
                         {user.telefone || "N/A"}
                       </TableCell>
                       <TableCell className="text-right">
@@ -137,10 +170,13 @@ export default function UserAccess() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Label className="text-sm">Itens por página:</Label>
-              <Select value={itemsPerPage.toString()} onValueChange={(v) => {
-                setItemsPerPage(Number(v));
-                setCurrentPage(1);
-              }}>
+              <Select
+                value={itemsPerPage.toString()}
+                onValueChange={(v) => {
+                  setItemsPerPage(Number(v));
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="w-20">
                   <SelectValue />
                 </SelectTrigger>
@@ -152,7 +188,9 @@ export default function UserAccess() {
                 </SelectContent>
               </Select>
               <span className="text-sm text-muted-foreground">
-                Mostrando {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredUsers.length)} de {filteredUsers.length}
+                Mostrando {(currentPage - 1) * itemsPerPage + 1}–
+                {Math.min(currentPage * itemsPerPage, filteredUsers.length)} de{" "}
+                {filteredUsers.length}
               </span>
             </div>
             <div className="flex gap-2">
@@ -160,7 +198,7 @@ export default function UserAccess() {
                 variant="outline"
                 size="sm"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => p - 1)}
+                onClick={() => setCurrentPage((p) => p - 1)}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -171,7 +209,7 @@ export default function UserAccess() {
                 variant="outline"
                 size="sm"
                 disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(p => p + 1)}
+                onClick={() => setCurrentPage((p) => p + 1)}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

@@ -50,8 +50,6 @@ import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
 
 const App = () => {
-
-
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
       <TooltipProvider>
@@ -66,25 +64,28 @@ const App = () => {
                 <Route path="/dashboard" element={<Index />} />
                 <Route path="/horarios/criar" element={<CreateSchedule />} />
                 <Route path="/horarios/listar" element={<ScheduleList />} />
-                <Route path="/horarios/eliminados" element={<ScheduleListEliminated />} />
+                <Route
+                  path="/horarios/eliminados"
+                  element={<ScheduleListEliminated />}
+                />
                 <Route path="/salas/listar" element={<ClassromList />} />
                 <Route
                   path="/plano/disciplinas"
                   element={<DisciplineManagementList />}
                 />
-                <Route
+                {/* <Route
                   path="/inscricoes/matriculados"
                   element={<EnrolledList />}
-                />
+                /> */}
                 <Route
                   path="/gestao-docentes/listagem"
                   element={<GeneralListing />}
                 />
-                <Route
+                {/* <Route
                   path="/exame/lista-candidatos"
                   element={<CandidateList />}
-                />
-                <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
+                /> */}
+                {/* <Route path="/avaliacoes/notas" element={<LaunchNotes />} /> */}
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
                 <Route
@@ -92,10 +93,10 @@ const App = () => {
                   element={<FormulaOral />}
                 />
 
-                <Route
+                {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
-                />
+                /> */}
                 {/*
                 <Route
                   path="/assiduidade/docente"
@@ -113,10 +114,10 @@ const App = () => {
 
                 <Route path="/acessos/utilizador" element={<UserAccess />} />
 
-                <Route
+                {/* <Route
                   path="/acessos/funcionalidade-utilizador"
                   element={<UserFunctionality />}
-                />
+                /> */}
 
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
                 {/*

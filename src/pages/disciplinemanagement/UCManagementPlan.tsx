@@ -46,7 +46,10 @@ import { Label } from "@/components/ui/label";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useClasses } from "@/hooks/use-classes";
 import { useCursos } from "@/hooks/use-cursos";
-import { useGradeCurricular, useAddUCToPlan } from "@/hooks/use-grade-curricular";
+import {
+  useGradeCurricular,
+  useAddUCToPlan,
+} from "@/hooks/use-grade-curricular";
 import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
@@ -55,7 +58,7 @@ export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
   const [classeId, setClasseId] = useState<string>("");
-const {user} = useAuth();
+  const { user } = useAuth();
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -67,11 +70,13 @@ const {user} = useAuth();
     codigo_semestre: "",
   });
 
-  const { data: anosLetivos = [], isLoading: loadingAnos } = useQueryAnoAcademico();
+  const { data: anosLetivos = [], isLoading: loadingAnos } =
+    useQueryAnoAcademico();
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
   const { data: classes = [], isLoading: loadingClasses } = useClasses();
- const { data: disciplines = [], isLoading:loadingDisciplines } = useDisciplines();
-   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
+  const { data: disciplines = [], isLoading: loadingDisciplines } =
+    useDisciplines();
+  const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const {
     data: grade = [],
     isLoading: loadingGrade,
@@ -100,7 +105,9 @@ const {user} = useAuth();
 
   const handleOpenModal = () => {
     if (!anoLetivoId || !cursoId || !classeId) {
-      toast.error("Selecione ano letivo, curso e classe antes de adicionar uma UC.");
+      toast.error(
+        "Selecione ano letivo, curso e classe antes de adicionar uma UC."
+      );
       return;
     }
     setIsModalOpen(true);
@@ -119,7 +126,7 @@ const {user} = useAuth();
         codigo_semestre: Number(formData.codigo_semestre),
         codigo_classe: Number(classeId),
         codigo_curso: Number(cursoId),
-        codigo_utilizador: Number(user.user_id)
+        codigo_utilizador: Number(user.user_id),
       },
       {
         onSuccess: () => {
@@ -129,7 +136,9 @@ const {user} = useAuth();
           refetch();
         },
         onError: (error: any) => {
-          toast.error(error?.response?.data?.message || "Erro ao adicionar UC ao plano.");
+          toast.error(
+            error?.response?.data?.message || "Erro ao adicionar UC ao plano."
+          );
         },
       }
     );
@@ -142,11 +151,17 @@ const {user} = useAuth();
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink href="/">Início</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Início</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink href="/plano">Plano de Estudo</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/plano">Plano de Estudo</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Gestão de UC no Plano</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Gestão de UC no Plano</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
@@ -154,12 +169,12 @@ const {user} = useAuth();
       <PageHeader
         title="Gestão de Unidades Curriculares no Plano"
         subtitle="Visualizar e gerir todas as UCs por ano letivo, curso e classe"
-        actions={
-          <Button onClick={handleOpenModal} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar UC ao Plano
-          </Button>
-        }
+        // actions={
+        //   <Button onClick={handleOpenModal} size="sm">
+        //     <Plus className="h-4 w-4 mr-2" />
+        //     Adicionar UC ao Plano
+        //   </Button>
+        // }
       />
 
       {/* Filtros */}
@@ -167,7 +182,9 @@ const {user} = useAuth();
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Ano Letivo */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Ano Letivo</label>
+            <label className="text-sm font-medium text-foreground">
+              Ano Letivo
+            </label>
             {loadingAnos ? (
               <Skeleton className="h-10 w-full rounded-md" />
             ) : (
@@ -209,7 +226,9 @@ const {user} = useAuth();
 
           {/* Classe */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Classe</label>
+            <label className="text-sm font-medium text-foreground">
+              Classe
+            </label>
             {loadingClasses ? (
               <Skeleton className="h-10 w-full rounded-md" />
             ) : (
@@ -223,7 +242,10 @@ const {user} = useAuth();
                 </SelectTrigger>
                 <SelectContent>
                   {classes.map((classe) => (
-                    <SelectItem key={classe.codigo} value={String(classe.codigo)}>
+                    <SelectItem
+                      key={classe.codigo}
+                      value={String(classe.codigo)}
+                    >
                       {classe.designacao}
                     </SelectItem>
                   ))}
@@ -280,7 +302,10 @@ const {user} = useAuth();
               </TableHeader>
               <TableBody>
                 {currentData.map((uc) => (
-                  <TableRow key={uc.codigo} className="hover:bg-muted/50 transition-colors">
+                  <TableRow
+                    key={uc.codigo}
+                    className="hover:bg-muted/50 transition-colors"
+                  >
                     <TableCell className="font-mono font-semibold text-sm">
                       {uc.codigo_disciplina}
                     </TableCell>
@@ -294,16 +319,28 @@ const {user} = useAuth();
                       {uc.descricao_classe}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={uc.codigo_semestre === 1 ? "secondary" : "default"}>
+                      <Badge
+                        variant={
+                          uc.codigo_semestre === 1 ? "secondary" : "default"
+                        }
+                      >
                         {uc.designacao_semestre}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(uc.codigo_disciplina)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(uc.codigo_disciplina)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:bg-destructive/10"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -334,12 +371,15 @@ const {user} = useAuth();
                     <SelectItem value="100">100</SelectItem>
                   </SelectContent>
                 </Select>
-                <span className="text-sm text-muted-foreground">por página</span>
+                <span className="text-sm text-muted-foreground">
+                  por página
+                </span>
               </div>
 
               <div className="flex items-center gap-6">
                 <span className="text-sm text-muted-foreground">
-                  {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
+                  {startIndex + 1}-{Math.min(endIndex, totalItems)} de{" "}
+                  {totalItems}
                 </span>
                 <div className="flex items-center gap-2">
                   <Button
@@ -356,7 +396,9 @@ const {user} = useAuth();
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
                     disabled={currentPage === totalPages}
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -371,7 +413,11 @@ const {user} = useAuth();
       {/* Total geral */}
       {grade.length > 0 && !loadingGrade && (
         <div className="text-sm text-muted-foreground">
-          Total de <strong className="font-semibold text-foreground">{grade.length}</strong> unidade(s) curricular(es) no plano
+          Total de{" "}
+          <strong className="font-semibold text-foreground">
+            {grade.length}
+          </strong>{" "}
+          unidade(s) curricular(es) no plano
         </div>
       )}
 
@@ -387,92 +433,105 @@ const {user} = useAuth();
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-  <Label>Unidade Curricular</Label>
-  <Select
-    value={formData.codigo_disciplina}
-    onValueChange={(value) => setFormData({ ...formData, codigo_disciplina: value })}
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Selecione a disciplina..." />
-    </SelectTrigger>
-    <SelectContent className="max-h-96">
-      {loadingDisciplines ? (
-        <SelectItem value="loading" disabled>
-          <span className="flex items-center gap-2">
-            <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            Carregando disciplinas...
-          </span>
-        </SelectItem>
-      ) : disciplines.length === 0 ? (
-        <SelectItem value="empty" disabled>
-          Nenhuma disciplina disponível
-        </SelectItem>
-      ) : (
-        disciplines.map((disc) => (
-          <SelectItem
-            key={disc.codigo}
-            value={String(disc.codigo)}
-          >
-            <div className="flex items-center gap-3">
-              <span className="font-mono font-semibold text-sm">
-                {disc.codigo}
-              </span>
-              <span className="text-muted-foreground">–</span>
-              <span>{disc.desginacao}</span>
+              <Label>Unidade Curricular</Label>
+              <Select
+                value={formData.codigo_disciplina}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, codigo_disciplina: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a disciplina..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-96">
+                  {loadingDisciplines ? (
+                    <SelectItem value="loading" disabled>
+                      <span className="flex items-center gap-2">
+                        <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        Carregando disciplinas...
+                      </span>
+                    </SelectItem>
+                  ) : disciplines.length === 0 ? (
+                    <SelectItem value="empty" disabled>
+                      Nenhuma disciplina disponível
+                    </SelectItem>
+                  ) : (
+                    disciplines.map((disc) => (
+                      <SelectItem key={disc.codigo} value={String(disc.codigo)}>
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono font-semibold text-sm">
+                            {disc.codigo}
+                          </span>
+                          <span className="text-muted-foreground">–</span>
+                          <span>{disc.desginacao}</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
-          </SelectItem>
-        ))
-      )}
-    </SelectContent>
-  </Select>
-</div>
 
             <div className="grid gap-2">
               <Label htmlFor="semestre">Semestre</Label>
               <Select
                 value={formData.codigo_semestre}
-                onValueChange={(value) => setFormData({ ...formData, codigo_semestre: value })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, codigo_semestre: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o semestre" />
                 </SelectTrigger>
                 <SelectContent className="max-h-96">
-      {loadingSemestres ? (
-        <SelectItem value="loading" disabled>
-          <span className="flex items-center gap-2">
-            <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            Carregando Semestre...
-          </span>
-        </SelectItem>
-      ) : semestres.length === 0 ? (
-        <SelectItem value="empty" disabled>
-          Nenhum Semestre disponível
-        </SelectItem>
-      ) : (
-        semestres.map((sem) => (
-          <SelectItem
-            key={sem.codigo}
-            value={String(sem.codigo)}
-          >
-            <div className="flex items-center gap-3">
-              <span className="font-mono font-semibold text-sm">
-                {sem.codigo}
-              </span>
-              <span className="text-muted-foreground">–</span>
-              <span>{sem.designacao}</span>
-            </div>
-          </SelectItem>
-        ))
-      )}
-    </SelectContent>
+                  {loadingSemestres ? (
+                    <SelectItem value="loading" disabled>
+                      <span className="flex items-center gap-2">
+                        <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        Carregando Semestre...
+                      </span>
+                    </SelectItem>
+                  ) : semestres.length === 0 ? (
+                    <SelectItem value="empty" disabled>
+                      Nenhum Semestre disponível
+                    </SelectItem>
+                  ) : (
+                    semestres.map((sem) => (
+                      <SelectItem key={sem.codigo} value={String(sem.codigo)}>
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono font-semibold text-sm">
+                            {sem.codigo}
+                          </span>
+                          <span className="text-muted-foreground">–</span>
+                          <span>{sem.designacao}</span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
               </Select>
             </div>
 
             {/* Campos ocultos (pré-preenchidos) */}
             <div className="text-xs text-muted-foreground space-y-1 mt-4 pt-4 border-t">
-              <p><strong>Ano Letivo:</strong> {anosLetivos.find(a => String(a.codigo) === anoLetivoId)?.designacao}</p>
-              <p><strong>Curso:</strong> {cursos.find(c => String(c.codigo) === cursoId)?.designacao}</p>
-              <p><strong>Classe:</strong> {classes.find(cl => String(cl.codigo) === classeId)?.designacao}</p>
+              <p>
+                <strong>Ano Letivo:</strong>{" "}
+                {
+                  anosLetivos.find((a) => String(a.codigo) === anoLetivoId)
+                    ?.designacao
+                }
+              </p>
+              <p>
+                <strong>Curso:</strong>{" "}
+                {cursos.find((c) => String(c.codigo) === cursoId)?.designacao}
+              </p>
+              <p>
+                <strong>Classe:</strong>{" "}
+                {
+                  classes.find((cl) => String(cl.codigo) === classeId)
+                    ?.designacao
+                }
+              </p>
             </div>
           </div>
 
