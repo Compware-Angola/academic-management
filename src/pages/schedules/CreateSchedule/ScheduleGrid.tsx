@@ -24,19 +24,33 @@ import {
 import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
 import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 import { useToast } from "@/hooks/use-toast";
+import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
 export type AulaPayload = {
   diaSemana: number;
   ordemTempo: number;
   sala: number;
   tipoAula: number;
 };
-export default function ScheduleGrid({
-  scheduleData,
-  onChange,
-}: {
+type ScheduleGridProps = {
   scheduleData: TempoDisponivelItem[];
   onChange: (aulas: AulaPayload[]) => void;
-}) {
+
+  anoLetivo: string;
+  semestre: string;
+  periodo: string;
+  unidadeCurricular: string;
+  docente: string;
+};
+export default function ScheduleGrid(props: ScheduleGridProps) {
+  const {
+    scheduleData,
+    onChange,
+    unidadeCurricular,
+    semestre,
+    anoLetivo,
+    periodo,
+    docente,
+  } = props;
   const { toast } = useToast();
   const [selectedSlot, setSelectedSlot] = useState<null | {
     dia: DiaSemana;
@@ -52,6 +66,7 @@ export default function ScheduleGrid({
   const { data: salas, isLoading: isLoadingSala } = useQuerySalas({
     tipoSala: formData.tipoAula,
   });
+  const verifyCollision = useVerifyCollision();
 
   useEffect(() => {
     if (!formData.tipoAula || isLoadingSala) return;
@@ -81,7 +96,7 @@ export default function ScheduleGrid({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedSlot) return;
 
     const { dia, tempo, key } = selectedSlot;
@@ -95,25 +110,58 @@ export default function ScheduleGrid({
       return;
     }
 
-    const newItem: AulaPayload = {
-      diaSemana: dia.pkDiaDaSemana,
-      ordemTempo: tempo.ordem,
-      sala: Number(formData.sala),
-      tipoAula: Number(formData.tipoAula),
-    };
+    try {
+      const result = await verifyCollision.mutateAsync({
+        ano_lectivo: Number(anoLetivo),
+        semestre: Number(semestre),
+        periodo: Number(periodo),
+        unidade_curricular: Number(unidadeCurricular),
+        docente: Number(docente),
+        sala: Number(formData.sala),
+        dia_semana: dia.pkDiaDaSemana,
+        ordem_tempo: tempo.ordem,
+        horario_id: null,
+      });
 
-    const updated = {
-      ...slotData,
-      [key]: newItem,
-    };
+      // ✅ SE EXISTIR COLISÃO
+      if (result.temColisao === 1) {
+        toast({
+          variant: "destructive",
+          title: "Colisão detectada",
+          description: result.mensagem,
+        });
 
-    setSlotData(updated);
+        return;
+      }
 
-    // 🔹 ESTE É O PONTO MAIS IMPORTANTE 🔹
-    // Envia todas as aulas para o componente pai
-    onChange(Object.values(updated));
+      const newItem: AulaPayload = {
+        diaSemana: dia.pkDiaDaSemana,
+        ordemTempo: tempo.ordem,
+        sala: Number(formData.sala),
+        tipoAula: Number(formData.tipoAula),
+      };
 
-    setSelectedSlot(null);
+      const updated = {
+        ...slotData,
+        [key]: newItem,
+      };
+
+      setSlotData(updated);
+      onChange(Object.values(updated));
+
+      toast({
+        title: "Horário adicionado",
+        description: "Sala atribuída com sucesso.",
+      });
+
+      setSelectedSlot(null); // fecha o dialog
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Falha ao verificar colisão.",
+      });
+    }
   };
 
   const handleRemove = (key: string) => {
@@ -270,9 +318,24 @@ export default function ScheduleGrid({
 
             {/* BOTÕES */}
             <div className="flex gap-3 pt-4">
-              <Button onClick={handleSave} className="flex-1">
-                <Plus className="mr-2 h-4 w-4" />
-                Guardar
+              <Button
+                disabled={verifyCollision.isPending}
+                onClick={handleSave}
+                className="flex-1"
+              >
+                {verifyCollision.isPending ? (
+                  <>
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Verificando Colisões
+                    </>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Adicionar
+                  </>
+                )}
               </Button>
 
               {selectedSlot &&

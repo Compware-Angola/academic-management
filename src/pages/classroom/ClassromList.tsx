@@ -30,21 +30,55 @@ import {
 import { Link } from "react-router-dom";
 import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useMutationDeleteSala } from "@/hooks/salas/use-mutation-delete-sala";
+import { Sala } from "@/services/salas/fetch-sala";
+import { CreateSalaModal } from "./create-sala-modal";
+
 export default function ClassromList() {
+  const [openCreateModal, setOpenCreateModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
-
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedSala, setSelectedSala] = useState<{
+    id: string;
+    descricao: string;
+  } | null>(null);
   // Dados reais vindos do servidor
   const { data: salas = [], isLoading } = useQuerySalas();
-
+  const { mutate: deleteSala, isPending } = useMutationDeleteSala();
   // FILTRO DE PESQUISA
   const filteredData = salas.filter(
     (item) =>
       item.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.tipo_sala.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const handleOpenDelete = (item: Sala) => {
+    setSelectedSala({
+      id: item.pk,
+      descricao: item.descricao,
+    });
 
+    setOpenDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    if (!selectedSala) return;
+
+    deleteSala(selectedSala.id);
+
+    setOpenDialog(false);
+    setSelectedSala(null);
+  };
   // PAGINAÇÃO
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
@@ -74,7 +108,7 @@ export default function ClassromList() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm">
+          <Button size="sm" onClick={() => setOpenCreateModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova sala
           </Button>
@@ -234,8 +268,12 @@ export default function ClassromList() {
                           <Button variant="outline" size="sm">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenDelete(item)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
                       </TableCell>
@@ -296,6 +334,35 @@ export default function ClassromList() {
           </div>
         </>
       )}
+      <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão?</AlertDialogTitle>
+
+            <AlertDialogDescription>
+              Deseja realmente excluir a sala{" "}
+              <strong>{selectedSala?.descricao}</strong>? <br />
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isPending}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isPending ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <CreateSalaModal
+        open={openCreateModal}
+        onOpenChange={setOpenCreateModal}
+      />
     </div>
   );
 }

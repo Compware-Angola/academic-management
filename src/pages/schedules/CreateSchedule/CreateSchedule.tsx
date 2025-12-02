@@ -97,7 +97,7 @@ export default function CreateSchedule() {
   const { data: modalidade = [], isLoading: isLoadingModalidade } =
     useQueryModalidade();
   /* ---------- COLISÃO ----------- */
-  const verifyCollision = useVerifyCollision();
+
   const { mutate: salvarHorario, isPending } = useSaveHorario();
   useEffect(() => {
     setHasCheckedCollisions(false);
@@ -133,64 +133,6 @@ export default function CreateSchedule() {
     requiredFields.every(
       (f) => !isEmpty(formData[f.key as keyof typeof formData])
     ) && aulas.length > 0;
-
-  /* ---------- VERIFICAR COLISÕES ----------- */
-  const handleCheckCollisions = async () => {
-    setHasCheckedCollisions(false);
-    setCollisionMessage("");
-    if (!validateForm()) return;
-
-    setIsChecking(true);
-    setCollisionMessage("");
-
-    try {
-      const results = await Promise.all(
-        aulas.map((aula) =>
-          verifyCollision.mutateAsync({
-            ano_lectivo: Number(formData.anoLetivo),
-            semestre: Number(formData.semestre),
-            periodo: Number(formData.periodo),
-            unidade_curricular: Number(formData.unidadeCurricular),
-            docente: Number(formData.docente),
-            sala: aula.sala,
-            dia_semana: aula.diaSemana,
-            ordem_tempo: aula.ordemTempo,
-            horario_id: null,
-          })
-        )
-      );
-
-      const collision = results.find((r) => r.temColisao === 1);
-
-      if (collision) {
-        setCollisionMessage(
-          `${collision.mensagem} (${collision.horarioConflito} - ${collision.horaConflito})`
-        );
-
-        toast({
-          variant: "destructive",
-          title: "Colisão encontrada",
-          description: collision.mensagem,
-        });
-
-        return;
-      }
-
-      toast({
-        description: `${aulas.length} aulas sem colisão.`,
-      });
-
-      setHasCheckedCollisions(true);
-    } catch {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Falha ao verificar colisões.",
-      });
-    } finally {
-      setIsChecking(false);
-    }
-  };
 
   /* ---------- SUBMIT ----------- */
   const handleSubmit = (e: React.FormEvent) => {
@@ -393,9 +335,24 @@ export default function CreateSchedule() {
         </div>
 
         {/* GRID DE HORÁRIOS */}
-        {temposDisponiveis.length > 0 && (
-          <ScheduleGrid scheduleData={temposDisponiveis} onChange={setAulas} />
-        )}
+        {temposDisponiveis.length > 0 &&
+          !!formData.anoLetivo &&
+          !!formData.anoLetivo &&
+          !!formData.docente &&
+          !!formData.periodo &&
+          !!formData.semestre &&
+          !!formData.unidadeCurricular &&
+          !!formData.modalidade && (
+            <ScheduleGrid
+              scheduleData={temposDisponiveis}
+              onChange={setAulas}
+              anoLetivo={formData.anoLetivo}
+              docente={formData.docente}
+              periodo={formData.periodo}
+              semestre={formData.semestre}
+              unidadeCurricular={formData.unidadeCurricular}
+            />
+          )}
 
         {/* BOTÕES */}
         <div className="flex justify-end gap-3 pt-6 border-t">
@@ -406,18 +363,6 @@ export default function CreateSchedule() {
           >
             <X className="mr-2 h-4 w-4" />
             Cancelar
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCheckCollisions}
-            disabled={isChecking}
-          >
-            <RefreshCw
-              className={`mr-2 h-4 w-4 ${isChecking ? "animate-spin" : ""}`}
-            />
-            Verificar Colisões
           </Button>
 
           <Button
