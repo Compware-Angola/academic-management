@@ -1,9 +1,32 @@
 // src/pages/access/AccessGroup.tsx
 import { useState } from "react";
-import { RefreshCw, FileDown, Printer, Plus, Edit, Trash2, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  RefreshCw,
+  FileDown,
+  Printer,
+  Plus,
+  Edit,
+  Trash2,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -45,8 +68,12 @@ export default function AccessGroup() {
     setCurrentPage(1);
   };
 
-  const sortedGroups = [...groups].sort((a, b) => a.descricao?.localeCompare(b?.descricao));
-  const selectedGroup = groups.find((g) => g.codigo === Number(selectedGroupId));
+  const sortedGroups = [...groups].sort((a, b) =>
+    a.descricao?.localeCompare(b?.descricao)
+  );
+  const selectedGroup = groups.find(
+    (g) => g.codigo === Number(selectedGroupId)
+  );
 
   // Filtrar apenas permissões ativas
   const activeAccesses = accesses.filter((a) => a.disponibilidade === 1);
@@ -68,11 +95,17 @@ export default function AccessGroup() {
       <div>
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbLink href="/acessos">Acessos</BreadcrumbLink></BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/acessos">Acessos</BreadcrumbLink>
+            </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem><BreadcrumbPage>Acesso por Grupo</BreadcrumbPage></BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Acesso por Grupo</BreadcrumbPage>
+            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
@@ -82,7 +115,8 @@ export default function AccessGroup() {
           </h1>
           {selectedGroup && (
             <p className="text-muted-foreground mt-1">
-              Permissões do grupo: <strong>{selectedGroup.descricao}</strong> ({totalItems} permissões ativas)
+              Permissões do grupo: <strong>{selectedGroup.descricao}</strong> (
+              {totalItems} permissões ativas)
             </p>
           )}
         </div>
@@ -94,7 +128,11 @@ export default function AccessGroup() {
           <label className="text-sm font-medium">Selecionar Grupo</label>
           <Select value={selectedGroupId} onValueChange={handleGroupChange}>
             <SelectTrigger className="bg-background">
-              <SelectValue placeholder={loadingGroups ? "Carregando grupos..." : "Escolha um grupo"} />
+              <SelectValue
+                placeholder={
+                  loadingGroups ? "Carregando grupos..." : "Escolha um grupo"
+                }
+              />
             </SelectTrigger>
             <SelectContent className="max-h-96">
               {sortedGroups.map((group) => (
@@ -107,20 +145,23 @@ export default function AccessGroup() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button size="sm">
+          {/* <Button size="sm">
             <Plus className="mr-2 h-4 w-4" />
             Atribuir Permissão
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             size="sm"
             onClick={() => refetch()}
             disabled={loadingAccesses || !selectedGroupId}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loadingAccesses ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${
+                loadingAccesses ? "animate-spin" : ""
+              }`}
+            />
             Atualizar
           </Button>
-        
         </div>
       </div>
 
@@ -140,41 +181,64 @@ export default function AccessGroup() {
             {loadingAccesses ? (
               Array.from({ length: itemsPerPage }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-full max-w-md" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-32" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-full max-w-md" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-32" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-8 w-20 ml-auto" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : errorAccesses ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-destructive">
+                <TableCell
+                  colSpan={5}
+                  className="h-32 text-center text-destructive"
+                >
                   Erro ao carregar as permissões.
                 </TableCell>
               </TableRow>
             ) : !selectedGroupId ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={5}
+                  className="h-32 text-center text-muted-foreground"
+                >
                   <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>Selecione um grupo para visualizar as permissões</p>
                 </TableCell>
               </TableRow>
             ) : activeAccesses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={5}
+                  className="h-32 text-center text-muted-foreground"
+                >
                   Este grupo não possui permissões configuradas.
                 </TableCell>
               </TableRow>
             ) : (
               paginatedAccesses.map((access) => (
                 <TableRow key={access.codigo}>
-                  <TableCell className="font-mono text-sm">{access.codigo}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {access.codigo}
+                  </TableCell>
                   <TableCell className="max-w-lg">{access.descricao}</TableCell>
-                  <TableCell><Badge variant="default">Ativo</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant="default">Ativo</Badge>
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {access["Update at"]
-                      ? formatarData (access["Update at"])
+                      ? formatarData(access["Update at"])
                       : "—"}
                   </TableCell>
                   <TableCell className="text-right">
@@ -184,7 +248,7 @@ export default function AccessGroup() {
                         <Edit className="h-4 w-4" />
                       </Button>
                       */}
-                     <DeleteAccessButton acessoCodigo={access.codigo} />
+                      <DeleteAccessButton acessoCodigo={access.codigo} />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -226,7 +290,7 @@ export default function AccessGroup() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -237,7 +301,9 @@ export default function AccessGroup() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 <ChevronRight className="h-4 w-4" />

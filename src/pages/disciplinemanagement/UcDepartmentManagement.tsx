@@ -146,10 +146,10 @@ export default function UcDepartmentManagement() {
         subtitle="Gerir unidades curriculares organizadas por departamento académico"
         actions={
           <>
-            <Button variant="default" size="sm" onClick={handleCreate}>
+            {/* <Button variant="default" size="sm" onClick={handleCreate}>
               <Plus className="h-4 w-4 mr-2" />
               Nova UC
-            </Button>
+            </Button> */}
           </>
         }
       />

@@ -15,6 +15,7 @@ import {
   Edit,
   Copy,
   Trash2,
+  Check,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -25,7 +26,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -62,7 +63,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
@@ -72,23 +73,23 @@ import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-e
 import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
 import { Switch } from "@/components/ui/switch";
 import { useMutationDisponibilidadeHorario } from "@/hooks/horario/use-mutation-update-disponibilidade-horario";
+import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-validar-horario-director";
 type Item = {
-  id: string | number
-  nome: string
+  id: string | number;
+  nome: string;
 
   // outros campos...
-}
+};
 export default function ScheduleList() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const deleteMutation = useMutationDeletarHorario();
   // Aqui tu recebes o item inteiro ou só o ID – como quiseres
-  const [itemToDelete, setItemToDelete] = useState<Item | null>(null)
-  const mutation = useMutationDisponibilidadeHorario()
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
+  const mutation = useMutationDisponibilidadeHorario();
   async function handleDeleteConfirmed(item: Item) {
     try {
-
       deleteMutation.mutate(
         { p_horario_id: itemToDelete.id },
         {
@@ -98,16 +99,14 @@ export default function ScheduleList() {
           },
         }
       );
-
-
     } catch (error) {
       toast({
         title: "Erro",
         description: "Não foi possível excluir.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setDeleteDialogOpen(false)
+      setDeleteDialogOpen(false);
     }
   }
 
@@ -125,7 +124,8 @@ export default function ScheduleList() {
   const itemsPerPage = 15;
 
   // Queries dos filtros
-  const { data: anosAcademicos, isLoading: loadingAnos } = useQueryAnoAcademico();
+  const { data: anosAcademicos, isLoading: loadingAnos } =
+    useQueryAnoAcademico();
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
   const { data: cursos, isLoading: loadingCursos } = useCursos();
@@ -148,14 +148,18 @@ export default function ScheduleList() {
         ? filters.anoCurricular
         : undefined,
   });
+  const validarMutation = useMutationValidarHorarioDirector();
 
   // Filtro local por texto
-  const filteredHorarios = horarios.filter((h) =>
-    filters.search === "" ||
-    h.designacao.toLowerCase().includes(filters.search.toLowerCase()) ||
-    h.unidadeCurricular.toLowerCase().includes(filters.search.toLowerCase()) ||
-    h.curso.toLowerCase().includes(filters.search.toLowerCase()) ||
-    h.ano.toLowerCase().includes(filters.search.toLowerCase())
+  const filteredHorarios = horarios.filter(
+    (h) =>
+      filters.search === "" ||
+      h.designacao.toLowerCase().includes(filters.search.toLowerCase()) ||
+      h.unidadeCurricular
+        .toLowerCase()
+        .includes(filters.search.toLowerCase()) ||
+      h.curso.toLowerCase().includes(filters.search.toLowerCase()) ||
+      h.ano.toLowerCase().includes(filters.search.toLowerCase())
   );
 
   // Paginação lógica
@@ -204,7 +208,8 @@ export default function ScheduleList() {
             Horário Existentes
           </h1>
           <p className="text-muted-foreground">
-            Visualize todos os Horário criadas por ano letivo, semestre, período, curso e ano curricular.
+            Visualize todos os Horário criadas por ano letivo, semestre,
+            período, curso e ano curricular.
           </p>
         </div>
         <Button onClick={() => navigate("/horarios/criar")}>
@@ -232,7 +237,9 @@ export default function ScheduleList() {
               disabled={loadingAnos}
             >
               <SelectTrigger>
-                <SelectValue placeholder={loadingAnos ? "A carregar..." : "Selecionar"} />
+                <SelectValue
+                  placeholder={loadingAnos ? "A carregar..." : "Selecionar"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {anosAcademicos?.map((ano) => (
@@ -328,8 +335,8 @@ export default function ScheduleList() {
                     loadingAnosCurriculares
                       ? "A carregar..."
                       : !filters.curso
-                        ? "Selecione um curso"
-                        : "Todos os anos"
+                      ? "Selecione um curso"
+                      : "Todos os anos"
                   }
                 />
               </SelectTrigger>
@@ -363,14 +370,17 @@ export default function ScheduleList() {
           disabled={isLoadingHorarios}
         >
           <RefreshCw
-            className={`mr-2 h-4 w-4 ${isLoadingHorarios ? "animate-spin" : ""}`}
+            className={`mr-2 h-4 w-4 ${
+              isLoadingHorarios ? "animate-spin" : ""
+            }`}
           />
           Atualizar Lista
         </Button>
 
         {totalItems > 0 && (
           <p className="text-sm text-muted-foreground">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} turmas
+            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de{" "}
+            {totalItems} turmas
           </p>
         )}
       </div>
@@ -394,7 +404,9 @@ export default function ScheduleList() {
             <div className="rounded-full bg-muted p-6 mb-4">
               <File className="h-12 w-12 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Nenhum Horário encontrado</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              Nenhum Horário encontrado
+            </h3>
             <p className="text-muted-foreground max-w-md mb-6">
               {filters.anoLetivo && filters.curso
                 ? "Não existem Horários criadas com os filtros aplicados."
@@ -427,7 +439,6 @@ export default function ScheduleList() {
                     <TableRow
                       key={h.codigo}
                       className="hover:bg-muted/50 cursor-pointer"
-
                     >
                       <TableCell className="font-semibold text-primary">
                         {h.designacao}
@@ -440,7 +451,7 @@ export default function ScheduleList() {
                         <Badge
                           variant={
                             h.estado.toLowerCase().includes("pendente") ||
-                              h.estado.toLowerCase().includes("distribuição")
+                            h.estado.toLowerCase().includes("distribuição")
                               ? "secondary"
                               : "default"
                           }
@@ -455,7 +466,6 @@ export default function ScheduleList() {
                           onCheckedChange={() => {
                             mutation.mutate({
                               p_horario_id: h.codigo,
-                             
                             });
                           }}
                         />
@@ -489,17 +499,33 @@ export default function ScheduleList() {
                             <DropdownMenuItem
                               onSelect={(e) => e.preventDefault()} // evita fechar o menu
                               onClick={() => {
-                                setItemToDelete({ nome: h.designacao, id: h.codigo })
-                                setDeleteDialogOpen(true)
+                                setItemToDelete({
+                                  nome: h.designacao,
+                                  id: h.codigo,
+                                });
+                                setDeleteDialogOpen(true);
                               }}
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" /> Excluir
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled={
+                                validarMutation.isPending ||
+                                !h.estado.toLowerCase().includes("pendente")
+                              }
+                              onClick={() => {
+                                validarMutation.mutate({
+                                  p_horario_id: h.codigo,
+                                });
+                              }}
+                              className="text-green-500 focus:text-green-500 disabled:opacity-50"
+                            >
+                              <Check className="mr-2 h-4 w-4" /> Validar
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-
                     </TableRow>
                   ))}
                 </TableBody>
@@ -528,7 +554,8 @@ export default function ScheduleList() {
                   </Button>
 
                   <span className="text-sm text-muted-foreground px-4">
-                    Página <strong>{page}</strong> de <strong>{totalPages}</strong>
+                    Página <strong>{page}</strong> de{" "}
+                    <strong>{totalPages}</strong>
                   </span>
 
                   <Button
@@ -568,7 +595,9 @@ export default function ScheduleList() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => itemToDelete && handleDeleteConfirmed(itemToDelete)}
+              onClick={() =>
+                itemToDelete && handleDeleteConfirmed(itemToDelete)
+              }
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Sim, excluir
@@ -576,7 +605,6 @@ export default function ScheduleList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </div>
   );
 }

@@ -2,17 +2,40 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Download, Printer, Plus, Eye, Edit, Trash2, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import {
+  RefreshCw,
+  Download,
+  Printer,
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 // Assumindo que o seu hook está neste caminho
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher"; 
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 
 export default function GeneralListing() {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -20,36 +43,58 @@ export default function GeneralListing() {
   const [filterCategoria, setFilterCategoria] = useState("all");
   const [filterGrau, setFilterGrau] = useState("all");
   const [filterEscalao, setFilterEscalao] = useState("all");
-  
+
   // CORREÇÃO 1: Inicializa data com array vazio [] para evitar o erro .map (Uncaught TypeError: Cannot read properties of undefined (reading 'map'))
-  const { data: teachersData = [], isLoading, refetch, error } = useQueryTeacther();
+  const {
+    data: teachersData = [],
+    isLoading,
+    refetch,
+    error,
+  } = useQueryTeacther();
 
   // Aplicar filtros
-  const filteredData = teachersData.filter(item => {
+  const filteredData = teachersData.filter((item) => {
     // CORREÇÃO 2: Usa (item.propriedade ?? "").toLowerCase() para evitar o erro .toLowerCase
     // (Uncaught TypeError: Cannot read properties of undefined (reading 'toLowerCase'))
-    const matchSearch = 
+    const matchSearch =
       (item.nome ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.n_mecanografico ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.n_mecanografico ?? "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       (item.username ?? "").toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchCategoria = filterCategoria === "all" || item.descricao_categoria === filterCategoria;
-    const matchGrau = filterGrau === "all" || item.descricao_grau_academico === filterGrau;
-    const matchEscalao = filterEscalao === "all" || item.descricao_escalao === filterEscalao;
-    
+
+    const matchCategoria =
+      filterCategoria === "all" || item.descricao_categoria === filterCategoria;
+    const matchGrau =
+      filterGrau === "all" || item.descricao_grau_academico === filterGrau;
+    const matchEscalao =
+      filterEscalao === "all" || item.descricao_escalao === filterEscalao;
+
     return matchSearch && matchCategoria && matchGrau && matchEscalao;
   });
 
   // Extrair valores únicos para os filtros
-  const categorias = [...new Set(teachersData.map(t => t.descricao_categoria))].sort();
-  const grausAcademicos = [...new Set(teachersData.map(t => t.descricao_grau_academico))].sort();
-  const escaloes = [...new Set(teachersData.map(t => t.descricao_escalao))].sort();
+  const categorias = [
+    ...new Set(teachersData.map((t) => t.descricao_categoria)),
+  ].sort();
+  const grausAcademicos = [
+    ...new Set(teachersData.map((t) => t.descricao_grau_academico)),
+  ].sort();
+  const escaloes = [
+    ...new Set(teachersData.map((t) => t.descricao_escalao)),
+  ].sort();
 
   // Calcular estatísticas
   const totalDocentes = teachersData.length;
-  const totalMestres = teachersData.filter(t => t.descricao_grau_academico === "Mestre").length;
-  const totalDoutores = teachersData.filter(t => t.descricao_grau_academico === "Doutor").length;
-  const totalLicenciados = teachersData.filter(t => t.descricao_grau_academico === "Licenciado").length;
+  const totalMestres = teachersData.filter(
+    (t) => t.descricao_grau_academico === "Mestre"
+  ).length;
+  const totalDoutores = teachersData.filter(
+    (t) => t.descricao_grau_academico === "Doutor"
+  ).length;
+  const totalLicenciados = teachersData.filter(
+    (t) => t.descricao_grau_academico === "Licenciado"
+  ).length;
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice(
@@ -66,7 +111,9 @@ export default function GeneralListing() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Início</Link>
+        <Link to="/" className="hover:text-foreground">
+          Início
+        </Link>
         <span>/</span>
         <span className="font-medium">Gestão de Docentes</span>
         <span>/</span>
@@ -77,16 +124,23 @@ export default function GeneralListing() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Listagem geral</h1>
-          <p className="text-muted-foreground mt-1">Gestão completa do corpo docente</p>
+          <p className="text-muted-foreground mt-1">
+            Gestão completa do corpo docente
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" 
-          onClick={()=> refetch()} 
-          disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
             Atualizar lista
           </Button>
-          <Button variant="outline" size="sm">
+          {/* <Button variant="outline" size="sm">
             <Printer className="h-4 w-4 mr-2" />
             Imprimir
           </Button>
@@ -101,7 +155,7 @@ export default function GeneralListing() {
           <Button size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Novo docente
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -109,19 +163,27 @@ export default function GeneralListing() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Total Docentes</p>
-          <p className="text-3xl font-bold">{isLoading ? '...' : totalDocentes}</p>
+          <p className="text-3xl font-bold">
+            {isLoading ? "..." : totalDocentes}
+          </p>
         </div>
         <div className="bg-success/10 border border-success/20 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Doutores</p>
-          <p className="text-3xl font-bold text-success">{isLoading ? '...' : totalDoutores}</p>
+          <p className="text-3xl font-bold text-success">
+            {isLoading ? "..." : totalDoutores}
+          </p>
         </div>
         <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Mestres</p>
-          <p className="text-3xl font-bold text-warning">{isLoading ? '...' : totalMestres}</p>
+          <p className="text-3xl font-bold text-warning">
+            {isLoading ? "..." : totalMestres}
+          </p>
         </div>
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">Licenciados</p>
-          <p className="text-3xl font-bold text-primary">{isLoading ? '...' : totalLicenciados}</p>
+          <p className="text-3xl font-bold text-primary">
+            {isLoading ? "..." : totalLicenciados}
+          </p>
         </div>
       </div>
 
@@ -147,8 +209,10 @@ export default function GeneralListing() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
-                {categorias.map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                {categorias.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -162,8 +226,10 @@ export default function GeneralListing() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os graus</SelectItem>
-                {grausAcademicos.map(grau => (
-                  <SelectItem key={grau} value={grau}>{grau}</SelectItem>
+                {grausAcademicos.map((grau) => (
+                  <SelectItem key={grau} value={grau}>
+                    {grau}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -177,8 +243,10 @@ export default function GeneralListing() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os escalões</SelectItem>
-                {escaloes.map(esc => (
-                  <SelectItem key={esc} value={esc}>{esc}</SelectItem>
+                {escaloes.map((esc) => (
+                  <SelectItem key={esc} value={esc}>
+                    {esc}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -186,10 +254,13 @@ export default function GeneralListing() {
         </div>
 
         {/* Botão para limpar filtros */}
-        {(searchTerm || filterCategoria !== "all" || filterGrau !== "all" || filterEscalao !== "all") && (
+        {(searchTerm ||
+          filterCategoria !== "all" ||
+          filterGrau !== "all" ||
+          filterEscalao !== "all") && (
           <div className="mt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => {
                 setSearchTerm("");
@@ -208,12 +279,14 @@ export default function GeneralListing() {
       {error ? (
         <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 text-center">
           <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
-          <p className="text-destructive font-semibold mb-2">Erro ao carregar dados</p>
+          <p className="text-destructive font-semibold mb-2">
+            Erro ao carregar dados
+          </p>
           {/* Exibir a mensagem de erro de forma segura */}
-          <p className="text-sm text-muted-foreground mb-4">{error.message || "Erro desconhecido"}</p>
-          <Button 
-          onClick={()=> refetch()} 
-          variant="outline">
+          <p className="text-sm text-muted-foreground mb-4">
+            {error.message || "Erro desconhecido"}
+          </p>
+          <Button onClick={() => refetch()} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Tentar novamente
           </Button>
@@ -228,8 +301,12 @@ export default function GeneralListing() {
         </div>
       ) : paginatedData.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
-          <p className="text-muted-foreground mb-4">Nenhum registo encontrado</p>
-          <p className="text-sm text-muted-foreground mb-4">Não foram encontrados docentes com os critérios selecionados</p>
+          <p className="text-muted-foreground mb-4">
+            Nenhum registo encontrado
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Não foram encontrados docentes com os critérios selecionados
+          </p>
           <Button size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Registar novo docente
@@ -254,17 +331,23 @@ export default function GeneralListing() {
                 <TableBody>
                   {paginatedData.map((item) => (
                     <TableRow key={item.codigo}>
-                      <TableCell className="font-mono text-sm font-medium">{item.n_mecanografico}</TableCell>
+                      <TableCell className="font-mono text-sm font-medium">
+                        {item.n_mecanografico}
+                      </TableCell>
                       <TableCell className="font-medium">{item.nome}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{item.username}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{item.descricao_categoria}</Badge>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {item.username}
                       </TableCell>
                       <TableCell>
-                        <Badge 
+                        <Badge variant="outline">
+                          {item.descricao_categoria}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
                           variant={
-                            item.descricao_grau_academico === "Doutor" 
-                              ? "default" 
+                            item.descricao_grau_academico === "Doutor"
+                              ? "default"
                               : item.descricao_grau_academico === "Mestre"
                               ? "secondary"
                               : "outline"
@@ -280,7 +363,11 @@ export default function GeneralListing() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm" title="Ver detalhes">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            title="Ver detalhes"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="sm" title="Editar">
@@ -301,11 +388,16 @@ export default function GeneralListing() {
           {/* Paginação */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
-              <Select value={itemsPerPage.toString()} onValueChange={(value) => {
-                setItemsPerPage(Number(value));
-                setCurrentPage(1);
-              }}>
+              <Label htmlFor="items-per-page" className="text-sm">
+                Itens por página:
+              </Label>
+              <Select
+                value={itemsPerPage.toString()}
+                onValueChange={(value) => {
+                  setItemsPerPage(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger id="items-per-page" className="w-[80px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -317,7 +409,9 @@ export default function GeneralListing() {
                 </SelectContent>
               </Select>
               <span className="text-sm text-muted-foreground ml-4">
-                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, filteredData.length)} de {filteredData.length} registos
+                Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
+                {Math.min(currentPage * itemsPerPage, filteredData.length)} de{" "}
+                {filteredData.length} registos
               </span>
             </div>
 
@@ -325,7 +419,7 @@ export default function GeneralListing() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -337,7 +431,9 @@ export default function GeneralListing() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages || totalPages === 0}
               >
                 Seguinte

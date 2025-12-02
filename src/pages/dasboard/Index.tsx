@@ -83,8 +83,13 @@ const Index = () => {
           <CardDescription>Módulos mais utilizados</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
+              {
+                name: "Avaliações",
+                icon: FileCheck,
+                path: "/avaliacoes/controle",
+              },
               {
                 name: "Assiduidade",
                 icon: BookOpen,
