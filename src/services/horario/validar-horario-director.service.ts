@@ -11,9 +11,5 @@ export async function ValidarHorarioDirectorService(
 ): Promise<void> {
   const { p_horario_id } = payload;
 
-  await axiosApexGa.put("/horario/Validar", {
-    params: {
-      p_horario_id,
-    },
-  });
+  await axiosApexGa.put("/horario/Validar" + "?p_horario_id=" + p_horario_id);
 }

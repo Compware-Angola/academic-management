@@ -47,7 +47,8 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-existentes";
+
+import { useQueryHorariosExistentesEliminados } from "@/hooks/horario/use-query-horarios-existentes-eliminados";
 
 export default function ScheduleListEliminated() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function ScheduleListEliminated() {
     isLoading: isLoadingHorarios,
     error,
     refetch,
-  } = useQueryHorariosExistentes({
+  } = useQueryHorariosExistentesEliminados({
     p_ano_lectivo: filters.anoLetivo,
     p_semestre: filters.semestre,
     p_periodo: filters.periodo,
@@ -353,8 +354,8 @@ export default function ScheduleListEliminated() {
                     <TableHead>Ano Curricular</TableHead>
                     <TableHead>Capacidade</TableHead>
                     <TableHead>Estado</TableHead>
-                    <TableHead>Disponibilidade</TableHead>
-                    <TableHead>Criado em</TableHead>
+                  
+                    <TableHead>Deletado em</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -383,15 +384,9 @@ export default function ScheduleListEliminated() {
                           {h.estado}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={h.disponibilidade === "Fechado" ? "destructive" : "default"}
-                        >
-                          {h.disponibilidade}
-                        </Badge>
-                      </TableCell>
+                   
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(h.dataCriacao).toLocaleDateString("pt-AO")}
+                        {new Date(h.dataEliminacao).toLocaleDateString("pt-AO")}
                       </TableCell>
                     </TableRow>
                   ))}
