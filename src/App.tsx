@@ -47,9 +47,10 @@ import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentMan
 import ControlNotes from "./pages/rating(avaliation)/control";
 import FormulaUC from "./pages/rating(avaliation)/formula-uc";
 import FormulaOral from "./pages/rating(avaliation)/formula-oral";
+import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
 
 const App = () => {
-  // Generate all routes from menu structure
+
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -65,6 +66,7 @@ const App = () => {
                 <Route path="/dashboard" element={<Index />} />
                 <Route path="/horarios/criar" element={<CreateSchedule />} />
                 <Route path="/horarios/listar" element={<ScheduleList />} />
+                <Route path="/horarios/eliminados" element={<ScheduleListEliminated />} />
                 <Route path="/salas/listar" element={<ClassromList />} />
                 <Route
                   path="/plano/disciplinas"

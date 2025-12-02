@@ -10,22 +10,8 @@ import {
   ChevronLast,
   ChevronLeft,
   ChevronRight,
-  MoreVertical,
-  Eye,
-  Edit,
-  Copy,
-  Trash2,
 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -55,61 +41,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-existentes";
-import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
-import { Switch } from "@/components/ui/switch";
-import { useMutationDisponibilidadeHorario } from "@/hooks/horario/use-mutation-update-disponibilidade-horario";
-type Item = {
-  id: string | number
-  nome: string
 
-  // outros campos...
-}
-export default function ScheduleList() {
+export default function ScheduleListEliminated() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const deleteMutation = useMutationDeletarHorario();
-  // Aqui tu recebes o item inteiro ou só o ID – como quiseres
-  const [itemToDelete, setItemToDelete] = useState<Item | null>(null)
-  const mutation = useMutationDisponibilidadeHorario()
-  async function handleDeleteConfirmed(item: Item) {
-    try {
-
-      deleteMutation.mutate(
-        { p_horario_id: itemToDelete.id },
-        {
-          onSuccess: () => {
-            setDeleteDialogOpen(false);
-            setItemToDelete(null);
-          },
-        }
-      );
-
-
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir.",
-        variant: "destructive",
-      })
-    } finally {
-      setDeleteDialogOpen(false)
-    }
-  }
 
   const [filters, setFilters] = useState({
     anoLetivo: "",
@@ -201,16 +143,13 @@ export default function ScheduleList() {
             </BreadcrumbList>
           </Breadcrumb>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Horário Existentes
+            Horário Eliminados
           </h1>
           <p className="text-muted-foreground">
             Visualize todos os Horário criadas por ano letivo, semestre, período, curso e ano curricular.
           </p>
         </div>
-        <Button onClick={() => navigate("/horarios/criar")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Criar Horário
-        </Button>
+    
       </div>
 
       {/* Filtros */}
@@ -328,8 +267,8 @@ export default function ScheduleList() {
                     loadingAnosCurriculares
                       ? "A carregar..."
                       : !filters.curso
-                        ? "Selecione um curso"
-                        : "Todos os anos"
+                      ? "Selecione um curso"
+                      : "Todos os anos"
                   }
                 />
               </SelectTrigger>
@@ -400,10 +339,7 @@ export default function ScheduleList() {
                 ? "Não existem Horários criadas com os filtros aplicados."
                 : "Preencha os filtros para visualizar os Horários."}
             </p>
-            <Button onClick={() => navigate("/horarios/criar")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Horário
-            </Button>
+          
           </div>
         ) : (
           <>
@@ -419,7 +355,6 @@ export default function ScheduleList() {
                     <TableHead>Estado</TableHead>
                     <TableHead>Disponibilidade</TableHead>
                     <TableHead>Criado em</TableHead>
-                    <TableHead>Acção</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -427,7 +362,7 @@ export default function ScheduleList() {
                     <TableRow
                       key={h.codigo}
                       className="hover:bg-muted/50 cursor-pointer"
-
+                     
                     >
                       <TableCell className="font-semibold text-primary">
                         {h.designacao}
@@ -440,7 +375,7 @@ export default function ScheduleList() {
                         <Badge
                           variant={
                             h.estado.toLowerCase().includes("pendente") ||
-                              h.estado.toLowerCase().includes("distribuição")
+                            h.estado.toLowerCase().includes("distribuição")
                               ? "secondary"
                               : "default"
                           }
@@ -448,58 +383,16 @@ export default function ScheduleList() {
                           {h.estado}
                         </Badge>
                       </TableCell>
-                      <TableCell align="center">
-                        <Switch
-                          checked={h.disponibilidade === "Disponivel"}
-                          disabled={mutation.isPending}
-                          onCheckedChange={() => {
-                            mutation.mutate({
-                              p_horario_id: h.codigo,
-                             
-                            });
-                          }}
-                        />
+                      <TableCell>
+                        <Badge
+                          variant={h.disponibilidade === "Fechado" ? "destructive" : "default"}
+                        >
+                          {h.disponibilidade}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(h.dataCriacao).toLocaleDateString("pt-AO")}
                       </TableCell>
-                      <TableCell className="w-10">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="h-8 w-8 rounded-md p-0 hover:bg-muted inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors">
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Ações</span>
-                            </button>
-                          </DropdownMenuTrigger>
-
-                          <DropdownMenuContent align="end">
-                            {/*
-                            <DropdownMenuItem onClick={() => console.log("ver", h.id)}>
-                              <Eye className="mr-2 h-4 w-4" /> Ver
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem onClick={() => console.log("editar", item.id)}>
-                              <Edit className="mr-2 h-4 w-4" /> Editar
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem onClick={() => console.log("duplicar", item.id)}>
-                              <Copy className="mr-2 h-4 w-4" /> Duplicar
-                            </DropdownMenuItem>
-           */}
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()} // evita fechar o menu
-                              onClick={() => {
-                                setItemToDelete({ nome: h.designacao, id: h.codigo })
-                                setDeleteDialogOpen(true)
-                              }}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-
                     </TableRow>
                   ))}
                 </TableBody>
@@ -553,30 +446,6 @@ export default function ScheduleList() {
           </>
         )}
       </div>
-      {/* Modal de confirmação de exclusão */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Tens a certeza absoluta?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação é irreversível. Vais excluir permanentemente o item:{" "}
-              <span className="font-bold text-foreground">
-                {itemToDelete?.nome}
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => itemToDelete && handleDeleteConfirmed(itemToDelete)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Sim, excluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
     </div>
   );
 }
