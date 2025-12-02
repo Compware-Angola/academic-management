@@ -8,6 +8,16 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -29,6 +39,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
+
+import { useMutationfetchDeleteActivity } from "@/hooks/academiccalendar/use-mutation-delete-activity";
 
 export default function ActivitiesLecturesLic() {
   const {
@@ -55,6 +68,27 @@ export default function ActivitiesLecturesLic() {
     loadingAnosLetivos,
     loadingAtividades,
   } = useActivitiesLectures();
+ const [openDialog, setOpenDialog] = useState(false);
+   const [selectedSala, setSelectedSala] = useState<{ id: string; descricao: string } | null>(null);
+     const { mutate: deleteSala, isPending: deleting } = useMutationfetchDeleteActivity();
+
+   const handleOpenDelete = (item: any) => {
+     setSelectedSala({
+       id: item.codigo.toString(),
+       descricao: item.designacao,
+     });
+     setOpenDialog(true);
+   };
+     const handleConfirmDelete = () => {
+    if (!selectedSala) return;
+    deleteSala(selectedSala.id, {
+      onSuccess: () => {
+        setOpenDialog(false);
+        setSelectedSala(null);
+       
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -193,10 +227,8 @@ export default function ActivitiesLecturesLic() {
                   <TableCell>{item.tipo_calendario}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
+                    
+                      <Button onClick={() => handleOpenDelete(item)} variant="ghost" size="icon">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -240,7 +272,28 @@ export default function ActivitiesLecturesLic() {
           </div>
         </div>
       )}
-
+  {/* Modal de Confirmação de Exclusão */}
+      <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja realmente excluir a actividade  <strong>{selectedSala?.descricao}</strong>?<br />
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleting}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {/* Modal */}
       <ActivityModal
         open={openModal}

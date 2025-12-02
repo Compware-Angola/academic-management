@@ -22,6 +22,6 @@ export type CreateSalaPayload = {
 };
 
 export async function createSala(data: CreateSalaPayload) {
-  const response = await axiosNestGa.post("/room", data);
+  const response = await axiosNestGa.post("/rooms", data);
   return response.data;
 }

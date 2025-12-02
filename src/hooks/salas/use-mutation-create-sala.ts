@@ -20,7 +20,7 @@ export function useMutationCreateSala() {
 
       // Atualiza lista
       queryClient.invalidateQueries({
-        queryKey: ["salas"],
+        queryKey: ["salas-new"],
       });
     },
 

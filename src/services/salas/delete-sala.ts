@@ -4,7 +4,7 @@ export async function DeleteSala(id:string) {
 
 
   const { data } = await axiosNestGa.delete<DeleteResponse>(
-    `room/${id}`);
+    `rooms/${id}`);
 
 
   return data;

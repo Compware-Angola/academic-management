@@ -13,7 +13,7 @@ export function useMutationDeleteSala() {
       toast({
         title: data.message ,
       });
-      queryClient.invalidateQueries({ queryKey: ["salas"] });
+      queryClient.invalidateQueries({ queryKey: ["salas-new"] });
     },
     onError: () => {
       toast({

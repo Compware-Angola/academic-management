@@ -5,6 +5,6 @@ type  RoomTypes = {
       "descricao": string
     }
 export async function getRoomTypes():Promise<RoomTypes[]> {
-  const response = await axiosNestGa.get<{data:RoomTypes[]}>("/room/types");
+  const response = await axiosNestGa.get<{data:RoomTypes[]}>("/rooms/types");
   return response.data.data ?? [] ;
 }

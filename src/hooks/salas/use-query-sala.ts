@@ -1,4 +1,4 @@
-import { fetchSalas, Sala } from "@/services/salas/fetch-sala";
+import { fetchSalas, getAllRooms, Room, Sala } from "@/services/salas/fetch-sala";
 import { useQuery } from "@tanstack/react-query";
 
 type Props = {
@@ -14,4 +14,14 @@ export function useQuerySalas(params?: Props) {
     staleTime: 1000 * 60 * 5,
     retry: 1,
   });
+}
+
+export function useQuerySalasNew(){
+  return useQuery<Room[]>({
+    queryKey: ["salas-new"],
+    queryFn: () => getAllRooms(),
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
+  
 }
