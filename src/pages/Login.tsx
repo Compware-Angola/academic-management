@@ -153,23 +153,7 @@ const Login = () => {
                 </Button>
               </form>
             </Form>
-            <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">Não tem uma conta? </span>
-              <Button
-                type="button"
-                variant="link"
-                className="px-0 text-primary hover:text-primary/80"
-                onClick={() =>
-                  toast({
-                    title: "Registro",
-                    description:
-                      "Entre em contato com a administração para criar uma conta",
-                  })
-                }
-              >
-                Solicitar acesso
-              </Button>
-            </div>
+       
           </CardContent>
         </Card>
 
