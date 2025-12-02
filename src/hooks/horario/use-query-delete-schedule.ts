@@ -24,6 +24,10 @@ export const useMutationDeletarHorario = () => {
       });
     },
     onError: (error: any) => {
+       queryClient.invalidateQueries({
+        queryKey: ["horarios-existentes"],
+      });
+
       toast({
         title: "Erro ao excluir",
         description:
