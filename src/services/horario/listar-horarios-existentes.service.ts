@@ -54,7 +54,7 @@ export async function listarHorariosExistentesService(
         p_semestre,
         p_periodo,
         p_curso,
-        p_ano_curricular, // Agora envia se estiver preenchido
+        p_ano_curricular,
         p_unidade_curricular: "", // opcional, mas ajuda a manter compatibilidade
         p_estado: "",
         p_afetacao_docente: "",

@@ -1,16 +1,9 @@
+import { AuthResponse } from "@/services/auth/login.service";
+
 export type AuthUser = {
   user_id: string;
   username: string;
-  hash: string;
-};
-
-export type AuthResponse = {
-  codresposta: number;
-  msgresposta: string;
-  token: string;
-  user_id: string;
-  hash: string;
-  username: string;
+  expires_in: string;
 };
 
 export class AuthStorage {
@@ -19,12 +12,12 @@ export class AuthStorage {
 
   // Salvar informação completa do login
   static saveLogin(data: AuthResponse) {
-    localStorage.setItem(this.TOKEN_KEY, data.token);
+    localStorage.setItem(this.TOKEN_KEY, data.access_token);
 
     const user: AuthUser = {
-      user_id: data.user_id,
-      username: data.username,
-      hash: data.hash,
+      user_id: data.user.pk_utilizador  + "",
+      username: data.user.username,
+      expires_in: data.expires_in + "",
     };
 
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
