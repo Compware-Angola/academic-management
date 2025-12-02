@@ -138,12 +138,11 @@ export default function CreateSchedule() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-    if (!hasCheckedCollisions) {
+    if (!validateForm()) {
       toast({
         variant: "destructive",
         title: "Validação pendente",
-        description: "Verifique colisões primeiro.",
+        description: "Verifique todos os campos",
       });
       return;
     }
@@ -365,10 +364,7 @@ export default function CreateSchedule() {
             Cancelar
           </Button>
 
-          <Button
-            type="submit"
-            disabled={!isFormComplete || !hasCheckedCollisions || isPending}
-          >
+          <Button type="submit" disabled={!isFormComplete || isPending}>
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando

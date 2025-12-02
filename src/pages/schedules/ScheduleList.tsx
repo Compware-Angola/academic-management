@@ -88,25 +88,17 @@ export default function ScheduleList() {
   // Aqui tu recebes o item inteiro ou só o ID – como quiseres
   const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const mutation = useMutationDisponibilidadeHorario();
-  async function handleDeleteConfirmed(item: Item) {
+  async function handleDeleteConfirmed(item: number) {
     try {
-      deleteMutation.mutate(
-        { p_horario_id: itemToDelete.id },
-        {
-          onSuccess: () => {
-            setDeleteDialogOpen(false);
-            setItemToDelete(null);
-          },
-        }
-      );
+      deleteMutation.mutate({ p_horario_id: item });
     } catch (error) {
+      const message =
+        error instanceof Error ? error.name : "Não foi possível excluir.";
       toast({
         title: "Erro",
-        description: "Não foi possível excluir.",
+        description: message,
         variant: "destructive",
       });
-    } finally {
-      setDeleteDialogOpen(false);
     }
   }
 
@@ -499,11 +491,7 @@ export default function ScheduleList() {
                             <DropdownMenuItem
                               onSelect={(e) => e.preventDefault()} // evita fechar o menu
                               onClick={() => {
-                                setItemToDelete({
-                                  nome: h.designacao,
-                                  id: h.codigo,
-                                });
-                                setDeleteDialogOpen(true);
+                                handleDeleteConfirmed(h.codigo);
                               }}
                               className="text-destructive focus:text-destructive"
                             >
@@ -581,7 +569,7 @@ export default function ScheduleList() {
         )}
       </div>
       {/* Modal de confirmação de exclusão */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      {/* <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Tens a certeza absoluta?</AlertDialogTitle>
@@ -604,7 +592,7 @@ export default function ScheduleList() {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
     </div>
   );
 }
