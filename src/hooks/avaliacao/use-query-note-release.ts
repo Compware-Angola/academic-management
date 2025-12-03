@@ -7,6 +7,7 @@ interface UseQueryNoteReleasesParams {
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;
+  turno:number
   
 }
 

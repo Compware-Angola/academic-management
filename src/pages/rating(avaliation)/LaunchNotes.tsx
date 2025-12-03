@@ -20,6 +20,7 @@ import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
@@ -35,6 +36,7 @@ export default function LaunchNotes() {
     tipoAvaliacao: "",
     tipoProva: "",
     verHoario: "",
+   
     filtro: "",
   });
 
@@ -44,6 +46,7 @@ export default function LaunchNotes() {
     tipoProvaId: Number(formData.tipoProva),
     tipoAvaliacao: Number(formData.tipoAvaliacao),
     classe: Number(formData.classes),
+    turno: Number(formData.periodo)
   }); 
 
   const [localStudents, setLocalStudents] = useState(students);
@@ -60,7 +63,7 @@ export default function LaunchNotes() {
   const { data: classes = [], isLoading: isLoadingClasses } = useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } = useQueryTipoAvaliacao();
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } = useQueryTipoProva();
-
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const upsertNoteMutation = useUpsertNote();
 
   useEffect(() => {
@@ -162,6 +165,22 @@ export default function LaunchNotes() {
       options={academicYear}
       map={(a) => ({ key: a.codigo, label: a.designacao })}
     />
+     <FormSelect
+                disabled={
+                  isLoadingPeriodos ||
+                  isLoadingAcademicYear ||
+                  formData.anoLetivo === ""
+                }
+                loading={isLoadingPeriodos}
+                label="Período"
+                value={formData.periodo}
+                onChange={(v) => setFormData({ ...formData, periodo: v })}
+                options={periodos}
+                map={(p) => ({
+                  key: p.codigo,
+                  label: p.designacao,
+                })}
+              />
     <FormSelect
       disabled={isLoadingSemestres}
       loading={isLoadingSemestres}

@@ -41,6 +41,7 @@ export async function fetchNoteReleases(params: {
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;
+  turno:number
 }): Promise<NoteRelease[]> {
   try {
     const response = await axiosNestGa.get<NoteReleaseApiResponse>(
