@@ -7,13 +7,15 @@ interface UseQueryNoteReleasesParams {
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;
+  
 }
 
 export function useQueryNoteReleases(params: UseQueryNoteReleasesParams) {
   return useQuery<NoteRelease[]>({
-    queryKey: ["note-releases", params], 
+    queryKey: ["note-releases", params],
     queryFn: () => fetchNoteReleases(params),
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 1,
+    enabled: false, // NÃO buscar automaticamente
   });
 }

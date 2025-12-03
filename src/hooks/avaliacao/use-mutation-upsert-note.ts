@@ -1,0 +1,19 @@
+import { NoteUpsertPayload, NoteUpsertResponse, upsertNote } from "@/services/update-or-create-note-release";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+
+export function useUpsertNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation<NoteUpsertResponse, any, NoteUpsertPayload>({
+    mutationFn: (payload: NoteUpsertPayload) => upsertNote(payload),
+    onSuccess: (data, variables) => {
+      // Atualiza automaticamente a query de notas após salvar
+      queryClient.invalidateQueries({ queryKey: ["note-releases"] });
+      console.log("Nota lançada/atualizada:", data, variables);
+    },
+    onError: (error) => {
+      console.error("Erro ao lançar/atualizar nota:", error);
+    },
+  });
+}
