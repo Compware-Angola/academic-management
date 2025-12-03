@@ -237,17 +237,28 @@ export default function LaunchNotes() {
     />
 
     {/* Botão Listar na mesma linha */}
-    <div className="flex items-end">
-      <Button
-        size="sm"
-     
-        disabled={loadingNoteRelease}
-        onClick={() => refetch()}
-      >   <RefreshCw className="h-4 w-4 mr-2" />
-        Listar
-      </Button>
-      
-    </div>
+   <div className="flex items-end">
+  <Button
+ 
+    className="w-full" // opcional: deixa o botão maior horizontalmente
+    disabled={
+      loadingNoteRelease ||
+      !formData.anoLetivo ||
+      !formData.periodo ||
+      !formData.semestre ||
+      !formData.curso ||
+      !formData.classes ||
+      !formData.unidadeCurricular ||
+      !formData.tipoProva ||
+      !formData.tipoAvaliacao
+    }
+    onClick={() => refetch()}
+  >
+    <RefreshCw className="h-5 w-5 mr-2" />
+    Listar
+  </Button>
+</div>
+
   </div>
 </div>
 
