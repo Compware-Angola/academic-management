@@ -131,10 +131,10 @@ export default function DisciplineManagementList() {
             Gestão completa de disciplinas e unidades curriculares
           </p>
         </div>
-        {/* <Button size="sm" onClick={() => setCreateModalOpen(true)}>
+        <Button size="sm" onClick={() => setCreateModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Nova disciplina
-        </Button> */}
+        </Button>
       </div>
 
       {/* Estatísticas */}

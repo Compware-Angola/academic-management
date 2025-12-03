@@ -24,8 +24,8 @@ export interface User {
   user_pertence: string | null;
   created_by: number;
   last_updated_by: number;
-  created_at: string;             // ou Date se você for converter
-  updated_at: string;             // idem
+  created_at: string;
+  updated_at: string;
   last_password_change: string | null;
   active_state: number;
   fotoname: string | null;

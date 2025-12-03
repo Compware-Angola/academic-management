@@ -169,12 +169,12 @@ export default function UCManagementPlan() {
       <PageHeader
         title="Gestão de Unidades Curriculares no Plano"
         subtitle="Visualizar e gerir todas as UCs por ano letivo, curso e classe"
-        // actions={
-        //   <Button onClick={handleOpenModal} size="sm">
-        //     <Plus className="h-4 w-4 mr-2" />
-        //     Adicionar UC ao Plano
-        //   </Button>
-        // }
+        actions={
+          <Button onClick={handleOpenModal} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar UC ao Plano
+          </Button>
+        }
       />
 
       {/* Filtros */}
