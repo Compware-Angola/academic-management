@@ -240,12 +240,13 @@ export default function LaunchNotes() {
     <div className="flex items-end">
       <Button
         size="sm"
-        variant="outline"
+     
         disabled={loadingNoteRelease}
         onClick={() => refetch()}
-      >
+      >   <RefreshCw className="h-4 w-4 mr-2" />
         Listar
       </Button>
+      
     </div>
   </div>
 </div>
