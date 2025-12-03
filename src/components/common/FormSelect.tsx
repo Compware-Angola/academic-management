@@ -15,7 +15,7 @@ type MapResult = {
 
 type FormSelectProps<T> = {
   label: string;
-  value: string;
+  value?: string;
   options?: T[];
   map: (item: T) => MapResult;
   onChange: (value: string) => void;
@@ -34,8 +34,7 @@ export function FormSelect<T>({
 }: FormSelectProps<T>) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
-
+      {label && <Label>{label}</Label>}
       <Select value={value} disabled={disabled} onValueChange={onChange}>
         <SelectTrigger>
           {loading ? (

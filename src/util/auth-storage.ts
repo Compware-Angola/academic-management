@@ -1,9 +1,10 @@
 import { AuthResponse } from "@/services/auth/login.service";
 
 export type AuthUser = {
-  user_id: string;
+  user_id: number;
+  expires_in: number;
+  nome: string;
   username: string;
-  expires_in: string;
 };
 
 export class AuthStorage {
@@ -15,9 +16,10 @@ export class AuthStorage {
     localStorage.setItem(this.TOKEN_KEY, data.access_token);
 
     const user: AuthUser = {
-      user_id: data.user.pk_utilizador  + "",
+      user_id: data.user.pk_utilizador,
       username: data.user.username,
-      expires_in: data.expires_in + "",
+      expires_in: data.expires_in,
+      nome: data.user.nome,
     };
 
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
@@ -41,7 +43,11 @@ export class AuthStorage {
 
   // Verifica se está autenticado
   static isAuthenticated(): boolean {
-    return !!this.getToken();
+    const isAuthenticated = !!this.getToken() && !!this.getUser();
+    if (!isAuthenticated) {
+      this.logout();
+    }
+    return isAuthenticated;
   }
 
   // Limpar tudo

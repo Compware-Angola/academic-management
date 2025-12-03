@@ -9,10 +9,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Calendar,
@@ -38,13 +51,17 @@ import { useQueryAcademicYearVacancies } from "@/hooks/academiccalendar/use-quer
 import { useQueryAcademicYearMonthlyFees } from "@/hooks/academiccalendar/use-query-academic-year-monthly-fees";
 import { ParametersEditModal } from "./components/modals/ParametersEditModal";
 import { formatarData } from "@/util/date-formate";
+import { Switch } from "@/components/ui/switch";
+import { useMutationUpdateAcademicYearState } from "@/hooks/academiccalendar/useMutation-update-academic-year-state";
+import { number } from "framer-motion";
 
 export default function Parameters() {
   const { toast } = useToast();
 
   // Filtros e paginação
   const [anoLetivoSelecionado, setAnoLetivoSelecionado] = useState<string>("");
-  const [tipoCandidaturaSelecionado, setTipoCandidaturaSelecionado] = useState<string>("");
+  const [tipoCandidaturaSelecionado, setTipoCandidaturaSelecionado] =
+    useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPageMonthly, setCurrentPageMonthly] = useState(1);
@@ -57,15 +74,15 @@ export default function Parameters() {
     refetch: refetchYears,
   } = useQueryAnoAcademico();
 
-  const {
-    data: tiposCandidatura = [],
-    isLoading: isLoadingTipos,
-  } = useQueryTipoCandidatura();
-
+  const { data: tiposCandidatura = [], isLoading: isLoadingTipos } =
+    useQueryTipoCandidatura();
+  const updateEstadoMutation = useMutationUpdateAcademicYearState();
   // Cálculo seguro do código do ano selecionado
   const selectedCodigo = useMemo(() => {
     if (!anoLetivoSelecionado || academicYears.length === 0) return undefined;
-    const ano = academicYears.find((a) => a.designacao === anoLetivoSelecionado);
+    const ano = academicYears.find(
+      (a) => a.designacao === anoLetivoSelecionado
+    );
     return ano?.codigo ?? undefined;
   }, [anoLetivoSelecionado, academicYears]);
 
@@ -101,9 +118,10 @@ export default function Parameters() {
   // Auto-selecionar ano ativo + tipo padrão
   useEffect(() => {
     if (academicYears.length > 0 && !anoLetivoSelecionado) {
-      const anoAtivo = academicYears.find((a) =>
-        a.estado?.toLowerCase().includes("activo") ||
-        a.estado?.toLowerCase().includes("ativo")
+      const anoAtivo = academicYears.find(
+        (a) =>
+          a.estado?.toLowerCase().includes("activo") ||
+          a.estado?.toLowerCase().includes("ativo")
       );
       if (anoAtivo) setAnoLetivoSelecionado(anoAtivo.designacao);
     }
@@ -111,7 +129,12 @@ export default function Parameters() {
     if (tiposCandidatura.length > 0 && !tipoCandidaturaSelecionado) {
       setTipoCandidaturaSelecionado(String(tiposCandidatura[0].codigo));
     }
-  }, [academicYears, tiposCandidatura, anoLetivoSelecionado, tipoCandidaturaSelecionado]);
+  }, [
+    academicYears,
+    tiposCandidatura,
+    anoLetivoSelecionado,
+    tipoCandidaturaSelecionado,
+  ]);
 
   // Resetar página ao mudar filtros
   useEffect(() => {
@@ -138,10 +161,25 @@ export default function Parameters() {
   }, [selectedCodigo]);
   // Helpers
 
-
   const calcularDias = (inicio: string, fim: string) => {
     const diff = new Date(fim).getTime() - new Date(inicio).getTime();
     return Math.round(diff / (1000 * 60 * 60 * 24));
+  };
+  const handleToggleEstado = (ativo: boolean) => {
+    if (!selectedCodigo) {
+      toast({
+        title: "Erro",
+        description: "Selecione o ano letivo",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Atualiza o backend
+    updateEstadoMutation.mutate({
+      codigoAno: selectedCodigo,
+      estado: ativo ? 1 : 0,
+    });
   };
 
   const getEstadoBadge = (estado: string) => {
@@ -166,12 +204,11 @@ export default function Parameters() {
   };
 
   const tipoCandidaturaNome =
-    tiposCandidatura.find((t) => t.codigo === Number(tipoCandidaturaSelecionado))?.designacao ||
-    "Licenciatura";
+    tiposCandidatura.find(
+      (t) => t.codigo === Number(tipoCandidaturaSelecionado)
+    )?.designacao || "Licenciatura";
 
   const isLoadingGlobal = isLoadingYears || isLoadingTipos;
-
-
 
   return (
     <div className="space-y-8 pb-10">
@@ -181,14 +218,13 @@ export default function Parameters() {
         subtitle="Home / Calendário Académico / Parâmetros"
         actions={
           <>
-        
             <Button
               size="sm"
               onClick={() => setIsEditModalOpen(true)}
               disabled={!currentYearParams}
             >
               <Save className="h-4 w-4 mr-2" />
-              Novo Parâmetro 
+              Novo Parâmetro
             </Button>
           </>
         }
@@ -201,7 +237,9 @@ export default function Parameters() {
             <Calendar className="h-5 w-5" />
             Filtros
           </CardTitle>
-          <CardDescription>Selecione o ano letivo e o tipo de candidatura</CardDescription>
+          <CardDescription>
+            Selecione o ano letivo e o tipo de candidatura
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoadingGlobal ? (
@@ -214,7 +252,10 @@ export default function Parameters() {
               {/* Ano Letivo */}
               <div className="space-y-2">
                 <Label>Ano Letivo</Label>
-                <Select value={anoLetivoSelecionado} onValueChange={setAnoLetivoSelecionado}>
+                <Select
+                  value={anoLetivoSelecionado}
+                  onValueChange={setAnoLetivoSelecionado}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o ano letivo" />
                   </SelectTrigger>
@@ -224,7 +265,9 @@ export default function Parameters() {
                         <div className="flex items-center justify-between w-full">
                           <span>{ano.designacao}</span>
                           {!ano.estado?.toLowerCase().includes("desactiv") && (
-                            <span className="text-xs text-green-600 font-medium ml-2">(Ativo)</span>
+                            <span className="text-xs text-green-600 font-medium ml-2">
+                              (Ativo)
+                            </span>
                           )}
                         </div>
                       </SelectItem>
@@ -236,7 +279,10 @@ export default function Parameters() {
               {/* Tipo de Candidatura */}
               <div className="space-y-2">
                 <Label>Tipo de Candidatura</Label>
-                <Select value={tipoCandidaturaSelecionado} onValueChange={setTipoCandidaturaSelecionado}>
+                <Select
+                  value={tipoCandidaturaSelecionado}
+                  onValueChange={setTipoCandidaturaSelecionado}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
@@ -280,11 +326,12 @@ export default function Parameters() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Períodos Letivos — {currentYearParams?.designacao || "Carregando..."}
+                Períodos Letivos —{" "}
+                {currentYearParams?.designacao || "Carregando..."}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              {(isLoadingParams || isFetchingParams) ? (
+              {isLoadingParams || isFetchingParams ? (
                 <div className="space-y-4">
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
@@ -292,7 +339,9 @@ export default function Parameters() {
               ) : !currentYearParams ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <Calendar className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p className="text-lg">Selecione um ano letivo para visualizar os parâmetros</p>
+                  <p className="text-lg">
+                    Selecione um ano letivo para visualizar os parâmetros
+                  </p>
                 </div>
               ) : (
                 <Table>
@@ -303,7 +352,9 @@ export default function Parameters() {
                       <TableHead>Fim 1º Semestre</TableHead>
                       <TableHead>Início 2º Semestre</TableHead>
                       <TableHead>Fim 2º Semestre</TableHead>
-                      <TableHead className="text-center">Duração Total</TableHead>
+                      <TableHead className="text-center">
+                        Duração Total
+                      </TableHead>
                       <TableHead className="text-center w-32">Estado</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -313,26 +364,38 @@ export default function Parameters() {
                         {currentYearParams.designacao}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {formatarData(currentYearParams.dataInicioPrimeiroSemestre)}
+                        {formatarData(
+                          currentYearParams.dataInicioPrimeiroSemestre
+                        )}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {formatarData(currentYearParams.dataFimPrimeiroSemestre)}
+                        {formatarData(
+                          currentYearParams.dataFimPrimeiroSemestre
+                        )}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {formatarData(currentYearParams.dataInicioSegundoSemestre)}
+                        {formatarData(
+                          currentYearParams.dataInicioSegundoSemestre
+                        )}
                       </TableCell>
                       <TableCell className="font-medium">
                         {formatarData(currentYearParams.dataFimSegundoSemestre)}
                       </TableCell>
                       <TableCell className="text-center font-medium">
-                        {calcularDias(currentYearParams.dataInicioPrimeiroSemestre, currentYearParams.dataFimSegundoSemestre)} dias
+                        {calcularDias(
+                          currentYearParams.dataInicioPrimeiroSemestre,
+                          currentYearParams.dataFimSegundoSemestre
+                        )}{" "}
+                        dias
                       </TableCell>
                       <TableCell className="text-center">
-                        {currentYearParams.estado ? (
-                          getEstadoBadge(currentYearParams.estado)
-                        ) : (
-                          <Badge variant="outline">Indefinido</Badge>
-                        )}
+                        <Switch
+                          checked={
+                            currentYearParams.estado.toLowerCase() === "activo"
+                          }
+                          disabled={updateEstadoMutation.isPending}
+                          onCheckedChange={handleToggleEstado}
+                        />
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -355,11 +418,16 @@ export default function Parameters() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Vagas Disponíveis — {tipoCandidaturaNome} ({currentYearParams?.designacao})
+                Vagas Disponíveis — {tipoCandidaturaNome} (
+                {currentYearParams?.designacao})
               </CardTitle>
               <CardDescription>
-                Total de vagas: {vacancies.reduce((acc, v) => acc + v.numeroVagas, 0).toLocaleString()} •
-                Cursos com vagas: {vacancies.filter(v => v.numeroVagas > 0).length}
+                Total de vagas:{" "}
+                {vacancies
+                  .reduce((acc, v) => acc + v.numeroVagas, 0)
+                  .toLocaleString()}{" "}
+                • Cursos com vagas:{" "}
+                {vacancies.filter((v) => v.numeroVagas > 0).length}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -373,7 +441,9 @@ export default function Parameters() {
               ) : vacancies.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p className="text-lg">Nenhuma vaga encontrada para este ano e tipo de candidatura.</p>
+                  <p className="text-lg">
+                    Nenhuma vaga encontrada para este ano e tipo de candidatura.
+                  </p>
                 </div>
               ) : (
                 <>
@@ -391,11 +461,20 @@ export default function Parameters() {
                         <TableBody>
                           {paginatedVacancies.length > 0 ? (
                             paginatedVacancies.map((vaga, i) => (
-                              <TableRow key={`${vaga.codigoCurso}-${vaga.periodoDescricao}`} className="hover:bg-muted/50">
-                                <TableCell className="font-medium">{vaga.cursoDescricao}</TableCell>
+                              <TableRow
+                                key={`${vaga.codigoCurso}-${vaga.periodoDescricao}`}
+                                className="hover:bg-muted/50"
+                              >
+                                <TableCell className="font-medium">
+                                  {vaga.cursoDescricao}
+                                </TableCell>
                                 <TableCell>
                                   <Badge
-                                    variant={vaga.periodoDescricao === "Diurno" ? "default" : "secondary"}
+                                    variant={
+                                      vaga.periodoDescricao === "Diurno"
+                                        ? "default"
+                                        : "secondary"
+                                    }
                                     className="text-xs"
                                   >
                                     {vaga.periodoDescricao}
@@ -403,9 +482,14 @@ export default function Parameters() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                   {vaga.numeroVagas > 0 ? (
-                                    <span className="font-bold text-primary">{vaga.numeroVagas.toLocaleString()}</span>
+                                    <span className="font-bold text-primary">
+                                      {vaga.numeroVagas.toLocaleString()}
+                                    </span>
                                   ) : (
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
                                       Esgotado
                                     </Badge>
                                   )}
@@ -414,8 +498,12 @@ export default function Parameters() {
                             ))
                           ) : (
                             <TableRow>
-                              <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
-                                Não há vagas com mais de 0 para exibir nesta página.
+                              <TableCell
+                                colSpan={3}
+                                className="text-center py-8 text-muted-foreground"
+                              >
+                                Não há vagas com mais de 0 para exibir nesta
+                                página.
                               </TableCell>
                             </TableRow>
                           )}
@@ -428,7 +516,10 @@ export default function Parameters() {
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <span>Itens por página:</span>
-                          <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(Number(v))}>
+                          <Select
+                            value={itemsPerPage.toString()}
+                            onValueChange={(v) => setItemsPerPage(Number(v))}
+                          >
                             <SelectTrigger className="w-20">
                               <SelectValue />
                             </SelectTrigger>
@@ -444,14 +535,30 @@ export default function Parameters() {
 
                         <div className="text-sm text-muted-foreground">
                           Mostrando {(currentPage - 1) * itemsPerPage + 1}–
-                          {Math.min(currentPage * itemsPerPage, filteredVacancies.length)} de {filteredVacancies.length} cursos
+                          {Math.min(
+                            currentPage * itemsPerPage,
+                            filteredVacancies.length
+                          )}{" "}
+                          de {filteredVacancies.length} cursos
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(1)}
+                            disabled={currentPage === 1}
+                          >
                             <ChevronsLeft className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setCurrentPage((p) => Math.max(1, p - 1))
+                            }
+                            disabled={currentPage === 1}
+                          >
                             <ChevronLeft className="h-4 w-4" />
                             Anterior
                           </Button>
@@ -460,11 +567,25 @@ export default function Parameters() {
                             {currentPage} / {totalPages || 1}
                           </span>
 
-                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages || 1, p + 1))} disabled={currentPage === totalPages}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setCurrentPage((p) =>
+                                Math.min(totalPages || 1, p + 1)
+                              )
+                            }
+                            disabled={currentPage === totalPages}
+                          >
                             Próximo
                             <ChevronRight className="h-4 w-4 ml-1" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => setCurrentPage(totalPages || 1)} disabled={currentPage === totalPages}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(totalPages || 1)}
+                            disabled={currentPage === totalPages}
+                          >
                             <ChevronsRight className="h-4 w-4" />
                           </Button>
                         </div>
@@ -487,8 +608,11 @@ export default function Parameters() {
                 Calendário de Mensalidades — {currentYearParams?.designacao}
               </CardTitle>
               <CardDescription>
-                Total de prestações: {monthlyFees.length} •
-                Vencidas: {monthlyFees.filter(f => new Date(f.dataLimite) < new Date()).length}
+                Total de prestações: {monthlyFees.length} • Vencidas:{" "}
+                {
+                  monthlyFees.filter((f) => new Date(f.dataLimite) < new Date())
+                    .length
+                }
               </CardDescription>
             </CardHeader>
 
@@ -502,7 +626,10 @@ export default function Parameters() {
               ) : monthlyFees.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                  <p className="text-lg">Nenhum calendário de mensalidades encontrado para este ano letivo.</p>
+                  <p className="text-lg">
+                    Nenhum calendário de mensalidades encontrado para este ano
+                    letivo.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -515,20 +642,29 @@ export default function Parameters() {
                           <TableHead>Prestação</TableHead>
                           <TableHead>Semestre</TableHead>
                           <TableHead>Data Limite</TableHead>
-                          <TableHead className="text-center w-32">Estado</TableHead>
+                          <TableHead className="text-center w-32">
+                            Estado
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {paginatedMonthlyFees.length > 0 ? (
                           paginatedMonthlyFees.map((fee, i) => {
-                            const isOverdue = new Date(fee.dataLimite) < new Date();
+                            const isOverdue =
+                              new Date(fee.dataLimite) < new Date();
                             return (
                               <TableRow
                                 key={i}
-                                className={`hover:bg-muted/50 transition-colors ${isOverdue ? "opacity-70" : ""}`}
+                                className={`hover:bg-muted/50 transition-colors ${
+                                  isOverdue ? "opacity-70" : ""
+                                }`}
                               >
-                                <TableCell className="font-medium">{fee.designacao}</TableCell>
-                                <TableCell>{fee.prestacao}ª Prestação</TableCell>
+                                <TableCell className="font-medium">
+                                  {fee.designacao}
+                                </TableCell>
+                                <TableCell>
+                                  {fee.prestacao}ª Prestação
+                                </TableCell>
                                 <TableCell>
                                   <Badge variant="outline" className="text-xs">
                                     {fee.semestre}
@@ -541,7 +677,9 @@ export default function Parameters() {
                                   {isOverdue ? (
                                     <Badge variant="destructive">Vencido</Badge>
                                   ) : (
-                                    <Badge className="bg-primary/10 text-primary">Pendente</Badge>
+                                    <Badge className="bg-primary/10 text-primary">
+                                      Pendente
+                                    </Badge>
                                   )}
                                 </TableCell>
                               </TableRow>
@@ -549,7 +687,10 @@ export default function Parameters() {
                           })
                         ) : (
                           <TableRow>
-                            <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                            <TableCell
+                              colSpan={5}
+                              className="text-center py-10 text-muted-foreground"
+                            >
                               Nenhuma prestação nesta página.
                             </TableCell>
                           </TableRow>
@@ -562,7 +703,10 @@ export default function Parameters() {
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>Itens por página:</span>
-                      <Select value={itemsPerPageMonthly.toString()} onValueChange={(v) => setItemsPerPageMonthly(Number(v))}>
+                      <Select
+                        value={itemsPerPageMonthly.toString()}
+                        onValueChange={(v) => setItemsPerPageMonthly(Number(v))}
+                      >
                         <SelectTrigger className="w-20">
                           <SelectValue />
                         </SelectTrigger>
@@ -577,8 +721,13 @@ export default function Parameters() {
                     </div>
 
                     <div className="text-sm text-muted-foreground">
-                      Mostrando {(currentPageMonthly - 1) * itemsPerPageMonthly + 1}–
-                      {Math.min(currentPageMonthly * itemsPerPageMonthly, monthlyFees.length)} de {monthlyFees.length} prestações
+                      Mostrando{" "}
+                      {(currentPageMonthly - 1) * itemsPerPageMonthly + 1}–
+                      {Math.min(
+                        currentPageMonthly * itemsPerPageMonthly,
+                        monthlyFees.length
+                      )}{" "}
+                      de {monthlyFees.length} prestações
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -593,7 +742,9 @@ export default function Parameters() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPageMonthly(p => Math.max(1, p - 1))}
+                        onClick={() =>
+                          setCurrentPageMonthly((p) => Math.max(1, p - 1))
+                        }
                         disabled={currentPageMonthly === 1}
                       >
                         <ChevronLeft className="h-4 w-4" />
@@ -607,7 +758,11 @@ export default function Parameters() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPageMonthly(p => Math.min(totalPagesMonthly || 1, p + 1))}
+                        onClick={() =>
+                          setCurrentPageMonthly((p) =>
+                            Math.min(totalPagesMonthly || 1, p + 1)
+                          )
+                        }
                         disabled={currentPageMonthly === totalPagesMonthly}
                       >
                         Próximo
@@ -616,7 +771,9 @@ export default function Parameters() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPageMonthly(totalPagesMonthly || 1)}
+                        onClick={() =>
+                          setCurrentPageMonthly(totalPagesMonthly || 1)
+                        }
                         disabled={currentPageMonthly === totalPagesMonthly}
                       >
                         <ChevronsRight className="h-4 w-4" />
@@ -636,6 +793,5 @@ export default function Parameters() {
         anoLetivo={currentYearParams?.designacao || ""}
       />
     </div>
-
   );
 }

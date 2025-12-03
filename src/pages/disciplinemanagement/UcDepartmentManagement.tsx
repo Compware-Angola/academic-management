@@ -45,7 +45,8 @@ import { useQueryDepartamento } from "@/hooks/depatamento/use-query-depardamento
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-quer-departamento-uc";
+import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-query-departamento-uc";
+import { CreateUcModal } from "./components/CreateUcModal";
 
 interface UnidadeCurricular {
   id: number;
@@ -62,6 +63,7 @@ interface UnidadeCurricular {
 }
 
 export default function UcDepartmentManagement() {
+  const [openModal, setOpenModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
@@ -146,7 +148,12 @@ export default function UcDepartmentManagement() {
         subtitle="Gerir unidades curriculares organizadas por departamento académico"
         actions={
           <>
-            <Button variant="default" size="sm" onClick={handleCreate}>
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() => setOpenModal(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nova UC
             </Button>
@@ -333,6 +340,7 @@ export default function UcDepartmentManagement() {
           </div>
         </div>
       )}
+      <CreateUcModal open={openModal} onClose={() => setOpenModal(false)} />
     </div>
   );
 }

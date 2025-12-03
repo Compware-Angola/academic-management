@@ -22,8 +22,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Plus, AlertCircle } from "lucide-react";
 import { useMutationCreateDiscipline } from "@/hooks/study_plan/use-mutation-create-discipline";
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
-import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { useTiposUnidade } from "@/hooks/study_plan/use-type-unidade";
 import { useToast } from "@/hooks/use-toast";
 
@@ -38,7 +36,10 @@ interface CreateDisciplineModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function CreateDisciplineModal({ open, onOpenChange }: CreateDisciplineModalProps) {
+export function CreateDisciplineModal({
+  open,
+  onOpenChange,
+}: CreateDisciplineModalProps) {
   const { mutate: create, isPending } = useMutationCreateDiscipline();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -46,18 +47,30 @@ export function CreateDisciplineModal({ open, onOpenChange }: CreateDisciplineMo
   const [designacao, setDesignacao] = useState("");
   const [codigo_disciplina, setCodigoDisciplina] = useState("");
   const [cAbbr, setCAbbr] = useState("");
-  const [natureza_unidade_curricular, setNatureza] = useState<"TP" | "T" | "P" | "">("");
+  const [natureza_unidade_curricular, setNatureza] = useState<
+    "TP" | "T" | "P" | ""
+  >("");
   const [tipo_unidade_curricular, setTipo] = useState<string>("");
-const { data: tiposUnidade = [], isLoading: loadingTipos,isError } = useTiposUnidade();
+  const {
+    data: tiposUnidade = [],
+    isLoading: loadingTipos,
+    isError,
+  } = useTiposUnidade();
 
   const handleSubmit = () => {
-    if (!designacao.trim() || !codigo_disciplina.trim() || !cAbbr.trim() || !tipo_unidade_curricular || !natureza_unidade_curricular) {
+    if (
+      !designacao.trim() ||
+      !codigo_disciplina.trim() ||
+      !cAbbr.trim() ||
+      !tipo_unidade_curricular ||
+      !natureza_unidade_curricular
+    ) {
       alert("Preencha todos os campos obrigatórios!");
-       toast({
-            title: "Erro ao fazer Cadastro",
-            description: 'Preencha todos os campos obrigatórios!',
-            variant: "destructive",
-          });
+      toast({
+        title: "Erro ao fazer Cadastro",
+        description: "Preencha todos os campos obrigatórios!",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -93,9 +106,14 @@ const { data: tiposUnidade = [], isLoading: loadingTipos,isError } = useTiposUni
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+          className="space-y-6"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
             {/* Nome */}
             <div className="space-y-2">
               <Label>Nome da Disciplina *</Label>
@@ -143,7 +161,11 @@ const { data: tiposUnidade = [], isLoading: loadingTipos,isError } = useTiposUni
                   Erro ao carregar tipos
                 </div>
               ) : (
-                <Select value={tipo_unidade_curricular} onValueChange={setTipo} disabled={isPending}>
+                <Select
+                  value={tipo_unidade_curricular}
+                  onValueChange={setTipo}
+                  disabled={isPending}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o tipo..." />
                   </SelectTrigger>
@@ -176,11 +198,15 @@ const { data: tiposUnidade = [], isLoading: loadingTipos,isError } = useTiposUni
                 </SelectContent>
               </Select>
             </div>
-
           </div>
 
           <DialogFooter className="gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isPending}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isPending}>
