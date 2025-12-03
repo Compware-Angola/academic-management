@@ -25,7 +25,7 @@ import { Curso } from "@/services/fetch-course";
 import { Classes } from "@/services/classes/class-filter-by-curso";
 import { Discipline } from "@/services/study_plan/fect-discipline.serice";
 import { AnoAcademico } from "@/services/fetch-anos-academico";
-import { Semestre } from "@/services/semestre/fecth-semestres";
+import { Semestre } from "@/services/study_plan/semestre/fecth-semestres";
 import { Departamento } from "@/services/departamento/fetch-departamento";
 
 interface Props {

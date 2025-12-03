@@ -2,6 +2,7 @@
 import { axiosApexGa } from "@/lib/axios-apex-ga";
 
 export type Vacancy = {
+  codigo: number;
   numeroVagas: number;
   cursoDescricao: string;
   codigoCurso: number;

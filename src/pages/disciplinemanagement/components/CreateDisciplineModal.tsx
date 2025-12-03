@@ -1,6 +1,8 @@
 // src/components/disciplines/CreateDisciplineModal.tsx
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogContent,
@@ -9,8 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import {
   Select,
   SelectContent,
@@ -18,12 +22,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { Skeleton } from "@/components/ui/skeleton";
-import { Loader2, Plus, AlertCircle } from "lucide-react";
+
+import { Loader2, Plus, AlertCircle, Save } from "lucide-react";
+
 import { useMutationCreateDiscipline } from "@/hooks/study_plan/use-mutation-create-discipline";
-import { useAuth } from "@/hooks/use-auth";
+import { useMutationUpdateDiscipline } from "@/hooks/study_plan/use-mutation-update-discipline";
 import { useTiposUnidade } from "@/hooks/study_plan/use-type-unidade";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+
+import { Discipline } from "@/services/study_plan/fect-discipline.serice";
 
 interface TipoUnidade {
   codigo: number;
@@ -34,15 +44,25 @@ interface TipoUnidade {
 interface CreateDisciplineModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  discipline?: Discipline;
 }
 
 export function CreateDisciplineModal({
   open,
   onOpenChange,
+  discipline,
 }: CreateDisciplineModalProps) {
-  const { mutate: create, isPending } = useMutationCreateDiscipline();
+  const isEdit = !!discipline;
+
+  const { mutate: create, isPending: creating } = useMutationCreateDiscipline();
+
+  const { mutate: update, isPending: updating } = useMutationUpdateDiscipline();
+
+  const isPending = creating || updating;
+
   const { user } = useAuth();
   const { toast } = useToast();
+
   // Estados do formulário
   const [designacao, setDesignacao] = useState("");
   const [codigo_disciplina, setCodigoDisciplina] = useState("");
@@ -51,45 +71,86 @@ export function CreateDisciplineModal({
     "TP" | "T" | "P" | ""
   >("");
   const [tipo_unidade_curricular, setTipo] = useState<string>("");
+
   const {
     data: tiposUnidade = [],
     isLoading: loadingTipos,
     isError,
   } = useTiposUnidade();
 
+  const reset = () => {
+    setDesignacao("");
+    setCodigoDisciplina("");
+    setTipo("");
+    setNatureza("");
+    setCAbbr("");
+  };
+
+  /**
+   * Preenche dados quando estiver editando
+   */
+  useEffect(() => {
+    if (discipline && open) {
+      setDesignacao(discipline.desginacao);
+      setCodigoDisciplina(discipline.codigo_disciplina);
+      setCAbbr(discipline.sigla);
+      setTipo(discipline.tipo_unidade_curricular);
+      setNatureza(discipline.natureza_unidade_curricular as "TP" | "T" | "P");
+    } else if (open) {
+      reset();
+    }
+  }, [discipline, open]);
+
   const handleSubmit = () => {
     if (
-      !designacao.trim() ||
-      !codigo_disciplina.trim() ||
-      !cAbbr.trim() ||
+      !designacao ||
+      !codigo_disciplina ||
+      !cAbbr ||
       !tipo_unidade_curricular ||
       !natureza_unidade_curricular
     ) {
-      alert("Preencha todos os campos obrigatórios!");
       toast({
-        title: "Erro ao fazer Cadastro",
+        title: "Erro",
         description: "Preencha todos os campos obrigatórios!",
         variant: "destructive",
       });
       return;
     }
 
+    // 🔄 Atualizar
+    if (isEdit) {
+      update(
+        {
+          codigo: discipline!.codigo,
+          codigo_disciplina: codigo_disciplina.toUpperCase(),
+          designacao: designacao.trim(),
+          natureza_unidade_curricular,
+          nome_abreviatura: cAbbr.toUpperCase(),
+          tipo_unidade_curricular,
+        },
+        {
+          onSuccess: () => {
+            reset();
+            onOpenChange(false);
+          },
+        }
+      );
+      return;
+    }
+
+    // ➕ Criar
     create(
       {
         designacao: designacao.trim(),
         pk_utilizador: Number(user?.user_id) || 1,
-        tipo_unidade_curricular: tipo_unidade_curricular,
+        tipo_unidade_curricular,
         natureza_unidade_curricular,
         codigo_disciplina: codigo_disciplina.toUpperCase(),
         cAbbr: cAbbr.toUpperCase(),
       },
       {
         onSuccess: () => {
-          setDesignacao("");
-          setCodigoDisciplina("");
-          setCAbbr("");
-          setTipo("");
-          setNatureza("");
+          reset();
           onOpenChange(false);
         },
       }
@@ -100,9 +161,14 @@ export function CreateDisciplineModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Nova Disciplina</DialogTitle>
+          {/* 🔥 TEXTO DINÂMICO */}
+          <DialogTitle>
+            {isEdit ? "Atualizar Disciplina" : "Nova Disciplina"}
+          </DialogTitle>
           <DialogDescription>
-            Preencha todos os dados da nova unidade curricular.
+            {isEdit
+              ? "Atualize os dados da unidade curricular selecionada."
+              : "Preencha os dados para cadastrar uma nova unidade curricular."}
           </DialogDescription>
         </DialogHeader>
 
@@ -118,8 +184,8 @@ export function CreateDisciplineModal({
             <div className="space-y-2">
               <Label>Nome da Disciplina *</Label>
               <Input
-                placeholder="Ex: Direito das Sociedades Comerciais"
                 value={designacao}
+                placeholder="Ex: Direito das Sociedades Comerciais"
                 onChange={(e) => setDesignacao(e.target.value)}
                 disabled={isPending}
               />
@@ -129,10 +195,10 @@ export function CreateDisciplineModal({
             <div className="space-y-2">
               <Label>Código da Disciplina *</Label>
               <Input
-                placeholder="Ex: BBRN"
                 value={codigo_disciplina}
-                onChange={(e) => setCodigoDisciplina(e.target.value)}
+                placeholder="Ex: ADS"
                 className="uppercase"
+                onChange={(e) => setCodigoDisciplina(e.target.value)}
                 disabled={isPending}
               />
             </div>
@@ -141,16 +207,16 @@ export function CreateDisciplineModal({
             <div className="space-y-2">
               <Label>Sigla (2 letras) *</Label>
               <Input
+                value={cAbbr}
                 placeholder="DL"
                 maxLength={2}
-                value={cAbbr}
-                onChange={(e) => setCAbbr(e.target.value.toUpperCase())}
                 className="uppercase text-center text-lg font-bold tracking-widest"
+                onChange={(e) => setCAbbr(e.target.value.toUpperCase())}
                 disabled={isPending}
               />
             </div>
 
-            {/* Tipo de Unidade Curricular - DINÂMICO DA API */}
+            {/* Tipo */}
             <div className="space-y-2">
               <Label>Tipo de Unidade *</Label>
               {loadingTipos ? (
@@ -180,7 +246,7 @@ export function CreateDisciplineModal({
               )}
             </div>
 
-            {/* Natureza (TP/T/P) */}
+            {/* Natureza */}
             <div className="space-y-2">
               <Label>Natureza da UC *</Label>
               <Select
@@ -209,16 +275,21 @@ export function CreateDisciplineModal({
             >
               Cancelar
             </Button>
+
             <Button type="submit" disabled={isPending}>
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Criando...
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {isEdit ? "Atualizando..." : "Criando..."}
                 </>
               ) : (
                 <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Criar Disciplina
+                  {isEdit ? (
+                    <Save className="w-4 h-4 mr-2" />
+                  ) : (
+                    <Plus className="w-4 h-4 mr-2" />
+                  )}
+                  {isEdit ? "Atualizar Disciplina" : "Criar Disciplina"}
                 </>
               )}
             </Button>

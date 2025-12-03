@@ -39,6 +39,8 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Edit,
+  Pencil,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -54,6 +56,9 @@ import { formatarData } from "@/util/date-formate";
 import { Switch } from "@/components/ui/switch";
 import { useMutationUpdateAcademicYearState } from "@/hooks/academiccalendar/useMutation-update-academic-year-state";
 import { number } from "framer-motion";
+import { Vacancy } from "@/services/academiccalendar/fetch-vacancies-per-course";
+import { EditVagaModal } from "./components/modals/EditVagaModal";
+import { useMutationUpdateVagas } from "@/hooks/academiccalendar/useMutation-update-vagas";
 
 export default function Parameters() {
   const { toast } = useToast();
@@ -66,6 +71,11 @@ export default function Parameters() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPageMonthly, setCurrentPageMonthly] = useState(1);
   const [itemsPerPageMonthly, setItemsPerPageMonthly] = useState(6);
+  const [openModal, setOpenModal] = useState(false);
+  const [vagaSelecionada, setVagaSelecionada] = useState<{
+    id: number;
+    numeroVagas: number;
+  } | null>(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const {
@@ -77,6 +87,7 @@ export default function Parameters() {
   const { data: tiposCandidatura = [], isLoading: isLoadingTipos } =
     useQueryTipoCandidatura();
   const updateEstadoMutation = useMutationUpdateAcademicYearState();
+
   // Cálculo seguro do código do ano selecionado
   const selectedCodigo = useMemo(() => {
     if (!anoLetivoSelecionado || academicYears.length === 0) return undefined;
@@ -106,7 +117,7 @@ export default function Parameters() {
   // Vagas
   const tipoCandidaturaId = Number(tipoCandidaturaSelecionado);
   const {
-    vacancies,
+    vacancies = [],
     isLoading: isLoadingVacancies,
     isFetching: isFetchingVacancies,
   } = useQueryAcademicYearVacancies({
@@ -114,8 +125,15 @@ export default function Parameters() {
     tipoCandidatura: tipoCandidaturaId,
     enabled: !!selectedCodigo && !!tipoCandidaturaId,
   });
+  const handleEditVaga = (vaga: Vacancy) => {
+    setVagaSelecionada({
+      id: vaga.codigo,
+      numeroVagas: vaga.numeroVagas,
+    });
 
-  // Auto-selecionar ano ativo + tipo padrão
+    setOpenModal(true);
+  };
+
   useEffect(() => {
     if (academicYears.length > 0 && !anoLetivoSelecionado) {
       const anoAtivo = academicYears.find(
@@ -456,8 +474,10 @@ export default function Parameters() {
                             <TableHead>Curso</TableHead>
                             <TableHead>Período</TableHead>
                             <TableHead className="text-right">Vagas</TableHead>
+                            <TableHead className="text-right">Ações</TableHead>
                           </TableRow>
                         </TableHeader>
+
                         <TableBody>
                           {paginatedVacancies.length > 0 ? (
                             paginatedVacancies.map((vaga, i) => (
@@ -465,9 +485,12 @@ export default function Parameters() {
                                 key={`${vaga.codigoCurso}-${vaga.periodoDescricao}`}
                                 className="hover:bg-muted/50"
                               >
+                                {/* Curso */}
                                 <TableCell className="font-medium">
                                   {vaga.cursoDescricao}
                                 </TableCell>
+
+                                {/* Período */}
                                 <TableCell>
                                   <Badge
                                     variant={
@@ -480,6 +503,8 @@ export default function Parameters() {
                                     {vaga.periodoDescricao}
                                   </Badge>
                                 </TableCell>
+
+                                {/* Vagas */}
                                 <TableCell className="text-right">
                                   {vaga.numeroVagas > 0 ? (
                                     <span className="font-bold text-primary">
@@ -494,12 +519,22 @@ export default function Parameters() {
                                     </Badge>
                                   )}
                                 </TableCell>
+
+                                <TableCell className="text-right">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleEditVaga(vaga)}
+                                  >
+                                    <Pencil className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
                               </TableRow>
                             ))
                           ) : (
                             <TableRow>
                               <TableCell
-                                colSpan={3}
+                                colSpan={4}
                                 className="text-center py-8 text-muted-foreground"
                               >
                                 Não há vagas com mais de 0 para exibir nesta
@@ -792,6 +827,14 @@ export default function Parameters() {
         onOpenChange={setIsEditModalOpen}
         anoLetivo={currentYearParams?.designacao || ""}
       />
+      {vagaSelecionada && (
+        <EditVagaModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          idVaga={vagaSelecionada.id}
+          numeroVagasAtual={vagaSelecionada.numeroVagas}
+        />
+      )}
     </div>
   );
 }
