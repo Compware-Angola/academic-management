@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,31 +6,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Download, Printer, Save, ChevronLeft, ChevronRight } from "lucide-react";
+import { RefreshCw, Download, Printer, Save, ChevronLeft, ChevronRight, Unlock, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryNoteReleases } from "@/hooks/avaliacao/use-query-note-release";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
 
-  // Mock data específico para lançamento de notas
-  const mockStudents = [
-    { id: "EST001", numero: "20230001", nome: "João Silva", teste1: "", teste2: "", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST002", numero: "20230002", nome: "Maria Santos", teste1: "15.5", teste2: "16.0", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST003", numero: "20230003", nome: "Pedro Costa", teste1: "12.0", teste2: "13.5", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST004", numero: "20230004", nome: "Ana Ferreira", teste1: "17.0", teste2: "18.5", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST005", numero: "20230005", nome: "Carlos Mendes", teste1: "14.0", teste2: "15.0", exame: "", recurso: "", oral: "", notaFinal: "" },
-  ];
+  // Hook que busca dados da API
+  const { data: students = [], isLoading } = useQueryNoteReleases({
+        anoLectivoId: 21,
+        gradeCurricularId: 346,
+        tipoProvaId: 1,
+        tipoAvaliacao: 2,
+        classe: 2,
+      });
 
-  const [students, setStudents] = useState(mockStudents);
+  // Total de páginas
+  const totalPages = Math.ceil(students.length / itemsPerPage);
 
-  const handleNotaChange = (id: string, field: string, value: string) => {
-    setStudents(students.map(student => 
-      student.id === id ? { ...student, [field]: value } : student
-    ));
+  // Função para atualizar nota ou descrição no estado local
+  const [localStudents, setLocalStudents] = useState(students);
+
+  React.useEffect(() => {
+    setLocalStudents(students);
+  }, [students]);
+
+  const handleNotaChange = (id: number, field: "notaFinal" | "descricao", value: string) => {
+    setLocalStudents((prev) =>
+      prev.map((s) => (s.codigo_grade_aluno === id ? { ...s, [field]: value } : s))
+    );
   };
 
   const handleSaveAll = () => {
@@ -38,9 +46,8 @@ export default function LaunchNotes() {
       title: "Notas guardadas",
       description: "Todas as notas foram guardadas com sucesso.",
     });
+    // Aqui podes adicionar chamada à API para salvar todas
   };
-
-  const totalPages = Math.ceil(students.length / itemsPerPage);
 
   return (
     <div className="space-y-6">
@@ -60,7 +67,7 @@ export default function LaunchNotes() {
           <p className="text-muted-foreground mt-1">Lançar notas de avaliações por UC e turma</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setIsLoading(true)}>
+          <Button variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar lista
           </Button>
@@ -83,7 +90,7 @@ export default function LaunchNotes() {
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros (não conectados à API neste exemplo) */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -100,98 +107,7 @@ export default function LaunchNotes() {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="semestre">Semestre</Label>
-            <Select defaultValue="1">
-              <SelectTrigger id="semestre">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1º Semestre</SelectItem>
-                <SelectItem value="2">2º Semestre</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="curso">Curso</Label>
-            <Select defaultValue="eng-info">
-              <SelectTrigger id="curso">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="eng-info">Engenharia Informática</SelectItem>
-                <SelectItem value="gestao">Gestão de Empresas</SelectItem>
-                <SelectItem value="arquitetura">Arquitetura</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="turma">Turma</Label>
-            <Select defaultValue="ei-3a">
-              <SelectTrigger id="turma">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ei-3a">EI-3A</SelectItem>
-                <SelectItem value="ei-3b">EI-3B</SelectItem>
-                <SelectItem value="ei-4a">EI-4A</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="uc">Unidade Curricular</Label>
-            <Select defaultValue="prog3">
-              <SelectTrigger id="uc">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="prog3">Programação III</SelectItem>
-                <SelectItem value="bd">Bases de Dados</SelectItem>
-                <SelectItem value="ia">Inteligência Artificial</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tipo-avaliacao">Tipo de Avaliação</Label>
-            <Select defaultValue="teste">
-              <SelectTrigger id="tipo-avaliacao">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="teste">Teste</SelectItem>
-                <SelectItem value="exame">Exame</SelectItem>
-                <SelectItem value="recurso">Recurso</SelectItem>
-                <SelectItem value="oral">Oral</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      {/* Informação da UC selecionada */}
-      <div className="bg-muted/50 border rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">UC:</span>
-            <span className="ml-2 font-semibold">Programação III</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Turma:</span>
-            <span className="ml-2 font-semibold">EI-3A</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Inscritos:</span>
-            <span className="ml-2 font-semibold">5 estudantes</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Docente:</span>
-            <span className="ml-2 font-semibold">Prof. Dr. António Sousa</span>
-          </div>
+          {/* Outras opções de filtro */}
         </div>
       </div>
 
@@ -202,7 +118,7 @@ export default function LaunchNotes() {
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
-      ) : students.length === 0 ? (
+      ) : localStudents.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
           <p className="text-muted-foreground mb-4">Nenhum registo encontrado</p>
           <p className="text-sm text-muted-foreground">Selecione os filtros acima para carregar estudantes</p>
@@ -214,88 +130,103 @@ export default function LaunchNotes() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">Número</TableHead>
+                    <TableHead className="w-[120px]">Nº Matrícula</TableHead>
                     <TableHead>Nome do Estudante</TableHead>
-                    <TableHead className="text-center w-[100px]">Teste 1</TableHead>
-                    <TableHead className="text-center w-[100px]">Teste 2</TableHead>
-                    <TableHead className="text-center w-[100px]">Exame</TableHead>
-                    <TableHead className="text-center w-[100px]">Recurso</TableHead>
-                    <TableHead className="text-center w-[100px]">Oral</TableHead>
-                    <TableHead className="text-center w-[100px]">Nota Final</TableHead>
+                    <TableHead className="w-[600px] text-center">Descrição</TableHead>
+                    <TableHead className="w-[140px] text-center">Nota (0-20)</TableHead>
+                    <TableHead className="w-[140px] text-center">Estado</TableHead>
+                    <TableHead className="w-[120px] text-center">Ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-mono text-sm">{student.numero}</TableCell>
-                      <TableCell className="font-medium">{student.nome}</TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.teste1}
-                          onChange={(e) => handleNotaChange(student.id, 'teste1', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.teste2}
-                          onChange={(e) => handleNotaChange(student.id, 'teste2', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.exame}
-                          onChange={(e) => handleNotaChange(student.id, 'exame', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.recurso}
-                          onChange={(e) => handleNotaChange(student.id, 'recurso', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.oral}
-                          onChange={(e) => handleNotaChange(student.id, 'oral', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="font-bold text-lg">
-                          {student.notaFinal || "-"}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {localStudents
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((student) => {
+                      const hasNota = student.nota !== null && student.nota !== undefined;
+                      const isValid = hasNota && Number(student.nota) >= 0 && Number(student.nota) <= 20;
+                      const [isLocked, setIsLocked] = React.useState(true);
+
+                      return (
+                        <TableRow key={student.codigo_grade_aluno}>
+                          <TableCell className="font-mono text-sm">{student.numero_de_matricula}</TableCell>
+                          <TableCell className="font-medium">{student.nome_completo}</TableCell>
+
+                          {/* Descrição */}
+                          <TableCell className="text-center">
+                            <Input
+                              type="text"
+                              value={student.observacao || ""}
+                              onChange={(e) => handleNotaChange(student.codigo_grade_aluno, "descricao", e.target.value)}
+                              className="w-full mx-auto text-left"
+                              placeholder="Pequena descrição..."
+                              disabled={isLocked}
+                            />
+                          </TableCell>
+
+                          {/* Nota */}
+                          <TableCell className="text-center">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="20"
+                              step="0.5"
+                              value={student.nota ?? ""}
+                              onChange={(e) => handleNotaChange(student.codigo_grade_aluno, "notaFinal", e.target.value)}
+                              className="w-24 mx-auto text-center"
+                              placeholder="0-20"
+                              disabled={isLocked}
+                            />
+                          </TableCell>
+
+                          {/* Estado */}
+                          <TableCell className="text-center">
+                            {!hasNota ? (
+                              <Badge variant="secondary">Pendente</Badge>
+                            ) : isValid ? (
+                              <Badge variant="default" className="bg-green-600">
+                                Lançada
+                              </Badge>
+                            ) : (
+                              <Badge variant="destructive">Inválida</Badge>
+                            )}
+                          </TableCell>
+
+                          {/* Ação */}
+                          <TableCell className="text-center flex justify-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setIsLocked(!isLocked)}
+                            >
+                              {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant={hasNota ? "default" : "outline"}
+                              onClick={() => {
+                                if (student.nota === null || student.nota === undefined) {
+                                  toast({ title: "Erro", description: "Insira uma nota primeiro", variant: "destructive" });
+                                  return;
+                                }
+                                if (Number(student.nota) < 0 || Number(student.nota) > 20) {
+                                  toast({ title: "Erro", description: "A nota deve estar entre 0 e 20", variant: "destructive" });
+                                  return;
+                                }
+                                toast({
+                                  title: hasNota ? "Nota atualizada" : "Nota lançada",
+                                  description: `${student.nome_completo} → ${student.nota} valores`,
+                                });
+                                setIsLocked(true);
+                              }}
+                            >
+                              <Save className="h-4 w-4 mr-1" />
+                              {hasNota ? "Atualizar" : "Lançar"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </div>
@@ -317,7 +248,7 @@ export default function LaunchNotes() {
                 </SelectContent>
               </Select>
               <span className="text-sm text-muted-foreground ml-4">
-                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, students.length)} de {students.length} registos
+                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, localStudents.length)} de {localStudents.length} registos
               </span>
             </div>
 
