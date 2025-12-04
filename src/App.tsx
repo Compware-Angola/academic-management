@@ -85,7 +85,7 @@ const App = () => {
                   path="/exame/lista-candidatos"
                   element={<CandidateList />}
                 /> */}
-                {/* <Route path="/avaliacoes/notas" element={<LaunchNotes />} /> */}
+                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
                 <Route

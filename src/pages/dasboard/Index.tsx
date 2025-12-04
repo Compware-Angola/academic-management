@@ -27,6 +27,7 @@ const Index = () => {
   const { user } = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
+    
   return (
     <div className="space-y-6">
       <PageHeader

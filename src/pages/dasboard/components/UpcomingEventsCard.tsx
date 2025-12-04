@@ -5,6 +5,7 @@ import { Calendar, Clock, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 
 interface Atividade {
@@ -33,22 +34,11 @@ export default function UpcomingEventsCard() {
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [loading, setLoading] = useState(true);
+ const { data: anosLetivos = [], isLoading: loadingAnosLetivos } = useQueryAnoAcademico();
 
-  const [anosLetivos, setAnosLetivos] = useState<AnoLetivo[]>([]);
   const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
 
-  // Carregar anos letivos
-  useEffect(() => {
-    axios.get(API_ANOS_LETIVOS)
-      .then(res => {
-        const data = res.data.anolectivos || [];
-        const ordenados = data.sort((a: any, b: any) => Number(b.codigo) - Number(a.codigo));
-        setAnosLetivos(ordenados);
-        const ativoOuRecente = ordenados.find((a: any) => !a.estado.toLowerCase().includes("desactiv")) || ordenados[0];
-        if (ativoOuRecente) setAnoLetivoId(ativoOuRecente.codigo);
-      })
-      .catch(() => setAnosLetivos([]));
-  }, []);
+
 
   // Carregar tipos de candidatura
   useEffect(() => {
@@ -86,7 +76,7 @@ export default function UpcomingEventsCard() {
     return configs[index] || configs[0];
   };
 
-  const anoSelecionado = anosLetivos.find(a => a.codigo === anoLetivoId);
+  const anoSelecionado = anosLetivos.find(a => a.codigo.toString()  === anoLetivoId);
   const tipoSelecionado = tiposCandidatura.find(t => t.codigo.toString() === tipoCandidaturaId);
 
   return (
@@ -113,7 +103,7 @@ export default function UpcomingEventsCard() {
                 </SelectTrigger>
                 <SelectContent>
                   {anosLetivos.map(ano => (
-                    <SelectItem key={ano.codigo} value={ano.codigo}>
+                    <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
                       <div className="flex items-center justify-between w-full">
                         <span>{ano.designacao}</span>
                         {!ano.estado.toLowerCase().includes("desactiv") && (

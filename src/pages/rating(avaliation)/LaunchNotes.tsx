@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,41 +6,130 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Download, Printer, Save, ChevronLeft, ChevronRight } from "lucide-react";
+import { RefreshCw, Save, ChevronLeft, ChevronRight, Unlock, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryNoteReleases } from "@/hooks/avaliacao/use-query-note-release";
+import { useUpsertNote } from "@/hooks/avaliacao/use-mutation-upsert-note";
+import { NoteUpsertPayload } from "@/services/update-or-create-note-release";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useCursos } from "@/hooks/use-cursos";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
+import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [formData, setFormData] = useState({
+    anoLetivo: "",
+    semestre: "",
+    periodo: "",
+    curso: "",
+    unidadeCurricular: "",
+    classes: "",
+    tipoAvaliacao: "",
+    tipoProva: "",
+    verHoario: "",
+   
+    filtro: "",
+  });
 
-  // Mock data específico para lançamento de notas
-  const mockStudents = [
-    { id: "EST001", numero: "20230001", nome: "João Silva", teste1: "", teste2: "", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST002", numero: "20230002", nome: "Maria Santos", teste1: "15.5", teste2: "16.0", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST003", numero: "20230003", nome: "Pedro Costa", teste1: "12.0", teste2: "13.5", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST004", numero: "20230004", nome: "Ana Ferreira", teste1: "17.0", teste2: "18.5", exame: "", recurso: "", oral: "", notaFinal: "" },
-    { id: "EST005", numero: "20230005", nome: "Carlos Mendes", teste1: "14.0", teste2: "15.0", exame: "", recurso: "", oral: "", notaFinal: "" },
-  ];
+  const { data: students = [], isLoading: loadingNoteRelease, refetch } = useQueryNoteReleases({
+    anoLectivoId: Number(formData.anoLetivo),
+    gradeCurricularId: Number(formData.unidadeCurricular),
+    tipoProvaId: Number(formData.tipoProva),
+    tipoAvaliacao: Number(formData.tipoAvaliacao),
+    classe: Number(formData.classes),
+    turno: Number(formData.periodo)
+  }); 
 
-  const [students, setStudents] = useState(mockStudents);
+  const [localStudents, setLocalStudents] = useState(students);
+  const [lockedStudents, setLockedStudents] = useState<{ [key: number]: boolean }>({});
 
-  const handleNotaChange = (id: string, field: string, value: string) => {
-    setStudents(students.map(student => 
-      student.id === id ? { ...student, [field]: value } : student
-    ));
+  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
+    classe: formData.classes,
+    curso: formData.curso,
+    semestre: formData.semestre,
+  });
+  const { data: classes = [], isLoading: isLoadingClasses } = useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } = useQueryTipoAvaliacao();
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } = useQueryTipoProva();
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
+  const upsertNoteMutation = useUpsertNote();
+
+  useEffect(() => {
+    setLocalStudents(students);
+    const initialLocks: { [key: number]: boolean } = {};
+    students.forEach(s => {
+      initialLocks[s.codigo_grade_aluno] = true;
+    });
+    setLockedStudents(initialLocks);
+  }, [students]);
+
+  const totalPages = Math.ceil(localStudents.length / itemsPerPage);
+
+  const handleNotaChange = (id: number, field: "nota" | "observacao", value: string) => {
+    let newValue: number | string | null = value === "" ? null : value;
+
+    if (field === "nota") {
+      const num = Number(value);
+      if (!isNaN(num)) {
+        newValue = Math.max(0, Math.min(20, num));
+      } else {
+        newValue = null;
+      }
+    }
+
+    setLocalStudents(prev =>
+      prev.map(s => s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s)
+    );
   };
 
-  const handleSaveAll = () => {
-    toast({
-      title: "Notas guardadas",
-      description: "Todas as notas foram guardadas com sucesso.",
+  const toggleLock = (id: number) => {
+    setLockedStudents(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleSaveAll = (student: any) => {
+    const payload: NoteUpsertPayload = {
+      gradeCurricularAluno: student.codigo_grade_aluno,
+      utilizador: 0,
+      nota: Number(student.nota),
+      tipoDeProva: Number(formData.tipoProva),
+      epoca: 2,
+      tipoAvaliacao: Number(formData.tipoAvaliacao),
+      observacao: student.observacao || null,
+      status: 2,
+      notaAnterior: student.notaFinalAnterior || 0,
+      refUtilizador: {
+        pk: 1556,
+        desc: "Margarida da Silva Rodrigues",
+        corLetra: "black",
+        disponivel: true,
+      },
+      codigo_grade_avaliacao_aluno: student.codigo_grade_avaliacao_aluno || undefined,
+    };
+
+    upsertNoteMutation.mutate(payload, {
+      onSuccess: () => {
+        toast({ title: "Sucesso", description: "Nota lançada/atualizada com sucesso." });
+      },
+      onError: () => {
+        toast({ title: "Erro", description: "Não foi possível lançar/atualizar a nota.", variant: "destructive" });
+      },
     });
   };
-
-  const totalPages = Math.ceil(students.length / itemsPerPage);
 
   return (
     <div className="space-y-6">
@@ -57,155 +146,133 @@ export default function LaunchNotes() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lançamento de notas</h1>
-          <p className="text-muted-foreground mt-1">Lançar notas de avaliações por UC e turma</p>
+          <p className="text-muted-foreground mt-1">Lançar notas de avaliações por UC</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => setIsLoading(true)}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar lista
-          </Button>
-          <Button variant="outline" size="sm">
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimir
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar Excel
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF
-          </Button>
-          <Button size="sm" onClick={handleSaveAll}>
-            <Save className="h-4 w-4 mr-2" />
-            Guardar todas
-          </Button>
-        </div>
+
+       
       </div>
 
       {/* Filtros */}
-      <div className="bg-card border rounded-lg p-6">
+ <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="ano-letivo">Ano Letivo</Label>
-            <Select defaultValue="2024-2025">
-              <SelectTrigger id="ano-letivo">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2024-2025">2024/2025</SelectItem>
-                <SelectItem value="2023-2024">2023/2024</SelectItem>
-                <SelectItem value="2022-2023">2022/2023</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <FormSelect
+      disabled={isLoadingAcademicYear}
+      loading={isLoadingAcademicYear}
+      label="Ano Letivo"
+      value={formData.anoLetivo}
+      onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+      options={academicYear}
+      map={(a) => ({ key: a.codigo, label: a.designacao })}
+    />
+     <FormSelect
+                disabled={
+                  isLoadingPeriodos ||
+                  isLoadingAcademicYear ||
+                  formData.anoLetivo === ""
+                }
+                loading={isLoadingPeriodos}
+                label="Período"
+                value={formData.periodo}
+                onChange={(v) => setFormData({ ...formData, periodo: v })}
+                options={periodos}
+                map={(p) => ({
+                  key: p.codigo,
+                  label: p.designacao,
+                })}
+              />
+    <FormSelect
+      disabled={isLoadingSemestres}
+      loading={isLoadingSemestres}
+      label="Semestre"
+      value={formData.semestre}
+      onChange={(v) => setFormData({ ...formData, semestre: v })}
+      options={semestres}
+      map={(s) => ({ key: s.codigo, label: s.designacao })}
+    />
+    <FormSelect
+      disabled={isLoadingCurso}
+      loading={isLoadingCurso}
+      label="Curso"
+      value={formData.curso}
+      onChange={(v) => setFormData({ ...formData, curso: v })}
+      options={cursos}
+      map={(c) => ({ key: c.codigo, label: c.designacao })}
+    />
+    <FormSelect
+      label="Ano Curricular"
+      value={formData.classes}
+      disabled={isLoadingClasses || !formData.curso}
+      onChange={(v) => setFormData({ ...formData, classes: v })}
+      options={classes}
+      map={(c) => ({ key: c.codigo, label: c.designacao })}
+      loading={isLoadingClasses}
+    />
+    <FormSelect
+      label="Unidade Curricular"
+      value={formData.unidadeCurricular}
+      disabled={isLoadingUC || !formData.semestre || !formData.curso || !formData.classes}
+      onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
+      options={unidadesCurriculares}
+      map={(u) => ({ key: u.pk, label: u.descricao })}
+      loading={isLoadingUC}
+    />
+    <FormSelect
+      label="Tipo de Prova"
+      value={formData.tipoProva}
+      disabled={isLoadingTipoProva}
+      onChange={(v) => setFormData({ ...formData, tipoProva: v })}
+      options={tipoProva}
+      map={(u) => ({ key: u.codigo, label: u.designacao })}
+      loading={isLoadingTipoProva}
+    />
+    <FormSelect
+      label="Tipo de Avaliação"
+      value={formData.tipoAvaliacao}
+      disabled={isLoadingTipoAvaliacao}
+      onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
+      options={tipoAvaliacao}
+      map={(u) => ({ key: u.codigo, label: u.designacao })}
+      loading={isLoadingTipoAvaliacao}
+    />
 
-          <div className="space-y-2">
-            <Label htmlFor="semestre">Semestre</Label>
-            <Select defaultValue="1">
-              <SelectTrigger id="semestre">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">1º Semestre</SelectItem>
-                <SelectItem value="2">2º Semestre</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    {/* Botão Listar na mesma linha */}
+   <div className="flex items-end">
+  <Button
+ 
+    className="w-full" // opcional: deixa o botão maior horizontalmente
+    disabled={
+      loadingNoteRelease ||
+      !formData.anoLetivo ||
+      !formData.periodo ||
+      !formData.semestre ||
+      !formData.curso ||
+      !formData.classes ||
+      !formData.unidadeCurricular ||
+      !formData.tipoProva ||
+      !formData.tipoAvaliacao
+    }
+    onClick={() => refetch()}
+  >
+    <RefreshCw className="h-5 w-5 mr-2" />
+    Listar
+  </Button>
+</div>
 
-          <div className="space-y-2">
-            <Label htmlFor="curso">Curso</Label>
-            <Select defaultValue="eng-info">
-              <SelectTrigger id="curso">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="eng-info">Engenharia Informática</SelectItem>
-                <SelectItem value="gestao">Gestão de Empresas</SelectItem>
-                <SelectItem value="arquitetura">Arquitetura</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+  </div>
+</div>
 
-          <div className="space-y-2">
-            <Label htmlFor="turma">Turma</Label>
-            <Select defaultValue="ei-3a">
-              <SelectTrigger id="turma">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ei-3a">EI-3A</SelectItem>
-                <SelectItem value="ei-3b">EI-3B</SelectItem>
-                <SelectItem value="ei-4a">EI-4A</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="uc">Unidade Curricular</Label>
-            <Select defaultValue="prog3">
-              <SelectTrigger id="uc">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="prog3">Programação III</SelectItem>
-                <SelectItem value="bd">Bases de Dados</SelectItem>
-                <SelectItem value="ia">Inteligência Artificial</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tipo-avaliacao">Tipo de Avaliação</Label>
-            <Select defaultValue="teste">
-              <SelectTrigger id="tipo-avaliacao">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="teste">Teste</SelectItem>
-                <SelectItem value="exame">Exame</SelectItem>
-                <SelectItem value="recurso">Recurso</SelectItem>
-                <SelectItem value="oral">Oral</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      {/* Informação da UC selecionada */}
-      <div className="bg-muted/50 border rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-          <div>
-            <span className="text-muted-foreground">UC:</span>
-            <span className="ml-2 font-semibold">Programação III</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Turma:</span>
-            <span className="ml-2 font-semibold">EI-3A</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Inscritos:</span>
-            <span className="ml-2 font-semibold">5 estudantes</span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">Docente:</span>
-            <span className="ml-2 font-semibold">Prof. Dr. António Sousa</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabela de lançamento */}
-      {isLoading ? (
+      {/* Tabela */}
+      {loadingNoteRelease ? (
         <div className="space-y-3">
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
-      ) : students.length === 0 ? (
+      ) : localStudents.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
           <p className="text-muted-foreground mb-4">Nenhum registo encontrado</p>
-          <p className="text-sm text-muted-foreground">Selecione os filtros acima para carregar estudantes</p>
+          <p className="text-sm text-muted-foreground">Clique em "Listar" após selecionar os filtros</p>
         </div>
       ) : (
         <>
@@ -214,138 +281,150 @@ export default function LaunchNotes() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">Número</TableHead>
+                    <TableHead className="w-[120px]">Nº Matrícula</TableHead>
                     <TableHead>Nome do Estudante</TableHead>
-                    <TableHead className="text-center w-[100px]">Teste 1</TableHead>
-                    <TableHead className="text-center w-[100px]">Teste 2</TableHead>
-                    <TableHead className="text-center w-[100px]">Exame</TableHead>
-                    <TableHead className="text-center w-[100px]">Recurso</TableHead>
-                    <TableHead className="text-center w-[100px]">Oral</TableHead>
-                    <TableHead className="text-center w-[100px]">Nota Final</TableHead>
+                    <TableHead className="w-[600px] text-center">Descrição</TableHead>
+                    <TableHead className="w-[140px] text-center">Nota (0-20)</TableHead>
+                    <TableHead className="w-[140px] text-center">Estado</TableHead>
+                    <TableHead className="w-[120px] text-center">Ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-mono text-sm">{student.numero}</TableCell>
-                      <TableCell className="font-medium">{student.nome}</TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.teste1}
-                          onChange={(e) => handleNotaChange(student.id, 'teste1', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.teste2}
-                          onChange={(e) => handleNotaChange(student.id, 'teste2', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.exame}
-                          onChange={(e) => handleNotaChange(student.id, 'exame', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.recurso}
-                          onChange={(e) => handleNotaChange(student.id, 'recurso', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.oral}
-                          onChange={(e) => handleNotaChange(student.id, 'oral', e.target.value)}
-                          className="w-20 text-center mx-auto"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="font-bold text-lg">
-                          {student.notaFinal || "-"}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {localStudents
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((student) => {
+                      const hasNota = student.nota !== null && student.nota !== undefined;
+                      const isValid = hasNota && Number(student.nota) >= 0 && Number(student.nota) <= 20;
+                      const isLocked = lockedStudents[student.codigo_grade_aluno] ?? true;
+
+                      return (
+                        <TableRow key={student.codigo_grade_aluno}>
+                          <TableCell className="font-mono text-sm">{student.numero_de_matricula}</TableCell>
+                          <TableCell className="font-medium">{student.nome_completo}</TableCell>
+
+                          <TableCell className="text-center">
+                            <Input
+                              type="text"
+                              value={student.observacao || ""}
+                              onChange={(e) => handleNotaChange(student.codigo_grade_aluno, "observacao", e.target.value)}
+                              className="w-full mx-auto text-left"
+                              placeholder="Pequena descrição..."
+                               disabled={isLocked}
+                            />
+                          </TableCell>
+
+                          <TableCell className="text-center">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="20"
+                              step="0.5"
+                              value={student.nota ?? ""}
+                              onChange={(e) => handleNotaChange(student.codigo_grade_aluno, "nota", e.target.value)}
+                              className="w-24 mx-auto text-center"
+                              placeholder="0-20"
+                              disabled={isLocked}
+                            />
+                          </TableCell>
+
+                          <TableCell className="text-center">
+                            {!hasNota ? (
+                              <Badge variant="secondary">Pendente</Badge>
+                            ) : isValid ? (
+                              <Badge variant="default" className="bg-green-600">Lançada</Badge>
+                            ) : (
+                              <Badge variant="destructive">Inválida</Badge>
+                            )}
+                          </TableCell>
+
+                          <TableCell className="text-center flex justify-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => toggleLock(student.codigo_grade_aluno)}
+                            >
+                              {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant={hasNota ? "default" : "outline"}
+                              onClick={() => {
+                                if (student.nota === null || student.nota === undefined) {
+                                  toast({ title: "Erro", description: "Insira uma nota primeiro", variant: "destructive" });
+                                  return;
+                                }
+                                if (Number(student.nota) < 0 || Number(student.nota) > 20) {
+                                  toast({ title: "Erro", description: "A nota deve estar entre 0 e 20", variant: "destructive" });
+                                  return;
+                                }
+                                handleSaveAll(student);
+                                toggleLock(student.codigo_grade_aluno);
+                                toast({
+                                  title: hasNota ? "Nota atualizada" : "Nota lançada",
+                                  description: `${student.nome_completo} → ${student.nota} valores`,
+                                });
+                              }}
+                            >
+                              <Save className="h-4 w-4 mr-1" />
+                              {hasNota ? "Atualizar" : "Lançar"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </div>
           </div>
-
-          {/* Paginação */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
-              <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-                <SelectTrigger id="items-per-page" className="w-[80px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-sm text-muted-foreground ml-4">
-                Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, students.length)} de {students.length} registos
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Anterior
-              </Button>
-              <span className="text-sm">
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Seguinte
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
         </>
+      )}
+
+      {/* Paginação */}
+      {localStudents.length > 0 && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
+            <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+              <SelectTrigger id="items-per-page" className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground ml-4">
+              Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, localStudents.length)} de {localStudents.length} registos
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </Button>
+            <span className="text-sm">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Seguinte
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );
