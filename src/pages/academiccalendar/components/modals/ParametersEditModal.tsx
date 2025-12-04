@@ -191,20 +191,35 @@ export function ParametersEditModal({
   };
 
   const handleNext = () => {
-    if (currentStep === "periodos" && !isPeriodoValid()) {
-      toast({
-        title: "Preencha todas as datas dos semestres!",
-        variant: "destructive",
-      });
-      return;
+    if (currentStep === "periodos") {
+      if (!isPeriodoValid()) {
+        toast({
+          title: "Preencha todas as datas dos semestres!",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validação: datas do primeiro semestre não podem estar no passado
+      const hoje = new Date();
+      const dataInicio = new Date(periodosForm.dataInicioPrimeiroSemestre);
+      const dataFim = new Date(periodosForm.dataFimPrimeiroSemestre);
+
+      if (dataInicio < hoje || dataFim < hoje) {
+        return toast({
+          title: "Datas inválidas",
+          description:
+            "O início e fim do primeiro semestre não podem estar no passado.",
+          variant: "destructive",
+        });
+      }
     }
 
     const nextIndex = currentIndex + 1;
     if (nextIndex < steps.length) {
       setCurrentStep(steps[nextIndex].id);
-    }
-    // Se for o último passo → salva tudo
-    else {
+    } else {
+      // Último passo → salva tudo
       mutationTudo.mutate();
     }
   };
@@ -310,6 +325,7 @@ export function ParametersEditModal({
                       <Label>{label} *</Label>
                       <Input
                         type="date"
+                        min={new Date().toISOString().split("T")[0]}
                         value={periodosForm[keys[i]]}
                         onChange={(e) =>
                           setPeriodosForm((prev) => ({
