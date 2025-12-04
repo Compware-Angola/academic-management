@@ -79,7 +79,7 @@ export function ParametersEditModal({
       const anoFinal = anoFim >= anoInicio ? anoFim : anoInicio + 1;
       setPeriodosForm((prev) => ({
         ...prev,
-        designacao: `${anoInicio}-${anoFinal}`,
+        designacao: `${anoInicio}/${anoFinal}`,
       }));
     } else {
       setPeriodosForm((prev) => ({ ...prev, designacao: "" }));
