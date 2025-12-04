@@ -13,9 +13,14 @@ import { Progress } from "@/components/ui/progress";
 import { Calendar, Users, CreditCard, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryVacancies } from "@/hooks/queries/use-query-vacancies";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { useAuth } from "@/hooks/use-auth";
+import { AxiosError } from "axios";
 
 type Step = "periodos" | "vagas" | "mensalidades";
 
@@ -155,14 +160,19 @@ export function ParametersEditModal({
     onSuccess: () => {
       toast({ title: "Parâmetros acadêmicos configurados com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["academic-year-params"] });
+      queryClient.invalidateQueries({ queryKey: ["anosLetivos"] });
       onSuccess?.();
       resetForm();
       onOpenChange(false);
     },
-    onError: (error: any) => {
+    onError: (
+      error: AxiosError<{
+        msgresposta: string;
+      }>
+    ) => {
       toast({
         title: "Erro ao salvar parâmetros",
-        description: error?.message || "Tente novamente",
+        description: error.response.data.msgresposta || "Tente novamente",
         variant: "destructive",
       });
     },
