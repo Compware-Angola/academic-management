@@ -28,7 +28,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { RefreshCw, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  RefreshCw,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  Edit,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
@@ -93,6 +100,12 @@ const API_CRIAR_PRAZO =
   "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
 const API_TIPO_DE_EPOCA_AVALIACAO =
   "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-epoca-avaliacao/all";
+
+const API_APAGAR_PRAZO =
+  "http://34.202.163.85:8080/ords/cmpdev/auto/fk2_mcal_tb_prazo";
+
+const API_ACTUALIZAR_PRAZO =
+  "http://34.202.163.85:8080/ords/cmpdev/auto/fk2_mcal_tb_prazo";
 export default function Deadlines() {
   const { toast } = useToast();
 
@@ -100,8 +113,9 @@ export default function Deadlines() {
   const [loading, setLoading] = useState(true);
   const [prazos, setPrazos] = useState<Prazo[]>([]);
   const [anosLetivos, setAnosLetivos] = useState<AnoLetivo[]>([]);
+  const [prazoId, setPrazoId] = useState<number>(0);
   const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>(
-    [],
+    []
   );
   const [tiposPrazo, setTiposPrazo] = useState<TipoPrazo[]>([]);
   const [tiposAvaliacao, setTiposAvaliacao] = useState<TipoAvaliacao[]>([]);
@@ -114,6 +128,7 @@ export default function Deadlines() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [tipoPrazoId, setTipoPrazoId] = useState<string>("");
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(true);
 
   // Modal Novo Prazo
   const [openModal, setOpenModal] = useState(false);
@@ -139,7 +154,7 @@ export default function Deadlines() {
       const res = await axios.get(API_ANOS_LETIVOS);
       const todos = res.data.anolectivos || [];
       const ordenados = todos.sort(
-        (a: AnoLetivo, b: AnoLetivo) => Number(b.codigo) - Number(a.codigo),
+        (a: AnoLetivo, b: AnoLetivo) => Number(b.codigo) - Number(a.codigo)
       );
       setAnosLetivos(ordenados);
       if (ordenados.length > 0) setAnoLetivoId(ordenados[0].codigo);
@@ -154,7 +169,7 @@ export default function Deadlines() {
       const data =
         res.data.tipo_epoca_avaliacoes || ([] as TipoEpocaAvaliacao[]);
       const filteredData = data.filter(
-        (item) => typeof item.descricao === "string",
+        (item) => typeof item.descricao === "string"
       );
       console.log(filteredData, data, res.data);
       setTiposEpocaAvaliacao(filteredData);
@@ -251,6 +266,71 @@ export default function Deadlines() {
     }
   };
 
+  const handleDeletePrazo = async (prazoId) => {
+    try {
+      const res = await axios.delete(API_APAGAR_PRAZO, {
+        data: {
+          pk_prazo: prazoId,
+        },
+      });
+      fetchPrazos();
+      toast({ title: `Prazo removido com sucesso` });
+    } catch (error) {
+      toast({
+        title: "Erro ao remover prazo",
+        description: "Verifique os filtros selecionados",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSelecionarPrazo = (prazo: Prazo) => {
+    // Converter datas para o formato YYYY-MM-DD (compatível com input date)
+    setPrazoId(prazo.prazo_id);
+    const dataInicioFormatada = prazo.data_inicio.split("T")[0];
+    const dataFimFormatada = prazo.data_fim.split("T")[0];
+    console.log(anoLetivoId);
+    setForm({
+      fk_tipo_prazo: tipoPrazoId,
+      fk_tipo_avaliacao: prazo.tipo_avaliacao_id?.toString() || "",
+      fk_semestre: semestres[0]?.codigo.toString() || "",
+      data_inicio: dataInicioFormatada,
+      data_fim: dataFimFormatada,
+      observacao: prazo.observacao || "",
+      fk_created_by: "1397",
+      anoletivo: anoLetivoId.toString(),
+      tipoCandidaturaId: tipoCandidaturaId,
+    });
+    setOpenModal(true);
+    setIsEditing(true);
+  };
+
+  const handleActualizarPrazo = async () => {
+    try {
+      const payload = {
+        pk_prazo: prazoId,
+        observacao: form.observacao,
+        fk_semestre: form.fk_semestre,
+        data_inicio: form.data_inicio,
+        data_fim: form.data_fim,
+        fk_tipo_avaliacao: form.fk_tipo_avaliacao,
+        fk_tipo_prazo: form.fk_tipo_prazo,
+        tipo_candidatura: form.tipoCandidaturaId,
+      };
+      const res = await axios.put(API_ACTUALIZAR_PRAZO, payload);
+      toast({ title: `Prazo actualizado com sucesso` });
+      setIsEditing(false);
+      setOpenModal(false);
+      fetchPrazos();
+    } catch (error) {
+      toast({
+        title: "Erro ao actualizar prazo",
+        description: "Verifique os filtros selecionados",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Criar prazo
   const handleCriarPrazo = async () => {
     if (
@@ -282,7 +362,7 @@ export default function Deadlines() {
     try {
       await axios.post(
         `${API_CRIAR_PRAZO}/${form.anoletivo}/${form.fk_tipo_prazo}/${form.tipoCandidaturaId}`,
-        payload,
+        payload
       );
       toast({ title: "Prazo criado com sucesso!" });
       setOpenModal(false);
@@ -313,7 +393,7 @@ export default function Deadlines() {
     fetchTiposCandidatura();
     fetchTiposPrazo();
     fetchTiposAvaliacao();
-    fetchSemestres(); 
+    fetchSemestres();
     fetchTipoEpocaAvaliacoes();
   }, []);
 
@@ -327,7 +407,7 @@ export default function Deadlines() {
   const totalPages = Math.ceil(prazos.length / itemsPerPage);
   const paginated = prazos.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   return (
@@ -340,7 +420,13 @@ export default function Deadlines() {
             <Button variant="outline" size="sm" onClick={fetchPrazos}>
               Atualizar
             </Button>
-            <Button size="sm" onClick={() => setOpenModal(true)}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setOpenModal(true);
+                setIsEditing(false);
+              }}
+            >
               Novo Prazo
             </Button>
           </>
@@ -446,6 +532,7 @@ export default function Deadlines() {
               <TableHead>Período</TableHead>
               <TableHead>Observação</TableHead>
               <TableHead>Criado por</TableHead>
+              <TableHead>Acções</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -495,6 +582,24 @@ export default function Deadlines() {
                   <TableCell className="text-sm text-muted-foreground">
                     {p.criado_por_nome}
                   </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleSelecionarPrazo(p)}
+                        size="sm"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeletePrazo(p.prazo_id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -506,7 +611,9 @@ export default function Deadlines() {
       <Dialog open={openModal} onOpenChange={setOpenModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Novo Prazo</DialogTitle>
+            <DialogTitle>
+              {isEditing ? "Editar Prazo" : "Novo Prazo"}
+            </DialogTitle>
             <DialogDescription>
               Defina o período para o tipo de prazo selecionado.
             </DialogDescription>
@@ -588,6 +695,7 @@ export default function Deadlines() {
             <div className="space-y-2">
               <Label>Ano Lectivo *</Label>
               <Select
+                disabled={isEditing ? true : false}
                 value={form.anoletivo}
                 onValueChange={(v) => setForm({ ...form, anoletivo: v })}
               >
@@ -697,10 +805,20 @@ export default function Deadlines() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpenModal(false);
+                setIsEditing(false);
+              }}
+            >
               Cancelar
             </Button>
-            <Button onClick={handleCriarPrazo}>Criar Prazo</Button>
+            <Button
+              onClick={isEditing ? handleActualizarPrazo : handleCriarPrazo}
+            >
+              {isEditing ? "Editar Prazo" : "Criar Prazo"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
