@@ -32,7 +32,22 @@ import { Link } from "react-router-dom";
 import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
 import { CreateDisciplineModal } from "./components/CreateDisciplineModal";
 import { useTiposUnidade } from "@/hooks/study_plan/use-type-unidade";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useMutationDeleteDiscipline } from "@/hooks/study_plan/use-mutation-delete-discipline";
+import { Discipline } from "@/services/study_plan/fect-discipline.serice";
+type NormalizeDiscipline = Discipline & {
+  tipo_descricao: string;
+  natureza: string;
+};
 export default function DisciplineManagementList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [naturezaFilter, setNaturezaFilter] = useState<string>("all");
@@ -40,7 +55,11 @@ export default function DisciplineManagementList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedDiscipline, setSelectedDiscipline] =
+    useState<Discipline | null>(null);
 
+  const deleteMutation = useMutationDeleteDiscipline();
   const {
     data: disciplines = [],
     isLoading,
@@ -68,20 +87,21 @@ export default function DisciplineManagementList() {
         return "Não definida";
     }
   };
+  const handleOpenDelete = (discipline: Discipline) => {
+    setSelectedDiscipline(discipline);
+    setOpenDeleteDialog(true);
+  };
 
-  // Normaliza disciplinas
-  const normalizedDisciplines = disciplines.map((d) => ({
-    codigo: d.codigo || "-",
-    designacao: d.desginacao || "Disciplina sem nome",
-    tipo_unidade_sigla: d.tipo_unidade_curricular,
+  const normalizedDisciplines: NormalizeDiscipline[] = disciplines.map((d) => ({
     tipo_descricao: getDescricaoTipo(d.tipo_unidade_curricular),
     natureza: getNaturezaLabel(d.natureza_unidade_curricular),
+    ...d,
   }));
 
   // Filtros combinados
   const filteredData = normalizedDisciplines.filter((item) => {
     const matchesSearch =
-      item.designacao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.desginacao.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.codigo.toString().includes(searchTerm);
 
     const matchesNatureza =
@@ -91,7 +111,7 @@ export default function DisciplineManagementList() {
       (naturezaFilter === "P" && item.natureza === "Prática");
 
     const matchesTipo =
-      tipoFilter === "all" || item.tipo_unidade_sigla === tipoFilter;
+      tipoFilter === "all" || item.tipo_unidade_curricular === tipoFilter;
 
     return matchesSearch && matchesNatureza && matchesTipo;
   });
@@ -107,6 +127,25 @@ export default function DisciplineManagementList() {
   const endItem = Math.min(currentPage * itemsPerPage, filteredData.length);
 
   const handleFilterChange = () => setCurrentPage(1);
+  const handleConfirmDelete = () => {
+    if (!selectedDiscipline) return;
+
+    deleteMutation.mutate(selectedDiscipline.codigo);
+
+    setOpenDeleteDialog(false);
+    setSelectedDiscipline(null);
+  };
+  const handleOpenEdit = (item: Discipline) => {
+    setSelectedDiscipline({
+      codigo: item.codigo,
+      codigo_disciplina: item.codigo_disciplina,
+      desginacao: item.desginacao,
+      natureza_unidade_curricular: item.natureza_unidade_curricular,
+      tipo_unidade_curricular: item.tipo_unidade_curricular,
+      sigla: item.sigla,
+    });
+    setCreateModalOpen(true);
+  };
 
   return (
     <div className="space-y-6 p-8">
@@ -157,8 +196,9 @@ export default function DisciplineManagementList() {
           </p>
           <p className="text-3xl font-bold text-blue-600">
             {
-              normalizedDisciplines.filter((d) => d.tipo_unidade_sigla === "S")
-                .length
+              normalizedDisciplines.filter(
+                (d) => d.tipo_unidade_curricular === "S"
+              ).length
             }
           </p>
         </div>
@@ -169,7 +209,7 @@ export default function DisciplineManagementList() {
           <p className="text-3xl font-bold text-purple-600">
             {
               normalizedDisciplines.filter(
-                (d) => d.tipo_unidade_sigla === "MIC"
+                (d) => d.tipo_unidade_curricular === "MIC"
               ).length
             }
           </p>
@@ -297,7 +337,7 @@ export default function DisciplineManagementList() {
                         {item.codigo}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {item.designacao}
+                        {item.desginacao}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
@@ -321,13 +361,22 @@ export default function DisciplineManagementList() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              handleOpenEdit(item);
+                            }}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
+                            type="button"
                             variant="ghost"
                             size="icon"
                             className="text-destructive hover:text-destructive"
+                            onClick={() => handleOpenDelete(item)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -398,8 +447,39 @@ export default function DisciplineManagementList() {
 
       <CreateDisciplineModal
         open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
+        onOpenChange={(b) => {
+          setSelectedDiscipline(null);
+          return setCreateModalOpen(b);
+        }}
+        discipline={selectedDiscipline}
       />
+      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Tem certeza que deseja eliminar?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              A disciplina <strong>{selectedDiscipline?.desginacao}</strong>{" "}
+              será removida permanentemente.
+              <br />
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "A eliminar..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

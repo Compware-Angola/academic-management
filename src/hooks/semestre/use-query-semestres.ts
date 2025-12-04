@@ -1,4 +1,7 @@
-import { fetchSemestres, Semestre } from "@/services/semestre/fecth-semestres";
+import {
+  fetchSemestres,
+  Semestre,
+} from "@/services/study_plan/semestre/fecth-semestres";
 import { useQuery } from "@tanstack/react-query";
 
 export function useQuerySemestres() {
