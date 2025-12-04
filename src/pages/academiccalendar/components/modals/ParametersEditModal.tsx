@@ -193,33 +193,73 @@ export function ParametersEditModal({
   const handleNext = () => {
     if (currentStep === "periodos") {
       if (!isPeriodoValid()) {
-        toast({
+        return toast({
           title: "Preencha todas as datas dos semestres!",
           variant: "destructive",
         });
-        return;
       }
 
-      // Validação: datas do primeiro semestre não podem estar no passado
       const hoje = new Date();
-      const dataInicio = new Date(periodosForm.dataInicioPrimeiroSemestre);
-      const dataFim = new Date(periodosForm.dataFimPrimeiroSemestre);
+      const anoAtual = hoje.getFullYear();
+      const anoSeguinte = anoAtual + 1;
 
-      if (dataInicio < hoje || dataFim < hoje) {
+      const inicio1 = new Date(periodosForm.dataInicioPrimeiroSemestre);
+      const fim1 = new Date(periodosForm.dataFimPrimeiroSemestre);
+      const inicio2 = new Date(periodosForm.dataInicioSegundoSemestre);
+      const fim2 = new Date(periodosForm.dataFimSegundoSemestre);
+
+      const mesInicio1 = inicio1.getMonth() + 1;
+      const mesFim1 = fim1.getMonth() + 1;
+      const mesInicio2 = inicio2.getMonth() + 1;
+      const mesFim2 = fim2.getMonth() + 1;
+
+      const anoInicio1 = inicio1.getFullYear();
+      const anoFim1 = fim1.getFullYear();
+      const anoInicio2 = inicio2.getFullYear();
+      const anoFim2 = fim2.getFullYear();
+
+      // ========= 1º SEMESTRE =========
+
+      if (mesInicio1 !== 10 || anoInicio1 !== anoAtual) {
         return toast({
-          title: "Datas inválidas",
-          description:
-            "O início e fim do primeiro semestre não podem estar no passado.",
+          title: "Data inválida",
+          description: `O 1º semestre deve iniciar em OUTUBRO de ${anoAtual}.`,
+          variant: "destructive",
+        });
+      }
+
+      if (mesFim1 !== 2 || anoFim1 !== anoSeguinte) {
+        return toast({
+          title: "Data inválida",
+          description: `O 1º semestre deve terminar em FEVEREIRO de ${anoSeguinte}.`,
+          variant: "destructive",
+        });
+      }
+
+      // ========= 2º SEMESTRE =========
+
+      if (mesInicio2 !== 3 || anoInicio2 !== anoSeguinte) {
+        return toast({
+          title: "Data inválida",
+          description: `O 2º semestre deve iniciar em MARÇO de ${anoSeguinte}.`,
+          variant: "destructive",
+        });
+      }
+
+      if (mesFim2 !== 7 || anoFim2 !== anoSeguinte) {
+        return toast({
+          title: "Data inválida",
+          description: `O 2º semestre deve terminar em JULHO de ${anoSeguinte}.`,
           variant: "destructive",
         });
       }
     }
 
+    // Avança ou salva
     const nextIndex = currentIndex + 1;
     if (nextIndex < steps.length) {
       setCurrentStep(steps[nextIndex].id);
     } else {
-      // Último passo → salva tudo
       mutationTudo.mutate();
     }
   };
@@ -325,7 +365,6 @@ export function ParametersEditModal({
                       <Label>{label} *</Label>
                       <Input
                         type="date"
-                        min={new Date().toISOString().split("T")[0]}
                         value={periodosForm[keys[i]]}
                         onChange={(e) =>
                           setPeriodosForm((prev) => ({
