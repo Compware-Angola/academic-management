@@ -24,11 +24,10 @@ export const useMutationDeletarHorario = () => {
       });
     },
     onError: (error: any) => {
-
       toast({
         title: "Erro ao excluir",
         description:
-          error?.response?.data?.mensagem ||
+          error?.response?.data?.message ||
           "Ocorreu um problema ao tentar excluir o horário.",
         variant: "destructive",
       });
