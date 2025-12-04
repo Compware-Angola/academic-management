@@ -50,11 +50,11 @@ interface ActivityModalProps {
   form: FormActivity;
   setForm: Dispatch<SetStateAction<FormActivity>>;
   handleSubmitNew: () => void;
-
+  editId?: number;
   // Dados para os selects
   loadingAnosLetivos: boolean;
   anosLetivos: AnoAcademico[];
-isSubmitting:boolean;
+  isSubmitting: boolean;
   loadingTiposCandidatura: boolean;
   tiposCandidatura: TipoCandidatura[];
 
@@ -75,14 +75,17 @@ export function ActivityModal({
   isSubmitting,
   loadingTiposCalendario,
   tiposCalendario,
+  editId,
 }: ActivityModalProps) {
+  console.log(editId);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Nova Atividade Letiva</DialogTitle>
           <DialogDescription>
-            Preencha os dados para cadastrar uma nova atividade no calendário acadêmico.
+            Preencha os dados para cadastrar uma nova atividade no calendário
+            acadêmico.
           </DialogDescription>
         </DialogHeader>
 
@@ -91,6 +94,7 @@ export function ActivityModal({
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="designacao">Descrição da Atividade *</Label>
             <Input
+              disabled={!!editId}
               id="designacao"
               value={form.designacao}
               onChange={(e) => setForm({ ...form, designacao: e.target.value })}
@@ -103,12 +107,18 @@ export function ActivityModal({
             <Label>Ano Letivo *</Label>
             <Select
               value={form.codigo_ano_lectivo?.toString() || ""}
-              onValueChange={(v) => setForm({ ...form, codigo_ano_lectivo: Number(v) })}
-              disabled={loadingAnosLetivos}
+              onValueChange={(v) =>
+                setForm({ ...form, codigo_ano_lectivo: Number(v) })
+              }
+              disabled={loadingAnosLetivos || !!editId}
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={loadingAnosLetivos ? "Carregando anos..." : "Selecione o ano letivo"}
+                  placeholder={
+                    loadingAnosLetivos
+                      ? "Carregando anos..."
+                      : "Selecione o ano letivo"
+                  }
                 />
               </SelectTrigger>
               <SelectContent>
@@ -126,12 +136,16 @@ export function ActivityModal({
             <Label>Tipo de Candidatura *</Label>
             <Select
               value={form.codigo_tipo_candidatura?.toString() || ""}
-              onValueChange={(v) => setForm({ ...form, codigo_tipo_candidatura: Number(v) })}
-              disabled={loadingTiposCandidatura}
+              onValueChange={(v) =>
+                setForm({ ...form, codigo_tipo_candidatura: Number(v) })
+              }
+              disabled={loadingTiposCandidatura || !!editId}
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={loadingTiposCandidatura ? "Carregando..." : "Selecione"}
+                  placeholder={
+                    loadingTiposCandidatura ? "Carregando..." : "Selecione"
+                  }
                 />
               </SelectTrigger>
               <SelectContent>
@@ -149,12 +163,16 @@ export function ActivityModal({
             <Label>Tipo de Calendário *</Label>
             <Select
               value={form.codigo_tipo_calendario?.toString() || ""}
-              onValueChange={(v) => setForm({ ...form, codigo_tipo_calendario: Number(v) })}
-              disabled={loadingTiposCalendario}
+              onValueChange={(v) =>
+                setForm({ ...form, codigo_tipo_calendario: Number(v) })
+              }
+              disabled={loadingTiposCalendario || !!editId}
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={loadingTiposCalendario ? "Carregando..." : "Selecione"}
+                  placeholder={
+                    loadingTiposCalendario ? "Carregando..." : "Selecione"
+                  }
                 />
               </SelectTrigger>
               <SelectContent>
@@ -173,7 +191,9 @@ export function ActivityModal({
             <Input
               type="date"
               value={form.data_inicio}
-              onChange={(e) => setForm({ ...form, data_inicio: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, data_inicio: e.target.value })
+              }
             />
           </div>
 
@@ -188,28 +208,44 @@ export function ActivityModal({
           </div>
         </div>
 
-      <DialogFooter className="gap-3">
-  <Button variant="outline" onClick={() => setOpen(false)}>
-    Cancelar
-  </Button>
-<Button 
-  onClick={handleSubmitNew} 
-  disabled={isSubmitting}
-  className="min-w-40"
->
-  {isSubmitting ? (
-    <>
-      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-      Criando...
-    </>
-  ) : (
-    "Criar Atividade"
-  )}
-</Button>
-</DialogFooter>
+        <DialogFooter className="gap-3">
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSubmitNew}
+            disabled={isSubmitting}
+            className="min-w-40"
+          >
+            {isSubmitting ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Criando...
+              </>
+            ) : (
+              "Criar Atividade"
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -2,8 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { fetchCreateActivity } from "@/services/academiccalendar/fetch-create-activity";
-
-
+import { AxiosError } from "axios";
 
 export function useMutationfetchCreateActivity() {
   const queryClient = useQueryClient();
@@ -18,11 +17,15 @@ export function useMutationfetchCreateActivity() {
       // queryClient.invalidateQueries({ queryKey: ["atividades", { anoLetivoId, tipoCandidaturaId }] });
     },
     onError: (error: any) => {
-      toast({
-        title: "Erro ao criar atividade",
-        description: error?.response?.data?.message || error?.message || "Tente novamente",
-        variant: "destructive",
-      });
+      if (error instanceof AxiosError) {
+        toast({
+          title: "Erro ao criar atividade",
+          description:
+            error.response.data?.msgresposta ||
+            "Verifique os dados e tente novamente. domingos",
+          variant: "destructive",
+        });
+      }
     },
   });
 }

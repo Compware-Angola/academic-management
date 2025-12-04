@@ -2,8 +2,21 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Download, Printer, RefreshCw, Edit, Trash2 } from "lucide-react";
@@ -17,9 +30,33 @@ export default function ActivitiesLecturesPos() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const mockData = [
-    { id: 1, programa: "MBA em Gestão", tipo: "Início das Aulas", dataInicio: "2024-10-01", dataFim: "2025-02-28", anoLetivo: "2024/2025", observacoes: "Período letivo intensivo" },
-    { id: 2, programa: "Mestrado em Eng. Civil", tipo: "Período de Avaliação", dataInicio: "2025-03-01", dataFim: "2025-03-20", anoLetivo: "2024/2025", observacoes: "Defesas de tese" },
-    { id: 3, programa: "Pós-Graduação em Direito", tipo: "Início das Aulas", dataInicio: "2024-11-15", dataFim: "2025-04-30", anoLetivo: "2024/2025", observacoes: "Módulos semanais" },
+    {
+      id: 1,
+      programa: "MBA em Gestão",
+      tipo: "Início das Aulas",
+      dataInicio: "2024-10-01",
+      dataFim: "2025-02-28",
+      anoLetivo: "2024/2025",
+      observacoes: "Período letivo intensivo",
+    },
+    {
+      id: 2,
+      programa: "Mestrado em Eng. Civil",
+      tipo: "Período de Avaliação",
+      dataInicio: "2025-03-01",
+      dataFim: "2025-03-20",
+      anoLetivo: "2024/2025",
+      observacoes: "Defesas de tese",
+    },
+    {
+      id: 3,
+      programa: "Pós-Graduação em Direito",
+      tipo: "Início das Aulas",
+      dataInicio: "2024-11-15",
+      dataFim: "2025-04-30",
+      anoLetivo: "2024/2025",
+      observacoes: "Módulos semanais",
+    },
   ];
 
   const handleRefresh = () => {
@@ -131,13 +168,18 @@ export default function ActivitiesLecturesPos() {
               Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
                   {Array.from({ length: 8 }).map((_, j) => (
-                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                    <TableCell key={j}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : mockData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={8}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   Nenhuma atividade letiva encontrada
                 </TableCell>
               </TableRow>
@@ -152,7 +194,9 @@ export default function ActivitiesLecturesPos() {
                   <TableCell>{item.dataInicio}</TableCell>
                   <TableCell>{item.dataFim}</TableCell>
                   <TableCell>{item.anoLetivo}</TableCell>
-                  <TableCell className="max-w-xs truncate">{item.observacoes}</TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {item.observacoes}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" size="sm">
@@ -173,7 +217,10 @@ export default function ActivitiesLecturesPos() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Label htmlFor="perPage">Itens por página:</Label>
-          <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(Number(v))}>
+          <Select
+            value={itemsPerPage.toString()}
+            onValueChange={(v) => setItemsPerPage(Number(v))}
+          >
             <SelectTrigger id="perPage" className="w-20">
               <SelectValue />
             </SelectTrigger>
@@ -186,9 +233,13 @@ export default function ActivitiesLecturesPos() {
           </Select>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={currentPage === 1}>Anterior</Button>
+          <Button variant="outline" size="sm" disabled={currentPage === 1}>
+            Anterior
+          </Button>
           <span className="text-sm">Página {currentPage} de 1</span>
-          <Button variant="outline" size="sm" disabled>Próxima</Button>
+          <Button variant="outline" size="sm" disabled>
+            Próxima
+          </Button>
         </div>
       </div>
     </div>

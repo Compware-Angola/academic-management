@@ -45,6 +45,7 @@ import { useMutationfetchDeleteActivity } from "@/hooks/academiccalendar/use-mut
 
 export default function ActivitiesLecturesLic() {
   const {
+    resetForm,
     atividades,
     totalPages,
     currentPage,
@@ -67,25 +68,30 @@ export default function ActivitiesLecturesLic() {
     isSubmitting,
     loadingAnosLetivos,
     loadingAtividades,
+    handleEdit,
+    editId,
   } = useActivitiesLectures();
- const [openDialog, setOpenDialog] = useState(false);
-   const [selectedSala, setSelectedSala] = useState<{ id: string; descricao: string } | null>(null);
-     const { mutate: deleteSala, isPending: deleting } = useMutationfetchDeleteActivity();
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedSala, setSelectedSala] = useState<{
+    id: string;
+    descricao: string;
+  } | null>(null);
+  const { mutate: deleteSala, isPending: deleting } =
+    useMutationfetchDeleteActivity();
 
-   const handleOpenDelete = (item: any) => {
-     setSelectedSala({
-       id: item.codigo.toString(),
-       descricao: item.designacao,
-     });
-     setOpenDialog(true);
-   };
-     const handleConfirmDelete = () => {
+  const handleOpenDelete = (item: any) => {
+    setSelectedSala({
+      id: item.codigo.toString(),
+      descricao: item.designacao,
+    });
+    setOpenDialog(true);
+  };
+  const handleConfirmDelete = () => {
     if (!selectedSala) return;
     deleteSala(selectedSala.id, {
       onSuccess: () => {
         setOpenDialog(false);
         setSelectedSala(null);
-       
       },
     });
   };
@@ -148,7 +154,9 @@ export default function ActivitiesLecturesLic() {
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={loadingTiposCandidatura ? "Carregando..." : "Selecione"}
+                  placeholder={
+                    loadingTiposCandidatura ? "Carregando..." : "Selecione"
+                  }
                 />
               </SelectTrigger>
 
@@ -227,8 +235,19 @@ export default function ActivitiesLecturesLic() {
                   <TableCell>{item.tipo_calendario}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                    
-                      <Button onClick={() => handleOpenDelete(item)} variant="ghost" size="icon">
+                      {/* <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(item)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button> */}
+
+                      <Button
+                        onClick={() => handleOpenDelete(item)}
+                        variant="ghost"
+                        size="icon"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -272,13 +291,14 @@ export default function ActivitiesLecturesLic() {
           </div>
         </div>
       )}
-  {/* Modal de Confirmação de Exclusão */}
+      {/* Modal de Confirmação de Exclusão */}
       <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão?</AlertDialogTitle>
             <AlertDialogDescription>
-              Deseja realmente excluir a actividade  <strong>{selectedSala?.descricao}</strong>?<br />
+              Deseja realmente excluir a actividade{" "}
+              <strong>{selectedSala?.descricao}</strong>?<br />
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -296,8 +316,12 @@ export default function ActivitiesLecturesLic() {
       </AlertDialog>
       {/* Modal */}
       <ActivityModal
+        editId={editId}
         open={openModal}
-        setOpen={setOpenModal}
+        setOpen={(state) => {
+          resetForm();
+          setOpenModal(state);
+        }}
         form={form}
         setForm={setForm}
         handleSubmitNew={handleSubmitNew}

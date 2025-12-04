@@ -1,5 +1,3 @@
-// src/services/study_plan/delete-discipline.service.ts
-
 import { axiosApexGa } from "@/lib/axios-apex-ga";
 
 /**

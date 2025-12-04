@@ -7,6 +7,11 @@ import { useQueryAtividades } from "@/hooks/queries/use-query-atividades";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useMutationfetchCreateActivity } from "@/hooks/academiccalendar/use-mutation-create-activity";
 import { useQueryTypeCalendar } from "@/hooks/academiccalendar/use-query-type-calendar";
+import { AxiosError } from "axios";
+import { error } from "console";
+import { AuthStorage } from "@/util/auth-storage";
+import { Atividade } from "@/services/fetch-atividade";
+import { number } from "framer-motion";
 
 interface FormActivity {
   designacao: string;
@@ -23,11 +28,12 @@ export function useActivitiesLectures() {
   // Filtros
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("");
+  const [editId, setEditId] = useState<number | null>(null);
 
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Modal
   const [openModal, setOpenModal] = useState(false);
 
@@ -42,9 +48,12 @@ const [isSubmitting, setIsSubmitting] = useState(false);
   });
 
   // Queries
-  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } = useQueryAnoAcademico();
-  const { data: tiposCandidatura = [], isLoading: loadingTiposCandidatura } = useQueryTipoCandidatura();
-  const { data: tiposCalendario = [], isLoading: loadingTiposCalendario } = useQueryTypeCalendar();
+  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } =
+    useQueryAnoAcademico();
+  const { data: tiposCandidatura = [], isLoading: loadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const { data: tiposCalendario = [], isLoading: loadingTiposCalendario } =
+    useQueryTypeCalendar();
 
   const {
     data: atividades = [],
@@ -65,7 +74,9 @@ const [isSubmitting, setIsSubmitting] = useState(false);
         !a.designacao.toLowerCase().includes("mestrado")
     );
 
-    const ativo = filtrados.find((a) => a.estado?.toLowerCase().includes("activ")) ?? filtrados[0];
+    const ativo =
+      filtrados.find((a) => a.estado?.toLowerCase().includes("activ")) ??
+      filtrados[0];
     if (ativo) {
       const id = ativo.codigo.toString();
       setAnoLetivoId(id);
@@ -75,7 +86,8 @@ const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!tiposCandidatura.length) return;
-    const padrao = tiposCandidatura.find((t) => t.codigo === 1) ?? tiposCandidatura[0];
+    const padrao =
+      tiposCandidatura.find((t) => t.codigo === 1) ?? tiposCandidatura[0];
     if (padrao) {
       setTipoCandidaturaId(padrao.codigo.toString());
       setForm((prev) => ({ ...prev, codigo_tipo_candidatura: padrao.codigo }));
@@ -110,13 +122,13 @@ const [isSubmitting, setIsSubmitting] = useState(false);
       });
       return;
     }
-setIsSubmitting(true);
+    setIsSubmitting(true);
     const payload = {
       designacao: form.designacao.trim(),
       codigo_ano_lectivo: Number(form.codigo_ano_lectivo),
       codigo_tipo_candidatura: Number(form.codigo_tipo_candidatura),
       codigo_tipo_calendario: Number(form.codigo_tipo_calendario),
-      codigo_utilizador: 2110, // depois substitua por useAuth().user.id
+      codigo_utilizador: AuthStorage.getUser().user_id, // depois substitua por useAuth().user.id
       data_inicio: form.data_inicio,
       data_fim: form.data_fim,
     };
@@ -124,30 +136,44 @@ setIsSubmitting(true);
     try {
       await criarAtividadeMutation.mutateAsync(payload);
 
-      toast({ title: "Sucesso!", description: "Atividade criada com sucesso." });
+      toast({
+        title: "Sucesso!",
+        description: "Atividade criada com sucesso.",
+      });
       setOpenModal(false);
       resetForm();
       refetchAtividades();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toast({
+          title: "Erro ao criar atividade",
+          description:
+            error.response.data?.msgresposta ||
+            "Verifique os dados e tente novamente domingos.",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "Erro ao criar atividade",
-        description: error?.message || "Verifique os dados e tente novamente.",
+        description: "Verifique os dados e tente novamente. Domingos",
         variant: "destructive",
       });
-    }finally {
-   
-    setIsSubmitting(false);
-  }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
-    setForm((prev) => ({
-      ...prev,
+    setForm({
       designacao: "",
+      codigo_ano_lectivo: "",
+      codigo_tipo_candidatura: "",
       codigo_tipo_calendario: "",
       data_inicio: "",
       data_fim: "",
-    }));
+    });
+    setEditId(null);
   };
 
   // ==================== PAGINAÇÃO ====================
@@ -159,6 +185,19 @@ setIsSubmitting(true);
 
   const nextPage = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
   const prevPage = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const handleEdit = (item: Atividade) => {
+    setForm({
+      designacao: item.descricao,
+      codigo_ano_lectivo: item.ano_lectivo,
+      codigo_tipo_candidatura: item.tipo_candidatura,
+      codigo_tipo_calendario: item.tipo_calendario,
+      data_inicio: item.data_inicio.split("T")[0],
+      data_fim: item.data_termino.split("T")[0],
+    });
+
+    setEditId(Number(item.codigo));
+    setOpenModal(true);
+  };
 
   // ==================== RETORNO ====================
   return {
@@ -184,14 +223,15 @@ setIsSubmitting(true);
     setAnoLetivoId,
     tipoCandidaturaId,
     setTipoCandidaturaId,
-
+    editId,
     anosLetivos,
     loadingAnosLetivos,
     tiposCandidatura,
     loadingTiposCandidatura,
     tiposCalendario,
     loadingTiposCalendario,
-
+    handleEdit,
+    resetForm,
     // Ações
     handleRefresh,
   };
