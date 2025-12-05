@@ -129,8 +129,9 @@ const App = () => {
                   path="/acessos/cargos"
                   element={<RectoratePositions />}
                 />
+                */}
                 <Route path="/profile" element={<TeacherProfile />} />
-*/}
+
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
                   path="/plano/uc-departamento"
