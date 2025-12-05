@@ -25,7 +25,7 @@ interface TipoCandidatura {
   designacao: string;
 }
 
-const API_ANOS_LETIVOS = "http://34.202.163.85:8080/ords/cmpdev/academic-year/all";
+
 const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
 const API_ATIVIDADES = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/academic-activities";
 
@@ -88,8 +88,8 @@ export default function UpcomingEventsCard() {
               <Calendar className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-xl">Próximas Atividades</CardTitle>
-              <CardDescription>Calendário Académico</CardDescription>
+               <CardTitle>Próximos Compromissos</CardTitle>
+                       <CardDescription>Agenda académica e institucional</CardDescription>
             </div>
           </div>
 
