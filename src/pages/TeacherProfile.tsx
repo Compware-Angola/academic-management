@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useAuth } from "@/hooks/use-auth";
+import UpcomingEventsCard from "./dasboard/components/UpcomingEventsCard";
 
 export interface TeacherInfo {
   name: string;
@@ -348,45 +349,7 @@ const TeacherProfile = () => {
         </Card>
       </div>
 
-      {/* Próximos Eventos */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <CalendarDays className="h-6 w-6 text-primary" />
-            <div>
-              <CardTitle>Próximos Compromissos</CardTitle>
-              <CardDescription>Agenda académica e institucional</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {upcomingEvents.map((event, i) => (
-              <div key={i} className="flex items-start justify-between rounded-lg border bg-card p-4">
-                <div className="flex-1">
-                  <p className="font-medium">{event.title}</p>
-                  {event.time && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      {event.time}
-                    </p>
-                  )}
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">
-                    {new Date(event.date).toLocaleDateString("pt-PT", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                  {getEventBadge(event.type)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 };
