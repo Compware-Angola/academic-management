@@ -21,6 +21,10 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useAuth } from "@/hooks/use-auth";
+import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
+import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
+import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
@@ -31,35 +35,44 @@ export default function LaunchNotes() {
     semestre: "",
     periodo: "",
     curso: "",
-    unidadeCurricular: "",
+    horarioId: "",
     classes: "",
     tipoAvaliacao: "",
     tipoProva: "",
     verHoario: "",
-   
+
     filtro: "",
   });
 
   const { data: students = [], isLoading: loadingNoteRelease, refetch } = useQueryNoteReleases({
     anoLectivoId: Number(formData.anoLetivo),
-    gradeCurricularId: Number(formData.unidadeCurricular),
+    horarioId: Number(formData.horarioId),
     tipoProvaId: Number(formData.tipoProva),
     tipoAvaliacao: Number(formData.tipoAvaliacao),
     classe: Number(formData.classes),
     turno: Number(formData.periodo)
-  }); 
+  });
 
   const [localStudents, setLocalStudents] = useState(students);
   const [lockedStudents, setLockedStudents] = useState<{ [key: number]: boolean }>({});
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+
   const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
-  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
-    classe: formData.classes,
-    curso: formData.curso,
-    semestre: formData.semestre,
+  const { user } = useAuth();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const year = academicYear?.filter(
+    (ay) => ay.estado.toLowerCase() === "activo"
+  )
+  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } = useQueryTeacherProfile(user?.user_id);
+  const { data: turmDataHorario, isLoading: isLoadingTurmaDataHorario, isError } = useQueryListSchedules({
+    teacherId: teacherInfoData?.codigo_docente,
+    anoLectivo: Number(formData.anoLetivo),
+    semestre: Number(formData.semestre),
+
   });
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+
   const { data: classes = [], isLoading: isLoadingClasses } = useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } = useQueryTipoAvaliacao();
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } = useQueryTipoProva();
@@ -113,8 +126,8 @@ export default function LaunchNotes() {
       status: 2,
       notaAnterior: student.notaFinalAnterior || 0,
       refUtilizador: {
-        pk: 1556,
-        desc: "Margarida da Silva Rodrigues",
+        pk: teacherInfoData?.codigo_docente,
+        desc: teacherInfoData?.nome,
         corLetra: "black",
         disponivel: true,
       },
@@ -149,118 +162,122 @@ export default function LaunchNotes() {
           <p className="text-muted-foreground mt-1">Lançar notas de avaliações por UC</p>
         </div>
 
-       
+
       </div>
 
       {/* Filtros */}
- <div className="bg-card border rounded-lg p-6">
+      <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <FormSelect
-      disabled={isLoadingAcademicYear}
-      loading={isLoadingAcademicYear}
-      label="Ano Letivo"
-      value={formData.anoLetivo}
-      onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
-      options={academicYear}
-      map={(a) => ({ key: a.codigo, label: a.designacao })}
-    />
-     <FormSelect
-                disabled={
-                  isLoadingPeriodos ||
-                  isLoadingAcademicYear ||
-                  formData.anoLetivo === ""
-                }
-                loading={isLoadingPeriodos}
-                label="Período"
-                value={formData.periodo}
-                onChange={(v) => setFormData({ ...formData, periodo: v })}
-                options={periodos}
-                map={(p) => ({
-                  key: p.codigo,
-                  label: p.designacao,
-                })}
-              />
-    <FormSelect
-      disabled={isLoadingSemestres}
-      loading={isLoadingSemestres}
-      label="Semestre"
-      value={formData.semestre}
-      onChange={(v) => setFormData({ ...formData, semestre: v })}
-      options={semestres}
-      map={(s) => ({ key: s.codigo, label: s.designacao })}
-    />
-    <FormSelect
-      disabled={isLoadingCurso}
-      loading={isLoadingCurso}
-      label="Curso"
-      value={formData.curso}
-      onChange={(v) => setFormData({ ...formData, curso: v })}
-      options={cursos}
-      map={(c) => ({ key: c.codigo, label: c.designacao })}
-    />
-    <FormSelect
-      label="Ano Curricular"
-      value={formData.classes}
-      disabled={isLoadingClasses || !formData.curso}
-      onChange={(v) => setFormData({ ...formData, classes: v })}
-      options={classes}
-      map={(c) => ({ key: c.codigo, label: c.designacao })}
-      loading={isLoadingClasses}
-    />
-    <FormSelect
-      label="Unidade Curricular"
-      value={formData.unidadeCurricular}
-      disabled={isLoadingUC || !formData.semestre || !formData.curso || !formData.classes}
-      onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
-      options={unidadesCurriculares}
-      map={(u) => ({ key: u.pk, label: u.descricao })}
-      loading={isLoadingUC}
-    />
-    <FormSelect
-      label="Tipo de Prova"
-      value={formData.tipoProva}
-      disabled={isLoadingTipoProva}
-      onChange={(v) => setFormData({ ...formData, tipoProva: v })}
-      options={tipoProva}
-      map={(u) => ({ key: u.codigo, label: u.designacao })}
-      loading={isLoadingTipoProva}
-    />
-    <FormSelect
-      label="Tipo de Avaliação"
-      value={formData.tipoAvaliacao}
-      disabled={isLoadingTipoAvaliacao}
-      onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
-      options={tipoAvaliacao}
-      map={(u) => ({ key: u.codigo, label: u.designacao })}
-      loading={isLoadingTipoAvaliacao}
-    />
+          <FormSelect
+            disabled={isLoadingAcademicYear}
+            loading={isLoadingAcademicYear}
+            label="Ano Letivo"
+            value={formData.anoLetivo}
+            onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+            options={year}
+            map={(a) => ({ key: a.codigo, label: a.designacao })}
+          />
+          <FormSelect
+            disabled={
+              isLoadingPeriodos ||
+              isLoadingAcademicYear ||
+              formData.anoLetivo === ""
+            }
+            loading={isLoadingPeriodos}
+            label="Período"
+            value={formData.periodo}
+            onChange={(v) => setFormData({ ...formData, periodo: v })}
+            options={periodos}
+            map={(p) => ({
+              key: p.codigo,
+              label: p.designacao,
+            })}
+          />
+          <FormSelect
+            disabled={isLoadingSemestres}
+            loading={isLoadingSemestres}
+            label="Semestre"
+            value={formData.semestre}
+            onChange={(v) => setFormData({ ...formData, semestre: v })}
+            options={semestres}
+            map={(s) => ({ key: s.codigo, label: s.designacao })}
+          />
+          <FormSelect
+            disabled={isLoadingCurso}
+            loading={isLoadingCurso}
+            label="Curso"
+            value={formData.curso}
+            onChange={(v) => setFormData({ ...formData, curso: v })}
+            options={cursos}
+            map={(c) => ({ key: c.codigo, label: c.designacao })}
+          />
+          <FormSelect
+            label="Ano Curricular"
+            value={formData.classes}
+            disabled={isLoadingClasses || !formData.curso}
+            onChange={(v) => setFormData({ ...formData, classes: v })}
+            options={classes}
+            map={(c) => ({ key: c.codigo, label: c.designacao })}
+            loading={isLoadingClasses}
+          />
+          <FormSelectIsaac
+            label="Horario"
+            value={formData.horarioId}
+            disabled={isLoadingTurmaDataHorario || !formData.semestre || !formData.classes}
+            onChange={(v) => setFormData({ ...formData, horarioId: v })}
+            options={turmDataHorario?.horarios}
+            map={(u,index) => ({
+              key: index,         
+              value: u.codigo_horario,          
+              label: `${u.horario} ${u.grade}`,
+            })}
+            loading={isLoadingTurmaDataHorario}
+          />
+          <FormSelect
+            label="Tipo de Prova"
+            value={formData.tipoProva}
+            disabled={isLoadingTipoProva}
+            onChange={(v) => setFormData({ ...formData, tipoProva: v })}
+            options={tipoProva}
+            map={(u) => ({ key: u.codigo, label: u.designacao })}
+            loading={isLoadingTipoProva}
+          />
+          <FormSelect
+            label="Tipo de Avaliação"
+            value={formData.tipoAvaliacao}
+            disabled={isLoadingTipoAvaliacao}
+            onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
+            options={tipoAvaliacao}
+            map={(u) => ({ key: u.codigo, label: u.designacao })}
+            loading={isLoadingTipoAvaliacao}
+          />
 
-    {/* Botão Listar na mesma linha */}
-   <div className="flex items-end">
-  <Button
- 
-    className="w-full" // opcional: deixa o botão maior horizontalmente
-    disabled={
-      loadingNoteRelease ||
-      !formData.anoLetivo ||
-      !formData.periodo ||
-      !formData.semestre ||
-      !formData.curso ||
-      !formData.classes ||
-      !formData.unidadeCurricular ||
-      !formData.tipoProva ||
-      !formData.tipoAvaliacao
-    }
-    onClick={() => refetch()}
-  >
-    <RefreshCw className="h-5 w-5 mr-2" />
-    Listar
-  </Button>
-</div>
+          {/* Botão Listar na mesma linha */}
+          <div className="flex items-end">
+            <Button
 
-  </div>
-</div>
+              className="w-full"
+              disabled={
+                loadingNoteRelease ||
+                !formData.anoLetivo ||
+                !formData.periodo ||
+                !formData.semestre ||
+                !formData.curso ||
+                !formData.classes ||
+                !formData.horarioId ||
+                !formData.tipoProva ||
+                !formData.tipoAvaliacao
+              }
+              onClick={() => refetch()}
+            >
+              <RefreshCw className="h-5 w-5 mr-2" />
+              Listar
+            </Button>
+          </div>
+
+        </div>
+      </div>
 
       {/* Tabela */}
       {loadingNoteRelease ? (
@@ -309,7 +326,7 @@ export default function LaunchNotes() {
                               onChange={(e) => handleNotaChange(student.codigo_grade_aluno, "observacao", e.target.value)}
                               className="w-full mx-auto text-left"
                               placeholder="Pequena descrição..."
-                               disabled={isLocked}
+                              disabled={isLocked}
                             />
                           </TableCell>
 

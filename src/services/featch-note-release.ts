@@ -37,7 +37,7 @@ export interface NoteReleaseApiResponse {
 // Função para buscar notas com filtros obrigatórios
 export async function fetchNoteReleases(params: {
   anoLectivoId: number;
-  gradeCurricularId: number;
+  horarioId: number;
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;

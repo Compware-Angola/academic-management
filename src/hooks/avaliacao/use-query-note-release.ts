@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 interface UseQueryNoteReleasesParams {
   anoLectivoId: number;
-  gradeCurricularId: number;
+  horarioId: number;
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;

@@ -19,10 +19,14 @@ import {
   Edit,
   CalendarDays,
   Building,
+  GraduationCap,
+  Users,
 } from "lucide-react";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useAuth } from "@/hooks/use-auth";
 import UpcomingEventsCard from "./dasboard/components/UpcomingEventsCard";
+import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 export interface TeacherInfo {
   name: string;
@@ -42,9 +46,17 @@ const TeacherProfile = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
-
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+    const year = academicYear?.filter(
+              (ay) => ay.estado.toLowerCase() === "activo"
+            )
   const { data: teacherInfoData, isLoading: teacherInfoDataLoading } = useQueryTeacherProfile(user?.user_id);
-
+  const { data:turmData, isLoading:isLoadingTurmaData, isError } = useQueryListSchedules({
+    teacherId:teacherInfoData.codigo_docente,
+    anoLectivo: year[0].codigo
+    
+  });
   // Estado inicial com valores vazios → evita flash nos cards
   const [teacherInfo, setTeacherInfo] = useState<TeacherInfo>({
     name: "",
@@ -110,7 +122,7 @@ const TeacherProfile = () => {
     : "";
 
   // Skeleton enquanto carrega
-  if (teacherInfoDataLoading) {
+  if (teacherInfoDataLoading || isLoadingTurmaData) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -210,9 +222,10 @@ const TeacherProfile = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="personal">Pessoal</TabsTrigger>
                 <TabsTrigger value="professional">Profissional</TabsTrigger>
+                <TabsTrigger value="classes">Horários</TabsTrigger>
               </TabsList>
 
               {/* Dados Pessoais */}
@@ -333,6 +346,51 @@ const TeacherProfile = () => {
                   </div>
                 </div>
               </TabsContent>
+                <TabsContent value="classes" className="pt-4">
+  <div className="space-y-3">
+    {turmData.horarios && turmData.horarios.length > 0 ? (
+      turmData.horarios.map((cls) => (
+        <div
+          key={cls.codigo_horario}
+          className="flex items-center justify-between rounded-lg border bg-card p-4 transition-all hover:shadow-md"
+        >
+          <div className="flex items-center gap-4">
+            <GraduationCap className="h-10 w-10 text-primary" />
+            <div>
+              <p className="font-semibold text-foreground">
+                {cls.codigo_grade} – {cls.grade}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                • Horário: {cls.horario}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                • Sala: {cls.sala}
+              </p>
+              {cls.docente && (
+                <p className="text-sm text-muted-foreground">
+                  • Docente: {cls.docente}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      ))
+    ) : (
+      // Mensagem amigável quando não há horários
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50 py-12 text-center">
+        <div className="rounded-full bg-muted p-4 mb-4">
+          <GraduationCap className="h-12 w-12 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-medium text-foreground">
+          Nenhum horário encontrado
+        </h3>
+        <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+          O docente está com agenda livre no presente ano lectivo
+        </p>
+      </div>
+    )}
+  </div>
+</TabsContent>
             </Tabs>
 
             {isEditing && (
