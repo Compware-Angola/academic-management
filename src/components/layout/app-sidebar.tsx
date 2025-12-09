@@ -25,7 +25,10 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { menuStructure } from "@/config/menuStructure";
+import { finaceStructure, menuStructure,healpStructure, academicStructure } from "@/config/menuStructure";
+import { NavFinance } from "./nav-finance";
+import { NavHealp } from "./nav-healp";
+import { NavAcademic } from "./nav-academic";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -35,6 +38,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={menuStructure.items} />
+         <NavAcademic items={academicStructure.items} />
+        <NavFinance items={finaceStructure.items} />
+       
+        <NavHealp items={healpStructure.items} />
+
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

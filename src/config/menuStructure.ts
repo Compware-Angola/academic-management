@@ -19,22 +19,13 @@ import {
   FolderOpen,
   FileBarChart,
   HomeIcon,
+  BadgeDollarSign,
+  HelpCircle,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
+import { MenuStructure } from "./menu.types";
 
-export const menuStructure: {
-  items: {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-      isActive?: boolean;
-    }[];
-  }[];
-} = {
+export const menuStructure: MenuStructure = {
   items: [
     {
       title: "Início",
@@ -86,82 +77,14 @@ export const menuStructure: {
       ],
     },
 
-    // ----------------------------------------------------
-    // AVALIAÇÕES
-    // ----------------------------------------------------
-    {
-      title: "Avaliações",
-      url: "/avaliacoes",
-      icon: FileCheck,
-      items: [
-        {
-          title: "Controle de lançamento de notas",
-          url: "/avaliacoes/controle",
-        },
-        {
-          title: "Fórmula por unidade curricular",
-          url: "/avaliacoes/formula-uc",
-        },
-        {
-          title: "Fórmula para grade com oral",
-          url: "/avaliacoes/formula-oral",
-        },
-        { title: "Estatísticas", url: "/avaliacoes/estatisticas" },
-        { title: "Estudantes inscritos", url: "/avaliacoes/estudantes" },
-        { title: "Histórico de lançamentos", url: "/avaliacoes/historico" },
-        { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
-        { title: "Lançamento de notas", url: "/avaliacoes/notas" },
-        { title: "Lista de presença", url: "/avaliacoes/presenca" },
-     
-        { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
-        { title: "Pauta por UC", url: "/avaliacoes/pauta-uc" },
-        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
-        { title: "Validação", url: "/avaliacoes/validacao" },
-        { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
-      ],
-    },
 
-    // ----------------------------------------------------
-    // BOLSA
-    /* ----------------------------------------------------
-    {
-      title: "Bolsa e Desconto",
-      url: "/bolsa",
-      icon: Wallet,
-      items: [
-        { title: "Atribuição", url: "/bolsa/atribuicao" },
-        { title: "Estatísticas", url: "/bolsa/estatisticas" },
-        { title: "Histórico", url: "/bolsa/historico" },
-        { title: "Instituições", url: "/bolsa/instituicoes" },
-        { title: "Inserção de pagamentos", url: "/bolsa/pagamentos" },
-        { title: "Bolseiros", url: "/bolsa/bolseiros" },
-        { title: "Pagamentos bolseiros", url: "/bolsa/pagamentos-bolseiros" },
-        {
-          title: "Percentagem de aproveitamento",
-          url: "/bolsa/aproveitamento",
-        },
-      ],
-    },
-    */
+
+
 
     // ----------------------------------------------------
     // CALENDÁRIO LIC
     // ----------------------------------------------------
-    {
-      title: "Calendário Académico ",
-      url: "/calendario",
-      icon: Calendar,
-      items: [
-        { title: "Atividades letivas", url: "/calendario/atividades" },
-        { title: "Prazos", url: "/calendario/prazos" },
-        //{ title: "Calendário de provas", url: "/calendario/provas" },
-        { title: "Dias isentos", url: "/calendario/dias-isentos" },
-        { title: "Parâmetros", url: "/calendario/parametros" },
-        // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
 
-        //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
-      ],
-    },
 
     // ----------------------------------------------------
     // CALENDÁRIO PÓS
@@ -178,19 +101,7 @@ export const menuStructure: {
     },
     */
 
-    // ----------------------------------------------------
-    // COMUNICAÇÃO
-    // ----------------------------------------------------
-    {
-      title: "Comunicação",
-      url: "/comunicacao",
-      icon: MessageSquare,
-      items: [
-        { title: "Avisos", url: "/comunicacao/avisos" },
-        { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-        { title: "Solicitações", url: "/comunicacao/solicitacoes" },
-      ],
-    },
+ 
 
     // ----------------------------------------------------
     // CRIAR UTILIZADORES
@@ -212,36 +123,7 @@ export const menuStructure: {
       ],
     },
 
-    // ----------------------------------------------------
-    // EXAME DE ACESSO
-    // ----------------------------------------------------
-    {
-      title: "Exame de Acesso",
-      url: "/exame",
-      icon: FileCheck,
-      items: [
-        { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-        { title: "Admitir candidatura", url: "/exame/admitir" },
-        { title: "Alterar senha", url: "/exame/alterar-senha" },
-        { title: "Alterar tipo", url: "/exame/alterar-tipo" },
-        { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-        { title: "Consultar prova", url: "/exame/consultar-prova" },
-        { title: "Estatísticas", url: "/exame/estatisticas" },
-        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
-        { title: "Inscrição época especial", url: "/exame/epoca-especial" },
-        { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
-        { title: "Lista de candidatos", url: "/exame/lista-candidatos" },
-        { title: "Admitidos", url: "/exame/admitidos" },
-        { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
-        { title: "Sem prova marcada", url: "/exame/sem-prova" },
-        { title: "Provas por candidato", url: "/exame/provas-candidato" },
-        { title: "Resultados finais", url: "/exame/resultados" },
-        { title: "Horários por curso", url: "/exame/horarios" },
-        { title: "Pauta geral", url: "/exame/pauta-geral" },
-        { title: "Resetar prova", url: "/exame/resetar" },
-        { title: "Lista de presença", url: "/exame/presenca" },
-      ],
-    },
+
 
     // ----------------------------------------------------
     // TFC
@@ -421,7 +303,165 @@ export const menuStructure: {
       items: [{ title: "Listar salas", url: "/salas/listar" }],
     },
 
+
+
     // ----------------------------------------------------
+    // MARCAÇÃO DE PROVAS
+    // ----------------------------------------------------
+    {
+      title: "Marcação de Provas",
+      url: "/marcacao-provas",
+      icon: FileCheck,
+      items: [
+        { title: "Controle", url: "/marcacao-provas/controle" },
+        { title: "Marcação", url: "/marcacao-provas/marcacao" },
+      ],
+    },
+  ],
+};
+
+export const finaceStructure:MenuStructure={
+  items:[
+       /* -------------------------------------------------------- */
+  /* 1) FINANÇAS (UNIFICADO) */
+  /* -------------------------------------------------------- */
+  {
+    title: "Finanças",
+    url: "/financas",
+    icon: BadgeDollarSign,
+    items: [
+      /* Área Financeira */
+      { title: "Estud. Mensalidades Pagas", url: "/financas/mensalidades-pagas" },
+      { title: "Estudantes Devedores", url: "/financas/devedores" },
+      { title: "Estudantes Inactivos", url: "/financas/inactivos" },
+      { title: "Estud. Finalistas Inactivos", url: "/financas/finalistas-inactivos" },
+      { title: "Consult. Nº Operação", url: "/financas/num-operacao" },
+      { title: "Controlo Actual. Saldo", url: "/financas/controlo-saldo" },
+      { title: "Isentar Serviços (Novos)", url: "/financas/isentar-novos" },
+      { title: "Isentar Serviços (Antigos)", url: "/financas/isentar-antigos" },
+      { title: "Pagamentos por Referência", url: "/financas/pagamentos-referencia" },
+      { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
+      { title: "Talão em Desuso", url: "/financas/talao-desuso" },
+      { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
+
+      /* Crédito Educacional */
+      { title: "Instituições", url: "/financas/credito/instituicoes" },
+      { title: "Instituições - Todas", url: "/financas/credito/instituicoes/todas" },
+      { title: "Instituições com Despesa", url: "/financas/credito/instituicoes/despesa" },
+      { title: "Instituições com Receita", url: "/financas/credito/instituicoes/receita" },
+      { title: "Tipo Bolsas", url: "/financas/credito/tipo-bolsas" },
+      { title: "Tipos de Estudantes", url: "/financas/credito/tipo-estudantes" },
+      { title: "Atribuir Crédito Educacional", url: "/financas/credito/atribuir" },
+      { title: "Pagamentos Bolseiros", url: "/financas/credito/pag-bolseiros" },
+      { title: "Listar Pagamentos de Bolseiros", url: "/financas/credito/listar-bolseiros" },
+      { title: "Listar Crédito Educacional", url: "/financas/credito/listar" },
+
+      /* Gestão de Descontos */
+      { title: "Atribuição de Desconto", url: "/financas/descontos/atribuicao" },
+      { title: "Estudantes com Descontos", url: "/financas/descontos/estudantes" },
+      { title: "Listar Descontos", url: "/financas/descontos/listar" },
+
+      /* Fecho de Caixa */
+      { title: "Fecho Caixa Diário", url: "/financas/caixa/diario" },
+      { title: "Fecho Caixa Geral", url: "/financas/caixa/geral" },
+      { title: "Fecho Caixa Utilizador", url: "/financas/caixa/utilizador" },
+
+      /* Outros Recursos */
+      { title: "Pagamentos Docentes", url: "/financas/outros/pagamentos-docentes" },
+
+      /* Relatórios */
+      { title: "Estudantes Matriculados", url: "/financas/relatorios/matriculados" },
+      { title: "Listar Estudantes Isentos", url: "/financas/relatorios/isentos" },
+      { title: "Estudantes Matriculadas", url: "/financas/relatorios/matriculadas" },
+      { title: "Listar Todos", url: "/financas/relatorios/todos" },
+      { title: "Estudantes Finalistas", url: "/financas/relatorios/finalistas" },
+      { title: "Estudantes com Crédito Institucional", url: "/financas/relatorios/credito-institucional" },
+      { title: "Estudantes com Desconto", url: "/financas/relatorios/descontos" },
+      { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
+
+      /* Serviços Tributários */
+      { title: "Nota de Crédito", url: "/financas/agt/nota-credito" },
+      { title: "Taxa do IVA", url: "/financas/agt/iva" },
+      { title: "Gerar SAFT", url: "/financas/agt/saft" },
+    ],
+  },
+  ]
+
+}
+
+export const healpStructure:MenuStructure ={
+
+  items: [
+        {
+      title: "Comunicação",
+      url: "/comunicacao",
+      icon: MessageSquare,
+      items: [
+        { title: "Avisos", url: "/comunicacao/avisos" },
+        { title: "Imagens de abertura", url: "/comunicacao/imagens" },
+        { title: "Solicitações", url: "/comunicacao/solicitacoes" },
+      ],
+    },
+     {
+    title: "Ajuda",
+    url: "/ajuda",
+    icon: HelpCircle,
+    items: [],
+  },
+  ]
+}
+
+export const academicStructure:MenuStructure ={
+  items:[ 
+    
+        {
+      title: "Calendário Académico ",
+      url: "/calendario",
+      icon: Calendar,
+      items: [
+        { title: "Atividades letivas", url: "/calendario/atividades" },
+        { title: "Prazos", url: "/calendario/prazos" },
+        //{ title: "Calendário de provas", url: "/calendario/provas" },
+        { title: "Dias isentos", url: "/calendario/dias-isentos" },
+        { title: "Parâmetros", url: "/calendario/parametros" },
+        // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
+
+        //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
+      ],
+    },// ----------------------------------------------------
+    // AVALIAÇÕES
+    // ----------------------------------------------------
+    {
+      title: "Avaliações",
+      url: "/avaliacoes",
+      icon: FileCheck,
+      items: [
+        {
+          title: "Controle de lançamento de notas",
+          url: "/avaliacoes/controle",
+        },
+        {
+          title: "Fórmula por unidade curricular",
+          url: "/avaliacoes/formula-uc",
+        },
+        {
+          title: "Fórmula para grade com oral",
+          url: "/avaliacoes/formula-oral",
+        },
+        { title: "Estatísticas", url: "/avaliacoes/estatisticas" },
+        { title: "Estudantes inscritos", url: "/avaliacoes/estudantes" },
+        { title: "Histórico de lançamentos", url: "/avaliacoes/historico" },
+        { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
+        { title: "Lançamento de notas", url: "/avaliacoes/notas" },
+        { title: "Lista de presença", url: "/avaliacoes/presenca" },
+     
+        { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
+        { title: "Pauta por UC", url: "/avaliacoes/pauta-uc" },
+        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
+        { title: "Validação", url: "/avaliacoes/validacao" },
+        { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
+      ],
+    },    // ----------------------------------------------------
     // HORÁRIOS
     // ----------------------------------------------------
     {
@@ -444,18 +484,38 @@ export const menuStructure: {
         { title: "Parâmetros", url: "/horarios/parametros" },
       ],
     },
-
-    // ----------------------------------------------------
-    // MARCAÇÃO DE PROVAS
+        // ----------------------------------------------------
+    // EXAME DE ACESSO
     // ----------------------------------------------------
     {
-      title: "Marcação de Provas",
-      url: "/marcacao-provas",
+      title: "Exame de Acesso",
+      url: "/exame",
       icon: FileCheck,
       items: [
-        { title: "Controle", url: "/marcacao-provas/controle" },
-        { title: "Marcação", url: "/marcacao-provas/marcacao" },
+        { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
+        { title: "Admitir candidatura", url: "/exame/admitir" },
+        { title: "Alterar senha", url: "/exame/alterar-senha" },
+        { title: "Alterar tipo", url: "/exame/alterar-tipo" },
+        { title: "Atribuir prova", url: "/exame/atribuir-prova" },
+        { title: "Consultar prova", url: "/exame/consultar-prova" },
+        { title: "Estatísticas", url: "/exame/estatisticas" },
+        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+        { title: "Inscrição época especial", url: "/exame/epoca-especial" },
+        { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
+        { title: "Lista de candidatos", url: "/exame/lista-candidatos" },
+        { title: "Admitidos", url: "/exame/admitidos" },
+        { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
+        { title: "Sem prova marcada", url: "/exame/sem-prova" },
+        { title: "Provas por candidato", url: "/exame/provas-candidato" },
+        { title: "Resultados finais", url: "/exame/resultados" },
+        { title: "Horários por curso", url: "/exame/horarios" },
+        { title: "Pauta geral", url: "/exame/pauta-geral" },
+        { title: "Resetar prova", url: "/exame/resetar" },
+        { title: "Lista de presença", url: "/exame/presenca" },
       ],
     },
-  ],
-};
+  
+  
+  
+  ]
+}

@@ -40,7 +40,6 @@ export default function LaunchNotes() {
     tipoAvaliacao: "",
     tipoProva: "",
     verHoario: "",
-
     filtro: "",
   });
 
