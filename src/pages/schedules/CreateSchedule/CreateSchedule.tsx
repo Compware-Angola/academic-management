@@ -18,8 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 
 import ScheduleGrid, { AulaPayload } from "./ScheduleGrid";
 
-import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
-
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
@@ -31,6 +29,7 @@ import { FormSelect } from "../../../components/common/FormSelect";
 import { useSaveHorario } from "@/hooks/horario/use-save-horario";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
+import { SaveHorarioPayload } from "@/services/horario/save-horario.service";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -147,7 +146,7 @@ export default function CreateSchedule() {
       return;
     }
 
-    const payload = {
+    const payload: SaveHorarioPayload = {
       anoLectivo: Number(formData.anoLetivo),
       semestre: Number(formData.semestre),
       periodo: Number(formData.periodo),

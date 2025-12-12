@@ -29,10 +29,7 @@ export type SaveHorarioResponse = {
 export async function saveHorarioService(
   payload: SaveHorarioPayload
 ): Promise<SaveHorarioResponse> {
-  const { data } = await axiosApexGa.post(
-    "/horario/salvarHorario",
-    payload
-  );
+  const { data } = await axiosApexGa.post("/horario/salvarHorario", payload);
 
   return data;
 }

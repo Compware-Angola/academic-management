@@ -8,10 +8,10 @@ import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidat
 import { useMutationfetchCreateActivity } from "@/hooks/academiccalendar/use-mutation-create-activity";
 import { useQueryTypeCalendar } from "@/hooks/academiccalendar/use-query-type-calendar";
 import { AxiosError } from "axios";
-import { error } from "console";
 import { AuthStorage } from "@/util/auth-storage";
 import { Atividade } from "@/services/fetch-atividade";
-import { number } from "framer-motion";
+import { Edit } from "lucide-react";
+import { useMutationActivity } from "@/hooks/academiccalendar/use-mutation-update-activity";
 
 interface FormActivity {
   designacao: string;
@@ -63,7 +63,7 @@ export function useActivitiesLectures() {
 
   // Mutation com loading state
   const criarAtividadeMutation = useMutationfetchCreateActivity();
-
+  const updateAtividadeMutation = useMutationActivity();
   // ==================== EFEITOS ====================
   useEffect(() => {
     if (!anosLetivos.length) return;
@@ -128,18 +128,23 @@ export function useActivitiesLectures() {
       codigo_ano_lectivo: Number(form.codigo_ano_lectivo),
       codigo_tipo_candidatura: Number(form.codigo_tipo_candidatura),
       codigo_tipo_calendario: Number(form.codigo_tipo_calendario),
-      codigo_utilizador: AuthStorage.getUser().user_id, // depois substitua por useAuth().user.id
+      codigo_utilizador: AuthStorage.getUser().user_id,
       data_inicio: form.data_inicio,
       data_fim: form.data_fim,
     };
 
     try {
+      if (editId) {
+        updateAtividadeMutation.mutateAsync({
+          codigo: editId,
+          data_inicio: form.data_inicio,
+          data_termino: form.data_fim,
+          descricao: form.designacao,
+        });
+        return;
+      }
       await criarAtividadeMutation.mutateAsync(payload);
 
-      toast({
-        title: "Sucesso!",
-        description: "Atividade criada com sucesso.",
-      });
       setOpenModal(false);
       resetForm();
       refetchAtividades();
@@ -149,14 +154,14 @@ export function useActivitiesLectures() {
           title: "Erro ao criar atividade",
           description:
             error.response.data?.msgresposta ||
-            "Verifique os dados e tente novamente domingos.",
+            "Verifique os dados e tente novamente.",
           variant: "destructive",
         });
         return;
       }
       toast({
         title: "Erro ao criar atividade",
-        description: "Verifique os dados e tente novamente. Domingos",
+        description: "Verifique os dados e tente novamente",
         variant: "destructive",
       });
     } finally {
@@ -188,11 +193,17 @@ export function useActivitiesLectures() {
   const handleEdit = (item: Atividade) => {
     setForm({
       designacao: item.descricao,
-      codigo_ano_lectivo: item.ano_lectivo,
-      codigo_tipo_candidatura: item.tipo_candidatura,
-      codigo_tipo_calendario: item.tipo_calendario,
-      data_inicio: item.data_inicio.split("T")[0],
-      data_fim: item.data_termino.split("T")[0],
+      codigo_ano_lectivo: anosLetivos.find(
+        (ano) => ano.designacao === item.ano_lectivo
+      )?.codigo,
+      codigo_tipo_candidatura: tiposCandidatura.find(
+        (cand) => cand.designacao === item.tipo_candidatura
+      )?.codigo,
+      codigo_tipo_calendario: tiposCalendario.find(
+        (cale) => cale.designacao === item.tipo_calendario
+      )?.codigo,
+      data_inicio: formatDateForInput(item.data_inicio),
+      data_fim: formatDateForInput(item.data_termino),
     });
 
     setEditId(Number(item.codigo));
@@ -235,4 +246,13 @@ export function useActivitiesLectures() {
     // Ações
     handleRefresh,
   };
+}
+export function formatDateForInput(date: Date | string): string {
+  const d = new Date(date);
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
