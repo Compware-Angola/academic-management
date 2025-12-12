@@ -1,12 +1,22 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton"; // <- adiciona este componente se ainda não tiveres
+import { Skeleton } from "@/components/ui/skeleton";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   User,
@@ -15,16 +25,13 @@ import {
   MapPin,
   Calendar,
   Briefcase,
-  Clock,
-  Edit,
-  CalendarDays,
   Building,
   GraduationCap,
-  Users,
+  Edit,
 } from "lucide-react";
+
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useAuth } from "@/hooks/use-auth";
-import UpcomingEventsCard from "./dasboard/components/UpcomingEventsCard";
 import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
@@ -46,18 +53,37 @@ const TeacherProfile = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-    const year = academicYear?.filter(
-              (ay) => ay.estado.toLowerCase() === "activo"
-            )
-  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } = useQueryTeacherProfile(user?.user_id);
-  const { data:turmData, isLoading:isLoadingTurmaData, isError } = useQueryListSchedules({
-    teacherId:teacherInfoData.codigo_docente,
-    anoLectivo: year[0].codigo
+
+  // Queries
+  const {
+    data: academicYear,
+    isLoading: isLoadingAcademicYear,
+    isError: isErrorAcademicYear,
+  } = useQueryAnoAcademico();
+
+  const {
+    data: teacherInfoData,
+    isLoading: teacherInfoDataLoading,
+    isError: teacherInfoError,
+  } = useQueryTeacherProfile(user?.user_id);
+
+  // Ano letivo ativo
+  const activeYear = academicYear?.find(
+    (ay) => ay.estado.toLowerCase() === "activo"
+  );
+
+  const {
+    data: turmData,
+    isLoading: isLoadingTurmaData,
+    isError: isErrorTurma,
+    refetch: refetchTurma,
+  } = useQueryListSchedules({
+    teacherId: teacherInfoData?.codigo_docente,
+    anoLectivo: activeYear?.codigo,
     
   });
-  // Estado inicial com valores vazios → evita flash nos cards
+
+  // Estado local do perfil
   const [teacherInfo, setTeacherInfo] = useState<TeacherInfo>({
     name: "",
     employeeId: "",
@@ -72,7 +98,7 @@ const TeacherProfile = () => {
     address: "",
   });
 
-  // Preenche apenas quando os dados chegam
+  // Preenche os dados quando chegam
   useEffect(() => {
     if (teacherInfoData) {
       setTeacherInfo({
@@ -91,13 +117,9 @@ const TeacherProfile = () => {
     }
   }, [teacherInfoData]);
 
-  // Dados de exemplo (podes substituir por hook real depois)
-  const upcomingEvents = [
-    { title: "Reunião de Departamento", date: "2025-11-28", time: "14:30", type: "reuniao" },
-    { title: "Prazo de Lançamento de Notas P1", date: "2025-12-05", time: "23:59", type: "prazo" },
-    { title: "Formação Pedagógica", date: "2025-12-10", time: "09:00–17:00", type: "formacao" },
-    { title: "Avaliação por Pares", date: "2026-01-15", time: "", type: "avaliacao" },
-  ];
+  const initials = teacherInfo.name
+    ? teacherInfo.name.split(" ").map((n) => n[0]).join("").toUpperCase()
+    : "";
 
   const handleSave = () => {
     toast({
@@ -107,40 +129,30 @@ const TeacherProfile = () => {
     setIsEditing(false);
   };
 
-  const getEventBadge = (type: string) => {
-    switch (type) {
-      case "reuniao":   return <Badge variant="default">Reunião</Badge>;
-      case "prazo":     return <Badge variant="destructive">Prazo</Badge>;
-      case "formacao":  return <Badge variant="secondary">Formação</Badge>;
-      case "avaliacao": return <Badge variant="outline">Avaliação</Badge>;
-      default:          return <Badge>Evento</Badge>;
-    }
-  };
+  // Estados globais
+  const isLoading = isLoadingAcademicYear || teacherInfoDataLoading || isLoadingTurmaData;
+  const hasError = isErrorAcademicYear || teacherInfoError || isErrorTurma;
 
-  const initials = teacherInfo.name
-    ? teacherInfo.name.split(" ").map(n => n[0]).join("").toUpperCase()
-    : "";
-
-  // Skeleton enquanto carrega
-  if (teacherInfoDataLoading || isLoadingTurmaData) {
+  // ================== LOADING SKELETON ==================
+  if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <Skeleton className="h-10 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
+            <Skeleton className="h-10 w-80 mb-2" />
+            <Skeleton className="h-5 w-96" />
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3">
           <Card>
             <CardContent className="pt-6 space-y-6">
               <Skeleton className="h-40 w-40 rounded-full mx-auto" />
-              <div className="space-y-3 text-center">
-                <Skeleton className="h-6 w-48 mx-auto" />
-                <Skeleton className="h-4 w-32 mx-auto" />
-                <Skeleton className="h-9 w-full" />
+              <div className="text-center space-y-3">
+                <Skeleton className="h-7 w-56 mx-auto" />
+                <Skeleton className="h-5 w-32 mx-auto" />
+                <Skeleton className="h-10 w-full" />
               </div>
             </CardContent>
           </Card>
@@ -148,9 +160,12 @@ const TeacherProfile = () => {
           <Card className="lg:col-span-2">
             <CardContent className="pt-6 space-y-6">
               <Skeleton className="h-8 w-64" />
-              <div className="grid gap-4 md:grid-cols-2">
-                {[...Array(6)].map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
+              <div className="grid gap-6 md:grid-cols-2">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
                 ))}
               </div>
             </CardContent>
@@ -160,28 +175,48 @@ const TeacherProfile = () => {
     );
   }
 
+  // ================== ERRO GLOBAL ==================
+  if (hasError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-96 space-y-6 p-8">
+        <AlertCircle className="h-16 w-16 text-destructive" />
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold">Erro a processar informações do perfil</h2>
+          <p className="text-muted-foreground max-w-md">
+            Não foi possível carregar os dados do docente. Verifique a sua ligação à internet ou tente novamente.
+          </p>
+        </div>
+        <Button onClick={() => window.location.reload()} size="lg">
+          <RefreshCw className="mr-2 h-5 w-5" />
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  // ================== RENDER PRINCIPAL ==================
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-6">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Perfil do Docente</h1>
-          <p className="text-muted-foreground">Gerencie as suas informações profissionais</p>
+          <p className="text-muted-foreground">
+            Visualize e edite as suas informações profissionais
+          </p>
         </div>
-        {/*
-        <Button
+        {/* <Button
           variant={isEditing ? "default" : "outline"}
           onClick={() => setIsEditing(!isEditing)}
         >
           <Edit className="mr-2 h-4 w-4" />
           {isEditing ? "Cancelar" : "Editar Dados"}
-        </Button>
-        */}
+        </Button> */}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Card da Foto + Info rápida */}
-        <Card className="lg:col-span-1">
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Foto + Info Rápida */}
+        <Card>
           <CardHeader>
             <CardTitle>Foto do Perfil</CardTitle>
           </CardHeader>
@@ -195,9 +230,11 @@ const TeacherProfile = () => {
               </Avatar>
             </div>
 
-            <div className="text-center space-y-2">
-              <h3 className="text-xl font-semibold">{teacherInfo.name || "Carregando..."}</h3>
-              <p className="text-sm text-muted-foreground">{teacherInfo.employeeId || "N/A"}</p>
+            <div className="text-center space-y-3">
+              <h3 className="text-2xl font-semibold">{teacherInfo.name}</h3>
+              <p className="text-sm text-muted-foreground">
+                Nº Mec: {teacherInfo.employeeId || "N/A"}
+              </p>
               <div className="flex items-center justify-center gap-2 text-sm">
                 <Briefcase className="h-4 w-4" />
                 <span>{teacherInfo.category || "N/A"}</span>
@@ -214,7 +251,7 @@ const TeacherProfile = () => {
           </CardContent>
         </Card>
 
-        {/* Informações detalhadas */}
+        {/* Informações Detalhadas */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Informações Profissionais</CardTitle>
@@ -228,14 +265,15 @@ const TeacherProfile = () => {
                 <TabsTrigger value="classes">Horários</TabsTrigger>
               </TabsList>
 
-              {/* Dados Pessoais */}
+              {/* PESSOAL */}
               <TabsContent value="personal" className="space-y-4 pt-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Nome Completo</Label>
+                    <Label htmlFor="name">Nome Completo</Label>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <Input
+                        id="name"
                         value={teacherInfo.name}
                         disabled={!isEditing}
                         onChange={(e) => setTeacherInfo({ ...teacherInfo, name: e.target.value })}
@@ -244,10 +282,11 @@ const TeacherProfile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Email Institucional</Label>
+                    <Label htmlFor="email">Email Institucional</Label>
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       <Input
+                        id="email"
                         type="email"
                         value={teacherInfo.email}
                         disabled={!isEditing}
@@ -257,10 +296,11 @@ const TeacherProfile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Telefone Principal</Label>
+                    <Label htmlFor="phone">Telefone Principal</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <Input
+                        id="phone"
                         value={teacherInfo.phone}
                         disabled={!isEditing}
                         onChange={(e) => setTeacherInfo({ ...teacherInfo, phone: e.target.value })}
@@ -269,10 +309,11 @@ const TeacherProfile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Telefone Alternativo</Label>
+                    <Label htmlFor="phone2">Telefone Alternativo</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
                       <Input
+                        id="phone2"
                         value={teacherInfo.phone2}
                         disabled={!isEditing}
                         onChange={(e) => setTeacherInfo({ ...teacherInfo, phone2: e.target.value })}
@@ -281,11 +322,12 @@ const TeacherProfile = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Data de Nascimento</Label>
+                    <Label htmlFor="birth">Data de Nascimento</Label>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <Input
-                        value={teacherInfo.birthDate}
+                        id="birth"
+                        value={teacherInfo.birthDate ? new Date(teacherInfo.birthDate).toLocaleDateString("pt-AO") : ""}
                         disabled={!isEditing}
                         onChange={(e) => setTeacherInfo({ ...teacherInfo, birthDate: e.target.value })}
                       />
@@ -293,10 +335,11 @@ const TeacherProfile = () => {
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
-                    <Label>Endereço</Label>
+                    <Label htmlFor="address">Endereço</Label>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <Input
+                        id="address"
                         value={teacherInfo.address}
                         disabled={!isEditing}
                         onChange={(e) => setTeacherInfo({ ...teacherInfo, address: e.target.value })}
@@ -306,7 +349,7 @@ const TeacherProfile = () => {
                 </div>
               </TabsContent>
 
-              {/* Dados Profissionais */}
+              {/* PROFISSIONAL */}
               <TabsContent value="professional" className="space-y-4 pt-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
@@ -346,55 +389,53 @@ const TeacherProfile = () => {
                   </div>
                 </div>
               </TabsContent>
-                <TabsContent value="classes" className="pt-4">
-  <div className="space-y-3">
-    {turmData.horarios && turmData.horarios.length > 0 ? (
-      turmData.horarios.map((cls) => (
-        <div
-          key={cls.codigo_horario}
-          className="flex items-center justify-between rounded-lg border bg-card p-4 transition-all hover:shadow-md"
-        >
-          <div className="flex items-center gap-4">
-            <GraduationCap className="h-10 w-10 text-primary" />
-            <div>
-              <p className="font-semibold text-foreground">
-                {cls.codigo_grade} – {cls.grade}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                • Horário: {cls.horario}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                • Sala: {cls.sala}
-              </p>
-              {cls.docente && (
-                <p className="text-sm text-muted-foreground">
-                  • Docente: {cls.docente}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      ))
-    ) : (
-      // Mensagem amigável quando não há horários
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50 py-12 text-center">
-        <div className="rounded-full bg-muted p-4 mb-4">
-          <GraduationCap className="h-12 w-12 text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-medium text-foreground">
-          Nenhum horário encontrado
-        </h3>
-        <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-          O docente está com agenda livre no presente ano lectivo
-        </p>
-      </div>
-    )}
-  </div>
-</TabsContent>
+
+              {/* HORÁRIOS */}
+              <TabsContent value="classes" className="pt-4">
+                {isLoadingTurmaData ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-28 w-full rounded-lg" />
+                    ))}
+                  </div>
+                ) : turmData?.horarios && turmData.horarios.length > 0 ? (
+                  <div className="space-y-4">
+                    {turmData.horarios.map((cls) => (
+                      <div
+                        key={cls.codigo_horario}
+                        className="flex items-center gap-4 rounded-lg border bg-card p-5 transition-all hover:shadow-md"
+                      >
+                        <GraduationCap className="h-12 w-12 text-primary" />
+                        <div className="flex-1">
+                          <p className="font-semibold text-lg">
+                            {cls.codigo_grade} – {cls.grade}
+                          </p>
+                          <div className="mt-1 space-y-1 text-sm text-muted-foreground">
+                            <p>• Horário: {cls.horario}</p>
+                            <p>• Sala: {cls.sala}</p>
+                            {cls.docente && <p>• Docente: {cls.docente}</p>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50 py-16 text-center">
+                    <div className="rounded-full bg-muted p-5 mb-4">
+                      <GraduationCap className="h-14 w-14 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium">Nenhum horário encontrado</h3>
+                    <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+                      Não existem turmas ou horários atribuídos ao docente no ano lectivo ativo.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
             </Tabs>
 
+            {/* Botões de edição */}
             {isEditing && (
-              <div className="mt-6 flex gap-3">
+              <div className="mt-8 flex gap-3">
                 <Button onClick={handleSave} className="flex-1">
                   Guardar Alterações
                 </Button>
@@ -406,8 +447,6 @@ const TeacherProfile = () => {
           </CardContent>
         </Card>
       </div>
-
-
     </div>
   );
 };

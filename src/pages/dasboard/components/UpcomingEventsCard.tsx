@@ -26,8 +26,8 @@ interface TipoCandidatura {
 }
 
 
-const API_TIPOS_CANDIDATURA = "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
-const API_ATIVIDADES = "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/academic-activities";
+const API_TIPOS_CANDIDATURA = "https://api.compware.net/ords/cmpdev/uma/tipo-candidatura/all";
+const API_ATIVIDADES = "https://api.compware.net/ords/cmpdev/ga/academic-calendar/academic-activities";
 
 export default function UpcomingEventsCard() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");

@@ -48,6 +48,8 @@ import ControlNotes from "./pages/rating(avaliation)/control";
 import FormulaUC from "./pages/rating(avaliation)/formula-uc";
 import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
+import schedulesByUC from "./pages/schedules/SchedulesByUC";
+import SchedulesByUC from "./pages/schedules/SchedulesByUC";
 
 const App = () => {
   return (
@@ -131,6 +133,7 @@ const App = () => {
                 />
                 */}
                 <Route path="/profile" element={<TeacherProfile />} />
+                 <Route path="/horarios/uc" element={<SchedulesByUC />} />
 
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
@@ -158,6 +161,9 @@ const App = () => {
                   path="/calendario-pos/provas"
                   element={<ExamCalendarPos />}
                 />
+                 
+
+                
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
