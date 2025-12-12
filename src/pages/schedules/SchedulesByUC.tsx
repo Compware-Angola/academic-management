@@ -112,7 +112,7 @@ const openDetails = (turmaId: number) => {
   setSelectedTurmaId(turmaId);
   setIsModalOpen(true);
 };
-  const closeModal = () => setIsModalOpen(false);
+
 
   const tableData = turmasResponse?.data || [];
   const total = turmasResponse?.total || 0;

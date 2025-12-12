@@ -1,193 +1,328 @@
+// src/pages/TeacherSchedules.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Home, Search, Download, RefreshCw, Printer, GraduationCap, Calendar } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Home, GraduationCap, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useQuerySchedulesByDocente } from "@/hooks/horario/use-query-schedules-by-docente-service";
+
+
+// Converte ticks .NET → HH:mm
+const formatTime = (ticks: string): string => {
+  const totalSeconds = Number(ticks) / 10_000_000;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+};
 
 export default function TeacherSchedules() {
-  const [isLoading, setIsLoading] = useState(false);
-    // === Dados base ===
-    const { data: anosAcademicos } = useQueryAnoAcademico();
-    const { data: semestres } = useQuerySemestres();
-    const { data: periodos } = useQueryPeriod();
-  
-    // filtros
-    const [filters, setFilters] = useState({
-      anoLetivo: "",
-      semestre: "",
-      periodo: "",
-      curso: "",
-      anoCurricular: "",
-      unidadeCurricular: "",
-    });
+  const [filters, setFilters] = useState({
+    anoLetivo: "",
+    semestre: "",
+    periodo: "",
+    docenteId: "",
+  });
 
-  const mockData = [
-    { id: 1, docente: "Prof. João Silva", departamento: "Informática", uc: "Programação I", curso: "Eng. Informática", turma: "T1", sala: "Lab 1", dia: "Segunda", horario: "08:00 - 10:00", tipo: "Teórica", cargaHoraria: "4h/semana" },
-    { id: 2, docente: "Prof. João Silva", departamento: "Informática", uc: "Programação I", curso: "Eng. Informática", turma: "T1", sala: "Lab 2", dia: "Quarta", horario: "10:00 - 12:00", tipo: "Prática", cargaHoraria: "4h/semana" },
-    { id: 3, docente: "Prof. Maria Santos", departamento: "Informática", uc: "Base de Dados", curso: "Eng. Informática", turma: "T2", sala: "Sala 105", dia: "Terça", horario: "14:00 - 16:00", tipo: "Teórica", cargaHoraria: "6h/semana" },
-    { id: 4, docente: "Prof. Carlos Dias", departamento: "Matemática", uc: "Cálculo I", curso: "Eng. Civil", turma: "T1", sala: "Sala 201", dia: "Segunda", horario: "10:00 - 12:00", tipo: "Teórica", cargaHoraria: "4h/semana" },
-    { id: 5, docente: "Prof. Ana Costa", departamento: "Física", uc: "Física I", curso: "Eng. Mecânica", turma: "T1", sala: "Lab Física", dia: "Quinta", horario: "08:00 - 10:00", tipo: "Laboratório", cargaHoraria: "6h/semana" },
-  ];
+  // Paginação (igual ao SchedulesByUC)
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
-  const resumoDocentes = [
-    { docente: "Prof. João Silva", totalHoras: 8, totalUCs: 1, totalTurmas: 1 },
-    { docente: "Prof. Maria Santos", totalHoras: 6, totalUCs: 1, totalTurmas: 1 },
-    { docente: "Prof. Carlos Dias", totalHoras: 4, totalUCs: 1, totalTurmas: 1 },
-    { docente: "Prof. Ana Costa", totalHoras: 6, totalUCs: 1, totalTurmas: 1 },
-  ];
+  // Dados base
+  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: semestres } = useQuerySemestres();
+  const { data: periodos } = useQueryPeriod();
+
+  // Chama a API real com paginação
+  const { data: response, isLoading } = useQuerySchedulesByDocente(
+    {
+      docenteId: Number(filters.docenteId) || 0,
+      anoLectivo: Number(filters.anoLetivo) || 0,
+      semestre: Number(filters.semestre) || 0,
+      periodo: Number(filters.periodo) || 0,
+      page,
+      limit,
+    },
+    {
+      enabled:
+        !!filters.docenteId &&
+        !!filters.anoLetivo &&
+        !!filters.semestre &&
+        !!filters.periodo,
+      
+    }
+  );
+
+  const aulas = response?.data || [];
+  const total = response?.total || 0;
+  const totalPages = Math.ceil(total / limit);
+
+  const docenteNome = aulas.length > 0 ? aulas[0].docente_nome : "";
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-8">
+      {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild><Link to="/"><Home className="h-4 w-4" /></Link></BreadcrumbLink>
+            <BreadcrumbLink asChild>
+              <Link to="/"><Home className="h-4 w-4" /></Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Horários</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>Horários</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Horários por Docente</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbPage>Por Docente</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex items-center gap-3">
-        <GraduationCap className="h-8 w-8 text-primary" />
+      {/* Cabeçalho */}
+      <div className="flex items-center gap-4">
+        <GraduationCap className="h-9 w-9 text-primary" />
         <div>
-          <h1 className="text-2xl font-bold">Horários por Docente</h1>
-          <p className="text-muted-foreground">Consultar horários organizados por docente/professor.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Horários por Docente</h1>
+          <p className="text-muted-foreground mt-1">
+            Consulte todas as aulas de um professor com paginação.
+          </p>
         </div>
       </div>
 
+      {/* Filtros */}
       <Card>
-        <CardHeader><CardTitle>Filtros de Pesquisa</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-xl">Filtros de Pesquisa</CardTitle>
+        </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <Input placeholder="Nome do docente" />
-            <Select>
-              <SelectTrigger><SelectValue placeholder="Departamento" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Departamentos</SelectItem>
-                <SelectItem value="info">Informática</SelectItem>
-                <SelectItem value="mat">Matemática</SelectItem>
-                <SelectItem value="fis">Física</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select>
-              <SelectTrigger><SelectValue placeholder="Ano Lectivo" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2024">2024/2025</SelectItem>
-                <SelectItem value="2023">2023/2024</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select>
-              <SelectTrigger><SelectValue placeholder="Semestre" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="1">1º Semestre</SelectItem>
-                <SelectItem value="2">2º Semestre</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button className="gap-2"><Search className="h-4 w-4" />Pesquisar</Button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Ano Letivo</label>
+              <Select
+                value={filters.anoLetivo}
+                onValueChange={(v) => {
+                  setFilters({ ...filters, anoLetivo: v });
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent>
+                  {anosAcademicos?.map((a) => (
+                    <SelectItem key={a.codigo} value={a.codigo.toString()}>
+                      {a.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Semestre</label>
+              <Select
+                value={filters.semestre}
+                onValueChange={(v) => {
+                  setFilters({ ...filters, semestre: v });
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent>
+                  {semestres?.map((s) => (
+                    <SelectItem key={s.codigo} value={s.codigo.toString()}>
+                      {s.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Período</label>
+              <Select
+                value={filters.periodo}
+                onValueChange={(v) => {
+                  setFilters({ ...filters, periodo: v });
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectContent>
+                  {periodos?.map((p) => (
+                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                      {p.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Docente (ID)</label>
+              <Select
+                value={filters.docenteId}
+                onValueChange={(v) => {
+                  setFilters({ ...filters, docenteId: v });
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger><SelectValue placeholder="Selecionar docente" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2273">JOAQUIM DE CARVALHO (2273)</SelectItem>
+                  <SelectItem value="1965">Esmael Olsen (1965)</SelectItem>
+                  {/* Adiciona mais conforme necessário */}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {resumoDocentes.map((doc, i) => (
-          <Card key={i}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-primary/10">
-                  <GraduationCap className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{doc.docente}</p>
-                  <p className="text-xs text-muted-foreground">{doc.totalHoras}h/semana • {doc.totalUCs} UC(s)</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-
-
+      {/* Tabela */}
       <Card>
-        <CardHeader><CardTitle>Lista de Horários por Docente</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-2xl">
+            Aulas do Docente
+            {docenteNome && (
+              <span className="text-lg font-normal text-muted-foreground ml-3">
+                — {docenteNome}
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-3">
-              {[1,2,3,4,5].map(i => <div key={i} className="h-12 bg-muted animate-pulse rounded" />)}
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Carregando aulas...</p>
             </div>
-          ) : mockData.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum registo encontrado.
+          ) : aulas.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <p className="text-xl">
+                {!filters.docenteId
+                  ? "Selecione um docente para ver as aulas."
+                  : "Nenhuma aula encontrada com os filtros aplicados."}
+              </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Docente</TableHead>
-                  <TableHead>Departamento</TableHead>
-                  <TableHead>UC</TableHead>
-                  <TableHead>Curso</TableHead>
-                  <TableHead>Turma</TableHead>
-                  <TableHead>Sala</TableHead>
-                  <TableHead>Dia</TableHead>
-                  <TableHead>Horário</TableHead>
-                  <TableHead>Tipo</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockData.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.docente}</TableCell>
-                    <TableCell>{item.departamento}</TableCell>
-                    <TableCell>{item.uc}</TableCell>
-                    <TableCell>{item.curso}</TableCell>
-                    <TableCell>{item.turma}</TableCell>
-                    <TableCell>{item.sala}</TableCell>
-                    <TableCell>{item.dia}</TableCell>
-                    <TableCell>{item.horario}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        item.tipo === "Teórica" ? "bg-blue-100 text-blue-700" :
-                        item.tipo === "Prática" ? "bg-green-100 text-green-700" :
-                        "bg-purple-100 text-purple-700"
-                      }`}>
-                        {item.tipo}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <>
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Disciplina</TableHead>
+                      <TableHead>Turma</TableHead>
+                      <TableHead>Curso / Ano</TableHead>
+                      <TableHead>Dia</TableHead>
+                      <TableHead>Horário</TableHead>
+                      <TableHead>Sala</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Modalidade</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {aulas.map((aula) => (
+                      <TableRow key={aula.codigo} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">{aula.disciplina}</TableCell>
+                        <TableCell className="font-mono text-sm">{aula.horario_nome}</TableCell>
+                        <TableCell>{aula.curso} • {aula.ano}</TableCell>
+                        <TableCell>{aula.dia_semana.replace("-Feira", "")}</TableCell>
+                        <TableCell className="font-mono">
+                          {formatTime(aula.hora_inicio)}–{formatTime(aula.hora_termino)}
+                        </TableCell>
+                        <TableCell className="font-medium">{aula.sala}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                              aula.tipo_aula.includes("Teórica") || aula.tipo_aula.includes("Teorica")
+                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                : aula.tipo_aula.includes("Prática")
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                            }`}
+                          >
+                            {aula.tipo_aula.replace("Teorica", "Teórica")}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {aula.modalidade}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Paginação — EXATAMENTE como no SchedulesByUC */}
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-muted-foreground">
+                  A mostrar {aulas.length} de {total} registos
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="text-sm">
+                    Página {page} de {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </Button>
+
+                  <Select
+                    value={String(limit)}
+                    onValueChange={(v) => {
+                      setLimit(Number(v));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
-
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">A mostrar {mockData.length} registos</p>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Itens por página:</span>
-          <Select defaultValue="10">
-            <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
     </div>
   );
 }
