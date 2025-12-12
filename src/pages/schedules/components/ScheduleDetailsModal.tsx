@@ -1,3 +1,4 @@
+// src/components/ScheduleDetailsModal.tsx
 import {
   Dialog,
   DialogContent,
@@ -7,68 +8,85 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-
-type ScheduleItem = {
-  id: number;
-  uc: string;
-  codigo: string;
-  curso: string;
-  turma: string;
-  docente: string;
-  sala: string;
-  dia: string;
-  horario: string;
-  tipo: string;
-};
+import { Loader2 } from "lucide-react";
+import { useQueryScheduleDetails } from "@/hooks/horario/use-query-schedule-details";
 
 type ScheduleDetailsModalProps = {
-  items: ScheduleItem[];
+  horarioId: number | null;   // ID da turma/horário
   isOpen: boolean;
   onClose: () => void;
 };
 
+// Converte .NET ticks (100ns) → HH:mm
+const formatTime = (ticks: string): string => {
+  const totalSeconds = Number(ticks) / 10_000_000; // 1 tick = 100ns
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+};
+
 export default function ScheduleDetailsModal({
-  items,
+  horarioId,
   isOpen,
   onClose,
 }: ScheduleDetailsModalProps) {
-  if (items.length === 0) return null;
+  const { data: horario, isLoading, isError } = useQueryScheduleDetails(horarioId, {
+    enabled: isOpen && !!horarioId,
+  });
 
-  const ucName = items[0].uc;
-  const ucCode = items[0].codigo;
+  const closeModal = () => {
+    onClose();
+  };
+
+  if (!isOpen) return null;
 
   const daysOfWeek = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
-  // Agrupa aulas por dia e ordena dentro de cada dia por horário
+  // Agrupa aulas por dia
   const groupedByDay = daysOfWeek.reduce((acc, day) => {
-    const dayItems = items
-      .filter((item) => item.dia === day)
-      .sort((a, b) => a.horario.localeCompare(b.horario));
+    const dayItems = (horario?.aulas || [])
+      .filter((aula) => {
+        const diaNome = aula.diaSemana.replace("-Feira", ""); // "Sexta-Feira" → "Sexta"
+        return diaNome === day;
+      })
+      .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
 
-    if (dayItems.length > 0) {
-      acc[day] = dayItems;
-    }
+    if (dayItems.length > 0) acc[day] = dayItems;
     return acc;
-  }, {} as Record<string, ScheduleItem[]>);
-
-  const hasClasses = Object.keys(groupedByDay).length > 0;
+  }, {} as Record<string, typeof horario.aulas>);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-2xl">
-            {ucName}{" "}
-            <span className="text-muted-foreground font-mono">({ucCode})</span>
+            {horario?.unidadeCurricular || "Carregando..."}{" "}
+            <span className="text-muted-foreground font-mono text-lg">
+              ({horario?.designacao || "..."})
+            </span>
           </DialogTitle>
           <DialogDescription>
-            Horário semanal completo da unidade curricular
+            {horario
+              ? `Horário semanal completo • Turma ${horario.designacao} • ${horario.curso} • ${horario.ano}`
+              : "Carregando detalhes do horário..."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-6 min-h-0">
-          {hasClasses ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Carregando horário...</p>
+            </div>
+          ) : isError || !horario ? (
+            <div className="text-center py-20 text-destructive">
+              Erro ao carregar o horário da turma.
+            </div>
+          ) : horario.aulas.length === 0 ? (
+            <div className="text-center py-20 text-muted-foreground">
+              <p className="text-lg">Nenhuma aula cadastrada para esta turma.</p>
+            </div>
+          ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {daysOfWeek.map((day) => {
                 const dayItems = groupedByDay[day];
@@ -91,55 +109,58 @@ export default function ScheduleDetailsModal({
                       }`}
                     >
                       {day.substring(0, 3)}
-                      <span className="block text-sm font-medium opacity-80">
-                        {day}
-                      </span>
+                      <span className="block text-sm font-medium opacity-80">{day}</span>
                     </div>
 
-                    {/* Lista de aulas do dia */}
+                    {/* Aulas do dia */}
                     <div className="p-4 space-y-3 min-h-[120px]">
                       {dayItems ? (
-                        dayItems.map((item, idx) => (
+                        dayItems.map((aula) => (
                           <div
-                            key={item.id}
+                            key={aula.id}
                             className="rounded-lg bg-background border p-4 text-sm shadow-sm hover:shadow transition-shadow"
                           >
-                            <div className="flex justify-between items-start mb-2">
+                            {/* Horário + Tipo */}
+                            <div className="flex justify-between items-start mb-3">
                               <span className="font-mono font-bold text-base">
-                                {item.horario}
+                                {formatTime(aula.horaInicio)}–{formatTime(aula.horaTermino)}
                               </span>
                               <span
                                 className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  item.tipo === "Teórica"
+                                  aula.tipoAula.includes("Teórica") || aula.tipoAula.includes("Teorico")
                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                                    : item.tipo === "Prática"
+                                    : aula.tipoAula.includes("Prática")
                                     ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                                     : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
                                 }`}
                               >
-                                {item.tipo}
+                                {aula.tipoAula.replace("Teorico", "Teórico")}
                               </span>
                             </div>
 
-                            <div className="space-y-1.5 text-muted-foreground">
+                            {/* Detalhes */}
+                            <div className="space-y-1.5 text-muted-foreground text-xs">
                               <div className="flex justify-between">
-                                <span>Turma</span>
-                                <span className="font-medium text-foreground">
-                                  {item.turma}
+                                <span>Designação</span>
+                                <span className="font-medium text-foreground">{horario.designacao}</span>
+                              </div>
+
+                              {/* Docente: sempre mostra (se não tiver, aparece "—") */}
+                              <div className="flex justify-between">
+                                <span>Docente</span>
+                                <span className="font-medium text-foreground truncate max-w-[140px]">
+                                  {aula.docenteNome && aula.docenteNome !== "Sem docente" ? aula.docenteNome : "—"}
                                 </span>
                               </div>
-                              {item.docente && (
-                                <div className="flex justify-between">
-                                  <span>Docente</span>
-                                  <span className="font-medium text-foreground truncate max-w-[120px]">
-                                    {item.docente}
-                                  </span>
-                                </div>
-                              )}
+
                               <div className="flex justify-between">
                                 <span>Sala</span>
-                                <span className="font-medium text-foreground">
-                                  {item.sala || "—"}
+                                <span className="font-medium text-foreground">{aula.sala || "—"}</span>
+                              </div>
+                                <div className="flex justify-between">
+                                <span className="text-muted-foreground">Modalidade</span>
+                                <span className="font-semibold text-foreground">
+                                  {aula.modalidade || "—"}
                                 </span>
                               </div>
                             </div>
@@ -155,15 +176,11 @@ export default function ScheduleDetailsModal({
                 );
               })}
             </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              Nenhuma aula cadastrada para esta UC.
-            </div>
           )}
         </div>
 
-        <DialogFooter className="flex-shrink-0">
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="flex-shrink-0 border-t pt-4">
+          <Button variant="outline" onClick={closeModal} size="lg">
             Fechar
           </Button>
         </DialogFooter>
