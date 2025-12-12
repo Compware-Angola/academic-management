@@ -1,4 +1,18 @@
-// src/pages/TeacherSchedules.tsx
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -32,6 +46,7 @@ import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQuerySchedulesByDocente } from "@/hooks/horario/use-query-schedules-by-docente-service";
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 
 
 // Converte ticks .NET → HH:mm
@@ -53,12 +68,17 @@ export default function TeacherSchedules() {
   // Paginação (igual ao SchedulesByUC)
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-
+const [openDocente, setOpenDocente] = useState(false);
   // Dados base
   const { data: anosAcademicos } = useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-
+const {
+    data: teachersData = [],
+    
+    refetch,
+    error,
+  } = useQueryTeacther();
   // Chama a API real com paginação
   const { data: response, isLoading } = useQuerySchedulesByDocente(
     {
@@ -179,24 +199,70 @@ export default function TeacherSchedules() {
                 </SelectContent>
               </Select>
             </div>
+<div className="space-y-2">
+  <label className="text-sm font-medium">Docente</label>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Docente (ID)</label>
-              <Select
-                value={filters.docenteId}
-                onValueChange={(v) => {
-                  setFilters({ ...filters, docenteId: v });
+  <Popover open={openDocente} onOpenChange={setOpenDocente}>
+    <PopoverTrigger asChild>
+      {/* ← Usa um elemento simples (div ou button nativo) */}
+      <button
+        type="button"
+        className={cn(
+          "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+          "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+        )}
+      >
+        <div className="flex items-center gap-2 truncate">
+          <User className="h-4 w-4 opacity-50 flex-shrink-0" />
+          <span className="truncate">
+            {filters.docenteId
+              ? teachersData?.find((p) => p.codigo.toString() === filters.docenteId)?.nome || "Selecionar docente"
+              : "Selecionar docente"}
+          </span>
+        </div>
+        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+      </button>
+    </PopoverTrigger>
+
+    <PopoverContent
+      className="w-full p-0 max-w-[var(--radix-popover-trigger-width)]"
+      align="start"
+      sideOffset={4}
+    >
+      <Command>
+        <CommandInput placeholder="Procurar docente..." autoFocus />
+        <CommandList>
+          <CommandEmpty>Nenhum docente encontrado.</CommandEmpty>
+          <CommandGroup>
+            {teachersData?.map((docente) => (
+              <CommandItem
+                key={docente.codigo}
+                value={`${docente.nome} ${docente.codigo}`}
+                onSelect={() => {
+                  setFilters({ ...filters, docenteId: docente.codigo.toString() });
                   setPage(1);
+                  setOpenDocente(false);
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="Selecionar docente" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2273">JOAQUIM DE CARVALHO (2273)</SelectItem>
-                  <SelectItem value="1965">Esmael Olsen (1965)</SelectItem>
-                  {/* Adiciona mais conforme necessário */}
-                </SelectContent>
-              </Select>
-            </div>
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    filters.docenteId === docente.codigo.toString() ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                <div className="flex flex-col text-left">
+                  <span className="font-medium">{docente.nome}</span>
+                  <span className="text-xs text-muted-foreground">ID: {docente.codigo}</span>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </PopoverContent>
+  </Popover>
+</div>
           </div>
         </CardContent>
       </Card>
@@ -234,7 +300,7 @@ export default function TeacherSchedules() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Disciplina</TableHead>
-                      <TableHead>Turma</TableHead>
+                      <TableHead>Desigação</TableHead>
                       <TableHead>Curso / Ano</TableHead>
                       <TableHead>Dia</TableHead>
                       <TableHead>Horário</TableHead>
