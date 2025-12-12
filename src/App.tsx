@@ -50,7 +50,11 @@ import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
 import schedulesByUC from "./pages/schedules/SchedulesByUC";
 import SchedulesByUC from "./pages/schedules/SchedulesByUC";
+<<<<<<< HEAD
 import TeacherSchedules from "./pages/schedules/TeacherSchedules";
+=======
+import SchedulesInscription from "./pages/schedules/ScheduleInscription";
+>>>>>>> f88ed551df7f1d43cb461bc16e5dfb4e97b15d37
 
 const App = () => {
   return (
@@ -66,6 +70,10 @@ const App = () => {
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Index />} />
                 <Route path="/horarios/criar" element={<CreateSchedule />} />
+                <Route
+                  path="horarios/inscricoes"
+                  element={<SchedulesInscription />}
+                />
                 <Route path="/horarios/listar" element={<ScheduleList />} />
                 <Route
                   path="/horarios/eliminados"
@@ -88,7 +96,7 @@ const App = () => {
                   path="/exame/lista-candidatos"
                   element={<CandidateList />}
                 /> */}
-                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
+                <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
                 <Route
@@ -134,8 +142,13 @@ const App = () => {
                 />
                 */}
                 <Route path="/profile" element={<TeacherProfile />} />
+<<<<<<< HEAD
                  <Route path="/horarios/uc" element={<SchedulesByUC />} /> 
                   <Route path="/horarios/docente" element={<TeacherSchedules />} />  
+=======
+                <Route path="/horarios/uc" element={<SchedulesByUC />} />
+
+>>>>>>> f88ed551df7f1d43cb461bc16e5dfb4e97b15d37
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
                   path="/plano/uc-departamento"
@@ -162,9 +175,6 @@ const App = () => {
                   path="/calendario-pos/provas"
                   element={<ExamCalendarPos />}
                 />
-                 
-
-                
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
