@@ -50,6 +50,7 @@ import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
 import schedulesByUC from "./pages/schedules/SchedulesByUC";
 import SchedulesByUC from "./pages/schedules/SchedulesByUC";
+import SchedulesInscription from "./pages/schedules/ScheduleInscription";
 
 const App = () => {
   return (
@@ -65,6 +66,10 @@ const App = () => {
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Index />} />
                 <Route path="/horarios/criar" element={<CreateSchedule />} />
+                <Route
+                  path="horarios/inscricoes"
+                  element={<SchedulesInscription />}
+                />
                 <Route path="/horarios/listar" element={<ScheduleList />} />
                 <Route
                   path="/horarios/eliminados"
@@ -87,7 +92,7 @@ const App = () => {
                   path="/exame/lista-candidatos"
                   element={<CandidateList />}
                 /> */}
-                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
+                <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
                 <Route
@@ -133,7 +138,7 @@ const App = () => {
                 />
                 */}
                 <Route path="/profile" element={<TeacherProfile />} />
-                 <Route path="/horarios/uc" element={<SchedulesByUC />} />
+                <Route path="/horarios/uc" element={<SchedulesByUC />} />
 
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
@@ -161,9 +166,6 @@ const App = () => {
                   path="/calendario-pos/provas"
                   element={<ExamCalendarPos />}
                 />
-                 
-
-                
 
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
