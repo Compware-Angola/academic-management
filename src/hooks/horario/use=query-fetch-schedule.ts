@@ -1,0 +1,24 @@
+import {
+  fetchSchedule,
+  ScheduleParams,
+} from "@/services/horario/fetch-schedule.service";
+import { useQuery } from "@tanstack/react-query";
+
+export const useScheduleQuery = (params: ScheduleParams) => {
+  // Cria um objeto limpo apenas com valores definidos
+  const cleanParams = Object.entries(params).reduce((acc, [key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as Record<string, any>);
+
+  return useQuery({
+    // QueryKey com apenas valores definidos
+    queryKey: ["schedule", cleanParams],
+    queryFn: () => fetchSchedule(params),
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
+    enabled: Boolean(params.anoLectivo),
+  });
+};
