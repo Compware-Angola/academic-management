@@ -7,9 +7,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Home, Search, Download, RefreshCw, Printer, GraduationCap, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
-export default function HorariosPorDocente() {
+export default function TeacherSchedules() {
   const [isLoading, setIsLoading] = useState(false);
+    // === Dados base ===
+    const { data: anosAcademicos } = useQueryAnoAcademico();
+    const { data: semestres } = useQuerySemestres();
+    const { data: periodos } = useQueryPeriod();
+  
+    // filtros
+    const [filters, setFilters] = useState({
+      anoLetivo: "",
+      semestre: "",
+      periodo: "",
+      curso: "",
+      anoCurricular: "",
+      unidadeCurricular: "",
+    });
 
   const mockData = [
     { id: 1, docente: "Prof. João Silva", departamento: "Informática", uc: "Programação I", curso: "Eng. Informática", turma: "T1", sala: "Lab 1", dia: "Segunda", horario: "08:00 - 10:00", tipo: "Teórica", cargaHoraria: "4h/semana" },
@@ -100,13 +117,7 @@ export default function HorariosPorDocente() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" className="gap-2"><RefreshCw className="h-4 w-4" />Atualizar Lista</Button>
-        <Button variant="outline" className="gap-2"><Download className="h-4 w-4" />Exportar Excel</Button>
-        <Button variant="outline" className="gap-2"><Download className="h-4 w-4" />Exportar PDF</Button>
-        <Button variant="outline" className="gap-2"><Printer className="h-4 w-4" />Imprimir</Button>
-        <Button variant="outline" className="gap-2"><Calendar className="h-4 w-4" />Ver Calendário</Button>
-      </div>
+
 
       <Card>
         <CardHeader><CardTitle>Lista de Horários por Docente</CardTitle></CardHeader>
