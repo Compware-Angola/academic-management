@@ -27,36 +27,37 @@ import {
 import { Home, Search, BookOpen, Eye, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
-
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { useQueryRegistrationBySchedule } from "@/hooks/horario/use-query-schedule-inscription";
 import { RegistrationScheduleItem } from "@/services/horario/fetch-schedule-inscription.service";
-
-type TableScheduleItem = {
-  id: number;
-  uc: string;
-  turma: string;
-  curso: string;
-  unidadeCurricularId: number;
-};
+import ScheduleDetailsSchoolModal from "./components/ScheduleDetailsStudentModal";
 
 export default function SchedulesInscription() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [selectedSchedule, setSelectedSchedule] =
+    useState<RegistrationScheduleItem>({} as RegistrationScheduleItem);
 
+  const parseFilter = (v?: string) => {
+    if (!v || v === "all") return undefined;
+    const n = Number(v);
+    return Number.isNaN(n) ? undefined : n;
+  };
   const [filters, setFilters] = useState({
     anoLetivo: "",
     semestre: "",
     periodo: "",
-    curso: "",
-    anoCurricular: "", // "all" = todos os anos
-    unidadeCurricular: "", // UC selecionada
+    curso: "all",
+    anoCurricular: "all",
+    unidadeCurricular: "all",
+    estado: "all",
+    afetacaoDocente: "all",
   });
 
   // === Dados base ===
@@ -83,35 +84,31 @@ export default function SchedulesInscription() {
 
   // Turmas da UC selecionada
   const canLoadTurmas =
-    !!filters.anoLetivo &&
-    !!filters.semestre &&
-    !!filters.periodo &&
-    !!filters.curso &&
-    !!filters.unidadeCurricular;
+    !!filters.anoLetivo && !!filters.semestre && !!filters.periodo;
+  //filters.unidadeCurricular;
+  //!!filters.curso &&
+  //!!filters.unidadeCurricular;
 
   const { data: turmasResponse, isLoading: loadingTurmas } =
     useQueryRegistrationBySchedule(
       {
         anoLectivo: Number(filters.anoLetivo),
-        //semestre: Number(filters.semestre),
-        //periodo: Number(filters.periodo),
-        //curso: Number(filters.curso),
-        //unidadeCurricular: Number(filters.unidadeCurricular),
+        page: page,
+        limit: limit,
+        semestre: Number(filters.semestre),
+        periodo: Number(filters.periodo),
+        curso: parseFilter(filters.curso),
+        anoCurricular: parseFilter(filters.anoCurricular),
+        unidadeCurricular: parseFilter(filters.unidadeCurricular),
+        estado: parseFilter(filters.estado),
+        afetacaoDocente: parseFilter(filters.afetacaoDocente),
       },
       { enabled: canLoadTurmas }
     );
 
-  // Detalhes para o modal
-  // const { data: detalhesUc } = useQuerySchedulesByUc({
-  //   anoLectivo: Number(filters.anoLetivo),
-  //   semestre: Number(filters.semestre),
-  //   periodo: Number(filters.periodo),
-  //   curso: Number(filters.curso),
-  //   unidadeCurricular: Number(filters.anoCurricular),
-  // });
-
-  const openDetails = (ucId: number) => {
+  const openDetails = (item: RegistrationScheduleItem) => {
     setIsModalOpen(true);
+    setSelectedSchedule(item);
   };
 
   const closeModal = () => {
@@ -119,6 +116,8 @@ export default function SchedulesInscription() {
   };
 
   const tableData = turmasResponse?.data || [];
+  const total = turmasResponse?.total || 0;
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="p-6 space-y-8">
@@ -197,8 +196,8 @@ export default function SchedulesInscription() {
                   setFilters({
                     ...filters,
                     semestre: v,
-                    anoCurricular: "",
-                    unidadeCurricular: "",
+                    anoCurricular: "all",
+                    unidadeCurricular: "all",
                   })
                 }
               >
@@ -245,14 +244,15 @@ export default function SchedulesInscription() {
                     ...filters,
                     curso: v,
                     anoCurricular: "all",
-                    unidadeCurricular: "",
+                    unidadeCurricular: "all",
                   })
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
+                  <SelectValue placeholder="Todos os Cursos" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
                   {cursos?.map((c) => (
                     <SelectItem key={c.codigo} value={c.codigo.toString()}>
                       {c.designacao}
@@ -271,7 +271,7 @@ export default function SchedulesInscription() {
                   setFilters({
                     ...filters,
                     anoCurricular: v,
-                    unidadeCurricular: "",
+                    unidadeCurricular: "all",
                   })
                 }
                 disabled={!filters.curso}
@@ -318,11 +318,55 @@ export default function SchedulesInscription() {
                   />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
                   {unidadesCurriculares.map((uc) => (
                     <SelectItem key={uc.codigo} value={uc.codigo.toString()}>
                       {uc.descricao}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Estado</label>
+              <Select
+                value={filters.estado}
+                onValueChange={(v) =>
+                  setFilters({
+                    ...filters,
+                    estado: v,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="2">Pendente</SelectItem>
+                  <SelectItem value="3">Validado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Afectação de Docente */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Docente</label>
+              <Select
+                value={filters.afetacaoDocente}
+                onValueChange={(v) =>
+                  setFilters({
+                    ...filters,
+                    afetacaoDocente: v,
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="1">Com docente</SelectItem>
+                  <SelectItem value="2">Sem docente</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -341,7 +385,7 @@ export default function SchedulesInscription() {
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
               <p className="text-muted-foreground">Carregando turmas...</p>
             </div>
-          ) : tableData.length < 0 ? (
+          ) : tableData.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-30" />
               <p className="text-lg">
@@ -351,61 +395,113 @@ export default function SchedulesInscription() {
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Curso</TableHead>
-                    <TableHead>Ano</TableHead>
-                    <TableHead>Unidade Curricular</TableHead>
-                    <TableHead>Designação</TableHead>
-                    <TableHead>Capacidade</TableHead>
-                    <TableHead>Semestre</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Criado Por</TableHead>
-                    <TableHead>Quantidade de Alunos</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableData.map((item) => (
-                    <TableRow
-                      key={item.codigo}
-                      className="hover:bg-muted/50 transition-colors"
-                    >
-                      <TableCell className="font-medium">
-                        {item.curso}
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {item.ano}
-                      </TableCell>
-                      <TableCell>{item.unidadecurricular}</TableCell>
-                      <TableCell>{item.designacao}</TableCell>
-                      <TableCell>{item.capacidade}</TableCell>
-                      <TableCell>{item.semestre}</TableCell>
-                      <TableCell>{item.estado}</TableCell>
-                      <TableCell>{item.criadopor}</TableCell>
-                      <TableCell>{item.total_alunos}</TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {}}
-                          className="gap-2"
-                        >
-                          <Eye className="h-4 w-4" />
-                          Ver Horário
-                        </Button>
-                      </TableCell>
+            <>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Curso</TableHead>
+                      <TableHead>Ano</TableHead>
+                      <TableHead>Unidade Curricular</TableHead>
+                      <TableHead>Designação</TableHead>
+                      <TableHead>Capacidade</TableHead>
+                      <TableHead>Semestre</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Criado Por</TableHead>
+                      <TableHead>Quantidade de Alunos</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {tableData.map((item) => (
+                      <TableRow
+                        key={item.codigo}
+                        className="hover:bg-muted/50 transition-colors"
+                      >
+                        <TableCell className="font-medium">
+                          {item.curso}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {item.ano}
+                        </TableCell>
+                        <TableCell>{item.unidadecurricular}</TableCell>
+                        <TableCell>{item.designacao}</TableCell>
+                        <TableCell>{item.capacidade}</TableCell>
+                        <TableCell>{item.semestre}</TableCell>
+                        <TableCell>{item.estado}</TableCell>
+                        <TableCell>{item.criadopor}</TableCell>
+                        <TableCell>{item.total_alunos}</TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              openDetails(item);
+                            }}
+                            className="gap-2"
+                          >
+                            <Eye className="h-4 w-4" />
+                            Ver Alunos
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              {/* Paginação */}
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-muted-foreground">
+                  A mostrar {tableData.length} de {total} registos
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <span>
+                    Página {page} de {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </Button>
+
+                  <Select
+                    value={String(limit)}
+                    onValueChange={(v) => {
+                      setLimit(Number(v));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       {/* Modal com calendário semanal */}
+      <ScheduleDetailsSchoolModal
+        item={selectedSchedule}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
       {/*
       <ScheduleDetailsModal
         items={
