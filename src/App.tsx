@@ -53,6 +53,7 @@ import SchedulesByUC from "./pages/schedules/SchedulesByUC";
 import TeacherSchedules from "./pages/schedules/TeacherSchedules";
 
 import SchedulesInscription from "./pages/schedules/ScheduleInscription";
+import MovimentarEstudantes from "./pages/schedules/MoveStudents";
 
 const App = () => {
   return (
@@ -144,6 +145,7 @@ const App = () => {
                   <Route path="/horarios/docente" element={<TeacherSchedules />} />  
 
                 <Route path="/horarios/uc" element={<SchedulesByUC />} />
+                  <Route path="/horarios/movimentar/estudantes" element={<MovimentarEstudantes />} />
 
 
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />

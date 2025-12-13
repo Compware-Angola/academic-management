@@ -473,7 +473,7 @@ export const academicStructure:MenuStructure ={
         { title: "Horários semanais", url: "/horarios/semanais" },
         { title: "Substitutos", url: "/horarios/substitutos" },
         { title: "Horários com/sem sala", url: "/horarios/salas" },
-        { title: "Movimentar estudantes", url: "/horarios/movimentar" },
+        { title: "Movimentar estudantes", url: "/horarios/movimentar/estudantes" },
         { title: "Permissão editar", url: "/horarios/permissao" },
         { title: "Horários por docente", url: "/horarios/docente" },
         { title: "Inscrições por horário", url: "/horarios/inscricoes" },
