@@ -50,7 +50,10 @@ import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
 import schedulesByUC from "./pages/schedules/SchedulesByUC";
 import SchedulesByUC from "./pages/schedules/SchedulesByUC";
+import TeacherSchedules from "./pages/schedules/TeacherSchedules";
+
 import SchedulesInscription from "./pages/schedules/ScheduleInscription";
+import MovimentarEstudantes from "./pages/schedules/MoveStudents";
 
 const App = () => {
   return (
@@ -138,7 +141,12 @@ const App = () => {
                 />
                 */}
                 <Route path="/profile" element={<TeacherProfile />} />
+                 <Route path="/horarios/uc" element={<SchedulesByUC />} /> 
+                  <Route path="/horarios/docente" element={<TeacherSchedules />} />  
+
                 <Route path="/horarios/uc" element={<SchedulesByUC />} />
+                  <Route path="/horarios/movimentar/estudantes" element={<MovimentarEstudantes />} />
+
 
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
