@@ -54,6 +54,8 @@ import TeacherSchedules from "./pages/schedules/TeacherSchedules";
 
 import SchedulesInscription from "./pages/schedules/ScheduleInscription";
 import MovimentarEstudantes from "./pages/schedules/MoveStudents";
+import HorariosSemanais from "./pages/schedules/HorariosSemanais";
+import HealpFAQ from "./pages/healp/HealpFAQ";
 
 const App = () => {
   return (
@@ -144,7 +146,7 @@ const App = () => {
                  <Route path="/horarios/uc" element={<SchedulesByUC />} /> 
                   <Route path="/horarios/docente" element={<TeacherSchedules />} />  
 
-                <Route path="/horarios/uc" element={<SchedulesByUC />} />
+                <Route path="/horarios/semanais" element={<HorariosSemanais />} />
                   <Route path="/horarios/movimentar/estudantes" element={<MovimentarEstudantes />} />
 
 
@@ -178,6 +180,10 @@ const App = () => {
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
                 <Route path="*" element={<UnderConstruction />} />
+
+
+                {/* Finanças */}
+             <Route path="/ajuda" element={<HealpFAQ />} />
               </Route>
             </Routes>
           </BrowserRouter>
