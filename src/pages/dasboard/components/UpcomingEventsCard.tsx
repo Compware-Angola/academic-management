@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { useQueryAtividades } from "@/hooks/queries/use-query-atividades";
 
 
 interface Atividade {
@@ -25,46 +27,20 @@ interface TipoCandidatura {
   designacao: string;
 }
 
-
-const API_TIPOS_CANDIDATURA = "https://api.compware.net/ords/cmpdev/uma/tipo-candidatura/all";
-const API_ATIVIDADES = "https://api.compware.net/ords/cmpdev/ga/academic-calendar/academic-activities";
-
+ const { data: tiposCandidatura = [], isLoading: loadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 export default function UpcomingEventsCard() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
-  const [atividades, setAtividades] = useState<Atividade[]>([]);
+
   const [loading, setLoading] = useState(true);
  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } = useQueryAnoAcademico();
 
-  const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>([]);
-
-
-
-  // Carregar tipos de candidatura
-  useEffect(() => {
-    axios.get(API_TIPOS_CANDIDATURA)
-      .then(res => {
-        const data = res.data.tipo_candidaturas || [];
-        setTiposCandidatura(data);
-        const licenciatura = data.find((t: any) => t.codigo === 1);
-        if (licenciatura) setTipoCandidaturaId("1");
-      })
-      .catch(() => setTiposCandidatura([]));
-  }, []);
-
-  // Carregar atividades
-  useEffect(() => {
-    if (!anoLetivoId || !tipoCandidaturaId) return;
-
-    setLoading(true);
-    axios.get(`${API_ATIVIDADES}/${anoLetivoId}/${tipoCandidaturaId}`)
-      .then(res => {
-        const data: Atividade[] = res.data.actividades || [];
-        setAtividades(data.slice(0, 3)); // Apenas as 3 primeiras
-      })
-      .catch(() => setAtividades([]))
-      .finally(() => setLoading(false));
-  }, [anoLetivoId, tipoCandidaturaId]);
+  const {
+    data: atividades = [],
+    isLoading: loadingAtividades,
+    refetch: refetchAtividades,
+  } = useQueryAtividades({ anoLetivoId, tipoCandidaturaId });
 
 
   const getIconAndColor = (index: number) => {
