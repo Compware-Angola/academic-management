@@ -9,7 +9,7 @@ export type GetRegistrationBySchedulePayload = {
   anoCurricular?: number;      // opcional
   unidadeCurricular?: number;  // opcional
   estado?: number;             // opcional
-
+  afetacaoDocente?: number;
   page?: number;
   limit?: number;
 };
@@ -57,6 +57,7 @@ export async function getRegistrationByScheduleService(
     curso,
     anoCurricular,
     unidadeCurricular,
+    afetacaoDocente,
     estado,
     page = 1,
     limit = 25,
@@ -72,6 +73,7 @@ export async function getRegistrationByScheduleService(
         curso,
         anoCurricular,
         unidadeCurricular,
+        afetacaoDocente,
         estado,
         page,
         limit,

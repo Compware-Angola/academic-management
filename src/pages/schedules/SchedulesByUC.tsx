@@ -112,7 +112,7 @@ const openDetails = (turmaId: number) => {
   setSelectedTurmaId(turmaId);
   setIsModalOpen(true);
 };
-  const closeModal = () => setIsModalOpen(false);
+
 
   const tableData = turmasResponse?.data || [];
   const total = turmasResponse?.total || 0;
@@ -294,7 +294,7 @@ const openDetails = (turmaId: number) => {
           {loadingTurmas ? (
             <div className="flex flex-col items-center justify-center py-16">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Carregando turmas...</p>
+              <p className="text-muted-foreground">Carregando Horários...</p>
             </div>
           ) : tableData.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
