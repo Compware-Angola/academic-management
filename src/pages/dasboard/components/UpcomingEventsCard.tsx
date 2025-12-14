@@ -2,30 +2,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock, Users } from "lucide-react";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
+
 import { formatarData } from "@/util/date-formate";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQueryAtividades } from "@/hooks/queries/use-query-atividades";
 
 
-interface Atividade {
-  descricao: string;
-  data_inicio: string;
-  data_termino: string;
-}
 
-interface AnoLetivo {
-  codigo: string;
-  designacao: string;
-  estado: string;
-}
-
-interface TipoCandidatura {
-  codigo: number;
-  designacao: string;
-}
 
  const { data: tiposCandidatura = [], isLoading: loadingTiposCandidatura } =
     useQueryTipoCandidatura();
@@ -33,13 +18,11 @@ export default function UpcomingEventsCard() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
 
-  const [loading, setLoading] = useState(true);
  const { data: anosLetivos = [], isLoading: loadingAnosLetivos } = useQueryAnoAcademico();
 
   const {
     data: atividades = [],
-    isLoading: loadingAtividades,
-    refetch: refetchAtividades,
+
   } = useQueryAtividades({ anoLetivoId, tipoCandidaturaId });
 
 
@@ -121,7 +104,7 @@ export default function UpcomingEventsCard() {
       </CardHeader>
 
       <CardContent className="space-y-4 pt-4">
-        {loading ? (
+        {loadingAnosLetivos ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-lg border">
               <Skeleton className="h-12 w-12 rounded-full" />
