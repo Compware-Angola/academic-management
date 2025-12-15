@@ -1,18 +1,7 @@
 // src/pages/horarios/ScheduleList.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Plus,
-  RefreshCw,
-  Search,
-  File,
-  ChevronFirst,
-  ChevronLast,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Eye,
-} from "lucide-react";
+import { Loader2, Eye, MoreVertical, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,17 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
@@ -54,18 +33,24 @@ import { useQueryHorariosEliminados } from "@/hooks/horario/use-query-horarios-e
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
 
+import { useRestaurarHorario } from "@/hooks/horario/use-restaurar-horario";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 export default function ScheduleListEliminated() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     anoLectivo: "",
-    anoCurricular: "",
-    search: "",
-    curso: "",
     semestre: "",
+    curso: "",
+    anoCurricular: "",
+    classes: "",
+    unidadeCurricular: "",
+    search: "",
     periodo: "",
   });
+
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -76,19 +61,37 @@ export default function ScheduleListEliminated() {
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
   const { data: cursos, isLoading: loadingCursos } = useCursos();
-
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: filters.curso });
   const { data: anosCurriculares = [], isLoading: loadingAnosCurriculares } =
     useQueryClassFilterByCurso({ curso: filters.curso });
-
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: filters.classes,
+      curso: filters.curso,
+      semestre: filters.semestre,
+    });
   const { data, isLoading, error, refetch } = useQueryHorariosEliminados({
     anoLectivo: Number(filters.anoLectivo),
+
+    semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    periodo: filters.periodo ? Number(filters.periodo) : undefined,
+    curso: filters.curso ? Number(filters.curso) : undefined,
     anoCurricular: filters.anoCurricular
       ? Number(filters.anoCurricular)
       : undefined,
+    unidadeCurricular: filters.unidadeCurricular
+      ? Number(filters.unidadeCurricular)
+      : undefined,
+    classe: filters.classes ? Number(filters.classes) : undefined,
+
+    search: filters.search || undefined,
+
     page,
     limit,
   });
 
+  const { mutate: restaurarHorario } = useRestaurarHorario();
   const horarios = data?.data ?? [];
 
   // Filtro local por texto
@@ -128,48 +131,131 @@ export default function ScheduleListEliminated() {
       {/* ---------- Filtros ---------- */}
       <div className="rounded-lg border bg-card p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Ano Letivo */}
-          <Select
+          <FormSelect
+            label="Ano Letivo"
             value={filters.anoLectivo}
-            onValueChange={(v) =>
-              setFilters({ ...filters, anoLectivo: v, anoCurricular: "" })
+            loading={loadingAnos}
+            onChange={(v) =>
+              setFilters({
+                anoLectivo: v,
+                semestre: "",
+                curso: "",
+                anoCurricular: "",
+                classes: "",
+                unidadeCurricular: "",
+                search: "",
+                periodo: "",
+              })
             }
-            disabled={loadingAnos}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Ano Letivo" />
-            </SelectTrigger>
-            <SelectContent>
-              {anosAcademicos?.map((ano) => (
-                <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-                  {ano.designacao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={anosAcademicos}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
+          />
 
-          {/* Ano Curricular */}
-          <Select
-            value={filters.anoCurricular || "todos"}
-            onValueChange={(v) =>
-              setFilters({ ...filters, anoCurricular: v === "todos" ? "" : v })
+          <FormSelect
+            label="Semestre"
+            value={filters.semestre}
+            disabled={!filters.anoLectivo}
+            loading={loadingSemestres}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                semestre: v,
+                classes: "",
+                unidadeCurricular: "",
+              })
             }
-            disabled={loadingAnosCurriculares}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Ano Curricular" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              {anosCurriculares.map((ac) => (
-                <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-                  {ac.designacao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={semestres}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
+          />
 
-          {/* Pesquisa */}
+          <FormSelect
+            label="Curso"
+            value={filters.curso}
+            disabled={!filters.anoLectivo}
+            loading={loadingCursos}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                curso: v,
+                anoCurricular: "",
+                classes: "",
+                unidadeCurricular: "",
+              })
+            }
+            options={cursos}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
+          />
+
+          <FormSelect
+            label="Ano Curricular"
+            value={filters.anoCurricular}
+            disabled={!filters.curso}
+            loading={loadingAnosCurriculares}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                anoCurricular: v,
+                classes: "",
+                unidadeCurricular: "",
+              })
+            }
+            options={anosCurriculares}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
+          />
+          <FormSelect
+            label="Classe"
+            value={filters.classes}
+            disabled={!filters.curso || !filters.anoCurricular}
+            loading={isLoadingClasses}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                classes: v,
+                unidadeCurricular: "",
+              })
+            }
+            options={classes}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
+          />
+          <FormSelect
+            label="Unidade Curricular"
+            value={filters.unidadeCurricular}
+            disabled={!filters.curso || !filters.semestre || !filters.classes}
+            loading={isLoadingUC}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                unidadeCurricular: v,
+              })
+            }
+            options={unidadesCurriculares}
+            map={(u) => ({
+              key: u.pk,
+              label: u.descricao,
+              value: u.pk,
+            })}
+          />
+
           <Input
             placeholder="Pesquisar..."
             value={filters.search}
@@ -206,7 +292,6 @@ export default function ScheduleListEliminated() {
                       <TableHead>Curso</TableHead>
                       <TableHead>Ano Curricular</TableHead>
                       <TableHead>Estado</TableHead>
-                      <TableHead>Disponibilidade</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -232,11 +317,26 @@ export default function ScheduleListEliminated() {
 
                         <TableCell className="text-center">
                           <Button
-                            size="sm"
-                            variant="outline"
+                            className="cursor-pointer"
+                            title="Ver detalhes"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => openDetails(item.codigo)}
                           >
-                            <Eye className="h-4 w-4 mr-2" /> Ver Horário
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            className="cursor-pointer"
+                            title="Restaurar"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              restaurarHorario({
+                                codigo: item.codigo,
+                              })
+                            }
+                          >
+                            <RotateCcw className="h-4 w-4" />
                           </Button>
                         </TableCell>
                       </TableRow>

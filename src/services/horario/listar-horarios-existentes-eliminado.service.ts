@@ -31,7 +31,13 @@ export interface HorarioEliminado {
 
 export interface ListarHorariosEliminadosPayload {
   anoLectivo: number;
+  semestre?: number;
+  periodo?: number;
+  curso?: number;
   anoCurricular?: number;
+  unidadeCurricular?: number;
+  classe?: number;
+  search?: string;
   page?: number;
   limit?: number;
 }
@@ -49,14 +55,31 @@ export interface ListarHorariosEliminadosResponse {
 export async function listarHorariosEliminadosService(
   payload: ListarHorariosEliminadosPayload
 ): Promise<ListarHorariosEliminadosResponse> {
-  const { anoLectivo, anoCurricular, page = 1, limit = 25 } = payload;
+  const {
+    anoLectivo,
+    semestre,
+    periodo,
+    curso,
+    anoCurricular,
+    unidadeCurricular,
+    classe,
+    search,
+    page = 1,
+    limit = 25,
+  } = payload;
 
   const { data } = await axiosNestGa.get<ListarHorariosEliminadosResponse>(
     "/schedule/eliminated",
     {
       params: {
         anoLectivo,
+        semestre,
+        periodo,
+        curso,
         anoCurricular,
+        unidadeCurricular,
+        classe,
+        search,
         page,
         limit,
       },
