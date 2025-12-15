@@ -15,6 +15,6 @@ export function useQueryAtividades({
       return fetchAtividade({ anoLetivoId, tipoCandidaturaId });
     },
     staleTime: 5 * 60 * 1000,
-    enabled: !!tipoCandidaturaId,
+       enabled: Boolean(anoLetivoId && tipoCandidaturaId),
   });
 }
