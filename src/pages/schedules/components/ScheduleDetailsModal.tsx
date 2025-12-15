@@ -17,19 +17,15 @@ type ScheduleDetailsModalProps = {
   onClose: () => void;
 };
 
-const formatTime = (isoDate: string): string => {
-  if (!isoDate) return "";
-
-  const date = new Date(isoDate);
-
-  const hours = date.getUTCHours();   // usa UTC por causa do Z
-  const minutes = date.getUTCMinutes();
-
+// Converte .NET ticks (100ns) → HH:mm
+const formatTime = (ticks: string): string => {
+  const totalSeconds = Number(ticks) / 10_000_000; // 1 tick = 100ns
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   return `${hours.toString().padStart(2, "0")}:${minutes
     .toString()
     .padStart(2, "0")}`;
 };
-
 
 export default function ScheduleDetailsModal({
   horarioId,
@@ -145,8 +141,8 @@ export default function ScheduleDetailsModal({
                             {/* Horário + Tipo */}
                             <div className="flex justify-between items-start mb-3">
                               <span className="font-mono font-bold text-base">
-                                { formatTime(aula.horaInicio)}–
-                                {formatTime(aula.horaTermino)}
+                                {aula.horaInicio}–
+                                {aula.horaTermino}
                               </span>
                               <span
                                 className={`px-2 py-0.5 rounded text-xs font-medium ${
