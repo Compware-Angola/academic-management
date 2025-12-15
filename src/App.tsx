@@ -56,6 +56,7 @@ import SchedulesInscription from "./pages/schedules/ScheduleInscription";
 import MovimentarEstudantes from "./pages/schedules/MoveStudents";
 import HorariosSemanais from "./pages/schedules/HorariosSemanais";
 import HealpFAQ from "./pages/healp/HealpFAQ";
+import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
 
 const App = () => {
   return (
@@ -80,6 +81,11 @@ const App = () => {
                   path="/horarios/eliminados"
                   element={<ScheduleListEliminated />}
                 />
+                <Route
+                  path="/horarios/permissao"
+                  element={<SchedulesWithPermission />}
+                />
+
                 <Route path="/salas/listar" element={<ClassromList />} />
                 <Route
                   path="/plano/disciplinas"
@@ -104,7 +110,6 @@ const App = () => {
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
                 />
-
                 {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
@@ -123,14 +128,11 @@ const App = () => {
                   element={<MarkAttendance />}
                 />
 */}
-
                 <Route path="/acessos/utilizador" element={<UserAccess />} />
-
                 {/* <Route
                   path="/acessos/funcionalidade-utilizador"
                   element={<UserFunctionality />}
                 /> */}
-
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
                 {/*
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
@@ -143,31 +145,34 @@ const App = () => {
                 />
                 */}
                 <Route path="/profile" element={<TeacherProfile />} />
-                 <Route path="/horarios/uc" element={<SchedulesByUC />} /> 
-                  <Route path="/horarios/docente" element={<TeacherSchedules />} />  
-
-                <Route path="/horarios/semanais" element={<HorariosSemanais />} />
-                  <Route path="/horarios/movimentar/estudantes" element={<MovimentarEstudantes />} />
-
-
+                <Route path="/horarios/uc" element={<SchedulesByUC />} />
+                <Route
+                  path="/horarios/docente"
+                  element={<TeacherSchedules />}
+                />
+                <Route
+                  path="/horarios/semanais"
+                  element={<HorariosSemanais />}
+                />
+                <Route
+                  path="/horarios/movimentar/estudantes"
+                  element={<MovimentarEstudantes />}
+                />
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
                   path="/plano/uc-departamento"
                   element={<UcDepartmentManagement />}
                 />
-
                 <Route
                   path="/calendario/atividades"
                   element={<ActivitiesLecturesLic />}
                 />
-
                 <Route
                   path="/calendario/dias-isentos"
                   element={<ExemptDays />}
                 />
                 <Route path="/calendario/parametros" element={<Parameters />} />
                 <Route path="/calendario/prazos" element={<Deadlines />} />
-
                 <Route
                   path="/calendario-pos/atividades"
                   element={<ActivitiesLecturesPos />}
@@ -176,14 +181,11 @@ const App = () => {
                   path="/calendario-pos/provas"
                   element={<ExamCalendarPos />}
                 />
-
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
                 <Route path="*" element={<UnderConstruction />} />
-
-
                 {/* Finanças */}
-             <Route path="/ajuda" element={<HealpFAQ />} />
+                <Route path="/ajuda" element={<HealpFAQ />} />
               </Route>
             </Routes>
           </BrowserRouter>
