@@ -340,11 +340,11 @@ const HorariosSemanais = () => {
                         
                         </div>
                          <div className="text-sm text-muted-foreground">
-                          • Sala {aula.sala} 
+                          • Sala  <span className="text-green-400">{aula.sala || 'N/A'}</span>
                         
                         </div>
                          <div className="text-sm text-muted-foreground">
-                         • Modalidade {aula.modalidade}
+                         • Modalidade:  <span className="text-green-400">{aula.modalidade}</span>
                         </div>
                       </div>
                     </div>

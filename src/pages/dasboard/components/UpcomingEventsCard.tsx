@@ -150,7 +150,7 @@ export default function UpcomingEventsCard() {
       </CardHeader>
 
      <CardContent className="pt-4">
-  <div className="space-y-4 max-h-[320px] overflow-y-auto pr-2">
+  <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
     {loadingAnosLetivos ? (
       Array.from({ length: 3 }).map((_, i) => (
         <div
