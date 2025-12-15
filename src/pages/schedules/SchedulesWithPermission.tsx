@@ -154,7 +154,7 @@ export default function SchedulesWithPermission() {
 
   return (
     <div className="p-6 space-y-8">
-      <h1 className="text-3xl font-bold">Horários Existentes</h1>
+      <h1 className="text-3xl font-bold">Permissão para editar horário</h1>
 
       {/* ---------- Filtros ---------- */}
       <Card>
