@@ -112,7 +112,7 @@ export default function ScheduleDetailsSchoolModal({
           )}
         </div>
 
-        <DialogFooter className="flex-shrink-0 border-t pt-4">
+        <DialogFooter className="border-t pt-4">
           <Button variant="outline" onClick={closeModal} size="lg">
             Fechar
           </Button>

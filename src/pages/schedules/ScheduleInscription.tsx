@@ -320,7 +320,7 @@ export default function SchedulesInscription() {
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
                   {unidadesCurriculares.map((uc) => (
-                    <SelectItem key={uc.codigo} value={uc.codigo.toString()}>
+                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
                       {uc.descricao}
                     </SelectItem>
                   ))}
