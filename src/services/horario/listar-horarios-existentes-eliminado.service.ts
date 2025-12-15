@@ -1,67 +1,67 @@
-// src/services/horario/listar-horarios-existentes.service.ts
+// src/services/horario/types.ts
 
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-/* ---------- PAYLOAD (Filtros) ---------- */
-export type ListarHorariosExistentesPayload = {
-  p_ano_lectivo: number | string;
-  p_semestre: number | string;
-  p_periodo: number | string;
-  p_curso: number | string;
-  p_ano_curricular?: number | string; // Novo campo opcional
-};
+export type DisponibilidadeHorario =
+  | "Disponivel"
+  | "Fechado"
+  | "Pausa"
+  | "Em atendimento";
 
-/* ---------- RESPONSE ITEM ---------- */
-export type DisponibilidadeHorario = "Disponivel" | "Fechado" | "Pausa" | "Em atendimento";
-
-export interface HorarioExistenteEliminado {
+export interface HorarioEliminado {
   codigo: number;
   designacao: string;
-  unidadeCurricularId: number;
-  unidadeCurricular: string;
+  unidadecurricularid: number;
+  unidadecurricular: string;
   curso: string;
   ano: string;
   capacidade: number;
   reservado: "Sim" | "Não";
-  semestre: number;
+  semestre: string;
   estado: string;
-  estadoId: number;
-
-  dataEliminacao?: string | null; // opcional, pode ser null se não eliminado
+  estadocor: string | null;
+  estadoid: number;
+  disponibilidade: DisponibilidadeHorario;
+  criadopor: string;
+  atualizadopor: string;
+  dataultimaatualizacao: string;
+  datacriacao: string;
 }
+// src/services/horario/listar-horarios-eliminados.payload.ts
 
-/* ---------- RESPONSE COMPLETO ---------- */
-export type ListarHorariosExistentesResponse = {
-  horarios: HorarioExistenteEliminado[];
-};
+export interface ListarHorariosEliminadosPayload {
+  anoLectivo: number;
+  anoCurricular?: number;
+  page?: number;
+  limit?: number;
+}
+// src/services/horario/listar-horarios-eliminados.response.ts
 
-/* ---------- SERVICE ---------- */
-export async function listarHorariosExistentesEliminadosService(
-  payload: ListarHorariosExistentesPayload,
-): Promise<HorarioExistenteEliminado[]> {
-  const {
-    p_ano_lectivo,
-    p_semestre,
-    p_periodo,
-    p_curso,
-    p_ano_curricular,
-  } = payload;
+export interface ListarHorariosEliminadosResponse {
+  data: HorarioEliminado[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+// src/services/horario/listar-horarios-eliminados.service.ts
 
-  const { data } = await axiosApexGa.get<ListarHorariosExistentesResponse>(
-    "/horario/eliminados",
+export async function listarHorariosEliminadosService(
+  payload: ListarHorariosEliminadosPayload
+): Promise<ListarHorariosEliminadosResponse> {
+  const { anoLectivo, anoCurricular, page = 1, limit = 25 } = payload;
+
+  const { data } = await axiosNestGa.get<ListarHorariosEliminadosResponse>(
+    "/schedule/eliminated",
     {
       params: {
-        p_ano_lectivo,
-        p_semestre,
-        p_periodo,
-        p_curso,
-        p_ano_curricular,
-        p_unidade_curricular: "", 
-        p_estado: "",
-        p_afetacao_docente: "",
+        anoLectivo,
+        anoCurricular,
+        page,
+        limit,
       },
     }
   );
 
-  return data.horarios || [];
+  return data;
 }

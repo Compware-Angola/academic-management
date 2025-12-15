@@ -20,7 +20,7 @@ export type SaveHorarioPayload = {
   curso: number;
   unidadeCurricular: number;
   modalidade: number;
-  estadoHorario: 0;
+  estadoHorario: number;
   designacao: string;
   capacidade: number;
   turma: number;

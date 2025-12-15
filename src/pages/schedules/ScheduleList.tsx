@@ -39,6 +39,7 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
 import { FormSelect } from "@/components/common/FormSelect";
+import { Badge } from "@/components/ui/badge";
 
 export default function ScheduleList() {
   const navigate = useNavigate();
@@ -311,6 +312,8 @@ export default function ScheduleList() {
                       <TableHead>Designação</TableHead>
                       <TableHead>Curso</TableHead>
                       <TableHead>Ano Curricular</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Disponibilidade</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -321,6 +324,19 @@ export default function ScheduleList() {
                         <TableCell>{item.designacao}</TableCell>
                         <TableCell>{item.curso}</TableCell>
                         <TableCell>{item.ano}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              item.estado.toLowerCase().includes("pendente") ||
+                              item.estado.toLowerCase().includes("distribuição")
+                                ? "secondary"
+                                : "default"
+                            }
+                          >
+                            {item.estado}
+                          </Badge>
+                        </TableCell>
+
                         <TableCell className="text-center">
                           <Button
                             size="sm"

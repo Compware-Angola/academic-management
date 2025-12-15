@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, X, RefreshCw, AlertCircle, Loader2 } from "lucide-react";
+import { Save, X, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -44,7 +44,6 @@ const requiredFields = [
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
-  { key: "docente", label: "Docente" },
   { key: "modalidade", label: "Modalidade" },
 ];
 
@@ -65,7 +64,7 @@ export default function CreateSchedule() {
     classes: "",
     apenasPrimeiroAno: "",
     designacao: "",
-    capacidade: "", // 👈 NOVO
+    capacidade: "",
   });
 
   const [aulas, setAulas] = useState<AulaPayload[]>([]);
@@ -182,9 +181,9 @@ export default function CreateSchedule() {
       tipoAula: aulas[0].tipoAula,
       aulas,
       apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
-      capacidade: Number(formData.capacidade), // 👈 AGORA CERTO
+      capacidade: Number(formData.capacidade),
       designacao: formData.designacao,
-      estadoHorario: 0,
+      estadoHorario: 2,
       turma: 0,
       obs: "",
     };
