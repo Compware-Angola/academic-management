@@ -5,9 +5,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 export const useScheduleQuery = (params: ScheduleParams) => {
-  // Cria um objeto limpo apenas com valores definidos
   const cleanParams = Object.entries(params).reduce((acc, [key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
+    if (value) {
       acc[key] = value;
     }
     return acc;
@@ -19,6 +18,6 @@ export const useScheduleQuery = (params: ScheduleParams) => {
     queryFn: () => fetchSchedule(params),
     staleTime: 5 * 60 * 1000,
     retry: 2,
-    enabled: Boolean(params.anoLectivo),
+    enabled: Boolean(params.anoLectivo) && Boolean(params.semestre),
   });
 };

@@ -12,7 +12,7 @@ import { Loader2 } from "lucide-react";
 import { useQueryScheduleDetails } from "@/hooks/horario/use-query-schedule-details";
 
 type ScheduleDetailsModalProps = {
-  horarioId: number | null;   // ID da turma/horário
+  horarioId: number | null; // ID da turma/horário
   isOpen: boolean;
   onClose: () => void;
 };
@@ -22,7 +22,9 @@ const formatTime = (ticks: string): string => {
   const totalSeconds = Number(ticks) / 10_000_000; // 1 tick = 100ns
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
 };
 
 export default function ScheduleDetailsModal({
@@ -30,7 +32,11 @@ export default function ScheduleDetailsModal({
   isOpen,
   onClose,
 }: ScheduleDetailsModalProps) {
-  const { data: horario, isLoading, isError } = useQueryScheduleDetails(horarioId, {
+  const {
+    data: horario,
+    isLoading,
+    isError,
+  } = useQueryScheduleDetails(horarioId, {
     enabled: isOpen && !!horarioId,
   });
 
@@ -40,7 +46,15 @@ export default function ScheduleDetailsModal({
 
   if (!isOpen) return null;
 
-  const daysOfWeek = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+  const daysOfWeek = [
+    "Segunda",
+    "Terça",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sábado",
+    "Domingo",
+  ];
 
   // Agrupa aulas por dia
   const groupedByDay = daysOfWeek.reduce((acc, day) => {
@@ -84,7 +98,9 @@ export default function ScheduleDetailsModal({
             </div>
           ) : horario.aulas.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
-              <p className="text-lg">Nenhuma aula cadastrada para esta turma.</p>
+              <p className="text-lg">
+                Nenhuma aula cadastrada para esta turma.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -109,7 +125,9 @@ export default function ScheduleDetailsModal({
                       }`}
                     >
                       {day.substring(0, 3)}
-                      <span className="block text-sm font-medium opacity-80">{day}</span>
+                      <span className="block text-sm font-medium opacity-80">
+                        {day}
+                      </span>
                     </div>
 
                     {/* Aulas do dia */}
@@ -123,11 +141,13 @@ export default function ScheduleDetailsModal({
                             {/* Horário + Tipo */}
                             <div className="flex justify-between items-start mb-3">
                               <span className="font-mono font-bold text-base">
-                                {formatTime(aula.horaInicio)}–{formatTime(aula.horaTermino)}
+                                {formatTime(aula.horaInicio)}–
+                                {formatTime(aula.horaTermino)}
                               </span>
                               <span
                                 className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  aula.tipoAula.includes("Teórica") || aula.tipoAula.includes("Teorico")
+                                  aula.tipoAula.includes("Teórica") ||
+                                  aula.tipoAula.includes("Teorico")
                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                                     : aula.tipoAula.includes("Prática")
                                     ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
@@ -142,23 +162,32 @@ export default function ScheduleDetailsModal({
                             <div className="space-y-1.5 text-muted-foreground text-xs">
                               <div className="flex justify-between">
                                 <span>Designação</span>
-                                <span className="font-medium text-foreground">{horario.designacao}</span>
+                                <span className="font-medium text-foreground">
+                                  {horario.designacao}
+                                </span>
                               </div>
 
                               {/* Docente: sempre mostra (se não tiver, aparece "—") */}
                               <div className="flex justify-between">
                                 <span>Docente</span>
                                 <span className="font-medium text-foreground truncate max-w-[140px]">
-                                  {aula.docenteNome && aula.docenteNome !== "Sem docente" ? aula.docenteNome : "—"}
+                                  {aula.docenteNome &&
+                                  aula.docenteNome !== "Sem docente"
+                                    ? aula.docenteNome
+                                    : "—"}
                                 </span>
                               </div>
 
                               <div className="flex justify-between">
                                 <span>Sala</span>
-                                <span className="font-medium text-foreground">{aula.sala || "—"}</span>
+                                <span className="font-medium text-foreground">
+                                  {aula.sala || "—"}
+                                </span>
                               </div>
-                                <div className="flex justify-between">
-                                <span className="text-muted-foreground">Modalidade</span>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  Modalidade
+                                </span>
                                 <span className="font-semibold text-foreground">
                                   {aula.modalidade || "—"}
                                 </span>
@@ -179,7 +208,7 @@ export default function ScheduleDetailsModal({
           )}
         </div>
 
-        <DialogFooter className="flex-shrink-0 border-t pt-4">
+        <DialogFooter className="shrink-0 border-t pt-4">
           <Button variant="outline" onClick={closeModal} size="lg">
             Fechar
           </Button>

@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 
 type MapResult = {
   key: string | number;
+  value: string | number;
   label: string;
 };
 
@@ -52,7 +53,7 @@ export function FormSelect<T>({
             const mapped = map(item);
 
             return (
-              <SelectItem key={mapped.key} value={String(mapped.key)}>
+              <SelectItem key={mapped.key} value={String(mapped.value)}>
                 {mapped.label}
               </SelectItem>
             );

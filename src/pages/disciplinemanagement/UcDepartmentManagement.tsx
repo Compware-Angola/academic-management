@@ -172,6 +172,7 @@ export default function UcDepartmentManagement() {
           map={(a) => ({
             key: a.codigo,
             label: a.designacao,
+            value: a.codigo,
           })}
         />
         <FormSelect
@@ -184,6 +185,7 @@ export default function UcDepartmentManagement() {
           map={(a) => ({
             key: a.codigo,
             label: a.designacao,
+            value: a.codigo,
           })}
         />
         <FormSelect
@@ -195,6 +197,7 @@ export default function UcDepartmentManagement() {
           map={(c) => ({
             key: c.codigo,
             label: c.designacao,
+            value: c.codigo,
           })}
           loading={isLoadingClasses}
         />
@@ -208,6 +211,7 @@ export default function UcDepartmentManagement() {
           map={(s) => ({
             key: s.codigo,
             label: s.designacao,
+            value: s.codigo,
           })}
         />
       </FilterBar>

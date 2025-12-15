@@ -106,6 +106,7 @@ export function CreateUcModal({ open, onClose }: Props) {
               map={(c) => ({
                 key: String(c.codigo),
                 label: c.designacao,
+                value: String(c.codigo),
               })}
             />
 
@@ -119,6 +120,7 @@ export function CreateUcModal({ open, onClose }: Props) {
               map={(c) => ({
                 key: String(c.codigo),
                 label: c.designacao,
+                value: String(c.codigo),
               })}
             />
 
@@ -131,6 +133,7 @@ export function CreateUcModal({ open, onClose }: Props) {
               map={(d) => ({
                 key: String(d.codigo),
                 label: d.desginacao,
+                value: String(d.codigo),
               })}
             />
 
@@ -143,6 +146,7 @@ export function CreateUcModal({ open, onClose }: Props) {
               map={(a) => ({
                 key: String(a.codigo),
                 label: a.designacao,
+                value: String(a.codigo),
               })}
             />
 
@@ -155,6 +159,7 @@ export function CreateUcModal({ open, onClose }: Props) {
               map={(s) => ({
                 key: String(s.codigo),
                 label: s.designacao,
+                value: String(s.codigo),
               })}
             />
 
@@ -167,6 +172,7 @@ export function CreateUcModal({ open, onClose }: Props) {
               map={(d) => ({
                 key: String(d.codigo),
                 label: d.designacao,
+                value: String(d.codigo),
               })}
             />
 

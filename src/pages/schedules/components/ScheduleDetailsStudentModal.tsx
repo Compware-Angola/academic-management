@@ -65,7 +65,7 @@ export default function ScheduleDetailsSchoolModal({
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl">
             {item?.unidadecurricular || "Carregando..."}{" "}
             <span className="text-muted-foreground font-mono text-lg">

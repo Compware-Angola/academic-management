@@ -106,6 +106,7 @@ export default function FormulaOral() {
             map={(s) => ({
               key: s.codigo,
               label: s.designacao,
+              value: s.codigo,
             })}
           />
 
@@ -117,6 +118,7 @@ export default function FormulaOral() {
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.codigo,
             })}
           />
 
@@ -129,6 +131,7 @@ export default function FormulaOral() {
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.codigo,
             })}
           />
         </div>

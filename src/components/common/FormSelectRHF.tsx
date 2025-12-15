@@ -11,8 +11,9 @@ import {
 import { FormSelect } from "@/components/common/FormSelect";
 
 type MapResult = {
-  key: string | number;
+  value: string | number;
   label: string;
+  key: string;
 };
 
 type FormSelectRHFProps<TForm extends FieldValues, TOption> = {
