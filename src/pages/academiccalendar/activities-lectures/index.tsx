@@ -235,13 +235,13 @@ export default function ActivitiesLecturesLic() {
                   <TableCell>{item.tipo_calendario}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      {/* <Button
+                      <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(item)}
                       >
                         <Edit className="h-4 w-4" />
-                      </Button> */}
+                      </Button>
 
                       <Button
                         onClick={() => handleOpenDelete(item)}

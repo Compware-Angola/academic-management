@@ -8,15 +8,10 @@ import {
 } from "@/services/horario/save-horario.service";
 
 export function useSaveHorario(onSuccessReset?: () => void) {
-  return useMutation<
-    SaveHorarioResponse,
-    Error,
-    SaveHorarioPayload
-  >({
+  return useMutation<SaveHorarioResponse, Error, SaveHorarioPayload>({
     mutationFn: saveHorarioService,
 
     onSuccess: (data) => {
-
       if (data.sucesso === 0) {
         toast({
           variant: "destructive",
@@ -25,7 +20,6 @@ export function useSaveHorario(onSuccessReset?: () => void) {
         });
         return;
       }
-
 
       toast({
         title: "Horário salvo",
@@ -36,7 +30,6 @@ export function useSaveHorario(onSuccessReset?: () => void) {
     },
 
     onError: () => {
-      // ⚠️ Isso só cai em falhas reais: timeout, 500, sem internet…
       toast({
         variant: "destructive",
         title: "Erro de conexão",

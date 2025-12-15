@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Save, X, RefreshCw, AlertCircle, Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,30 +11,34 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
 import { useToast } from "@/hooks/use-toast";
-
-import ScheduleGrid, { AulaPayload } from "./ScheduleGrid";
-
-import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
-
+import ScheduleGrid from "./ScheduleGrid";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-disponiveis";
-import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { FormSelect } from "../../../components/common/FormSelect";
 import { useSaveHorario } from "@/hooks/horario/use-save-horario";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
+import {
+  AulaPayload,
+  SaveHorarioPayload,
+} from "@/services/horario/save-horario.service";
+
+import { Input } from "@/components/ui/input";
+import { useNextScheduleDesignation } from "@/hooks/horario/use-next-schedule-designation";
+import { Label } from "@/components/ui/label";
 
 /* -----------------------------------
    CONSTANTES E UTILS
 ----------------------------------- */
 
 const requiredFields = [
+  { key: "designacao", label: "Designação do Horário" },
+  { key: "capacidade", label: "Capacidade" }, // 👈
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
@@ -59,14 +61,15 @@ export default function CreateSchedule() {
     periodo: "",
     curso: "",
     unidadeCurricular: "",
-    docente: "",
     modalidade: "",
     classes: "",
+    apenasPrimeiroAno: "",
+    designacao: "",
+    capacidade: "", // 👈 NOVO
   });
 
   const [aulas, setAulas] = useState<AulaPayload[]>([]);
 
-  const [isChecking, setIsChecking] = useState(false);
   const [hasCheckedCollisions, setHasCheckedCollisions] = useState(false);
   const [collisionMessage, setCollisionMessage] = useState("");
 
@@ -89,20 +92,42 @@ export default function CreateSchedule() {
       curso: formData.curso,
       semestre: formData.semestre,
     });
-
-  const { data: teachers = [], isLoading: isLoadingTeacher } =
-    useQueryTeacherByUC(formData.unidadeCurricular);
+  const { data: designacao } = useNextScheduleDesignation(
+    formData.curso
+      ? gerarSiglaCurso(
+          cursos.find((c) => c.codigo.toString() === formData.curso)
+            ?.designacao || ""
+        )
+      : undefined,
+    formData.classes,
+    formData.unidadeCurricular
+      ? unidadesCurriculares.find(
+          (c) => c.pk.toString() === formData.unidadeCurricular
+        )?.codigo || ""
+      : ""
+  );
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: modalidade = [], isLoading: isLoadingModalidade } =
     useQueryModalidade();
   /* ---------- COLISÃO ----------- */
 
-  const { mutate: salvarHorario, isPending } = useSaveHorario();
+  const {
+    mutateAsync: salvarHorario,
+    isPending,
+    isSuccess: isSuccessSaveHorario,
+  } = useSaveHorario();
   useEffect(() => {
     setHasCheckedCollisions(false);
     setCollisionMessage("");
   }, [formData, aulas]);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      designacao: designacao || "",
+    }));
+  }, [designacao]);
 
   /* ---------- VALIDAR FORM ----------- */
   const validateForm = () => {
@@ -135,7 +160,7 @@ export default function CreateSchedule() {
     ) && aulas.length > 0;
 
   /* ---------- SUBMIT ----------- */
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -147,28 +172,38 @@ export default function CreateSchedule() {
       return;
     }
 
-    const payload = {
+    const payload: SaveHorarioPayload = {
       anoLectivo: Number(formData.anoLetivo),
       semestre: Number(formData.semestre),
       periodo: Number(formData.periodo),
       curso: Number(formData.curso),
       unidadeCurricular: Number(formData.unidadeCurricular),
-      docente: Number(formData.docente),
       modalidade: Number(formData.modalidade),
       tipoAula: aulas[0].tipoAula,
       aulas,
+      apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
+      capacidade: Number(formData.capacidade), // 👈 AGORA CERTO
+      designacao: formData.designacao,
+      estadoHorario: 0,
+      turma: 0,
+      obs: "",
     };
 
-    salvarHorario(payload);
+    await salvarHorario(payload);
+    if (!isSuccessSaveHorario) {
+      return;
+    }
     setFormData({
       anoLetivo: "",
       semestre: "",
       periodo: "",
       curso: "",
       unidadeCurricular: "",
-      docente: "",
       modalidade: "",
       classes: "",
+      apenasPrimeiroAno: "",
+      capacidade: "",
+      designacao: "",
     });
     setAulas([]);
     setHasCheckedCollisions(false);
@@ -224,6 +259,7 @@ export default function CreateSchedule() {
             map={(a) => ({
               key: a.codigo,
               label: a.designacao,
+              value: a.codigo,
             })}
           />
           <FormSelect
@@ -240,6 +276,7 @@ export default function CreateSchedule() {
             map={(p) => ({
               key: p.codigo,
               label: p.designacao,
+              value: p.codigo,
             })}
           />
 
@@ -254,6 +291,7 @@ export default function CreateSchedule() {
             map={(s) => ({
               key: s.codigo,
               label: s.designacao,
+              value: s.codigo,
             })}
           />
 
@@ -263,11 +301,20 @@ export default function CreateSchedule() {
             loading={isLoadingCurso}
             label="Curso"
             value={formData.curso}
-            onChange={(v) => setFormData({ ...formData, curso: v })}
+            onChange={(v) =>
+              setFormData({
+                ...formData,
+                curso: v,
+                unidadeCurricular: "",
+                designacao: "",
+                classes: "",
+              })
+            }
             options={cursos}
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.codigo,
             })}
           />
           <FormSelect
@@ -279,6 +326,7 @@ export default function CreateSchedule() {
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.codigo,
             })}
             loading={isLoadingClasses}
           />
@@ -295,27 +343,16 @@ export default function CreateSchedule() {
               !formData.curso ||
               !formData.classes
             }
-            onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
+            onChange={(v) =>
+              setFormData({ ...formData, unidadeCurricular: v, designacao: "" })
+            }
             options={unidadesCurriculares}
             map={(u) => ({
               key: u.pk,
               label: u.descricao,
+              value: u.pk,
             })}
             loading={isLoadingUC}
-          />
-
-          {/* DOCENTE */}
-          <FormSelect
-            label="Docente"
-            value={formData.docente}
-            disabled={isLoadingTeacher || !formData.unidadeCurricular}
-            onChange={(v) => setFormData({ ...formData, docente: v })}
-            options={teachers}
-            map={(t) => ({
-              key: t.pk,
-              label: t.nomeCompleto,
-            })}
-            loading={isLoadingTeacher}
           />
 
           {/* MODALIDADE */}
@@ -328,16 +365,52 @@ export default function CreateSchedule() {
             map={(m) => ({
               key: m.pkModalidade,
               label: m.designacao,
+              value: m.pkModalidade,
             })}
             loading={isLoadingModalidade}
           />
+          <FormSelect
+            label="Apenas para primeiro ano"
+            value={formData.apenasPrimeiroAno}
+            onChange={(v) => setFormData({ ...formData, apenasPrimeiroAno: v })}
+            options={onlyFirstYear}
+            map={(m) => ({
+              key: m.value,
+              label: m.label,
+              value: m.value,
+            })}
+          />
+          <div className="">
+            <Label>Designação do Horário</Label>
+            <Input
+              readOnly
+              placeholder="Ex: Horário LEI 1º Ano - Manhã"
+              value={formData.designacao}
+              onChange={(e) =>
+                setFormData({ ...formData, designacao: e.target.value })
+              }
+            />
+          </div>
+
+          {/* CAPACIDADE */}
+          <div>
+            <Label>Capacidade</Label>
+            <Input
+              type="number"
+              min={0}
+              placeholder="Ex: 40"
+              value={formData.capacidade}
+              onChange={(e) =>
+                setFormData({ ...formData, capacidade: e.target.value })
+              }
+            />
+          </div>
         </div>
 
         {/* GRID DE HORÁRIOS */}
         {temposDisponiveis.length > 0 &&
           !!formData.anoLetivo &&
           !!formData.anoLetivo &&
-          !!formData.docente &&
           !!formData.periodo &&
           !!formData.semestre &&
           !!formData.unidadeCurricular &&
@@ -346,7 +419,6 @@ export default function CreateSchedule() {
               scheduleData={temposDisponiveis}
               onChange={setAulas}
               anoLetivo={formData.anoLetivo}
-              docente={formData.docente}
               periodo={formData.periodo}
               semestre={formData.semestre}
               unidadeCurricular={formData.unidadeCurricular}
@@ -379,4 +451,17 @@ export default function CreateSchedule() {
       </form>
     </div>
   );
+}
+const onlyFirstYear = [
+  { value: 0, label: "Sim" },
+  { value: 1, label: "Não" },
+];
+const STOP_WORDS = ["e", "de", "do", "da", "dos", "das"];
+
+function gerarSiglaCurso(nome: string) {
+  return nome
+    .split(" ")
+    .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
+    .map((p) => p[0].toUpperCase())
+    .join("");
 }

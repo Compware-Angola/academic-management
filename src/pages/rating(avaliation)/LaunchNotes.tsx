@@ -2,11 +2,31 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Save, ChevronLeft, ChevronRight, Unlock, Lock } from "lucide-react";
+import {
+  RefreshCw,
+  Save,
+  ChevronLeft,
+  ChevronRight,
+  Unlock,
+  Lock,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryNoteReleases } from "@/hooks/avaliacao/use-query-note-release";
@@ -43,45 +63,58 @@ export default function LaunchNotes() {
     filtro: "",
   });
 
-  const { data: students = [], isLoading: loadingNoteRelease, refetch } = useQueryNoteReleases({
+  const {
+    data: students = [],
+    isLoading: loadingNoteRelease,
+    refetch,
+  } = useQueryNoteReleases({
     anoLectivoId: Number(formData.anoLetivo),
     horarioId: Number(formData.horarioId),
     tipoProvaId: Number(formData.tipoProva),
     tipoAvaliacao: Number(formData.tipoAvaliacao),
     classe: Number(formData.classes),
-    turno: Number(formData.periodo)
+    turno: Number(formData.periodo),
   });
 
   const [localStudents, setLocalStudents] = useState(students);
-  const [lockedStudents, setLockedStudents] = useState<{ [key: number]: boolean }>({});
+  const [lockedStudents, setLockedStudents] = useState<{
+    [key: number]: boolean;
+  }>({});
 
-
-  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
   const { user } = useAuth();
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
   const year = academicYear?.filter(
     (ay) => ay.estado.toLowerCase() === "activo"
-  )
-  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } = useQueryTeacherProfile(user?.user_id);
-  const { data: turmDataHorario, isLoading: isLoadingTurmaDataHorario, isError } = useQueryListSchedules({
+  );
+  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } =
+    useQueryTeacherProfile(user?.user_id);
+  const {
+    data: turmDataHorario,
+    isLoading: isLoadingTurmaDataHorario,
+    isError,
+  } = useQueryListSchedules({
     teacherId: teacherInfoData?.codigo_docente,
     anoLectivo: Number(formData.anoLetivo),
     semestre: Number(formData.semestre),
-
   });
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
 
-  const { data: classes = [], isLoading: isLoadingClasses } = useQueryClassFilterByCurso({ curso: formData.curso });
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } = useQueryTipoAvaliacao();
-  const { data: tipoProva = [], isLoading: isLoadingTipoProva } = useQueryTipoProva();
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
+    useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const upsertNoteMutation = useUpsertNote();
 
   useEffect(() => {
     setLocalStudents(students);
     const initialLocks: { [key: number]: boolean } = {};
-    students.forEach(s => {
+    students.forEach((s) => {
       initialLocks[s.codigo_grade_aluno] = true;
     });
     setLockedStudents(initialLocks);
@@ -89,7 +122,11 @@ export default function LaunchNotes() {
 
   const totalPages = Math.ceil(localStudents.length / itemsPerPage);
 
-  const handleNotaChange = (id: number, field: "nota" | "observacao", value: string) => {
+  const handleNotaChange = (
+    id: number,
+    field: "nota" | "observacao",
+    value: string
+  ) => {
     let newValue: number | string | null = value === "" ? null : value;
 
     if (field === "nota") {
@@ -101,13 +138,15 @@ export default function LaunchNotes() {
       }
     }
 
-    setLocalStudents(prev =>
-      prev.map(s => s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s)
+    setLocalStudents((prev) =>
+      prev.map((s) =>
+        s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s
+      )
     );
   };
 
   const toggleLock = (id: number) => {
-    setLockedStudents(prev => ({
+    setLockedStudents((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
@@ -130,15 +169,23 @@ export default function LaunchNotes() {
         corLetra: "black",
         disponivel: true,
       },
-      codigo_grade_avaliacao_aluno: student.codigo_grade_avaliacao_aluno || undefined,
+      codigo_grade_avaliacao_aluno:
+        student.codigo_grade_avaliacao_aluno || undefined,
     };
 
     upsertNoteMutation.mutate(payload, {
       onSuccess: () => {
-        toast({ title: "Sucesso", description: "Nota lançada/atualizada com sucesso." });
+        toast({
+          title: "Sucesso",
+          description: "Nota lançada/atualizada com sucesso.",
+        });
       },
       onError: () => {
-        toast({ title: "Erro", description: "Não foi possível lançar/atualizar a nota.", variant: "destructive" });
+        toast({
+          title: "Erro",
+          description: "Não foi possível lançar/atualizar a nota.",
+          variant: "destructive",
+        });
       },
     });
   };
@@ -147,7 +194,9 @@ export default function LaunchNotes() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Início</Link>
+        <Link to="/" className="hover:text-foreground">
+          Início
+        </Link>
         <span>/</span>
         <span className="font-medium">Avaliações</span>
         <span>/</span>
@@ -157,11 +206,13 @@ export default function LaunchNotes() {
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Lançamento de notas</h1>
-          <p className="text-muted-foreground mt-1">Lançar notas de avaliações por UC</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Lançamento de notas
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Lançar notas de avaliações por UC
+          </p>
         </div>
-
-
       </div>
 
       {/* Filtros */}
@@ -175,7 +226,11 @@ export default function LaunchNotes() {
             value={formData.anoLetivo}
             onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
             options={year}
-            map={(a) => ({ key: a.codigo, label: a.designacao })}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
           />
           <FormSelect
             disabled={
@@ -191,6 +246,7 @@ export default function LaunchNotes() {
             map={(p) => ({
               key: p.codigo,
               label: p.designacao,
+              value: p.codigo,
             })}
           />
           <FormSelect
@@ -200,7 +256,11 @@ export default function LaunchNotes() {
             value={formData.semestre}
             onChange={(v) => setFormData({ ...formData, semestre: v })}
             options={semestres}
-            map={(s) => ({ key: s.codigo, label: s.designacao })}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
           />
           <FormSelect
             disabled={isLoadingCurso}
@@ -209,7 +269,11 @@ export default function LaunchNotes() {
             value={formData.curso}
             onChange={(v) => setFormData({ ...formData, curso: v })}
             options={cursos}
-            map={(c) => ({ key: c.codigo, label: c.designacao })}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
           />
           <FormSelect
             label="Ano Curricular"
@@ -217,18 +281,26 @@ export default function LaunchNotes() {
             disabled={isLoadingClasses || !formData.curso}
             onChange={(v) => setFormData({ ...formData, classes: v })}
             options={classes}
-            map={(c) => ({ key: c.codigo, label: c.designacao })}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
             loading={isLoadingClasses}
           />
           <FormSelectIsaac
             label="Horario"
             value={formData.horarioId}
-            disabled={isLoadingTurmaDataHorario || !formData.semestre || !formData.classes}
+            disabled={
+              isLoadingTurmaDataHorario ||
+              !formData.semestre ||
+              !formData.classes
+            }
             onChange={(v) => setFormData({ ...formData, horarioId: v })}
             options={turmDataHorario?.horarios}
-            map={(u,index) => ({
-              key: index,         
-              value: u.codigo_horario,          
+            map={(u, index) => ({
+              key: index,
+              value: u.codigo_horario,
               label: `${u.horario} ${u.grade}`,
             })}
             loading={isLoadingTurmaDataHorario}
@@ -239,7 +311,11 @@ export default function LaunchNotes() {
             disabled={isLoadingTipoProva}
             onChange={(v) => setFormData({ ...formData, tipoProva: v })}
             options={tipoProva}
-            map={(u) => ({ key: u.codigo, label: u.designacao })}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+              value: u.codigo,
+            })}
             loading={isLoadingTipoProva}
           />
           <FormSelect
@@ -248,14 +324,17 @@ export default function LaunchNotes() {
             disabled={isLoadingTipoAvaliacao}
             onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
             options={tipoAvaliacao}
-            map={(u) => ({ key: u.codigo, label: u.designacao })}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+              value: u.codigo,
+            })}
             loading={isLoadingTipoAvaliacao}
           />
 
           {/* Botão Listar na mesma linha */}
           <div className="flex items-end">
             <Button
-
               className="w-full"
               disabled={
                 loadingNoteRelease ||
@@ -274,7 +353,6 @@ export default function LaunchNotes() {
               Listar
             </Button>
           </div>
-
         </div>
       </div>
 
@@ -287,8 +365,12 @@ export default function LaunchNotes() {
         </div>
       ) : localStudents.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
-          <p className="text-muted-foreground mb-4">Nenhum registo encontrado</p>
-          <p className="text-sm text-muted-foreground">Clique em "Listar" após selecionar os filtros</p>
+          <p className="text-muted-foreground mb-4">
+            Nenhum registo encontrado
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Clique em "Listar" após selecionar os filtros
+          </p>
         </div>
       ) : (
         <>
@@ -299,30 +381,56 @@ export default function LaunchNotes() {
                   <TableRow>
                     <TableHead className="w-[120px]">Nº Matrícula</TableHead>
                     <TableHead>Nome do Estudante</TableHead>
-                    <TableHead className="w-[600px] text-center">Descrição</TableHead>
-                    <TableHead className="w-[140px] text-center">Nota (0-20)</TableHead>
-                    <TableHead className="w-[140px] text-center">Estado</TableHead>
-                    <TableHead className="w-[120px] text-center">Ação</TableHead>
+                    <TableHead className="w-[600px] text-center">
+                      Descrição
+                    </TableHead>
+                    <TableHead className="w-[140px] text-center">
+                      Nota (0-20)
+                    </TableHead>
+                    <TableHead className="w-[140px] text-center">
+                      Estado
+                    </TableHead>
+                    <TableHead className="w-[120px] text-center">
+                      Ação
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {localStudents
-                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .slice(
+                      (currentPage - 1) * itemsPerPage,
+                      currentPage * itemsPerPage
+                    )
                     .map((student) => {
-                      const hasNota = student.nota !== null && student.nota !== undefined;
-                      const isValid = hasNota && Number(student.nota) >= 0 && Number(student.nota) <= 20;
-                      const isLocked = lockedStudents[student.codigo_grade_aluno] ?? true;
+                      const hasNota =
+                        student.nota !== null && student.nota !== undefined;
+                      const isValid =
+                        hasNota &&
+                        Number(student.nota) >= 0 &&
+                        Number(student.nota) <= 20;
+                      const isLocked =
+                        lockedStudents[student.codigo_grade_aluno] ?? true;
 
                       return (
                         <TableRow key={student.codigo_grade_aluno}>
-                          <TableCell className="font-mono text-sm">{student.numero_de_matricula}</TableCell>
-                          <TableCell className="font-medium">{student.nome_completo}</TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {student.numero_de_matricula}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {student.nome_completo}
+                          </TableCell>
 
                           <TableCell className="text-center">
                             <Input
                               type="text"
                               value={student.observacao || ""}
-                              onChange={(e) => handleNotaChange(student.codigo_grade_aluno, "observacao", e.target.value)}
+                              onChange={(e) =>
+                                handleNotaChange(
+                                  student.codigo_grade_aluno,
+                                  "observacao",
+                                  e.target.value
+                                )
+                              }
                               className="w-full mx-auto text-left"
                               placeholder="Pequena descrição..."
                               disabled={isLocked}
@@ -336,7 +444,13 @@ export default function LaunchNotes() {
                               max="20"
                               step="0.5"
                               value={student.nota ?? ""}
-                              onChange={(e) => handleNotaChange(student.codigo_grade_aluno, "nota", e.target.value)}
+                              onChange={(e) =>
+                                handleNotaChange(
+                                  student.codigo_grade_aluno,
+                                  "nota",
+                                  e.target.value
+                                )
+                              }
                               className="w-24 mx-auto text-center"
                               placeholder="0-20"
                               disabled={isLocked}
@@ -347,7 +461,9 @@ export default function LaunchNotes() {
                             {!hasNota ? (
                               <Badge variant="secondary">Pendente</Badge>
                             ) : isValid ? (
-                              <Badge variant="default" className="bg-green-600">Lançada</Badge>
+                              <Badge variant="default" className="bg-green-600">
+                                Lançada
+                              </Badge>
                             ) : (
                               <Badge variant="destructive">Inválida</Badge>
                             )}
@@ -357,27 +473,50 @@ export default function LaunchNotes() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => toggleLock(student.codigo_grade_aluno)}
+                              onClick={() =>
+                                toggleLock(student.codigo_grade_aluno)
+                              }
                             >
-                              {isLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                              {isLocked ? (
+                                <Lock className="w-4 h-4" />
+                              ) : (
+                                <Unlock className="w-4 h-4" />
+                              )}
                             </Button>
 
                             <Button
                               size="sm"
                               variant={hasNota ? "default" : "outline"}
                               onClick={() => {
-                                if (student.nota === null || student.nota === undefined) {
-                                  toast({ title: "Erro", description: "Insira uma nota primeiro", variant: "destructive" });
+                                if (
+                                  student.nota === null ||
+                                  student.nota === undefined
+                                ) {
+                                  toast({
+                                    title: "Erro",
+                                    description: "Insira uma nota primeiro",
+                                    variant: "destructive",
+                                  });
                                   return;
                                 }
-                                if (Number(student.nota) < 0 || Number(student.nota) > 20) {
-                                  toast({ title: "Erro", description: "A nota deve estar entre 0 e 20", variant: "destructive" });
+                                if (
+                                  Number(student.nota) < 0 ||
+                                  Number(student.nota) > 20
+                                ) {
+                                  toast({
+                                    title: "Erro",
+                                    description:
+                                      "A nota deve estar entre 0 e 20",
+                                    variant: "destructive",
+                                  });
                                   return;
                                 }
                                 handleSaveAll(student);
                                 toggleLock(student.codigo_grade_aluno);
                                 toast({
-                                  title: hasNota ? "Nota atualizada" : "Nota lançada",
+                                  title: hasNota
+                                    ? "Nota atualizada"
+                                    : "Nota lançada",
                                   description: `${student.nome_completo} → ${student.nota} valores`,
                                 });
                               }}
@@ -400,8 +539,13 @@ export default function LaunchNotes() {
       {localStudents.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
-            <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+            <Label htmlFor="items-per-page" className="text-sm">
+              Itens por página:
+            </Label>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => setItemsPerPage(Number(value))}
+            >
               <SelectTrigger id="items-per-page" className="w-[80px]">
                 <SelectValue />
               </SelectTrigger>
@@ -413,7 +557,9 @@ export default function LaunchNotes() {
               </SelectContent>
             </Select>
             <span className="text-sm text-muted-foreground ml-4">
-              Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, localStudents.length)} de {localStudents.length} registos
+              Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
+              {Math.min(currentPage * itemsPerPage, localStudents.length)} de{" "}
+              {localStudents.length} registos
             </span>
           </div>
 
@@ -421,7 +567,7 @@ export default function LaunchNotes() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -433,7 +579,7 @@ export default function LaunchNotes() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
               Seguinte

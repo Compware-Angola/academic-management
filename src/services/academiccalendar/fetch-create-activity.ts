@@ -31,7 +31,7 @@ export type updateActivity = {
 };
 
 export async function updateActivity(params: updateActivity) {
-  const { data } = await axiosApexGa.post(
+  const { data } = await axiosApexGa.put(
     "auto/fk2_tb_calendario_actividade_lectivas",
     params
   );

@@ -191,6 +191,7 @@ export default function ControlNotes() {
             map={(a) => ({
               key: a.codigo,
               label: a.designacao,
+              value: a.codigo,
             })}
           />
 
@@ -205,6 +206,7 @@ export default function ControlNotes() {
             map={(s) => ({
               key: s.codigo,
               label: s.designacao,
+              value: s.codigo,
             })}
           />
 
@@ -219,6 +221,7 @@ export default function ControlNotes() {
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.codigo,
             })}
           />
           <FormSelect
@@ -230,6 +233,7 @@ export default function ControlNotes() {
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.codigo,
             })}
             loading={isLoadingClasses}
           />
@@ -249,8 +253,9 @@ export default function ControlNotes() {
             onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
             options={unidadesCurriculares}
             map={(u) => ({
-              key: u.pk,
+              key: u.codigo,
               label: u.descricao,
+              value: u.pk,
             })}
             loading={isLoadingUC}
           />
@@ -263,6 +268,7 @@ export default function ControlNotes() {
             map={(u) => ({
               key: u.codigo,
               label: u.designacao,
+              value: u.codigo,
             })}
             loading={isLoadingTipoProva}
           />
@@ -275,6 +281,7 @@ export default function ControlNotes() {
             map={(u) => ({
               key: u.codigo,
               label: u.designacao,
+              value: u.codigo,
             })}
             loading={isLoadingTipoAvaliacao}
           />
@@ -286,6 +293,7 @@ export default function ControlNotes() {
             map={(u) => ({
               key: u.codigo,
               label: u.designacao,
+              value: u.codigo,
             })}
           />
         </div>

@@ -25,49 +25,48 @@ import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
 import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 import { useToast } from "@/hooks/use-toast";
 import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
-export type AulaPayload = {
-  diaSemana: number;
-  ordemTempo: number;
-  sala: number;
-  tipoAula: number;
-};
+import { AulaPayload } from "@/services/horario/save-horario.service";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+type SlotKey = string;
+
 type ScheduleGridProps = {
   scheduleData: TempoDisponivelItem[];
   onChange: (aulas: AulaPayload[]) => void;
-
   anoLetivo: string;
   semestre: string;
   periodo: string;
   unidadeCurricular: string;
-  docente: string;
 };
 export default function ScheduleGrid(props: ScheduleGridProps) {
   const {
     scheduleData,
     onChange,
     unidadeCurricular,
-    semestre,
     anoLetivo,
     periodo,
-    docente,
+    semestre,
   } = props;
+
   const { toast } = useToast();
   const [selectedSlot, setSelectedSlot] = useState<null | {
     dia: DiaSemana;
     tempo: Tempo;
     key: string;
   }>(null);
-  const [slotData, setSlotData] = useState({});
+  const [slotData, setSlotData] = useState<Record<SlotKey, AulaPayload>>({});
   const [formData, setFormData] = useState({
     sala: "",
     tipoAula: "",
+    docente: undefined,
   });
   const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
   const { data: salas, isLoading: isLoadingSala } = useQuerySalas({
     tipoSala: formData.tipoAula,
   });
   const verifyCollision = useVerifyCollision();
-
+  const { data: teachers = [], isLoading: isLoadingTeacher } =
+    useQueryTeacherByUC(unidadeCurricular);
   useEffect(() => {
     if (!formData.tipoAula || isLoadingSala) return;
 
@@ -87,102 +86,92 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       setFormData({
         sala: String(slotData[key].sala),
         tipoAula: String(slotData[key].tipoAula),
+        docente: String(slotData[key].docente),
       });
     } else {
       setFormData({
         sala: "",
         tipoAula: "",
+        docente: undefined,
       });
     }
   };
 
-  const handleSave = async () => {
+  const handleConfirm = async () => {
     if (!selectedSlot) return;
 
     const { dia, tempo, key } = selectedSlot;
 
-    if (!formData.tipoAula || !formData.sala) {
+    if (!formData.tipoAula || !formData.sala || !formData.docente) {
       toast({
         variant: "destructive",
         title: "Dados incompletos",
-        description: "Selecione o tipo de aula e a sala.",
+        description: "Selecione docente, tipo de aula e sala.",
       });
       return;
     }
+    const result = await verifyCollision.mutateAsync({
+      ano_lectivo: Number(anoLetivo),
+      semestre: Number(semestre),
+      periodo: Number(periodo),
+      unidade_curricular: Number(unidadeCurricular),
+      docente: Number(formData.docente),
+      sala: Number(formData.sala),
+      dia_semana: dia.pkDiaDaSemana,
+      ordem_tempo: tempo.ordem,
+      horario_id: null,
+    });
 
-    try {
-      const result = await verifyCollision.mutateAsync({
-        ano_lectivo: Number(anoLetivo),
-        semestre: Number(semestre),
-        periodo: Number(periodo),
-        unidade_curricular: Number(unidadeCurricular),
-        docente: Number(docente),
-        sala: Number(formData.sala),
-        dia_semana: dia.pkDiaDaSemana,
-        ordem_tempo: tempo.ordem,
-        horario_id: null,
-      });
-
-      // ✅ SE EXISTIR COLISÃO
-      if (result.temColisao === 1) {
-        toast({
-          variant: "destructive",
-          title: "Colisão detectada",
-          description: result.mensagem,
-        });
-
-        return;
-      }
-
-      const newItem: AulaPayload = {
-        diaSemana: dia.pkDiaDaSemana,
-        ordemTempo: tempo.ordem,
-        sala: Number(formData.sala),
-        tipoAula: Number(formData.tipoAula),
-      };
-
-      const updated = {
-        ...slotData,
-        [key]: newItem,
-      };
-
-      setSlotData(updated);
-      onChange(Object.values(updated));
-
-      toast({
-        title: "Horário adicionado",
-        description: "Sala atribuída com sucesso.",
-      });
-
-      setSelectedSlot(null); // fecha o dialog
-    } catch {
+    // ✅ SE EXISTIR COLISÃO
+    if (result.temColisao === 1) {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: "Falha ao verificar colisão.",
+        title: "Colisão detectada",
+        description: result.mensagem,
       });
+
+      return;
     }
+    const novaAula: AulaPayload = {
+      docente: Number(formData.docente),
+      diaSemana: dia.pkDiaDaSemana,
+      ordemTempo: tempo.ordem,
+      sala: Number(formData.sala),
+      tipoAula: Number(formData.tipoAula),
+      hora_inicio: tempo.horaInicio,
+      hora_fim: tempo.horaFim,
+      obs: "",
+    };
+
+    const updatedSlots = {
+      ...slotData,
+      [key]: novaAula,
+    };
+
+    setSlotData(updatedSlots);
+    onChange(Object.values(updatedSlots));
+
+    toast({
+      title: "Aula adicionada",
+      description: "Aula criada com sucesso.",
+    });
+
+    setSelectedSlot(null);
   };
 
   const handleRemove = (key: string) => {
     const updated = { ...slotData };
     delete updated[key];
-
     setSlotData(updated);
-
-    // 🔹 atualiza o pai também
     onChange(Object.values(updated));
-
     setSelectedSlot(null);
   };
 
   const hasData = (diaId: number, ordem: number) => {
-    const key = `${diaId}-${ordem}`;
-    return slotData[key] && Object.values(slotData[key]).some((v) => v);
+    return Boolean(slotData[`${diaId}-${ordem}`]);
   };
-
   const days = scheduleData.filter((item) => item.diaSemana);
-
+  console.log(selectedSlot?.tempo.horaInicio, selectedSlot?.tempo.horaFim);
   return (
     <>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -255,6 +244,20 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            <FormSelect
+              label="Docente"
+              value={formData.docente}
+              disabled={isLoadingTeacher}
+              onChange={(v) => setFormData({ ...formData, docente: v })}
+              options={teachers}
+              map={(t) => ({
+                key: t.pk,
+                label: t.nomeCompleto,
+                value: t.pk,
+              })}
+              loading={isLoadingTeacher}
+            />
+
             {/* TIPO DE AULA */}
             <div>
               <Label>Tipo de Aula</Label>
@@ -320,7 +323,7 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
             <div className="flex gap-3 pt-4">
               <Button
                 disabled={verifyCollision.isPending}
-                onClick={handleSave}
+                onClick={handleConfirm}
                 className="flex-1"
               >
                 {verifyCollision.isPending ? (
