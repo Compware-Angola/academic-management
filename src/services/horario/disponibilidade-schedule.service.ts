@@ -1,15 +1,14 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
-
-
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type UpdateSchedulePayload = {
-  p_horario_id: number | string;
+  horarioId: number | string;
+  userId: number | string;
 };
 
-export async function updateDiponibilidadeService(
+export async function updateDisponibilidadeService(
   payload: UpdateSchedulePayload,
 ): Promise<void> {
-  const { p_horario_id } = payload;
+  const { horarioId, userId } = payload;
 
-  await axiosApexGa.put("/horario/disponibilidade?p_horario_id=" + p_horario_id);
+  await axiosNestGa.patch(`/schedule/${horarioId}/disponibilidade/${userId}`);
 }

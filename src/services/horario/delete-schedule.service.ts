@@ -1,19 +1,14 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
-
-
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type DeleteSchedulePayload = {
-  p_horario_id: number | string;
+  horarioId: number | string;
+  userId: number | string;
 };
 
 export async function deleteScheduleService(
   payload: DeleteSchedulePayload,
 ): Promise<void> {
-  const { p_horario_id } = payload;
+  const { horarioId, userId } = payload;
 
-  await axiosApexGa.delete("/horario/eliminar", {
-    params: {
-      p_horario_id,
-    },
-  });
+  await axiosNestGa.delete(`/schedule/${horarioId}/excluir/${userId}`);
 }
