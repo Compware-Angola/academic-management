@@ -6,23 +6,12 @@ export type GetNextScheduleDesignationResponse = {
 };
 
 export async function getNextScheduleDesignationService(base: string) {
-  try {
-    const { data } = await axiosNestGa.get<GetNextScheduleDesignationResponse>(
-      `/schedule/designation/${encodeURIComponent(base + "-H")}`
-    );
-    return data;
-  } catch (err: any) {
-    if (err.response?.status === 404) {
-      return { success: true, data: [] };
-    }
-
-    throw err;
-  }
+  const { data } = await axiosNestGa.get<GetNextScheduleDesignationResponse>(
+    `/schedule/designation/${encodeURIComponent(base + "-H")}`
+  );
+  return data;
 }
 
-/**
- * Gera a designação final com base na resposta
- */
 export function gerarDesignacao(
   base: string,
   response: GetNextScheduleDesignationResponse
