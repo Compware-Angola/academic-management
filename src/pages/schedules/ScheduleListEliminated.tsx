@@ -137,9 +137,22 @@ export default function ScheduleListEliminated() {
   React.useEffect(() => {
     resetPageOnFilterChange();
   }, [filters]);
+  // Filtrar horários localmente
+  const filteredHorarios = horarios.filter((h) => {
+    if (!filters.search) return true;
+    const searchNormalized = normalizeText(filters.search);
 
-  const total = data?.total || 0;
+    return (
+      normalizeText(h.designacao).includes(searchNormalized) ||
+      normalizeText(h.unidadecurricular).includes(searchNormalized) ||
+      normalizeText(h.curso).includes(searchNormalized) ||
+      normalizeText(h.ano).includes(searchNormalized)
+    );
+  });
+
+  const total = filteredHorarios.length;
   const totalPages = Math.ceil(total / limit);
+
   return (
     <div className="flex-1 space-y-6 p-8">
       <h1 className="text-3xl font-bold">Horários Eliminados</h1>
@@ -290,7 +303,7 @@ export default function ScheduleListEliminated() {
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
               <p className="text-muted-foreground">Carregando Horários...</p>
             </div>
-          ) : horarios.length === 0 ? (
+          ) : filteredHorarios.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               Nenhuma Horários encontrada.
             </div>
@@ -309,7 +322,7 @@ export default function ScheduleListEliminated() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {horarios.map((item) => (
+                    {filteredHorarios.map((item) => (
                       <TableRow key={item.codigo}>
                         <TableCell>{item.unidadecurricular}</TableCell>
                         <TableCell>{item.designacao}</TableCell>
@@ -434,3 +447,8 @@ export default function ScheduleListEliminated() {
     </div>
   );
 }
+const normalizeText = (text: string) =>
+  text
+    .normalize("NFD") // Normaliza acentos
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacríticos
+    .toLowerCase(); // Deixa tudo em minúsculas
