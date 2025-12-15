@@ -2,7 +2,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Eye, MoreVertical, RotateCcw } from "lucide-react";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,6 +45,7 @@ import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
 import { useRestaurarHorario } from "@/hooks/horario/use-restaurar-horario";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { HorarioEliminado } from "@/services/horario/listar-horarios-existentes-eliminado.service";
 export default function ScheduleListEliminated() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -45,29 +55,29 @@ export default function ScheduleListEliminated() {
     semestre: "",
     curso: "",
     anoCurricular: "",
-    classes: "",
     unidadeCurricular: "",
     search: "",
     periodo: "",
   });
-
+  const [openDialog, setOpenDialog] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-
+  const [selectedHorario, setSelectedHorario] = useState<{
+    codigo: number;
+    descricao: string;
+  } | null>(null);
   // Queries dos filtros
   const { data: anosAcademicos, isLoading: loadingAnos } =
     useQueryAnoAcademico();
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
   const { data: cursos, isLoading: loadingCursos } = useCursos();
-  const { data: classes = [], isLoading: isLoadingClasses } =
-    useQueryClassFilterByCurso({ curso: filters.curso });
   const { data: anosCurriculares = [], isLoading: loadingAnosCurriculares } =
     useQueryClassFilterByCurso({ curso: filters.curso });
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
-      classe: filters.classes,
+      classe: filters.anoCurricular,
       curso: filters.curso,
       semestre: filters.semestre,
     });
@@ -83,27 +93,33 @@ export default function ScheduleListEliminated() {
     unidadeCurricular: filters.unidadeCurricular
       ? Number(filters.unidadeCurricular)
       : undefined,
-    classe: filters.classes ? Number(filters.classes) : undefined,
-
-    search: filters.search || undefined,
 
     page,
     limit,
   });
 
-  const { mutate: restaurarHorario } = useRestaurarHorario();
+  const { mutate: restoreHorario, isPending: isRestore } =
+    useRestaurarHorario();
   const horarios = data?.data ?? [];
-
-  // Filtro local por texto
-  const filteredHorarios = horarios.filter(
-    (h) =>
-      filters.search === "" ||
-      h.designacao.toLowerCase().includes(filters.search.toLowerCase()) ||
-      h.unidadecurricular
-        .toLowerCase()
-        .includes(filters.search.toLowerCase()) ||
-      h.curso.toLowerCase().includes(filters.search.toLowerCase())
-  );
+  const handleOpenConfirm = (item: HorarioEliminado) => {
+    setSelectedHorario({
+      codigo: item.codigo,
+      descricao: item.designacao,
+    });
+    setOpenDialog(true);
+  };
+  const handleConfirmRestore = () => {
+    if (!selectedHorario) return;
+    restoreHorario(
+      { codigo: selectedHorario.codigo },
+      {
+        onSuccess: () => {
+          setOpenDialog(false);
+          setSelectedHorario(null);
+        },
+      }
+    );
+  };
 
   React.useEffect(() => {
     setPage(1);
@@ -141,7 +157,6 @@ export default function ScheduleListEliminated() {
                 semestre: "",
                 curso: "",
                 anoCurricular: "",
-                classes: "",
                 unidadeCurricular: "",
                 search: "",
                 periodo: "",
@@ -164,11 +179,29 @@ export default function ScheduleListEliminated() {
               setFilters({
                 ...filters,
                 semestre: v,
-                classes: "",
+                anoCurricular: "",
                 unidadeCurricular: "",
               })
             }
             options={semestres}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
+          />
+          <FormSelect
+            label="Período"
+            value={filters.periodo}
+            disabled={!filters.anoLectivo}
+            loading={loadingSemestres}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                periodo: v,
+              })
+            }
+            options={periodos}
             map={(s) => ({
               key: s.codigo,
               label: s.designacao,
@@ -186,7 +219,6 @@ export default function ScheduleListEliminated() {
                 ...filters,
                 curso: v,
                 anoCurricular: "",
-                classes: "",
                 unidadeCurricular: "",
               })
             }
@@ -207,7 +239,6 @@ export default function ScheduleListEliminated() {
               setFilters({
                 ...filters,
                 anoCurricular: v,
-                classes: "",
                 unidadeCurricular: "",
               })
             }
@@ -218,29 +249,13 @@ export default function ScheduleListEliminated() {
               value: a.codigo,
             })}
           />
-          <FormSelect
-            label="Classe"
-            value={filters.classes}
-            disabled={!filters.curso || !filters.anoCurricular}
-            loading={isLoadingClasses}
-            onChange={(v) =>
-              setFilters({
-                ...filters,
-                classes: v,
-                unidadeCurricular: "",
-              })
-            }
-            options={classes}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
-          />
+
           <FormSelect
             label="Unidade Curricular"
             value={filters.unidadeCurricular}
-            disabled={!filters.curso || !filters.semestre || !filters.classes}
+            disabled={
+              !filters.curso || !filters.semestre || !filters.anoCurricular
+            }
             loading={isLoadingUC}
             onChange={(v) =>
               setFilters({
@@ -257,6 +272,7 @@ export default function ScheduleListEliminated() {
           />
 
           <Input
+            className="col-span-3"
             placeholder="Pesquisar..."
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
@@ -264,9 +280,6 @@ export default function ScheduleListEliminated() {
         </div>
       </div>
 
-      {/* ---------- Ações ---------- */}
-
-      {/* ---------- Tabela ---------- */}
       <Card>
         <CardHeader>
           <CardTitle>Horários Encontradas</CardTitle>
@@ -314,31 +327,29 @@ export default function ScheduleListEliminated() {
                             {item.estado}
                           </Badge>
                         </TableCell>
-
-                        <TableCell className="text-center">
-                          <Button
-                            className="cursor-pointer"
-                            title="Ver detalhes"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openDetails(item.codigo)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            className="cursor-pointer"
-                            title="Restaurar"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() =>
-                              restaurarHorario({
-                                codigo: item.codigo,
-                              })
-                            }
-                          >
-                            <RotateCcw className="h-4 w-4" />
-                          </Button>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              className="cursor-pointer"
+                              title="Ver detalhes"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => openDetails(item.codigo)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              className="cursor-pointer"
+                              title="Restaurar"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleOpenConfirm(item)}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
+                        <TableCell className="text-center"></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -392,6 +403,26 @@ export default function ScheduleListEliminated() {
           )}
         </CardContent>
       </Card>
+      <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Restauração?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja realmente restaurar o horário
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRestore}
+              disabled={isRestore}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isRestore ? "Restarando..." : "Restaurar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <ScheduleDetailsModal
         horarioId={selectedTurmaId}
         isOpen={isModalOpen}

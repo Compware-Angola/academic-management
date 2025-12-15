@@ -36,8 +36,6 @@ export interface ListarHorariosEliminadosPayload {
   curso?: number;
   anoCurricular?: number;
   unidadeCurricular?: number;
-  classe?: number;
-  search?: string;
   page?: number;
   limit?: number;
 }
@@ -62,8 +60,6 @@ export async function listarHorariosEliminadosService(
     curso,
     anoCurricular,
     unidadeCurricular,
-    classe,
-    search,
     page = 1,
     limit = 25,
   } = payload;
@@ -78,8 +74,6 @@ export async function listarHorariosEliminadosService(
         curso,
         anoCurricular,
         unidadeCurricular,
-        classe,
-        search,
         page,
         limit,
       },
