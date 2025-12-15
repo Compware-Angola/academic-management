@@ -100,13 +100,7 @@ export default function SchedulesByUC() {
     { enabled: canLoadTurmas }
   );
 
-  const { data: detalhesUc } = useQuerySchedulesByUc({
-    anoLectivo: Number(filters.anoLetivo),
-    semestre: Number(filters.semestre),
-    periodo: Number(filters.periodo),
-    curso: Number(filters.curso),
-    unidadeCurricular: Number(filters.unidadeCurricular),
-  });
+
 
 const openDetails = (turmaId: number) => {
   setSelectedTurmaId(turmaId);

@@ -29,10 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  RefreshCw,
-  Plus,
-  ChevronLeft,
-  ChevronRight,
+
   Trash2,
   Edit,
 } from "lucide-react";
@@ -40,6 +37,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 // Interfaces
 interface Prazo {
@@ -84,28 +82,26 @@ interface TipoEpocaAvaliacao {
   descricao: string;
 }
 
-// ROTAS REAIS
-const API_ANOS_LETIVOS =
-  "http://34.202.163.85:8080/ords/cmpdev/academic-year/all";
+
 const API_TIPOS_CANDIDATURA =
-  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-candidatura/all";
+  "https://api.compware.net/ords/cmpdev/uma/tipo-candidatura/all";
 const API_TIPOS_PRAZO =
-  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-prazo/all";
+  "https://api.compware.net/ords/cmpdev/uma/tipo-prazo/all";
 const API_TIPOS_AVALIACAO =
-  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-avaliacao/all";
-const API_SEMESTRES = "http://34.202.163.85:8080/ords/cmpdev/uma/semestre/all"; // NOVA ROTA
+  "https://api.compware.net/ords/cmpdev/uma/tipo-avaliacao/all";
+const API_SEMESTRES = "https://api.compware.net/ords/cmpdev/uma/semestre/all"; 
 const API_PRAZOS =
-  "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
+  "https://api.compware.net/ords/cmpdev/ga/academic-calendar/deadlines";
 const API_CRIAR_PRAZO =
-  "http://34.202.163.85:8080/ords/cmpdev/ga/academic-calendar/deadlines";
+  "https://api.compware.net/ords/cmpdev/ga/academic-calendar/deadlines";
 const API_TIPO_DE_EPOCA_AVALIACAO =
-  "http://34.202.163.85:8080/ords/cmpdev/uma/tipo-epoca-avaliacao/all";
+  "https://api.compware.net/ords/cmpdev/uma/tipo-epoca-avaliacao/all";
 
 const API_APAGAR_PRAZO =
-  "http://34.202.163.85:8080/ords/cmpdev/auto/fk2_mcal_tb_prazo";
+  "https://api.compware.net/ords/cmpdev/auto/fk2_mcal_tb_prazo";
 
 const API_ACTUALIZAR_PRAZO =
-  "http://34.202.163.85:8080/ords/cmpdev/auto/fk2_mcal_tb_prazo";
+  "https://api.compware.net/ords/cmpdev/auto/fk2_mcal_tb_prazo";
 export default function Deadlines() {
   const { toast } = useToast();
 
@@ -123,6 +119,7 @@ export default function Deadlines() {
   const [tiposEpocaAvaliacao, setTiposEpocaAvaliacao] = useState<
     TipoEpocaAvaliacao[]
   >([]);
+    const { data: anosAcademicos } = useQueryAnoAcademico();
 
   // Filtros
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -148,20 +145,7 @@ export default function Deadlines() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Carregar anos letivos (todos, ordenados do mais recente)
-  const fetchAnosLetivos = async () => {
-    try {
-      const res = await axios.get(API_ANOS_LETIVOS);
-      const todos = res.data.anolectivos || [];
-      const ordenados = todos.sort(
-        (a: AnoLetivo, b: AnoLetivo) => Number(b.codigo) - Number(a.codigo)
-      );
-      setAnosLetivos(ordenados);
-      if (ordenados.length > 0) setAnoLetivoId(ordenados[0].codigo);
-    } catch {
-      toast({ title: "Erro ao carregar anos letivos", variant: "destructive" });
-    }
-  };
+
 
   const fetchTipoEpocaAvaliacoes = async () => {
     try {
@@ -389,7 +373,7 @@ export default function Deadlines() {
 
   // Inicialização
   useEffect(() => {
-    fetchAnosLetivos();
+  
     fetchTiposCandidatura();
     fetchTiposPrazo();
     fetchTiposAvaliacao();
@@ -449,8 +433,8 @@ export default function Deadlines() {
                 />
               </SelectTrigger>
               <SelectContent>
-                {anosLetivos.map((a) => (
-                  <SelectItem key={a.codigo} value={a.codigo}>
+                {anosAcademicos?.map((a) => (
+                  <SelectItem key={a.codigo} value={a.codigo.toString()}>
                     <div className="flex items-center justify-between w-full">
                       <span>{a.designacao}</span>
                       {!a.estado.toLowerCase().includes("desactiv") && (
@@ -707,7 +691,7 @@ export default function Deadlines() {
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {anosLetivos.map((s) => (
+                  {anosAcademicos.map((s) => (
                     <SelectItem key={s.codigo} value={s.codigo.toString()}>
                       {s.designacao}
                     </SelectItem>
