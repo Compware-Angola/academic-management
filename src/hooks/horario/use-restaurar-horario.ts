@@ -13,7 +13,7 @@ export function useRestaurarHorario() {
         queryKey: ["horarios-eliminados"],
       });
       queryClient.invalidateQueries({
-        queryKey: ["horarios"],
+        queryKey: ["schedule"],
       });
       toast({
         description: "Horário restaurado com sucesso",
