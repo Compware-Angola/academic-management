@@ -97,7 +97,7 @@ export const ScheduleMoveStudentCard = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onHandleToggleSelecteAll(filteredData)}
+                      onClick={() => onHandleToggleSelecteAll([])}
                     >
                       Desmarcar Todos
                     </Button>
