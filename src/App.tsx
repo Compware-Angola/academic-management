@@ -56,6 +56,7 @@ import SchedulesInscription from "./pages/schedules/ScheduleInscription";
 import MovimentarEstudantes from "./pages/schedules/MoveStudents";
 import HorariosSemanais from "./pages/schedules/HorariosSemanais";
 import HealpFAQ from "./pages/healp/HealpFAQ";
+import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 
 const App = () => {
   return (
@@ -80,6 +81,7 @@ const App = () => {
                   path="/horarios/eliminados"
                   element={<ScheduleListEliminated />}
                 />
+                <Route path="horarios/sala" element={<SchedulesByRoom />} />
                 <Route path="/salas/listar" element={<ClassromList />} />
                 <Route
                   path="/plano/disciplinas"
@@ -143,12 +145,20 @@ const App = () => {
                 />
                 */}
                 <Route path="/profile" element={<TeacherProfile />} />
-                 <Route path="/horarios/uc" element={<SchedulesByUC />} /> 
-                  <Route path="/horarios/docente" element={<TeacherSchedules />} />  
+                <Route path="/horarios/uc" element={<SchedulesByUC />} />
+                <Route
+                  path="/horarios/docente"
+                  element={<TeacherSchedules />}
+                />
 
-                <Route path="/horarios/semanais" element={<HorariosSemanais />} />
-                  <Route path="/horarios/movimentar/estudantes" element={<MovimentarEstudantes />} />
-
+                <Route
+                  path="/horarios/semanais"
+                  element={<HorariosSemanais />}
+                />
+                <Route
+                  path="/horarios/movimentar/estudantes"
+                  element={<MovimentarEstudantes />}
+                />
 
                 <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
                 <Route
@@ -181,9 +191,8 @@ const App = () => {
                 {/* <Route path="*" element={<NotFound />} />*/}
                 <Route path="*" element={<UnderConstruction />} />
 
-
                 {/* Finanças */}
-             <Route path="/ajuda" element={<HealpFAQ />} />
+                <Route path="/ajuda" element={<HealpFAQ />} />
               </Route>
             </Routes>
           </BrowserRouter>
