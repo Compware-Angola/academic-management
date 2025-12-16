@@ -91,20 +91,23 @@ export default function CreateSchedule() {
       curso: formData.curso,
       semestre: formData.semestre,
     });
-  const { data: designacao } = useNextScheduleDesignation(
-    formData.curso
-      ? gerarSiglaCurso(
-          cursos.find((c) => c.codigo.toString() === formData.curso)
-            ?.designacao || ""
-        )
-      : undefined,
-    formData.classes,
-    formData.unidadeCurricular
-      ? unidadesCurriculares.find(
-          (c) => c.pk.toString() === formData.unidadeCurricular
-        )?.codigo || ""
-      : ""
-  );
+const { data: designacao } = useNextScheduleDesignation(
+  formData.curso
+    ? gerarSiglaCurso(
+        cursos.find((c) => c.codigo.toString() === formData.curso)
+          ?.designacao || ""
+      )
+    : undefined,
+  formData.classes,
+  formData.unidadeCurricular
+    ? unidadesCurriculares.find(
+        (c) => c.pk.toString() === formData.unidadeCurricular
+      )?.codigo || ""
+    : "",
+  Number(formData.periodo),        
+  Number(formData.anoLetivo)      
+);
+
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: modalidade = [], isLoading: isLoadingModalidade } =

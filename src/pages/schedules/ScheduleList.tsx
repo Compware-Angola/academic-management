@@ -364,7 +364,7 @@ export default function ScheduleList() {
         </CardContent>
       </Card>
 
-      {/* Tabela */}
+      {/* Tabela   Pimentel##123!! */}
       <Card>
         <CardHeader>
           <CardTitle>Horários Encontradas</CardTitle>
@@ -376,9 +376,17 @@ export default function ScheduleList() {
               <p className="text-muted-foreground">Carregando Horários...</p>
             </div>
           ) : tableData.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
-              Nenhuma Horários encontrada.
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <Search className="h-8 w-8 text-muted-foreground" />
             </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum registo encontrado</h3>
+            <p className="text-muted-foreground mb-4">Não foram encontrados horários com os filtros aplicados.</p>
+            <Button onClick={() => navigate("/horarios/criar")}>
+              <Plus className="mr-2 h-4 w-4" />
+              Criar Primeiro Horário
+            </Button>
+          </div>
           ) : (
             <>
               <div className="rounded-md border overflow-hidden">
