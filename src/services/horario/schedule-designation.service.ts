@@ -5,12 +5,31 @@ export type GetNextScheduleDesignationResponse = {
   data: { designacao: string }[];
 };
 
-export async function getNextScheduleDesignationService(base: string) {
+type GetNextScheduleDesignationParams = {
+  base: string;        // ex: ACSP.1.QUIG
+  periodo: number;    // ex: 5
+  anoLectivo: number; // ex: 23
+};
+
+export async function getNextScheduleDesignationService({
+  base,
+  periodo,
+  anoLectivo,
+}: GetNextScheduleDesignationParams) {
   const { data } = await axiosNestGa.get<GetNextScheduleDesignationResponse>(
-    `/schedule/designation/${encodeURIComponent(base + "-H")}`
+    "/schedule/designation",
+    {
+      params: {
+        designation: `${base}-H`, // backend vai procurar ACSP.1.QUIG-H*
+        periodo,
+        ano_lectivo: anoLectivo,
+      },
+    }
   );
+
   return data;
 }
+
 
 export function gerarDesignacao(
   base: string,
@@ -27,7 +46,7 @@ export function gerarDesignacao(
     })
     .filter(Boolean);
 
-  const proximo = Math.max(...numeros) + 1;
+  const proximo = numeros.length + 1;
 
   return `${base}-H${proximo}`;
 }
