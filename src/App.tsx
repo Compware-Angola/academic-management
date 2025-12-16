@@ -58,6 +58,7 @@ import HorariosSemanais from "./pages/schedules/HorariosSemanais";
 import HealpFAQ from "./pages/healp/HealpFAQ";
 import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
 import { EditSchedule } from "./pages/schedules/EditSchedule";
+import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 
 const App = () => {
   return (
@@ -87,6 +88,7 @@ const App = () => {
                   element={<SchedulesWithPermission />}
                 />
                 <Route path="/schedule/:id/edit" element={<EditSchedule />} />
+                <Route path="horarios/sala" element={<SchedulesByRoom />} />
                 <Route path="/salas/listar" element={<ClassromList />} />
                 <Route
                   path="/plano/disciplinas"

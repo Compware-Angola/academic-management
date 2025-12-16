@@ -22,6 +22,7 @@ import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-dispo
 
 import ScheduleGridEdit from "./components/ScheduleGridEdit";
 import { AulaPayload } from "@/services/horario/save-horario.service";
+import { useNextScheduleDesignation } from "@/hooks/horario/use-next-schedule-designation";
 
 /* ------------------------------------------------------------------ */
 
@@ -79,7 +80,29 @@ export function EditSchedule() {
     anoLectivo: Number(formData.anoLetivo),
     periodo: Number(formData.periodo),
   });
-
+  const { data: designacao, isLoading: isLoadindeNextScheduleDesignation } =
+    useNextScheduleDesignation(
+      formData.curso
+        ? gerarSiglaCurso(
+            cursos.find((c) => c.codigo.toString() === formData.curso)
+              ?.designacao || ""
+          )
+        : undefined,
+      formData.classes,
+      formData.unidadeCurricular
+        ? unidadesCurriculares.find(
+            (c) => c.pk.toString() === formData.unidadeCurricular
+          )?.codigo || ""
+        : "",
+      Number(formData.periodo),
+      Number(formData.anoLetivo)
+    );
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      designacao: designacao || "",
+    }));
+  }, [designacao]);
   /* ------------------------- LOAD INICIAL ------------------------- */
 
   useEffect(() => {
@@ -310,9 +333,32 @@ export function EditSchedule() {
             setFormData((prev) => ({ ...prev, apenasPrimeiroAno: v }))
           }
         />
-        <div>
-          <Label>Designação</Label>
-          <Input readOnly value={formData.designacao} />
+        <div className="space-y-1">
+          <Label htmlFor="designacao">Designação</Label>
+
+          <div className="relative">
+            <Input
+              id="designacao"
+              readOnly
+              disabled={isLoadindeNextScheduleDesignation}
+              value={formData.designacao}
+              placeholder={
+                isLoadindeNextScheduleDesignation
+                  ? "A gerar designação automaticamente…"
+                  : "Designação do horário"
+              }
+              className="pr-10"
+            />
+
+            {isLoadindeNextScheduleDesignation && (
+              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            A designação é gerada automaticamente com base no curso, UC e
+            modalidade.
+          </p>
         </div>
 
         <div>
@@ -376,3 +422,11 @@ const onlyFirstYear = [
   { value: 0, label: "Sim" },
   { value: 1, label: "Não" },
 ];
+const STOP_WORDS = ["e", "de", "do", "da", "dos", "das"];
+function gerarSiglaCurso(nome: string) {
+  return nome
+    .split(" ")
+    .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
+    .map((p) => p[0].toUpperCase())
+    .join("");
+}
