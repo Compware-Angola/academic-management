@@ -57,6 +57,7 @@ import MovimentarEstudantes from "./pages/schedules/MoveStudents";
 import HorariosSemanais from "./pages/schedules/HorariosSemanais";
 import HealpFAQ from "./pages/healp/HealpFAQ";
 import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
+import { EditSchedule } from "./pages/schedules/EditSchedule";
 
 const App = () => {
   return (
@@ -85,7 +86,7 @@ const App = () => {
                   path="/horarios/permissao"
                   element={<SchedulesWithPermission />}
                 />
-
+                <Route path="/schedule/:id/edit" element={<EditSchedule />} />
                 <Route path="/salas/listar" element={<ClassromList />} />
                 <Route
                   path="/plano/disciplinas"

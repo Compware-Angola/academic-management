@@ -429,7 +429,7 @@ export default function CreateSchedule() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("/horarios")}
+            onClick={() => navigate("horarios/listar")}
           >
             <X className="mr-2 h-4 w-4" />
             Cancelar

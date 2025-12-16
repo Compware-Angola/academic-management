@@ -26,7 +26,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Eye, Loader2, Plus, Trash2, Check, X } from "lucide-react";
+import {
+  Home,
+  Search,
+  Eye,
+  Loader2,
+  Plus,
+  Trash2,
+  Check,
+  X,
+  Pencil,
+} from "lucide-react";
 
 import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
 
@@ -80,7 +90,7 @@ export default function ScheduleList() {
 
   const mutation = useMutationDisponibilidadeHorario();
 
-  const validarMutation = useMutationValidarHorarioDirector()
+  const validarMutation = useMutationValidarHorarioDirector();
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
@@ -96,31 +106,44 @@ export default function ScheduleList() {
   const [limit, setLimit] = useState(10);
 
   // === Dados base ===
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
   const { data: cursos } = useCursos();
-  const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({ curso: filters.curso });
-
-  const canLoadUcs = !!filters.curso && !!filters.semestre;
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
+  const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
-    semestre: filters.semestre,
-    classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
 
-  // Memorizar parâmetros para evitar re-renders infinitos
-  const queryParams = useMemo(() => ({
-    anoLectivo: Number(filters.anoLetivo),
-    semestre: Number(filters.semestre),
-    periodo: Number(filters.periodo),
-    curso: Number(filters.curso),
-    unidadeCurricular: Number(filters.unidadeCurricular),
-    page,
-    limit,
-  }), [filters, page, limit]);
+  const canLoadUcs = !!filters.curso && !!filters.semestre;
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      curso: filters.curso,
+      semestre: filters.semestre,
+      classe:
+        filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
+    });
 
-  const { data: ScheduleResponse, isLoading: isLoadingSchedule, refetch: refetchHorarios } = useQueryHorariosExistentes(queryParams);
+  // Memorizar parâmetros para evitar re-renders infinitos
+  const queryParams = useMemo(
+    () => ({
+      anoLectivo: Number(filters.anoLetivo),
+      semestre: Number(filters.semestre),
+      periodo: Number(filters.periodo),
+      curso: Number(filters.curso),
+      unidadeCurricular: Number(filters.unidadeCurricular),
+      page,
+      limit,
+    }),
+    [filters, page, limit]
+  );
+
+  const {
+    data: ScheduleResponse,
+    isLoading: isLoadingSchedule,
+    refetch: refetchHorarios,
+  } = useQueryHorariosExistentes(queryParams);
 
   // === Funções de Ação com Confirmação ===
 
@@ -214,7 +237,11 @@ export default function ScheduleList() {
               value={filters.anoLetivo}
               onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
               options={anosAcademicos}
-              map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
             />
             <FormSelect
               disabled={isLoadingSemestres}
@@ -223,17 +250,26 @@ export default function ScheduleList() {
               value={filters.semestre}
               onChange={(v) => setFilters({ ...filters, semestre: v })}
               options={semestres}
-              map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
             />
             <div className="space-y-2">
               <label className="text-sm font-medium">Período</label>
-              <Select value={filters.periodo} onValueChange={(v) => setFilters({ ...filters, periodo: v })}>
+              <Select
+                value={filters.periodo}
+                onValueChange={(v) => setFilters({ ...filters, periodo: v })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecionar" />
                 </SelectTrigger>
                 <SelectContent>
                   {periodos?.map((p) => (
-                    <SelectItem key={p.codigo} value={p.codigo.toString()}>{p.designacao}</SelectItem>
+                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                      {p.designacao}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -242,14 +278,23 @@ export default function ScheduleList() {
               <label className="text-sm font-medium">Curso</label>
               <Select
                 value={filters.curso}
-                onValueChange={(v) => setFilters({ ...filters, curso: v, anoCurricular: "all", unidadeCurricular: "" })}
+                onValueChange={(v) =>
+                  setFilters({
+                    ...filters,
+                    curso: v,
+                    anoCurricular: "all",
+                    unidadeCurricular: "",
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecionar" />
                 </SelectTrigger>
                 <SelectContent>
                   {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>{c.designacao}</SelectItem>
+                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
+                      {c.designacao}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -258,16 +303,28 @@ export default function ScheduleList() {
               <label className="text-sm font-medium">Ano Curricular</label>
               <Select
                 value={filters.anoCurricular}
-                onValueChange={(v) => setFilters({ ...filters, anoCurricular: v, unidadeCurricular: "" })}
+                onValueChange={(v) =>
+                  setFilters({
+                    ...filters,
+                    anoCurricular: v,
+                    unidadeCurricular: "",
+                  })
+                }
                 disabled={!filters.curso}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={filters.curso ? "Todos os anos" : "Selecione curso"} />
+                  <SelectValue
+                    placeholder={
+                      filters.curso ? "Todos os anos" : "Selecione curso"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os anos</SelectItem>
                   {anosCurriculares.map((ac) => (
-                    <SelectItem key={ac.codigo} value={ac.codigo.toString()}>{ac.designacao}</SelectItem>
+                    <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
+                      {ac.designacao}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -276,21 +333,29 @@ export default function ScheduleList() {
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
                 value={filters.unidadeCurricular}
-                onValueChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+                onValueChange={(v) =>
+                  setFilters({ ...filters, unidadeCurricular: v })
+                }
                 disabled={!canLoadUcs}
               >
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
-                      !filters.curso ? "Selecione curso" :
-                        !filters.semestre ? "Selecione semestre" :
-                          isLoadingUC ? "Carregando UCs..." : "Selecionar UC"
+                      !filters.curso
+                        ? "Selecione curso"
+                        : !filters.semestre
+                        ? "Selecione semestre"
+                        : isLoadingUC
+                        ? "Carregando UCs..."
+                        : "Selecionar UC"
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   {unidadesCurriculares.map((uc) => (
-                    <SelectItem key={uc.pk} value={uc.pk.toString()}>{uc.descricao}</SelectItem>
+                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
+                      {uc.descricao}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -343,7 +408,7 @@ export default function ScheduleList() {
                           <Badge
                             variant={
                               item.estado.toLowerCase().includes("pendente") ||
-                                item.estado.toLowerCase().includes("distribuição")
+                              item.estado.toLowerCase().includes("distribuição")
                                 ? "secondary"
                                 : "default"
                             }
@@ -355,13 +420,17 @@ export default function ScheduleList() {
                           <Switch
                             checked={item.disponibilidade === "Disponivel"}
                             disabled={mutation.isPending}
-                            onCheckedChange={() => mutation.mutateAsync({
-                              horarioId: item.codigo,
-                              userId: user.user_id
-                            })}
+                            onCheckedChange={() =>
+                              mutation.mutateAsync({
+                                horarioId: item.codigo,
+                                userId: user.user_id,
+                              })
+                            }
                           />
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{item.datacriacao}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {item.datacriacao}
+                        </TableCell>
                         <TableCell className="w-40 min-w-40">
                           <div className="flex items-center space-x-2 justify-center">
                             {/* 1. Botão de Detalhes (Eye) */}
@@ -374,17 +443,30 @@ export default function ScheduleList() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              title="Editar horário"
+                              onClick={() =>
+                                navigate(`/schedule/${item.codigo}/edit`)
+                              }
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
 
-                            {/* 2. Botão de Excluir (Trash) - Abre o Dialog */}
                             <Button
                               variant="destructive"
                               size="icon"
                               onClick={() => openDeleteDialog(item.codigo)}
                               title="Excluir Horário"
                               aria-label="Excluir Horário"
-                              disabled={deleteMutation.isPending && itemIdToConfirm === item.codigo}
+                              disabled={
+                                deleteMutation.isPending &&
+                                itemIdToConfirm === item.codigo
+                              }
                             >
-                              {deleteMutation.isPending && itemIdToConfirm === item.codigo ? (
+                              {deleteMutation.isPending &&
+                              itemIdToConfirm === item.codigo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
@@ -397,12 +479,16 @@ export default function ScheduleList() {
                                 variant="default"
                                 size="icon"
                                 onClick={() => openValidateDialog(item.codigo)}
-                                disabled={validarMutation.isPending && itemIdToConfirm === item.codigo}
+                                disabled={
+                                  validarMutation.isPending &&
+                                  itemIdToConfirm === item.codigo
+                                }
                                 title="Validar Horário"
                                 aria-label="Validar Horário"
                                 className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
                               >
-                                {validarMutation.isPending && itemIdToConfirm === item.codigo ? (
+                                {validarMutation.isPending &&
+                                itemIdToConfirm === item.codigo ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                   <Check className="h-4 w-4" />
@@ -423,12 +509,34 @@ export default function ScheduleList() {
                   A mostrar {tableData.length} de {total} registos
                 </p>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Anterior</Button>
-                  <span>Página {page} de {totalPages}</span>
-                  <Button variant="outline" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Próxima</Button>
+                  <Button
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <span>
+                    Página {page} de {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </Button>
 
-                  <Select value={String(limit)} onValueChange={(v) => { setLimit(Number(v)); setPage(1); }}>
-                    <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
+                  <Select
+                    value={String(limit)}
+                    onValueChange={(v) => {
+                      setLimit(Number(v));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="10">10</SelectItem>
                       <SelectItem value="25">25</SelectItem>
@@ -454,7 +562,10 @@ export default function ScheduleList() {
       />
 
       {/* === Diálogo de Confirmação de Exclusão === */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Tem certeza que deseja excluir?</AlertDialogTitle>
@@ -491,7 +602,10 @@ export default function ScheduleList() {
       {/* ======================================== */}
 
       {/* === Diálogo de Confirmação de Validação === */}
-      <AlertDialog open={isValidateDialogOpen} onOpenChange={setIsValidateDialogOpen}>
+      <AlertDialog
+        open={isValidateDialogOpen}
+        onOpenChange={setIsValidateDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Deseja validar este Horário?</AlertDialogTitle>
