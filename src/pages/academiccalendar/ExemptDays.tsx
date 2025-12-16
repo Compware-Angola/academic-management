@@ -51,7 +51,7 @@ interface DiaIsento {
   estado: number;
 }
 
-const API_URL = "http://34.202.163.85:8080/ords/cmpdev/ga/exempt-days";
+const API_URL = "https://api.compware.net/ords/cmpdev/ga/exempt-days";
 
 export default function ExemptDays() {
   const { toast } = useToast();
