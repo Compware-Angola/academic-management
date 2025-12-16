@@ -28,16 +28,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-
-  Trash2,
-  Edit,
-} from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { AuthStorage } from "@/util/auth-storage";
 
 // Interfaces
 interface Prazo {
@@ -82,14 +79,13 @@ interface TipoEpocaAvaliacao {
   descricao: string;
 }
 
-
 const API_TIPOS_CANDIDATURA =
   "https://api.compware.net/ords/cmpdev/uma/tipo-candidatura/all";
 const API_TIPOS_PRAZO =
   "https://api.compware.net/ords/cmpdev/uma/tipo-prazo/all";
 const API_TIPOS_AVALIACAO =
   "https://api.compware.net/ords/cmpdev/uma/tipo-avaliacao/all";
-const API_SEMESTRES = "https://api.compware.net/ords/cmpdev/uma/semestre/all"; 
+const API_SEMESTRES = "https://api.compware.net/ords/cmpdev/uma/semestre/all";
 const API_PRAZOS =
   "https://api.compware.net/ords/cmpdev/ga/academic-calendar/deadlines";
 const API_CRIAR_PRAZO =
@@ -119,7 +115,7 @@ export default function Deadlines() {
   const [tiposEpocaAvaliacao, setTiposEpocaAvaliacao] = useState<
     TipoEpocaAvaliacao[]
   >([]);
-    const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: anosAcademicos } = useQueryAnoAcademico();
 
   // Filtros
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -144,8 +140,6 @@ export default function Deadlines() {
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-
 
   const fetchTipoEpocaAvaliacoes = async () => {
     try {
@@ -340,7 +334,7 @@ export default function Deadlines() {
       data_inicio: `${form.data_inicio}T00:00:00`,
       data_fim: `${form.data_fim}T00:00:00`,
       observacao: form.observacao || null,
-      fk_created_by: Number(form.fk_created_by),
+      fk_created_by: AuthStorage.getUser().user_id.toString(),
     };
 
     try {
@@ -357,7 +351,7 @@ export default function Deadlines() {
         data_inicio: "",
         data_fim: "",
         observacao: "",
-        fk_created_by: "1397",
+        fk_created_by: "",
         anoletivo: "",
         tipoCandidaturaId: "",
       });
@@ -373,7 +367,6 @@ export default function Deadlines() {
 
   // Inicialização
   useEffect(() => {
-  
     fetchTiposCandidatura();
     fetchTiposPrazo();
     fetchTiposAvaliacao();
@@ -841,3 +834,5 @@ export default function Deadlines() {
     </div>
   );
 }
+
+// TODO:FIX ME PLEASE
