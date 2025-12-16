@@ -1,15 +1,14 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
-
-
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type ValidarHorarioDirectoPayload = {
-  p_horario_id: number | string;
+  horarioId: number | string;
+  userId: number | string;
 };
 
-export async function ValidarHorarioDirectorService(
+export async function validarHorarioDirectorService(
   payload: ValidarHorarioDirectoPayload,
 ): Promise<void> {
-  const { p_horario_id } = payload;
+  const { horarioId, userId } = payload;
 
-  await axiosApexGa.put("/horario/Validar" + "?p_horario_id=" + p_horario_id);
+  await axiosNestGa.patch(`/schedule/${horarioId}/validar/${userId}`);
 }

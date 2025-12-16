@@ -1,34 +1,16 @@
-// src/pages/horarios/ScheduleList.tsx
-import React, { useState } from "react";
+// src/pages/SchedulesByUC.tsx
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Plus,
-  RefreshCw,
-  Search,
-  File,
-  ChevronFirst,
-  ChevronLast,
-  ChevronLeft,
-  ChevronRight,
-  MoreVertical,
-  Eye,
-  Edit,
-  Copy,
-  Trash2,
-  Check,
-} from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -44,141 +26,169 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+  Home,
+  Search,
+  Eye,
+  Loader2,
+  Plus,
+  Trash2,
+  Check,
+  X,
+  Pencil,
+} from "lucide-react";
+
+import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
+
+// Importações para o Dialog de Confirmação
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"; // Certifique-se de que este caminho está correto
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+
+import { FormSelect } from "@/components/common/FormSelect";
+import { Badge } from "@/components/ui/badge";
 import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-existentes";
-import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
-import { Switch } from "@/components/ui/switch";
+
 import { useMutationDisponibilidadeHorario } from "@/hooks/horario/use-mutation-update-disponibilidade-horario";
+import { Switch } from "@/components/ui/switch";
 import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-validar-horario-director";
-type Item = {
-  id: string | number;
-  nome: string;
+import { useToast } from "@/hooks/use-toast";
+import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
+import { useAuth } from "@/hooks/use-auth";
+import { useQueryClient } from "@tanstack/react-query";
 
-  // outros campos...
-};
 export default function ScheduleList() {
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const deleteMutation = useMutationDeletarHorario();
-  // Aqui tu recebes o item inteiro ou só o ID – como quiseres
-  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
-  const mutation = useMutationDisponibilidadeHorario();
-  async function handleDeleteConfirmed(item: number) {
-    try {
-      deleteMutation.mutate({ p_horario_id: item });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.name : "Não foi possível excluir.";
-      toast({
-        title: "Erro",
-        description: message,
-        variant: "destructive",
-      });
-    }
-  }
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
+
+  // === Estados para os Diálogos de Confirmação ===
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isValidateDialogOpen, setIsValidateDialogOpen] = useState(false);
+  const [itemIdToConfirm, setItemIdToConfirm] = useState<number | null>(null);
+  // ==============================================
+
+  const deleteMutation = useMutationDeletarHorario();
+
+  const mutation = useMutationDisponibilidadeHorario();
+
+  const validarMutation = useMutationValidarHorarioDirector();
+  // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
     semestre: "",
     periodo: "",
     curso: "",
     anoCurricular: "",
-    search: "",
+    unidadeCurricular: "",
   });
 
   // Paginação
   const [page, setPage] = useState(1);
-  const itemsPerPage = 15;
+  const [limit, setLimit] = useState(10);
 
-  // Queries dos filtros
-  const { data: anosAcademicos, isLoading: loadingAnos } =
+  // === Dados base ===
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
-  const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
-  const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
-  const { data: cursos, isLoading: loadingCursos } = useCursos();
-
-  const { data: anosCurriculares = [], isLoading: loadingAnosCurriculares } =
-    useQueryClassFilterByCurso({ curso: filters.curso });
-
-  const {
-    data: horarios = [],
-    isLoading: isLoadingHorarios,
-    error,
-    refetch,
-  } = useQueryHorariosExistentes({
-    p_ano_lectivo: filters.anoLetivo,
-    p_semestre: filters.semestre,
-    p_periodo: filters.periodo,
-    p_curso: filters.curso,
-    p_ano_curricular:
-      filters.anoCurricular && filters.anoCurricular !== "todos"
-        ? filters.anoCurricular
-        : undefined,
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
+  const { data: periodos } = useQueryPeriod();
+  const { data: cursos } = useCursos();
+  const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
+    curso: filters.curso,
   });
-  const validarMutation = useMutationValidarHorarioDirector();
 
-  // Filtro local por texto
-  const filteredHorarios = horarios.filter(
-    (h) =>
-      filters.search === "" ||
-      h.designacao.toLowerCase().includes(filters.search.toLowerCase()) ||
-      h.unidadeCurricular
-        .toLowerCase()
-        .includes(filters.search.toLowerCase()) ||
-      h.curso.toLowerCase().includes(filters.search.toLowerCase()) ||
-      h.ano.toLowerCase().includes(filters.search.toLowerCase())
+  const canLoadUcs = !!filters.curso && !!filters.semestre;
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      curso: filters.curso,
+      semestre: filters.semestre,
+      classe:
+        filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
+    });
+
+  // Memorizar parâmetros para evitar re-renders infinitos
+  const queryParams = useMemo(
+    () => ({
+      anoLectivo: Number(filters.anoLetivo),
+      semestre: Number(filters.semestre),
+      periodo: Number(filters.periodo),
+      curso: Number(filters.curso),
+      unidadeCurricular: Number(filters.unidadeCurricular),
+      page,
+      limit,
+    }),
+    [filters, page, limit]
   );
 
-  // Paginação lógica
-  const totalItems = filteredHorarios.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = filteredHorarios.slice(startIndex, endIndex);
+  const {
+    data: ScheduleResponse,
+    isLoading: isLoadingSchedule,
+    refetch: refetchHorarios,
+  } = useQueryHorariosExistentes(queryParams);
 
-  const handleRefresh = () => {
-    refetch();
-    toast({ description: "Lista atualizada com sucesso." });
+  // === Funções de Ação com Confirmação ===
+
+  const handleDeleteConfirmed = async () => {
+    if (itemIdToConfirm) {
+      deleteMutation.mutate({
+        horarioId: itemIdToConfirm,
+        userId: user.user_id,
+      });
+    }
   };
 
-  // Resetar página ao mudar filtros
-  const resetPageOnFilterChange = () => {
-    setPage(1);
+  const handleValidateConfirmed = async () => {
+    if (itemIdToConfirm) {
+      validarMutation.mutate({
+        horarioId: itemIdToConfirm,
+        userId: user.user_id,
+      });
+    }
   };
 
-  // Monitora mudanças nos filtros para resetar a página
-  React.useEffect(() => {
-    resetPageOnFilterChange();
-  }, [filters]);
+  const openDeleteDialog = (horarioId: number) => {
+    setItemIdToConfirm(horarioId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const openValidateDialog = (horarioId: number) => {
+    setItemIdToConfirm(horarioId);
+    setIsValidateDialogOpen(true);
+  };
+
+  const openDetails = async (turmaId: number) => {
+    setSelectedTurmaId(turmaId);
+    setIsModalOpen(true);
+  };
+
+  // ========================================
+
+  const tableData = ScheduleResponse?.data || [];
+  const total = ScheduleResponse?.total || 0;
+  const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="flex-1 space-y-6 p-8">
-      {/* Header */}
+    <div className="p-6 space-y-8">
+      {/* Breadcrumb */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <Breadcrumb>
@@ -211,388 +221,433 @@ export default function ScheduleList() {
       </div>
 
       {/* Filtros */}
-      <div className="rounded-lg border bg-card p-6 shadow-sm">
-        <div className="mb-4 flex items-center gap-2">
-          <Search className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-semibold">Filtros</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Ano Letivo */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ano Letivo</label>
-            <Select
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <Search className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Filtros de Pesquisa</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <FormSelect
+              disabled={isLoadingAcademicYear}
+              loading={isLoadingAcademicYear}
+              label="Ano Letivo"
               value={filters.anoLetivo}
-              onValueChange={(v) =>
-                setFilters({ ...filters, anoLetivo: v, anoCurricular: "" })
-              }
-              disabled={loadingAnos}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={loadingAnos ? "A carregar..." : "Selecionar"}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {anosAcademicos?.map((ano) => (
-                  <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-                    {ano.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Semestre */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Semestre</label>
-            <Select
+              onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
+              options={anosAcademicos}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
+            />
+            <FormSelect
+              disabled={isLoadingSemestres}
+              loading={isLoadingSemestres}
+              label="Semestre"
               value={filters.semestre}
-              onValueChange={(v) => setFilters({ ...filters, semestre: v })}
-              disabled={loadingSemestres}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar" />
-              </SelectTrigger>
-              <SelectContent>
-                {semestres?.map((s) => (
-                  <SelectItem key={s.codigo} value={s.codigo.toString()}>
-                    {s.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Período */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Período</label>
-            <Select
-              value={filters.periodo}
-              onValueChange={(v) => setFilters({ ...filters, periodo: v })}
-              disabled={loadingPeriodos}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar" />
-              </SelectTrigger>
-              <SelectContent>
-                {periodos?.map((p) => (
-                  <SelectItem key={p.codigo} value={p.codigo.toString()}>
-                    {p.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Curso */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Curso</label>
-            <Select
-              value={filters.curso}
-              onValueChange={(v) =>
-                setFilters({ ...filters, curso: v, anoCurricular: "" })
-              }
-              disabled={loadingCursos}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar" />
-              </SelectTrigger>
-              <SelectContent>
-                {cursos?.map((c) => (
-                  <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                    {c.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Ano Curricular */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ano Curricular</label>
-            <Select
-              value={filters.anoCurricular || "todos"}
-              onValueChange={(v) =>
-                setFilters({
-                  ...filters,
-                  anoCurricular: v === "todos" ? "" : v,
-                })
-              }
-              disabled={loadingAnosCurriculares || !filters.curso}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    loadingAnosCurriculares
-                      ? "A carregar..."
-                      : !filters.curso
-                      ? "Selecione um curso"
-                      : "Todos os anos"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os anos</SelectItem>
-                {anosCurriculares?.map((ac) => (
-                  <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-                    {ac.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <Input
-            placeholder="Pesquisar por turma, UC, curso ou ano..."
-            value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            className="max-w-md"
-          />
-        </div>
-      </div>
-
-      {/* Ações */}
-      <div className="flex items-center justify-between">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          disabled={isLoadingHorarios}
-        >
-          <RefreshCw
-            className={`mr-2 h-4 w-4 ${
-              isLoadingHorarios ? "animate-spin" : ""
-            }`}
-          />
-          Atualizar Lista
-        </Button>
-
-        {totalItems > 0 && (
-          <p className="text-sm text-muted-foreground">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de{" "}
-            {totalItems} turmas
-          </p>
-        )}
-      </div>
-
-      {/* Tabela + Paginação */}
-      <div className="rounded-lg border bg-card shadow-sm">
-        {isLoadingHorarios ? (
-          <div className="p-8 space-y-4">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full" />
-            ))}
-          </div>
-        ) : error ? (
-          <Alert variant="destructive" className="m-6">
-            <AlertDescription>
-              Erro ao carregar Horário. Tente novamente.
-            </AlertDescription>
-          </Alert>
-        ) : filteredHorarios.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center">
-            <div className="rounded-full bg-muted p-6 mb-4">
-              <File className="h-12 w-12 text-muted-foreground" />
+              onChange={(v) => setFilters({ ...filters, semestre: v })}
+              options={semestres}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
+            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Período</label>
+              <Select
+                value={filters.periodo}
+                onValueChange={(v) => setFilters({ ...filters, periodo: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {periodos?.map((p) => (
+                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                      {p.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <h3 className="text-xl font-semibold mb-2">
-              Nenhum Horário encontrado
-            </h3>
-            <p className="text-muted-foreground max-w-md mb-6">
-              {filters.anoLetivo && filters.curso
-                ? "Não existem Horários criadas com os filtros aplicados."
-                : "Preencha os filtros para visualizar os Horários."}
-            </p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Curso</label>
+              <Select
+                value={filters.curso}
+                onValueChange={(v) =>
+                  setFilters({
+                    ...filters,
+                    curso: v,
+                    anoCurricular: "all",
+                    unidadeCurricular: "",
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cursos?.map((c) => (
+                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
+                      {c.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Ano Curricular</label>
+              <Select
+                value={filters.anoCurricular}
+                onValueChange={(v) =>
+                  setFilters({
+                    ...filters,
+                    anoCurricular: v,
+                    unidadeCurricular: "",
+                  })
+                }
+                disabled={!filters.curso}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      filters.curso ? "Todos os anos" : "Selecione curso"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os anos</SelectItem>
+                  {anosCurriculares.map((ac) => (
+                    <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
+                      {ac.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Unidade Curricular</label>
+              <Select
+                value={filters.unidadeCurricular}
+                onValueChange={(v) =>
+                  setFilters({ ...filters, unidadeCurricular: v })
+                }
+                disabled={!canLoadUcs}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      !filters.curso
+                        ? "Selecione curso"
+                        : !filters.semestre
+                        ? "Selecione semestre"
+                        : isLoadingUC
+                        ? "Carregando UCs..."
+                        : "Selecionar UC"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {unidadesCurriculares.map((uc) => (
+                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
+                      {uc.descricao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela   Pimentel##123!! */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Horários Encontradas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingSchedule ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Carregando Horários...</p>
+            </div>
+          ) : tableData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <Search className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum registo encontrado</h3>
+            <p className="text-muted-foreground mb-4">Não foram encontrados horários com os filtros aplicados.</p>
             <Button onClick={() => navigate("/horarios/criar")}>
               <Plus className="mr-2 h-4 w-4" />
-              Criar Horário
+              Criar Primeiro Horário
             </Button>
           </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Turma</TableHead>
-                    <TableHead>Curso</TableHead>
-                    <TableHead>Unidade Curricular</TableHead>
-                    <TableHead>Ano Curricular</TableHead>
-                    <TableHead>Capacidade</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Disponibilidade</TableHead>
-                    <TableHead>Criado em</TableHead>
-                    <TableHead>Acção</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentItems.map((h) => (
-                    <TableRow
-                      key={h.codigo}
-                      className="hover:bg-muted/50 cursor-pointer"
-                    >
-                      <TableCell className="font-semibold text-primary">
-                        {h.designacao}
-                      </TableCell>
-                      <TableCell>{h.curso}</TableCell>
-                      <TableCell>{h.unidadeCurricular}</TableCell>
-                      <TableCell className="font-medium">{h.ano}</TableCell>
-                      <TableCell>{h.capacidade}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            h.estado.toLowerCase().includes("pendente") ||
-                            h.estado.toLowerCase().includes("distribuição")
-                              ? "secondary"
-                              : "default"
-                          }
-                        >
-                          {h.estado}
-                        </Badge>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Switch
-                          checked={h.disponibilidade === "Disponivel"}
-                          disabled={mutation.isPending}
-                          onCheckedChange={() => {
-                            mutation.mutate({
-                              p_horario_id: h.codigo,
-                            });
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(h.dataCriacao).toLocaleDateString("pt-AO")}
-                      </TableCell>
-                      <TableCell className="w-10">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="h-8 w-8 rounded-md p-0 hover:bg-muted inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors">
-                              <MoreVertical className="h-4 w-4" />
-                              <span className="sr-only">Ações</span>
-                            </button>
-                          </DropdownMenuTrigger>
-
-                          <DropdownMenuContent align="end">
-                            {/*
-                            <DropdownMenuItem onClick={() => console.log("ver", h.id)}>
-                              <Eye className="mr-2 h-4 w-4" /> Ver
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem onClick={() => console.log("editar", item.id)}>
-                              <Edit className="mr-2 h-4 w-4" /> Editar
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem onClick={() => console.log("duplicar", item.id)}>
-                              <Copy className="mr-2 h-4 w-4" /> Duplicar
-                            </DropdownMenuItem>
-           */}
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()} // evita fechar o menu
-                              onClick={() => {
-                                handleDeleteConfirmed(h.codigo);
-                              }}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" /> Excluir
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              disabled={
-                                validarMutation.isPending ||
-                                !h.estado.toLowerCase().includes("pendente")
-                              }
-                              onClick={() => {
-                                validarMutation.mutate({
-                                  p_horario_id: h.codigo,
-                                });
-                              }}
-                              className="text-green-500 focus:text-green-500 disabled:opacity-50"
-                            >
-                              <Check className="mr-2 h-4 w-4" /> Validar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+          ) : (
+            <>
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Designação</TableHead>
+                      <TableHead>Curso</TableHead>
+                      <TableHead>Unidade Curricular</TableHead>
+                      <TableHead>Ano Curricular</TableHead>
+                      <TableHead>Capacidade</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Disponibilidade</TableHead>
+                      <TableHead>Criado em</TableHead>
+                      <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {tableData.map((item) => (
+                      <TableRow key={item.codigo}>
+                        <TableCell>{item.designacao}</TableCell>
+                        <TableCell>{item.curso}</TableCell>
+                        <TableCell>{item.unidadecurricular}</TableCell>
+                        <TableCell>{item.ano}</TableCell>
+                        <TableCell>{item.capacidade}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              item.estado.toLowerCase().includes("pendente") ||
+                              item.estado.toLowerCase().includes("distribuição")
+                                ? "secondary"
+                                : "default"
+                            }
+                          >
+                            {item.estado}
+                          </Badge>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Switch
+                            checked={item.disponibilidade === "Disponivel"}
+                            disabled={mutation.isPending}
+                            onCheckedChange={() =>
+                              mutation.mutateAsync({
+                                horarioId: item.codigo,
+                                userId: user.user_id,
+                              })
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {item.datacriacao}
+                        </TableCell>
+                        <TableCell className="w-40 min-w-40">
+                          <div className="flex items-center space-x-2 justify-center">
+                            {/* 1. Botão de Detalhes (Eye) */}
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => openDetails(item.codigo)}
+                              title="Ver Detalhes"
+                              aria-label="Ver Detalhes"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              title="Editar horário"
+                              onClick={() =>
+                                navigate(`/schedule/${item.codigo}/edit`)
+                              }
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
 
-            {/* Paginação */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t bg-muted/20 px-4 py-3">
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => openDeleteDialog(item.codigo)}
+                              title="Excluir Horário"
+                              aria-label="Excluir Horário"
+                              disabled={
+                                deleteMutation.isPending &&
+                                itemIdToConfirm === item.codigo
+                              }
+                            >
+                              {deleteMutation.isPending &&
+                              itemIdToConfirm === item.codigo ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+
+                            {/* 3. Botão de Validar (Check) - Abre o Dialog se PENDENTE */}
+                            {Number(item.estadoid) == 2 && (
+                              <Button
+                                variant="default"
+                                size="icon"
+                                onClick={() => openValidateDialog(item.codigo)}
+                                disabled={
+                                  validarMutation.isPending &&
+                                  itemIdToConfirm === item.codigo
+                                }
+                                title="Validar Horário"
+                                aria-label="Validar Horário"
+                                className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
+                              >
+                                {validarMutation.isPending &&
+                                itemIdToConfirm === item.codigo ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Check className="h-4 w-4" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Paginação */}
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-muted-foreground">
+                  A mostrar {tableData.length} de {total} registos
+                </p>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
-                    size="icon"
-                    onClick={() => setPage(1)}
                     disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
                   >
-                    <ChevronFirst className="h-4 w-4" />
+                    Anterior
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-
-                  <span className="text-sm text-muted-foreground px-4">
-                    Página <strong>{page}</strong> de{" "}
-                    <strong>{totalPages}</strong>
+                  <span>
+                    Página {page} de {totalPages}
                   </span>
+                  <Button
+                    variant="outline"
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </Button>
 
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
+                  <Select
+                    value={String(limit)}
+                    onValueChange={(v) => {
+                      setLimit(Number(v));
+                      setPage(1);
+                    }}
                   >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage(totalPages)}
-                    disabled={page === totalPages}
-                  >
-                    <ChevronLast className="h-4 w-4" />
-                  </Button>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </div>
-      {/* Modal de confirmação de exclusão */}
-      {/* <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Modal de Detalhes */}
+      <ScheduleDetailsModal
+        horarioId={selectedTurmaId}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedTurmaId(null);
+        }}
+      />
+
+      {/* === Diálogo de Confirmação de Exclusão === */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Tens a certeza absoluta?</AlertDialogTitle>
+            <AlertDialogTitle>Tem certeza que deseja excluir?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação é irreversível. Vais excluir permanentemente o item:{" "}
-              <span className="font-bold text-foreground">
-                {itemToDelete?.nome}
-              </span>
+              Esta ação é irreversível. O horário selecionado será removido
+              permanentemente do servidor.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() =>
-                itemToDelete && handleDeleteConfirmed(itemToDelete)
-              }
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            <AlertDialogCancel
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setItemIdToConfirm(null);
+              }}
+              disabled={deleteMutation.isPending}
             >
-              Sim, excluir
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirmed}
+              disabled={deleteMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog> */}
+      </AlertDialog>
+      {/* ======================================== */}
+
+      {/* === Diálogo de Confirmação de Validação === */}
+      <AlertDialog
+        open={isValidateDialogOpen}
+        onOpenChange={setIsValidateDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deseja validar este Horário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ao validar, você confirma que o horário está correto e pode ser
+              usado. Esta ação não pode ser desfeita facilmente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setIsValidateDialogOpen(false);
+                setItemIdToConfirm(null);
+              }}
+              disabled={validarMutation.isPending}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleValidateConfirmed}
+              disabled={validarMutation.isPending}
+              className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+            >
+              {validarMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="mr-2 h-4 w-4" />
+              )}
+              Validar Horário
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* ========================================== */}
     </div>
   );
 }

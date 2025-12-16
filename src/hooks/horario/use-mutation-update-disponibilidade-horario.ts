@@ -3,14 +3,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useToast } from "@/components/ui/use-toast";
 
-import { updateDiponibilidadeService } from "@/services/horario/disponibilidade-schedule.service";
+import { updateDisponibilidadeService } from "@/services/horario/disponibilidade-schedule.service";
 
 export const useMutationDisponibilidadeHorario= () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: updateDiponibilidadeService,
+    mutationFn: updateDisponibilidadeService,
 
 
     onSuccess: () => {

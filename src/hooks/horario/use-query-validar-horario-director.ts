@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { ValidarHorarioDirectorService } from "@/services/horario/validar-horario-director.service";
+import { validarHorarioDirectorService } from "@/services/horario/validar-horario-director.service";
 
 export const useMutationValidarHorarioDirector = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: ValidarHorarioDirectorService,
+    mutationFn: validarHorarioDirectorService,
 
 
     onSuccess: () => {

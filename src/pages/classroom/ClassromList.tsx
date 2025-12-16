@@ -50,7 +50,10 @@ export default function ClassromList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedSala, setSelectedSala] = useState<{ id: string; descricao: string } | null>(null);
+  const [selectedSala, setSelectedSala] = useState<{
+    id: string;
+    descricao: string;
+  } | null>(null);
 
   // Dados da API
   const { data: salas = [], isLoading, refetch } = useQuerySalasNew();
@@ -112,7 +115,9 @@ export default function ClassromList() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Início</Link>
+        <Link to="/" className="hover:text-foreground">
+          Início
+        </Link>
         <span>/</span>
         <span className="font-medium">Gestão de Salas</span>
         <span>/</span>
@@ -180,12 +185,18 @@ export default function ClassromList() {
                 <TableBody>
                   {paginatedData.map((item) => (
                     <TableRow key={item.codigo}>
-                      <TableCell className="font-mono text-sm">{item.codigo}</TableCell>
-                      <TableCell className="font-medium">{item.designacao}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {item.codigo}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {item.designacao}
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline">{item.tipo_sala}</Badge>
                       </TableCell>
-                      <TableCell className="font-semibold">{item.capacidade}</TableCell>
+                      <TableCell className="font-semibold">
+                        {item.capacidade}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {item.capacidadeexameacessoprova}
                       </TableCell>
@@ -198,7 +209,9 @@ export default function ClassromList() {
                               : "bg-destructive/10 text-destructive border-destructive/20"
                           }
                         >
-                          {item.utilizavel?.toUpperCase() === "SIM" ? "Disponível" : "Indisponível"}
+                          {item.utilizavel?.toUpperCase() === "SIM"
+                            ? "Disponível"
+                            : "Indisponível"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -267,7 +280,9 @@ export default function ClassromList() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Seguinte
@@ -284,7 +299,8 @@ export default function ClassromList() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão?</AlertDialogTitle>
             <AlertDialogDescription>
-              Deseja realmente excluir a sala <strong>{selectedSala?.descricao}</strong>?<br />
+              Deseja realmente excluir a sala{" "}
+              <strong>{selectedSala?.descricao}</strong>?<br />
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>

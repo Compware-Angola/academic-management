@@ -134,6 +134,7 @@ export default function FormulaUC() {
             map={(a) => ({
               key: a.codigo,
               label: a.designacao,
+              value: a.codigo,
             })}
           />
 
@@ -148,6 +149,7 @@ export default function FormulaUC() {
             map={(s) => ({
               key: s.codigo,
               label: s.designacao,
+              value: s.codigo,
             })}
           />
 
@@ -162,6 +164,7 @@ export default function FormulaUC() {
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.codigo,
             })}
           />
           <FormSelect
@@ -173,6 +176,7 @@ export default function FormulaUC() {
             map={(c) => ({
               key: c.codigo,
               label: c.designacao,
+              value: c.designacao,
             })}
             loading={isLoadingClasses}
           />

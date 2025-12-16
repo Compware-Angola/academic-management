@@ -1,20 +1,19 @@
-
-
+import {
+  ListarHorariosEliminadosPayload,
+  listarHorariosEliminadosService,
+} from "@/services/horario/listar-horarios-existentes-eliminado.service";
 import { useQuery } from "@tanstack/react-query";
-import {  ListarHorariosExistentesPayload } from "@/services/horario/listar-horarios-existentes.service";
-import { listarHorariosExistentesEliminadosService } from "@/services/horario/listar-horarios-existentes-eliminado.service";
 
-export const useQueryHorariosExistentesEliminados = (filters: ListarHorariosExistentesPayload) => {
-  const enabled = !!filters.p_ano_lectivo &&
-                  !!filters.p_semestre &&
-                  !!filters.p_periodo &&
-                  !!filters.p_curso;
+export const useQueryHorariosEliminados = (
+  filters: ListarHorariosEliminadosPayload
+) => {
+  const enabled = !!filters.anoLectivo;
 
   return useQuery({
-    queryKey: ["horarios-existentes-eliminados", filters],
-    queryFn: () => listarHorariosExistentesEliminadosService(filters),
+    queryKey: ["horarios-eliminados", filters],
+    queryFn: () => listarHorariosEliminadosService(filters),
     enabled,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 2,
   });
 };

@@ -28,9 +28,11 @@ import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
 import { AulaPayload } from "@/services/horario/save-horario.service";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+
 type SlotKey = string;
 
 type ScheduleGridProps = {
+  aulasExistentes: AulaPayload[];
   scheduleData: TempoDisponivelItem[];
   onChange: (aulas: AulaPayload[]) => void;
   anoLetivo: string;
@@ -38,7 +40,8 @@ type ScheduleGridProps = {
   periodo: string;
   unidadeCurricular: string;
 };
-export default function ScheduleGrid(props: ScheduleGridProps) {
+
+export default function ScheduleGridEdit(props: ScheduleGridProps) {
   const {
     scheduleData,
     onChange,
@@ -46,6 +49,7 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
     anoLetivo,
     periodo,
     semestre,
+    aulasExistentes,
   } = props;
 
   const { toast } = useToast();
@@ -54,12 +58,14 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
     tempo: Tempo;
     key: string;
   }>(null);
+
   const [slotData, setSlotData] = useState<Record<SlotKey, AulaPayload>>({});
-  const [formData, setFormData] = useState({
-    sala: "",
-    tipoAula: "",
-    docente: undefined,
-  });
+  const [formData, setFormData] = useState<{
+    sala: string;
+    tipoAula: string;
+    docente?: string;
+  }>({ sala: "", tipoAula: "", docente: undefined });
+  console.log({ aulasExistentes });
   const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
   const { data: salas, isLoading: isLoadingSala } = useQuerySalas({
     tipoSala: formData.tipoAula,
@@ -67,9 +73,20 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
   const verifyCollision = useVerifyCollision();
   const { data: teachers = [], isLoading: isLoadingTeacher } =
     useQueryTeacherByUC(unidadeCurricular);
+
+  // Inicializa slots a partir das aulas existentes
+  useEffect(() => {
+    const initialSlotData: Record<string, AulaPayload> = {};
+    aulasExistentes.forEach((aula) => {
+      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      initialSlotData[key] = aula;
+    });
+    setSlotData(initialSlotData);
+  }, [aulasExistentes]);
+
+  // Atualiza sala disponível ao mudar tipo de aula
   useEffect(() => {
     if (!formData.tipoAula || isLoadingSala) return;
-
     toast({
       title: "Salas atualizadas",
       description: `Foram encontradas ${salas?.length ?? 0} salas.`,
@@ -79,27 +96,21 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
 
   const handleSlotClick = (dia: DiaSemana, tempo: Tempo) => {
     const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
-
     setSelectedSlot({ dia, tempo, key });
 
     if (slotData[key]) {
       setFormData({
         sala: String(slotData[key].sala),
         tipoAula: String(slotData[key].tipoAula),
-        docente: String(slotData[key].docente),
+        docente: slotData[key].docente.toString(),
       });
     } else {
-      setFormData({
-        sala: "",
-        tipoAula: "",
-        docente: undefined,
-      });
+      setFormData({ sala: "", tipoAula: "", docente: undefined });
     }
   };
 
   const handleConfirm = async () => {
     if (!selectedSlot) return;
-
     const { dia, tempo, key } = selectedSlot;
 
     if (!formData.tipoAula || !formData.sala || !formData.docente) {
@@ -110,6 +121,7 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       });
       return;
     }
+
     const result = await verifyCollision.mutateAsync({
       ano_lectivo: Number(anoLetivo),
       semestre: Number(semestre),
@@ -122,16 +134,15 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       horario_id: null,
     });
 
-    // ✅ SE EXISTIR COLISÃO
     if (result.temColisao === 1) {
       toast({
         variant: "destructive",
         title: "Colisão detectada",
         description: result.mensagem,
       });
-
       return;
     }
+
     const novaAula: AulaPayload = {
       docente: Number(formData.docente),
       diaSemana: dia.pkDiaDaSemana,
@@ -143,11 +154,7 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       obs: "",
     };
 
-    const updatedSlots = {
-      ...slotData,
-      [key]: novaAula,
-    };
-
+    const updatedSlots = { ...slotData, [key]: novaAula };
     setSlotData(updatedSlots);
     onChange(Object.values(updatedSlots));
 
@@ -155,7 +162,6 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       title: "Aula adicionada",
       description: "Aula criada com sucesso.",
     });
-
     setSelectedSlot(null);
   };
 
@@ -167,18 +173,17 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
     setSelectedSlot(null);
   };
 
-  const hasData = (diaId: number, ordem: number) => {
-    return Boolean(slotData[`${diaId}-${ordem}`]);
-  };
+  const hasData = (diaId: number, ordem: number) =>
+    Boolean(slotData[`${diaId}-${ordem}`]);
   const days = scheduleData.filter((item) => item.diaSemana);
-  console.log(selectedSlot?.tempo.horaInicio, selectedSlot?.tempo.horaFim);
+
   return (
     <>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {days.map((item) => (
           <Card
-            className="rounded-none border-0"
             key={item.diaSemana.pkDiaDaSemana}
+            className="rounded-none border-0"
           >
             <CardHeader className="bg-linear-to-r from-primary to-primary text-white">
               <CardTitle className="text-center text-sm">
@@ -191,34 +196,29 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
                   item.diaSemana.pkDiaDaSemana,
                   tempo.ordem
                 );
-
                 return (
                   <Button
-                    type="button"
                     key={tempo.ordem}
+                    type="button"
                     onClick={() => handleSlotClick(item.diaSemana, tempo)}
                     variant={filled ? "default" : "outline"}
                     className={`w-full justify-start h-auto py-3 ${
                       filled
-                        ? "bg-green-50 text-green-900  hover:bg-green-100"
+                        ? "bg-green-50 text-green-900 hover:bg-green-100"
                         : ""
                     }`}
                   >
-                    <div className="w-full">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Clock
-                            size={16}
-                            className={
-                              filled
-                                ? "text-green-600"
-                                : "text-muted-foreground"
-                            }
-                          />
-                          <span className="text-sm font-semibold">
-                            {tempo.horaInicio} - {tempo.horaFim}
-                          </span>
-                        </div>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <Clock
+                          size={16}
+                          className={
+                            filled ? "text-green-600" : "text-muted-foreground"
+                          }
+                        />
+                        <span className="text-sm font-semibold">
+                          {tempo.horaInicio} - {tempo.horaFim}
+                        </span>
                       </div>
                     </div>
                   </Button>
@@ -232,29 +232,23 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       <Dialog open={!!selectedSlot} onOpenChange={() => setSelectedSlot(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <div>
-                <div className="text-xl">{selectedSlot?.dia.designacao}</div>
-                <div className="text-sm text-muted-foreground font-normal">
-                  {selectedSlot?.tempo.horaInicio} -{" "}
-                  {selectedSlot?.tempo.horaFim}
-                </div>
-              </div>
+            <DialogTitle className="flex flex-col">
+              <span className="text-xl">{selectedSlot?.dia.designacao}</span>
+              <span className="text-sm text-muted-foreground">
+                {selectedSlot?.tempo.horaInicio} - {selectedSlot?.tempo.horaFim}
+              </span>
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {/* DOCENTE */}
             <FormSelect
               label="Docente"
               value={formData.docente}
               disabled={isLoadingTeacher}
               onChange={(v) => setFormData({ ...formData, docente: v })}
               options={teachers}
-              map={(t) => ({
-                key: t.pk,
-                label: t.nomeCompleto,
-                value: t.pk,
-              })}
+              map={(t) => ({ key: t.pk, label: t.nomeCompleto, value: t.pk })}
               loading={isLoadingTeacher}
             />
 
@@ -265,7 +259,7 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
                 value={formData.tipoAula}
                 onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
               >
-                <SelectTrigger className="w-full ">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Escolha o tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -289,23 +283,12 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
                 onValueChange={(v) => setFormData({ ...formData, sala: v })}
               >
                 <SelectTrigger
-                  disabled={
-                    Boolean(formData.tipoAula) === false || isLoadingSala
-                  }
-                  className="w-full "
+                  disabled={!formData.tipoAula || isLoadingSala}
+                  className="w-full"
                 >
                   <SelectValue
                     placeholder={
-                      <>
-                        {" "}
-                        {isLoadingSala ? (
-                          <span className="flex gap-2 items-center">
-                            Carregando <Loader2 className="animate-spin" />
-                          </span>
-                        ) : (
-                          "Selecione Salas"
-                        )}
-                      </>
+                      isLoadingSala ? "Carregando..." : "Selecione Salas"
                     }
                   />
                 </SelectTrigger>
@@ -322,16 +305,14 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
             {/* BOTÕES */}
             <div className="flex gap-3 pt-4">
               <Button
-                disabled={verifyCollision.isPending}
                 onClick={handleConfirm}
+                disabled={verifyCollision.isPending}
                 className="flex-1"
               >
                 {verifyCollision.isPending ? (
                   <>
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verificando Colisões
-                    </>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verificando Colisões
                   </>
                 ) : (
                   <>

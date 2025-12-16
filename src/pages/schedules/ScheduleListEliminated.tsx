@@ -1,17 +1,17 @@
 // src/pages/horarios/ScheduleList.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Loader2, Eye, MoreVertical, RotateCcw } from "lucide-react";
 import {
-  Plus,
-  RefreshCw,
-  Search,
-  File,
-  ChevronFirst,
-  ChevronLast,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,17 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
@@ -48,399 +38,417 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 
-import { useQueryHorariosExistentesEliminados } from "@/hooks/horario/use-query-horarios-existentes-eliminados";
+import { useQueryHorariosEliminados } from "@/hooks/horario/use-query-horarios-existentes-eliminados";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
 
+import { useRestaurarHorario } from "@/hooks/horario/use-restaurar-horario";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { HorarioEliminado } from "@/services/horario/listar-horarios-existentes-eliminado.service";
 export default function ScheduleListEliminated() {
   const navigate = useNavigate();
   const { toast } = useToast();
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
-    anoLetivo: "",
+    anoLectivo: "",
     semestre: "",
-    periodo: "",
     curso: "",
     anoCurricular: "",
+    unidadeCurricular: "",
     search: "",
+    periodo: "",
   });
-
-  // Paginação
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
-  const itemsPerPage = 15;
-
+  const [limit, setLimit] = useState(10);
+  const [selectedHorario, setSelectedHorario] = useState<{
+    codigo: number;
+    descricao: string;
+  } | null>(null);
   // Queries dos filtros
-  const { data: anosAcademicos, isLoading: loadingAnos } = useQueryAnoAcademico();
+  const { data: anosAcademicos, isLoading: loadingAnos } =
+    useQueryAnoAcademico();
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
   const { data: cursos, isLoading: loadingCursos } = useCursos();
-
   const { data: anosCurriculares = [], isLoading: loadingAnosCurriculares } =
     useQueryClassFilterByCurso({ curso: filters.curso });
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: filters.anoCurricular,
+      curso: filters.curso,
+      semestre: filters.semestre,
+    });
+  const { data, isLoading, error, refetch } = useQueryHorariosEliminados({
+    anoLectivo: Number(filters.anoLectivo),
 
-  const {
-    data: horarios = [],
-    isLoading: isLoadingHorarios,
-    error,
-    refetch,
-  } = useQueryHorariosExistentesEliminados({
-    p_ano_lectivo: filters.anoLetivo,
-    p_semestre: filters.semestre,
-    p_periodo: filters.periodo,
-    p_curso: filters.curso,
-    p_ano_curricular:
-      filters.anoCurricular && filters.anoCurricular !== "todos"
-        ? filters.anoCurricular
-        : undefined,
+    semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    periodo: filters.periodo ? Number(filters.periodo) : undefined,
+    curso: filters.curso ? Number(filters.curso) : undefined,
+    anoCurricular: filters.anoCurricular
+      ? Number(filters.anoCurricular)
+      : undefined,
+    unidadeCurricular: filters.unidadeCurricular
+      ? Number(filters.unidadeCurricular)
+      : undefined,
+
+    page,
+    limit,
   });
 
-  // Filtro local por texto
-  const filteredHorarios = horarios.filter((h) =>
-    filters.search === "" ||
-    h.designacao.toLowerCase().includes(filters.search.toLowerCase()) ||
-    h.unidadeCurricular.toLowerCase().includes(filters.search.toLowerCase()) ||
-    h.curso.toLowerCase().includes(filters.search.toLowerCase()) ||
-    h.ano.toLowerCase().includes(filters.search.toLowerCase())
-  );
-
-  // Paginação lógica
-  const totalItems = filteredHorarios.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = filteredHorarios.slice(startIndex, endIndex);
-
-  const handleRefresh = () => {
-    refetch();
-    toast({ description: "Lista atualizada com sucesso." });
+  const { mutate: restoreHorario, isPending: isRestore } =
+    useRestaurarHorario();
+  const horarios = data?.data ?? [];
+  const handleOpenConfirm = (item: HorarioEliminado) => {
+    setSelectedHorario({
+      codigo: item.codigo,
+      descricao: item.designacao,
+    });
+    setOpenDialog(true);
   };
+  const handleConfirmRestore = () => {
+    if (!selectedHorario) return;
+    restoreHorario(
+      { codigo: selectedHorario.codigo },
+      {
+        onSuccess: () => {
+          setOpenDialog(false);
+          setSelectedHorario(null);
+        },
+      }
+    );
+  };
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [filters.anoLectivo, filters.anoCurricular]);
 
   // Resetar página ao mudar filtros
   const resetPageOnFilterChange = () => {
     setPage(1);
   };
-
+  const openDetails = (turmaId: number) => {
+    setSelectedTurmaId(turmaId);
+    setIsModalOpen(true);
+  };
   // Monitora mudanças nos filtros para resetar a página
   React.useEffect(() => {
     resetPageOnFilterChange();
   }, [filters]);
+  // Filtrar horários localmente
+  const filteredHorarios = horarios.filter((h) => {
+    if (!filters.search) return true;
+    const searchNormalized = normalizeText(filters.search);
+
+    return (
+      normalizeText(h.designacao).includes(searchNormalized) ||
+      normalizeText(h.unidadecurricular).includes(searchNormalized) ||
+      normalizeText(h.curso).includes(searchNormalized) ||
+      normalizeText(h.ano).includes(searchNormalized)
+    );
+  });
+
+  const total = filteredHorarios.length;
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="flex-1 space-y-6 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/horarios">Horários</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Listar</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Horário Eliminados
-          </h1>
-          <p className="text-muted-foreground">
-            Visualize todos os Horário criadas por ano letivo, semestre, período, curso e ano curricular.
-          </p>
-        </div>
-    
-      </div>
+      <h1 className="text-3xl font-bold">Horários Eliminados</h1>
 
-      {/* Filtros */}
-      <div className="rounded-lg border bg-card p-6 shadow-sm">
-        <div className="mb-4 flex items-center gap-2">
-          <Search className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-lg font-semibold">Filtros</h3>
-        </div>
+      {/* ---------- Filtros ---------- */}
+      <div className="rounded-lg border bg-card p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormSelect
+            label="Ano Letivo"
+            value={filters.anoLectivo}
+            loading={loadingAnos}
+            onChange={(v) =>
+              setFilters({
+                anoLectivo: v,
+                semestre: "",
+                curso: "",
+                anoCurricular: "",
+                unidadeCurricular: "",
+                search: "",
+                periodo: "",
+              })
+            }
+            options={anosAcademicos}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
+          />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Ano Letivo */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ano Letivo</label>
-            <Select
-              value={filters.anoLetivo}
-              onValueChange={(v) =>
-                setFilters({ ...filters, anoLetivo: v, anoCurricular: "" })
-              }
-              disabled={loadingAnos}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={loadingAnos ? "A carregar..." : "Selecionar"} />
-              </SelectTrigger>
-              <SelectContent>
-                {anosAcademicos?.map((ano) => (
-                  <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-                    {ano.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormSelect
+            label="Semestre"
+            value={filters.semestre}
+            disabled={!filters.anoLectivo}
+            loading={loadingSemestres}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                semestre: v,
+                anoCurricular: "",
+                unidadeCurricular: "",
+              })
+            }
+            options={semestres}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
+          />
+          <FormSelect
+            label="Período"
+            value={filters.periodo}
+            disabled={!filters.anoLectivo}
+            loading={loadingSemestres}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                periodo: v,
+              })
+            }
+            options={periodos}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
+          />
 
-          {/* Semestre */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Semestre</label>
-            <Select
-              value={filters.semestre}
-              onValueChange={(v) => setFilters({ ...filters, semestre: v })}
-              disabled={loadingSemestres}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar" />
-              </SelectTrigger>
-              <SelectContent>
-                {semestres?.map((s) => (
-                  <SelectItem key={s.codigo} value={s.codigo.toString()}>
-                    {s.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormSelect
+            label="Curso"
+            value={filters.curso}
+            disabled={!filters.anoLectivo}
+            loading={loadingCursos}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                curso: v,
+                anoCurricular: "",
+                unidadeCurricular: "",
+              })
+            }
+            options={cursos}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
+          />
 
-          {/* Período */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Período</label>
-            <Select
-              value={filters.periodo}
-              onValueChange={(v) => setFilters({ ...filters, periodo: v })}
-              disabled={loadingPeriodos}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar" />
-              </SelectTrigger>
-              <SelectContent>
-                {periodos?.map((p) => (
-                  <SelectItem key={p.codigo} value={p.codigo.toString()}>
-                    {p.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormSelect
+            label="Ano Curricular"
+            value={filters.anoCurricular}
+            disabled={!filters.curso}
+            loading={loadingAnosCurriculares}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                anoCurricular: v,
+                unidadeCurricular: "",
+              })
+            }
+            options={anosCurriculares}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
+          />
 
-          {/* Curso */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Curso</label>
-            <Select
-              value={filters.curso}
-              onValueChange={(v) =>
-                setFilters({ ...filters, curso: v, anoCurricular: "" })
-              }
-              disabled={loadingCursos}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar" />
-              </SelectTrigger>
-              <SelectContent>
-                {cursos?.map((c) => (
-                  <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                    {c.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormSelect
+            label="Unidade Curricular"
+            value={filters.unidadeCurricular}
+            disabled={
+              !filters.curso || !filters.semestre || !filters.anoCurricular
+            }
+            loading={isLoadingUC}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                unidadeCurricular: v,
+              })
+            }
+            options={unidadesCurriculares}
+            map={(u) => ({
+              key: u.pk,
+              label: u.descricao,
+              value: u.pk,
+            })}
+          />
 
-          {/* Ano Curricular */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ano Curricular</label>
-            <Select
-              value={filters.anoCurricular || "todos"}
-              onValueChange={(v) =>
-                setFilters({
-                  ...filters,
-                  anoCurricular: v === "todos" ? "" : v,
-                })
-              }
-              disabled={loadingAnosCurriculares || !filters.curso}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    loadingAnosCurriculares
-                      ? "A carregar..."
-                      : !filters.curso
-                      ? "Selecione um curso"
-                      : "Todos os anos"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os anos</SelectItem>
-                {anosCurriculares?.map((ac) => (
-                  <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-                    {ac.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="mt-6">
           <Input
-            placeholder="Pesquisar por turma, UC, curso ou ano..."
+            className="col-span-3"
+            placeholder="Pesquisar..."
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            className="max-w-md"
           />
         </div>
       </div>
 
-      {/* Ações */}
-      <div className="flex items-center justify-between">
-        <Button
-          onClick={handleRefresh}
-          variant="outline"
-          disabled={isLoadingHorarios}
-        >
-          <RefreshCw
-            className={`mr-2 h-4 w-4 ${isLoadingHorarios ? "animate-spin" : ""}`}
-          />
-          Atualizar Lista
-        </Button>
-
-        {totalItems > 0 && (
-          <p className="text-sm text-muted-foreground">
-            Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems} turmas
-          </p>
-        )}
-      </div>
-
-      {/* Tabela + Paginação */}
-      <div className="rounded-lg border bg-card shadow-sm">
-        {isLoadingHorarios ? (
-          <div className="p-8 space-y-4">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full" />
-            ))}
-          </div>
-        ) : error ? (
-          <Alert variant="destructive" className="m-6">
-            <AlertDescription>
-              Erro ao carregar Horário. Tente novamente.
-            </AlertDescription>
-          </Alert>
-        ) : filteredHorarios.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-16 text-center">
-            <div className="rounded-full bg-muted p-6 mb-4">
-              <File className="h-12 w-12 text-muted-foreground" />
+      <Card>
+        <CardHeader>
+          <CardTitle>Horários Encontradas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Carregando Horários...</p>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Nenhum Horário encontrado</h3>
-            <p className="text-muted-foreground max-w-md mb-6">
-              {filters.anoLetivo && filters.curso
-                ? "Não existem Horários criadas com os filtros aplicados."
-                : "Preencha os filtros para visualizar os Horários."}
-            </p>
-          
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Turma</TableHead>
-                    <TableHead>Curso</TableHead>
-                    <TableHead>Unidade Curricular</TableHead>
-                    <TableHead>Ano Curricular</TableHead>
-                    <TableHead>Capacidade</TableHead>
-                    <TableHead>Estado</TableHead>
-                  
-                    <TableHead>Deletado em</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentItems.map((h) => (
-                    <TableRow
-                      key={h.codigo}
-                      className="hover:bg-muted/50 cursor-pointer"
-                     
-                    >
-                      <TableCell className="font-semibold text-primary">
-                        {h.designacao}
-                      </TableCell>
-                      <TableCell>{h.curso}</TableCell>
-                      <TableCell>{h.unidadeCurricular}</TableCell>
-                      <TableCell className="font-medium">{h.ano}</TableCell>
-                      <TableCell>{h.capacidade}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            h.estado.toLowerCase().includes("pendente") ||
-                            h.estado.toLowerCase().includes("distribuição")
-                              ? "secondary"
-                              : "default"
-                          }
-                        >
-                          {h.estado}
-                        </Badge>
-                      </TableCell>
-                   
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(h.dataEliminacao).toLocaleDateString("pt-AO")}
-                      </TableCell>
+          ) : filteredHorarios.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              Nenhuma Horários encontrada.
+            </div>
+          ) : (
+            <>
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Unidade Curricular</TableHead>
+                      <TableHead>Designação</TableHead>
+                      <TableHead>Curso</TableHead>
+                      <TableHead>Ano Curricular</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredHorarios.map((item) => (
+                      <TableRow key={item.codigo}>
+                        <TableCell>{item.unidadecurricular}</TableCell>
+                        <TableCell>{item.designacao}</TableCell>
+                        <TableCell>{item.curso}</TableCell>
+                        <TableCell>{item.ano}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              item.estado.toLowerCase().includes("pendente") ||
+                              item.estado.toLowerCase().includes("distribuição")
+                                ? "secondary"
+                                : "default"
+                            }
+                          >
+                            {item.estado}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              className="cursor-pointer"
+                              title="Ver detalhes"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => openDetails(item.codigo)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              className="cursor-pointer"
+                              title="Restaurar"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleOpenConfirm(item)}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center"></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-            {/* Paginação */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t bg-muted/20 px-4 py-3">
+              {/* Paginação */}
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-muted-foreground">
+                  A mostrar {horarios.length} de {total} registos
+                </p>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
-                    size="icon"
-                    onClick={() => setPage(1)}
                     disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
                   >
-                    <ChevronFirst className="h-4 w-4" />
+                    Anterior
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-
-                  <span className="text-sm text-muted-foreground px-4">
-                    Página <strong>{page}</strong> de <strong>{totalPages}</strong>
+                  <span>
+                    Página {page} de {totalPages}
                   </span>
+                  <Button
+                    variant="outline"
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </Button>
 
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
+                  <Select
+                    value={String(limit)}
+                    onValueChange={(v) => {
+                      setLimit(Number(v));
+                      setPage(1);
+                    }}
                   >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setPage(totalPages)}
-                    disabled={page === totalPages}
-                  >
-                    <ChevronLast className="h-4 w-4" />
-                  </Button>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+      <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Restauração?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja realmente restaurar o horário
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRestore}
+              disabled={isRestore}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {isRestore ? "Restarando..." : "Restaurar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <ScheduleDetailsModal
+        horarioId={selectedTurmaId}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedTurmaId(null);
+        }}
+      />
     </div>
   );
 }
+const normalizeText = (text: string) =>
+  text
+    .normalize("NFD") // Normaliza acentos
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacríticos
+    .toLowerCase(); // Deixa tudo em minúsculas
