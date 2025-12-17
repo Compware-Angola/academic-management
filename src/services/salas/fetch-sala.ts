@@ -1,23 +1,28 @@
 import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type Sala = {
- "pk": string,
-"descricao": string,
-"capacidade": string,
-"capacidade_exame_acesso_prova": string,
-"utilizavel": string,
-"tipo_sala": string
+  pk: string;
+  descricao: string;
+  capacidade: string;
+  capacidade_exame_acesso_prova: string;
+  utilizavel: string;
+  tipo_sala: string;
 };
 
+export async function fetchSalas({
+  estado,
+  tipoSala,
+}: {
+  tipoSala?: string;
+  estado: string;
+}): Promise<Sala[]> {
+  const params = tipoSala
+    ? { p_tipo_sala: tipoSala, p_estado: estado }
+    : undefined;
 
-export async function fetchSalas({estado,tipoSala}:{tipoSala?: string, estado:string}): Promise<Sala[]> {
-  const params = tipoSala ? { p_tipo_sala: tipoSala, p_estado:estado } : undefined;
-
-  const { data } = await axiosApexGa.get<{items: Sala[]}>(
-    "/uma/salas/all",
-    { params }
-  );
-
+  const { data } = await axiosApexGa.get<{ items: Sala[] }>("/uma/salas/all", {
+    params,
+  });
 
   return data.items ?? [];
 }
@@ -49,20 +54,18 @@ export interface Room {
 
 export interface RoomsApiResponse {
   success: boolean;
-  data: Room[];               // <-- a API devolve "data": [ ... ]
+  data: Room[]; // <-- a API devolve "data": [ ... ]
   // se houver paginação no futuro pode ter mais campos (total, page, etc.)
 }
 
-
-
 export async function getAllRooms(): Promise<Room[]> {
   try {
-    const response = await axiosNestGa.get<RoomsApiResponse>('/rooms/list-all');
+    const response = await axiosNestGa.get<RoomsApiResponse>("/rooms/list-all");
 
     // A API devolve { success: true, data: [...] }
     return response.data.data ?? [];
   } catch (error) {
-    console.error('Erro ao buscar salas:', error);
+    console.error("Erro ao buscar salas:", error);
     // Podes lançar novamente ou devolver array vazio – depende da tua política
     return [];
     // ou: throw error;

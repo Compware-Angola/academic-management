@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, X, AlertCircle, Loader2 } from "lucide-react";
+import { Save, X, AlertCircle, Loader2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -69,9 +68,6 @@ export default function CreateSchedule() {
 
   const [aulas, setAulas] = useState<AulaPayload[]>([]);
 
-  const [hasCheckedCollisions, setHasCheckedCollisions] = useState(false);
-  const [collisionMessage, setCollisionMessage] = useState("");
-
   /* ---------- QUERIES ----------- */
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
@@ -91,22 +87,22 @@ export default function CreateSchedule() {
       curso: formData.curso,
       semestre: formData.semestre,
     });
-const { data: designacao } = useNextScheduleDesignation(
-  formData.curso
-    ? gerarSiglaCurso(
-        cursos.find((c) => c.codigo.toString() === formData.curso)
-          ?.designacao || ""
-      )
-    : undefined,
-  formData.classes,
-  formData.unidadeCurricular
-    ? unidadesCurriculares.find(
-        (c) => c.pk.toString() === formData.unidadeCurricular
-      )?.codigo || ""
-    : "",
-  Number(formData.periodo),        
-  Number(formData.anoLetivo)      
-);
+  const { data: designacao } = useNextScheduleDesignation(
+    formData.curso
+      ? gerarSiglaCurso(
+          cursos.find((c) => c.codigo.toString() === formData.curso)
+            ?.designacao || ""
+        )
+      : undefined,
+    formData.classes,
+    formData.unidadeCurricular
+      ? unidadesCurriculares.find(
+          (c) => c.pk.toString() === formData.unidadeCurricular
+        )?.codigo || ""
+      : "",
+    Number(formData.periodo),
+    Number(formData.anoLetivo)
+  );
 
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
@@ -114,15 +110,8 @@ const { data: designacao } = useNextScheduleDesignation(
     useQueryModalidade();
   /* ---------- COLISÃO ----------- */
 
-  const {
-    mutateAsync: salvarHorario,
-    isPending,
-    isSuccess: isSuccessSaveHorario,
-  } = useSaveHorario();
-  useEffect(() => {
-    setHasCheckedCollisions(false);
-    setCollisionMessage("");
-  }, [formData, aulas]);
+  const saveHorario = useSaveHorario();
+  useEffect(() => {}, [formData, aulas]);
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -162,6 +151,21 @@ const { data: designacao } = useNextScheduleDesignation(
     ) && aulas.length > 0;
 
   /* ---------- SUBMIT ----------- */
+  const handleResetHorario = () => {
+    setFormData({
+      anoLetivo: "",
+      semestre: "",
+      periodo: "",
+      curso: "",
+      unidadeCurricular: "",
+      modalidade: "",
+      classes: "",
+      apenasPrimeiroAno: "",
+      capacidade: "",
+      designacao: "",
+    });
+    setAulas([]);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -181,7 +185,6 @@ const { data: designacao } = useNextScheduleDesignation(
       curso: Number(formData.curso),
       unidadeCurricular: Number(formData.unidadeCurricular),
       modalidade: Number(formData.modalidade),
-     
       aulas,
       apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
       capacidade: Number(formData.capacidade),
@@ -191,25 +194,11 @@ const { data: designacao } = useNextScheduleDesignation(
       obs: "",
     };
 
-    await salvarHorario(payload);
-    if (!isSuccessSaveHorario) {
+    await saveHorario.mutateAsync(payload);
+    if (!saveHorario.isSuccess) {
       return;
     }
-    setFormData({
-      anoLetivo: "",
-      semestre: "",
-      periodo: "",
-      curso: "",
-      unidadeCurricular: "",
-      modalidade: "",
-      classes: "",
-      apenasPrimeiroAno: "",
-      capacidade: "",
-      designacao: "",
-    });
-    setAulas([]);
-    setHasCheckedCollisions(false);
-    setCollisionMessage("");
+    navigate("/horarios/listar");
   };
 
   /* ---------- UI ----------- */
@@ -235,14 +224,6 @@ const { data: designacao } = useNextScheduleDesignation(
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-
-      {/* ALERTA DE COLISÃO */}
-      {!!collisionMessage && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{collisionMessage}</AlertDescription>
-        </Alert>
-      )}
 
       {/* FORM */}
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -432,14 +413,23 @@ const { data: designacao } = useNextScheduleDesignation(
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate("horarios/listar")}
+            onClick={() => {
+              navigate("/horarios/listar");
+            }}
           >
+            <List className="mr-2 h-4 w-4" />
+            Listar Horário
+          </Button>
+          <Button type="button" variant="outline" onClick={handleResetHorario}>
             <X className="mr-2 h-4 w-4" />
             Cancelar
           </Button>
 
-          <Button type="submit" disabled={!isFormComplete || isPending}>
-            {isPending ? (
+          <Button
+            type="submit"
+            disabled={!isFormComplete || saveHorario.isPending}
+          >
+            {saveHorario.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando
               </>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Plus, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +28,7 @@ import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
 import { AulaPayload } from "@/services/horario/save-horario.service";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 type SlotKey = string;
 
 type ScheduleGridProps = {
@@ -39,14 +40,7 @@ type ScheduleGridProps = {
   unidadeCurricular: string;
 };
 export default function ScheduleGrid(props: ScheduleGridProps) {
-  const {
-    scheduleData,
-    onChange,
-    unidadeCurricular,
-    anoLetivo,
-    periodo,
-    semestre,
-  } = props;
+  const { scheduleData, onChange, unidadeCurricular, anoLetivo } = props;
 
   const { toast } = useToast();
   const [selectedSlot, setSelectedSlot] = useState<null | {
@@ -61,10 +55,14 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
     docente: undefined,
   });
   const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
-  const { data: salas, isLoading: isLoadingSala } = useQuerySalas({
-    tipoSala: formData.tipoAula,
+  const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
+    diaSemana: selectedSlot?.dia.pkDiaDaSemana,
+    anoLectivo: Number(anoLetivo),
+    horaFim: selectedSlot?.tempo?.horaFim,
+    horaInicio: selectedSlot?.tempo?.horaInicio,
+    tipoAula: Number(formData?.tipoAula),
   });
-  const verifyCollision = useVerifyCollision();
+
   const { data: teachers = [], isLoading: isLoadingTeacher } =
     useQueryTeacherByUC(unidadeCurricular);
   useEffect(() => {
@@ -110,28 +108,7 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       });
       return;
     }
-    const result = await verifyCollision.mutateAsync({
-      ano_lectivo: Number(anoLetivo),
-      semestre: Number(semestre),
-      periodo: Number(periodo),
-      unidade_curricular: Number(unidadeCurricular),
-      docente: Number(formData.docente),
-      sala: Number(formData.sala),
-      dia_semana: dia.pkDiaDaSemana,
-      ordem_tempo: tempo.ordem,
-      horario_id: null,
-    });
 
-    // ✅ SE EXISTIR COLISÃO
-    if (result.temColisao === 1) {
-      toast({
-        variant: "destructive",
-        title: "Colisão detectada",
-        description: result.mensagem,
-      });
-
-      return;
-    }
     const novaAula: AulaPayload = {
       docente: Number(formData.docente),
       diaSemana: dia.pkDiaDaSemana,
@@ -171,7 +148,7 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
     return Boolean(slotData[`${diaId}-${ordem}`]);
   };
   const days = scheduleData.filter((item) => item.diaSemana);
-  console.log(selectedSlot?.tempo.horaInicio, selectedSlot?.tempo.horaFim);
+
   return (
     <>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -311,34 +288,22 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {salas?.map((sala) => (
-                    <SelectItem key={sala.pk} value={sala.pk.toString()}>
-                      {sala.descricao}
+                    <SelectItem key={sala.salaid} value={sala.salaid}>
+                      {sala.sala}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* BOTÕES */}
             <div className="flex gap-3 pt-4">
               <Button
-                disabled={verifyCollision.isPending}
+                type="button"
+                className="flex-1 cursor-pointer"
                 onClick={handleConfirm}
-                className="flex-1"
               >
-                {verifyCollision.isPending ? (
-                  <>
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verificando Colisões
-                    </>
-                  </>
-                ) : (
-                  <>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Adicionar
-                  </>
-                )}
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar
               </Button>
 
               {selectedSlot &&

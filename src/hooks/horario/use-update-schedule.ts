@@ -18,12 +18,18 @@ export const useUpdateSchedule = () => {
         return;
       }
 
+      queryClient.invalidateQueries({
+        queryKey: ["schedule"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["schedule-details"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["horarios-existentes"],
+      });
       toast({
         title: "Horário Atualizado",
         description: data.mensagem,
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["schedule", "schedule-details","horarios-existentes"],
       });
     },
 
