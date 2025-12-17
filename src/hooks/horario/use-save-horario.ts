@@ -1,11 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 
-import {
-  saveHorarioService,
-  SaveHorarioPayload,
-  SaveHorarioResponse,
-} from "@/services/horario/save-horario.service";
+import { saveHorarioService } from "@/services/horario/save-horario.service";
 
 export function useSaveHorario(onSuccessReset?: () => void) {
   return useMutation({
