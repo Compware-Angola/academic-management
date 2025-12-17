@@ -149,7 +149,7 @@ export default function Deadlines() {
       const filteredData = data.filter(
         (item) => typeof item.descricao === "string"
       );
-      console.log(filteredData, data, res.data);
+
       setTiposEpocaAvaliacao(filteredData);
     } catch {
       toast({
@@ -263,11 +263,10 @@ export default function Deadlines() {
   };
 
   const handleSelecionarPrazo = (prazo: Prazo) => {
-    // Converter datas para o formato YYYY-MM-DD (compatível com input date)
     setPrazoId(prazo.prazo_id);
     const dataInicioFormatada = prazo.data_inicio.split("T")[0];
     const dataFimFormatada = prazo.data_fim.split("T")[0];
-    console.log(anoLetivoId);
+
     setForm({
       fk_tipo_prazo: tipoPrazoId,
       fk_tipo_avaliacao: prazo.tipo_avaliacao_id?.toString() || "",

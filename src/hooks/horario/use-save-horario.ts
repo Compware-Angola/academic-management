@@ -26,7 +26,6 @@ export function useSaveHorario(onSuccessReset?: () => void) {
     },
 
     onError: (err) => {
-      console.log(err);
       toast({
         variant: "destructive",
         title: "Erro",

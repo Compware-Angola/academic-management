@@ -38,13 +38,13 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const loginMutation = useMutationLogin();
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -56,7 +56,7 @@ const Login = () => {
   const onSubmit = (values: LoginFormData) => {
     const { username, password } = values;
     loginMutation.mutate(
-      { username, password, platform: 'GA' },
+      { username, password, platform: "GA" },
       {
         onSuccess: (data) => {
           toast({
@@ -66,16 +66,15 @@ const Login = () => {
           navigate("/dashboard");
         },
         onError: (err: Error) => {
-          console.log(err);
-          
-          const message = err.message || "Erro ao autenticar. Verifique credenciais.";
+          const message =
+            err.message || "Erro ao autenticar. Verifique credenciais.";
           toast({
             title: "Erro ao fazer login",
             description: message,
             variant: "destructive",
           });
         },
-      },
+      }
     );
   };
 
@@ -153,7 +152,6 @@ const Login = () => {
                 </Button>
               </form>
             </Form>
-       
           </CardContent>
         </Card>
 

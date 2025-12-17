@@ -28,6 +28,7 @@ import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
 import { AulaPayload } from "@/services/horario/save-horario.service";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 
 type SlotKey = string;
 
@@ -65,10 +66,14 @@ export default function ScheduleGridEdit(props: ScheduleGridProps) {
     tipoAula: string;
     docente?: string;
   }>({ sala: "", tipoAula: "", docente: undefined });
-  console.log({ aulasExistentes });
+
   const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
-  const { data: salas, isLoading: isLoadingSala } = useQuerySalas({
-    tipoSala: formData.tipoAula,
+  const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
+    diaSemana: selectedSlot?.dia.pkDiaDaSemana,
+    anoLectivo: Number(anoLetivo),
+    horaFim: selectedSlot?.tempo?.horaFim,
+    horaInicio: selectedSlot?.tempo?.horaInicio,
+    tipoAula: Number(formData?.tipoAula),
   });
   const verifyCollision = useVerifyCollision();
   const { data: teachers = [], isLoading: isLoadingTeacher } =
@@ -118,27 +123,6 @@ export default function ScheduleGridEdit(props: ScheduleGridProps) {
         variant: "destructive",
         title: "Dados incompletos",
         description: "Selecione docente, tipo de aula e sala.",
-      });
-      return;
-    }
-
-    const result = await verifyCollision.mutateAsync({
-      ano_lectivo: Number(anoLetivo),
-      semestre: Number(semestre),
-      periodo: Number(periodo),
-      unidade_curricular: Number(unidadeCurricular),
-      docente: Number(formData.docente),
-      sala: Number(formData.sala),
-      dia_semana: dia.pkDiaDaSemana,
-      ordem_tempo: tempo.ordem,
-      horario_id: null,
-    });
-
-    if (result.temColisao === 1) {
-      toast({
-        variant: "destructive",
-        title: "Colisão detectada",
-        description: result.mensagem,
       });
       return;
     }
@@ -294,8 +278,8 @@ export default function ScheduleGridEdit(props: ScheduleGridProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {salas?.map((sala) => (
-                    <SelectItem key={sala.pk} value={sala.pk.toString()}>
-                      {sala.descricao}
+                    <SelectItem key={sala?.salaid} value={sala?.salaid}>
+                      {sala.sala}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -309,17 +293,8 @@ export default function ScheduleGridEdit(props: ScheduleGridProps) {
                 disabled={verifyCollision.isPending}
                 className="flex-1"
               >
-                {verifyCollision.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verificando Colisões
-                  </>
-                ) : (
-                  <>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Adicionar
-                  </>
-                )}
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar
               </Button>
 
               {selectedSlot &&

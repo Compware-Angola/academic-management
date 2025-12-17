@@ -78,7 +78,6 @@ export function ActivityModal({
   tiposCalendario,
   editId,
 }: ActivityModalProps) {
-  console.log(editId);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-3xl">

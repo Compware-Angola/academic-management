@@ -23,7 +23,18 @@ import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-dispo
 import ScheduleGridEdit from "./components/ScheduleGridEdit";
 import { AulaPayload } from "@/services/horario/save-horario.service";
 import { useNextScheduleDesignation } from "@/hooks/horario/use-next-schedule-designation";
+const requiredFields = [
+  { key: "designacao", label: "Designação do Horário" },
+  { key: "capacidade", label: "Capacidade" }, // 👈
+  { key: "anoLetivo", label: "Ano Letivo" },
+  { key: "semestre", label: "Semestre" },
+  { key: "periodo", label: "Período" },
+  { key: "curso", label: "Curso" },
+  { key: "unidadeCurricular", label: "Unidade Curricular" },
+  { key: "modalidade", label: "Modalidade" },
+];
 
+const isEmpty = (v: unknown) => v === null || v === undefined || v === "";
 /* ------------------------------------------------------------------ */
 
 export function EditSchedule() {
@@ -202,7 +213,7 @@ export function EditSchedule() {
         designacao: formData.designacao,
         capacidade: Number(formData.capacidade),
         turma: Number(formData.classes),
-        estadoHorario:2,
+        estadoHorario: 2,
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
         aulas,
       },
@@ -213,7 +224,10 @@ export function EditSchedule() {
   };
 
   /* ------------------------- UI ------------------------- */
-
+  const isFormComplete =
+    requiredFields.every(
+      (f) => !isEmpty(formData[f.key as keyof typeof formData])
+    ) && aulas.length > 0;
   if (isLoading) {
     return (
       <div className="p-6 flex items-center gap-2">
@@ -390,8 +404,16 @@ export function EditSchedule() {
         <Button type="button" variant="outline" onClick={() => navigate(-1)}>
           <X className="mr-2 h-4 w-4" /> Cancelar
         </Button>
-        <Button type="submit">
-          <Save className="mr-2 h-4 w-4" /> Guardar
+        <Button
+          type="submit"
+          disabled={!isFormComplete || updateSchedule.isPending}
+        >
+          {updateSchedule.isPending ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
+          {updateSchedule.isPending ? "A guardar..." : "Guardar"}
         </Button>
       </div>
     </form>
