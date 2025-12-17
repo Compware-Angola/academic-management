@@ -1,6 +1,6 @@
 // src/pages/SchedulesByUC.tsx
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -26,9 +26,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, BookOpen, Eye, Loader2, Plus } from "lucide-react";
+import {
+  Home,
+  Search,
+  Eye,
+  Loader2,
+  Plus,
+  Trash2,
+  Check,
+  X,
+  Pencil,
+} from "lucide-react";
 
 import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
+
+// Importações para o Dialog de Confirmação
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"; // Certifique-se de que este caminho está correto
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
@@ -36,18 +58,40 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
-import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
+
 import { FormSelect } from "@/components/common/FormSelect";
 import { Badge } from "@/components/ui/badge";
+import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-existentes";
+
+import { useMutationDisponibilidadeHorario } from "@/hooks/horario/use-mutation-update-disponibilidade-horario";
+import { Switch } from "@/components/ui/switch";
+import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-validar-horario-director";
+import { useToast } from "@/hooks/use-toast";
+import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
+import { useAuth } from "@/hooks/use-auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ScheduleList() {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
 
-  // filtros
+  // === Estados para os Diálogos de Confirmação ===
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isValidateDialogOpen, setIsValidateDialogOpen] = useState(false);
+  const [itemIdToConfirm, setItemIdToConfirm] = useState<number | null>(null);
+  // ==============================================
+
+  const deleteMutation = useMutationDeletarHorario();
+
+  const mutation = useMutationDisponibilidadeHorario();
+
+  const validarMutation = useMutationValidarHorarioDirector();
+  // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
     semestre: "",
@@ -57,7 +101,7 @@ export default function ScheduleList() {
     unidadeCurricular: "",
   });
 
-  // paginação
+  // Paginação
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -68,7 +112,6 @@ export default function ScheduleList() {
     useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
   const { data: cursos } = useCursos();
-
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
@@ -82,8 +125,9 @@ export default function ScheduleList() {
         filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
     });
 
-  const { data: ScheduleResponse, isLoading: isLoadingSchedule } =
-    useScheduleQuery({
+  // Memorizar parâmetros para evitar re-renders infinitos
+  const queryParams = useMemo(
+    () => ({
       anoLectivo: Number(filters.anoLetivo),
       semestre: Number(filters.semestre),
       periodo: Number(filters.periodo),
@@ -91,13 +135,52 @@ export default function ScheduleList() {
       unidadeCurricular: Number(filters.unidadeCurricular),
       page,
       limit,
-    });
+    }),
+    [filters, page, limit]
+  );
 
-  const openDetails = (turmaId: number) => {
+  const {
+    data: ScheduleResponse,
+    isLoading: isLoadingSchedule,
+    refetch: refetchHorarios,
+  } = useQueryHorariosExistentes(queryParams);
+
+  // === Funções de Ação com Confirmação ===
+
+  const handleDeleteConfirmed = async () => {
+    if (itemIdToConfirm) {
+      deleteMutation.mutate({
+        horarioId: itemIdToConfirm,
+        userId: user.user_id,
+      });
+    }
+  };
+
+  const handleValidateConfirmed = async () => {
+    if (itemIdToConfirm) {
+      validarMutation.mutate({
+        horarioId: itemIdToConfirm,
+        userId: user.user_id,
+      });
+    }
+  };
+
+  const openDeleteDialog = (horarioId: number) => {
+    setItemIdToConfirm(horarioId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const openValidateDialog = (horarioId: number) => {
+    setItemIdToConfirm(horarioId);
+    setIsValidateDialogOpen(true);
+  };
+
+  const openDetails = async (turmaId: number) => {
     setSelectedTurmaId(turmaId);
     setIsModalOpen(true);
   };
-  const closeModal = () => setIsModalOpen(false);
+
+  // ========================================
 
   const tableData = ScheduleResponse?.data || [];
   const total = ScheduleResponse?.total || 0;
@@ -160,8 +243,6 @@ export default function ScheduleList() {
                 value: a.codigo,
               })}
             />
-
-            {/* Semestre */}
             <FormSelect
               disabled={isLoadingSemestres}
               loading={isLoadingSemestres}
@@ -175,7 +256,6 @@ export default function ScheduleList() {
                 value: s.codigo,
               })}
             />
-            {/* Período */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Período</label>
               <Select
@@ -194,7 +274,6 @@ export default function ScheduleList() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Curso */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Curso</label>
               <Select
@@ -220,7 +299,6 @@ export default function ScheduleList() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Ano Curricular */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Curricular</label>
               <Select
@@ -251,7 +329,6 @@ export default function ScheduleList() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Unidade Curricular */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
@@ -287,7 +364,7 @@ export default function ScheduleList() {
         </CardContent>
       </Card>
 
-      {/* Tabela */}
+      {/* Tabela   Pimentel##123!! */}
       <Card>
         <CardHeader>
           <CardTitle>Horários Encontradas</CardTitle>
@@ -299,31 +376,42 @@ export default function ScheduleList() {
               <p className="text-muted-foreground">Carregando Horários...</p>
             </div>
           ) : tableData.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
-              Nenhuma Horários encontrada.
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <Search className="h-8 w-8 text-muted-foreground" />
             </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum registo encontrado</h3>
+            <p className="text-muted-foreground mb-4">Não foram encontrados horários com os filtros aplicados.</p>
+            <Button onClick={() => navigate("/horarios/criar")}>
+              <Plus className="mr-2 h-4 w-4" />
+              Criar Primeiro Horário
+            </Button>
+          </div>
           ) : (
             <>
               <div className="rounded-md border overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Unidade Curricular</TableHead>
                       <TableHead>Designação</TableHead>
                       <TableHead>Curso</TableHead>
+                      <TableHead>Unidade Curricular</TableHead>
                       <TableHead>Ano Curricular</TableHead>
+                      <TableHead>Capacidade</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead>Disponibilidade</TableHead>
+                      <TableHead>Criado em</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {tableData.map((item) => (
                       <TableRow key={item.codigo}>
-                        <TableCell>{item.unidadecurricular}</TableCell>
                         <TableCell>{item.designacao}</TableCell>
                         <TableCell>{item.curso}</TableCell>
+                        <TableCell>{item.unidadecurricular}</TableCell>
                         <TableCell>{item.ano}</TableCell>
+                        <TableCell>{item.capacidade}</TableCell>
                         <TableCell>
                           <Badge
                             variant={
@@ -336,15 +424,86 @@ export default function ScheduleList() {
                             {item.estado}
                           </Badge>
                         </TableCell>
+                        <TableCell align="center">
+                          <Switch
+                            checked={item.disponibilidade === "Disponivel"}
+                            disabled={mutation.isPending}
+                            onCheckedChange={() =>
+                              mutation.mutateAsync({
+                                horarioId: item.codigo,
+                                userId: user.user_id,
+                              })
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {item.datacriacao}
+                        </TableCell>
+                        <TableCell className="w-40 min-w-40">
+                          <div className="flex items-center space-x-2 justify-center">
+                            {/* 1. Botão de Detalhes (Eye) */}
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => openDetails(item.codigo)}
+                              title="Ver Detalhes"
+                              aria-label="Ver Detalhes"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              title="Editar horário"
+                              onClick={() =>
+                                navigate(`/schedule/${item.codigo}/edit`)
+                              }
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
 
-                        <TableCell className="text-center">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openDetails(item.codigo)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" /> Ver Horário
-                          </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => openDeleteDialog(item.codigo)}
+                              title="Excluir Horário"
+                              aria-label="Excluir Horário"
+                              disabled={
+                                deleteMutation.isPending &&
+                                itemIdToConfirm === item.codigo
+                              }
+                            >
+                              {deleteMutation.isPending &&
+                              itemIdToConfirm === item.codigo ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+
+                            {/* 3. Botão de Validar (Check) - Abre o Dialog se PENDENTE */}
+                            {Number(item.estadoid) == 2 && (
+                              <Button
+                                variant="default"
+                                size="icon"
+                                onClick={() => openValidateDialog(item.codigo)}
+                                disabled={
+                                  validarMutation.isPending &&
+                                  itemIdToConfirm === item.codigo
+                                }
+                                title="Validar Horário"
+                                aria-label="Validar Horário"
+                                className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
+                              >
+                                {validarMutation.isPending &&
+                                itemIdToConfirm === item.codigo ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Check className="h-4 w-4" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -400,7 +559,7 @@ export default function ScheduleList() {
         </CardContent>
       </Card>
 
-      {/* Modal */}
+      {/* Modal de Detalhes */}
       <ScheduleDetailsModal
         horarioId={selectedTurmaId}
         isOpen={isModalOpen}
@@ -409,6 +568,86 @@ export default function ScheduleList() {
           setSelectedTurmaId(null);
         }}
       />
+
+      {/* === Diálogo de Confirmação de Exclusão === */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja excluir?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. O horário selecionado será removido
+              permanentemente do servidor.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setItemIdToConfirm(null);
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirmed}
+              disabled={deleteMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+            >
+              {deleteMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* ======================================== */}
+
+      {/* === Diálogo de Confirmação de Validação === */}
+      <AlertDialog
+        open={isValidateDialogOpen}
+        onOpenChange={setIsValidateDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deseja validar este Horário?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ao validar, você confirma que o horário está correto e pode ser
+              usado. Esta ação não pode ser desfeita facilmente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setIsValidateDialogOpen(false);
+                setItemIdToConfirm(null);
+              }}
+              disabled={validarMutation.isPending}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleValidateConfirmed}
+              disabled={validarMutation.isPending}
+              className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+            >
+              {validarMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="mr-2 h-4 w-4" />
+              )}
+              Validar Horário
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* ========================================== */}
     </div>
   );
 }

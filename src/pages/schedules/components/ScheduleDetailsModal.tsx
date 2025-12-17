@@ -72,7 +72,7 @@ export default function ScheduleDetailsModal({
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
       <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl">
             {horario?.unidadeCurricular || "Carregando..."}{" "}
             <span className="text-muted-foreground font-mono text-lg">
@@ -141,8 +141,8 @@ export default function ScheduleDetailsModal({
                             {/* Horário + Tipo */}
                             <div className="flex justify-between items-start mb-3">
                               <span className="font-mono font-bold text-base">
-                                {formatTime(aula.horaInicio)}–
-                                {formatTime(aula.horaTermino)}
+                                {aula.horaInicio}–
+                                {aula.horaTermino}
                               </span>
                               <span
                                 className={`px-2 py-0.5 rounded text-xs font-medium ${

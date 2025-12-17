@@ -28,16 +28,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-
-  Trash2,
-  Edit,
-} from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { AuthStorage } from "@/util/auth-storage";
 
 // Interfaces
 interface Prazo {
@@ -82,14 +79,13 @@ interface TipoEpocaAvaliacao {
   descricao: string;
 }
 
-
 const API_TIPOS_CANDIDATURA =
   "https://api.compware.net/ords/cmpdev/uma/tipo-candidatura/all";
 const API_TIPOS_PRAZO =
   "https://api.compware.net/ords/cmpdev/uma/tipo-prazo/all";
 const API_TIPOS_AVALIACAO =
   "https://api.compware.net/ords/cmpdev/uma/tipo-avaliacao/all";
-const API_SEMESTRES = "https://api.compware.net/ords/cmpdev/uma/semestre/all"; 
+const API_SEMESTRES = "https://api.compware.net/ords/cmpdev/uma/semestre/all";
 const API_PRAZOS =
   "https://api.compware.net/ords/cmpdev/ga/academic-calendar/deadlines";
 const API_CRIAR_PRAZO =
@@ -119,7 +115,7 @@ export default function Deadlines() {
   const [tiposEpocaAvaliacao, setTiposEpocaAvaliacao] = useState<
     TipoEpocaAvaliacao[]
   >([]);
-    const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: anosAcademicos } = useQueryAnoAcademico();
 
   // Filtros
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -145,8 +141,6 @@ export default function Deadlines() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-
-
   const fetchTipoEpocaAvaliacoes = async () => {
     try {
       const res = await axios.get(API_TIPO_DE_EPOCA_AVALIACAO);
@@ -155,7 +149,7 @@ export default function Deadlines() {
       const filteredData = data.filter(
         (item) => typeof item.descricao === "string"
       );
-      console.log(filteredData, data, res.data);
+
       setTiposEpocaAvaliacao(filteredData);
     } catch {
       toast({
@@ -269,11 +263,10 @@ export default function Deadlines() {
   };
 
   const handleSelecionarPrazo = (prazo: Prazo) => {
-    // Converter datas para o formato YYYY-MM-DD (compatível com input date)
     setPrazoId(prazo.prazo_id);
     const dataInicioFormatada = prazo.data_inicio.split("T")[0];
     const dataFimFormatada = prazo.data_fim.split("T")[0];
-    console.log(anoLetivoId);
+
     setForm({
       fk_tipo_prazo: tipoPrazoId,
       fk_tipo_avaliacao: prazo.tipo_avaliacao_id?.toString() || "",
@@ -340,7 +333,7 @@ export default function Deadlines() {
       data_inicio: `${form.data_inicio}T00:00:00`,
       data_fim: `${form.data_fim}T00:00:00`,
       observacao: form.observacao || null,
-      fk_created_by: Number(form.fk_created_by),
+      fk_created_by: AuthStorage.getUser().user_id.toString(),
     };
 
     try {
@@ -357,7 +350,7 @@ export default function Deadlines() {
         data_inicio: "",
         data_fim: "",
         observacao: "",
-        fk_created_by: "1397",
+        fk_created_by: "",
         anoletivo: "",
         tipoCandidaturaId: "",
       });
@@ -373,7 +366,6 @@ export default function Deadlines() {
 
   // Inicialização
   useEffect(() => {
-  
     fetchTiposCandidatura();
     fetchTiposPrazo();
     fetchTiposAvaliacao();
@@ -841,3 +833,5 @@ export default function Deadlines() {
     </div>
   );
 }
+
+// TODO:FIX ME PLEASE

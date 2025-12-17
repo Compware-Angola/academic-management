@@ -1,14 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 
-import {
-  saveHorarioService,
-  SaveHorarioPayload,
-  SaveHorarioResponse,
-} from "@/services/horario/save-horario.service";
+import { saveHorarioService } from "@/services/horario/save-horario.service";
 
 export function useSaveHorario(onSuccessReset?: () => void) {
-  return useMutation<SaveHorarioResponse, Error, SaveHorarioPayload>({
+  return useMutation({
     mutationFn: saveHorarioService,
 
     onSuccess: (data) => {
@@ -29,11 +25,11 @@ export function useSaveHorario(onSuccessReset?: () => void) {
       onSuccessReset?.();
     },
 
-    onError: () => {
+    onError: (err) => {
       toast({
         variant: "destructive",
-        title: "Erro de conexão",
-        description: "Não foi possível comunicar com o servidor.",
+        title: "Erro",
+        description: err?.message,
       });
     },
   });

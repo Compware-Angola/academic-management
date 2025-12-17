@@ -11,7 +11,8 @@ export type Aula = {
   diaSemana: string;          // "Sexta-Feira"
   diaSemanaId: number;
   ordem: number;
-  sala: string;               // "U-202"
+  sala: string;  
+  salaid:number;             // "U-202"
   horaInicio: string;         // "29400000000000" (nanoseconds ou ticks)
   horaTermino: string;
   docenteId: number | null;

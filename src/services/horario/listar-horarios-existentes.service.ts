@@ -1,14 +1,19 @@
 // src/services/horario/listar-horarios-existentes.service.ts
 
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-/* ---------- PAYLOAD (Filtros) ---------- */
+
 export type ListarHorariosExistentesPayload = {
-  p_ano_lectivo: number | string;
-  p_semestre: number | string;
-  p_periodo: number | string;
-  p_curso: number | string;
-  p_ano_curricular?: number | string; // Novo campo opcional
+  anoLectivo: number | string;
+  semestre: number | string;
+  periodo: number | string;
+  curso: number | string;
+  anoCurricular?: number | string;
+  unidadeCurricular?: number | string;
+  estado?: number | string;
+  afetacaoDocente?: number | string;
+  page?: number;
+  limit?: number;
 };
 
 /* ---------- RESPONSE ITEM ---------- */
@@ -16,51 +21,65 @@ export type HorarioExistente = {
   codigo: number;
   designacao: string;
   unidadeCurricularId: number;
-  unidadeCurricular: string;
+  unidadecurricular: string;
   curso: string;
   ano: string;
   capacidade: number;
   reservado: string;
-  semestre: number;
+  semestre: string;
   estado: string;
-  estadoId: number;
+  estadoid: number;
+  estadocor: string | null;
   disponibilidade: string;
+  criadoPor: string | null;
+  atualizadoPor: string | null;
   dataUltimaAtualizacao: string;
-  dataCriacao: string;
+  datacriacao: string;
 };
 
 /* ---------- RESPONSE COMPLETO ---------- */
 export type ListarHorariosExistentesResponse = {
-  horarios: HorarioExistente[];
+  data: HorarioExistente[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 };
 
 /* ---------- SERVICE ---------- */
 export async function listarHorariosExistentesService(
   payload: ListarHorariosExistentesPayload,
-): Promise<HorarioExistente[]> {
+): Promise<ListarHorariosExistentesResponse> {
   const {
-    p_ano_lectivo,
-    p_semestre,
-    p_periodo,
-    p_curso,
-    p_ano_curricular,
+    anoLectivo,
+    semestre,
+    periodo,
+    curso,
+    anoCurricular,
+    unidadeCurricular,
+    estado,
+    afetacaoDocente,
+    page = 1,
+    limit = 25,
   } = payload;
 
-  const { data } = await axiosApexGa.get<ListarHorariosExistentesResponse>(
-    "/horario/listar",
+  const { data } = await axiosNestGa.get<ListarHorariosExistentesResponse>(
+    "/schedule",
     {
       params: {
-        p_ano_lectivo,
-        p_semestre,
-        p_periodo,
-        p_curso,
-        p_ano_curricular,
-        p_unidade_curricular: "", // opcional, mas ajuda a manter compatibilidade
-        p_estado: "",
-        p_afetacao_docente: "",
+        anoLectivo,
+        semestre,
+        periodo,
+        curso,
+        anoCurricular,
+        unidadeCurricular,
+        estado,
+        afetacaoDocente,
+        page,
+        limit,
       },
     }
   );
 
-  return data.horarios || [];
+  return data;
 }
