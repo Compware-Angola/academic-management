@@ -181,7 +181,7 @@ const { data: designacao } = useNextScheduleDesignation(
       curso: Number(formData.curso),
       unidadeCurricular: Number(formData.unidadeCurricular),
       modalidade: Number(formData.modalidade),
-      tipoAula: aulas[0].tipoAula,
+     
       aulas,
       apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
       capacidade: Number(formData.capacidade),

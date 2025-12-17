@@ -23,7 +23,7 @@ export const useUpdateSchedule = () => {
         description: data.mensagem,
       });
       queryClient.invalidateQueries({
-        queryKey: ["schedule", "schedule-details"],
+        queryKey: ["schedule", "schedule-details","horarios-existentes"],
       });
     },
 

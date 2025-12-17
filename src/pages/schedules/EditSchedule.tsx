@@ -134,7 +134,7 @@ export function EditSchedule() {
       data.aulas?.map((a: any) => ({
         docente: a.docenteId,
         tipoAula: a.tipoAulaId,
-        sala: a.sala,
+        sala: a.salaid,
         diaSemana: a.diaSemanaId,
         ordemTempo: a.ordem,
         hora_inicio: a.horaInicio,
@@ -202,6 +202,7 @@ export function EditSchedule() {
         designacao: formData.designacao,
         capacidade: Number(formData.capacidade),
         turma: Number(formData.classes),
+        estadoHorario:2,
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
         aulas,
       },

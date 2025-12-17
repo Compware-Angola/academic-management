@@ -25,7 +25,7 @@ export type SaveHorarioPayload = {
   capacidade: number;
   turma: number;
   apenasPrimeiroAno: number;
-  tipoAula: number;
+ 
   obs: string;
   aulas: AulaPayload[];
 };
