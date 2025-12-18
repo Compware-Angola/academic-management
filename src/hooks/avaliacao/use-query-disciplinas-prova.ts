@@ -12,7 +12,7 @@ export function useQueryDisciplinasProva(
     !!params.anoCurricularSelecionado &&
     !!params.semestreSelecionado &&
     !!params.anoLectivoSelecionado &&
-    !!params.tipoProvaSelecionada &&
+   
     !!params.tipoAvaliacaoSelecionada;
 
   return useQuery<DisciplinaProva[], Error>({
@@ -24,7 +24,7 @@ export function useQueryDisciplinasProva(
       params.anoCurricularSelecionado,
       params.semestreSelecionado,
       params.anoLectivoSelecionado,
-      params.tipoProvaSelecionada,
+
       params.tipoAvaliacaoSelecionada,
       params.filtro
     ],
