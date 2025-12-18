@@ -10,7 +10,7 @@ export type AvailableRoomsParams = {
 
 export type AvailableRoomsResponse = {
   success: boolean;
-  data: { salaid: null; sala: string }[];
+  data: { salaid: number; sala: string }[];
 };
 
 export async function availableRooms(

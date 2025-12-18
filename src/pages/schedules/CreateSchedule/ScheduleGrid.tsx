@@ -74,6 +74,12 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
       duration: 3000,
     });
   }, [formData.tipoAula, salas, isLoadingSala]);
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      sala: "",
+    }));
+  }, [formData.tipoAula]);
 
   const handleSlotClick = (dia: DiaSemana, tempo: Tempo) => {
     const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
@@ -288,7 +294,10 @@ export default function ScheduleGrid(props: ScheduleGridProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {salas?.map((sala) => (
-                    <SelectItem key={sala.salaid} value={sala.salaid}>
+                    <SelectItem
+                      key={sala.salaid}
+                      value={sala.salaid.toString()}
+                    >
                       {sala.sala}
                     </SelectItem>
                   ))}

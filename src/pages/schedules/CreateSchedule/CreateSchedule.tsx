@@ -169,14 +169,7 @@ export default function CreateSchedule() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      toast({
-        variant: "destructive",
-        title: "Validação pendente",
-        description: "Verifique todos os campos",
-      });
-      return;
-    }
+    if (!validateForm()) return;
 
     const payload: SaveHorarioPayload = {
       anoLectivo: Number(formData.anoLetivo),
@@ -194,11 +187,22 @@ export default function CreateSchedule() {
       obs: "",
     };
 
-    await saveHorario.mutateAsync(payload);
-    if (!saveHorario.isSuccess) {
-      return;
+    try {
+      await saveHorario.mutateAsync(payload);
+
+      toast({
+        title: "Sucesso",
+        description: "Horário criado com sucesso",
+      });
+
+      navigate("/horarios/listar");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao criar horário",
+        description: "Verifique os dados e tente novamente",
+      });
     }
-    navigate("/horarios/listar");
   };
 
   /* ---------- UI ----------- */

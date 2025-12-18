@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
-import { useQuerySalas } from "@/hooks/salas/use-query-sala";
+
 import { useToast } from "@/hooks/use-toast";
 import { useVerifyCollision } from "@/hooks/horario/use-verify-collision";
 import { AulaPayload } from "@/services/horario/save-horario.service";
@@ -37,8 +37,6 @@ type ScheduleGridProps = {
   scheduleData: TempoDisponivelItem[];
   onChange: (aulas: AulaPayload[]) => void;
   anoLetivo: string;
-  semestre: string;
-  periodo: string;
   unidadeCurricular: string;
 };
 
@@ -48,8 +46,6 @@ export default function ScheduleGridEdit(props: ScheduleGridProps) {
     onChange,
     unidadeCurricular,
     anoLetivo,
-    periodo,
-    semestre,
     aulasExistentes,
   } = props;
 
@@ -267,18 +263,32 @@ export default function ScheduleGridEdit(props: ScheduleGridProps) {
                 onValueChange={(v) => setFormData({ ...formData, sala: v })}
               >
                 <SelectTrigger
-                  disabled={!formData.tipoAula || isLoadingSala}
-                  className="w-full"
+                  disabled={
+                    Boolean(formData.tipoAula) === false || isLoadingSala
+                  }
+                  className="w-full "
                 >
                   <SelectValue
                     placeholder={
-                      isLoadingSala ? "Carregando..." : "Selecione Salas"
+                      <>
+                        {" "}
+                        {isLoadingSala ? (
+                          <span className="flex gap-2 items-center">
+                            Carregando <Loader2 className="animate-spin" />
+                          </span>
+                        ) : (
+                          "Selecione Salas"
+                        )}
+                      </>
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   {salas?.map((sala) => (
-                    <SelectItem key={sala?.salaid} value={sala?.salaid}>
+                    <SelectItem
+                      key={sala.salaid}
+                      value={sala.salaid.toString()}
+                    >
                       {sala.sala}
                     </SelectItem>
                   ))}

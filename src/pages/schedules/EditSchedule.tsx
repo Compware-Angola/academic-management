@@ -394,8 +394,6 @@ export function EditSchedule() {
           aulasExistentes={aulas}
           onChange={setAulas}
           anoLetivo={formData.anoLetivo}
-          periodo={formData.periodo}
-          semestre={formData.semestre}
           unidadeCurricular={formData.unidadeCurricular}
         />
       )}
