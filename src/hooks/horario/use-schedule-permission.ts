@@ -1,13 +1,16 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createSchedulePermission } from "@/services/horario/schedule-permission.service";
 import { useToast } from "@/hooks/use-toast";
 
 export function useSchedulePermission() {
   const { toast } = useToast();
-
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createSchedulePermission,
     onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["schedule-with-permission"],
+      });
       toast({
         title: "Permissão criada com sucesso",
         description: data.message,
