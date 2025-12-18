@@ -70,7 +70,7 @@ export default function ControlNotes() {
     unidadeCurricular: "",
     classes: "",
     tipoAvaliacao: "",
-    tipoProva: "",
+  
     verHoario: "",
     filtro: "",
   });
@@ -97,9 +97,7 @@ export default function ControlNotes() {
     anoLectivoSelecionado: formData.anoLetivo
       ? Number(formData.anoLetivo)
       : undefined,
-    tipoProvaSelecionada: formData.tipoProva
-      ? Number(formData.tipoProva)
-      : undefined,
+
     tipoAvaliacaoSelecionada: formData.tipoAvaliacao
       ? Number(formData.tipoAvaliacao)
       : undefined,
@@ -259,19 +257,7 @@ export default function ControlNotes() {
             })}
             loading={isLoadingUC}
           />
-          <FormSelect
-            label="Tipo de Prova"
-            value={formData.tipoProva}
-            disabled={isLoadingTipoProva}
-            onChange={(v) => setFormData({ ...formData, tipoProva: v })}
-            options={tipoProva}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
-            loading={isLoadingTipoProva}
-          />
+    
           <FormSelect
             label="Tipo de Avaliação"
             value={formData.tipoAvaliacao}
