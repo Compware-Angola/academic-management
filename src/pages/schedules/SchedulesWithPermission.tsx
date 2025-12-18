@@ -1,7 +1,8 @@
 // src/pages/SchedulesWithPermission.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Eye, Plus, Search } from "lucide-react";
+import { Loader2, Eye, Plus, Search, Trash2 } from "lucide-react";
+import { useUpdateSchedulePermission } from "@/hooks/horario/use-update-schedule-permission";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -42,9 +43,11 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
 import { useSchedulePermission } from "@/hooks/horario/use-schedule-permission";
 import { Schedule } from "@/services/horario/fetch-schedule.service";
+import { useScheduleWithPermissionQuery } from "@/hooks/horario/use-query-schedule-with-permission";
+import { formatarData } from "@/util/date-formate";
+import { ScheduleWithPermissao } from "@/services/horario/fetch-schedule-with-permission.service";
 
 export default function SchedulesWithPermission() {
   const navigate = useNavigate();
@@ -69,7 +72,7 @@ export default function SchedulesWithPermission() {
 
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [selectedHorarioForPermission, setSelectedHorarioForPermission] =
-    useState<Schedule | null>(null);
+    useState<ScheduleWithPermissao | null>(null);
 
   const [permissionForm, setPermissionForm] = useState({
     dataInicio: "",
@@ -95,7 +98,7 @@ export default function SchedulesWithPermission() {
 
   // --------- Query de horários ---------
   const { data: scheduleResponse, isLoading: isLoadingSchedule } =
-    useScheduleQuery({
+    useScheduleWithPermissionQuery({
       anoLectivo: Number(filters.anoLetivo),
       semestre: Number(filters.semestre),
       periodo: Number(filters.periodo),
@@ -104,6 +107,8 @@ export default function SchedulesWithPermission() {
       page,
       limit,
     });
+  const { mutate: updatePermission, isPending: isUpdatingPermission } =
+    useUpdateSchedulePermission();
 
   const tableData = scheduleResponse?.data ?? [];
   const total = scheduleResponse?.total ?? 0;
@@ -119,9 +124,14 @@ export default function SchedulesWithPermission() {
     setIsDetailsModalOpen(true);
   };
 
-  const openPermissionModal = (horario: Schedule) => {
+  const openPermissionModal = (horario: ScheduleWithPermissao) => {
     setSelectedHorarioForPermission(horario);
-    setPermissionForm({ dataInicio: "", dataFim: "" });
+
+    setPermissionForm({
+      dataInicio: horario.permissao?.datainicio?.slice(0, 10) || "",
+      dataFim: horario.permissao?.datafim?.slice(0, 10) || "",
+    });
+
     setIsPermissionModalOpen(true);
   };
 
@@ -136,6 +146,34 @@ export default function SchedulesWithPermission() {
       onSuccess: () => {
         setIsPermissionModalOpen(false);
         setSelectedHorarioForPermission(null);
+      },
+    });
+  };
+
+  const handleConfirmUpdatePermission = () => {
+    if (!selectedHorarioForPermission?.permissao) return;
+
+    updatePermission(
+      {
+        permissionId: selectedHorarioForPermission.permissao.codigo,
+        payload: {
+          dataInicio: permissionForm.dataInicio || undefined,
+          dataFim: permissionForm.dataFim || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsPermissionModalOpen(false);
+          setSelectedHorarioForPermission(null);
+        },
+      }
+    );
+  };
+  const handleDisablePermission = (permissionId: number) => {
+    updatePermission({
+      permissionId,
+      payload: {
+        ativeState: 0,
       },
     });
   };
@@ -307,6 +345,8 @@ export default function SchedulesWithPermission() {
                       <TableHead>Curso</TableHead>
                       <TableHead>Ano Curricular</TableHead>
                       <TableHead>Estado</TableHead>
+                      <TableHead>Início da permissão</TableHead>
+                      <TableHead>Fim da permissão</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -328,6 +368,20 @@ export default function SchedulesWithPermission() {
                             {item.estado}
                           </Badge>
                         </TableCell>
+                        <TableCell>
+                          {item.permissao == null ? (
+                            "-"
+                          ) : (
+                            <p>{formatarData(item.permissao.datainicio)}</p>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {item.permissao == null ? (
+                            "-"
+                          ) : (
+                            <p>{formatarData(item.permissao.datafim)}</p>
+                          )}
+                        </TableCell>
                         <TableCell className="flex justify-end gap-2">
                           <Button
                             size="sm"
@@ -336,12 +390,26 @@ export default function SchedulesWithPermission() {
                           >
                             <Eye className="h-4 w-4 mr-2" /> Ver
                           </Button>
+                          {item.permissao && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                handleDisablePermission(item.permissao.codigo)
+                              }
+                            >
+                              <Trash2 />
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => openPermissionModal(item)}
                           >
-                            <Plus className="h-4 w-4 mr-2" /> Permissão
+                            <Plus className="h-4 w-4 mr-2" />
+                            {item.permissao
+                              ? "Editar Permissão"
+                              : "Conceder Permissão"}
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -415,7 +483,11 @@ export default function SchedulesWithPermission() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Conceder Permissão</AlertDialogTitle>
+            <AlertDialogTitle>
+              {selectedHorarioForPermission?.permissao
+                ? "Editar Permissão"
+                : "Conceder Permissão"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Horário: {selectedHorarioForPermission?.designacao}
             </AlertDialogDescription>
@@ -447,7 +519,11 @@ export default function SchedulesWithPermission() {
           <AlertDialogFooter className="space-x-2">
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmPermission}
+              onClick={
+                selectedHorarioForPermission?.permissao == null
+                  ? handleConfirmPermission
+                  : handleConfirmUpdatePermission
+              }
               disabled={isCreatingPermission}
             >
               {isCreatingPermission ? "Concedendo..." : "Conceder"}
