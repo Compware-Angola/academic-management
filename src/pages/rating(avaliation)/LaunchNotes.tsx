@@ -45,6 +45,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
+import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
@@ -55,6 +56,7 @@ export default function LaunchNotes() {
     semestre: "",
     periodo: "",
     curso: "",
+    unidadeCurricular: "",
     horarioId: "",
     classes: "",
     tipoAvaliacao: "",
@@ -110,7 +112,31 @@ export default function LaunchNotes() {
     useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const upsertNoteMutation = useUpsertNote();
-
+ const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: formData.classes,
+      curso: formData.curso,
+      semestre: formData.semestre,
+    });
+      const canLoadTurmas =
+        !!formData.anoLetivo &&
+        !!formData.semestre &&
+        !!formData.periodo &&
+        !!formData.curso &&
+        !!formData.unidadeCurricular;
+    
+      const { data: scheduleResponse, isLoading: loadingschedule } = useQuerySchedulesByUc(
+        {
+          anoLectivo: Number(formData.anoLetivo),
+          semestre: Number(formData.semestre),
+          periodo: Number(formData.periodo),
+          curso: Number(formData.curso),
+          unidadeCurricular: Number(formData.unidadeCurricular),
+         
+        },
+        { enabled: canLoadTurmas }
+      );
+    
   useEffect(() => {
     setLocalStudents(students);
     const initialLocks: { [key: number]: boolean } = {};
@@ -225,7 +251,7 @@ export default function LaunchNotes() {
             label="Ano Letivo"
             value={formData.anoLetivo}
             onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
-            options={year}
+            options={academicYear}
             map={(a) => ({
               key: a.codigo,
               label: a.designacao,
@@ -288,22 +314,41 @@ export default function LaunchNotes() {
             })}
             loading={isLoadingClasses}
           />
+               {/* UC */}
+          <FormSelect
+            label="Unidade Curricular"
+            value={formData.unidadeCurricular}
+            disabled={
+              isLoadingUC ||
+              !formData.semestre ||
+              !formData.curso ||
+              !formData.classes
+            }
+            onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
+            options={unidadesCurriculares}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.descricao,
+              value: u.pk,
+            })}
+            loading={isLoadingUC}
+          />
           <FormSelectIsaac
             label="Horario"
             value={formData.horarioId}
             disabled={
-              isLoadingTurmaDataHorario ||
+              loadingschedule ||
               !formData.semestre ||
               !formData.classes
             }
             onChange={(v) => setFormData({ ...formData, horarioId: v })}
-            options={turmDataHorario?.horarios}
+            options={scheduleResponse?.data}
             map={(u, index) => ({
               key: index,
-              value: u.codigo_horario,
-              label: `${u.horario} ${u.grade}`,
+              value: u.codigo,
+              label: `${u.designacao}`,
             })}
-            loading={isLoadingTurmaDataHorario}
+            loading={loadingschedule}
           />
           <FormSelect
             label="Tipo de Prova"

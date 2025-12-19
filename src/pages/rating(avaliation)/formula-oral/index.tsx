@@ -39,8 +39,8 @@ export default function FormulaOral() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const [selected, setSelected] = useState<DefinirOral | null>(null);
-  const [openModal, setOpenModal] = useState(false);
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
 
   const { data: semestres } = useQuerySemestres();
   const { data: cursos } = useCursos();
@@ -55,6 +55,7 @@ export default function FormulaOral() {
     isLoading,
     refetch,
   } = useQueryDefinirOral({
+    anoLectivo:filters.anoLetivo? Number(filters.anoLetivo):undefined,
     cursoId: filters.curso ? Number(filters.curso) : undefined,
     anoCurricular: filters.classes ? Number(filters.classes) : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
@@ -98,6 +99,20 @@ export default function FormulaOral() {
       {/* ========== FILTROS ========== */}
       <div className="bg-card border rounded-lg p-6">
         <div className="grid grid-cols-4 gap-4">
+
+              <FormSelect
+            disabled={isLoadingAcademicYear}
+            loading={isLoadingAcademicYear}
+            label="Ano Letivo"
+            value={filters.anoLetivo}
+            onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
+            options={academicYear}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
+          />
           <FormSelect
             label="Semestre"
             value={filters.semestre}

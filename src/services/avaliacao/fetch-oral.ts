@@ -7,6 +7,7 @@ export type DefinirOral = {
 };
 
 export type FilterDefinirOralParams = {
+  anoLectivo:number,
   cursoId?: number;
   anoCurricular?: number;
   semestre?: number;

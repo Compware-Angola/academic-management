@@ -6,6 +6,6 @@ export function useQueryDefinirOral(params:FilterDefinirOralParams) {
   return useQuery({
     queryKey: ["definir-oral", params],
     queryFn: () => fetchDefinirOral(params),
-    enabled: !!params.cursoId && !!params.anoCurricular && !!params.semestre,
+    enabled: !!params.cursoId && !!params.anoCurricular && !!params.semestre && !!params.anoLectivo,
   });
 }

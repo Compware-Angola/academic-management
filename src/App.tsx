@@ -59,6 +59,7 @@ import HealpFAQ from "./pages/healp/HealpFAQ";
 import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
 import { EditSchedule } from "./pages/schedules/EditSchedule";
 import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
+import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
 
 const App = () => {
   return (
@@ -109,6 +110,7 @@ const App = () => {
                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
+                <Route path="/avaliacoes/presenca" element={<PresenceList />} />
                 <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
@@ -185,7 +187,7 @@ const App = () => {
                   element={<ExamCalendarPos />}
                 />
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
-                {/* <Route path="*" element={<NotFound />} />*/}
+                {/* <Route path="*" element={<NotFound />} />*/}  
                 <Route path="*" element={<UnderConstruction />} />
                 {/* Finanças */}
                 <Route path="/ajuda" element={<HealpFAQ />} />
