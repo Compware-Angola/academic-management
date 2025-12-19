@@ -35,44 +35,94 @@ import axios from "axios";
 import { formatarData } from "@/util/date-formate";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { AuthStorage } from "@/util/auth-storage";
-import { useQueryPrazos } from "@/hooks/prazos/use-query-prazo";
-import { useQueryClient } from "@tanstack/react-query";
-import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
-import { useQueryTiposPrazos } from "@/hooks/prazos/use-query-tipo-prazo";
-import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
-import { useQueryTipoEpocaAvaliacoes } from "@/hooks/avaliacao/use-query-fetch-tipo-epoca-avaliacoes";
-import { useCreatePrazo } from "@/hooks/prazos/use-create-prazo";
-import { useUpdatePrazo } from "@/hooks/prazos/use-update-prazo";
-import { useDeletePrazo } from "@/hooks/prazos/use-delete-prazo";
-import { Prazo } from "@/services/prazos/fetchPrazos";
 
+// Interfaces
+interface Prazo {
+  prazo_id: number;
+  observacao: string;
+  tipo_avaliacao_id: number;
+  data_inicio: string;
+  data_fim: string;
+  tipo_avaliacao: string;
+  criado_por_nome: string;
+}
+
+interface AnoLetivo {
+  codigo: string;
+  designacao: string;
+  estado: string;
+}
+
+interface TipoCandidatura {
+  codigo: number;
+  designacao: string;
+}
+
+interface TipoPrazo {
+  pk_tipo_prazo: number;
+  designacao: string;
+}
+
+interface TipoAvaliacao {
+  codigo: number;
+  designacao: string;
+  sigla: string;
+}
+
+interface Semestre {
+  codigo: number;
+  designacao: string;
+}
+
+interface TipoEpocaAvaliacao {
+  codigo: number;
+  descricao: string;
+}
+
+const API_TIPOS_CANDIDATURA =
+  "https://api.compware.net/ords/cmpdev/uma/tipo-candidatura/all";
+const API_TIPOS_PRAZO =
+  "https://api.compware.net/ords/cmpdev/uma/tipo-prazo/all";
+const API_TIPOS_AVALIACAO =
+  "https://api.compware.net/ords/cmpdev/uma/tipo-avaliacao/all";
+const API_SEMESTRES = "https://api.compware.net/ords/cmpdev/uma/semestre/all";
+const API_PRAZOS =
+  "https://api.compware.net/ords/cmpdev/ga/academic-calendar/deadlines";
+const API_CRIAR_PRAZO =
+  "https://api.compware.net/ords/cmpdev/ga/academic-calendar/deadlines";
+const API_TIPO_DE_EPOCA_AVALIACAO =
+  "https://api.compware.net/ords/cmpdev/uma/tipo-epoca-avaliacao/all";
+
+const API_APAGAR_PRAZO =
+  "https://api.compware.net/ords/cmpdev/auto/fk2_mcal_tb_prazo";
+
+const API_ACTUALIZAR_PRAZO =
+  "https://api.compware.net/ords/cmpdev/auto/fk2_mcal_tb_prazo";
 export default function Deadlines() {
-  const [prazoId, setPrazoId] = useState<number>(0);
-  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
-    useQueryTipoCandidatura();
-  const { mutateAsync: criarPrazo, isPending: isCreating } = useCreatePrazo();
+  const { toast } = useToast();
 
-  const { mutateAsync: actualizarPrazo, isPending: isUpdating } =
-    useUpdatePrazo();
-  const { mutateAsync: removerPrazo, isPending: isRemoverPrazo } =
-    useDeletePrazo();
-  const { data: tiposAvaliacao = [] } = useQueryTipoAvaliacao();
-  const { data: semestres = [] } = useQuerySemestres();
-  const { data: tiposEpocaAvaliacao = [] } = useQueryTipoEpocaAvaliacoes();
+  // Estados
+  const [loading, setLoading] = useState(true);
+  const [prazos, setPrazos] = useState<Prazo[]>([]);
+  const [anosLetivos, setAnosLetivos] = useState<AnoLetivo[]>([]);
+  const [prazoId, setPrazoId] = useState<number>(0);
+  const [tiposCandidatura, setTiposCandidatura] = useState<TipoCandidatura[]>(
+    []
+  );
+  const [tiposPrazo, setTiposPrazo] = useState<TipoPrazo[]>([]);
+  const [tiposAvaliacao, setTiposAvaliacao] = useState<TipoAvaliacao[]>([]);
+  const [semestres, setSemestres] = useState<Semestre[]>([]); // NOVO
+  const [tiposEpocaAvaliacao, setTiposEpocaAvaliacao] = useState<
+    TipoEpocaAvaliacao[]
+  >([]);
+  const { data: anosAcademicos } = useQueryAnoAcademico();
+
+  // Filtros
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [tipoPrazoId, setTipoPrazoId] = useState<string>("");
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("");
-  const { data: tiposPrazo = [], isLoading: isLoadingTiposPrazo } =
-    useQueryTiposPrazos();
   const [isEditing, setIsEditing] = useState<boolean>(true);
-  const { data: anosAcademicos = [], isLoading: isLoadingAnosAcademicos } =
-    useQueryAnoAcademico();
-  const { data: prazos = [], isLoading: isLoadingPrazo } = useQueryPrazos({
-    anoLetivoId: anoLetivoId,
-    tipoPrazoId: tipoPrazoId,
-    tipoCandidaturaId: tipoCandidaturaId,
-  });
+
   // Modal Novo Prazo
   const [openModal, setOpenModal] = useState(false);
   const [form, setForm] = useState({
@@ -91,8 +141,125 @@ export default function Deadlines() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const handleDeletePrazo = async (prazoId: number) => {
-    await removerPrazo(prazoId);
+  const fetchTipoEpocaAvaliacoes = async () => {
+    try {
+      const res = await axios.get(API_TIPO_DE_EPOCA_AVALIACAO);
+      const data =
+        res.data.tipo_epoca_avaliacoes || ([] as TipoEpocaAvaliacao[]);
+      const filteredData = data.filter(
+        (item) => typeof item.descricao === "string"
+      );
+
+      setTiposEpocaAvaliacao(filteredData);
+    } catch {
+      toast({
+        title: "Erro ao carregar tipos de época de avaliação",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchTiposCandidatura = async () => {
+    try {
+      const res = await axios.get(API_TIPOS_CANDIDATURA);
+      const data = res.data.tipo_candidaturas || [];
+      setTiposCandidatura(data);
+      const licenciatura = data.find((t: any) => t.codigo === 1);
+      if (licenciatura) setTipoCandidaturaId("1");
+    } catch {
+      toast({
+        title: "Erro ao carregar tipos de candidatura",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchTiposPrazo = async () => {
+    try {
+      const res = await axios.get(API_TIPOS_PRAZO);
+      const data = res.data.tiposPrazo || [];
+      setTiposPrazo(data);
+      const marcacaoProvas = data.find((t: TipoPrazo) => t.pk_tipo_prazo === 4);
+      if (marcacaoProvas) {
+        setTipoPrazoId("4");
+        setForm((prev) => ({ ...prev, fk_tipo_prazo: "4" }));
+      }
+    } catch {
+      toast({
+        title: "Erro ao carregar tipos de prazo",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchTiposAvaliacao = async () => {
+    try {
+      const res = await axios.get(API_TIPOS_AVALIACAO);
+      const data = res.data.tipo_avaliacoes || [];
+      setTiposAvaliacao(data);
+    } catch {
+      toast({
+        title: "Erro ao carregar tipos de avaliação",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // NOVA FUNÇÃO: carregar semestres da API
+  const fetchSemestres = async () => {
+    try {
+      const res = await axios.get(API_SEMESTRES);
+      const data = res.data.semestres || [];
+      setSemestres(data);
+      if (data.length > 0) {
+        setForm((prev) => ({
+          ...prev,
+          fk_semestre: data[0].codigo.toString(),
+        })); // preenche com o 1º semestre por padrão
+      }
+    } catch {
+      toast({ title: "Erro ao carregar semestres", variant: "destructive" });
+    }
+  };
+
+  const fetchPrazos = async () => {
+    if (!anoLetivoId || !tipoPrazoId || !tipoCandidaturaId) return;
+    setLoading(true);
+    try {
+      const url = `${API_PRAZOS}/${anoLetivoId}/${tipoPrazoId}/${tipoCandidaturaId}`;
+      const res = await axios.get(url);
+      const data = res.data.prazos || [];
+      setPrazos(data);
+      toast({ title: `Carregados ${data.length} prazos` });
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        title: "Erro ao carregar prazos",
+        description: "Verifique os filtros selecionados",
+        variant: "destructive",
+      });
+      setPrazos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePrazo = async (prazoId) => {
+    try {
+      const res = await axios.delete(API_APAGAR_PRAZO, {
+        data: {
+          pk_prazo: prazoId,
+        },
+      });
+      fetchPrazos();
+      toast({ title: `Prazo removido com sucesso` });
+    } catch (error) {
+      toast({
+        title: "Erro ao remover prazo",
+        description: "Verifique os filtros selecionados",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSelecionarPrazo = (prazo: Prazo) => {
@@ -116,64 +283,103 @@ export default function Deadlines() {
   };
 
   const handleActualizarPrazo = async () => {
-    await actualizarPrazo({
-      pk_prazo: prazoId,
-      observacao: form.observacao,
-      fk_semestre: form.fk_semestre,
-      data_inicio: form.data_inicio,
-      data_fim: form.data_fim,
-      fk_tipo_avaliacao: form.fk_tipo_avaliacao,
-      fk_tipo_prazo: form.fk_tipo_prazo,
-      tipo_candidatura: form.tipoCandidaturaId,
-    });
-
-    setOpenModal(false);
-  };
-  const handleCriarPrazo = () => {
-    criarPrazo({
-      anoLetivoId: form.anoletivo,
-      tipoPrazoId: form.fk_tipo_prazo,
-      tipoCandidaturaId: form.tipoCandidaturaId,
-      payload: {
-        fk_tipo_prazo: Number(form.fk_tipo_prazo),
-        fk_tipo_avaliacao:
-          Number(form.fk_tipo_prazo) === 5
-            ? null
-            : Number(form.fk_tipo_avaliacao),
-        fk_semestre: Number(form.fk_semestre),
-        data_inicio: `${form.data_inicio}T00:00:00`,
-        data_fim: `${form.data_fim}T00:00:00`,
-        observacao: form.observacao || null,
-        fk_created_by: AuthStorage.getUser().user_id.toString(),
-      },
-    });
-
-    setOpenModal(false);
+    try {
+      const payload = {
+        pk_prazo: prazoId,
+        observacao: form.observacao,
+        fk_semestre: form.fk_semestre,
+        data_inicio: form.data_inicio,
+        data_fim: form.data_fim,
+        fk_tipo_avaliacao: form.fk_tipo_avaliacao,
+        fk_tipo_prazo: form.fk_tipo_prazo,
+        tipo_candidatura: form.tipoCandidaturaId,
+      };
+      const res = await axios.put(API_ACTUALIZAR_PRAZO, payload);
+      toast({ title: `Prazo actualizado com sucesso` });
+      setIsEditing(false);
+      setOpenModal(false);
+      fetchPrazos();
+    } catch (error) {
+      toast({
+        title: "Erro ao actualizar prazo",
+        description: "Verifique os filtros selecionados",
+        variant: "destructive",
+      });
+    }
   };
 
-  useEffect(() => {
-    if (isLoadingAnosAcademicos && anosAcademicos.length === 0) {
+  // Criar prazo
+  const handleCriarPrazo = async () => {
+    if (
+      !form.fk_tipo_prazo ||
+      !form.fk_semestre ||
+      !form.data_inicio ||
+      !form.data_fim
+    ) {
+      toast({
+        title: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      });
       return;
     }
-    const anoAcademicoAtivo = anosAcademicos.filter((ano) =>
-      ano.estado.toLowerCase().startsWith("activ")
-    );
-    setAnoLetivoId(anoAcademicoAtivo[0].codigo.toString());
-  }, [isLoadingAnosAcademicos, anosAcademicos]);
+
+    const payload = {
+      fk_tipo_prazo: Number(form.fk_tipo_prazo),
+      fk_tipo_avaliacao:
+        Number(form.fk_tipo_prazo) === 5
+          ? null
+          : Number(form.fk_tipo_avaliacao),
+      fk_semestre: Number(form.fk_semestre),
+      data_inicio: `${form.data_inicio}T00:00:00`,
+      data_fim: `${form.data_fim}T00:00:00`,
+      observacao: form.observacao || null,
+      fk_created_by: AuthStorage.getUser().user_id.toString(),
+    };
+
+    try {
+      await axios.post(
+        `${API_CRIAR_PRAZO}/${form.anoletivo}/${form.fk_tipo_prazo}/${form.tipoCandidaturaId}`,
+        payload
+      );
+      toast({ title: "Prazo criado com sucesso!" });
+      setOpenModal(false);
+      setForm({
+        fk_tipo_prazo: tipoPrazoId,
+        fk_tipo_avaliacao: "",
+        fk_semestre: semestres[0]?.codigo.toString() || "1",
+        data_inicio: "",
+        data_fim: "",
+        observacao: "",
+        fk_created_by: "",
+        anoletivo: "",
+        tipoCandidaturaId: "",
+      });
+      fetchPrazos();
+    } catch (err: any) {
+      toast({
+        title: "Erro ao criar prazo",
+        description: err.response?.data?.message || "Tente novamente",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Inicialização
+  useEffect(() => {
+    fetchTiposCandidatura();
+    fetchTiposPrazo();
+    fetchTiposAvaliacao();
+    fetchSemestres();
+    fetchTipoEpocaAvaliacoes();
+  }, []);
 
   useEffect(() => {
-    if (isLoadingTiposPrazo || tiposPrazo.length === 0) return;
-    if (tipoPrazoId) return;
+    if (anoLetivoId && tipoPrazoId && tipoCandidaturaId) {
+      fetchPrazos();
+    }
+  }, [anoLetivoId, tipoPrazoId, tipoCandidaturaId]);
 
-    setTipoPrazoId(String(tiposPrazo[0].pk_tipo_prazo));
-  }, [isLoadingTiposPrazo, tiposPrazo, tipoPrazoId]);
-  useEffect(() => {
-    if (isLoadingTiposCandidatura || tiposCandidatura.length === 0) return;
-    if (tipoCandidaturaId) return;
-
-    setTipoCandidaturaId(String(tiposCandidatura[0].codigo));
-  }, [isLoadingTiposCandidatura, tiposCandidatura, tipoCandidaturaId]);
-
+  // Paginação
   const totalPages = Math.ceil(prazos.length / itemsPerPage);
   const paginated = prazos.slice(
     (currentPage - 1) * itemsPerPage,
@@ -186,16 +392,20 @@ export default function Deadlines() {
         title="Prazos Académicos"
         subtitle="Home / Calendário Académico / Prazos"
         actions={
-          <Button
-            disabled={isCreating}
-            size="sm"
-            onClick={() => {
-              setOpenModal(true);
-              setIsEditing(false);
-            }}
-          >
-            Novo Prazo
-          </Button>
+          <>
+            <Button variant="outline" size="sm" onClick={fetchPrazos}>
+              Atualizar
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setOpenModal(true);
+                setIsEditing(false);
+              }}
+            >
+              Novo Prazo
+            </Button>
+          </>
         }
       />
 
@@ -210,7 +420,7 @@ export default function Deadlines() {
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    isLoadingAnosAcademicos ? "Carregando..." : "Selecione"
+                    anosLetivos.length === 0 ? "Carregando..." : "Selecione"
                   }
                 />
               </SelectTrigger>
@@ -238,7 +448,7 @@ export default function Deadlines() {
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    isLoadingTiposPrazo ? "Carregando..." : "Selecione"
+                    tiposPrazo.length === 0 ? "Carregando..." : "Selecione"
                   }
                 />
               </SelectTrigger>
@@ -265,7 +475,9 @@ export default function Deadlines() {
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    isLoadingTiposCandidatura ? "Carregando..." : "Selecione"
+                    tiposCandidatura.length === 0
+                      ? "Carregando..."
+                      : "Selecione"
                   }
                 />
               </SelectTrigger>
@@ -277,6 +489,12 @@ export default function Deadlines() {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-end">
+            <Button variant="outline" className="w-full" onClick={fetchPrazos}>
+              Aplicar Filtros
+            </Button>
           </div>
         </div>
       </div>
@@ -294,7 +512,7 @@ export default function Deadlines() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoadingPrazo ? (
+            {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell>
@@ -573,7 +791,6 @@ export default function Deadlines() {
               Cancelar
             </Button>
             <Button
-              disabled={isUpdating || isCreating}
               onClick={isEditing ? handleActualizarPrazo : handleCriarPrazo}
             >
               {isEditing ? "Editar Prazo" : "Criar Prazo"}
@@ -583,7 +800,7 @@ export default function Deadlines() {
       </Dialog>
 
       {/* Paginação */}
-      {!isLoadingPrazo && prazos.length > 0 && (
+      {!loading && prazos.length > 0 && (
         <div className="flex items-center justify-between py-4">
           <div className="text-sm text-muted-foreground">
             Mostrando {(currentPage - 1) * itemsPerPage + 1}–
@@ -616,3 +833,5 @@ export default function Deadlines() {
     </div>
   );
 }
+
+// TODO:FIX ME PLEASE

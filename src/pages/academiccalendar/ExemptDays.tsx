@@ -26,39 +26,36 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  CalendarIcon,
-  Plus,
-  Download,
-  Printer,
-  RefreshCw,
-  Edit,
-  Trash2,
-} from "lucide-react";
-import { useState, useEffect } from "react";
+import { CalendarIcon, Plus, RefreshCw, Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
 import { format } from "date-fns";
 import { formatarData } from "@/util/date-formate";
 import { useMutationUpdateExemptDay } from "@/hooks/exempt-day/use-mutation-update-exempt-day";
 import { useMutationDeleteExemptDay } from "@/hooks/exempt-day/use-mutation-delete-exempt-day";
 
-interface DiaIsento {
+import { useQueryExemptDays } from "@/hooks/exempt-day/use-query-exempt-days";
+import { useSaveExemptDay } from "@/hooks/exempt-day/use-mutation-save-exempt-day";
+
+type DiaIsento = {
   codigo: number;
   designacao: string;
   data_inicio: string;
   data_fim: string;
   estado: number;
-}
-
-const API_URL = "https://api.compware.net/ords/cmpdev/ga/exempt-days";
+};
 
 export default function ExemptDays() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [diasIsentos, setDiasIsentos] = useState<DiaIsento[]>([]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const {
+    data: exemptDays = [],
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQueryExemptDays();
 
   // Modal states
   const [openModal, setOpenModal] = useState(false);
@@ -72,26 +69,7 @@ export default function ExemptDays() {
   const [dataFim, setDataFim] = useState<Date | undefined>();
   const { mutateAsync: updateExemptDay } = useMutationUpdateExemptDay();
   const { mutateAsync: deleteExemptDay } = useMutationDeleteExemptDay();
-  const fetchDiasIsentos = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(API_URL);
-      const data = response.data.dias_isentos || [];
-      setDiasIsentos(data);
-    } catch (error) {
-      toast({
-        title: "Erro ao carregar dias isentos",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDiasIsentos();
-  }, []);
-
+  const { mutateAsync: saveExemptDay } = useSaveExemptDay();
   const handleSalvar = async () => {
     if (!dataInicio || !dataFim || !novaDescricao.trim()) {
       toast({ title: "Preencha todos os campos", variant: "destructive" });
@@ -117,7 +95,7 @@ export default function ExemptDays() {
           estado: payload.estado,
         });
       } else {
-        await axios.post(API_URL, payload);
+        await saveExemptDay(payload);
 
         toast({ title: "Dia isento cadastrado com sucesso!" });
       }
@@ -131,7 +109,7 @@ export default function ExemptDays() {
       setDataFim(undefined);
       setNovoEstado("1");
 
-      fetchDiasIsentos();
+      //  fetchDiasIsentos();
     } catch {
       toast({
         title: "Erro ao salvar",
@@ -159,8 +137,8 @@ export default function ExemptDays() {
     setDataInicio(undefined);
     setDataFim(undefined);
   };
-  const totalPages = Math.ceil(diasIsentos.length / itemsPerPage);
-  const paginatedData = diasIsentos.slice(
+  const totalPages = Math.ceil(exemptDays.length / itemsPerPage);
+  const paginatedData = exemptDays.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -178,7 +156,6 @@ export default function ExemptDays() {
   };
   const handleDelete = async (id: number) => {
     await deleteExemptDay(id);
-    await fetchDiasIsentos();
   };
   return (
     <div className="space-y-6">
@@ -190,11 +167,11 @@ export default function ExemptDays() {
             <Button
               variant="outline"
               size="sm"
-              onClick={fetchDiasIsentos}
-              disabled={loading}
+              onClick={() => refetch()}
+              disabled={isRefetching}
             >
               <RefreshCw
-                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                className={`h-4 w-4 mr-2 ${isRefetching ? "animate-spin" : ""}`}
               />
               Atualizar
             </Button>
@@ -228,7 +205,7 @@ export default function ExemptDays() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell>
@@ -251,7 +228,7 @@ export default function ExemptDays() {
                   </TableCell>
                 </TableRow>
               ))
-            ) : diasIsentos.length === 0 ? (
+            ) : exemptDays.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={6}
@@ -295,51 +272,6 @@ export default function ExemptDays() {
             )}
           </TableBody>
         </Table>
-      </div>
-
-      {/* Paginação */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Itens por página:
-          </span>
-          <select
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-            value={itemsPerPage}
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-          >
-            {[10, 25, 50, 100].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
-            Anterior
-          </Button>
-          <span className="text-sm">
-            Página {currentPage} de {totalPages || 1}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
-            Próxima
-          </Button>
-        </div>
       </div>
 
       {/* Modal de Novo Dia Isento */}
