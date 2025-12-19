@@ -50,7 +50,7 @@ type SelectedNotas = {
 };
 const VER_HORARIO = [
   { codigo: "SIM", designacao: "SIM" },
-  { codigo: "NÃO", designacao: "NÃO" },
+ 
 ];
 
 export default function ControlNotes() {
@@ -120,8 +120,7 @@ export default function ControlNotes() {
     useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
-  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
-    useQueryTipoProva();
+
 
   // =======================================
   // PAGINAÇÃO LOCAL
