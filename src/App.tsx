@@ -60,6 +60,7 @@ import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
 import { EditSchedule } from "./pages/schedules/EditSchedule";
 import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
+import LaunchHistoric from "./pages/rating(avaliation)/launch-historic";
 
 const App = () => {
   return (
@@ -114,6 +115,10 @@ const App = () => {
                 <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
+                />
+                <Route
+                  path="/avaliacoes/historico"
+                  element={<LaunchHistoric />}
                 />
                 {/* <Route
                   path="/bolsa/bolseiros"
@@ -187,7 +192,7 @@ const App = () => {
                   element={<ExamCalendarPos />}
                 />
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
-                {/* <Route path="*" element={<NotFound />} />*/}  
+                {/* <Route path="*" element={<NotFound />} />*/}
                 <Route path="*" element={<UnderConstruction />} />
                 {/* Finanças */}
                 <Route path="/ajuda" element={<HealpFAQ />} />
