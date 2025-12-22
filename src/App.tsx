@@ -60,6 +60,7 @@ import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
 import { EditSchedule } from "./pages/schedules/EditSchedule";
 import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
+import LancamentoPauta from "./pages/rating(avaliation)/LancamentoPauta";
 
 const App = () => {
   return (
@@ -110,7 +111,8 @@ const App = () => {
                 <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
-                <Route path="/avaliacoes/presenca" element={<PresenceList />} />
+                <Route path="/avaliacoes/presenca" element={<PresenceList />} /> 
+                <Route path="/avaliacoes/pauta" element={<LancamentoPauta />} /> 
                 <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
