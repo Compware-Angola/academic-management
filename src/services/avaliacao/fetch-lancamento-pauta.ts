@@ -7,6 +7,8 @@ export type LancamentoPauta = {
   ano_lectivo: string;
   designacao_av: string;
   descricao_av: string;
+  estado_pauta_designacao:string;
+  estado_pauta:number;
   classe: string;
   semestre: string;
   curso: string;

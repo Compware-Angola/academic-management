@@ -16,11 +16,12 @@ import {
   RefreshCw,
   Download,
   Upload,
- 
   FileText,
   ChevronLeft,
   ChevronRight,
   Trash2,
+  CircleCheck,
+  CircleX,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -40,15 +41,37 @@ import { useUploadSingle } from "@/hooks/upload/use-upload-single";
 import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-update-estado-lancamento-pauta";
+
 export default function LancamentoPauta() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-const {user}=useAuth()
+  const { user } = useAuth();
 
-  const uploadMutation = useUploadSingle()
+  // Modal de submissão
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Modal de aprovação/rejeição
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [acaoTipo, setAcaoTipo] = useState<"aprovar" | "rejeitar" | null>(null);
+  const [pautaIdSelecionada, setPautaIdSelecionada] = useState<number | null>(null);
+  const [pautaInfo, setPautaInfo] = useState<any>(null); // Para mostrar detalhes na modal
+
+  const uploadMutation = useUploadSingle();
+  const createMutation = useCreateLancamentoPauta();
+const atualizarEstadoMutation = useMutationAtualizarEstadoPauta();
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 10; 
+  const limit = 10;
+
   const [filters, setFilters] = useState({
     anoLectivo: "",
     semestre: "",
@@ -58,6 +81,7 @@ const {user}=useAuth()
     tipoAvaliacao: "",
   });
 
+  // Queries
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
@@ -67,14 +91,12 @@ const {user}=useAuth()
     useQuerySemestres();
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
-
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       classe: filters.anoCurricular,
       curso: filters.curso,
       semestre: filters.semestre,
     });
-
 
   const {
     data: response,
@@ -88,12 +110,12 @@ const {user}=useAuth()
     curso: filters.curso ? Number(filters.curso) : undefined,
     anoCurricular: filters.anoCurricular ? Number(filters.anoCurricular) : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
-
     page: currentPage,
     limit: limit,
   });
- const { data: teacherInfoData, isLoading: teacherInfoDataLoading } =
-    useQueryTeacherProfile(user?.user_id);
+
+  const { data: teacherInfoData } = useQueryTeacherProfile(user?.user_id);
+
   const pautas = response?.data ?? [];
   const pagination = {
     page: response?.page ?? 1,
@@ -101,7 +123,14 @@ const {user}=useAuth()
     total: response?.total ?? 0,
     totalPages: response?.totalPages ?? 1,
   };
-  const createMutation = useCreateLancamentoPauta();
+
+  // Função para limpar input de arquivo
+  const clearFileInput = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -112,6 +141,7 @@ const {user}=useAuth()
           description: "Por favor, selecione um arquivo PDF.",
           variant: "destructive",
         });
+        e.target.value = "";
         return;
       }
       setSelectedFile(file);
@@ -121,8 +151,8 @@ const {user}=useAuth()
       });
     }
   };
-// aqui vou  fazer upload !
-  const handleSubmitPauta = async () => {
+
+  const handleOpenSubmitModal = () => {
     if (!selectedFile) {
       toast({
         title: "Nenhum arquivo selecionado",
@@ -131,15 +161,6 @@ const {user}=useAuth()
       });
       return;
     }
-       const response = await uploadMutation.mutateAsync(selectedFile)
-       if(!response.file.path){
-           toast({
-        title: "Erro ao fazer upload",
-        description: "Selecione um PDF.",
-        variant: "destructive",
-      });
-      return;
-       }
 
     if (!filters.anoLectivo || !filters.unidadeCurricular || !filters.tipoAvaliacao) {
       toast({
@@ -150,75 +171,134 @@ const {user}=useAuth()
       return;
     }
 
-    const docenteId = teacherInfoData.codigo_docente; 
-
-    createMutation.mutate(
-      {
-        anoLectivoId: Number(filters.anoLectivo),
-        docenteId: docenteId,
-        gradeCurricularId: Number(filters.unidadeCurricular),
-        fkEstadoLancamentoPauta: 0,
-        fkTipoAvaliacao: Number(filters.tipoAvaliacao),
-        ficheiroName: response.file.filename,
-      },
-      {
-        onSuccess: (data) => {
-          toast({
-            title: "Sucesso!",
-            description: data.message,
-          });
-          setSelectedFile(null);
-          if (fileInputRef.current) fileInputRef.current.value = "";
-          setCurrentPage(1); 
-          refetch();
-        },
-        onError: (error: any) => {
-          toast({
-            title: "Erro ao submeter",
-            description: error.message || "Tente novamente.",
-            variant: "destructive",
-          });
-        },
-      }
-    );
+    setIsModalOpen(true);
   };
 
-const handleDownload = async (ficheiroName: string) => {
-  if (!ficheiroName) return;
+  const handleConfirmSubmit = async () => {
+    setIsModalOpen(false);
 
-  try {
-    const blob = await viewFile(ficheiroName);
+    try {
+      const uploadResponse = await uploadMutation.mutateAsync(selectedFile!);
 
-    const fileUrl = URL.createObjectURL(blob);
-    window.open(fileUrl, "_blank");
+      if (!uploadResponse.file?.path) {
+        toast({
+          title: "Erro ao fazer upload",
+          description: "Não foi possível fazer upload do ficheiro.",
+          variant: "destructive",
+        });
+        return;
+      }
 
- 
-    setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
-  } catch (error) {
-    if (error instanceof ApiError) {
-      console.error(error.message);
-      alert(error.message);
-    } else {
-      console.error("Erro ao abrir o ficheiro", error);
+      const docenteId = teacherInfoData?.codigo_docente;
+
+      createMutation.mutate(
+        {
+          anoLectivoId: Number(filters.anoLectivo),
+          docenteId: docenteId,
+          gradeCurricularId: Number(filters.unidadeCurricular),
+          fkEstadoLancamentoPauta: 1,
+          fkTipoAvaliacao: Number(filters.tipoAvaliacao),
+          ficheiroName: uploadResponse.file.filename,
+        },
+        {
+          onSuccess: (data) => {
+            toast({
+              title: "Sucesso!",
+              description: data.message || "Pauta submetida com sucesso.",
+            });
+            clearFileInput();
+            setCurrentPage(1);
+            refetch();
+          },
+          onError: (error: any) => {
+            toast({
+              title: "Erro ao submeter",
+              description: error.message || "Tente novamente.",
+              variant: "destructive",
+            });
+          },
+        }
+      );
+    } catch (error) {
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao processar o upload.",
+        variant: "destructive",
+      });
     }
-  }
+  };
+
+  // Funções para Aprovar / Rejeitar
+  const abrirConfirmacao = (pauta: any, acao: "aprovar" | "rejeitar") => {
+    setPautaIdSelecionada(pauta.codigo);
+    setPautaInfo(pauta);
+    setAcaoTipo(acao);
+    setIsConfirmModalOpen(true);
+  };
+const confirmarAcao = () => {
+  if (!pautaIdSelecionada || !acaoTipo) return;
+
+  const novoEstado = acaoTipo === "aprovar" ? 2 : 3;
+
+  atualizarEstadoMutation.mutate(
+    {
+      codigo: pautaIdSelecionada,
+      fkEstadoLancamentoPauta: novoEstado as 2 | 3,
+    },
+    {
+      onSettled: () => {
+        // Fecha a modal após sucesso ou erro
+        setIsConfirmModalOpen(false);
+        setAcaoTipo(null);
+        setPautaIdSelecionada(null);
+        setPautaInfo(null);
+      },
+    }
+  );
 };
 
+  const handleDownload = async (ficheiroName: string) => {
+    if (!ficheiroName) return;
 
-  const getEstadoBadge = (activeState: number) => {
-    switch (activeState) {
+    try {
+      const blob = await viewFile(ficheiroName);
+      const fileUrl = URL.createObjectURL(blob);
+      window.open(fileUrl, "_blank");
+      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error instanceof ApiError ? error.message : "Erro ao abrir o ficheiro.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getEstadoBadge = (estado: number) => {
+    switch (estado) {
       case 1:
-        return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Ativa</Badge>;
-      case 0:
         return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Pendente</Badge>;
+      case 2:
+        return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Aprovado</Badge>;
+      case 3:
+        return <Badge className="bg-red-500/20 text-red-600 border-red-500/30">Rejeitado</Badge>;
       default:
         return <Badge variant="secondary">Desconhecido</Badge>;
     }
   };
 
+  const getAnoLetivoLabel = () =>
+    academicYear?.find((a) => a.codigo === Number(filters.anoLectivo))?.designacao || "";
+  const getCursoLabel = () =>
+    cursos?.find((c) => c.codigo === Number(filters.curso))?.designacao || "";
+  const getUnidadeCurricularLabel = () =>
+    unidadesCurriculares?.find((u) => u.pk === Number(filters.unidadeCurricular))?.descricao || "";
+  const getTipoAvaliacaoLabel = () =>
+    tipoAvaliacao?.find((t) => t.codigo === Number(filters.tipoAvaliacao))?.designacao || "";
+
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
+      {/* Breadcrumb e Cabeçalho */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link to="/" className="hover:text-foreground">Início</Link>
         <span>/</span>
@@ -227,7 +307,6 @@ const handleDownload = async (ficheiroName: string) => {
         <span className="text-foreground">Lançamento de Pauta</span>
       </nav>
 
-      {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Lançamento de Pauta</h1>
@@ -243,84 +322,12 @@ const handleDownload = async (ficheiroName: string) => {
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
-            label="Ano Letivo"
-            value={filters.anoLectivo}
-            onChange={(v) => {
-              setFilters({ ...filters, anoLectivo: v });
-              setCurrentPage(1); // reset página ao mudar filtro
-            }}
-            options={academicYear}
-            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
-           
-          />
-
-          <FormSelect
-            disabled={isLoadingSemestres}
-            loading={isLoadingSemestres}
-            label="Semestre"
-            value={filters.semestre}
-            onChange={(v) => {
-              setFilters({ ...filters, semestre: v });
-              setCurrentPage(1);
-            }}
-            options={semestres}
-            map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
-          />
-
-          <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
-            label="Curso"
-            value={filters.curso}
-            onChange={(v) => {
-              setFilters({ ...filters, curso: v, anoCurricular: "", unidadeCurricular: "" });
-              setCurrentPage(1);
-            }}
-            options={cursos}
-            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
-          />
-
-          <FormSelect
-            label="Ano Curricular"
-            value={filters.anoCurricular}
-            disabled={isLoadingClasses || !filters.curso}
-            loading={isLoadingClasses}
-            onChange={(v) => {
-              setFilters({ ...filters, anoCurricular: v, unidadeCurricular: "" });
-              setCurrentPage(1);
-            }}
-            options={classes}
-            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
-          />
-
-          <FormSelect
-            label="Unidade Curricular"
-            value={filters.unidadeCurricular}
-            disabled={isLoadingUC || !filters.semestre || !filters.curso || !filters.anoCurricular}
-            loading={isLoadingUC}
-            onChange={(v) => {
-              setFilters({ ...filters, unidadeCurricular: v });
-              setCurrentPage(1);
-            }}
-            options={unidadesCurriculares}
-            map={(u) => ({ key: u.pk, label: u.descricao, value: u.pk })}
-          />
-
-          <FormSelect
-            label="Tipo de Avaliação"
-            value={filters.tipoAvaliacao}
-            disabled={isLoadingTipoAvaliacao}
-            loading={isLoadingTipoAvaliacao}
-            onChange={(v) => {
-              setFilters({ ...filters, tipoAvaliacao: v });
-              setCurrentPage(1);
-            }}
-            options={tipoAvaliacao}
-            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
-          />
+          <FormSelect disabled={isLoadingAcademicYear} loading={isLoadingAcademicYear} label="Ano Letivo" value={filters.anoLectivo} onChange={(v) => { setFilters({ ...filters, anoLectivo: v }); setCurrentPage(1); }} options={academicYear} map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })} />
+          <FormSelect disabled={isLoadingSemestres} loading={isLoadingSemestres} label="Semestre" value={filters.semestre} onChange={(v) => { setFilters({ ...filters, semestre: v }); setCurrentPage(1); }} options={semestres} map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })} />
+          <FormSelect disabled={isLoadingCurso} loading={isLoadingCurso} label="Curso" value={filters.curso} onChange={(v) => { setFilters({ ...filters, curso: v, anoCurricular: "", unidadeCurricular: "" }); setCurrentPage(1); }} options={cursos} map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })} />
+          <FormSelect label="Ano Curricular" value={filters.anoCurricular} disabled={isLoadingClasses || !filters.curso} loading={isLoadingClasses} onChange={(v) => { setFilters({ ...filters, anoCurricular: v, unidadeCurricular: "" }); setCurrentPage(1); }} options={classes} map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })} />
+          <FormSelect label="Unidade Curricular" value={filters.unidadeCurricular} disabled={isLoadingUC || !filters.semestre || !filters.curso || !filters.anoCurricular} loading={isLoadingUC} onChange={(v) => { setFilters({ ...filters, unidadeCurricular: v }); setCurrentPage(1); }} options={unidadesCurriculares} map={(u) => ({ key: u.pk, label: u.descricao, value: u.pk })} />
+          <FormSelect label="Tipo de Avaliação" value={filters.tipoAvaliacao} disabled={isLoadingTipoAvaliacao} loading={isLoadingTipoAvaliacao} onChange={(v) => { setFilters({ ...filters, tipoAvaliacao: v }); setCurrentPage(1); }} options={tipoAvaliacao} map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })} />
         </div>
       </div>
 
@@ -330,43 +337,88 @@ const handleDownload = async (ficheiroName: string) => {
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-end">
           <div className="flex-1 space-y-2">
             <Label htmlFor="file-upload">Arquivo PDF da Pauta</Label>
-            <Input
-              ref={fileInputRef}
-              id="file-upload"
-              type="file"
-              accept=".pdf"
-              onChange={handleFileSelect}
-            />
+            <Input ref={fileInputRef} id="file-upload" type="file" accept=".pdf" onChange={handleFileSelect} />
             {selectedFile && (
               <p className="text-sm text-muted-foreground flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 {selectedFile.name}
-                <Button variant="ghost" size="sm" onClick={() => setSelectedFile(null)}>
+                <Button variant="ghost" size="sm" onClick={clearFileInput}>
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </p>
             )}
           </div>
-          <Button
-            onClick={handleSubmitPauta}
-            disabled={!selectedFile || createMutation.isPending}
-          >
+          <Button onClick={handleOpenSubmitModal} disabled={!selectedFile || createMutation.isPending || uploadMutation.isPending}>
             <Upload className="h-4 w-4 mr-2" />
-            {createMutation.isPending ? "Submetendo..." : "Submeter Pauta"}
+            {createMutation.isPending || uploadMutation.isPending ? "Submetendo..." : "Submeter Pauta"}
           </Button>
         </div>
       </div>
+
+      {/* Modal Submissão */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Submissão de Pauta</DialogTitle>
+            <DialogDescription>Verifique os dados antes de submeter a pauta.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            <div className="grid grid-cols-4 items-center gap-4"><Label className="text-right font-medium">Arquivo:</Label><span className="col-span-3 truncate">{selectedFile?.name}</span></div>
+            <div className="grid grid-cols-4 items-center gap-4"><Label className="text-right font-medium">Ano Letivo:</Label><span className="col-span-3">{getAnoLetivoLabel()}</span></div>
+            {filters.curso && (<div className="grid grid-cols-4 items-center gap-4"><Label className="text-right font-medium">Curso:</Label><span className="col-span-3">{getCursoLabel()}</span></div>)}
+            <div className="grid grid-cols-4 items-center gap-4"><Label className="text-right font-medium">Unidade Curricular:</Label><span className="col-span-3">{getUnidadeCurricularLabel()}</span></div>
+            <div className="grid grid-cols-4 items-center gap-4"><Label className="text-right font-medium">Tipo de Avaliação:</Label><span className="col-span-3">{getTipoAvaliacaoLabel()}</span></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={createMutation.isPending || uploadMutation.isPending}>Cancelar</Button>
+            <Button onClick={handleConfirmSubmit} disabled={createMutation.isPending || uploadMutation.isPending}>
+              {createMutation.isPending || uploadMutation.isPending ? "Submetendo..." : "Confirmar Submissão"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Confirmação Aprovar/Rejeitar */}
+      <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {acaoTipo === "aprovar" ? "Aprovar" : "Rejeitar"} Pauta
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja <strong>{acaoTipo === "aprovar" ? "aprovar" : "rejeitar"}</strong> esta pauta?
+              <br />
+              {pautaInfo && (
+                <>
+                  <strong>Unidade Curricular:</strong> {pautaInfo.unidade_curricular}
+                  <br />
+                  <strong>Docente:</strong> {pautaInfo.docente_nome}
+                </>
+              )}
+              <br />
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsConfirmModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant={acaoTipo === "aprovar" ? "default" : "destructive"}
+              onClick={confirmarAcao}
+            >
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Tabela */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Pautas Submetidas</h3>
 
         {isLoadingPautas ? (
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
+          <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
         ) : errorPautas ? (
           <div className="text-center py-8 text-destructive">
             Erro ao carregar pautas: {(errorPautas as Error).message}
@@ -401,11 +453,9 @@ const handleDownload = async (ficheiroName: string) => {
                           <FileText className="h-4 w-4 text-red-500" />
                           {pauta.ficheiro_name ? (
                             <span className="truncate max-w-[200px]">
-                              {pauta.ficheiro_name.split('/').pop()}
+                              {pauta.ficheiro_name.split("/").pop()}
                             </span>
-                          ) : (
-                            "-"
-                          )}
+                          ) : "-"}
                         </div>
                       </TableCell>
                       <TableCell>{new Date(pauta.created_at).toLocaleDateString("pt-AO")}</TableCell>
@@ -414,14 +464,36 @@ const handleDownload = async (ficheiroName: string) => {
                       <TableCell>{pauta.classe}</TableCell>
                       <TableCell>{pauta.docente_nome}</TableCell>
                       <TableCell>{pauta.designacao_av}</TableCell>
-                      <TableCell>{getEstadoBadge(pauta.active_state)}</TableCell>
+                      <TableCell>{getEstadoBadge(pauta.estado_pauta)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           {pauta.ficheiro_name && (
+                            <Button variant="outline" size="sm" onClick={() => handleDownload(pauta.ficheiro_name!)}>
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
+
+                          {/* Botões apenas se pendente */}
+                          {pauta.estado_pauta === 1 && (
                             <>
-                             
-                              <Button variant="outline" size="sm" onClick={() => handleDownload(pauta.ficheiro_name!)}>
-                                <Download className="h-4 w-4" />
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 text-green-600 hover:bg-green-50"
+                                title="Aprovar"
+                                onClick={() => abrirConfirmacao(pauta, "aprovar")}
+                              >
+                                <CircleCheck className="h-4 w-4" />
+                              </Button>
+
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 text-red-600 hover:bg-red-50"
+                                title="Rejeitar"
+                                onClick={() => abrirConfirmacao(pauta, "rejeitar")}
+                              >
+                                <CircleX className="h-4 w-4" />
                               </Button>
                             </>
                           )}
@@ -436,33 +508,15 @@ const handleDownload = async (ficheiroName: string) => {
             {/* Paginação */}
             <div className="flex items-center justify-between mt-6">
               <div className="text-sm text-muted-foreground">
-                Mostrando {(currentPage - 1) * limit + 1} a{" "}
-                {Math.min(currentPage * limit, pagination.total)} de {pagination.total} registos
+                Mostrando {(currentPage - 1) * limit + 1} a {Math.min(currentPage * limit, pagination.total)} de {pagination.total} registos
               </div>
-
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1 || isLoadingPautas}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Anterior
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} disabled={currentPage === 1 || isLoadingPautas}>
+                  <ChevronLeft className="h-4 w-4" /> Anterior
                 </Button>
-
-                <span className="text-sm px-3">
-                  Página {currentPage} de {pagination.totalPages}
-                </span>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
-                  disabled={currentPage === pagination.totalPages || isLoadingPautas}
-                >
-                  Seguinte
-                  <ChevronRight className="h-4 w-4" />
+                <span className="text-sm px-3">Página {currentPage} de {pagination.totalPages}</span>
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))} disabled={currentPage === pagination.totalPages || isLoadingPautas}>
+                  Seguinte <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
