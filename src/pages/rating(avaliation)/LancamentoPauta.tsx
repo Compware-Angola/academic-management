@@ -16,7 +16,7 @@ import {
   RefreshCw,
   Download,
   Upload,
-  Eye,
+ 
   FileText,
   ChevronLeft,
   ChevronRight,
@@ -157,7 +157,7 @@ const {user}=useAuth()
         anoLectivoId: Number(filters.anoLectivo),
         docenteId: docenteId,
         gradeCurricularId: Number(filters.unidadeCurricular),
-        fkEstadoLancamentoPauta: 1,
+        fkEstadoLancamentoPauta: 0,
         fkTipoAvaliacao: Number(filters.tipoAvaliacao),
         ficheiroName: response.file.filename,
       },
@@ -169,7 +169,7 @@ const {user}=useAuth()
           });
           setSelectedFile(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
-          setCurrentPage(1); // volta para página 1 após criar
+          setCurrentPage(1); 
           refetch();
         },
         onError: (error: any) => {
@@ -210,7 +210,7 @@ const handleDownload = async (ficheiroName: string) => {
       case 1:
         return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Ativa</Badge>;
       case 0:
-        return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Inativa</Badge>;
+        return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Pendente</Badge>;
       default:
         return <Badge variant="secondary">Desconhecido</Badge>;
     }
