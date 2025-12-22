@@ -60,6 +60,7 @@ import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
 import { EditSchedule } from "./pages/schedules/EditSchedule";
 import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
+import CreateUser from "./pages/access/CreateUser";
 
 const App = () => {
   return (
@@ -139,6 +140,7 @@ const App = () => {
                   element={<UserFunctionality />}
                 /> */}
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
+                <Route path="/utilizadores/criar" element={<CreateUser />} />
                 {/*
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
                 <Route path="/acessos/bloquear" element={<BlockAccess />} />
