@@ -25,7 +25,7 @@ import AttendanceControl from "./pages/attendance/AttendanceControl";
 import MarkAttendance from "./pages/attendance/MarkAttendance";
 import UserAccess from "./pages/access/UserAccess";
 import LoggedInUsers from "./pages/access/LoggedInUsers";
-import AccessLogs from "./pages/access/AccessLogs";
+//import AccessLogs from "./pages/access/AccessLogs";
 import UserFunctionality from "./pages/access/UserFunctionality";
 import RectoratePositions from "./pages/access/RectoratePositions";
 import BlockAccess from "./pages/access/BlockAccess";
@@ -61,6 +61,8 @@ import { EditSchedule } from "./pages/schedules/EditSchedule";
 import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
 import CreateUser from "./pages/access/CreateUser";
+import AccessLogs from "./pages/access/AccessLogs";
+import LogsAcessos from "./pages/access/LogsAccess";
 
 const App = () => {
   return (
@@ -141,7 +143,9 @@ const App = () => {
                 /> */}
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
                 <Route path="/utilizadores/criar" element={<CreateUser />} />
+                <Route path="/acessos/logs" element={<LogsAcessos />}  />
                 {/*
+                <Route path="/acessos/logs" element={<AccessLogs />} />
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
                 <Route path="/acessos/bloquear" element={<BlockAccess />} />
                 <Route path="/acessos/todos" element={<AllAccesses />} />

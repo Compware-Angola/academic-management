@@ -5,11 +5,11 @@ export interface CreatePersonUserRequest {
   nomeCompleto: string
   numDocIdentificacao: string
   email: string
-  dataDeNascimento: string
-  tipoDocumentoId: string
-  sexoId: string
-  estadoCivilId: string
-  nacionalidadeId: string
+  dataDeNascimento: number
+  tipoDocumentoId: number
+  sexoId: number
+  estadoCivilId: number
+  nacionalidadeId: number
 }
 
 export interface CreatePersonUserResponse{
@@ -22,11 +22,7 @@ export interface CreatePersonUserResponse{
 
 export async function createPersonUser(user: CreatePersonUserRequest): Promise<CreatePersonUserResponse>{
   const userID = AuthStorage.getUser().user_id
-    const {data} = await axiosNestGa.post("acess_management/create-person-user",user, {
-      headers: {
-        "x-user-logado-id": userID,
-      },
-    })
+    const {data} = await axiosNestGa.post("acess_management/create-person-user",user)
 
     return data
 }

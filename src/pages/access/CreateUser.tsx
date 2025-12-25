@@ -15,6 +15,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useCreatePersonUser } from "@/hooks/acess/use-create-person-user";
+import { useQueryEstadoCivil } from "@/hooks/acess/use-query-estado-civil";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryNacionalidade } from "@/hooks/acess/use-query-nacionalidade";
+import { useQueryTipoDocumento } from "@/hooks/acess/use-query-tipo-documento";
+import { useQuerySexo } from "@/hooks/acess/use-query-sexo";
 
 interface FormData {
   nomeCompleto: string;
@@ -38,13 +43,7 @@ const sexos = [
   { id: "2", nome: "Feminino" },
 ];
 
-const estadosCivis = [
-  { id: "1", nome: "Solteiro(a)" },
-  { id: "2", nome: "Casado(a)" },
-  { id: "3", nome: "Divorciado(a)" },
-  { id: "4", nome: "Viúvo(a)" },
-  { id: "5", nome: "União de Facto" },
-];
+
 
 const nacionalidades = [
   { id: "1", nome: "Angolana" },
@@ -71,6 +70,11 @@ export default function CreateUser() {
   });
   const  {mutateAsync:CreateUser} = useCreatePersonUser()
 
+const {data:estadosCivis=[], isLoading:isLoadingEstadosCivis} = useQueryEstadoCivil()
+const {data:estadosNacionalidade=[], isLoading:isLoadingNacionalidade} = useQueryNacionalidade()
+const {data:estadosTipoDocumento=[], isLoading:isLoadingTipoDocumento} = useQueryTipoDocumento()
+const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
+
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -90,11 +94,11 @@ export default function CreateUser() {
         nomeCompleto: formData.nomeCompleto,
         numDocIdentificacao: formData.numDocIdentificacao,
         email: formData.email,
-        dataDeNascimento: formData.dataDeNascimento,
-        tipoDocumentoId: formData.tipoDocumentoId,
-        sexoId: formData.sexoId,
-        estadoCivilId: formData.estadoCivilId,
-        nacionalidadeId: formData.nacionalidadeId,
+        dataDeNascimento: Number(formData.dataDeNascimento),
+        tipoDocumentoId: Number(formData.tipoDocumentoId),
+        sexoId: Number(formData.sexoId),
+        estadoCivilId: Number(formData.estadoCivilId),
+        nacionalidadeId: Number(formData.nacionalidadeId),
     })
     
 
@@ -190,81 +194,58 @@ export default function CreateUser() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tipoDocumentoId">Tipo de Documento</Label>
-              <Select
-                value={formData.tipoDocumentoId}
-                onValueChange={(value) => handleInputChange("tipoDocumentoId", value)}
-              >
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Selecione o tipo de documento" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tiposDocumento.map((tipo) => (
-                    <SelectItem key={tipo.id} value={tipo.id}>
-                      {tipo.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
+            
+      <FormSelect label="Estado Civil" 
+          options={estadosCivis} 
+          map={(e) => ({
+                      key: e.codigo,
+                      label: e.designacao,
+                      value: e.codigo,
+                    })}
+          onChange={(e) => setFormData({ ...formData, estadoCivilId: e })}
+          disabled={isLoadingEstadosCivis} 
+          loading={isLoadingEstadosCivis} value={formData.estadoCivilId}/>
 
-            <div className="space-y-2">
-              <Label htmlFor="sexoId">Sexo</Label>
-              <Select
-                value={formData.sexoId}
-                onValueChange={(value) => handleInputChange("sexoId", value)}
-              >
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Selecione o sexo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sexos.map((sexo) => (
-                    <SelectItem key={sexo.id} value={sexo.id}>
-                      {sexo.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="estadoCivilId">Estado Civil</Label>
-              <Select
-                value={formData.estadoCivilId}
-                onValueChange={(value) => handleInputChange("estadoCivilId", value)}
-              >
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Selecione o estado civil" />
-                </SelectTrigger>
-                <SelectContent>
-                  {estadosCivis.map((estado) => (
-                    <SelectItem key={estado.id} value={estado.id}>
-                      {estado.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="nacionalidadeId">Nacionalidade</Label>
-              <Select
-                value={formData.nacionalidadeId}
-                onValueChange={(value) => handleInputChange("nacionalidadeId", value)}
-              >
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Selecione a nacionalidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {nacionalidades.map((nac) => (
-                    <SelectItem key={nac.id} value={nac.id}>
-                      {nac.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <FormSelect label="Nacionalidade" 
+          options={estadosNacionalidade} 
+          map={(n) => ({
+                      key: n.codigo,
+                      label: n.designacao,
+                      value: n.codigo,
+                    })}
+          onChange={(n) => setFormData({ ...formData, nacionalidadeId: n })}
+          disabled={isLoadingNacionalidade} 
+          loading={isLoadingNacionalidade} value={formData.nacionalidadeId}/>
+
+
+              <FormSelect label="Sexo" 
+                options={estadosSexo} 
+                map={(s) => ({
+                            key: s.codigo,
+                            label: s.designacao,
+                            value: s.codigo,
+                          })}
+                onChange={(s) => setFormData({ ...formData, sexoId: s })}
+                disabled={isLoadingNacionalidade} 
+                loading={isLoadingSexo} value={formData.sexoId}/>
+
+                <FormSelect label="Tipo de Documento" 
+                  options={estadosTipoDocumento} 
+                  map={(d) => ({
+                            key: d.codigo,
+                            label: d.designacao,
+                            value: d.codigo,
+                          })}
+                  onChange={(d) => setFormData({ ...formData, tipoDocumentoId: d })}
+                  disabled={isLoadingTipoDocumento} 
+                  loading={isLoadingTipoDocumento} value={formData.tipoDocumentoId}/>
+
+
+
+  
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
