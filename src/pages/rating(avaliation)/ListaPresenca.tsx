@@ -10,19 +10,174 @@ import { Badge } from "@/components/ui/badge";
 import { Home, Search, Download, RefreshCw, Printer, Check, X, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useCursos } from "@/hooks/use-cursos";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
+import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
+import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
+import { Estudante, ListaEstudantesPDF } from "@/components/list-student";
 
 export default function PresenceList() {
-  const [anoLectivo, setAnoLectivo] = useState("");
-  const [semestre, setSemestre] = useState("");
-  const [periodo, setPeriodo] = useState("");
-  const [curso, setCurso] = useState("");
-  const [anoCurricular, setAnoCurricular] = useState("");
-  const [unidadeCurricular, setUnidadeCurricular] = useState("");
-  const [tipoAvaliacao, setTipoAvaliacao] = useState("");
-  const [horario, setHorario] = useState("");
-  const [situacaoFinanceira, setSituacaoFinanceira] = useState("");
-  const [showResults, setShowResults] = useState(false);
 
+  const [formData, setFormData] = useState({
+    anoLetivo: "",
+    semestre: "",
+    periodo: "",
+    curso: "",
+    unidadeCurricular: "",
+    horarioId: "",
+    classes: "",
+    tipoAvaliacao: "",
+    tipoProva: "",
+    verHoario: "",
+    filtro: "",
+  });
+  const [showResults, setShowResults] = useState(false);
+const estudantes2: Estudante[] = [
+  {
+    id: 1,
+    numeroProcesso: '2025/001',
+    nome: 'João Alberto Silva',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 923 456 789',
+  },
+  {
+    id: 2,
+    numeroProcesso: '2025/002',
+    nome: 'Maria Fernanda Lopes',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 912 345 678',
+  },
+  {
+    id: 3,
+    numeroProcesso: '2025/003',
+    nome: 'Pedro António Manuel',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 934 567 890',
+  },
+  {
+    id: 4,
+    numeroProcesso: '2025/004',
+    nome: 'Ana Paula dos Santos',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 927 123 456',
+  },
+  {
+    id: 5,
+    numeroProcesso: '2025/005',
+    nome: 'José Eduardo Kumba',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 931 789 012',
+  },
+  {
+    id: 6,
+    numeroProcesso: '2025/006',
+    nome: 'Luísa Margarida Neto',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 945 234 567',
+  },
+  {
+    id: 7,
+    numeroProcesso: '2025/007',
+    nome: 'Carlos Domingos Vicente',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 919 876 543',
+  },
+  {
+    id: 8,
+    numeroProcesso: '2025/008',
+    nome: 'Beatriz Sofia Cardoso',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 933 456 789',
+  },
+  {
+    id: 9,
+    numeroProcesso: '2025/009',
+    nome: 'António Francisco Mendes',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 926 789 012',
+  },
+  {
+    id: 10,
+    numeroProcesso: '2025/010',
+    nome: 'Catarina Isabel Domingos',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 938 123 456',
+  },
+  {
+    id: 11,
+    numeroProcesso: '2025/011',
+    nome: 'Manuel João Baptista',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 941 567 890',
+  },
+  {
+    id: 12,
+    numeroProcesso: '2025/012',
+    nome: 'Rosa Maria Fernandes',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 929 345 678',
+  },
+  {
+    id: 13,
+    numeroProcesso: '2025/013',
+    nome: 'David Jeremias Costa',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 935 678 901',
+  },
+  {
+    id: 14,
+    numeroProcesso: '2025/014',
+    nome: 'Elsa Patrícia Augusto',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 922 456 789',
+  },
+  {
+    id: 15,
+    numeroProcesso: '2025/015',
+    nome: 'Tiago Miguel de Almeida',
+    curso: 'Licenciatura em Informática',
+    ano: '2º',
+    turma: 'A',
+    contacto: '+244 937 890 123',
+  },
+]
+
+  const titulo = 'Lista de Estudantes - Licenciatura em Informática - 2025/2026'
   const [estudantes, setEstudantes] = useState([
     { id: 1, numero: "2024001", nome: "Ana Maria Silva", curso: "Eng. Informática", situacaoFinanceira: "Regular", presente: false },
     { id: 2, numero: "2024002", nome: "Pedro João Santos", curso: "Eng. Informática", situacaoFinanceira: "Regular", presente: false },
@@ -33,23 +188,44 @@ export default function PresenceList() {
     { id: 7, numero: "2024007", nome: "Carla Patrícia Mendes", curso: "Eng. Informática", situacaoFinanceira: "Regular", presente: false },
     { id: 8, numero: "2024008", nome: "Ricardo José Alves", curso: "Eng. Informática", situacaoFinanceira: "Regular", presente: false },
   ]);
+      const canLoadTurmas =
+        !!formData.anoLetivo &&
+        !!formData.semestre &&
+        !!formData.periodo &&
+        !!formData.curso &&
+        !!formData.unidadeCurricular;
+    
+      const { data: scheduleResponse, isLoading: loadingschedule } = useQuerySchedulesByUc(
+        {
+          anoLectivo: Number(formData.anoLetivo),
+          semestre: Number(formData.semestre),
+          periodo: Number(formData.periodo),
+          curso: Number(formData.curso),
+          unidadeCurricular: Number(formData.unidadeCurricular),
+         
+        },
+        { enabled: canLoadTurmas }
+      );
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
 
-  const handleSearch = () => {
-    if (!anoLectivo || !semestre || !curso || !unidadeCurricular || !tipoAvaliacao) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha pelo menos Ano Lectivo, Semestre, Curso, UC e Tipo de Avaliação.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setShowResults(true);
-    toast({
-      title: "Pesquisa realizada",
-      description: `Encontrados ${estudantes.length} estudantes inscritos.`,
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
+    useQueryTipoProva();
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
+
+ const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: formData.classes,
+      curso: formData.curso,
+      semestre: formData.semestre,
     });
-  };
-
   const handlePresencaChange = (estudanteId: number, presente: boolean) => {
     setEstudantes(prev => 
       prev.map(est => 
@@ -107,186 +283,164 @@ export default function PresenceList() {
       <Card>
         <CardHeader><CardTitle>Filtros de Pesquisa</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Lectivo *</label>
-              <Select value={anoLectivo} onValueChange={setAnoLectivo}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Semestre *</label>
-              <Select value={semestre} onValueChange={setSemestre}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1º Semestre</SelectItem>
-                  <SelectItem value="2">2º Semestre</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Período</label>
-              <Select value={periodo} onValueChange={setPeriodo}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="manha">Manhã</SelectItem>
-                  <SelectItem value="tarde">Tarde</SelectItem>
-                  <SelectItem value="noite">Noite</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Curso *</label>
-              <Select value={curso} onValueChange={setCurso}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="eng-informatica">Engenharia Informática</SelectItem>
-                  <SelectItem value="direito">Direito</SelectItem>
-                  <SelectItem value="medicina">Medicina</SelectItem>
-                  <SelectItem value="economia">Economia</SelectItem>
-                  <SelectItem value="gestao">Gestão de Empresas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Curricular</label>
-              <Select value={anoCurricular} onValueChange={setAnoCurricular}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="1">1º Ano</SelectItem>
-                  <SelectItem value="2">2º Ano</SelectItem>
-                  <SelectItem value="3">3º Ano</SelectItem>
-                  <SelectItem value="4">4º Ano</SelectItem>
-                  <SelectItem value="5">5º Ano</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Unidade Curricular *</label>
-              <Select value={unidadeCurricular} onValueChange={setUnidadeCurricular}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="prog1">Programação I</SelectItem>
-                  <SelectItem value="prog2">Programação II</SelectItem>
-                  <SelectItem value="bd">Base de Dados</SelectItem>
-                  <SelectItem value="redes">Redes de Computadores</SelectItem>
-                  <SelectItem value="so">Sistemas Operativos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Tipo de Avaliação *</label>
-              <Select value={tipoAvaliacao} onValueChange={setTipoAvaliacao}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="teste1">Teste 1</SelectItem>
-                  <SelectItem value="teste2">Teste 2</SelectItem>
-                  <SelectItem value="exame">Exame Normal</SelectItem>
-                  <SelectItem value="recurso">Exame de Recurso</SelectItem>
-                  <SelectItem value="especial">Época Especial</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Horário</label>
-              <Select value={horario} onValueChange={setHorario}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="08-10">08:00 - 10:00</SelectItem>
-                  <SelectItem value="10-12">10:00 - 12:00</SelectItem>
-                  <SelectItem value="14-16">14:00 - 16:00</SelectItem>
-                  <SelectItem value="16-18">16:00 - 18:00</SelectItem>
-                  <SelectItem value="18-20">18:00 - 20:00</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Situação Financeira</label>
-              <Select value={situacaoFinanceira} onValueChange={setSituacaoFinanceira}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="regular">Regular</SelectItem>
-                  <SelectItem value="devedor">Devedor</SelectItem>
-                  <SelectItem value="isento">Isento</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <Button onClick={handleSearch} className="w-full gap-2">
-                <Search className="h-4 w-4" />Pesquisar
-              </Button>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                 <FormSelect
+                   disabled={isLoadingAcademicYear}
+                   loading={isLoadingAcademicYear}
+                   label="Ano Letivo"
+                   value={formData.anoLetivo}
+                   onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+                   options={academicYear}
+                   map={(a) => ({
+                     key: a.codigo,
+                     label: a.designacao,
+                     value: a.codigo,
+                   })}
+                 />
+                 <FormSelect
+                   disabled={
+                     isLoadingPeriodos ||
+                     isLoadingAcademicYear ||
+                     formData.anoLetivo === ""
+                   }
+                   loading={isLoadingPeriodos}
+                   label="Período"
+                   value={formData.periodo}
+                   onChange={(v) => setFormData({ ...formData, periodo: v })}
+                   options={periodos}
+                   map={(p) => ({
+                     key: p.codigo,
+                     label: p.designacao,
+                     value: p.codigo,
+                   })}
+                 />
+                 <FormSelect
+                   disabled={isLoadingSemestres}
+                   loading={isLoadingSemestres}
+                   label="Semestre"
+                   value={formData.semestre}
+                   onChange={(v) => setFormData({ ...formData, semestre: v })}
+                   options={semestres}
+                   map={(s) => ({
+                     key: s.codigo,
+                     label: s.designacao,
+                     value: s.codigo,
+                   })}
+                 />
+                 <FormSelect
+                   disabled={isLoadingCurso}
+                   loading={isLoadingCurso}
+                   label="Curso"
+                   value={formData.curso}
+                   onChange={(v) => setFormData({ ...formData, curso: v })}
+                   options={cursos}
+                   map={(c) => ({
+                     key: c.codigo,
+                     label: c.designacao,
+                     value: c.codigo,
+                   })}
+                 />
+                 <FormSelect
+                   label="Ano Curricular"
+                   value={formData.classes}
+                   disabled={isLoadingClasses || !formData.curso}
+                   onChange={(v) => setFormData({ ...formData, classes: v })}
+                   options={classes}
+                   map={(c) => ({
+                     key: c.codigo,
+                     label: c.designacao,
+                     value: c.codigo,
+                   })}
+                   loading={isLoadingClasses}
+                 />
+                      {/* UC */}
+                 <FormSelect
+                   label="Unidade Curricular"
+                   value={formData.unidadeCurricular}
+                   disabled={
+                     isLoadingUC ||
+                     !formData.semestre ||
+                     !formData.curso ||
+                     !formData.classes
+                   }
+                   onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
+                   options={unidadesCurriculares}
+                   map={(u) => ({
+                     key: u.codigo,
+                     label: u.descricao,
+                     value: u.pk,
+                   })}
+                   loading={isLoadingUC}
+                 />
+                 <FormSelectIsaac
+                   label="Horario"
+                   value={formData.horarioId}
+                   disabled={
+                     loadingschedule ||
+                     !formData.semestre ||
+                     !formData.classes
+                   }
+                   onChange={(v) => setFormData({ ...formData, horarioId: v })}
+                   options={scheduleResponse?.data}
+                   map={(u, index) => ({
+                     key: index,
+                     value: u.codigo,
+                     label: `${u.designacao}`,
+                   })}
+                   loading={loadingschedule}
+                 />
+                 <FormSelect
+                   label="Tipo de Prova"
+                   value={formData.tipoProva}
+                   disabled={isLoadingTipoProva}
+                   onChange={(v) => setFormData({ ...formData, tipoProva: v })}
+                   options={tipoProva}
+                   map={(u) => ({
+                     key: u.codigo,
+                     label: u.designacao,
+                     value: u.codigo,
+                   })}
+                   loading={isLoadingTipoProva}
+                 />
+                 <FormSelect
+                   label="Tipo de Avaliação"
+                   value={formData.tipoAvaliacao}
+                   disabled={isLoadingTipoAvaliacao}
+                   onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
+                   options={tipoAvaliacao}
+                   map={(u) => ({
+                     key: u.codigo,
+                     label: u.designacao,
+                     value: u.codigo,
+                   })}
+                   loading={isLoadingTipoAvaliacao}
+                 />
+       
+                 {/* Botão Listar na mesma linha */}
+                 <div className="flex items-end">
+                   <Button
+                     className="w-full"
+                    
+                   >
+                     <RefreshCw className="h-5 w-5 mr-2" />
+                     Listar
+                   </Button>
+                 </div>
+               </div>
         </CardContent>
       </Card>
 
-      {showResults && (
-        <>
-          <div className="flex flex-wrap gap-2 items-center justify-between">
+   <div className="flex flex-wrap gap-2 items-center justify-between">
+           
             <div className="flex gap-2">
-              <Button variant="outline" className="gap-2" onClick={() => handleMarcarTodos(true)}>
-                <Check className="h-4 w-4" />Marcar Todos Presente
-              </Button>
-              <Button variant="outline" className="gap-2" onClick={() => handleMarcarTodos(false)}>
-                <X className="h-4 w-4" />Desmarcar Todos
-              </Button>
-              <Button className="gap-2" onClick={handleSavePresencas}>
-                <Save className="h-4 w-4" />Guardar Presenças
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="gap-2"><RefreshCw className="h-4 w-4" />Atualizar</Button>
-              <Button variant="outline" className="gap-2"><Download className="h-4 w-4" />Excel</Button>
-              <Button variant="outline" className="gap-2"><Printer className="h-4 w-4" />Imprimir</Button>
+            
+              <ListaEstudantesPDF 
+        estudantes={estudantes2} 
+        titulo={titulo} 
+      />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold">{estudantes.length}</div>
-                <p className="text-sm text-muted-foreground">Total Inscritos</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-green-600">{totalPresentes}</div>
-                <p className="text-sm text-muted-foreground">Presentes</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-destructive">{totalAusentes}</div>
-                <p className="text-sm text-muted-foreground">Ausentes</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold text-primary">
-                  {estudantes.length > 0 ? Math.round((totalPresentes / estudantes.length) * 100) : 0}%
-                </div>
-                <p className="text-sm text-muted-foreground">Taxa de Presença</p>
-              </CardContent>
-            </Card>
-          </div>
 
           <Card>
             <CardHeader>
@@ -322,8 +476,6 @@ export default function PresenceList() {
               </Table>
             </CardContent>
           </Card>
-        </>
-      )}
     </div>
   );
 }

@@ -47,7 +47,7 @@ import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-tea
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 
-export default function LaunchNotes() {
+export default function PautaGeral() {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
@@ -112,31 +112,31 @@ export default function LaunchNotes() {
     useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const upsertNoteMutation = useUpsertNote();
- const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       classe: formData.classes,
       curso: formData.curso,
       semestre: formData.semestre,
     });
-      const canLoadTurmas =
-        !!formData.anoLetivo &&
-        !!formData.semestre &&
-        !!formData.periodo &&
-        !!formData.curso &&
-        !!formData.unidadeCurricular;
-    
-      const { data: scheduleResponse, isLoading: loadingschedule } = useQuerySchedulesByUc(
-        {
-          anoLectivo: Number(formData.anoLetivo),
-          semestre: Number(formData.semestre),
-          periodo: Number(formData.periodo),
-          curso: Number(formData.curso),
-          unidadeCurricular: Number(formData.unidadeCurricular),
-         
-        },
-        { enabled: canLoadTurmas }
-      );
-    
+  const canLoadTurmas =
+    !!formData.anoLetivo &&
+    !!formData.semestre &&
+    !!formData.periodo &&
+    !!formData.curso &&
+    !!formData.unidadeCurricular;
+
+  const { data: scheduleResponse, isLoading: loadingschedule } =
+    useQuerySchedulesByUc(
+      {
+        anoLectivo: Number(formData.anoLetivo),
+        semestre: Number(formData.semestre),
+        periodo: Number(formData.periodo),
+        curso: Number(formData.curso),
+        unidadeCurricular: Number(formData.unidadeCurricular),
+      },
+      { enabled: canLoadTurmas }
+    );
+
   useEffect(() => {
     setLocalStudents(students);
     const initialLocks: { [key: number]: boolean } = {};
@@ -226,18 +226,13 @@ export default function LaunchNotes() {
         <span>/</span>
         <span className="font-medium">Avaliações</span>
         <span>/</span>
-        <span className="text-foreground">Lançamento de notas</span>
+        <span className="text-foreground">Pauta Geral</span>
       </nav>
 
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Lançamento de notas
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Lançar notas de avaliações por UC
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">Pauta Geral</h1>
         </div>
       </div>
 
@@ -314,7 +309,7 @@ export default function LaunchNotes() {
             })}
             loading={isLoadingClasses}
           />
-               {/* UC */}
+
           <FormSelect
             label="Unidade Curricular"
             value={formData.unidadeCurricular}
@@ -337,9 +332,7 @@ export default function LaunchNotes() {
             label="Horario"
             value={formData.horarioId}
             disabled={
-              loadingschedule ||
-              !formData.semestre ||
-              !formData.classes
+              loadingschedule || !formData.semestre || !formData.classes
             }
             onChange={(v) => setFormData({ ...formData, horarioId: v })}
             options={scheduleResponse?.data}
@@ -349,32 +342,6 @@ export default function LaunchNotes() {
               label: `${u.designacao}`,
             })}
             loading={loadingschedule}
-          />
-          <FormSelect
-            label="Tipo de Prova"
-            value={formData.tipoProva}
-            disabled={isLoadingTipoProva}
-            onChange={(v) => setFormData({ ...formData, tipoProva: v })}
-            options={tipoProva}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
-            loading={isLoadingTipoProva}
-          />
-          <FormSelect
-            label="Tipo de Avaliação"
-            value={formData.tipoAvaliacao}
-            disabled={isLoadingTipoAvaliacao}
-            onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
-            options={tipoAvaliacao}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
-            loading={isLoadingTipoAvaliacao}
           />
 
           {/* Botão Listar na mesma linha */}
@@ -388,9 +355,7 @@ export default function LaunchNotes() {
                 !formData.semestre ||
                 !formData.curso ||
                 !formData.classes ||
-                !formData.horarioId ||
-                !formData.tipoProva ||
-                !formData.tipoAvaliacao
+                !formData.horarioId
               }
               onClick={() => refetch()}
             >

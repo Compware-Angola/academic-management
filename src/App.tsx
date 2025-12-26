@@ -65,6 +65,7 @@ import LaunchHistoric from "./pages/rating(avaliation)/launch-historic";
 import MarkingAssessment from "./pages/rating(avaliation)/marking-assessment";
 import StatisticAssessment from "./pages/rating(avaliation)/statistic";
 import Permission from "./pages/rating(avaliation)/permission/permission";
+import PautaGeral from "./pages/rating(avaliation)/pauta-geral";
 
 const App = () => {
   return (
@@ -117,6 +118,7 @@ const App = () => {
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
                 <Route path="/avaliacoes/presenca" element={<PresenceList />} />
                 <Route path="/avaliacoes/pauta" element={<LancamentoPauta />} />
+                <Route path="avaliacoes/pauta-geral" element={<PautaGeral />} />
                 <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
