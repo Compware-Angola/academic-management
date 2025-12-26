@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { RefreshCw, FileDown, Printer, Eye, Search } from "lucide-react";
+import { RefreshCw, FileDown, Printer, Eye, Search, Save, SearchCheck, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +15,53 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryLogsAccesses } from "@/hooks/acess/use-query-logs-accesses";
+import { string } from "zod";
+
+type FiltersLogs = {
+  dataInicio: string,
+  dataFim: string
+}
 
 export default function LogsAcessos() {
+  const [filters, setFilters] = useState<FiltersLogs>({
+    dataInicio: "",
+    dataFim: ""
+  })
+
+   const [paramsPesquisa, setParamsPesquisa] = useState<typeof filters | null>(null);
+
+ 
+  const {data:logs, isLoading} = useQueryLogsAccesses(paramsPesquisa)
+
+  function ajustarDatasParaPesquisa(dataInicio: string, dataFim: string) {
+  // transforma para ISO completo, incluindo hora
+  return {
+    dataInicio: `${dataInicio} 00:00:00`,
+    dataFim: `${dataFim} 23:59:59`,
+  };
+}
+
+  const handlePesquisar = () => {
+
+     if (!filters.dataInicio || !filters.dataFim) return;
+
+  const paramsAjustados = ajustarDatasParaPesquisa(
+    filters.dataInicio,
+    filters.dataFim
+  );
+
+    setParamsPesquisa(paramsAjustados); 
+      
+  }
+
+  const handleInputChange = (field: keyof FiltersLogs, value: string) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+ console.log("Logs accesses: ", logs) 
+
   const [loading, setLoading] = useState(false);
   const [filtros, setFiltros] = useState({
     tipo: "todos",
@@ -61,38 +107,35 @@ export default function LogsAcessos() {
 
       <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-end">
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium text-foreground">Data Início</label>
-          <Select value={filtros.tipo} onValueChange={(v) => setFiltros({ ...filtros, tipo: v })}>
-            <SelectTrigger className="bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos os Tipos</SelectItem>
-              {tiposAcesso.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="DataInicio">Data Inicio</Label>
+          <Input 
+            type="date" 
+            id="dataInicio"
+            value={filters.dataInicio}
+            onChange={(e) => handleInputChange("dataInicio", e.target.value)}
+            className="bg-background" 
+            />
         </div>
 
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium text-foreground">Período</label>
-          <Select value={filtros.periodo} onValueChange={(v) => setFiltros({ ...filtros, periodo: v })}>
-            <SelectTrigger className="bg-background">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {periodos.map(p => <SelectItem key={p} value={p.toLowerCase()}>{p}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="DataFim">Data Fim</Label>
+          <Input 
+            type="date" 
+            id="dataFim"
+            onChange={(e) => handleInputChange("dataFim", e.target.value)} 
+            value={filters.dataFim}
+            className="bg-background" />
+        </div>
+
+        <div>
+          <Button onClick={handlePesquisar}>
+              <SearchX className="mr-2 h-4 w-4" />
+              Pesquisar
+          </Button>
         </div>
 
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm"><RefreshCw className="mr-2 h-4 w-4" />Atualizar lista</Button>
-        <Button variant="outline" size="sm"><FileDown className="mr-2 h-4 w-4" />Exportar Excel</Button>
-        <Button variant="outline" size="sm"><FileDown className="mr-2 h-4 w-4" />Exportar PDF</Button>
-        <Button variant="outline" size="sm"><Printer className="mr-2 h-4 w-4" />Imprimir</Button>
-      </div>
 
       <div className="rounded-lg border border-border bg-card shadow-sm">
         <Table>

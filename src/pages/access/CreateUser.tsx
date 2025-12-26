@@ -32,29 +32,6 @@ interface FormData {
   nacionalidadeId: string;
 }
 
-const tiposDocumento = [
-  { id: "1", nome: "Bilhete de Identidade" },
-  { id: "2", nome: "Passaporte" },
-  { id: "3", nome: "Cartão de Residência" },
-];
-
-const sexos = [
-  { id: "1", nome: "Masculino" },
-  { id: "2", nome: "Feminino" },
-];
-
-
-
-const nacionalidades = [
-  { id: "1", nome: "Angolana" },
-  { id: "2", nome: "Portuguesa" },
-  { id: "3", nome: "Brasileira" },
-  { id: "4", nome: "Cabo-verdiana" },
-  { id: "5", nome: "Moçambicana" },
-  { id: "6", nome: "São-tomense" },
-  { id: "7", nome: "Guineense" },
-  { id: "8", nome: "Outra" },
-];
 
 export default function CreateUser() {
   const { toast } = useToast();

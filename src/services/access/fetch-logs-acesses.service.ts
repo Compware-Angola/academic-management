@@ -1,10 +1,9 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 import { AuthStorage } from "@/util/auth-storage";
 
 
 export type createLogsParams = {
-    dataInicio: string;
+    dataInicio: string
     dataFim: string
 } 
 
@@ -23,7 +22,11 @@ export type tipoLogsAccesses = {
 export async function fetchLogsAccessos(params: createLogsParams):Promise<tipoLogsAccesses[]>{
 const userID = AuthStorage.getUser().user_id.toString()
 const _params = {...params, utilizadorId:userID}
-    const {data} = await axiosNestGa.get("/acess_management/logs-acessos-funcionalidade",{params:_params})
 
+    console.log("Params no service: ", params)
+
+    const {data} = await axiosNestGa.get("/acess_management/logs-acessos-funcionalidade",{params:_params})
+    
+    
     return data
 }
