@@ -62,6 +62,7 @@ import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
 import LancamentoPauta from "./pages/rating(avaliation)/LancamentoPauta";
 import LaunchHistoric from "./pages/rating(avaliation)/launch-historic";
+import PautaGeral from "./pages/rating(avaliation)/pauta-geral";
 
 const App = () => {
   return (
@@ -114,6 +115,7 @@ const App = () => {
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
                 <Route path="/avaliacoes/presenca" element={<PresenceList />} />
                 <Route path="/avaliacoes/pauta" element={<LancamentoPauta />} />
+                <Route path="avaliacoes/pauta-geral" element={<PautaGeral />} />
                 <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
