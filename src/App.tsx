@@ -62,6 +62,9 @@ import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
 import LancamentoPauta from "./pages/rating(avaliation)/LancamentoPauta";
 import LaunchHistoric from "./pages/rating(avaliation)/launch-historic";
+import MarkingAssessment from "./pages/rating(avaliation)/marking-assessment";
+import StatisticAssessment from "./pages/rating(avaliation)/statistic";
+import Permission from "./pages/rating(avaliation)/permission/permission";
 
 const App = () => {
   return (
@@ -122,6 +125,15 @@ const App = () => {
                   path="/avaliacoes/historico"
                   element={<LaunchHistoric />}
                 />
+                <Route
+                  path="/marcacao-provas/controle"
+                  element={<MarkingAssessment />}
+                />
+                <Route
+                  path="avaliacoes/estatisticas"
+                  element={<StatisticAssessment />}
+                />
+                <Route path="avaliacoes/permissao" element={<Permission />} />
                 {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
