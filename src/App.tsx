@@ -66,6 +66,7 @@ import MarkingAssessment from "./pages/rating(avaliation)/marking-assessment";
 import StatisticAssessment from "./pages/rating(avaliation)/statistic";
 import Permission from "./pages/rating(avaliation)/permission/permission";
 import PautaGeral from "./pages/rating(avaliation)/pauta-geral";
+import ViewNotes from "./pages/rating(avaliation)/view-notes";
 
 const App = () => {
   return (
@@ -136,6 +137,7 @@ const App = () => {
                   element={<StatisticAssessment />}
                 />
                 <Route path="avaliacoes/permissao" element={<Permission />} />
+                <Route path="avaliacoes/visualizar" element={<ViewNotes />} />
                 {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
