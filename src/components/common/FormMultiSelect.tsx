@@ -1,15 +1,4 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Loader2, ChevronDown } from "lucide-react";
-
+"use client";
 type MapResult = {
   key: string | number;
   value: string;
@@ -18,107 +7,69 @@ type MapResult = {
 
 type FormMultiSelectProps<T> = {
   label?: string;
-  value?: string[];
+  values?: string[];
   options?: T[];
   map: (item: T) => MapResult;
   onChange: (values: string[]) => void;
   disabled?: boolean;
   loading?: boolean;
-  maxVisibleLabels?: number;
+  placeholder?: string;
 };
+
+import { Label } from "@/components/ui/label";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
+import { Loader2 } from "lucide-react";
 
 export function FormMultiSelect<T>({
   label,
-  value = [],
+  values = [],
   options = [],
   map,
   onChange,
-  disabled = false,
   loading = false,
-  maxVisibleLabels = 2,
+  placeholder = "Selecionar",
 }: FormMultiSelectProps<T>) {
-  const [open, setOpen] = useState(false);
-
-  const toggleValue = (val: string) => {
-    if (value.includes(val)) {
-      onChange(value.filter((v) => v !== val));
-    } else {
-      onChange([...value, val]);
-    }
-  };
-
-  const selectedOptions = options
-    .map(map)
-    .filter((o) => value.includes(o.value));
-
-  const visibleLabels = selectedOptions
-    .slice(0, maxVisibleLabels)
-    .map((o) => o.label);
-
-  const extraCount = selectedOptions.length - visibleLabels.length;
-
   return (
     <div className="space-y-2">
-      {label && <Label>{label}</Label>}
-
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disabled}
-            className="w-full justify-between text-left"
-          >
-            {loading ? (
-              <span className="flex items-center gap-2 text-muted-foreground">
-                Carregando <Loader2 className="h-4 w-4 animate-spin" />
-              </span>
-            ) : selectedOptions.length ? (
-              <span className="truncate">
-                {visibleLabels.join(", ")}
-                {extraCount > 0 && ` +${extraCount}`}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">Selecionar</span>
-            )}
-            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
-          </Button>
-        </PopoverTrigger>
-
-        <PopoverContent
-          side="bottom"
-          align="start"
-          className="w-[var(--radix-popover-trigger-width)] p-2 space-y-2 max-h-64 overflow-auto"
-        >
+      <div>{label && <Label>{label}</Label>}</div>
+      <MultiSelect
+        values={values ?? []}
+        onValuesChange={(vals) => onChange(vals ?? [])}
+      >
+        <MultiSelectTrigger className="w-full">
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-4 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />A carregar...
-            </div>
-          ) : options.length === 0 ? (
-            <div className="py-4 text-sm text-muted-foreground text-center">
-              Sem opções
+            <div className="flex items-center gap-2 text-muted-foreground">
+              Carregando
+              <Loader2 className="h-4 w-4 animate-spin" />
             </div>
           ) : (
-            options.map((item) => {
-              const mapped = map(item);
-              const checked = value.includes(mapped.value);
-
-              return (
-                <label
-                  key={mapped.key}
-                  className="flex items-center gap-2 cursor-pointer rounded px-2 py-1 hover:bg-muted"
-                >
-                  <Checkbox
-                    checked={checked}
-                    onCheckedChange={() => toggleValue(mapped.value)}
-                  />
-                  <span className="text-sm">{mapped.label}</span>
-                </label>
-              );
-            })
+            <MultiSelectValue
+              placeholder={placeholder}
+              overflowBehavior="cutoff"
+            />
           )}
-        </PopoverContent>
-      </Popover>
+        </MultiSelectTrigger>
+
+        <MultiSelectContent>
+          <MultiSelectGroup>
+            {options.map((item) => {
+              const mapped = map(item);
+              return (
+                <MultiSelectItem key={mapped.key} value={mapped.value}>
+                  {mapped.label}
+                </MultiSelectItem>
+              );
+            })}
+          </MultiSelectGroup>
+        </MultiSelectContent>
+      </MultiSelect>
     </div>
   );
 }

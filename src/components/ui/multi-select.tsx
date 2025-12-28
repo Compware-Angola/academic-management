@@ -79,7 +79,7 @@ export function MultiSelect({
   }, []);
 
   return (
-    <MultiSelectContext
+    <MultiSelectContext.Provider
       value={{
         open,
         setOpen,
@@ -92,7 +92,7 @@ export function MultiSelect({
       <Popover open={open} onOpenChange={setOpen} modal={true}>
         {children}
       </Popover>
-    </MultiSelectContext>
+    </MultiSelectContext.Provider>
   );
 }
 
@@ -107,7 +107,7 @@ export function MultiSelectTrigger({
   const { open } = useMultiSelectContext();
 
   return (
-    <PopoverTrigger asChild>
+    <PopoverTrigger>
       <Button
         {...props}
         variant={props.variant ?? "outline"}
@@ -129,7 +129,7 @@ export function MultiSelectValue({
   placeholder,
   clickToRemove = true,
   className,
-  overflowBehavior = "wrap-when-open",
+  overflowBehavior = "cutoff",
   ...props
 }: {
   placeholder?: string;
