@@ -42,6 +42,7 @@ import { useQueryViewNotas } from "@/hooks/avaliacao/use-query-fetch-view-notes"
 import { parseFilter } from "@/util/parse-filter";
 import { formatarData } from "@/util/date-formate";
 import { Button } from "@/components/ui/button";
+import { useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
 
 export default function ViewNotes() {
   // filtros
@@ -53,6 +54,7 @@ export default function ViewNotes() {
     anoCurricular: "",
     unidadeCurricular: "",
     horarioId: "",
+    turmaId: "",
     tipoProva: "",
     tipoAvaliacao: "",
   });
@@ -102,21 +104,33 @@ export default function ViewNotes() {
       },
       { enabled: canLoadTurmas }
     );
+  const isShowSchedule =
+    filters.anoLetivo == "" || Number(filters.anoLetivo) > 17;
   const { data: viewNotesResponse, isLoading: loadingViewNotes } =
     useQueryViewNotas({
       anoLectivo: parseFilter(filters.anoLetivo),
-      horarioOrTurmaId: parseFilter(filters.horarioId),
+      horarioOrTurmaId: isShowSchedule
+        ? parseFilter(filters.horarioId)
+        : parseFilter(filters.turmaId),
       tipoAvaliacao: parseFilter(filters.tipoAvaliacao),
       tipoProva: parseFilter(filters.tipoProva),
       gradeId: parseFilter(filters.unidadeCurricular),
-      tipoConsulta: 1,
+      tipoConsulta: isShowSchedule ? 1 : 2,
       page,
       limit,
+    });
+  const { data: turmas = [], isLoading: isLoadingTurma } =
+    useTeamOldRulesTurmas({
+      anoLectivo: filters.anoLetivo,
+      classe: filters.anoCurricular,
+      curso: filters.curso,
+      periodo: filters.periodo,
     });
   const schedules = scheduleResponse?.data || [];
   const viewNotes = viewNotesResponse?.data || [];
   const total = viewNotesResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+
   return (
     <div className="p-6 space-y-8">
       {/* Breadcrumb */}
@@ -314,19 +328,36 @@ export default function ViewNotes() {
                 </SelectContent>
               </Select>
             </div>
-            <FormSelect
-              label="Horarios"
-              value={filters.horarioId}
-              onChange={(v) => setFilters({ ...filters, horarioId: v })}
-              options={schedules}
-              loading={loadingSchedule}
-              disabled={loadingSchedule}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo,
-              })}
-            />
+            {isShowSchedule ? (
+              <FormSelect
+                label="Horarios"
+                value={filters.horarioId}
+                onChange={(v) => setFilters({ ...filters, horarioId: v })}
+                options={schedules}
+                loading={loadingSchedule}
+                disabled={loadingSchedule}
+                map={(u) => ({
+                  key: u.codigo,
+                  label: u.designacao,
+                  value: u.codigo,
+                })}
+              />
+            ) : (
+              <FormSelect
+                label="Turmas"
+                value={filters.turmaId}
+                onChange={(v) => setFilters({ ...filters, turmaId: v })}
+                options={turmas}
+                loading={isLoadingTurma}
+                disabled={isLoadingTurma}
+                map={(u) => ({
+                  key: u.codigo,
+                  label: u.designacao,
+                  value: u.codigo,
+                })}
+              />
+            )}
+
             <FormSelect
               label="Tipo de Prova"
               value={filters.tipoProva}

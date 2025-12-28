@@ -39,6 +39,8 @@ import { useQueryAssessmentStats } from "@/hooks/avaliacao/use-query-statistic-a
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { Badge } from "@/components/ui/badge";
+import { FormMultiSelect } from "@/components/common/FormMultiSelect";
+import { OverflowBehaviorMultiSelect } from "@/components/common/MultiSelect";
 
 export default function StatisticAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,10 +60,6 @@ export default function StatisticAssessment() {
     tipoProva: "",
     tipoAvaliacao: "",
   });
-
-  // paginação
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
 
   // === Dados base ===
   const { data: anosAcademicos } = useQueryAnoAcademico();
@@ -361,6 +359,24 @@ export default function StatisticAssessment() {
                 value: u.codigo,
               })}
               loading={isLoadingTipoAvaliacao}
+            />
+            <FormMultiSelect
+              label="Tipo de Avaliação"
+              values={avaliacoes}
+              options={tipoAvaliacao}
+              onChange={(e) => {
+                console.log(e);
+                if (e == undefined) {
+                  setAvaliacoes([]);
+                  return;
+                }
+                setAvaliacoes(e);
+              }}
+              map={(u) => ({
+                key: u.codigo,
+                label: u.designacao,
+                value: u.codigo.toString(),
+              })}
             />
           </div>
         </CardContent>
