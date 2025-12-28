@@ -32,6 +32,8 @@ export type PautasGeralParams = {
   gradeCurricular?: string;
   horario?: string;
   semestre: string;
+  gradeCurricularTurma?: string;
+  turma?: string;
 };
 
 export type PautasGeralResponse = PautaGeral[];

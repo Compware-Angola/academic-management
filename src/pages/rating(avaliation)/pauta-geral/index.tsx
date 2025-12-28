@@ -46,47 +46,81 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
 import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
+type Filters = {
+  anoLetivo: string;
+  periodo: string;
+  semestre: string;
+  curso: string;
+  classes: string;
 
+  // Fluxo novo (> 2021)
+  unidadeCurricular: string;
+  horarioId: string;
+
+  // Fluxo antigo (<= 2021)
+  turma: string;
+  gradeCurricularTurma: string;
+};
 export default function PautaGeral() {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
 
   const [shouldFetch, setShouldFetch] = useState(false);
-  const [filters, setFilters] = useState({
-    curso: "",
+  const [filters, setFilters] = useState<Filters>({
     anoLetivo: "",
-    semestre: "",
-    classes: "",
     periodo: "",
+    semestre: "",
+    curso: "",
+    classes: "",
     unidadeCurricular: "",
     horarioId: "",
     turma: "",
+    gradeCurricularTurma: "",
   });
-
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+  useEffect(() => {
+    setShouldFetch(false);
+  }, [filters]);
+  /** ================== QUERIES BASE ================== */
+  const { data: academicYear = [], isLoading: loadingYear } =
     useQueryAnoAcademico();
-  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
-  const { data: semestres, isLoading: isLoadingSemestres } =
+  const { data: periodos = [], isLoading: loadingPeriodos } = useQueryPeriod();
+  const { data: semestres = [], isLoading: loadingSemestres } =
     useQuerySemestres();
-  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
-  const { data: classes = [], isLoading: isLoadingClasses } =
+  const { data: cursos = [], isLoading: loadingCursos } = useCursos();
+
+  const { data: classes = [], isLoading: loadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+
+  const { data: unidadesCurriculares = [], isLoading: loadingUC } =
     useQueryDisciplinaWithFilter({
       classe: filters.classes,
       curso: filters.curso,
       semestre: filters.semestre,
     });
-  const canLoadTurmas =
+
+  /** ================== REGRA DO ANO ================== */
+  const academicYearInfo = useMemo(() => {
+    return academicYear.find((a) => a.codigo.toString() === filters.anoLetivo);
+  }, [academicYear, filters.anoLetivo]);
+
+  const isNewAcademicFlow = useMemo(() => {
+    if (!academicYearInfo) return false;
+    const [startYear] = academicYearInfo.designacao.split("-");
+    return Number(startYear) > 2021;
+  }, [academicYearInfo]);
+
+  /** ================== FLUXO NOVO (> 2021) ================== */
+  const canLoadSchedules =
+    isNewAcademicFlow &&
     !!filters.anoLetivo &&
     !!filters.semestre &&
     !!filters.periodo &&
     !!filters.curso &&
     !!filters.unidadeCurricular;
 
-  const { data: scheduleResponse, isLoading: loadingschedule } =
+  const { data: schedules, isLoading: loadingSchedules } =
     useQuerySchedulesByUc(
       {
         anoLectivo: Number(filters.anoLetivo),
@@ -95,70 +129,73 @@ export default function PautaGeral() {
         curso: Number(filters.curso),
         unidadeCurricular: Number(filters.unidadeCurricular),
       },
-      { enabled: canLoadTurmas }
+      { enabled: canLoadSchedules }
     );
 
-  const { data: turmas = [], isLoading: isLoadingTurma } =
-    useTeamOldRulesTurmas({
+  /** ================== FLUXO ANTIGO (<= 2021) ================== */
+  const { data: turmas = [], isLoading: loadingTurmas } = useTeamOldRulesTurmas(
+    {
       anoLectivo: filters.anoLetivo,
       classe: filters.classes,
       curso: filters.curso,
       periodo: filters.periodo,
-    });
-  const { data: ucBYTurma = [], isLoading: isLoadingUcBYTurma } =
-    useTeamOldRules({
-      anoLectivo: filters.anoLetivo,
-      semestre: filters.semestre,
-      turma: filters.turma,
-    });
-  console.log({ ucBYTurma });
-  useEffect(() => {
-    if (academicYear.length > 0) {
-      const activeYear = academicYear.find((a) =>
-        a.estado.toLowerCase().startsWith("activ")
-      );
     }
-  }, [academicYear]);
-  const { data: pautaGeral = [], isLoading: isLoadingPautaGeral } =
-    usePautasGeral(
-      {
-        gradeCurricular: filters.unidadeCurricular,
-        horario: filters.horarioId,
-        semestre: filters.semestre,
-        anoLectivo: filters.anoLetivo,
-      },
-      shouldFetch
-    );
-  const isAcademicYearAfter2021 = useMemo(() => {
-    if (!filters.anoLetivo || !academicYear?.length) return false;
+  );
 
-    const year = academicYear.find(
-      (a) => a.codigo.toString() === filters.anoLetivo
-    );
+  const { data: ucByTurma = [], isLoading: loadingUcTurma } = useTeamOldRules({
+    anoLectivo: filters.anoLetivo,
+    semestre: filters.semestre,
+    turma: filters.turma,
+  });
 
-    if (!year) return false;
-
-    const [startYear] = year.designacao.split("-");
-    return Number(startYear) > 2021;
-  }, [academicYear, filters.anoLetivo]);
-  const handleSearch = async () => {
-    // Validar campos obrigatórios
+  /** ================== BUSCA FINAL ================== */
+  const { data: pautaGeral = [], isLoading: loadingPauta } = usePautasGeral(
+    {
+      gradeCurricular: filters.unidadeCurricular,
+      horario: filters.horarioId,
+      semestre: filters.semestre,
+      anoLectivo: filters.anoLetivo,
+      turma: filters.turma,
+      gradeCurricularTurma: filters.gradeCurricularTurma,
+    },
+    shouldFetch
+  );
+  const handleSearch = () => {
     if (!filters.anoLetivo || !filters.semestre) {
       toast({
         title: "Campos obrigatórios",
-        description:
-          "Por favor, preencha ano lectivo, grade curricular e semestre.",
+        description: "Ano lectivo e semestre são obrigatórios.",
         variant: "destructive",
       });
       return;
     }
 
+    if (
+      isNewAcademicFlow &&
+      (!filters.unidadeCurricular || !filters.horarioId)
+    ) {
+      toast({
+        title: "Filtros incompletos",
+        description: "Selecione unidade curricular e horário.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (
+      !isNewAcademicFlow &&
+      (!filters.turma || !filters.gradeCurricularTurma)
+    ) {
+      toast({
+        title: "Filtros incompletos",
+        description: "Selecione turma e unidade curricular.",
+        variant: "destructive",
+      });
+      return;
+    }
+    console.log("aqui", { filters });
     setShouldFetch(true);
-
-    // Simular chamada à API
-    // Em produção: const response = await fetch(`/api/assessment/pautas-geral?anoLectivo=${filters.anoLectivo}&gradeCurricular=${filters.gradeCurricular}&horario=${filters.horario}&semestre=${filters.semestre}&turma=${filters.turma}&gradeCurricularTurma=${filters.gradeCurricularTurma}`);
   };
-
   const getResultadoBadge = (resultado: string) => {
     if (resultado === "Aprovado") {
       return (
@@ -208,8 +245,8 @@ export default function PautaGeral() {
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
+            disabled={loadingYear}
+            loading={loadingYear}
             label="Ano Letivo"
             value={filters.anoLetivo}
             onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
@@ -223,11 +260,9 @@ export default function PautaGeral() {
 
           <FormSelect
             disabled={
-              isLoadingPeriodos ||
-              isLoadingAcademicYear ||
-              filters.anoLetivo === ""
+              loadingPeriodos || loadingYear || filters.anoLetivo === ""
             }
-            loading={isLoadingPeriodos}
+            loading={loadingPeriodos}
             label="Período"
             value={filters.periodo}
             onChange={(v) => setFilters({ ...filters, periodo: v })}
@@ -240,8 +275,8 @@ export default function PautaGeral() {
           />
 
           <FormSelect
-            disabled={isLoadingSemestres}
-            loading={isLoadingSemestres}
+            disabled={loadingSemestres}
+            loading={loadingSemestres}
             label="Semestre"
             value={filters.semestre}
             onChange={(v) => setFilters({ ...filters, semestre: v })}
@@ -253,8 +288,8 @@ export default function PautaGeral() {
             })}
           />
           <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
+            disabled={loadingCursos}
+            loading={loadingCursos}
             label="Curso"
             value={filters.curso}
             onChange={(v) => setFilters({ ...filters, curso: v })}
@@ -268,7 +303,7 @@ export default function PautaGeral() {
           <FormSelect
             label="Ano Curricular"
             value={filters.classes}
-            disabled={isLoadingClasses || !filters.curso}
+            disabled={loadingClasses || !filters.curso}
             onChange={(v) => setFilters({ ...filters, classes: v })}
             options={classes}
             map={(c) => ({
@@ -276,14 +311,14 @@ export default function PautaGeral() {
               label: c.designacao,
               value: c.codigo,
             })}
-            loading={isLoadingClasses}
+            loading={loadingClasses}
           />
-          {isAcademicYearAfter2021 && (
+          {isNewAcademicFlow && (
             <FormSelect
               label="Unidade Curricular"
               value={filters.unidadeCurricular}
               disabled={
-                isLoadingUC ||
+                loadingUC ||
                 !filters.semestre ||
                 !filters.curso ||
                 !filters.classes
@@ -295,32 +330,32 @@ export default function PautaGeral() {
                 label: u.descricao,
                 value: u.pk,
               })}
-              loading={isLoadingUC}
+              loading={loadingUC}
             />
           )}
 
-          {isAcademicYearAfter2021 && (
+          {isNewAcademicFlow && (
             <FormSelect
               label="Horario"
               value={filters.horarioId}
               disabled={
-                loadingschedule || !filters.semestre || !filters.classes
+                loadingSchedules || !filters.semestre || !filters.classes
               }
               onChange={(v) => setFilters({ ...filters, horarioId: v })}
-              options={scheduleResponse?.data}
+              options={schedules?.data}
               map={(u) => ({
                 key: u.codigo,
                 value: u.codigo,
                 label: `${u.designacao}`,
               })}
-              loading={loadingschedule}
+              loading={loadingSchedules}
             />
           )}
-          {!isAcademicYearAfter2021 && (
+          {!isNewAcademicFlow && (
             <FormSelect
               label="Turma"
               value={filters.turma}
-              disabled={isLoadingTurma || !filters.semestre || !filters.classes}
+              disabled={loadingUcTurma || !filters.semestre || !filters.classes}
               onChange={(v) => setFilters({ ...filters, turma: v })}
               options={turmas}
               map={(u) => ({
@@ -328,32 +363,32 @@ export default function PautaGeral() {
                 value: u.codigo.toString(),
                 label: `${u.designacao}`,
               })}
-              loading={loadingschedule}
+              loading={loadingUcTurma}
             />
           )}
 
-          {!isAcademicYearAfter2021 && (
+          {!isNewAcademicFlow && (
             <FormSelect
               label=" Unidade curricular"
-              value={filters.unidadeCurricular}
-              disabled={
-                isLoadingUcBYTurma || !filters.semestre || !filters.classes
+              value={filters.gradeCurricularTurma}
+              disabled={loadingUcTurma || !filters.semestre || !filters.classes}
+              onChange={(v) =>
+                setFilters({ ...filters, gradeCurricularTurma: v })
               }
-              onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
-              options={ucBYTurma}
+              options={ucByTurma}
               map={(u) => ({
                 key: u.grade_curricular,
                 value: u.grade_curricular.toString(),
                 label: `${u.unidade_curricular}`,
               })}
-              loading={isLoadingUcBYTurma}
+              loading={loadingUcTurma}
             />
           )}
         </div>
 
         <div className="flex justify-end mt-4">
-          <Button onClick={handleSearch} disabled={isLoading}>
-            {isLoadingPautaGeral ? (
+          <Button onClick={handleSearch} disabled={loadingPauta}>
+            {loadingPauta ? (
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <Search className="h-4 w-4 mr-2" />
@@ -367,7 +402,7 @@ export default function PautaGeral() {
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
 
-        {isLoadingPautaGeral ? (
+        {loadingPauta ? (
           <div className="space-y-3">
             <Skeleton className="h-12 w-full" />
             <Skeleton className="h-12 w-full" />
