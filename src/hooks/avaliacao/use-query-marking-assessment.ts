@@ -21,6 +21,7 @@ export const useQueryMarkingAssessment = (
     anoCurricular,
     tipoAvaliacao,
     tipoHorario,
+    horarioId,
     page = 1,
     limit = 25,
   } = filters;
@@ -43,6 +44,7 @@ export const useQueryMarkingAssessment = (
         anoCurricular,
         tipoAvaliacao,
         tipoHorario,
+        horarioId,
         page,
         limit,
       },

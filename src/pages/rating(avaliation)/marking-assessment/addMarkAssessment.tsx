@@ -10,6 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -25,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, BookOpen, Loader2 } from "lucide-react";
+import { Home, Search, BookOpen, Eye, Loader2, Plus } from "lucide-react";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
@@ -33,17 +34,23 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
-import { FormSelect } from "@/components/common/FormSelect";
-import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
-import { Badge } from "@/components/ui/badge";
-import { useQueryViewNotas } from "@/hooks/avaliacao/use-query-fetch-view-notes";
-import { parseFilter } from "@/util/parse-filter";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
 import { formatarData } from "@/util/date-formate";
-import { Button } from "@/components/ui/button";
+import { parseFilter } from "@/util/parse-filter";
+import { convertGuards } from "./convertGuards";
+import MarkingDetailsGuardModal from "../components/MarkingDetailsGuardModal";
+import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
+import AddMarkingAssessmentModal from "../components/AddMarkingAssessmentModal";
 
-export default function ViewNotes() {
+export default function AddMarkingAssessment() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddMarkingModalOpen, setIsMarkingModalOpen] = useState(false);
+  const [guards, setGuards] = useState<string[]>([]);
+
+  const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
+
   // filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
@@ -52,9 +59,8 @@ export default function ViewNotes() {
     curso: "",
     anoCurricular: "",
     unidadeCurricular: "",
-    horarioId: "",
-    tipoProva: "",
     tipoAvaliacao: "",
+    horarioId: "",
   });
 
   // paginação
@@ -66,13 +72,13 @@ export default function ViewNotes() {
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
   const { data: cursos } = useCursos();
-  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
-    useQueryTipoProva();
+
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
+
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -85,38 +91,49 @@ export default function ViewNotes() {
   const canLoadTurmas =
     !!filters.anoLetivo &&
     !!filters.semestre &&
-    !!filters.periodo &&
     !!filters.curso &&
-    !!filters.unidadeCurricular;
+    !!filters.tipoAvaliacao;
 
-  const { data: scheduleResponse, isLoading: loadingSchedule } =
-    useQuerySchedulesByUc(
+  const { data: markingResponse, isLoading: loadingTurmas } =
+    useQueryMarkingAssessment(
       {
         anoLectivo: Number(filters.anoLetivo),
         semestre: Number(filters.semestre),
-        periodo: Number(filters.periodo),
+        periodo: parseFilter(filters.periodo),
         curso: Number(filters.curso),
-        unidadeCurricular: Number(filters.unidadeCurricular),
-        page: 1,
-        limit: 100,
+        tipoAvaliacao: Number(filters.tipoAvaliacao),
+        tipoHorario: 1,
+        anoCurricular: parseFilter(filters.anoCurricular),
+        horarioId: Number(filters.horarioId),
+        page,
+        limit,
       },
       { enabled: canLoadTurmas }
     );
-  const { data: viewNotesResponse, isLoading: loadingViewNotes } =
-    useQueryViewNotas({
-      anoLectivo: parseFilter(filters.anoLetivo),
-      horarioOrTurmaId: parseFilter(filters.horarioId),
-      tipoAvaliacao: parseFilter(filters.tipoAvaliacao),
-      tipoProva: parseFilter(filters.tipoProva),
-      gradeId: parseFilter(filters.unidadeCurricular),
-      tipoConsulta: 1,
-      page,
-      limit,
+
+  const { data: scheduleResponse, isLoading: loadingSchedule } =
+    useQuerySchedulesByUc({
+      anoLectivo: Number(filters.anoLetivo),
+      semestre: Number(filters.semestre),
+      periodo: Number(filters.periodo),
+      curso: Number(filters.curso),
+      unidadeCurricular: Number(filters.unidadeCurricular),
+      page: 1,
+      limit: 100,
     });
+
+  const openDetails = (item: string | null) => {
+    setGuards(convertGuards(item));
+    setIsModalOpen(true);
+  };
+  const openAddMarkingModal = () => {
+    setIsMarkingModalOpen(true);
+  };
   const schedules = scheduleResponse?.data || [];
-  const viewNotes = viewNotesResponse?.data || [];
-  const total = viewNotesResponse?.total || 0;
+  const tableData = markingResponse?.data || [];
+  const total = markingResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+
   return (
     <div className="p-6 space-y-8">
       {/* Breadcrumb */}
@@ -130,22 +147,30 @@ export default function ViewNotes() {
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>Avaliação</BreadcrumbItem>
+          <BreadcrumbItem>Marcação</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Visualizar Notas</BreadcrumbPage>
+            <BreadcrumbPage>Controle</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4">
-        <BookOpen className="h-8 w-8 text-primary" />
-        <div>
-          <h1 className="text-3xl font-bold">Visualizar</h1>
-          <p className="text-muted-foreground">Notas Lançadas.</p>
+      <header className="flex justify-between">
+        <div className="flex items-center gap-4">
+          <BookOpen className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold">Marcação de Prova</h1>
+            <p className="text-muted-foreground">Controle de Nota</p>
+          </div>
         </div>
-      </div>
+        <Button size="sm" onClick={() => openAddMarkingModal()}>
+          <Plus
+            className={`w-4 h-4 mr-2 ${loadingTurmas ? "animate-spin" : ""}`}
+          />
+          Adicionar
+        </Button>
+      </header>
 
       {/* Filtros */}
       <Card>
@@ -212,7 +237,7 @@ export default function ViewNotes() {
                 onValueChange={(v) => setFilters({ ...filters, periodo: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
+                  <SelectValue placeholder="Seleciona Periodo" />
                 </SelectTrigger>
                 <SelectContent>
                   {periodos?.map((p) => (
@@ -233,8 +258,7 @@ export default function ViewNotes() {
                   setFilters({
                     ...filters,
                     curso: v,
-                    anoCurricular: "",
-                    unidadeCurricular: "",
+                    anoCurricular: "all",
                   })
                 }
               >
@@ -260,7 +284,6 @@ export default function ViewNotes() {
                   setFilters({
                     ...filters,
                     anoCurricular: v,
-                    unidadeCurricular: "",
                   })
                 }
                 disabled={!filters.curso}
@@ -268,7 +291,7 @@ export default function ViewNotes() {
                 <SelectTrigger>
                   <SelectValue
                     placeholder={
-                      filters.curso ? "Selecione Ano" : "Selecione curso"
+                      filters.curso ? "Selecione o ano" : "Selecione curso"
                     }
                   />
                 </SelectTrigger>
@@ -281,7 +304,6 @@ export default function ViewNotes() {
                 </SelectContent>
               </Select>
             </div>
-
             {/* Unidade Curricular */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
@@ -328,30 +350,17 @@ export default function ViewNotes() {
               })}
             />
             <FormSelect
-              label="Tipo de Prova"
-              value={filters.tipoProva}
-              disabled={isLoadingTipoProva}
-              onChange={(v) => setFilters({ ...filters, tipoProva: v })}
-              options={tipoProva}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo,
-              })}
-              loading={isLoadingTipoProva}
-            />
-            <FormSelect
               label="Tipo de Avaliação"
               value={filters.tipoAvaliacao}
-              disabled={isLoadingTipoAvaliacao}
               onChange={(v) => setFilters({ ...filters, tipoAvaliacao: v })}
               options={tipoAvaliacao}
+              loading={isLoadingTipoAvaliacao}
+              disabled={isLoadingTipoAvaliacao}
               map={(u) => ({
                 key: u.codigo,
                 label: u.designacao,
                 value: u.codigo,
               })}
-              loading={isLoadingTipoAvaliacao}
             />
           </div>
         </CardContent>
@@ -360,107 +369,133 @@ export default function ViewNotes() {
       {/* Tabela */}
       <Card>
         <CardHeader>
-          <CardTitle>Notas Encontradas</CardTitle>
+          <CardTitle>Horários Encontradas</CardTitle>
         </CardHeader>
         <CardContent>
-          <>
-            {loadingViewNotes ? (
-              <div className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-                <p className="text-muted-foreground">Carregando Notas...</p>
-              </div>
-            ) : viewNotes.length == 0 ? (
-              <div className="text-center py-16 text-muted-foreground">
-                Nenhuma Nota encontrada.
-              </div>
-            ) : (
+          {loadingTurmas ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Carregando Horários...</p>
+            </div>
+          ) : tableData.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              Nenhuma Horários encontrada.
+            </div>
+          ) : (
+            <>
               <div className="rounded-md border overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Matricula</TableHead>
-                      <TableHead>Nome Completo</TableHead>
-                      <TableHead>Tipo de Avaliação</TableHead>
-                      <TableHead>Nota</TableHead>
-                      <TableHead>Nome do Docente</TableHead>
-                      <TableHead>Data de Lançamento</TableHead>
+                      <TableHead>Curso</TableHead>
+                      <TableHead>Ano Lectivo</TableHead>
+                      <TableHead>Classe</TableHead>
+                      <TableHead>Horario</TableHead>
+                      <TableHead>Periodo</TableHead>
+                      <TableHead>Sala</TableHead>
+                      <TableHead>Data da Prova</TableHead>
+                      <TableHead>Duração</TableHead>
+                      <TableHead>Hora da Prova</TableHead>
+                      <TableHead>Hora de Término</TableHead>
+                      <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {viewNotes.map((item, i) => (
-                      <TableRow key={i}>
-                        <TableCell>{item.numero_matricula}</TableCell>
-                        <TableCell>{item.nome_completo}</TableCell>
-                        <TableCell>{item.descricao_avaliacao}</TableCell>
+                    {tableData.map((item) => (
+                      <TableRow key={item.codigoprova}>
+                        <TableCell>{item.curso}</TableCell>
+                        <TableCell>{item.anolectivo}</TableCell>
+                        <TableCell>{item.classe}</TableCell>
+                        <TableCell>{item.horario}</TableCell>
+                        <TableCell>{item.periodo}</TableCell>
+                        <TableCell>{item.tb_salas_designacao}</TableCell>
                         <TableCell>
-                          <Badge
-                            variant="default"
-                            className={`${
-                              item.nota > 10 ? "bg-green-600" : ""
-                            }`}
-                          >
-                            {item.nota == null ? "-" : item.nota}
-                          </Badge>
+                          {formatarData(item.tcp_data_prova)}
                         </TableCell>
-                        <TableCell> {item.nome_docente} </TableCell>
-                        <TableCell>
-                          {" "}
-                          {formatarData(item.data_lancamento)}{" "}
+                        <TableCell>{item.duracaoprova}</TableCell>
+                        <TableCell>{item.tcp_hora_prova}</TableCell>
+                        <TableCell>{item.horatermino}</TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openDetails(item.vigilantes)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" /> Ver Vigentes
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
-            )}
 
-            {/* Paginação */}
+              {/* Paginação */}
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-muted-foreground">
+                  A mostrar {tableData.length} de {total} registos
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <span>
+                    Página {page} de {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </Button>
 
-            <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-muted-foreground">
-                A mostrar {viewNotes.length} de {total} registos
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Anterior
-                </Button>
-                <span>
-                  Página {page} de {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Próxima
-                </Button>
-
-                <Select
-                  value={String(limit)}
-                  onValueChange={(v) => {
-                    setLimit(Number(v));
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-20">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="25">25</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                    <SelectItem value="100">100</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Select
+                    value={String(limit)}
+                    onValueChange={(v) => {
+                      setLimit(Number(v));
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="25">25</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-          </>
+            </>
+          )}
         </CardContent>
       </Card>
+
+      <AddMarkingAssessmentModal
+        isOpen={isAddMarkingModalOpen}
+        onClose={() => {
+          setIsMarkingModalOpen(false);
+        }}
+      />
+
+      {/* Modal */}
+      <MarkingDetailsGuardModal
+        item={guards}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedTurmaId(null);
+        }}
+      />
     </div>
   );
 }

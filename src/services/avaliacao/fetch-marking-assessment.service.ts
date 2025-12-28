@@ -9,6 +9,7 @@ export type GetMarkingAssessmentPayload = {
   anoCurricular?: number; // ex: 1
   tipoAvaliacao?: number; // ex: "Normal"
   tipoHorario?: number; // ex: "Diurno"
+  horarioId?: number;
   page?: number;
   limit?: number;
 };
@@ -53,6 +54,7 @@ export async function getMarkingAssessmentService(
     curso,
     anoCurricular,
     tipoAvaliacao,
+    horarioId,
     tipoHorario,
     page = 1,
     limit = 25,
@@ -69,6 +71,7 @@ export async function getMarkingAssessmentService(
         anoCurricular,
         tipoAvaliacao,
         tipoHorario,
+        horarioId,
         page,
         limit,
       },

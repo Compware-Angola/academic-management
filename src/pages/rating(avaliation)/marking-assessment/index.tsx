@@ -344,8 +344,8 @@ export default function MarkingAssessment() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tableData.map((item) => (
-                      <TableRow key={item.codigoprova}>
+                    {tableData.map((item, i) => (
+                      <TableRow key={i}>
                         <TableCell>{item.curso}</TableCell>
                         <TableCell>{item.anolectivo}</TableCell>
                         <TableCell>{item.classe}</TableCell>
