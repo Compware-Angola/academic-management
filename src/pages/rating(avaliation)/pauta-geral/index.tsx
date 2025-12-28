@@ -45,6 +45,7 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
+import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
 
 export default function PautaGeral() {
   const { toast } = useToast();
@@ -61,6 +62,7 @@ export default function PautaGeral() {
     periodo: "",
     unidadeCurricular: "",
     horarioId: "",
+    turma: "",
   });
 
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
@@ -95,6 +97,21 @@ export default function PautaGeral() {
       },
       { enabled: canLoadTurmas }
     );
+
+  const { data: turmas = [], isLoading: isLoadingTurma } =
+    useTeamOldRulesTurmas({
+      anoLectivo: filters.anoLetivo,
+      classe: filters.classes,
+      curso: filters.curso,
+      periodo: filters.periodo,
+    });
+  const { data: ucBYTurma = [], isLoading: isLoadingUcBYTurma } =
+    useTeamOldRules({
+      anoLectivo: filters.anoLetivo,
+      semestre: filters.semestre,
+      turma: filters.turma,
+    });
+  console.log({ ucBYTurma });
   useEffect(() => {
     if (academicYear.length > 0) {
       const activeYear = academicYear.find((a) =>
@@ -302,35 +319,34 @@ export default function PautaGeral() {
           {!isAcademicYearAfter2021 && (
             <FormSelect
               label="Turma"
-              value={filters.horarioId}
-              disabled={
-                loadingschedule || !filters.semestre || !filters.classes
-              }
-              onChange={(v) => setFilters({ ...filters, horarioId: v })}
-              options={scheduleResponse?.data}
+              value={filters.turma}
+              disabled={isLoadingTurma || !filters.semestre || !filters.classes}
+              onChange={(v) => setFilters({ ...filters, turma: v })}
+              options={turmas}
               map={(u) => ({
-                key: u.codigo,
-                value: u.codigo,
+                key: u.codigo.toString(),
+                value: u.codigo.toString(),
                 label: `${u.designacao}`,
               })}
               loading={loadingschedule}
             />
           )}
+
           {!isAcademicYearAfter2021 && (
             <FormSelect
-              label=" Unidade curricular por Turma"
-              value={filters.horarioId}
+              label=" Unidade curricular"
+              value={filters.unidadeCurricular}
               disabled={
-                loadingschedule || !filters.semestre || !filters.classes
+                isLoadingUcBYTurma || !filters.semestre || !filters.classes
               }
-              onChange={(v) => setFilters({ ...filters, horarioId: v })}
-              options={scheduleResponse?.data}
+              onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              options={ucBYTurma}
               map={(u) => ({
-                key: u.codigo,
-                value: u.codigo,
-                label: `${u.designacao}`,
+                key: u.grade_curricular,
+                value: u.grade_curricular.toString(),
+                label: `${u.unidade_curricular}`,
               })}
-              loading={loadingschedule}
+              loading={isLoadingUcBYTurma}
             />
           )}
         </div>
