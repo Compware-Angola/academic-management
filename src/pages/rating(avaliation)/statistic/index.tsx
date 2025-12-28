@@ -40,7 +40,6 @@ import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { Badge } from "@/components/ui/badge";
 import { FormMultiSelect } from "@/components/common/FormMultiSelect";
-import { OverflowBehaviorMultiSelect } from "@/components/common/MultiSelect";
 
 export default function StatisticAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -361,19 +360,13 @@ export default function StatisticAssessment() {
               loading={isLoadingTipoAvaliacao}
             />
             <FormMultiSelect
+              search={false}
               label="Tipo de Avaliação"
               values={avaliacoes}
               options={tipoAvaliacao}
-              onChange={(e) => {
-                console.log(e);
-                if (e == undefined) {
-                  setAvaliacoes([]);
-                  return;
-                }
-                setAvaliacoes(e);
-              }}
+              onChange={setAvaliacoes}
               map={(u) => ({
-                key: u.codigo,
+                key: u.codigo.toString(),
                 label: u.designacao,
                 value: u.codigo.toString(),
               })}

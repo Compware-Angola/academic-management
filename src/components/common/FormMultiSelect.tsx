@@ -14,6 +14,7 @@ type FormMultiSelectProps<T> = {
   disabled?: boolean;
   loading?: boolean;
   placeholder?: string;
+  search: boolean;
 };
 
 import { Label } from "@/components/ui/label";
@@ -27,22 +28,21 @@ import {
 } from "@/components/ui/multi-select";
 import { Loader2 } from "lucide-react";
 
-export function FormMultiSelect<T>({
-  label,
-  values = [],
-  options = [],
-  map,
-  onChange,
-  loading = false,
-  placeholder = "Selecionar",
-}: FormMultiSelectProps<T>) {
+export function FormMultiSelect<T>(props: FormMultiSelectProps<T>) {
+  const {
+    label,
+    values = [],
+    options = [],
+    map,
+    onChange,
+    loading = false,
+    placeholder = "Selecionar",
+    search,
+  } = props;
   return (
-    <div className="space-y-2">
-      <div>{label && <Label>{label}</Label>}</div>
-      <MultiSelect
-        values={values ?? []}
-        onValuesChange={(vals) => onChange(vals ?? [])}
-      >
+    <div className="flex flex-col gap-2">
+      {label && <Label>{label}</Label>}
+      <MultiSelect values={values} onValuesChange={onChange}>
         <MultiSelectTrigger className="w-full">
           {loading ? (
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -56,8 +56,7 @@ export function FormMultiSelect<T>({
             />
           )}
         </MultiSelectTrigger>
-
-        <MultiSelectContent>
+        <MultiSelectContent search={search}>
           <MultiSelectGroup>
             {options.map((item) => {
               const mapped = map(item);

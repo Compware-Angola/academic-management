@@ -140,6 +140,10 @@ export function MultiSelectValue({
   const [overflowAmount, setOverflowAmount] = useState(0);
   const valueRef = useRef<HTMLDivElement>(null);
   const overflowRef = useRef<HTMLDivElement>(null);
+  const observersRef = useRef<{
+    mutation?: MutationObserver;
+    resize?: ResizeObserver;
+  }>({});
 
   const shouldWrap =
     overflowBehavior === "wrap" ||
@@ -170,27 +174,59 @@ export function MultiSelectValue({
   }, []);
 
   const handleResize = useCallback(
-    (node: HTMLDivElement) => {
+    (node: HTMLDivElement | null) => {
+      // Limpa observers anteriores
+      if (observersRef.current.mutation) {
+        observersRef.current.mutation.disconnect();
+      }
+      if (observersRef.current.resize) {
+        observersRef.current.resize.disconnect();
+      }
+
+      // Se o node for null (componente desmontando), apenas retorna
+      if (!node) {
+        valueRef.current = null;
+        return;
+      }
+
       valueRef.current = node;
 
-      const mutationObserver = new MutationObserver(checkOverflow);
-      const observer = new ResizeObserver(debounce(checkOverflow, 100));
+      try {
+        const mutationObserver = new MutationObserver(checkOverflow);
+        const resizeObserver = new ResizeObserver(debounce(checkOverflow, 100));
 
-      mutationObserver.observe(node, {
-        childList: true,
-        attributes: true,
-        attributeFilter: ["class", "style"],
-      });
-      observer.observe(node);
+        // Verifica se o node ainda está no DOM antes de observar
+        if (node.isConnected) {
+          mutationObserver.observe(node, {
+            childList: true,
+            attributes: true,
+            attributeFilter: ["class", "style"],
+          });
+          resizeObserver.observe(node);
 
-      return () => {
-        observer.disconnect();
-        mutationObserver.disconnect();
-        valueRef.current = null;
-      };
+          observersRef.current = {
+            mutation: mutationObserver,
+            resize: resizeObserver,
+          };
+        }
+      } catch (error) {
+        console.error("Error setting up observers:", error);
+      }
     },
     [checkOverflow]
   );
+
+  // Cleanup quando o componente desmontar
+  useEffect(() => {
+    return () => {
+      if (observersRef.current.mutation) {
+        observersRef.current.mutation.disconnect();
+      }
+      if (observersRef.current.resize) {
+        observersRef.current.resize.disconnect();
+      }
+    };
+  }, []);
 
   if (selectedValues.size === 0 && placeholder) {
     return (
