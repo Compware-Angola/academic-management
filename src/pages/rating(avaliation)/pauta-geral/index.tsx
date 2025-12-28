@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -62,6 +62,7 @@ export default function PautaGeral() {
     unidadeCurricular: "",
     horarioId: "",
   });
+
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
@@ -94,7 +95,13 @@ export default function PautaGeral() {
       },
       { enabled: canLoadTurmas }
     );
-
+  useEffect(() => {
+    if (academicYear.length > 0) {
+      const activeYear = academicYear.find((a) =>
+        a.estado.toLowerCase().startsWith("activ")
+      );
+    }
+  }, [academicYear]);
   const { data: pautaGeral = [], isLoading: isLoadingPautaGeral } =
     usePautasGeral(
       {
@@ -105,7 +112,18 @@ export default function PautaGeral() {
       },
       shouldFetch
     );
+  const isAcademicYearAfter2021 = useMemo(() => {
+    if (!filters.anoLetivo || !academicYear?.length) return false;
 
+    const year = academicYear.find(
+      (a) => a.codigo.toString() === filters.anoLetivo
+    );
+
+    if (!year) return false;
+
+    const [startYear] = year.designacao.split("-");
+    return Number(startYear) > 2021;
+  }, [academicYear, filters.anoLetivo]);
   const handleSearch = async () => {
     // Validar campos obrigatórios
     if (!filters.anoLetivo || !filters.semestre) {
@@ -243,38 +261,78 @@ export default function PautaGeral() {
             })}
             loading={isLoadingClasses}
           />
+          {isAcademicYearAfter2021 && (
+            <FormSelect
+              label="Unidade Curricular"
+              value={filters.unidadeCurricular}
+              disabled={
+                isLoadingUC ||
+                !filters.semestre ||
+                !filters.curso ||
+                !filters.classes
+              }
+              onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              options={unidadesCurriculares}
+              map={(u) => ({
+                key: u.codigo,
+                label: u.descricao,
+                value: u.pk,
+              })}
+              loading={isLoadingUC}
+            />
+          )}
 
-          <FormSelect
-            label="Unidade Curricular"
-            value={filters.unidadeCurricular}
-            disabled={
-              isLoadingUC ||
-              !filters.semestre ||
-              !filters.curso ||
-              !filters.classes
-            }
-            onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
-            options={unidadesCurriculares}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.descricao,
-              value: u.pk,
-            })}
-            loading={isLoadingUC}
-          />
-          <FormSelect
-            label="Horario"
-            value={filters.horarioId}
-            disabled={loadingschedule || !filters.semestre || !filters.classes}
-            onChange={(v) => setFilters({ ...filters, horarioId: v })}
-            options={scheduleResponse?.data}
-            map={(u) => ({
-              key: u.codigo,
-              value: u.codigo,
-              label: `${u.designacao}`,
-            })}
-            loading={loadingschedule}
-          />
+          {isAcademicYearAfter2021 && (
+            <FormSelect
+              label="Horario"
+              value={filters.horarioId}
+              disabled={
+                loadingschedule || !filters.semestre || !filters.classes
+              }
+              onChange={(v) => setFilters({ ...filters, horarioId: v })}
+              options={scheduleResponse?.data}
+              map={(u) => ({
+                key: u.codigo,
+                value: u.codigo,
+                label: `${u.designacao}`,
+              })}
+              loading={loadingschedule}
+            />
+          )}
+          {!isAcademicYearAfter2021 && (
+            <FormSelect
+              label="Turma"
+              value={filters.horarioId}
+              disabled={
+                loadingschedule || !filters.semestre || !filters.classes
+              }
+              onChange={(v) => setFilters({ ...filters, horarioId: v })}
+              options={scheduleResponse?.data}
+              map={(u) => ({
+                key: u.codigo,
+                value: u.codigo,
+                label: `${u.designacao}`,
+              })}
+              loading={loadingschedule}
+            />
+          )}
+          {!isAcademicYearAfter2021 && (
+            <FormSelect
+              label=" Unidade curricular por Turma"
+              value={filters.horarioId}
+              disabled={
+                loadingschedule || !filters.semestre || !filters.classes
+              }
+              onChange={(v) => setFilters({ ...filters, horarioId: v })}
+              options={scheduleResponse?.data}
+              map={(u) => ({
+                key: u.codigo,
+                value: u.codigo,
+                label: `${u.designacao}`,
+              })}
+              loading={loadingschedule}
+            />
+          )}
         </div>
 
         <div className="flex justify-end mt-4">
