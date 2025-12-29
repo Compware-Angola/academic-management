@@ -50,6 +50,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-update-estado-lancamento-pauta";
+import { useQueryEstadoPauta } from "@/hooks/avaliacao/use-query-estado-pauta";
+import { number } from "framer-motion";
 
 export default function ValidationTeacherAgenda() {
   const { toast } = useToast();
@@ -81,6 +83,7 @@ export default function ValidationTeacherAgenda() {
     anoCurricular: "",
     unidadeCurricular: "",
     tipoAvaliacao: "",
+    estadoPauta: "",
   });
 
   // Queries
@@ -99,12 +102,12 @@ export default function ValidationTeacherAgenda() {
       curso: filters.curso,
       semestre: filters.semestre,
     });
-
+  const { data: estadoPauta = [], isLoading: isLoadingPautaEstado } =
+    useQueryEstadoPauta();
   const {
     data: response,
     isLoading: isLoadingPautas,
     error: errorPautas,
-    refetch,
   } = useLancamentosPauta({
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
     tipoAvaliacao: filters.tipoAvaliacao
@@ -118,11 +121,10 @@ export default function ValidationTeacherAgenda() {
       ? Number(filters.anoCurricular)
       : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    estadoPauta: filters.estadoPauta ? Number(filters.estadoPauta) : undefined,
     page: currentPage,
     limit: limit,
   });
-
-  const { data: teacherInfoData } = useQueryTeacherProfile(user?.user_id);
 
   const pautas = response?.data ?? [];
   const pagination = {
@@ -137,107 +139,6 @@ export default function ValidationTeacherAgenda() {
     setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type !== "application/pdf") {
-        toast({
-          title: "Formato inválido",
-          description: "Por favor, selecione um arquivo PDF.",
-          variant: "destructive",
-        });
-        e.target.value = "";
-        return;
-      }
-      setSelectedFile(file);
-      toast({
-        title: "Arquivo selecionado",
-        description: `${file.name} pronto para submissão.`,
-      });
-    }
-  };
-
-  const handleOpenSubmitModal = () => {
-    if (!selectedFile) {
-      toast({
-        title: "Nenhum arquivo selecionado",
-        description: "Selecione um PDF.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (
-      !filters.anoLectivo ||
-      !filters.unidadeCurricular ||
-      !filters.tipoAvaliacao
-    ) {
-      toast({
-        title: "Campos obrigatórios",
-        description:
-          "Ano letivo, unidade curricular e tipo de avaliação são obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmSubmit = async () => {
-    setIsModalOpen(false);
-
-    try {
-      const uploadResponse = await uploadMutation.mutateAsync(selectedFile!);
-
-      if (!uploadResponse.file?.path) {
-        toast({
-          title: "Erro ao fazer upload",
-          description: "Não foi possível fazer upload do ficheiro.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const docenteId = teacherInfoData?.codigo_docente;
-
-      createMutation.mutate(
-        {
-          anoLectivoId: Number(filters.anoLectivo),
-          docenteId: docenteId,
-          gradeCurricularId: Number(filters.unidadeCurricular),
-          fkEstadoLancamentoPauta: 1,
-          fkTipoAvaliacao: Number(filters.tipoAvaliacao),
-          ficheiroName: uploadResponse.file.filename,
-        },
-        {
-          onSuccess: (data) => {
-            toast({
-              title: "Sucesso!",
-              description: data.message || "Pauta submetida com sucesso.",
-            });
-            clearFileInput();
-            setCurrentPage(1);
-            refetch();
-          },
-          onError: (error: any) => {
-            toast({
-              title: "Erro ao submeter",
-              description: error.message || "Tente novamente.",
-              variant: "destructive",
-            });
-          },
-        }
-      );
-    } catch (error) {
-      toast({
-        title: "Erro inesperado",
-        description: "Ocorreu um erro ao processar o upload.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -453,6 +354,22 @@ export default function ValidationTeacherAgenda() {
               setCurrentPage(1);
             }}
             options={tipoAvaliacao}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+              value: u.codigo,
+            })}
+          />
+          <FormSelect
+            label="Estado da Pauta"
+            value={filters.estadoPauta}
+            disabled={isLoadingPautaEstado}
+            loading={isLoadingPautaEstado}
+            onChange={(v) => {
+              setFilters({ ...filters, estadoPauta: v });
+              setCurrentPage(1);
+            }}
+            options={estadoPauta}
             map={(u) => ({
               key: u.codigo,
               label: u.designacao,
