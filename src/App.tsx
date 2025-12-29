@@ -68,6 +68,7 @@ import Permission from "./pages/rating(avaliation)/permission/permission";
 import PautaGeral from "./pages/rating(avaliation)/pauta-geral";
 import ViewNotes from "./pages/rating(avaliation)/view-notes";
 import AddMarkingAssessment from "./pages/rating(avaliation)/marking-assessment/addMarkAssessment";
+import ValidationTeacherAgenda from "./pages/rating(avaliation)/Validation-teacher-agenda";
 
 const App = () => {
   return (
@@ -121,6 +122,10 @@ const App = () => {
                 <Route path="/avaliacoes/presenca" element={<PresenceList />} />
                 <Route path="/avaliacoes/pauta" element={<LancamentoPauta />} />
                 <Route path="avaliacoes/pauta-geral" element={<PautaGeral />} />
+                <Route
+                  path="/avaliacoes/validacao"
+                  element={<ValidationTeacherAgenda />}
+                />
                 <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
