@@ -70,6 +70,7 @@ import ViewNotes from "./pages/rating(avaliation)/view-notes";
 import AddMarkingAssessment from "./pages/rating(avaliation)/marking-assessment/addMarkAssessment";
 import ValidationTeacherAgenda from "./pages/rating(avaliation)/Validation-teacher-agenda";
 import PautaGeralPorUC from "./pages/rating(avaliation)/pauta-geral-uc";
+import EstudantesInscritos from "./pages/rating(avaliation)/enrolled-students";
 
 const App = () => {
   return (
@@ -139,6 +140,11 @@ const App = () => {
                   path="/avaliacoes/historico"
                   element={<LaunchHistoric />}
                 />
+                <Route
+                  path="/avaliacoes/estudantes"
+                  element={<EstudantesInscritos />}
+                />
+
                 <Route
                   path="/marcacao-provas/controle"
                   element={<MarkingAssessment />}

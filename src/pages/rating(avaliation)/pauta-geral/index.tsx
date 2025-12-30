@@ -66,7 +66,7 @@ export default function PautaGeral() {
   const { toast } = useToast();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [shouldFetch, setShouldFetch] = useState(false);
   const [filters, setFilters] = useState<Filters>({
