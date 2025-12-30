@@ -18,6 +18,6 @@ export const useScheduleQuery = (params: ScheduleParams) => {
     queryFn: () => fetchSchedule(params),
     staleTime: 5 * 60 * 1000,
     retry: 2,
-    enabled: Boolean(params.anoLectivo) && Boolean(params.semestre),
+    enabled: Boolean(params.anoLectivo),
   });
 };
