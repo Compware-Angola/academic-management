@@ -1,18 +1,16 @@
-
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-
 
 export type LancamentoPauta = {
   codigo: number;
   ano_lectivo: string;
   designacao_av: string;
   descricao_av: string;
-  estado_pauta_designacao:string;
-  estado_pauta:number;
+  estado_pauta_designacao: string;
+  estado_pauta: number;
   classe: string;
   semestre: string;
   curso: string;
-  created_at: string; 
+  created_at: string;
   updated_at: string;
   active_state: number;
   ficheiro_name: string | null;
@@ -36,11 +34,12 @@ export type FilterLancamentoPautaParams = {
   anoLectivo?: number;
   tipoAvaliacao?: number;
   codigoGrade?: number;
-  anoCurricular?:number;
-  semestre?:number;
-  curso?:number;
+  anoCurricular?: number;
+  semestre?: number;
+  curso?: number;
   page?: number;
   limit?: number;
+  estadoPauta?: number;
 };
 /**
  * Busca a lista de lançamentos de pauta com filtros e paginação
@@ -53,7 +52,6 @@ export async function fetchLancamentosPauta(
     "/assessment/lancamento/pauta",
     { params }
   );
-
 
   return (
     response.data ?? {

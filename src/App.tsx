@@ -68,6 +68,9 @@ import Permission from "./pages/rating(avaliation)/permission/permission";
 import PautaGeral from "./pages/rating(avaliation)/pauta-geral";
 import ViewNotes from "./pages/rating(avaliation)/view-notes";
 import AddMarkingAssessment from "./pages/rating(avaliation)/marking-assessment/addMarkAssessment";
+import ValidationTeacherAgenda from "./pages/rating(avaliation)/Validation-teacher-agenda";
+import PautaGeralPorUC from "./pages/rating(avaliation)/pauta-geral-uc";
+import EstudantesInscritos from "./pages/rating(avaliation)/enrolled-students";
 import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
 
 const App = () => {
@@ -123,6 +126,14 @@ const App = () => {
                 <Route path="/avaliacoes/pauta" element={<LancamentoPauta />} />
                 <Route path="avaliacoes/pauta-geral" element={<PautaGeral />} />
                 <Route
+                  path="avaliacoes/pauta-uc"
+                  element={<PautaGeralPorUC />}
+                />
+                <Route
+                  path="/avaliacoes/validacao"
+                  element={<ValidationTeacherAgenda />}
+                />
+                <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
                 />
@@ -130,6 +141,11 @@ const App = () => {
                   path="/avaliacoes/historico"
                   element={<LaunchHistoric />}
                 />
+                <Route
+                  path="/avaliacoes/estudantes"
+                  element={<EstudantesInscritos />}
+                />
+
                 <Route
                   path="/marcacao-provas/controle"
                   element={<MarkingAssessment />}

@@ -46,7 +46,6 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
 import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
-import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
 type Filters = {
   anoLetivo: string;
   periodo: string;
@@ -62,7 +61,7 @@ type Filters = {
   turma: string;
   gradeCurricularTurma: string;
 };
-export default function PautaGeral() {
+export default function PautaGeralPorUC() {
   const { toast } = useToast();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,14 +112,25 @@ export default function PautaGeral() {
   }, [academicYearInfo]);
 
   /** ================== FLUXO NOVO (> 2021) ================== */
+  const canLoadSchedules =
+    isNewAcademicFlow &&
+    !!filters.anoLetivo &&
+    !!filters.semestre &&
+    !!filters.periodo &&
+    !!filters.curso &&
+    !!filters.unidadeCurricular;
 
-  const { data: schedules, isLoading: loadingSchedules } = useScheduleQuery({
-    anoLectivo: Number(filters.anoLetivo),
-    semestre: Number(filters.semestre),
-    periodo: Number(filters.periodo),
-    curso: Number(filters.curso),
-    unidadeCurricular: Number(filters.unidadeCurricular),
-  });
+  const { data: schedules, isLoading: loadingSchedules } =
+    useQuerySchedulesByUc(
+      {
+        anoLectivo: Number(filters.anoLetivo),
+        semestre: Number(filters.semestre),
+        periodo: Number(filters.periodo),
+        curso: Number(filters.curso),
+        unidadeCurricular: Number(filters.unidadeCurricular),
+      },
+      { enabled: canLoadSchedules }
+    );
 
   /** ================== FLUXO ANTIGO (<= 2021) ================== */
   const { data: turmas = [], isLoading: loadingTurmas } = useTeamOldRulesTurmas(
@@ -217,16 +227,15 @@ export default function PautaGeral() {
         <span>/</span>
         <span className="font-medium">Avaliações</span>
         <span>/</span>
-        <span className="text-foreground">Pauta Geral</span>
+        <span className="text-foreground">Pauta Geral por UC</span>
       </nav>
 
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Pauta Geral</h1>
-          <p className="text-muted-foreground mt-1">
-            Consulte as pautas de avaliação dos estudantes
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Pauta Geral por UC
+          </h1>
         </div>
       </div>
 
@@ -239,9 +248,7 @@ export default function PautaGeral() {
             loading={loadingYear}
             label="Ano Letivo"
             value={filters.anoLetivo}
-            onChange={(v) =>
-              setFilters({ ...filters, anoLetivo: v, horarioId: "" })
-            }
+            onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
             options={academicYear}
             map={(a) => ({
               key: a.codigo,
@@ -257,9 +264,7 @@ export default function PautaGeral() {
             loading={loadingPeriodos}
             label="Período"
             value={filters.periodo}
-            onChange={(v) =>
-              setFilters({ ...filters, periodo: v, horarioId: "" })
-            }
+            onChange={(v) => setFilters({ ...filters, periodo: v })}
             options={periodos}
             map={(p) => ({
               key: p.codigo,
@@ -273,9 +278,7 @@ export default function PautaGeral() {
             loading={loadingSemestres}
             label="Semestre"
             value={filters.semestre}
-            onChange={(v) =>
-              setFilters({ ...filters, semestre: v, horarioId: "" })
-            }
+            onChange={(v) => setFilters({ ...filters, semestre: v })}
             options={semestres}
             map={(s) => ({
               key: s.codigo,
@@ -288,9 +291,7 @@ export default function PautaGeral() {
             loading={loadingCursos}
             label="Curso"
             value={filters.curso}
-            onChange={(v) =>
-              setFilters({ ...filters, curso: v, horarioId: "" })
-            }
+            onChange={(v) => setFilters({ ...filters, curso: v })}
             options={cursos}
             map={(c) => ({
               key: c.codigo,
@@ -321,9 +322,7 @@ export default function PautaGeral() {
                 !filters.curso ||
                 !filters.classes
               }
-              onChange={(v) =>
-                setFilters({ ...filters, unidadeCurricular: v, horarioId: "" })
-              }
+              onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
               options={unidadesCurriculares}
               map={(u) => ({
                 key: u.codigo,
@@ -338,7 +337,9 @@ export default function PautaGeral() {
             <FormSelect
               label="Horario"
               value={filters.horarioId}
-              disabled={loadingSchedules}
+              disabled={
+                loadingSchedules || !filters.semestre || !filters.classes
+              }
               onChange={(v) => setFilters({ ...filters, horarioId: v })}
               options={schedules?.data}
               map={(u) => ({
