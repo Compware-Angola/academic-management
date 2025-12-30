@@ -4,7 +4,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type GetAssessmentStatsPayload = {
   anoLectivo: number; // ex: 22
   tipoProva: number; // ex: 1
-  tipoAvaliacao: number; // ex: 2
+  tipoAvaliacao: number[]; // ex: 2
   horarioId: number; // ex: 10
   gradeId: number; // ex: 5
 };
@@ -37,16 +37,14 @@ export async function getAssessmentStatsService(
 ): Promise<GetAssessmentStatsResponse> {
   const { anoLectivo, tipoProva, tipoAvaliacao, horarioId, gradeId } = payload;
 
-  const { data } = await axiosNestGa.get<GetAssessmentStatsResponse>(
+  const { data } = await axiosNestGa.post<GetAssessmentStatsResponse>(
     "/assessment/estatistica-avaliacao",
     {
-      params: {
-        anoLectivo,
-        tipoProva,
-        tipoAvaliacao,
-        horarioId,
-        gradeId,
-      },
+      anoLectivo,
+      tipoProva,
+      tipoAvaliacao,
+      horarioId,
+      gradeId,
     }
   );
 

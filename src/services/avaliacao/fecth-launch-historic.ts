@@ -1,17 +1,17 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type GetHistoryNoteReleasePayload = {
-  codigoAnoLectivo: number; // ex: 22
-  codigoMatricula: number; // ex: 54312
-  codigo_grade_curricular_aluno: number; // ex: 1336896
+  codigoAnoLectivo: number;
+  codigoMatricula: number;
+  codigo_grade_curricular_aluno: number;
 };
 
 export type HistoryNoteItem = {
   matricula: number;
-  nome: string; // "Catarina Morena Lopes Fernando"
-  grade: string; // "Biologia Celular e Molecular"
-  nota_lancada: number; // ex: 11
-  datalancada: string; // ISO string "2025-02-11T17:39:54.000Z"
+  nome: string;
+  grade: string;
+  nota_lancada: number;
+  datalancada: string;
   utilizador: string | null;
 };
 

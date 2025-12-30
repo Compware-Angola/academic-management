@@ -68,6 +68,7 @@ import Permission from "./pages/rating(avaliation)/permission/permission";
 import PautaGeral from "./pages/rating(avaliation)/pauta-geral";
 import ViewNotes from "./pages/rating(avaliation)/view-notes";
 import AddMarkingAssessment from "./pages/rating(avaliation)/marking-assessment/addMarkAssessment";
+import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
 
 const App = () => {
   return (
@@ -139,6 +140,10 @@ const App = () => {
                 />
                 <Route path="avaliacoes/permissao" element={<Permission />} />
                 <Route path="avaliacoes/visualizar" element={<ViewNotes />} />
+                <Route
+                  path="avaliacoes/parametros"
+                  element={<GeneralParametersAvaluation />}
+                />
                 <Route
                   path="marcacao-provas/marcacao"
                   element={<AddMarkingAssessment />}

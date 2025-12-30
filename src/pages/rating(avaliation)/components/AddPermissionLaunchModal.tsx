@@ -109,7 +109,7 @@ export default function AddPermissionLaunchModal({
         <DialogDescription></DialogDescription>
 
         <div className="flex-1 overflow-y-auto py-6 min-h-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Letivo</label>
               <Select
