@@ -62,7 +62,6 @@ type Filters = {
   horarioId?: string;
   tipoCandidatura?: string;
   sala?: string;
-  tipoPrazo?: string;
   duracaoProva?: string;
   horaProva?: string;
   horaTermino?: string;
@@ -115,11 +114,11 @@ export default function AddMarkingAssessmentModal({
       tipoAvaliacao: Number(filters.tipoAvaliacao),
       tipoHorario: 1,
       anoCurricular: parseFilter(filters.anoCurricular),
+      unidadeCurricular: Number(filters.unidadeCurricular),
       page: 1,
       limit: 100,
     });
-  const { data: tipoPrazo, isLoading: isLoadingTipoPrazo } =
-    useQueryTiposPrazos();
+
   const handleVigilantesChange = (values: string[]) => {
     if (values.length > 2) {
       toast({
@@ -194,7 +193,7 @@ export default function AddMarkingAssessmentModal({
         markingSchedules.find(
           (h) => h.codigo_horario.toString() === filters.horarioId
         ).horario ?? "",
-      tipoPrazo: Number(filters.tipoPrazo),
+      tipoPrazo: 4,
       tipoAvaliacao: Number(filters.tipoAvaliacao),
       anoLectivo: Number(filters.anoLetivo),
       tipoCandidatura: Number(filters.tipoCandidatura),
@@ -387,19 +386,7 @@ export default function AddMarkingAssessmentModal({
                 value: u.codigo.toString(),
               })}
             />
-            <FormSelect
-              label="Tipo Prazo"
-              value={filters.tipoPrazo}
-              onChange={(v) => setFilters({ ...filters, tipoPrazo: v })}
-              options={tipoPrazo}
-              loading={isLoadingTipoPrazo}
-              disabled={isLoadingTipoPrazo}
-              map={(u) => ({
-                key: u.pk_tipo_prazo,
-                label: u.designacao,
-                value: u.pk_tipo_prazo,
-              })}
-            />
+
             <FormMultiSelect
               search={false}
               label="Docentes"

@@ -24,6 +24,7 @@ export const useQueryMarkingAssessment = (
     horarioId,
     page = 1,
     limit = 25,
+    unidadeCurricular,
   } = filters;
 
   // Só faz a chamada se todos os campos obrigatórios estiverem preenchidos
@@ -32,7 +33,7 @@ export const useQueryMarkingAssessment = (
       ? options.enabled
       : !!anoLectivo && !!semestre && !!curso && !!tipoAvaliacao;
   !!tipoHorario;
-
+  console.log({ unidadeCurricular });
   return useQuery<GetMarkingAssessmentResponse>({
     queryKey: [
       "marking-assessment",
@@ -47,8 +48,10 @@ export const useQueryMarkingAssessment = (
         horarioId,
         page,
         limit,
+        unidadeCurricular,
       },
     ],
+
     queryFn: () => getMarkingAssessmentService(filters),
     enabled,
     staleTime: 1000 * 60 * 10, // 10 minutos

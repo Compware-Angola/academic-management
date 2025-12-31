@@ -12,6 +12,7 @@ export type GetMarkingAssessmentPayload = {
   horarioId?: number;
   page?: number;
   limit?: number;
+  unidadeCurricular?: number;
 };
 
 /* ---------- RESPONSE ---------- */
@@ -58,6 +59,7 @@ export async function getMarkingAssessmentService(
     tipoHorario,
     page = 1,
     limit = 25,
+    unidadeCurricular,
   } = payload;
 
   const { data } = await axiosNestGa.get<GetMarkingAssessmentResponse>(
@@ -74,6 +76,7 @@ export async function getMarkingAssessmentService(
         horarioId,
         page,
         limit,
+        unidadeCurricular,
       },
     }
   );
