@@ -111,7 +111,7 @@ export default function StatisticAssessment() {
       horarioId: Number(filters.horarioId),
       gradeId: Number(filters.unidadeCurricular),
       tipoProva: Number(filters.tipoProva),
-      tipoAvaliacao: Number(filters.tipoAvaliacao),
+      tipoAvaliacao: avaliacoes.map((t) => parseInt(t)),
     });
 
   const openDetails = (turmaId: number) => {
@@ -346,19 +346,7 @@ export default function StatisticAssessment() {
               })}
               loading={isLoadingTipoProva}
             />
-            <FormSelect
-              label="Tipo de Avaliação"
-              value={filters.tipoAvaliacao}
-              disabled={isLoadingTipoAvaliacao}
-              onChange={(v) => setFilters({ ...filters, tipoAvaliacao: v })}
-              options={tipoAvaliacao}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo,
-              })}
-              loading={isLoadingTipoAvaliacao}
-            />
+
             <FormMultiSelect
               search={false}
               label="Tipo de Avaliação"

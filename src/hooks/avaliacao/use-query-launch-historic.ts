@@ -8,13 +8,11 @@ import { useQuery } from "@tanstack/react-query";
 export const useQueryHistoryNoteRelease = (
   filters: GetHistoryNoteReleasePayload,
   options?: {
-    enabled?: boolean; // permite sobrescrever o enabled automático
+    enabled?: boolean;
   }
 ) => {
   const { codigoAnoLectivo, codigoMatricula, codigo_grade_curricular_aluno } =
     filters;
-
-  // Só faz a chamada se os campos obrigatórios estiverem preenchidos
   const enabled =
     typeof options?.enabled === "boolean"
       ? options.enabled
@@ -29,8 +27,8 @@ export const useQueryHistoryNoteRelease = (
     ],
     queryFn: () => getHistoryNoteReleaseService(filters),
     enabled,
-    staleTime: 1000 * 60 * 10, // 10 minutos
-    gcTime: 1000 * 60 * 30, // 30 minutos
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
     retry: 2,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,

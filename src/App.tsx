@@ -71,6 +71,7 @@ import AddMarkingAssessment from "./pages/rating(avaliation)/marking-assessment/
 import ValidationTeacherAgenda from "./pages/rating(avaliation)/Validation-teacher-agenda";
 import PautaGeralPorUC from "./pages/rating(avaliation)/pauta-geral-uc";
 import EstudantesInscritos from "./pages/rating(avaliation)/enrolled-students";
+import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
 
 const App = () => {
   return (
@@ -155,6 +156,10 @@ const App = () => {
                 />
                 <Route path="avaliacoes/permissao" element={<Permission />} />
                 <Route path="avaliacoes/visualizar" element={<ViewNotes />} />
+                <Route
+                  path="avaliacoes/parametros"
+                  element={<GeneralParametersAvaluation />}
+                />
                 <Route
                   path="marcacao-provas/marcacao"
                   element={<AddMarkingAssessment />}

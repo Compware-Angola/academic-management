@@ -20,14 +20,14 @@ export const useQueryAssessmentStats = (
       ? options.enabled
       : !!anoLectivo &&
         !!tipoProva &&
-        !!tipoAvaliacao &&
+        tipoAvaliacao.length > 0 &&
         !!horarioId &&
         !!gradeId;
-
+  const avaliations = tipoAvaliacao.join(",");
   return useQuery<GetAssessmentStatsResponse>({
     queryKey: [
       "assessment-stats",
-      { anoLectivo, tipoProva, tipoAvaliacao, horarioId, gradeId },
+      { anoLectivo, tipoProva, horarioId, gradeId, avaliations },
     ],
     queryFn: () => getAssessmentStatsService(filters),
     enabled,
