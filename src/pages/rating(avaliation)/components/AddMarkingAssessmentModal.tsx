@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
@@ -23,7 +22,6 @@ import {
 } from "@/components/ui/select";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { FormSelect } from "@/components/common/FormSelect";
-import { useQueryTeacherByUcAndAcademicYear } from "@/hooks/teacher/use-query-teacher-by-uc";
 import { parseFilter } from "@/util/parse-filter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,54 +31,74 @@ import { Loader } from "lucide-react";
 import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
+import { FormMultiSelect } from "@/components/common/FormMultiSelect";
+import { AuthStorage } from "@/util/auth-storage";
+import { useMutationCreateCalendar } from "@/hooks/avaliacao/use-mutation-create-calendar";
+import { CreateCalendarPayload } from "@/services/avaliacao/create-calendario-prova";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { useQuerySalas } from "@/hooks/salas/use-query-sala";
+import { useQueryTiposPrazos } from "@/hooks/prazos/use-query-tipo-prazo";
+import { useToast } from "@/hooks/use-toast";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
+type Filters = {
+  anoLetivo?: string;
+  semestre?: string;
+  periodo?: string;
+  curso?: string;
+  anoCurricular?: string;
+  unidadeCurricular?: string;
+  tipoAvaliacao?: string;
+  docente?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  modalidade?: string;
+  tipoProva?: string;
+  horarioId?: string;
+  tipoCandidatura?: string;
+  sala?: string;
+  tipoPrazo?: string;
+  duracaoProva?: string;
+  horaProva?: string;
+  horaTermino?: string;
+};
+const isInvalid = (v?: string) => v === undefined || v.trim() === "";
 
 export default function AddMarkingAssessmentModal({
   isOpen,
   onClose,
 }: AddPermissionLaunchModalProps) {
-  //Cadastrar Permissão
-  const { mutate: createPermission, isPending: isCreateLoadingPermission } =
-    useMutationCreatePermissionLaunch();
+  const { toast } = useToast();
+  const { mutate: createCalendar, isPending: isCreateLoadingCalendar } =
+    useMutationCreateCalendar();
   // filtros
-  const [filters, setFilters] = useState({
-    anoLetivo: "",
-    semestre: "",
-    periodo: "",
-    curso: "",
-    anoCurricular: "",
-    unidadeCurricular: "",
-    tipoAvaliacao: "",
-    docente: "",
-    dataInicio: "",
-    dataFim: "",
-    modalidade: "",
-    tipoProva: "",
-    horarioId: "",
-  });
-
-  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const [filters, setFilters] = useState<Filters>({});
+  const [teacher, setTeacher] = useState<string[]>([]);
+  const { data: anosAcademicos, isLoading: isLoadingAnosAcademicos } =
+    useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: cursos } = useCursos();
   const { data: modalidade = [], isLoading: isLoadingModalidade } =
     useQueryModalidade();
-  const { data: docentes, isLoading: isLoadingDocente } =
-    useQueryTeacherByUcAndAcademicYear({
-      anoLectivo: parseFilter(filters.anoLetivo),
-      unidadeCurricular: parseFilter(filters.unidadeCurricular),
-    });
+  const { data: docentes = [], isLoading: isLoadingDocente } =
+    useQueryTeacther();
+
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
+  const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
+    useQueryTipoCandidatura();
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
     useQueryTipoProva();
-
+  const { data: salas = [], isLoading: isLoadingSala } = useQuerySalas();
+  const { data: period = [], isLoading: isLoadingPeriod } = useQueryPeriod();
   const canLoadUcs = !!filters.curso && !!filters.semestre;
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
@@ -100,169 +118,223 @@ export default function AddMarkingAssessmentModal({
       page: 1,
       limit: 100,
     });
+  const { data: tipoPrazo, isLoading: isLoadingTipoPrazo } =
+    useQueryTiposPrazos();
+  const handleVigilantesChange = (values: string[]) => {
+    if (values.length > 2) {
+      toast({
+        description: "Só é permitido selecionar no máximo 2 vigilantes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTeacher(values);
+  };
+  const isFormInvalid =
+    isInvalid(filters.anoLetivo) ||
+    isInvalid(filters.semestre) ||
+    isInvalid(filters.curso) ||
+    isInvalid(filters.unidadeCurricular) ||
+    isInvalid(filters.dataInicio) ||
+    isInvalid(filters.duracaoProva) ||
+    isInvalid(filters.horaProva) ||
+    isInvalid(filters.horaTermino);
+
   const closeModal = () => {
+    setFilters({});
+    setTeacher([]);
     onClose();
   };
-  const handleCreatePermission = async () => {
-    const payload: AssessmentPermissionPayload = {
+  function getMissingFields(
+    fields: Record<string, string | undefined>
+  ): string[] {
+    return Object.entries(fields)
+      .filter(([, value]) => isInvalid(value))
+      .map(([label]) => label);
+  }
+
+  const markingSchedules = markingResponse?.data || [];
+  const handleCreateCalendarioProva = () => {
+    const missingFields = getMissingFields({
+      "Ano letivo": filters.anoLetivo,
+      Semestre: filters.semestre,
+      Curso: filters.curso,
+      "Unidade Curricular": filters.unidadeCurricular,
+      "Data da prova": filters.dataInicio,
+      "Duração da prova": filters.duracaoProva,
+      "Hora de início": filters.horaProva,
+      "Hora de término": filters.horaTermino,
+    });
+
+    if (missingFields.length > 0) {
+      toast({
+        title: "Erro",
+        description: `Faltam preencher os seguintes campos:\n\n• ${missingFields.join(
+          "\n• "
+        )}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    const payload: CreateCalendarPayload = {
+      codigoCalendario: 1, // pode vir fixo ou de outro select
+      codigoTipoProva: Number(filters.tipoProva),
+      codigoModalidade: Number(filters.modalidade),
+      codigoSala: 101, // exemplo (se tiver select depois, é só mapear)
+      codigoPeriodo: Number(filters.periodo),
+      codigoDisciplina: Number(filters.unidadeCurricular),
+      dataProva: filters.dataInicio,
+      duracaoProva: Number(filters.duracaoProva),
+      horaProva: filters.horaProva,
+      horaTermino: filters.horaTermino,
+      url: "",
+      Horario: Number(filters.horarioId),
+      descHorario:
+        markingSchedules.find(
+          (h) => h.codigo_horario.toString() === filters.horarioId
+        ).horario ?? "",
+      tipoPrazo: Number(filters.tipoPrazo),
+      tipoAvaliacao: Number(filters.tipoAvaliacao),
       anoLectivo: Number(filters.anoLetivo),
-      dataFim: filters.dataFim,
-      dataInicio: filters.dataInicio,
-      docenteId: Number(filters.docente),
-      tipoAvalacaoId: Number(filters.tipoAvaliacao),
-      unidadeCurricular: Number(filters.unidadeCurricular),
+      tipoCandidatura: Number(filters.tipoCandidatura),
+      semestre: Number(filters.semestre),
+      vigilantes: teacher.map((t) => {
+        const docente = docentes.find((d) => d.codigo.toString() === t);
+        return {
+          codigoUtilizador: Number(t),
+          desc: docente?.nome ?? "",
+        };
+      }),
     };
-    createPermission(payload, {
+
+    createCalendar(payload, {
       onSuccess: () => {
+        setFilters({});
+        setTeacher([]);
         onClose();
       },
     });
   };
 
   if (!isOpen) return null;
-  const markingSchedules = markingResponse?.data || [];
+
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-5xl!  w-full  max-h-[90vh] overflow-y-auto">
         <DialogHeader className="shrink-0">
-          <DialogTitle className="text-2xl">Adicionar Permissões</DialogTitle>
+          <DialogTitle className="text-2xl">Marcação de Prova</DialogTitle>
         </DialogHeader>
         <DialogDescription></DialogDescription>
 
-        <div className="flex-1 overflow-y-auto py-6 min-h-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Letivo</label>
-              <Select
-                value={filters.anoLetivo}
-                onValueChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosAcademicos?.map((a) => (
-                    <SelectItem key={a.codigo} value={a.codigo.toString()}>
-                      {a.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="flex-1 min-w-full    py-6 min-h-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  gap-4">
+            <FormSelect
+              label="Ano Letivo"
+              value={filters.anoLetivo}
+              onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
+              options={anosAcademicos}
+              loading={isLoadingAnosAcademicos}
+              disabled={isLoadingAnosAcademicos}
+              map={(u) => ({
+                key: u.codigo,
+                label: u.designacao,
+                value: u.codigo,
+              })}
+            />
 
             {/* Semestre */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Semestre</label>
-              <Select
-                value={filters.semestre}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    semestre: v,
-                    anoCurricular: "",
-                    unidadeCurricular: "",
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {semestres?.map((s) => (
-                    <SelectItem key={s.codigo} value={s.codigo.toString()}>
-                      {s.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <FormSelect
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  semestre: v,
+                  anoCurricular: undefined,
+                  unidadeCurricular: undefined,
+                })
+              }
+              options={semestres}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
+            />
+            <FormSelect
+              label="Período"
+              value={filters.periodo}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  periodo: v,
+                })
+              }
+              options={period}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
+              loading={isLoadingPeriod}
+            />
 
             {/* Curso */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select
-                value={filters.curso}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    curso: v,
-                    anoCurricular: "",
-                    unidadeCurricular: "",
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                      {c.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <FormSelect
+              label="Curso"
+              value={filters.curso}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  curso: v,
+                  anoCurricular: undefined,
+                  unidadeCurricular: undefined,
+                })
+              }
+              options={cursos}
+              map={(c) => ({
+                key: c.codigo,
+                label: c.designacao,
+                value: c.codigo,
+              })}
+            />
 
             {/* Ano Curricular */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Curricular</label>
-              <Select
-                value={filters.anoCurricular}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    anoCurricular: v,
-                    unidadeCurricular: "",
-                  })
-                }
-                disabled={!filters.curso}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={"Selecione curso"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosCurriculares.map((ac) => (
-                    <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-                      {ac.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <FormSelect
+              label="Ano Curricular"
+              value={filters.anoCurricular}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  anoCurricular: v,
+                  unidadeCurricular: undefined,
+                })
+              }
+              options={anosCurriculares}
+              disabled={!filters.curso}
+              map={(ac) => ({
+                key: ac.codigo,
+                label: ac.designacao,
+                value: ac.codigo,
+              })}
+            />
 
             {/* Unidade Curricular */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Unidade Curricular</label>
-              <Select
-                value={filters.unidadeCurricular}
-                onValueChange={(v) =>
-                  setFilters({ ...filters, unidadeCurricular: v })
-                }
-                disabled={!canLoadUcs}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione curso"
-                        : !filters.semestre
-                        ? "Selecione semestre"
-                        : isLoadingUC
-                        ? "Carregando UCs..."
-                        : "Selecionar UC"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {unidadesCurriculares.map((uc) => (
-                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
-                      {uc.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <FormSelect
+              label="Unidade Curricular"
+              value={filters.unidadeCurricular}
+              onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              options={unidadesCurriculares}
+              loading={isLoadingUC}
+              disabled={!filters.curso || !filters.semestre}
+              map={(uc) => ({
+                key: uc.pk,
+                label: uc.descricao,
+                value: uc.pk,
+              })}
+            />
+
             <FormSelect
               label="Modalidade"
               value={filters.modalidade}
@@ -303,18 +375,45 @@ export default function AddMarkingAssessmentModal({
               loading={isLoadingTipoProva}
             />
             <FormSelect
-              label="Docentes"
-              value={filters.docente}
-              onChange={(v) => setFilters({ ...filters, docente: v })}
-              options={docentes}
-              loading={isLoadingDocente}
-              disabled={isLoadingDocente && !filters.unidadeCurricular}
+              label="Tipo Candidatura"
+              value={filters.tipoCandidatura}
+              onChange={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+              options={tipoCandidatura}
+              loading={isLoadingTipoCandidatura}
+              disabled={loadingMarking && !filters.unidadeCurricular}
               map={(u) => ({
-                key: u.codigo_docente,
-                label: u.nome_docente,
-                value: u.codigo_docente,
+                key: u.codigo,
+                label: u.designacao,
+                value: u.codigo.toString(),
               })}
             />
+            <FormSelect
+              label="Tipo Prazo"
+              value={filters.tipoPrazo}
+              onChange={(v) => setFilters({ ...filters, tipoPrazo: v })}
+              options={tipoPrazo}
+              loading={isLoadingTipoPrazo}
+              disabled={isLoadingTipoPrazo}
+              map={(u) => ({
+                key: u.pk_tipo_prazo,
+                label: u.designacao,
+                value: u.pk_tipo_prazo,
+              })}
+            />
+            <FormMultiSelect
+              search={false}
+              label="Docentes"
+              values={teacher}
+              onChange={handleVigilantesChange}
+              map={(t) => ({
+                key: t.codigo,
+                label: t.nome,
+                value: t.codigo.toString(),
+              })}
+              options={docentes}
+              loading={isLoadingDocente}
+            />
+
             <FormSelect
               label="Horarios"
               value={filters.horarioId}
@@ -328,6 +427,20 @@ export default function AddMarkingAssessmentModal({
                 value: u.codigo_horario,
               })}
             />
+            <FormSelect
+              label="Salas"
+              value={filters.sala}
+              onChange={(v) => setFilters({ ...filters, sala: v })}
+              options={salas}
+              loading={isLoadingSala}
+              disabled={isLoadingSala}
+              map={(u) => ({
+                key: u.pk,
+                label: u.descricao,
+                value: u.pk,
+              })}
+            />
+
             <div className="space-y-2">
               <Label>Data Inicial</Label>
               <Input
@@ -356,6 +469,44 @@ export default function AddMarkingAssessmentModal({
                 }
               />
             </div>
+            <div className="space-y-2">
+              <Label>Duração da Prova (minutos)</Label>
+              <Input
+                type="number"
+                min={1}
+                placeholder="Ex: 120"
+                value={filters.duracaoProva ?? ""}
+                onChange={(e) =>
+                  setFilters({ ...filters, duracaoProva: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Hora de Início</Label>
+              <Input
+                type="time"
+                step="60"
+                lang="pt-PT"
+                value={filters.horaProva ?? ""}
+                onChange={(e) =>
+                  setFilters({ ...filters, horaProva: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Hora de Término</Label>
+              <Input
+                type="time"
+                step="60"
+                lang="pt-PT"
+                value={filters.horaTermino ?? ""}
+                onChange={(e) =>
+                  setFilters({ ...filters, horaTermino: e.target.value })
+                }
+              />
+            </div>
           </div>
         </div>
 
@@ -364,11 +515,11 @@ export default function AddMarkingAssessmentModal({
             Fechar
           </Button>
           <Button
-            disabled={isCreateLoadingPermission}
-            onClick={handleCreatePermission}
+            disabled={isCreateLoadingCalendar || isFormInvalid}
+            onClick={handleCreateCalendarioProva}
             size="lg"
           >
-            {isCreateLoadingPermission ? <Loader /> : "Criar"}
+            {isCreateLoadingCalendar ? <Loader /> : "Criar"}
           </Button>
         </DialogFooter>
       </DialogContent>

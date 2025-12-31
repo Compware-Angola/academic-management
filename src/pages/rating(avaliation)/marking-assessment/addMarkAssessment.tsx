@@ -43,6 +43,7 @@ import { convertGuards } from "./convertGuards";
 import MarkingDetailsGuardModal from "../components/MarkingDetailsGuardModal";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import AddMarkingAssessmentModal from "../components/AddMarkingAssessmentModal";
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 
 export default function AddMarkingAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
