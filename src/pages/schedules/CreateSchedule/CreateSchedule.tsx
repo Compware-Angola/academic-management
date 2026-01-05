@@ -41,11 +41,14 @@ import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" }, // 👈
+  { key: "capacidade", label: "Capacidade" }, 
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
+  {key:"docente", label:"Docente"}, 
+  {key:"tipoAula", label:"Tipo de Aula"},
+  {key:"sala", label:"Sala"},
   { key: "unidadeCurricular", label: "Unidade Curricular" },
   { key: "modalidade", label: "Modalidade" },
 ];

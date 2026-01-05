@@ -117,7 +117,7 @@ export default function ScheduleGrid({
             <CardTitle className="text-center text-sm">{item.diaSemana.designacao}</CardTitle>
 
             <div className="flex gap-2">
-            <Button
+            <Button type="button"
   size="sm"
   variant="outline"
   onClick={() => toggleAllForDay(item.diaSemana, item.tempos)}
