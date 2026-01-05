@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { listarHorariosExistentesService, ListarHorariosExistentesPayload } from "@/services/horario/listar-horarios-existentes.service";
+import {
+  listarHorariosExistentesService,
+  ListarHorariosExistentesPayload,
+} from "@/services/horario/listar-horarios-existentes.service";
 
-export const useQueryHorariosExistentes = (filters: ListarHorariosExistentesPayload) => {
-
-  const enabled =
-    !!filters.anoLectivo &&
-    !!filters.semestre &&
-    !!filters.periodo &&
-    !!filters.curso;
+export const useQueryHorariosExistentes = (
+  filters: ListarHorariosExistentesPayload
+) => {
+  const enabled = !!filters.anoLectivo;
 
   return useQuery({
     queryKey: ["horarios-existentes", filters],

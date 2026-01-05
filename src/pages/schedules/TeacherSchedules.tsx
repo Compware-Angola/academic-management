@@ -47,14 +47,16 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQuerySchedulesByDocente } from "@/hooks/horario/use-query-schedules-by-docente-service";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
-
+import { formatReadableTimeInterval } from "@/util/format-readable-time-interval";
 
 // Converte ticks .NET → HH:mm
 const formatTime = (ticks: string): string => {
   const totalSeconds = Number(ticks) / 10_000_000;
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
 };
 
 export default function TeacherSchedules() {
@@ -68,14 +70,14 @@ export default function TeacherSchedules() {
   // Paginação (igual ao SchedulesByUC)
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-const [openDocente, setOpenDocente] = useState(false);
+  const [openDocente, setOpenDocente] = useState(false);
   // Dados base
   const { data: anosAcademicos } = useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-const {
+  const {
     data: teachersData = [],
-    
+
     refetch,
     error,
   } = useQueryTeacther();
@@ -95,7 +97,6 @@ const {
         !!filters.anoLetivo &&
         !!filters.semestre &&
         !!filters.periodo,
-      
     }
   );
 
@@ -112,13 +113,17 @@ const {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/"><Home className="h-4 w-4" /></Link>
+              <Link to="/">
+                <Home className="h-4 w-4" />
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>Horários</BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Por Docente</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Por Docente</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
@@ -126,7 +131,9 @@ const {
       <div className="flex items-center gap-4">
         <GraduationCap className="h-9 w-9 text-primary" />
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Horários por Docente</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Horários por Docente
+          </h1>
           <p className="text-muted-foreground mt-1">
             Consulte todas as aulas de um professor com paginação.
           </p>
@@ -149,7 +156,9 @@ const {
                   setPage(1);
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
                 <SelectContent>
                   {anosAcademicos?.map((a) => (
                     <SelectItem key={a.codigo} value={a.codigo.toString()}>
@@ -169,7 +178,9 @@ const {
                   setPage(1);
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
                 <SelectContent>
                   {semestres?.map((s) => (
                     <SelectItem key={s.codigo} value={s.codigo.toString()}>
@@ -189,7 +200,9 @@ const {
                   setPage(1);
                 }}
               >
-                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
                 <SelectContent>
                   {periodos?.map((p) => (
                     <SelectItem key={p.codigo} value={p.codigo.toString()}>
@@ -199,70 +212,81 @@ const {
                 </SelectContent>
               </Select>
             </div>
-<div className="space-y-2">
-  <label className="text-sm font-medium">Docente</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Docente</label>
 
-  <Popover open={openDocente} onOpenChange={setOpenDocente}>
-    <PopoverTrigger asChild>
-      {/* ← Usa um elemento simples (div ou button nativo) */}
-      <button
-        type="button"
-        className={cn(
-          "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-          "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-          "disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
-        )}
-      >
-        <div className="flex items-center gap-2 truncate">
-          <User className="h-4 w-4 opacity-50 flex-shrink-0" />
-          <span className="truncate">
-            {filters.docenteId
-              ? teachersData?.find((p) => p.codigo.toString() === filters.docenteId)?.nome || "Selecionar docente"
-              : "Selecionar docente"}
-          </span>
-        </div>
-        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-      </button>
-    </PopoverTrigger>
+              <Popover open={openDocente} onOpenChange={setOpenDocente}>
+                <PopoverTrigger asChild>
+                  {/* ← Usa um elemento simples (div ou button nativo) */}
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+                      "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                      "disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <User className="h-4 w-4 opacity-50 flex-shrink-0" />
+                      <span className="truncate">
+                        {filters.docenteId
+                          ? teachersData?.find(
+                              (p) => p.codigo.toString() === filters.docenteId
+                            )?.nome || "Selecionar docente"
+                          : "Selecionar docente"}
+                      </span>
+                    </div>
+                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                  </button>
+                </PopoverTrigger>
 
-    <PopoverContent
-      className="w-full p-0 max-w-[var(--radix-popover-trigger-width)]"
-      align="start"
-      sideOffset={4}
-    >
-      <Command>
-        <CommandInput placeholder="Procurar docente..." autoFocus />
-        <CommandList>
-          <CommandEmpty>Nenhum docente encontrado.</CommandEmpty>
-          <CommandGroup>
-            {teachersData?.map((docente) => (
-              <CommandItem
-                key={docente.codigo}
-                value={`${docente.nome} ${docente.codigo}`}
-                onSelect={() => {
-                  setFilters({ ...filters, docenteId: docente.codigo.toString() });
-                  setPage(1);
-                  setOpenDocente(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    filters.docenteId === docente.codigo.toString() ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <div className="flex flex-col text-left">
-                  <span className="font-medium">{docente.nome}</span>
-                  <span className="text-xs text-muted-foreground">ID: {docente.codigo}</span>
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </PopoverContent>
-  </Popover>
-</div>
+                <PopoverContent
+                  className="w-full p-0 max-w-[var(--radix-popover-trigger-width)]"
+                  align="start"
+                  sideOffset={4}
+                >
+                  <Command>
+                    <CommandInput placeholder="Procurar docente..." autoFocus />
+                    <CommandList>
+                      <CommandEmpty>Nenhum docente encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        {teachersData?.map((docente) => (
+                          <CommandItem
+                            key={docente.codigo}
+                            value={`${docente.nome} ${docente.codigo}`}
+                            onSelect={() => {
+                              setFilters({
+                                ...filters,
+                                docenteId: docente.codigo.toString(),
+                              });
+                              setPage(1);
+                              setOpenDocente(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                filters.docenteId === docente.codigo.toString()
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col text-left">
+                              <span className="font-medium">
+                                {docente.nome}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                ID: {docente.codigo}
+                              </span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -312,18 +336,32 @@ const {
                   <TableBody>
                     {aulas.map((aula) => (
                       <TableRow key={aula.codigo} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{aula.disciplina}</TableCell>
-                        <TableCell className="font-mono text-sm">{aula.horario_nome}</TableCell>
-                        <TableCell>{aula.curso} • {aula.ano}</TableCell>
-                        <TableCell>{aula.dia_semana.replace("-Feira", "")}</TableCell>
-                        <TableCell className="font-mono">
-                          {formatTime(aula.hora_inicio)}–{formatTime(aula.hora_termino)}
+                        <TableCell className="font-medium">
+                          {aula.disciplina}
                         </TableCell>
-                        <TableCell className="font-medium">{aula.sala}</TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {aula.horario_nome}
+                        </TableCell>
+                        <TableCell>
+                          {aula.curso} • {aula.ano}
+                        </TableCell>
+                        <TableCell>
+                          {aula.dia_semana.replace("-Feira", "")}
+                        </TableCell>
+                        <TableCell className="font-mono">
+                          {formatReadableTimeInterval(
+                            aula.hora_inicio,
+                            aula.hora_termino
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {aula.sala}
+                        </TableCell>
                         <TableCell>
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                              aula.tipo_aula.includes("Teórica") || aula.tipo_aula.includes("Teorica")
+                              aula.tipo_aula.includes("Teórica") ||
+                              aula.tipo_aula.includes("Teorica")
                                 ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
                                 : aula.tipo_aula.includes("Prática")
                                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
