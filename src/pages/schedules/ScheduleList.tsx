@@ -70,6 +70,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryClient } from "@tanstack/react-query";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 export default function ScheduleList() {
   const { user } = useAuth();
@@ -229,7 +230,7 @@ export default function ScheduleList() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
             <FormSelect
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
@@ -274,31 +275,25 @@ export default function ScheduleList() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select
-                value={filters.curso}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    curso: v,
-                    anoCurricular: "all",
-                    unidadeCurricular: "",
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                      {c.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+            <FormCommandSelect
+              value={filters.curso}
+              label="Curso"
+              options={cursos}
+              map={(c) => ({
+                key: c.codigo.toString(),
+                value: c.codigo.toString(),
+                label: c.designacao,
+              })}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  curso: v,
+
+                  unidadeCurricular: "",
+                })
+              }
+            />
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Curricular</label>
               <Select
@@ -329,37 +324,27 @@ export default function ScheduleList() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Unidade Curricular</label>
-              <Select
-                value={filters.unidadeCurricular}
-                onValueChange={(v) =>
-                  setFilters({ ...filters, unidadeCurricular: v })
-                }
-                disabled={!canLoadUcs}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione curso"
-                        : !filters.semestre
-                        ? "Selecione semestre"
-                        : isLoadingUC
-                        ? "Carregando UCs..."
-                        : "Selecionar UC"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {unidadesCurriculares.map((uc) => (
-                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
-                      {uc.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <FormCommandSelect
+              value={filters.unidadeCurricular}
+              label="Unidade Curricular"
+              placeholder={
+                !filters.curso
+                  ? "Selecione curso"
+                  : !filters.semestre
+                  ? "Selecione semestre"
+                  : isLoadingUC
+                  ? "Carregando UCs..."
+                  : "Selecionar UC"
+              }
+              options={unidadesCurriculares}
+              disabled={!canLoadUcs}
+              map={(u) => ({
+                key: u.pk.toString(),
+                value: u.pk.toString(),
+                label: u.descricao,
+              })}
+              onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
+            />
           </div>
         </CardContent>
       </Card>
@@ -376,17 +361,21 @@ export default function ScheduleList() {
               <p className="text-muted-foreground">Carregando Horários...</p>
             </div>
           ) : tableData.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-12 text-center">
-            <div className="rounded-full bg-muted p-4 mb-4">
-              <Search className="h-8 w-8 text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <div className="rounded-full bg-muted p-4 mb-4">
+                <Search className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Nenhum registo encontrado
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Não foram encontrados horários com os filtros aplicados.
+              </p>
+              <Button onClick={() => navigate("/horarios/criar")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Criar Primeiro Horário
+              </Button>
             </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum registo encontrado</h3>
-            <p className="text-muted-foreground mb-4">Não foram encontrados horários com os filtros aplicados.</p>
-            <Button onClick={() => navigate("/horarios/criar")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Criar Primeiro Horário
-            </Button>
-          </div>
           ) : (
             <>
               <div className="rounded-md border overflow-hidden">

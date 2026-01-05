@@ -22,12 +22,14 @@ type FormSelectProps<T> = {
   onChange: (value: string) => void;
   disabled?: boolean;
   loading?: boolean;
+  defaultSelectItem?: { value: string; label: string; key?: string }[];
 };
 
 export function FormSelect<T>({
   label,
   value,
   options = [],
+  defaultSelectItem = [],
   map,
   onChange,
   disabled = false,
@@ -49,6 +51,11 @@ export function FormSelect<T>({
         </SelectTrigger>
 
         <SelectContent>
+          {defaultSelectItem.map((item) => (
+            <SelectItem key={item.key ?? item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
           {options.map((item) => {
             const mapped = map(item);
 
