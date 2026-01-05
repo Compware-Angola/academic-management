@@ -2,10 +2,9 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type AvailableRoomsParams = {
   anoLectivo: number;
-  diaSemana: number;
+  periodo: number;
   tipoAula: number;
-  horaInicio: string;
-  horaFim: string;
+
 };
 
 export type AvailableRoomsResponse = {
