@@ -1,4 +1,5 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
+import { normalizeParam } from "@/util/normalize-param";
 
 /* =======================
  * PARAMS
@@ -74,36 +75,37 @@ export type ScheduleWithPermissaoResponse = {
  * FETCH
  * ======================= */
 export const fetchScheduleWithSchedule = async (
-  params: ScheduleWIthPermissionParams
+  payload: ScheduleWIthPermissionParams
 ): Promise<ScheduleWithPermissaoResponse> => {
-  const queryParams = new URLSearchParams({
-    anoLectivo: params.anoLectivo.toString(),
-    page: (params.page || 1).toString(),
-    limit: (params.limit || 25).toString(),
-  });
-
-  if (params.semestre !== undefined)
-    queryParams.append("semestre", params.semestre.toString());
-  if (params.periodo !== undefined)
-    queryParams.append("periodo", params.periodo.toString());
-  if (params.curso !== undefined)
-    queryParams.append("curso", params.curso.toString());
-  if (params.anoCurricular !== undefined)
-    queryParams.append("anoCurricular", params.anoCurricular.toString());
-  if (params.unidadeCurricular !== undefined)
-    queryParams.append(
-      "unidadeCurricular",
-      params.unidadeCurricular.toString()
-    );
-  if (params.estado !== undefined)
-    queryParams.append("estado", params.estado.toString());
-  if (params.afetacaoDocente !== undefined)
-    queryParams.append("afetacaoDocente", params.afetacaoDocente.toString());
+  const {
+    anoLectivo,
+    anoCurricular,
+    curso,
+    estado,
+    afetacaoDocente,
+    limit,
+    page,
+    periodo,
+    semestre,
+    unidadeCurricular,
+  } = payload;
+  const params = {
+    anoLectivo: normalizeParam(anoLectivo),
+    semestre: normalizeParam(semestre),
+    periodo: normalizeParam(periodo),
+    curso: normalizeParam(curso),
+    anoCurricular: normalizeParam(anoCurricular),
+    unidadeCurricular: normalizeParam(unidadeCurricular),
+    estado: normalizeParam(estado),
+    afetacaoDocente: normalizeParam(afetacaoDocente),
+    page,
+    limit,
+  };
 
   const response = await axiosNestGa.get<ScheduleWithPermissaoResponse>(
     "/schedule/with-permission",
     {
-      params: queryParams,
+      params: params,
     }
   );
 
