@@ -30,6 +30,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useNextScheduleDesignation } from "@/hooks/horario/use-next-schedule-designation";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
+import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -64,15 +68,28 @@ export default function CreateSchedule() {
     apenasPrimeiroAno: "",
     designacao: "",
     capacidade: "",
+    docente: "",
+    tipoAula: "",
+    sala: "",
   });
 
   const [aulas, setAulas] = useState<AulaPayload[]>([]);
 
   /* ---------- QUERIES ----------- */
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-  const { data: semestres, isLoading: isLoadingSemestres } =
+    const { data: academicYear, isLoading: isLoadingAcademicYear } =
+     useQueryAnoAcademico();
+      const { data: teachers = [], isLoading: isLoadingTeacher } =
+        useQueryTeacherByUC(formData.unidadeCurricular);
+         const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
+     const { data: semestres, isLoading: isLoadingSemestres } =
     useQuerySemestres();
+      const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
+        
+        anoLectivo: Number(formData.anoLetivo),
+      
+        tipoAula: Number(formData?.tipoAula),
+        periodo: Number(formData?.periodo),
+      });
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
@@ -163,6 +180,9 @@ export default function CreateSchedule() {
       apenasPrimeiroAno: "",
       capacidade: "",
       designacao: "",
+      docente: "",
+      tipoAula: "",
+      sala: "",
     });
     setAulas([]);
   };
@@ -183,6 +203,9 @@ export default function CreateSchedule() {
       capacidade: Number(formData.capacidade),
       designacao: formData.designacao,
       estadoHorario: 2,
+      docente: Number(formData.docente),
+      tipoAula: Number(formData.tipoAula),
+      sala: Number(formData.sala),
       turma: 0,
       obs: "",
     };
@@ -392,7 +415,85 @@ export default function CreateSchedule() {
               }
             />
           </div>
+          <FormSelect
+                        label="Docente"
+                        value={formData.docente}
+                        disabled={isLoadingTeacher}
+                        onChange={(v) => setFormData({ ...formData, docente: v })}
+                        options={teachers}
+                        map={(t) => ({
+                          key: t.pk,
+                          label: t.nomeCompleto,
+                          value: t.pk,
+                        })}
+                        loading={isLoadingTeacher}
+                      />
+          
+                      {/* TIPO DE AULA */}
+                      <div>
+                        <Label>Tipo de Aula</Label>
+                        <Select
+                          value={formData.tipoAula}
+                          onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
+                        >
+                          <SelectTrigger className="w-full ">
+                            <SelectValue placeholder="Escolha o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tipoDeSalas.map((tipo) => (
+                              <SelectItem
+                                key={tipo.pkTipoAula}
+                                value={tipo.pkTipoAula.toString()}
+                              >
+                                {tipo.designacao}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+          
+                      {/* SALA */}
+                      <div>
+                        <Label>Sala</Label>
+                        <Select
+                          value={formData.sala}
+                          onValueChange={(v) => setFormData({ ...formData, sala: v })}
+                        >
+                          <SelectTrigger
+                            disabled={
+                              Boolean(formData.tipoAula) === false || isLoadingSala
+                            }
+                            className="w-full "
+                          >
+                            <SelectValue
+                              placeholder={
+                                <>
+                                  {" "}
+                                  {isLoadingSala ? (
+                                    <span className="flex gap-2 items-center">
+                                      Carregando <Loader2 className="animate-spin" />
+                                    </span>
+                                  ) : (
+                                    "Selecione Salas"
+                                  )}
+                                </>
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {salas?.map((sala) => (
+                              <SelectItem
+                                key={sala.salaid}
+                                value={sala.salaid.toString()}
+                              >
+                                {sala.sala}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
         </div>
+
 
         {/* GRID DE HORÁRIOS */}
         {temposDisponiveis.length > 0 &&
@@ -405,10 +506,8 @@ export default function CreateSchedule() {
             <ScheduleGrid
               scheduleData={temposDisponiveis}
               onChange={setAulas}
-              anoLetivo={formData.anoLetivo}
-              periodo={formData.periodo}
-              semestre={formData.semestre}
-              unidadeCurricular={formData.unidadeCurricular}
+             
+          
             />
           )}
 
