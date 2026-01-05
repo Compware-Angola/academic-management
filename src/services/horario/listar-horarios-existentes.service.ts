@@ -1,7 +1,7 @@
 // src/services/horario/listar-horarios-existentes.service.ts
 
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-
+import { normalizeParam } from "@/util/normalize-param";
 
 export type ListarHorariosExistentesPayload = {
   anoLectivo: number | string;
@@ -48,7 +48,7 @@ export type ListarHorariosExistentesResponse = {
 
 /* ---------- SERVICE ---------- */
 export async function listarHorariosExistentesService(
-  payload: ListarHorariosExistentesPayload,
+  payload: ListarHorariosExistentesPayload
 ): Promise<ListarHorariosExistentesResponse> {
   const {
     anoLectivo,
@@ -63,22 +63,22 @@ export async function listarHorariosExistentesService(
     limit = 25,
   } = payload;
 
+  const params = {
+    anoLectivo: normalizeParam(anoLectivo),
+    semestre: normalizeParam(semestre),
+    periodo: normalizeParam(periodo),
+    curso: normalizeParam(curso),
+    anoCurricular: normalizeParam(anoCurricular),
+    unidadeCurricular: normalizeParam(unidadeCurricular),
+    estado: normalizeParam(estado),
+    afetacaoDocente: normalizeParam(afetacaoDocente),
+    page,
+    limit,
+  };
+
   const { data } = await axiosNestGa.get<ListarHorariosExistentesResponse>(
     "/schedule",
-    {
-      params: {
-        anoLectivo,
-        semestre,
-        periodo,
-        curso,
-        anoCurricular,
-        unidadeCurricular,
-        estado,
-        afetacaoDocente,
-        page,
-        limit,
-      },
-    }
+    { params }
   );
 
   return data;
