@@ -28,7 +28,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={filterMenuByGroups(menuStructure.items)} />
         <NavAcademic items={filterMenuByGroups(academicStructure.items)} />
-        <NavFinance items={filterMenuByGroups(finaceStructure.items)} />
+        <NavFinance  items={filterMenuByGroups(finaceStructure.items)} />
         <NavHealp items={filterMenuByGroups(healpStructure.items)} />
       </SidebarContent>
       <SidebarRail />
