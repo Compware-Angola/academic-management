@@ -121,6 +121,14 @@ export default function ScheduleGrid({
   size="sm"
   variant="outline"
   onClick={() => toggleAllForDay(item.diaSemana, item.tempos)}
+   className={`w-full justify-start h-auto py-3 transition ${
+                      hasData(item.diaSemana.pkDiaDaSemana, item.tempos[0].ordem) &&
+                      item.tempos.every((tempo) =>
+                        hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem)
+                      )
+                      ? "bg-green-50 text-green-900 hover:bg-green-100"
+                      : "bg-white text-muted-foreground hover:bg-gray-50"
+                  }`}
 >
   {item.tempos.every((tempo) =>
     hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem)
