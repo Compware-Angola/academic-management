@@ -20,13 +20,16 @@ export type tipoLogsAccesses = {
 }
 
 export async function fetchLogsAccessos(params: createLogsParams):Promise<tipoLogsAccesses[]>{
-const userID = AuthStorage.getUser().user_id.toString()
+const userID = 1548 //AuthStorage.getUser().user_id.toString()
 const _params = {...params, utilizadorId:userID}
 
-    console.log("Params no service: ", params)
+    console.log(" USER ID ", userID)
+
+    //console.log("Params no service: ", params)
 
     const {data} = await axiosNestGa.get("/acess_management/logs-acessos-funcionalidade",{params:_params})
     
+    //console.log("Dados rerornados da api: ", data)
     
     return data
 }

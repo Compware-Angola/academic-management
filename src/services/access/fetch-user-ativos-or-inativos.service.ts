@@ -1,11 +1,10 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga"
 
-
 export type FetchUserParams = {
     ativo?: boolean
 }
 
-export type User = {
+export type UserFilterResponse = {
     
     pkUtilizador: number,
     nome: string,
@@ -13,8 +12,8 @@ export type User = {
     email: string,
     active: boolean,
     refPessoa: {
-      personId: number,
-      personName: string
+      pk: number,
+      desc: string
     },
     createdAt: string,
     updatedAt: string
@@ -22,10 +21,10 @@ export type User = {
 }
 
 
-export async function fetchUserActive(params?: FetchUserParams): Promise<User[]>{
-    const response = await axiosNestGa.get<User[]>("users",{
+export async function fetchUserActive(params?: FetchUserParams): Promise<UserFilterResponse[]>{
+    const response = await axiosNestGa.get<UserFilterResponse[]>("/acess_management/users",{
         params
     })
 
-    return response.data as User[]
+    return response.data as UserFilterResponse[]
 }

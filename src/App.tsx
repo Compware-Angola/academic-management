@@ -29,7 +29,7 @@ import LoggedInUsers from "./pages/access/LoggedInUsers";
 import UserFunctionality from "./pages/access/UserFunctionality";
 import RectoratePositions from "./pages/access/RectoratePositions";
 import BlockAccess from "./pages/access/BlockAccess";
-import AllAccesses from "./pages/access/AllAccesses";
+
 import AcessGrup from "./pages/access/AccessGroup";
 import TeacherProfile from "./pages/TeacherProfile";
 import ActivitiesLecturesLic from "./pages/academiccalendar/activities-lectures";
@@ -63,6 +63,12 @@ import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
 import CreateUser from "./pages/access/CreateUser";
 import AccessLogs from "./pages/access/AccessLogs";
 import LogsAcessos from "./pages/access/LogsAccess";
+import ListaUtilizadoresActiveOrInactive from "./pages/access/ListUsersActiveAndInactive";
+import ListarGrupos from "./pages/access/ListarTodosGrupos";
+import { GrupoAcessos } from "./pages/access/GrupoAcessos";
+import { ListarAcessos } from "./pages/access/AllAccesses";
+import { UtilizadorAcessos } from "./pages/access/UtilizadorAcessos";
+
 
 const App = () => {
   return (
@@ -144,11 +150,17 @@ const App = () => {
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
                 <Route path="/utilizadores/criar" element={<CreateUser />} />
                 <Route path="/acessos/logs" element={<LogsAcessos />}  />
+                <Route path="/acessos/utilizadores_active_or_inactive" element={<ListaUtilizadoresActiveOrInactive/>} />
+                <Route path="/acessos/todos" element={<ListarAcessos />} />
+                <Route path="/acessos/bloquear" element={<BlockAccess />} />
+                <Route path="/acessos/grupos" element={<ListarGrupos />} />
+                <Route path="/grupos/:id/acessos" element={<GrupoAcessos />} />
+                <Route path="/utilizador/acessos" element={<UtilizadorAcessos />} />
                 {/*
                 <Route path="/acessos/logs" element={<AccessLogs />} />
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
-                <Route path="/acessos/bloquear" element={<BlockAccess />} />
-                <Route path="/acessos/todos" element={<AllAccesses />} />
+                
+                
                 <Route path="/acessos/logs" element={<AccessLogs />} />
                   <Route
                   path="/acessos/cargos"
