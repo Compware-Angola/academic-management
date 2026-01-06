@@ -21,8 +21,9 @@ import {
   HomeIcon,
   BadgeDollarSign,
   HelpCircle,
+  BrickWallIcon
 } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+
 import { MenuStructure } from "./menu.types";
 
 export const menuStructure: MenuStructure = {
@@ -57,6 +58,27 @@ export const menuStructure: MenuStructure = {
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
+      ],
+    },
+     // ----------------------------------------------------
+    // CONTROLE DE ACESSO
+    // ----------------------------------------------------
+    {
+      title: "Controle de Acesso",
+      url: "/controle-acesso",
+      icon:   BrickWallIcon
+,
+      items: [
+        { title: "Documentos", url: "/controle-acesso/documentos" },
+        { title: "Módulos", url: "/controle-acesso/modulos" },
+        {
+          title: "Solicitações encaminhadas",
+          url: "/controle-acesso/solicitacoes",
+        },
+        { title: "Aplicação", url: "/controle-acesso/aplicacao" },
+        { title: "Páginas", url: "/controle-acesso/paginas" },
+        { title: "Diretor do curso", url: "/controle-acesso/diretor" },
+        { title: "Grupos", url: "/controle-acesso/grupos" },
       ],
     },
 
@@ -254,26 +276,7 @@ export const menuStructure: MenuStructure = {
     // ----------------------------------------------------
 
 
-    // ----------------------------------------------------
-    // CONTROLE DE ACESSO
-    // ----------------------------------------------------
-    {
-      title: "Controle de Acesso",
-      url: "/controle-acesso",
-      icon: Shield,
-      items: [
-        { title: "Documentos", url: "/controle-acesso/documentos" },
-        { title: "Módulos", url: "/controle-acesso/modulos" },
-        {
-          title: "Solicitações encaminhadas",
-          url: "/controle-acesso/solicitacoes",
-        },
-        { title: "Aplicação", url: "/controle-acesso/aplicacao" },
-        { title: "Páginas", url: "/controle-acesso/paginas" },
-        { title: "Diretor do curso", url: "/controle-acesso/diretor" },
-        { title: "Grupos", url: "/controle-acesso/grupos" },
-      ],
-    },
+   
 
     // ----------------------------------------------------
     // DOCUMENTOS MINISTÉRIO
