@@ -72,6 +72,7 @@ import ValidationTeacherAgenda from "./pages/rating(avaliation)/Validation-teach
 import PautaGeralPorUC from "./pages/rating(avaliation)/pauta-geral-uc";
 import EstudantesInscritos from "./pages/rating(avaliation)/enrolled-students";
 import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
+import Grupos from "./pages/controle-acesso/grupos";
 
 const App = () => {
   return (
@@ -188,6 +189,7 @@ const App = () => {
                   element={<UserFunctionality />}
                 /> */}
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
+                <Route path="/controle-acesso/grupos" element={<Grupos />} />
                 {/*
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
                 <Route path="/acessos/bloquear" element={<BlockAccess />} />
@@ -238,6 +240,7 @@ const App = () => {
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
                 <Route path="*" element={<UnderConstruction />} />
+
                 {/* Finanças */}
                 <Route path="/ajuda" element={<HealpFAQ />} />
               </Route>

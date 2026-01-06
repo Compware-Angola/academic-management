@@ -58,6 +58,26 @@ export const menuStructure: MenuStructure = {
         { title: "Utilizadores logados", url: "/acessos/logados" },
       ],
     },
+    // ----------------------------------------------------
+    // CONTROLE DE ACESSO
+    // ----------------------------------------------------
+    {
+      title: "Controle de Acesso",
+      url: "/controle-acesso",
+      icon: Shield,
+      items: [
+        { title: "Documentos", url: "/controle-acesso/documentos" },
+        { title: "Módulos", url: "/controle-acesso/modulos" },
+        {
+          title: "Solicitações encaminhadas",
+          url: "/controle-acesso/solicitacoes",
+        },
+        { title: "Aplicação", url: "/controle-acesso/aplicacao" },
+        { title: "Páginas", url: "/controle-acesso/paginas" },
+        { title: "Diretor do curso", url: "/controle-acesso/diretor" },
+        { title: "Grupos", url: "/controle-acesso/grupos" },
+      ],
+    },
 
     // ----------------------------------------------------
     // ASSIDUIDADE
@@ -242,27 +262,6 @@ export const menuStructure: MenuStructure = {
     // ----------------------------------------------------
     // VER UTILIZADORES
     // ----------------------------------------------------
-
-    // ----------------------------------------------------
-    // CONTROLE DE ACESSO
-    // ----------------------------------------------------
-    {
-      title: "Controle de Acesso",
-      url: "/controle-acesso",
-      icon: Shield,
-      items: [
-        { title: "Documentos", url: "/controle-acesso/documentos" },
-        { title: "Módulos", url: "/controle-acesso/modulos" },
-        {
-          title: "Solicitações encaminhadas",
-          url: "/controle-acesso/solicitacoes",
-        },
-        { title: "Aplicação", url: "/controle-acesso/aplicacao" },
-        { title: "Páginas", url: "/controle-acesso/paginas" },
-        { title: "Diretor do curso", url: "/controle-acesso/diretor" },
-        { title: "Grupos", url: "/controle-acesso/grupos" },
-      ],
-    },
 
     // ----------------------------------------------------
     // DOCUMENTOS MINISTÉRIO
