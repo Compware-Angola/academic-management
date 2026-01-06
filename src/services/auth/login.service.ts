@@ -8,7 +8,7 @@ export class LoginPayload {
 export interface Group {
   codigo: number;                  
   designation: string;            
-  acronym: string;                 
+  sigla: string;                 
   type_group: number;              
   type_group_designation: string;   
 }

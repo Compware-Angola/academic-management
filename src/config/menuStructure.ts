@@ -54,7 +54,7 @@ export const menuStructure: MenuStructure = {
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
       ],
-       roles: ['adm', 'dct', 'instrutor', 'aluno']
+       roles: ['adm', 'dct']
     },
 
     // ----------------------------------------------------

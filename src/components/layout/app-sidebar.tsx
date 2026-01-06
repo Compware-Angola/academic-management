@@ -16,20 +16,20 @@ import { finaceStructure, menuStructure,healpStructure, academicStructure } from
 import { NavFinance } from "./nav-finance";
 import { NavHealp } from "./nav-healp";
 import { NavAcademic } from "./nav-academic";
+import { filterMenuByGroups } from "@/util/menuFilter";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={menuStructure.items} />
-         <NavAcademic items={academicStructure.items} />
-        <NavFinance items={finaceStructure.items} />
-       
-        <NavHealp items={healpStructure.items} />
-
+        <NavMain items={filterMenuByGroups(menuStructure.items)} />
+        <NavAcademic items={filterMenuByGroups(academicStructure.items)} />
+        <NavFinance items={filterMenuByGroups(finaceStructure.items)} />
+        <NavHealp items={filterMenuByGroups(healpStructure.items)} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
