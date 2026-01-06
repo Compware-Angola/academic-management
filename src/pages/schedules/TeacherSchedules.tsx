@@ -48,6 +48,7 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQuerySchedulesByDocente } from "@/hooks/horario/use-query-schedules-by-docente-service";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { formatReadableTimeInterval } from "@/util/format-readable-time-interval";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 // Converte ticks .NET → HH:mm
 const formatTime = (ticks: string): string => {
@@ -212,81 +213,16 @@ export default function TeacherSchedules() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Docente</label>
-
-              <Popover open={openDocente} onOpenChange={setOpenDocente}>
-                <PopoverTrigger asChild>
-                  {/* ← Usa um elemento simples (div ou button nativo) */}
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-                      "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                      "disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
-                    )}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <User className="h-4 w-4 opacity-50 flex-shrink-0" />
-                      <span className="truncate">
-                        {filters.docenteId
-                          ? teachersData?.find(
-                              (p) => p.codigo.toString() === filters.docenteId
-                            )?.nome || "Selecionar docente"
-                          : "Selecionar docente"}
-                      </span>
-                    </div>
-                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                  </button>
-                </PopoverTrigger>
-
-                <PopoverContent
-                  className="w-full p-0 max-w-[var(--radix-popover-trigger-width)]"
-                  align="start"
-                  sideOffset={4}
-                >
-                  <Command>
-                    <CommandInput placeholder="Procurar docente..." autoFocus />
-                    <CommandList>
-                      <CommandEmpty>Nenhum docente encontrado.</CommandEmpty>
-                      <CommandGroup>
-                        {teachersData?.map((docente) => (
-                          <CommandItem
-                            key={docente.codigo}
-                            value={`${docente.nome} ${docente.codigo}`}
-                            onSelect={() => {
-                              setFilters({
-                                ...filters,
-                                docenteId: docente.codigo.toString(),
-                              });
-                              setPage(1);
-                              setOpenDocente(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                filters.docenteId === docente.codigo.toString()
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            <div className="flex flex-col text-left">
-                              <span className="font-medium">
-                                {docente.nome}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                ID: {docente.codigo}
-                              </span>
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+            <FormCommandSelect
+              label="Docente"
+              value={filters.docenteId}
+              options={teachersData}
+              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
+              onChange={(codigo) => {
+                setFilters({ ...filters, docenteId: codigo });
+                setPage(1);
+              }}
+            />
           </div>
         </CardContent>
       </Card>
