@@ -10,19 +10,16 @@ import {
   GraduationCap,
   FileText,
   BookOpen,
-  Clock,
+
   BookMarked,
-  Search,
+
   Building,
-  MapPin,
-  Settings,
-  FolderOpen,
-  FileBarChart,
+
   HomeIcon,
   BadgeDollarSign,
   HelpCircle,
 } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+
 import { MenuStructure } from "./menu.types";
 
 export const menuStructure: MenuStructure = {
@@ -30,7 +27,7 @@ export const menuStructure: MenuStructure = {
     {
       title: "Início",
       url: "/dashboard",
-      icon: HomeIcon, // substitua pelo ícone que desejar
+      icon: HomeIcon, 
     },
     // ----------------------------------------------------
     // ACESSOS
@@ -57,6 +54,7 @@ export const menuStructure: MenuStructure = {
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
       ],
+       roles: ['adm', 'dct', 'instrutor', 'aluno']
     },
 
     // ----------------------------------------------------

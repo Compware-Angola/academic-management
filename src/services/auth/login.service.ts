@@ -5,12 +5,19 @@ export class LoginPayload {
   password: string;
   platform?: string = 'GA';
 }
-
+export interface Group {
+  codigo: number;                  
+  designation: string;            
+  acronym: string;                 
+  type_group: number;              
+  type_group_designation: string;   
+}
 
 export interface AuthResponse {
   access_token: string;
   expires_in: number;
   user: User;
+  groups: Group[];
   mensagem: string;
 }
 

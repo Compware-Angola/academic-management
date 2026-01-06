@@ -5,6 +5,7 @@ export interface MenuItem {
   url: string;
   icon?: LucideIcon;
   isActive?: boolean;
+  roles?: string[];
   items?: MenuItem[]; 
 }
 
