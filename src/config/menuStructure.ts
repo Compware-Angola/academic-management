@@ -72,6 +72,7 @@ export const menuStructure: MenuStructure = {
         { title: "Marcar assiduidade", url: "/assiduidade/marcar" },
         { title: "Marcar assiduidade prova", url: "/assiduidade/prova" },
       ],
+       roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -111,6 +112,7 @@ export const menuStructure: MenuStructure = {
         { title: "Validação do programa", url: "/docente/validacao" },
         { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
+       roles: ['adm', 'dct']
     },
 
     // ----------------------------------------------------
@@ -125,6 +127,7 @@ export const menuStructure: MenuStructure = {
         { title: "Orientadores", url: "/tfc/orientadores" },
         { title: "Pagamentos TFC", url: "/tfc/pagamentos" },
       ],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -149,6 +152,7 @@ export const menuStructure: MenuStructure = {
         { title: "Salário", url: "/gestao-docentes/salario" },
         { title: "Validação docente", url: "/gestao-docentes/validacao" },
       ],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -177,6 +181,7 @@ export const menuStructure: MenuStructure = {
           url: "/inscricoes/mensalidades-curso",
         },
       ],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -197,6 +202,7 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Gestão de UC no plano", url: "/plano/uc-plano" },
       ],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -225,6 +231,7 @@ export const menuStructure: MenuStructure = {
         { title: "Lista de presença", url: "/pos-graduacao/presenca" },
         { title: "TFC", url: "/pos-graduacao/tfc" },
       ],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -235,6 +242,7 @@ export const menuStructure: MenuStructure = {
       url: "/sumario",
       icon: FileText,
       items: [{ title: "Parâmetros", url: "/sumario/parametros" }],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -260,6 +268,7 @@ export const menuStructure: MenuStructure = {
         { title: "Diretor do curso", url: "/controle-acesso/diretor" },
         { title: "Grupos", url: "/controle-acesso/grupos" },
       ],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -278,6 +287,7 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
       ],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -288,6 +298,7 @@ export const menuStructure: MenuStructure = {
       url: "/salas",
       icon: Building,
       items: [{ title: "Listar salas", url: "/salas/listar" }],
+        roles: ['adm']
     },
 
     // ----------------------------------------------------
@@ -301,6 +312,7 @@ export const menuStructure: MenuStructure = {
         { title: "Controle", url: "/marcacao-provas/controle" },
         { title: "Marcação", url: "/marcacao-provas/marcacao" },
       ],
+        roles: ['adm', 'dct']
     },
   ],
 };
@@ -432,6 +444,7 @@ export const finaceStructure: MenuStructure = {
         { title: "Taxa do IVA", url: "/financas/agt/iva" },
         { title: "Gerar SAFT", url: "/financas/agt/saft" },
       ],
+       roles: ['adm', 'fin']
     },
   ],
 };
@@ -447,13 +460,16 @@ export const healpStructure: MenuStructure = {
         { title: "Imagens de abertura", url: "/comunicacao/imagens" },
         { title: "Solicitações", url: "/comunicacao/solicitacoes" },
       ],
+       roles: ['adm']
     },
     {
       title: "Ajuda",
       url: "/ajuda",
       icon: HelpCircle,
       items: [],
+       roles: ['adm', 'healp', 'dct', 'fin']
     },
+    
   ],
 };
 
@@ -473,6 +489,7 @@ export const academicStructure: MenuStructure = {
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
+       roles: ['adm', 'dct']
     }, // ----------------------------------------------------
     // AVALIAÇÕES
     // ----------------------------------------------------
@@ -507,6 +524,7 @@ export const academicStructure: MenuStructure = {
         { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
         { title: "Parâmetros gerais", url: "/avaliacoes/parametros" },
       ],
+        roles: ['adm', 'dct']
     }, // ----------------------------------------------------
     // HORÁRIOS
     // ----------------------------------------------------
@@ -532,6 +550,7 @@ export const academicStructure: MenuStructure = {
         { title: "Horários por UC", url: "/horarios/uc" },
         { title: "Parâmetros", url: "/horarios/parametros" },
       ],
+        roles: ['adm', 'dct']
     },
     // ----------------------------------------------------
     // EXAME DE ACESSO
@@ -562,6 +581,7 @@ export const academicStructure: MenuStructure = {
         { title: "Resetar prova", url: "/exame/resetar" },
         { title: "Lista de presença", url: "/exame/presenca" },
       ],
+        roles: ['adm', 'dct']
     },
   ],
 };
