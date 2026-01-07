@@ -1,5 +1,7 @@
+
 import axios from "axios";
 import { ApiError, type ApiErrorResponse } from "@/error";
+import { AuthStorage } from "@/util/auth-storage"; 
 
 export const axiosNestAuth = axios.create({
   baseURL: import.meta.env.VITE_NEST_AUTH_API_URL,
@@ -9,21 +11,34 @@ export const axiosNestAuth = axios.create({
 });
 
 // ==========================
-// ⭐ Interceptor de resposta
+// ⭐ Interceptor de REQUISIÇÃO
+// ==========================
+axiosNestAuth.interceptors.request.use(
+  (config) => {
+    const token = AuthStorage.getToken();
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    // Erro antes de enviar a requisição
+    return Promise.reject(error);
+  }
+);
+
+// ==========================
+// ⭐ Interceptor de RESPOSTA (já existente)
 // ==========================
 axiosNestAuth.interceptors.response.use(
   (response) => {
-    // Se está OK, devolve normalmente
     return response;
   },
   async (error) => {
-    // Se não tem resposta (timeout, network error, CORS, etc)
     if (!error.response) {
-      throw new ApiError(
-        "Erro de conexão com o servidor.",
-        0,
-        undefined
-      );
+      throw new ApiError("Erro de conexão com o servidor.", 0, undefined);
     }
 
     const { status, statusText, data } = error.response;
@@ -31,14 +46,12 @@ axiosNestAuth.interceptors.response.use(
     let errorData: ApiErrorResponse | undefined;
     let message = `Erro ${status}: ${statusText}`;
 
-    // Tenta extrair o JSON
     if (data) {
       try {
         const parsed = data as ApiErrorResponse;
         errorData = parsed;
         message = parsed.message || parsed.error || message;
       } catch {
-        // Caso venha texto puro
         if (typeof data === "string") {
           message = data.trim() || message;
         }

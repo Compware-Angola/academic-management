@@ -1,24 +1,20 @@
+
 import { axiosNestAuth } from "@/lib/axios-nest-auth";
+
 
 export class LoginPayload {
   username: string;
   password: string;
-  platform?: string = 'GA';
-}
-export interface Group {
-  codigo: number;                  
-  designation: string;            
-  sigla: string;                 
-  type_group: number;              
-  type_group_designation: string;   
+  platform?: 'GA' | 'PORTAL' = 'GA';
 }
 
-export interface AuthResponse {
-  access_token: string;
-  expires_in: number;
-  user: User;
-  groups: Group[];
-  mensagem: string;
+
+export interface Group {
+  codigo: number;
+  designation: string;
+  sigla: string;
+  type_group: number;
+  type_group_designation: string;
 }
 
 export interface User {
@@ -37,13 +33,41 @@ export interface User {
   active_state: number;
   fotoname: string | null;
   primeiro_log: number;
-  numeromaximotentativas: number;
+  numeromaximotentaivas: number;
   pk_utilizador: number;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  expires_in: number;
+  user: User;
+  groups: Group[];
+  mensagem: string;
+}
+
+
+export interface CurrentUserResponse {
+  isAuthenticated: boolean;
+  user: User;
+  groups?: Group[];       
+  message: string;
+  platform?: 'GA' | 'PORTAL'; 
 }
 
 export async function loginService(
   payload: LoginPayload,
 ): Promise<AuthResponse> {
-  const { data } = await axiosNestAuth.post("/auth/login", payload);
+  const { data } = await axiosNestAuth.post<AuthResponse>("/auth/login", payload);
+  return data;
+}
+
+
+export async function getCurrentUserService(
+  platform: 'GA', 
+): Promise<CurrentUserResponse> {
+  const { data } = await axiosNestAuth.get<CurrentUserResponse>("/auth/current-user", {
+    params: { platform }, 
+  });
+
   return data;
 }
