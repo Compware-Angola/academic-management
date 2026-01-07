@@ -8,13 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Shield,
-  ShieldCheck,
-  Users,
-  ChevronRight,
-  Plus,
-} from "lucide-react";
+import { Shield, ShieldCheck, Users, ChevronRight, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -47,10 +41,10 @@ export function UserPermissionsModal({
   const [selectedAccessId, setSelectedAccessId] = useState<number | null>(null);
 
   /** Grupos do utilizador */
-  const {
-    data: groups = [],
-    isLoading: loadingGroups,
-  } = useUserGroups({ userId: user.codigo, enabled: open });
+  const { data: groups = [], isLoading: loadingGroups } = useUserGroups({
+    userId: user.codigo,
+    enabled: open,
+  });
 
   /** Acessos do grupo selecionado */
   const {
@@ -63,16 +57,14 @@ export function UserPermissionsModal({
   });
 
   /** TODOS os acessos do sistema (catálogo) */
-  const {
-    data: allAccesses = [],
-    isLoading: loadingAllAccesses,
-  } = useQueryAcessos();
+  const { data: allAccesses = [], isLoading: loadingAllAccesses } =
+    useQueryAcessos();
 
-  console.log("Acessos: ")
+  console.log("Acessos: ");
 
   /** Mutação: conceder / reativar acesso */
   const { mutateAsync: grantAccess, isPending: granting } =
-  useGrantUserAccess();
+    useGrantUserAccess();
 
   async function handleGrantAccess() {
     if (!selectedAccessId) return;
@@ -88,7 +80,7 @@ export function UserPermissionsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl! w-full! max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl">
             <Shield className="h-6 w-6 text-primary" />
@@ -98,7 +90,6 @@ export function UserPermissionsModal({
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
-
           {/* COLUNA 1 — Grupos */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-semibold">
@@ -135,9 +126,7 @@ export function UserPermissionsModal({
             </div>
 
             {!selectedGroup ? (
-              <p className="text-muted-foreground italic">
-                Selecione um grupo
-              </p>
+              <p className="text-muted-foreground italic">Selecione um grupo</p>
             ) : loadingGroupAccesses ? (
               <Skeleton className="h-40 w-full" />
             ) : (
@@ -145,10 +134,7 @@ export function UserPermissionsModal({
                 {groupAccesses
                   .filter((a) => a.disponibilidade === 1)
                   .map((access) => (
-                    <div
-                      key={access.codigo}
-                      className="p-3 border rounded-lg"
-                    >
+                    <div key={access.codigo} className="p-3 border rounded-lg">
                       <div className="font-medium text-sm">
                         {access.codigo} – {access.descricao}
                       </div>
@@ -187,10 +173,7 @@ export function UserPermissionsModal({
                   </SelectTrigger>
                   <SelectContent>
                     {allAccesses.map((access) => (
-                      <SelectItem
-                        key={access.id}
-                        value={access.id.toString()}
-                      >
+                      <SelectItem key={access.id} value={access.id.toString()}>
                         {access.id} – {access.designacao}
                       </SelectItem>
                     ))}

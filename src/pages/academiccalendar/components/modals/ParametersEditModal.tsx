@@ -127,7 +127,7 @@ export function ParametersEditModal({
         data_fim_primeiro_semestre: periodosForm.dataFimPrimeiroSemestre,
         data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
         data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
-        codigo_utilizador: user.user_id ?? 16,
+        codigo_utilizador: user.user?.pk_utilizador,
       };
 
       const periodoRes = await axiosApexGa.post(
@@ -276,7 +276,7 @@ export function ParametersEditModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl! w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             Configurar Parâmetros Acadêmicos

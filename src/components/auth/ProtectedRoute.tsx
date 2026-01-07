@@ -1,6 +1,6 @@
 // components/auth/ProtectedRoute.tsx
 import { Navigate } from "react-router-dom";
-import { AuthStorage } from "@/util/auth-storage";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 
 type ProtectedRouteProps = {
   allowedGroups: string[]; 
@@ -11,14 +11,18 @@ export function ProtectedRoute({
   allowedGroups,
   children,
 }: ProtectedRouteProps) {
-  const user = AuthStorage.getUser();
+     const { data: user, isError } = useCurrentUser('GA');
+      if (isError) {
+        return [];
+      }
+    
+ 
 
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  const userGroups = user.groups?.map((g) => g.sigla) || [];
-
+  const userGroups = user?.groups?.map((g) => g.sigla) || [];
   const hasAccess = allowedGroups.some((group) =>
     userGroups.includes(group)
   );

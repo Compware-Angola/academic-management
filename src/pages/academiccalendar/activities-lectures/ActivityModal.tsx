@@ -80,7 +80,7 @@ export function ActivityModal({
 }: ActivityModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="">
         <DialogHeader>
           <DialogTitle>Nova Atividade Letiva</DialogTitle>
           <DialogDescription>

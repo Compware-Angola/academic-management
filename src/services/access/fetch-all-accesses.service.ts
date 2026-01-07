@@ -21,7 +21,7 @@ export async function fetchAcessos(
   params?: FetchAcessosParams
 ): Promise<AcessoResponse[]> {
 
-    const user = AuthStorage.getUser()
+  
     const queryParams: Record<string, any> = {};
 
     console.log("User information: ", user)

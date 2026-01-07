@@ -71,7 +71,7 @@ export default function UpdatePermissionLaunchModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={closeModal}>
-      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-5xl! w-full! max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle className="text-2xl">Actualizar Permissões</DialogTitle>
         </DialogHeader>

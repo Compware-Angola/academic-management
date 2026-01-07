@@ -1,9 +1,13 @@
 
-import { AuthStorage } from "@/util/auth-storage";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 
 export const filterMenuByGroups = (items: any[]) => {
-  const { groups } = AuthStorage.getUser() || { groups: [] };
-  const userGroups = groups?.map(g => g.sigla) || [];
+  const { data: user, isError } = useCurrentUser('GA');
+  if (isError) {
+    return [];
+  }
+
+  const userGroups = user?.groups?.map(g => g.sigla) || [];
   const filterItems = (menuItems: any[]): any[] => {
     return menuItems
       .filter(item => {
