@@ -72,6 +72,7 @@ export const menuStructure: MenuStructure = {
         { title: "Diretor do curso", url: "/controle-acesso/diretor" },
         { title: "Grupos", url: "/controle-acesso/grupos" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
