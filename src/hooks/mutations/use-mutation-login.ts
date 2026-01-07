@@ -15,21 +15,26 @@ export function useMutationLogin() {
 
   return useMutation<AuthResponse, Error, LoginPayload>({
     mutationKey: ["login"],
-    mutationFn: (payload: LoginPayload) => loginService(payload),
-    onSuccess: (data) => {
+    mutationFn: loginService,
+    onSuccess: async (data) => {
       AuthStorage.saveLogin(data);
-      queryClient.invalidateQueries({ queryKey: ["current-user"] });
+
+      // 🔐 garante que o token já existe
+      await queryClient.resetQueries({
+        queryKey: ["current-user"],
+      });
     },
   });
 }
 
-export function useCurrentUser(platform: "GA" ) {
+export function useCurrentUser(platform: "GA") {
+  const token = AuthStorage.getToken();
+
   return useQuery({
     queryKey: ["current-user", platform],
     queryFn: () => getCurrentUserService(platform),
-    enabled: AuthStorage.isAuthenticated(),
+    enabled: !!token, 
     staleTime: 5 * 60 * 1000,
-    retry: 1,
-    
+    retry: false, 
   });
 }

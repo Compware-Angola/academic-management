@@ -10,7 +10,7 @@ export const useAuth = () => {
   };
   
   const isAuthenticated = AuthStorage.isAuthenticated();
-  const { data: user,isError } = useCurrentUser('GA');
+  const { data: user,isError, isLoading } = useCurrentUser('GA');
   if (isError) {
     logout();
   }
@@ -19,6 +19,7 @@ export const useAuth = () => {
     user,
     token,
     isAuthenticated,
+    isLoading,
     logout,
   };
 };
