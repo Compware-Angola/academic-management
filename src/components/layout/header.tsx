@@ -16,8 +16,10 @@ import { ThemeSwitcher } from "../theme-switcher";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 
+
 export function Header() {
-  const { logout,user } = useAuth();
+  const { logout, user } = useAuth();
+  
     
   const navigate = useNavigate();
   return (
@@ -86,7 +88,7 @@ export function Header() {
                   <AvatarFallback>AD</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start text-sm">
-                  <span className="font-medium">{user?.username || 'N/A'}</span>
+                  <span className="font-medium">{user?.user?.username || 'N/A'}</span>
                   <span className="text-xs text-muted-foreground">
                     Administrador
                   </span>

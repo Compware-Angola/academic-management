@@ -25,7 +25,7 @@ import { formatNumber } from "@/util/format-number";
 import { AuthStorage } from "@/util/auth-storage";
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user:userData } = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
   const quickLinks = [
@@ -54,7 +54,7 @@ const Index = () => {
     roles: ["adm", "rootAdmin", "dct"],
   },
 ];
-const { groups } = AuthStorage.getUser() || { groups: [] };
+  const { groups,user } = userData || {};
 const userGroups = groups?.map(g => g.sigla) || [];
 
 const allowedQuickLinks = quickLinks.filter(link =>

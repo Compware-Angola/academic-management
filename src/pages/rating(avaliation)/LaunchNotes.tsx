@@ -85,14 +85,14 @@ export default function LaunchNotes() {
 
   const { data: semestres, isLoading: isLoadingSemestres } =
     useQuerySemestres();
-  const { user } = useAuth();
+  const { user:userData } = useAuth();
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
   const year = academicYear?.filter(
     (ay) => ay.estado.toLowerCase() === "activo"
   );
   const { data: teacherInfoData, isLoading: teacherInfoDataLoading } =
-    useQueryTeacherProfile(user?.user_id);
+    useQueryTeacherProfile(userData?.user?.pk_utilizador);
   const {
     data: turmDataHorario,
     isLoading: isLoadingTurmaDataHorario,
@@ -181,7 +181,7 @@ export default function LaunchNotes() {
   const handleSaveAll = (student: any) => {
     const payload: NoteUpsertPayload = {
       gradeCurricularAluno: student.codigo_grade_aluno,
-      utilizador: user.user_id,
+      utilizador: userData?.user?.pk_utilizador || 0,
       nota: Number(student.nota),
       tipoDeProva: Number(formData.tipoProva),
       epoca: 2,
