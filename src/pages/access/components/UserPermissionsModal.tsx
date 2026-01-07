@@ -51,6 +51,7 @@ export function UserPermissionsModal({
     data: groupAccesses = [],
     isLoading: loadingGroupAccesses,
     refetch: refetchGroupAccesses,
+    error: errorAccesses,
   } = useGroupAccesses({
     groupId: selectedGroup?.codigo || 0,
     enabled: !!selectedGroup && open,
@@ -58,9 +59,7 @@ export function UserPermissionsModal({
 
   /** TODOS os acessos do sistema (catálogo) */
   const { data: allAccesses = [], isLoading: loadingAllAccesses } =
-    useQueryAcessos();
-
-  console.log("Acessos: ");
+    useQueryAcessos({apenasAtivos: true});
 
   /** Mutação: conceder / reativar acesso */
   const { mutateAsync: grantAccess, isPending: granting } =
@@ -111,7 +110,7 @@ export function UserPermissionsModal({
                   className="w-full justify-between"
                   onClick={() => setSelectedGroup(group)}
                 >
-                  <span>{group.descricao}</span>
+                  <span>{group?.descricao}</span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               ))
@@ -119,39 +118,85 @@ export function UserPermissionsModal({
           </div>
 
           {/* COLUNA 2 — Permissões do grupo */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 font-semibold">
+           <div className="space-y-4">
+            <div className="flex items-center gap-2 text-lg font-semibold">
               <ShieldCheck className="h-5 w-5" />
               Permissões Ativas
+              {selectedGroup && (
+                <Badge className="ml-2">{selectedGroup.descricao}</Badge>
+              )}
             </div>
 
             {!selectedGroup ? (
-              <p className="text-muted-foreground italic">Selecione um grupo</p>
+              <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Selecione um grupo à esquerda para ver as permissões</p>
+              </div>
             ) : loadingGroupAccesses ? (
-              <Skeleton className="h-40 w-full" />
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : errorAccesses ? (
+              <p className="text-destructive">Erro ao carregar permissões.</p>
+            ) : groupAccesses.length === 0 ? (
+              <p className="text-muted-foreground italic">
+                Este grupo não tem permissões associadas.
+              </p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3 max-h-96 overflow-y-auto">
                 {groupAccesses
                   .filter((a) => a.disponibilidade === 1)
                   .map((access) => (
-                    <div key={access.codigo} className="p-3 border rounded-lg">
-                      <div className="font-medium text-sm">
-                        {access.codigo} – {access.descricao}
-                      </div>
-                      {access["Update at"] && (
-                        <div className="text-xs text-muted-foreground">
-                          Atualizado em{" "}
-                          {format(
-                            new Date(access["Update at"]),
-                            "dd/MM/yyyy HH:mm"
-                          )}
+                    <div
+                      key={access.codigo}
+                      className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-sm">
+                            {access.codigo} – {access.descricao}
+                          </span>
                         </div>
-                      )}
+                        {access["Update at"] && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Atualizado em:{" "}
+                            {format(
+                              new Date(access["Update at"]),
+                              "dd/MM/yyyy HH:mm"
+                            )}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant="default">Ativo</Badge>
                     </div>
                   ))}
+                {groupAccesses.filter((a) => a.disponibilidade !== 1).length > 0 && (
+                  <details className="mt-4">
+                    <summary className="text-sm cursor-pointer text-muted-foreground hover:text-foreground">
+                      Mostrar permissões inativas (
+                      {groupAccesses.filter((a) => a.disponibilidade !== 1).length})
+                    </summary>
+                    <div className="mt-3 space-y-2 pl-4 border-l-2 border-muted">
+                      {groupAccesses
+                        .filter((a) => a.disponibilidade !== 1)
+                        .map((access) => (
+                          <div
+                            key={access.codigo}
+                            className="text-sm text-muted-foreground"
+                          >
+                            {access.codigo} – {access.descricao}
+                          </div>
+                        ))}
+                    </div>
+                  </details>
+                )}
               </div>
             )}
           </div>
+        
 
           {/* COLUNA 3 — ADICIONAR ACESSO */}
           <div className="space-y-4">
