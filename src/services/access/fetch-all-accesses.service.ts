@@ -24,13 +24,15 @@ export async function fetchAcessos(
     const user = AuthStorage.getUser()
     const queryParams: Record<string, any> = {};
 
+    console.log("User information: ", user)
+    console.log("Grupo id: ", params.grupoId)
 
     if (params?.apenasAtivos !== undefined) {
         queryParams.apenasAtivos = params.apenasAtivos;
     }
 
     //console.log("Auth user:", user);
-    console.log("Query params:", queryParams);
+    //console.log("Query params:", queryParams);
 
     const response = await axiosNestGa.get<AcessoResponse[]>(
         "/acess_management/details/all",

@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge"
 import { useQueryAcessosPorGrupo } from "@/hooks/acess/use-acessos-grupo"
 
 
-
 export  function GrupoAcessos() {
   const navigate = useNavigate()
   const { id } = useParams()

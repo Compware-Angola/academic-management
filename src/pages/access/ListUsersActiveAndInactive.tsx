@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import {
@@ -52,6 +53,7 @@ interface Utilizador {
 }
 
 export default function ListaUtilizadoresActiveOrInactive() {
+  const navigate = useNavigate()
   const [filtro, setFiltro] = useState<FiltroUsuario>({
     ativo: undefined
   })
@@ -213,6 +215,14 @@ export default function ListaUtilizadoresActiveOrInactive() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDate(utilizador.updatedAt)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="link"
+                        onClick={() => navigate(`/acessos/utilizador/${utilizador.pkUtilizador}`)}
+                          >
+                          Ver Acessos
+                      </Button>
                     </TableCell>
                     <TableCell>
                       <Button
