@@ -60,15 +60,21 @@ import SchedulesWithPermission from "./pages/schedules/SchedulesWithPermission";
 import { EditSchedule } from "./pages/schedules/EditSchedule";
 import SchedulesByRoom from "./pages/schedules/ScheduleByRoom";
 import PresenceList from "./pages/rating(avaliation)/ListaPresenca";
-import CreateUser from "./pages/access/CreateUser";
-import AccessLogs from "./pages/access/AccessLogs";
-import LogsAcessos from "./pages/access/LogsAccess";
-import ListaUtilizadoresActiveOrInactive from "./pages/access/ListUsersActiveAndInactive";
-import ListarGrupos from "./pages/access/ListarTodosGrupos";
-import { GrupoAcessos } from "./pages/access/GrupoAcessos";
-import { ListarAcessos } from "./pages/access/AllAccesses";
-import { UtilizadorAcessos } from "./pages/access/UtilizadorAcessos";
-
+import LancamentoPauta from "./pages/rating(avaliation)/LancamentoPauta";
+import LaunchHistoric from "./pages/rating(avaliation)/launch-historic";
+import MarkingAssessment from "./pages/rating(avaliation)/marking-assessment";
+import StatisticAssessment from "./pages/rating(avaliation)/statistic";
+import Permission from "./pages/rating(avaliation)/permission/permission";
+import PautaGeral from "./pages/rating(avaliation)/pauta-geral";
+import ViewNotes from "./pages/rating(avaliation)/view-notes";
+import AddMarkingAssessment from "./pages/rating(avaliation)/marking-assessment/addMarkAssessment";
+import ValidationTeacherAgenda from "./pages/rating(avaliation)/Validation-teacher-agenda";
+import PautaGeralPorUC from "./pages/rating(avaliation)/pauta-geral-uc";
+import EstudantesInscritos from "./pages/rating(avaliation)/enrolled-students";
+import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import AccessDenied from "./pages/AccessDenied";
+import Grupos from "./pages/controle-acesso/grupos";
 
 const App = () => {
   return (
@@ -83,7 +89,14 @@ const App = () => {
 
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Index />} />
-                <Route path="/horarios/criar" element={<CreateSchedule />} />
+                <Route
+                  path="/horarios/criar"
+                  element={
+                    <ProtectedRoute allowedGroups={["adm", "dct", "rootAdmin"]}>
+                      <CreateSchedule />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="horarios/inscricoes"
                   element={<SchedulesInscription />}
@@ -120,9 +133,46 @@ const App = () => {
                 <Route path="/avaliacoes/controle" element={<ControlNotes />} />
                 <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
                 <Route path="/avaliacoes/presenca" element={<PresenceList />} />
+                <Route path="/avaliacoes/pauta" element={<LancamentoPauta />} />
+                <Route path="avaliacoes/pauta-geral" element={<PautaGeral />} />
+                <Route
+                  path="avaliacoes/pauta-uc"
+                  element={<PautaGeralPorUC />}
+                />
+                <Route
+                  path="/avaliacoes/validacao"
+                  element={<ValidationTeacherAgenda />}
+                />
                 <Route
                   path="/avaliacoes/formula-oral"
                   element={<FormulaOral />}
+                />
+                <Route
+                  path="/avaliacoes/historico"
+                  element={<LaunchHistoric />}
+                />
+                <Route
+                  path="/avaliacoes/estudantes"
+                  element={<EstudantesInscritos />}
+                />
+
+                <Route
+                  path="/marcacao-provas/controle"
+                  element={<MarkingAssessment />}
+                />
+                <Route
+                  path="avaliacoes/estatisticas"
+                  element={<StatisticAssessment />}
+                />
+                <Route path="avaliacoes/permissao" element={<Permission />} />
+                <Route path="avaliacoes/visualizar" element={<ViewNotes />} />
+                <Route
+                  path="avaliacoes/parametros"
+                  element={<GeneralParametersAvaluation />}
+                />
+                <Route
+                  path="marcacao-provas/marcacao"
+                  element={<AddMarkingAssessment />}
                 />
                 {/* <Route
                   path="/bolsa/bolseiros"
@@ -141,26 +191,18 @@ const App = () => {
                   path="/assiduidade/marcar"
                   element={<MarkAttendance />}
                 />
-*/}
+              */}
                 <Route path="/acessos/utilizador" element={<UserAccess />} />
                 {/* <Route
                   path="/acessos/funcionalidade-utilizador"
                   element={<UserFunctionality />}
                 /> */}
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
-                <Route path="/utilizadores/criar" element={<CreateUser />} />
-                <Route path="/acessos/logs" element={<LogsAcessos />}  />
-                <Route path="/acessos/utilizadores_active_or_inactive" element={<ListaUtilizadoresActiveOrInactive/>} />
-                <Route path="/acessos/todos" element={<ListarAcessos />} />
-                <Route path="/acessos/bloquear" element={<BlockAccess />} />
-                <Route path="/acessos/grupos" element={<ListarGrupos />} />
-                <Route path="/grupos/:id/acessos" element={<GrupoAcessos />} />
-                <Route path="/utilizador/acessos" element={<UtilizadorAcessos />} />
+                <Route path="/controle-acesso/grupos" element={<Grupos />} />
                 {/*
-                <Route path="/acessos/logs" element={<AccessLogs />} />
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
-                
-                
+                <Route path="/acessos/bloquear" element={<BlockAccess />} />
+                <Route path="/acessos/todos" element={<AllAccesses />} />
                 <Route path="/acessos/logs" element={<AccessLogs />} />
                   <Route
                   path="/acessos/cargos"
@@ -205,10 +247,12 @@ const App = () => {
                   element={<ExamCalendarPos />}
                 />
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
-                {/* <Route path="*" element={<NotFound />} />*/}  
+                {/* <Route path="*" element={<NotFound />} />*/}
                 <Route path="*" element={<UnderConstruction />} />
+
                 {/* Finanças */}
                 <Route path="/ajuda" element={<HealpFAQ />} />
+                <Route path="/sem-permissao" element={<AccessDenied />} />
               </Route>
             </Routes>
           </BrowserRouter>

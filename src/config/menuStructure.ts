@@ -10,18 +10,11 @@ import {
   GraduationCap,
   FileText,
   BookOpen,
-  Clock,
   BookMarked,
-  Search,
   Building,
-  MapPin,
-  Settings,
-  FolderOpen,
-  FileBarChart,
   HomeIcon,
   BadgeDollarSign,
   HelpCircle,
-  BrickWallIcon
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
@@ -31,7 +24,7 @@ export const menuStructure: MenuStructure = {
     {
       title: "Início",
       url: "/dashboard",
-      icon: HomeIcon, // substitua pelo ícone que desejar
+      icon: HomeIcon,
     },
     // ----------------------------------------------------
     // ACESSOS
@@ -52,22 +45,21 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Listar grupos", url: "/grupos" },
 
-
         { title: "Acessos (todos) + novos", url: "/acessos/todos" },
         { title: "Bloquear acesso", url: "/acessos/bloquear" },
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
       ],
+      roles: ["adm", "rootAdmin", "dct"],
     },
-     // ----------------------------------------------------
+    // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
     {
       title: "Controle de Acesso",
       url: "/controle-acesso",
-      icon:   BrickWallIcon
-,
+      icon: Shield,
       items: [
         { title: "Documentos", url: "/controle-acesso/documentos" },
         { title: "Módulos", url: "/controle-acesso/modulos" },
@@ -80,6 +72,7 @@ export const menuStructure: MenuStructure = {
         { title: "Diretor do curso", url: "/controle-acesso/diretor" },
         { title: "Grupos", url: "/controle-acesso/grupos" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -97,16 +90,12 @@ export const menuStructure: MenuStructure = {
         { title: "Marcar assiduidade", url: "/assiduidade/marcar" },
         { title: "Marcar assiduidade prova", url: "/assiduidade/prova" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
-
-
-
-
 
     // ----------------------------------------------------
     // CALENDÁRIO LIC
     // ----------------------------------------------------
-
 
     // ----------------------------------------------------
     // CALENDÁRIO PÓS
@@ -118,12 +107,10 @@ export const menuStructure: MenuStructure = {
       items: [
         { title: "Atividades letivas", url: "/calendario-pos/atividades" },
         { title: "Calendário de provas", url: "/calendario-pos/provas" },
-     
+
       ],
     },
     */
-
- 
 
     // ----------------------------------------------------
     // CRIAR UTILIZADORES
@@ -143,9 +130,8 @@ export const menuStructure: MenuStructure = {
         { title: "Validação do programa", url: "/docente/validacao" },
         { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
+      roles: ["adm", "rootAdmin", "dct"],
     },
-
-
 
     // ----------------------------------------------------
     // TFC
@@ -159,6 +145,7 @@ export const menuStructure: MenuStructure = {
         { title: "Orientadores", url: "/tfc/orientadores" },
         { title: "Pagamentos TFC", url: "/tfc/pagamentos" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -183,6 +170,7 @@ export const menuStructure: MenuStructure = {
         { title: "Salário", url: "/gestao-docentes/salario" },
         { title: "Validação docente", url: "/gestao-docentes/validacao" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -211,6 +199,7 @@ export const menuStructure: MenuStructure = {
           url: "/inscricoes/mensalidades-curso",
         },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -221,7 +210,7 @@ export const menuStructure: MenuStructure = {
       url: "/plano",
       icon: BookOpen,
       items: [
-       // { title: "Gestão de Curso", url: "/plano/cursos" },
+        // { title: "Gestão de Curso", url: "/plano/cursos" },
         { title: "Gestão de disciplinas", url: "/plano/disciplinas" },
         { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
 
@@ -231,6 +220,7 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Gestão de UC no plano", url: "/plano/uc-plano" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -259,6 +249,7 @@ export const menuStructure: MenuStructure = {
         { title: "Lista de presença", url: "/pos-graduacao/presenca" },
         { title: "TFC", url: "/pos-graduacao/tfc" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -269,14 +260,34 @@ export const menuStructure: MenuStructure = {
       url: "/sumario",
       icon: FileText,
       items: [{ title: "Parâmetros", url: "/sumario/parametros" }],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
     // VER UTILIZADORES
     // ----------------------------------------------------
 
-
-   
+    // ----------------------------------------------------
+    // CONTROLE DE ACESSO
+    // ----------------------------------------------------
+    {
+      title: "Controle de Acesso",
+      url: "/controle-acesso",
+      icon: Shield,
+      items: [
+        { title: "Documentos", url: "/controle-acesso/documentos" },
+        { title: "Módulos", url: "/controle-acesso/modulos" },
+        {
+          title: "Solicitações encaminhadas",
+          url: "/controle-acesso/solicitacoes",
+        },
+        { title: "Aplicação", url: "/controle-acesso/aplicacao" },
+        { title: "Páginas", url: "/controle-acesso/paginas" },
+        { title: "Diretor do curso", url: "/controle-acesso/diretor" },
+        { title: "Grupos", url: "/controle-acesso/grupos" },
+      ],
+      roles: ["adm", "rootAdmin"],
+    },
 
     // ----------------------------------------------------
     // DOCUMENTOS MINISTÉRIO
@@ -294,6 +305,7 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -304,9 +316,8 @@ export const menuStructure: MenuStructure = {
       url: "/salas",
       icon: Building,
       items: [{ title: "Listar salas", url: "/salas/listar" }],
+      roles: ["adm", "rootAdmin"],
     },
-
-
 
     // ----------------------------------------------------
     // MARCAÇÃO DE PROVAS
@@ -319,83 +330,146 @@ export const menuStructure: MenuStructure = {
         { title: "Controle", url: "/marcacao-provas/controle" },
         { title: "Marcação", url: "/marcacao-provas/marcacao" },
       ],
+      roles: ["adm", "rootAdmin", "dct"],
     },
   ],
 };
 
-export const finaceStructure:MenuStructure={
-  items:[
-       /* -------------------------------------------------------- */
-  /* 1) FINANÇAS (UNIFICADO) */
-  /* -------------------------------------------------------- */
-  {
-    title: "Finanças",
-    url: "/financas",
-    icon: BadgeDollarSign,
-    items: [
-      /* Área Financeira */
-      { title: "Estud. Mensalidades Pagas", url: "/financas/mensalidades-pagas" },
-      { title: "Estudantes Devedores", url: "/financas/devedores" },
-      { title: "Estudantes Inactivos", url: "/financas/inactivos" },
-      { title: "Estud. Finalistas Inactivos", url: "/financas/finalistas-inactivos" },
-      { title: "Consult. Nº Operação", url: "/financas/num-operacao" },
-      { title: "Controlo Actual. Saldo", url: "/financas/controlo-saldo" },
-      { title: "Isentar Serviços (Novos)", url: "/financas/isentar-novos" },
-      { title: "Isentar Serviços (Antigos)", url: "/financas/isentar-antigos" },
-      { title: "Pagamentos por Referência", url: "/financas/pagamentos-referencia" },
-      { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
-      { title: "Talão em Desuso", url: "/financas/talao-desuso" },
-      { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
-
-      /* Crédito Educacional */
-      { title: "Instituições", url: "/financas/credito/instituicoes" },
-      { title: "Instituições - Todas", url: "/financas/credito/instituicoes/todas" },
-      { title: "Instituições com Despesa", url: "/financas/credito/instituicoes/despesa" },
-      { title: "Instituições com Receita", url: "/financas/credito/instituicoes/receita" },
-      { title: "Tipo Bolsas", url: "/financas/credito/tipo-bolsas" },
-      { title: "Tipos de Estudantes", url: "/financas/credito/tipo-estudantes" },
-      { title: "Atribuir Crédito Educacional", url: "/financas/credito/atribuir" },
-      { title: "Pagamentos Bolseiros", url: "/financas/credito/pag-bolseiros" },
-      { title: "Listar Pagamentos de Bolseiros", url: "/financas/credito/listar-bolseiros" },
-      { title: "Listar Crédito Educacional", url: "/financas/credito/listar" },
-
-      /* Gestão de Descontos */
-      { title: "Atribuição de Desconto", url: "/financas/descontos/atribuicao" },
-      { title: "Estudantes com Descontos", url: "/financas/descontos/estudantes" },
-      { title: "Listar Descontos", url: "/financas/descontos/listar" },
-
-      /* Fecho de Caixa */
-      { title: "Fecho Caixa Diário", url: "/financas/caixa/diario" },
-      { title: "Fecho Caixa Geral", url: "/financas/caixa/geral" },
-      { title: "Fecho Caixa Utilizador", url: "/financas/caixa/utilizador" },
-
-      /* Outros Recursos */
-      { title: "Pagamentos Docentes", url: "/financas/outros/pagamentos-docentes" },
-
-      /* Relatórios */
-      { title: "Estudantes Matriculados", url: "/financas/relatorios/matriculados" },
-      { title: "Listar Estudantes Isentos", url: "/financas/relatorios/isentos" },
-      { title: "Estudantes Matriculadas", url: "/financas/relatorios/matriculadas" },
-      { title: "Listar Todos", url: "/financas/relatorios/todos" },
-      { title: "Estudantes Finalistas", url: "/financas/relatorios/finalistas" },
-      { title: "Estudantes com Crédito Institucional", url: "/financas/relatorios/credito-institucional" },
-      { title: "Estudantes com Desconto", url: "/financas/relatorios/descontos" },
-      { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
-
-      /* Serviços Tributários */
-      { title: "Nota de Crédito", url: "/financas/agt/nota-credito" },
-      { title: "Taxa do IVA", url: "/financas/agt/iva" },
-      { title: "Gerar SAFT", url: "/financas/agt/saft" },
-    ],
-  },
-  ]
-
-}
-
-export const healpStructure:MenuStructure ={
-
+export const finaceStructure: MenuStructure = {
   items: [
+    /* -------------------------------------------------------- */
+    /* 1) FINANÇAS (UNIFICADO) */
+    /* -------------------------------------------------------- */
+    {
+      title: "Finanças",
+      url: "/financas",
+      icon: BadgeDollarSign,
+      items: [
+        /* Área Financeira */
         {
+          title: "Estud. Mensalidades Pagas",
+          url: "/financas/mensalidades-pagas",
+        },
+        { title: "Estudantes Devedores", url: "/financas/devedores" },
+        { title: "Estudantes Inactivos", url: "/financas/inactivos" },
+        {
+          title: "Estud. Finalistas Inactivos",
+          url: "/financas/finalistas-inactivos",
+        },
+        { title: "Consult. Nº Operação", url: "/financas/num-operacao" },
+        { title: "Controlo Actual. Saldo", url: "/financas/controlo-saldo" },
+        { title: "Isentar Serviços (Novos)", url: "/financas/isentar-novos" },
+        {
+          title: "Isentar Serviços (Antigos)",
+          url: "/financas/isentar-antigos",
+        },
+        {
+          title: "Pagamentos por Referência",
+          url: "/financas/pagamentos-referencia",
+        },
+        { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
+        { title: "Talão em Desuso", url: "/financas/talao-desuso" },
+        { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
+
+        /* Crédito Educacional */
+        { title: "Instituições", url: "/financas/credito/instituicoes" },
+        {
+          title: "Instituições - Todas",
+          url: "/financas/credito/instituicoes/todas",
+        },
+        {
+          title: "Instituições com Despesa",
+          url: "/financas/credito/instituicoes/despesa",
+        },
+        {
+          title: "Instituições com Receita",
+          url: "/financas/credito/instituicoes/receita",
+        },
+        { title: "Tipo Bolsas", url: "/financas/credito/tipo-bolsas" },
+        {
+          title: "Tipos de Estudantes",
+          url: "/financas/credito/tipo-estudantes",
+        },
+        {
+          title: "Atribuir Crédito Educacional",
+          url: "/financas/credito/atribuir",
+        },
+        {
+          title: "Pagamentos Bolseiros",
+          url: "/financas/credito/pag-bolseiros",
+        },
+        {
+          title: "Listar Pagamentos de Bolseiros",
+          url: "/financas/credito/listar-bolseiros",
+        },
+        {
+          title: "Listar Crédito Educacional",
+          url: "/financas/credito/listar",
+        },
+
+        /* Gestão de Descontos */
+        {
+          title: "Atribuição de Desconto",
+          url: "/financas/descontos/atribuicao",
+        },
+        {
+          title: "Estudantes com Descontos",
+          url: "/financas/descontos/estudantes",
+        },
+        { title: "Listar Descontos", url: "/financas/descontos/listar" },
+
+        /* Fecho de Caixa */
+        { title: "Fecho Caixa Diário", url: "/financas/caixa/diario" },
+        { title: "Fecho Caixa Geral", url: "/financas/caixa/geral" },
+        { title: "Fecho Caixa Utilizador", url: "/financas/caixa/utilizador" },
+
+        /* Outros Recursos */
+        {
+          title: "Pagamentos Docentes",
+          url: "/financas/outros/pagamentos-docentes",
+        },
+
+        /* Relatórios */
+        {
+          title: "Estudantes Matriculados",
+          url: "/financas/relatorios/matriculados",
+        },
+        {
+          title: "Listar Estudantes Isentos",
+          url: "/financas/relatorios/isentos",
+        },
+        {
+          title: "Estudantes Matriculadas",
+          url: "/financas/relatorios/matriculadas",
+        },
+        { title: "Listar Todos", url: "/financas/relatorios/todos" },
+        {
+          title: "Estudantes Finalistas",
+          url: "/financas/relatorios/finalistas",
+        },
+        {
+          title: "Estudantes com Crédito Institucional",
+          url: "/financas/relatorios/credito-institucional",
+        },
+        {
+          title: "Estudantes com Desconto",
+          url: "/financas/relatorios/descontos",
+        },
+        { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
+
+        /* Serviços Tributários */
+        { title: "Nota de Crédito", url: "/financas/agt/nota-credito" },
+        { title: "Taxa do IVA", url: "/financas/agt/iva" },
+        { title: "Gerar SAFT", url: "/financas/agt/saft" },
+      ],
+      roles: ["adm", "rootAdmin", "fin"],
+    },
+  ],
+};
+
+export const healpStructure: MenuStructure = {
+  items: [
+    {
       title: "Comunicação",
       url: "/comunicacao",
       icon: MessageSquare,
@@ -404,20 +478,21 @@ export const healpStructure:MenuStructure ={
         { title: "Imagens de abertura", url: "/comunicacao/imagens" },
         { title: "Solicitações", url: "/comunicacao/solicitacoes" },
       ],
+      roles: ["adm", "rootAdmin"],
     },
-     {
-    title: "Ajuda",
-    url: "/ajuda",
-    icon: HelpCircle,
-    items: [],
-  },
-  ]
-}
+    {
+      title: "Ajuda",
+      url: "/ajuda",
+      icon: HelpCircle,
+      items: [],
+      roles: ["adm", "rootAdmin", "healp", "dct", "fin"],
+    },
+  ],
+};
 
-export const academicStructure:MenuStructure ={
-  items:[ 
-    
-        {
+export const academicStructure: MenuStructure = {
+  items: [
+    {
       title: "Calendário Académico ",
       url: "/calendario",
       icon: Calendar,
@@ -431,7 +506,8 @@ export const academicStructure:MenuStructure ={
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
-    },// ----------------------------------------------------
+      roles: ["adm", "rootAdmin", "dct"],
+    }, // ----------------------------------------------------
     // AVALIAÇÕES
     // ----------------------------------------------------
     {
@@ -457,14 +533,16 @@ export const academicStructure:MenuStructure ={
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
         { title: "Lançamento de notas", url: "/avaliacoes/notas" },
         { title: "Lista de presença", url: "/avaliacoes/presenca" },
-     
+
         { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
         { title: "Pauta por UC", url: "/avaliacoes/pauta-uc" },
         { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
         { title: "Validação", url: "/avaliacoes/validacao" },
         { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
+        { title: "Parâmetros gerais", url: "/avaliacoes/parametros" },
       ],
-    },    // ----------------------------------------------------
+      roles: ["adm", "rootAdmin", "dct"],
+    }, // ----------------------------------------------------
     // HORÁRIOS
     // ----------------------------------------------------
     {
@@ -475,8 +553,11 @@ export const academicStructure:MenuStructure ={
         { title: "Criar horário", url: "/horarios/criar" },
         { title: "Horários semanais", url: "/horarios/semanais" },
         { title: "Substitutos", url: "/horarios/substitutos" },
-      // { title: "Horários com/sem sala", url: "/horarios/salas" },
-        { title: "Movimentar estudantes", url: "/horarios/movimentar/estudantes" },
+        // { title: "Horários com/sem sala", url: "/horarios/salas" },
+        {
+          title: "Movimentar estudantes",
+          url: "/horarios/movimentar/estudantes",
+        },
         { title: "Permissão editar", url: "/horarios/permissao" },
         { title: "Horários por docente", url: "/horarios/docente" },
         { title: "Inscrições por horário", url: "/horarios/inscricoes" },
@@ -486,8 +567,9 @@ export const academicStructure:MenuStructure ={
         { title: "Horários por UC", url: "/horarios/uc" },
         { title: "Parâmetros", url: "/horarios/parametros" },
       ],
+      roles: ["adm", "rootAdmin", "dct"],
     },
-        // ----------------------------------------------------
+    // ----------------------------------------------------
     // EXAME DE ACESSO
     // ----------------------------------------------------
     {
@@ -516,9 +598,7 @@ export const academicStructure:MenuStructure ={
         { title: "Resetar prova", url: "/exame/resetar" },
         { title: "Lista de presença", url: "/exame/presenca" },
       ],
+      roles: ["adm", "rootAdmin", "dct"],
     },
-  
-  
-  
-  ]
-}
+  ],
+};

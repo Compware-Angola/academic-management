@@ -181,7 +181,7 @@ export default function LaunchNotes() {
   const handleSaveAll = (student: any) => {
     const payload: NoteUpsertPayload = {
       gradeCurricularAluno: student.codigo_grade_aluno,
-      utilizador: 0,
+      utilizador: user.user_id,
       nota: Number(student.nota),
       tipoDeProva: Number(formData.tipoProva),
       epoca: 2,
@@ -591,7 +591,7 @@ export default function LaunchNotes() {
               value={itemsPerPage.toString()}
               onValueChange={(value) => setItemsPerPage(Number(value))}
             >
-              <SelectTrigger id="items-per-page" className="w-[80px]">
+              <SelectTrigger id="items-per-page" className="w-20">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

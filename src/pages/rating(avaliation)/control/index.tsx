@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-
 import {
   Select,
   SelectContent,
@@ -9,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   Table,
   TableBody,
@@ -18,18 +16,16 @@ import {
   TableHead,
   TableHeader,
 } from "@/components/ui/table";
-
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import {
   RefreshCw,
   Shield,
   ChevronLeft,
   ChevronRight,
   Eye,
+  Search,
 } from "lucide-react";
-
 import { Link } from "react-router-dom";
 
 import { useQueryDisciplinasProva } from "@/hooks/avaliacao/use-query-disciplinas-prova";
@@ -41,72 +37,74 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
-import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 
 type SelectedNotas = {
   turmaOuHorarioId: number;
   tipoAvaliacaoId: number;
   anoLectivoId: number;
 };
-const VER_HORARIO = [
-  { codigo: "SIM", designacao: "SIM" },
- 
+
+const VER_HORARIO = [{ codigo: "SIM", designacao: "SIM" }];
+const ESTADO = [
+  { codigo: 0, designacao: "Todos" },
+  { codigo: 1, designacao: "Com Nota" },
+  { codigo: 2, designacao: "Sem Nota" },
 ];
 
 export default function ControlNotes() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // =======================================
-  // MODAL
-  // =======================================
+  // Modal
   const [openNotasModal, setOpenNotasModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<SelectedNotas | null>(null);
+
+  // Filtros (apenas aplicados ao clicar em Pesquisar)
   const [formData, setFormData] = useState({
     anoLetivo: "",
     semestre: "",
-    periodo: "",
     curso: "",
-    unidadeCurricular: "",
     classes: "",
+    unidadeCurricular: "",
     tipoAvaliacao: "",
-  
     verHoario: "",
-    filtro: "",
+    filtro: "0",
   });
+
+  // Estado para controlar quando os parâmetros foram enviados para a query
+  const [searchParams, setSearchParams] = useState<typeof formData | null>(null);
+
   // =======================================
-  // API — DISCIPLINAS PROVA
+  // API QUERIES
   // =======================================
   const {
     data: disciplinasProva = [],
     isLoading: loadingDisciplinas,
     refetch,
+    isFetching,
   } = useQueryDisciplinasProva({
-    verHorario: formData.verHoario === "SIM",
-    filtro: 0,
-    gradeSelecionada: formData.unidadeCurricular
-      ? Number(formData.unidadeCurricular)
+    verHorario: searchParams?.verHoario === "SIM",
+    filtro: Number(searchParams?.filtro || 0),
+    gradeSelecionada: searchParams?.unidadeCurricular
+      ? Number(searchParams.unidadeCurricular)
       : undefined,
-    cursoSelecionado: formData.curso ? Number(formData.curso) : undefined,
-    anoCurricularSelecionado: formData.classes
-      ? Number(formData.classes)
+    cursoSelecionado: searchParams?.curso ? Number(searchParams.curso) : undefined,
+    anoCurricularSelecionado: searchParams?.classes
+      ? Number(searchParams.classes)
       : undefined,
-    semestreSelecionado: formData.semestre
-      ? Number(formData.semestre)
+    semestreSelecionado: searchParams?.semestre
+      ? Number(searchParams.semestre)
       : undefined,
-    anoLectivoSelecionado: formData.anoLetivo
-      ? Number(formData.anoLetivo)
+    anoLectivoSelecionado: searchParams?.anoLetivo
+      ? Number(searchParams.anoLetivo)
       : undefined,
-
-    tipoAvaliacaoSelecionada: formData.tipoAvaliacao
-      ? Number(formData.tipoAvaliacao)
+    tipoAvaliacaoSelecionada: searchParams?.tipoAvaliacao
+      ? Number(searchParams.tipoAvaliacao)
       : undefined,
   });
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-  const { data: semestres, isLoading: isLoadingSemestres } =
-    useQuerySemestres();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -118,25 +116,40 @@ export default function ControlNotes() {
 
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
+
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
 
+  // =======================================
+  // VALIDAÇÃO PARA HABILITAR BOTÃO PESQUISAR
+  // =======================================
+  const isFormValid =
+    formData.anoLetivo &&
+    formData.semestre &&
+    formData.curso &&
+    formData.classes &&
+    formData.unidadeCurricular &&
+    formData.tipoAvaliacao;
+
+  const handleSearch = () => {
+    if (isFormValid) {
+      setSearchParams({ ...formData });
+      setCurrentPage(1); // Reset paginação
+    }
+  };
 
   // =======================================
-  // PAGINAÇÃO LOCAL
+  // PAGINAÇÃO
   // =======================================
   const totalPages = Math.ceil(disciplinasProva.length / itemsPerPage);
-
-  const paginatedDisciplinas = disciplinasProva?.slice(
+  const paginatedDisciplinas = disciplinasProva.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   return (
     <div className="space-y-6">
-      {/* ===========================
-          BREADCRUMB
-      =========================== */}
+      {/* BREADCRUMB */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link to="/" className="hover:text-foreground">
           Início
@@ -145,9 +158,7 @@ export default function ControlNotes() {
         <span className="text-foreground">Controle de Lançamento</span>
       </nav>
 
-      {/* ===========================
-           HEADER
-      =========================== */}
+      {/* HEADER */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -155,148 +166,117 @@ export default function ControlNotes() {
           </h1>
           <p className="text-muted-foreground">Gestão de lançamento de notas</p>
         </div>
-
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={loadingDisciplinas}
-          onClick={() => refetch()}
-        >
-          <RefreshCw
-            className={`h-4 w-4 mr-2 ${
-              loadingDisciplinas ? "animate-spin" : ""
-            }`}
-          />
-          Atualizar
-        </Button>
       </div>
 
-      {/* ===========================
-            FILTROS
-      =========================== */}
+      {/* FILTROS */}
       <div className="bg-card border rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Filtros</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Filtros</h3>
+          <Button
+            onClick={handleSearch}
+            disabled={!isFormValid || isFetching}
+            className="gap-2"
+          >
+            <Search className="h-4 w-4" />
+            Pesquisar
+          </Button>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
             label="Ano Letivo"
             value={formData.anoLetivo}
             onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
             options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            loading={isLoadingAcademicYear}
+            disabled={isLoadingAcademicYear}
+            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
           />
 
-          {/* SEMESTRE */}
           <FormSelect
-            disabled={isLoadingSemestres}
-            loading={isLoadingSemestres}
             label="Semestre"
             value={formData.semestre}
-            onChange={(v) => setFormData({ ...formData, semestre: v })}
+            onChange={(v) => setFormData({ ...formData, semestre: v, classes: "", unidadeCurricular: "" })}
             options={semestres}
-            map={(s) => ({
-              key: s.codigo,
-              label: s.designacao,
-              value: s.codigo,
-            })}
+            loading={isLoadingSemestres}
+            disabled={isLoadingSemestres}
+            map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
           />
 
-          {/* CURSO */}
           <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
             label="Curso"
             value={formData.curso}
-            onChange={(v) => setFormData({ ...formData, curso: v })}
+            onChange={(v) => setFormData({ ...formData, curso: v, classes: "", unidadeCurricular: "" })}
             options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
+            loading={isLoadingCurso}
+            disabled={isLoadingCurso}
+            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
           />
+
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
-            disabled={isLoadingClasses || !formData.curso}
-            onChange={(v) => setFormData({ ...formData, classes: v })}
+            onChange={(v) => setFormData({ ...formData, classes: v, unidadeCurricular: "" })}
             options={classes}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
             loading={isLoadingClasses}
+            disabled={isLoadingClasses || !formData.curso}
+            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
           />
 
-          {/* PERÍODO */}
-
-          {/* UC */}
           <FormSelect
             label="Unidade Curricular"
             value={formData.unidadeCurricular}
-            disabled={
-              isLoadingUC ||
-              !formData.semestre ||
-              !formData.curso ||
-              !formData.classes
-            }
             onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
             options={unidadesCurriculares}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.descricao,
-              value: u.pk,
-            })}
             loading={isLoadingUC}
+            disabled={isLoadingUC || !formData.semestre || !formData.curso || !formData.classes}
+            map={(u) => ({ key: u.codigo, label: u.descricao, value: u.pk })}
           />
-    
+
           <FormSelect
             label="Tipo de Avaliação"
             value={formData.tipoAvaliacao}
-            disabled={isLoadingTipoAvaliacao}
             onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
             options={tipoAvaliacao}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
             loading={isLoadingTipoAvaliacao}
+            disabled={isLoadingTipoAvaliacao}
+            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
           />
+
           <FormSelect
             label="Ver Horário"
             value={formData.verHoario}
             onChange={(v) => setFormData({ ...formData, verHoario: v })}
             options={VER_HORARIO}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
+            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
+          />
+
+          <FormSelect
+            label="Estado"
+            value={formData.filtro}
+            onChange={(v) => setFormData({ ...formData, filtro: v })}
+            options={ESTADO}
+            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo.toString() })}
           />
         </div>
       </div>
 
-      {/* ===========================
-            TABELA
-      =========================== */}
-      {loadingDisciplinas ? (
+      {/* TABELA */}
+      {loadingDisciplinas || isFetching ? (
         <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
+          {[...Array(8)].map((_, i) => (
             <Skeleton key={i} className="h-12 w-full" />
           ))}
         </div>
-      ) : paginatedDisciplinas?.length === 0 ? (
+      ) : disciplinasProva.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
           <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <p className="text-lg font-medium">Nenhuma disciplina encontrada</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {!searchParams
+              ? "Preencha os filtros e clique em Pesquisar para ver os resultados."
+              : "Tente ajustar os filtros."}
+          </p>
         </div>
       ) : (
         <>
@@ -315,38 +295,28 @@ export default function ControlNotes() {
               </TableHeader>
 
               <TableBody>
-                {paginatedDisciplinas?.map((item) => (
+                {paginatedDisciplinas.map((item) => (
                   <TableRow key={item.codigoTurmaHorario}>
-                    <TableCell>{item.disciplina}</TableCell>
-
-                    <TableCell className="font-mono">
-                      {item.turmaOuHorario}
-                    </TableCell>
-
+                    <TableCell className="font-medium">{item.disciplina}</TableCell>
+                    <TableCell className="font-mono">{item.turmaOuHorario}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{item.semestre}</Badge>
                     </TableCell>
-
                     <TableCell className="text-center">
                       <Badge>{item.numeroDeIscritos}</Badge>
                     </TableCell>
-
                     <TableCell className="text-center">
                       <Badge className="bg-emerald-500 text-white">
                         {item.numNotaLancada}
                       </Badge>
                     </TableCell>
-
                     <TableCell className="text-center">
                       {item.numNotaPorLancar > 0 ? (
-                        <Badge variant="destructive">
-                          {item.numNotaPorLancar}
-                        </Badge>
+                        <Badge variant="destructive">{item.numNotaPorLancar}</Badge>
                       ) : (
                         <Badge variant="outline">0</Badge>
                       )}
                     </TableCell>
-
                     <TableCell className="text-right">
                       <Button
                         size="sm"
@@ -357,7 +327,6 @@ export default function ControlNotes() {
                             tipoAvaliacaoId: Number(formData.tipoAvaliacao),
                             anoLectivoId: Number(formData.anoLetivo),
                           });
-
                           setOpenNotasModal(true);
                         }}
                       >
@@ -371,13 +340,10 @@ export default function ControlNotes() {
             </Table>
           </div>
 
-          {/* ===========================
-                PAGINAÇÃO
-          =========================== */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2">
+          {/* PAGINAÇÃO */}
+          <div className="flex items-center justify-between mt-6">
+            <div className="flex items-center gap-3">
               <Label className="text-sm">Itens por página:</Label>
-
               <Select
                 value={itemsPerPage.toString()}
                 onValueChange={(v) => {
@@ -388,7 +354,6 @@ export default function ControlNotes() {
                 <SelectTrigger className="w-20">
                   <SelectValue />
                 </SelectTrigger>
-
                 <SelectContent>
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>
@@ -399,12 +364,12 @@ export default function ControlNotes() {
 
               <span className="text-sm text-muted-foreground">
                 Mostrando {(currentPage - 1) * itemsPerPage + 1}–
-                {Math.min(currentPage * itemsPerPage, disciplinasProva.length)}{" "}
-                de {disciplinasProva.length}
+                {Math.min(currentPage * itemsPerPage, disciplinasProva.length)} de{" "}
+                {disciplinasProva.length}
               </span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Button
                 size="sm"
                 variant="outline"
@@ -415,7 +380,7 @@ export default function ControlNotes() {
               </Button>
 
               <span className="text-sm px-3 py-1">
-                {currentPage} / {totalPages}
+                {currentPage} / {totalPages || 1}
               </span>
 
               <Button
@@ -431,9 +396,7 @@ export default function ControlNotes() {
         </>
       )}
 
-      {/* ===========================
-              MODAL
-      =========================== */}
+      {/* MODAL */}
       <ModalNotasDisciplina
         open={openNotasModal}
         onClose={() => setOpenNotasModal(false)}

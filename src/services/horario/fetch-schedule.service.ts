@@ -49,22 +49,19 @@ export const fetchSchedule = async (
     limit: (params.limit || 25).toString(),
   });
 
-  if (params.semestre !== undefined)
+  if (params.semestre)
     queryParams.append("semestre", params.semestre.toString());
-  if (params.periodo !== undefined)
-    queryParams.append("periodo", params.periodo.toString());
-  if (params.curso !== undefined)
-    queryParams.append("curso", params.curso.toString());
-  if (params.anoCurricular !== undefined)
+  if (params.periodo) queryParams.append("periodo", params.periodo.toString());
+  if (params.curso) queryParams.append("curso", params.curso.toString());
+  if (params.anoCurricular)
     queryParams.append("anoCurricular", params.anoCurricular.toString());
-  if (params.unidadeCurricular !== undefined)
+  if (params.unidadeCurricular)
     queryParams.append(
       "unidadeCurricular",
       params.unidadeCurricular.toString()
     );
-  if (params.estado !== undefined)
-    queryParams.append("estado", params.estado.toString());
-  if (params.afetacaoDocente !== undefined)
+  if (params.estado) queryParams.append("estado", params.estado.toString());
+  if (params.afetacaoDocente)
     queryParams.append("afetacaoDocente", params.afetacaoDocente.toString());
 
   const response = await axiosNestGa.get<ScheduleResponse>("schedule", {

@@ -5,10 +5,9 @@ import { AuthStorage } from "@/util/auth-storage";
 export type AulaPayload = {
   diaSemana: number;
   ordemTempo: number;
-  sala: number;
-  docente: number;
+
   obs: string;
-  tipoAula: number;
+
   hora_inicio: string;
   hora_fim: string;
 };
@@ -25,13 +24,15 @@ export type SaveHorarioPayload = {
   capacidade: number;
   turma: number;
   apenasPrimeiroAno: number;
- 
+  sala: number;
+    docente: number;
+      tipoAula: number;
   obs: string;
   aulas: AulaPayload[];
 };
 
 export type SaveHorarioResponse = {
-  sucesso: number; // 1 | 0
+  sucesso: number; 
   mensagem: string;
   horarioId?: number;
   designacao?: string;

@@ -3,19 +3,17 @@ import { availableRooms } from "@/services/salas/available-rooms";
 
 type AvailableRoomsParams = {
   anoLectivo?: number;
-  diaSemana?: number;
+  periodo?: number;
   tipoAula?: number;
-  horaInicio?: string;
-  horaFim?: string;
+
 };
 
 export function useAvailableRooms(params?: AvailableRoomsParams) {
   const enabled = Boolean(
-    params?.anoLectivo &&
-      params?.diaSemana &&
-      params?.tipoAula &&
-      params?.horaInicio &&
-      params?.horaFim
+      params?.anoLectivo &&
+      params?.periodo &&
+      params?.tipoAula
+  
   );
 
   return useQuery({
@@ -23,9 +21,7 @@ export function useAvailableRooms(params?: AvailableRoomsParams) {
     queryFn: () =>
       availableRooms({
         anoLectivo: params.anoLectivo,
-        diaSemana: params.diaSemana,
-        horaFim: params.horaFim,
-        horaInicio: params.horaInicio,
+        periodo: params.periodo,
         tipoAula: params.tipoAula,
       }),
     staleTime: 1000 * 60 * 5,

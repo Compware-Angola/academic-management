@@ -61,6 +61,7 @@ export default function SchedulesWithPermission() {
     anoCurricular: "",
     unidadeCurricular: "",
     search: "",
+    estado: "",
   });
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -104,6 +105,7 @@ export default function SchedulesWithPermission() {
       periodo: Number(filters.periodo),
       curso: Number(filters.curso),
       unidadeCurricular: Number(filters.unidadeCurricular),
+      estado: Number(filters.estado),
       page,
       limit,
     });
@@ -203,7 +205,7 @@ export default function SchedulesWithPermission() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <FormSelect
               label="Ano Letivo"
               value={filters.anoLetivo}
@@ -306,6 +308,17 @@ export default function SchedulesWithPermission() {
               map={(uc) => ({ key: uc.pk, label: uc.descricao, value: uc.pk })}
               onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
               disabled={!canLoadUCs}
+            />
+            <FormSelect
+              label="Estado"
+              value={filters.estado}
+              options={ESTADO}
+              map={(e) => ({
+                key: e.value,
+                label: e.label,
+                value: e.value.toString(),
+              })}
+              onChange={(e) => setFilters({ ...filters, estado: e })}
             />
             <Input
               placeholder="Pesquisar..."
@@ -534,3 +547,7 @@ export default function SchedulesWithPermission() {
     </div>
   );
 }
+const ESTADO = [
+  { value: 2, label: "Pendente" },
+  { value: 3, label: "Validado" },
+];

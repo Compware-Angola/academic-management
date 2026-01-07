@@ -4,14 +4,20 @@ import { DataTable } from "@/components/common/DataTable";
 import { FilterBar } from "@/components/common/FilterBar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Download, Printer, RefreshCw } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { menuStructure } from "@/config/menuStructure";
 
 export default function GenericPage() {
   const location = useLocation();
-  
+
   // Find the page title from menu structure
   const getPageInfo = () => {
     for (const item of menuStructure) {
@@ -38,16 +44,30 @@ export default function GenericPage() {
       accessor: "actions",
       cell: () => (
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Ver</Button>
-          <Button variant="outline" size="sm">Editar</Button>
+          <Button variant="outline" size="sm">
+            Ver
+          </Button>
+          <Button variant="outline" size="sm">
+            Editar
+          </Button>
         </div>
       ),
     },
   ];
 
   const sampleData = [
-    { id: "001", nome: "João Silva", curso: "Engenharia Informática", estado: "Ativo" },
-    { id: "002", nome: "Maria Santos", curso: "Gestão de Empresas", estado: "Ativo" },
+    {
+      id: "001",
+      nome: "João Silva",
+      curso: "Engenharia Informática",
+      estado: "Ativo",
+    },
+    {
+      id: "002",
+      nome: "Maria Santos",
+      curso: "Gestão de Empresas",
+      estado: "Ativo",
+    },
     { id: "003", nome: "Pedro Costa", curso: "Arquitetura", estado: "Inativo" },
   ];
 
