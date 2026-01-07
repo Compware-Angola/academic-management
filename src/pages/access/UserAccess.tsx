@@ -40,6 +40,8 @@ export default function UserAccess() {
 
   const { data: users = [], isLoading, refetch } = useUsers();
 
+  console.log("Utilizadores: ", users)
+
   // Filtrar
   const filteredUsers = users.filter(
     (user) =>

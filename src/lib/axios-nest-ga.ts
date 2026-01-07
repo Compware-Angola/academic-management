@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ApiError, type ApiErrorResponse } from "@/error";
-import { parse } from "path";
+
 
 export const axiosNestGa = axios.create({
   baseURL: import.meta.env.VITE_NEST_GA_API_URL,
@@ -19,6 +19,10 @@ axiosNestGa.interceptors.response.use(
   },
   async (error) => {
     // Erro sem resposta (network, timeout, CORS, etc)
+
+
+    console.log(error,"TESTE");
+    
     if (!error.response) {
       throw new ApiError("Erro de conexão com o servidor.", 0, undefined);
     }

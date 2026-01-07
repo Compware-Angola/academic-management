@@ -10,11 +10,8 @@ import {
   GraduationCap,
   FileText,
   BookOpen,
-
   BookMarked,
-
   Building,
-
   HomeIcon,
   BadgeDollarSign,
   HelpCircle,
@@ -27,7 +24,7 @@ export const menuStructure: MenuStructure = {
     {
       title: "Início",
       url: "/dashboard",
-      icon: HomeIcon, 
+      icon: HomeIcon,
     },
     // ----------------------------------------------------
     // ACESSOS
@@ -54,9 +51,9 @@ export const menuStructure: MenuStructure = {
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
       ],
-       roles: ['adm','rootAdmin', 'dct']
+      roles: ["adm", "rootAdmin", "dct"],
     },
-       // ----------------------------------------------------
+    // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
     {
@@ -75,7 +72,7 @@ export const menuStructure: MenuStructure = {
         { title: "Diretor do curso", url: "/controle-acesso/diretor" },
         { title: "Grupos", url: "/controle-acesso/grupos" },
       ],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -93,7 +90,7 @@ export const menuStructure: MenuStructure = {
         { title: "Marcar assiduidade", url: "/assiduidade/marcar" },
         { title: "Marcar assiduidade prova", url: "/assiduidade/prova" },
       ],
-       roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -133,7 +130,7 @@ export const menuStructure: MenuStructure = {
         { title: "Validação do programa", url: "/docente/validacao" },
         { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
-       roles: ['adm','rootAdmin', 'dct']
+      roles: ["adm", "rootAdmin", "dct"],
     },
 
     // ----------------------------------------------------
@@ -148,7 +145,7 @@ export const menuStructure: MenuStructure = {
         { title: "Orientadores", url: "/tfc/orientadores" },
         { title: "Pagamentos TFC", url: "/tfc/pagamentos" },
       ],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -173,7 +170,7 @@ export const menuStructure: MenuStructure = {
         { title: "Salário", url: "/gestao-docentes/salario" },
         { title: "Validação docente", url: "/gestao-docentes/validacao" },
       ],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -202,7 +199,7 @@ export const menuStructure: MenuStructure = {
           url: "/inscricoes/mensalidades-curso",
         },
       ],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -223,7 +220,7 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Gestão de UC no plano", url: "/plano/uc-plano" },
       ],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -252,7 +249,7 @@ export const menuStructure: MenuStructure = {
         { title: "Lista de presença", url: "/pos-graduacao/presenca" },
         { title: "TFC", url: "/pos-graduacao/tfc" },
       ],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -263,14 +260,34 @@ export const menuStructure: MenuStructure = {
       url: "/sumario",
       icon: FileText,
       items: [{ title: "Parâmetros", url: "/sumario/parametros" }],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
     // VER UTILIZADORES
     // ----------------------------------------------------
 
- 
+    // ----------------------------------------------------
+    // CONTROLE DE ACESSO
+    // ----------------------------------------------------
+    {
+      title: "Controle de Acesso",
+      url: "/controle-acesso",
+      icon: Shield,
+      items: [
+        { title: "Documentos", url: "/controle-acesso/documentos" },
+        { title: "Módulos", url: "/controle-acesso/modulos" },
+        {
+          title: "Solicitações encaminhadas",
+          url: "/controle-acesso/solicitacoes",
+        },
+        { title: "Aplicação", url: "/controle-acesso/aplicacao" },
+        { title: "Páginas", url: "/controle-acesso/paginas" },
+        { title: "Diretor do curso", url: "/controle-acesso/diretor" },
+        { title: "Grupos", url: "/controle-acesso/grupos" },
+      ],
+      roles: ["adm", "rootAdmin"],
+    },
 
     // ----------------------------------------------------
     // DOCUMENTOS MINISTÉRIO
@@ -288,7 +305,7 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
       ],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -299,7 +316,7 @@ export const menuStructure: MenuStructure = {
       url: "/salas",
       icon: Building,
       items: [{ title: "Listar salas", url: "/salas/listar" }],
-        roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -313,7 +330,7 @@ export const menuStructure: MenuStructure = {
         { title: "Controle", url: "/marcacao-provas/controle" },
         { title: "Marcação", url: "/marcacao-provas/marcacao" },
       ],
-        roles: ['adm','rootAdmin', 'dct']
+      roles: ["adm", "rootAdmin", "dct"],
     },
   ],
 };
@@ -445,7 +462,7 @@ export const finaceStructure: MenuStructure = {
         { title: "Taxa do IVA", url: "/financas/agt/iva" },
         { title: "Gerar SAFT", url: "/financas/agt/saft" },
       ],
-       roles: ['adm','rootAdmin', 'fin']
+      roles: ["adm", "rootAdmin", "fin"],
     },
   ],
 };
@@ -461,16 +478,15 @@ export const healpStructure: MenuStructure = {
         { title: "Imagens de abertura", url: "/comunicacao/imagens" },
         { title: "Solicitações", url: "/comunicacao/solicitacoes" },
       ],
-       roles: ['adm','rootAdmin']
+      roles: ["adm", "rootAdmin"],
     },
     {
       title: "Ajuda",
       url: "/ajuda",
       icon: HelpCircle,
       items: [],
-       roles: ['adm','rootAdmin', 'healp', 'dct', 'fin']
+      roles: ["adm", "rootAdmin", "healp", "dct", "fin"],
     },
-    
   ],
 };
 
@@ -490,7 +506,7 @@ export const academicStructure: MenuStructure = {
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
-       roles: ['adm','rootAdmin', 'dct']
+      roles: ["adm", "rootAdmin", "dct"],
     }, // ----------------------------------------------------
     // AVALIAÇÕES
     // ----------------------------------------------------
@@ -525,7 +541,7 @@ export const academicStructure: MenuStructure = {
         { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
         { title: "Parâmetros gerais", url: "/avaliacoes/parametros" },
       ],
-        roles: ['adm','rootAdmin', 'dct']
+      roles: ["adm", "rootAdmin", "dct"],
     }, // ----------------------------------------------------
     // HORÁRIOS
     // ----------------------------------------------------
@@ -551,7 +567,7 @@ export const academicStructure: MenuStructure = {
         { title: "Horários por UC", url: "/horarios/uc" },
         { title: "Parâmetros", url: "/horarios/parametros" },
       ],
-        roles: ['adm','rootAdmin', 'dct']
+      roles: ["adm", "rootAdmin", "dct"],
     },
     // ----------------------------------------------------
     // EXAME DE ACESSO
@@ -582,7 +598,7 @@ export const academicStructure: MenuStructure = {
         { title: "Resetar prova", url: "/exame/resetar" },
         { title: "Lista de presença", url: "/exame/presenca" },
       ],
-        roles: ['adm','rootAdmin', 'dct']
+      roles: ["adm", "rootAdmin", "dct"],
     },
   ],
 };

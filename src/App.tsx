@@ -25,11 +25,11 @@ import AttendanceControl from "./pages/attendance/AttendanceControl";
 import MarkAttendance from "./pages/attendance/MarkAttendance";
 import UserAccess from "./pages/access/UserAccess";
 import LoggedInUsers from "./pages/access/LoggedInUsers";
-import AccessLogs from "./pages/access/AccessLogs";
+//import AccessLogs from "./pages/access/AccessLogs";
 import UserFunctionality from "./pages/access/UserFunctionality";
 import RectoratePositions from "./pages/access/RectoratePositions";
 import BlockAccess from "./pages/access/BlockAccess";
-import AllAccesses from "./pages/access/AllAccesses";
+
 import AcessGrup from "./pages/access/AccessGroup";
 import TeacherProfile from "./pages/TeacherProfile";
 import ActivitiesLecturesLic from "./pages/academiccalendar/activities-lectures";
@@ -74,6 +74,7 @@ import EstudantesInscritos from "./pages/rating(avaliation)/enrolled-students";
 import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import AccessDenied from "./pages/AccessDenied";
+import Grupos from "./pages/controle-acesso/grupos";
 
 const App = () => {
   return (
@@ -88,7 +89,14 @@ const App = () => {
 
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Index />} />
-                <Route path="/horarios/criar" element={ <ProtectedRoute allowedGroups={['adm','dct','rootAdmin']}><CreateSchedule /></ProtectedRoute>} />
+                <Route
+                  path="/horarios/criar"
+                  element={
+                    <ProtectedRoute allowedGroups={["adm", "dct", "rootAdmin"]}>
+                      <CreateSchedule />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="horarios/inscricoes"
                   element={<SchedulesInscription />}
@@ -190,6 +198,7 @@ const App = () => {
                   element={<UserFunctionality />}
                 /> */}
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
+                <Route path="/controle-acesso/grupos" element={<Grupos />} />
                 {/*
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
                 <Route path="/acessos/bloquear" element={<BlockAccess />} />
@@ -240,10 +249,10 @@ const App = () => {
                 <Route path="/alunos/novo" element={<UnderConstruction />} />
                 {/* <Route path="*" element={<NotFound />} />*/}
                 <Route path="*" element={<UnderConstruction />} />
+
                 {/* Finanças */}
                 <Route path="/ajuda" element={<HealpFAQ />} />
                 <Route path="/sem-permissao" element={<AccessDenied />} />
-
               </Route>
             </Routes>
           </BrowserRouter>
