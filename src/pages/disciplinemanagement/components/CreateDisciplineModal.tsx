@@ -60,7 +60,7 @@ export function CreateDisciplineModal({
 
   const isPending = creating || updating;
 
-  const { user } = useAuth();
+  const { user:userData } = useAuth();
   const { toast } = useToast();
 
   // Estados do formulário
@@ -142,7 +142,7 @@ export function CreateDisciplineModal({
     create(
       {
         designacao: designacao.trim(),
-        pk_utilizador: Number(user?.user_id) || 1,
+        pk_utilizador: Number(userData?.user?.pk_utilizador) || 1,
         tipo_unidade_curricular,
         natureza_unidade_curricular,
         codigo_disciplina: codigo_disciplina.toUpperCase(),

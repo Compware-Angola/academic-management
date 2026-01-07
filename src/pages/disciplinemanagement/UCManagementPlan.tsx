@@ -58,7 +58,7 @@ export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
   const [classeId, setClasseId] = useState<string>("");
-  const { user } = useAuth();
+  const { user:userData } = useAuth();
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -126,7 +126,7 @@ export default function UCManagementPlan() {
         codigo_semestre: Number(formData.codigo_semestre),
         codigo_classe: Number(classeId),
         codigo_curso: Number(cursoId),
-        codigo_utilizador: Number(user.user_id),
+        codigo_utilizador: Number(userData.user.pk_utilizador),
       },
       {
         onSuccess: () => {

@@ -65,7 +65,7 @@ const TeacherProfile = () => {
     data: teacherInfoData,
     isLoading: teacherInfoDataLoading,
     isError: teacherInfoError,
-  } = useQueryTeacherProfile(user?.user_id);
+  } = useQueryTeacherProfile(user?.user?.pk_utilizador);
 
   // Ano letivo ativo
   const activeYear = academicYear?.find(

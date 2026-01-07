@@ -55,7 +55,7 @@ export default function LancamentoPauta() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { user } = useAuth();
+  const { user:userData } = useAuth();
 
   // Modal de submissão
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -114,7 +114,7 @@ const atualizarEstadoMutation = useMutationAtualizarEstadoPauta();
     limit: limit,
   });
 
-  const { data: teacherInfoData } = useQueryTeacherProfile(user?.user_id);
+  const { data: teacherInfoData } = useQueryTeacherProfile(userData?.user?.pk_utilizador);
 
   const pautas = response?.data ?? [];
   const pagination = {

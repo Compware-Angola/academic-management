@@ -73,7 +73,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 export default function ScheduleList() {
-  const { user } = useAuth();
+  const { user:userData } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -152,7 +152,7 @@ export default function ScheduleList() {
     if (itemIdToConfirm) {
       deleteMutation.mutate({
         horarioId: itemIdToConfirm,
-        userId: user.user_id,
+        userId: userData.user.pk_utilizador,
       });
     }
   };
@@ -161,7 +161,7 @@ export default function ScheduleList() {
     if (itemIdToConfirm) {
       validarMutation.mutate({
         horarioId: itemIdToConfirm,
-        userId: user.user_id,
+      userId: userData.user.pk_utilizador,
       });
     }
   };
@@ -420,7 +420,7 @@ export default function ScheduleList() {
                             onCheckedChange={() =>
                               mutation.mutateAsync({
                                 horarioId: item.codigo,
-                                userId: user.user_id,
+                                userId: userData.user.pk_utilizador,
                               })
                             }
                           />

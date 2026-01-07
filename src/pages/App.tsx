@@ -5,9 +5,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { Navigate, Outlet } from "react-router-dom";
 
 export function MainLayout() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/" replace />;
   }
   return (

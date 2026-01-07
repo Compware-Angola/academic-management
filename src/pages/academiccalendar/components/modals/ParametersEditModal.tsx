@@ -127,7 +127,7 @@ export function ParametersEditModal({
         data_fim_primeiro_semestre: periodosForm.dataFimPrimeiroSemestre,
         data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
         data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
-        codigo_utilizador: user.user_id ?? 16,
+        codigo_utilizador: user.user?.pk_utilizador,
       };
 
       const periodoRes = await axiosApexGa.post(
