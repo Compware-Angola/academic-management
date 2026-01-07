@@ -5,6 +5,7 @@ export type AuthUser = {
   expires_in: number;
   nome: string;
   username: string;
+  groups: AuthResponse["groups"];
 };
 
 export class AuthStorage {
@@ -20,6 +21,7 @@ export class AuthStorage {
       username: data.user.username,
       expires_in: data.expires_in,
       nome: data.user.nome,
+      groups: data.groups,
     };
 
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));

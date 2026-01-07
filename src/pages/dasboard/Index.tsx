@@ -22,12 +22,44 @@ import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryDashboard } from "@/hooks/dashboard/use-query-dashboard";
 import { formatNumber } from "@/util/format-number";
+import { AuthStorage } from "@/util/auth-storage";
 
 const Index = () => {
   const { user } = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
-    
+  const quickLinks = [
+  {
+    name: "Avaliações",
+    icon: FileCheck,
+    path: "/avaliacoes/controle",
+    roles: ["adm", "rootAdmin"],
+  },
+  {
+    name: "Assiduidade",
+    icon: BookOpen,
+    path: "/assiduidade/controle",
+    roles: ["adm", "rootAdmin"],
+  },
+  {
+    name: "Horários",
+    icon: Calendar,
+    path: "/horarios/listar",
+    roles: ["adm", "rootAdmin", "dct"],
+  },
+  {
+    name: "Estudantes",
+    icon: Users,
+    path: "/inscricoes/lista-geral",
+    roles: ["adm", "rootAdmin", "dct"],
+  },
+];
+const { groups } = AuthStorage.getUser() || { groups: [] };
+const userGroups = groups?.map(g => g.sigla) || [];
+
+const allowedQuickLinks = quickLinks.filter(link =>
+  link.roles.some((role) => userGroups.includes(role))
+);
   return (
     <div className="space-y-6">
       <PageHeader
@@ -84,41 +116,24 @@ const Index = () => {
           <CardDescription>Módulos mais utilizados</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              {
-                name: "Avaliações",
-                icon: FileCheck,
-                path: "/avaliacoes/controle",
-              },
-              {
-                name: "Assiduidade",
-                icon: BookOpen,
-                path: "/assiduidade/controle",
-              },
-              { name: "Horários", icon: Calendar, path: "/horarios/listar" },
-            
-              {
-                name: "Estudantes",
-                icon: Users,
-                path: "/inscricoes/lista-geral",
-              },
-             
-            ].map((module) => {
-              const Icon = module.icon;
+  <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+  {allowedQuickLinks.map((module) => {
+    const Icon = module.icon;
 
-              return (
-                <Link
-                  key={module.name}
-                  to={module.path}
-                  className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                >
-                  <Icon className="h-8 w-8 text-primary" />
-                  <span className="text-sm font-medium">{module.name}</span>
-                </Link>
-              );
-            })}
-          </div>
+    return (
+      <Link
+        key={module.name}
+        to={module.path}
+        className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+      >
+        <Icon className="h-8 w-8 text-primary" />
+        <span className="text-sm font-medium">{module.name}</span>
+      </Link>
+    );
+  })}
+</div>
+
+
         </CardContent>
       </Card>
     </div>
