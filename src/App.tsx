@@ -72,6 +72,8 @@ import ValidationTeacherAgenda from "./pages/rating(avaliation)/Validation-teach
 import PautaGeralPorUC from "./pages/rating(avaliation)/pauta-geral-uc";
 import EstudantesInscritos from "./pages/rating(avaliation)/enrolled-students";
 import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import AccessDenied from "./pages/AccessDenied";
 
 const App = () => {
   return (
@@ -86,7 +88,7 @@ const App = () => {
 
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Index />} />
-                <Route path="/horarios/criar" element={<CreateSchedule />} />
+                <Route path="/horarios/criar" element={ <ProtectedRoute allowedGroups={['adm','dct','rootAdmin']}><CreateSchedule /></ProtectedRoute>} />
                 <Route
                   path="horarios/inscricoes"
                   element={<SchedulesInscription />}
@@ -181,7 +183,7 @@ const App = () => {
                   path="/assiduidade/marcar"
                   element={<MarkAttendance />}
                 />
-*/}
+              */}
                 <Route path="/acessos/utilizador" element={<UserAccess />} />
                 {/* <Route
                   path="/acessos/funcionalidade-utilizador"
@@ -240,6 +242,8 @@ const App = () => {
                 <Route path="*" element={<UnderConstruction />} />
                 {/* Finanças */}
                 <Route path="/ajuda" element={<HealpFAQ />} />
+                <Route path="/sem-permissao" element={<AccessDenied />} />
+
               </Route>
             </Routes>
           </BrowserRouter>
