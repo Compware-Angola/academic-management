@@ -28,7 +28,7 @@ import { AuthStorage } from "@/util/auth-storage";
 
 const estadosAtivo = [
   { codigo: "true", designacao: "Ativo" },
-  { codigo: "false", designacao: "Inativo" }
+  { codigo: "false", designacao: "Inativo" },
 ];
 
 type FiltroUsuario = {
@@ -53,32 +53,33 @@ interface Utilizador {
 
 export default function ListaUtilizadoresActiveOrInactive() {
   const [filtro, setFiltro] = useState<FiltroUsuario>({
-    ativo: undefined
-  })
+    ativo: undefined,
+  });
 
   //console.log("Filtro users: ", filtro)
 
-  const {data: users, isLoading} = usersQueryActive(filtro)
-  const {mutateAsync: updatePassword} = useUpdateUserPassword()
-  const user = AuthStorage.getUser()
+  const { data: users, isLoading } = usersQueryActive(filtro);
+  const { mutateAsync: updatePassword } = useUpdateUserPassword();
+  const user = AuthStorage.getUser();
 
   //console.log("Users Filters: ", users)
 
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUtilizador, setSelectedUtilizador] = useState<Utilizador | null>(null);
+  const [selectedUtilizador, setSelectedUtilizador] =
+    useState<Utilizador | null>(null);
   const [novaSenha, setNovaSenha] = useState("");
   const itemsPerPage = 10;
 
   const filteredData = users ?? [];
 
-  const totalPages =  Math.ceil(filteredData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const paginatedData = filteredData.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleOpenModal = (utilizador: Utilizador) => {
     setSelectedUtilizador(utilizador);
@@ -105,14 +106,14 @@ export default function ListaUtilizadoresActiveOrInactive() {
       return;
     }
 
-    //console.log("New Password: ",novaSenha)    
+    //console.log("New Password: ",novaSenha)
 
-     await updatePassword({
+    await updatePassword({
       utilizadorId: user.user_id,
-      novaSenha: novaSenha
+      novaSenha: novaSenha,
     });
 
-     //console.log("Response: ", response)
+    //console.log("Response: ", response)
 
     toast({
       title: "Sucesso",
@@ -141,148 +142,150 @@ export default function ListaUtilizadoresActiveOrInactive() {
         subtitle="Visualize e gerencie todos os utilizadores do sistema"
       />
 
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <FormSelect label="Estado do Utilizador"
-              options={estadosAtivo}
-              map={(s) => ({
-                key: s.codigo,
-                label: s.designacao,
-                value: s.codigo
-              })}
-              value={
-                filtro.ativo === undefined ? "" : filtro.ativo ? "true" : "false"
-              }
-
-              onChange={(value) =>
-                setFiltro({
-                ativo:
-                value === ""
-                ? undefined
-                : value === "true",
-                    })
-                }
-            />
-          </div>
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <FormSelect
+            label="Estado do Utilizador"
+            options={estadosAtivo}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
+            value={
+              filtro.ativo === undefined ? "" : filtro.ativo ? "true" : "false"
+            }
+            onChange={(value) =>
+              setFiltro({
+                ativo: value === "" ? undefined : value === "true",
+              })
+            }
+          />
         </div>
+      </div>
 
-        <div className="rounded-lg border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="font-semibold">ID</TableHead>
-                <TableHead className="font-semibold">Nome</TableHead>
-                <TableHead className="font-semibold">Username</TableHead>
-                <TableHead className="font-semibold">Email</TableHead>
-                <TableHead className="font-semibold">Pessoa Ref.</TableHead>
-                <TableHead className="font-semibold">Estado</TableHead>
-                <TableHead className="font-semibold">Criado em</TableHead>
-                <TableHead className="font-semibold">Atualizado em</TableHead>
-                <TableHead className="font-semibold">Ações</TableHead>
+      <div className="rounded-lg border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-semibold">ID</TableHead>
+              <TableHead className="font-semibold">Nome</TableHead>
+              <TableHead className="font-semibold">Username</TableHead>
+              <TableHead className="font-semibold">Email</TableHead>
+              <TableHead className="font-semibold">Pessoa Ref.</TableHead>
+              <TableHead className="font-semibold">Estado</TableHead>
+              <TableHead className="font-semibold">Criado em</TableHead>
+              <TableHead className="font-semibold">Atualizado em</TableHead>
+              <TableHead className="font-semibold">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={9}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  Nenhum utilizador encontrado
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={9}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    Nenhum utilizador encontrado
+            ) : (
+              paginatedData.map((utilizador) => (
+                <TableRow key={utilizador.pkUtilizador}>
+                  <TableCell>{utilizador.pkUtilizador}</TableCell>
+                  <TableCell className="font-medium">
+                    {utilizador.nome}
+                  </TableCell>
+                  <TableCell>{utilizador.username}</TableCell>
+                  <TableCell>{utilizador.email}</TableCell>
+                  <TableCell>
+                    <span className="text-sm text-muted-foreground">
+                      {utilizador.refPessoa.desc} (ID: {utilizador.refPessoa.pk}
+                      )
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={utilizador.active ? "default" : "secondary"}
+                    >
+                      {utilizador.active ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(utilizador.createdAt)}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(utilizador.updatedAt)}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenModal(utilizador)}
+                    >
+                      <Key className="h-4 w-4 mr-1" />
+                      Alterar Senha
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                paginatedData.map((utilizador) => (
-                  <TableRow key={utilizador.pkUtilizador}>
-                    <TableCell>{utilizador.pkUtilizador}</TableCell>
-                    <TableCell className="font-medium">{utilizador.nome}</TableCell>
-                    <TableCell>{utilizador.username}</TableCell>
-                    <TableCell>{utilizador.email}</TableCell>
-                    <TableCell>
-                      <span className="text-sm text-muted-foreground">
-                        {utilizador.refPessoa.desc} (ID: {utilizador.refPessoa.pk})
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={utilizador.active ? "default" : "secondary"}>
-                        {utilizador.active ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(utilizador.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(utilizador.updatedAt)}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenModal(utilizador)}
-                      >
-                        <Key className="h-4 w-4 mr-1" />
-                        Alterar Senha
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Página {currentPage} de {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((p) => p - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Próxima
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Página {currentPage} de {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => p - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Próxima
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Alterar Senha</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="novaSenha">Nova Senha</Label>
+              <Input
+                id="novaSenha"
+                type="password"
+                placeholder="Digite a nova senha"
+                value={novaSenha}
+                onChange={(e) => setNovaSenha(e.target.value)}
+              />
             </div>
           </div>
-        )}
-
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Alterar Senha</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="novaSenha">Nova Senha</Label>
-                <Input
-                  id="novaSenha"
-                  type="password"
-                  placeholder="Digite a nova senha"
-                  value={novaSenha}
-                  onChange={(e) => setNovaSenha(e.target.value)}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleAlterarSenha}>Confirmar</Button>
-            </DialogFooter>
-          </DialogContent>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAlterarSenha}>Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );

@@ -1,6 +1,6 @@
-import { useParams, useNavigate } from "react-router-dom"
-import { useState } from "react"
-import { PageHeader } from "@/components/common/PageHeader"
+import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { PageHeader } from "@/components/common/PageHeader";
 import {
   Table,
   TableBody,
@@ -8,31 +8,28 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { useAcessosUtilizador } from "@/hooks/acess/use-acessos-utilizador"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useAcessosUtilizador } from "@/hooks/acess/use-acessos-utilizador";
 
+export function UtilizadorAcessos() {
+  const { data: acessos = [], isLoading } = useAcessosUtilizador();
 
-export  function UtilizadorAcessos() {
-  const { data: acessos = [], isLoading } = useAcessosUtilizador()
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
-
-  const totalPages = Math.ceil(acessos.length / itemsPerPage)
+  const totalPages = Math.ceil(acessos.length / itemsPerPage);
 
   const paginatedData = acessos.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  )
+  );
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Acessos do utilizador"      
-      />
+      <PageHeader title="Acessos do utilizador" />
 
       <div className="rounded-lg border bg-card">
         <Table>
@@ -43,7 +40,7 @@ export  function UtilizadorAcessos() {
               <TableHead>Sigla</TableHead>
               <TableCell>Modulo nome</TableCell>
               <TableHead>Módulo id</TableHead>
-              
+
               <TableHead>Tipo de Acesso</TableHead>
               <TableHead>Estado</TableHead>
             </TableRow>
@@ -58,7 +55,10 @@ export  function UtilizadorAcessos() {
               </TableRow>
             ) : paginatedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center text-muted-foreground"
+                >
                   Nenhum acesso encontrado
                 </TableCell>
               </TableRow>
@@ -113,5 +113,5 @@ export  function UtilizadorAcessos() {
         </div>
       )}
     </div>
-  )
+  );
 }

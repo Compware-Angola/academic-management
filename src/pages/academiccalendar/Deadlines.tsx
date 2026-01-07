@@ -367,7 +367,7 @@ export default function Deadlines() {
 
       {/* Modal Novo Prazo */}
       <Dialog open={openModal} onOpenChange={setOpenModal}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg! w-full!">
           <DialogHeader>
             <DialogTitle>
               {isEditing ? "Editar Prazo" : "Novo Prazo"}
