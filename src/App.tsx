@@ -75,6 +75,7 @@ import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import AccessDenied from "./pages/AccessDenied";
 import Grupos from "./pages/controle-acesso/grupos";
+import ListarGrupos from "./pages/access/ListarTodosGrupos";
 
 const App = () => {
   return (
@@ -198,6 +199,10 @@ const App = () => {
                   element={<UserFunctionality />}
                 /> */}
                 <Route path="/acessos/grupo" element={<AcessGrup />} />
+                <Route
+                  path="/acessos/grupos/utilizadores"
+                  element={<ListarGrupos />}
+                />
                 <Route path="/controle-acesso/grupos" element={<Grupos />} />
                 {/*
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
