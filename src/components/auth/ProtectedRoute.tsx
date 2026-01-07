@@ -1,6 +1,5 @@
 // components/auth/ProtectedRoute.tsx
 import { Navigate } from "react-router-dom";
-import { AuthStorage } from "@/util/auth-storage";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 
 type ProtectedRouteProps = {
