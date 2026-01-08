@@ -58,7 +58,7 @@ export default function ListaUtilizadoresActiveOrInactive() {
     ativo: undefined,
   });
 
-  //console.log("Filtro users: ", filtro)
+  
 
   const { data: users, isLoading } = usersQueryActive(filtro);
   const { mutateAsync: updatePassword } = useUpdateUserPassword();
