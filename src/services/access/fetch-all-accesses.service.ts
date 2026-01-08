@@ -1,5 +1,5 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
+
 
 export type FetchAcessosParams = {
   grupoId?: number;
@@ -29,11 +29,10 @@ export async function fetchAcessos(
         queryParams.apenasAtivos = params.apenasAtivos;
     }
 
-    //console.log("Auth user:", user);
-    console.log("Query params:", queryParams);
+
 
     const response = await axiosNestGa.get<AcessoResponse[]>(
-        "/acess_management/details/all",
+        "/acess_management/details/all/dropdown",
          { params: queryParams }
 
     );

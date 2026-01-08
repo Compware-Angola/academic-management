@@ -217,7 +217,7 @@ export function UserPermissionsModal({
                     <SelectValue placeholder="Selecionar acesso" />
                   </SelectTrigger>
                   <SelectContent>
-                    {allAccesses.map((access) => (
+                    {allAccesses?.map((access) => (
                       <SelectItem key={access.id} value={access.id.toString()}>
                         {access.id} – {access.designacao}
                       </SelectItem>
