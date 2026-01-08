@@ -77,9 +77,10 @@ import AccessDenied from "./pages/AccessDenied";
 import Grupos from "./pages/controle-acesso/grupos";
 import ListarGrupos from "./pages/access/ListarTodosGrupos";
 import AccessGroup from "./pages/access/AccessGroup";
-import AccessLogs from "./pages/access/AccessLogs";
+
 import CreateUser from "./pages/access/CreateUser";
 import { ListarAcessos } from "./pages/access/AllAccesses";
+import LogsAcessos from "./pages/access/LogsAccess";
 
 const App = () => {
   return (
@@ -219,7 +220,7 @@ const App = () => {
                 <Route path="/acessos/logados" element={<LoggedInUsers />} />
                 <Route path="/acessos/bloquear" element={<BlockAccess />} />
                 <Route path="/acessos/todos" element={<ListarAcessos />} />
-                <Route path="/acessos/logs" element={<AccessLogs />} />
+                <Route path="/acessos/logs" element={<LogsAcessos />} />
                 <Route
                   path="/acessos/cargos"
                   element={<RectoratePositions />}
