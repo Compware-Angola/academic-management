@@ -1,11 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 
-import { saveHorarioService } from "@/services/horario/save-horario.service";
+import {
+  SaveHorarioPayload,
+  saveHorarioService,
+} from "@/services/horario/save-horario.service";
+import { useAuth } from "../use-auth";
 
 export function useSaveHorario(onSuccessReset?: () => void) {
+  const {
+    user: {
+      user: { pk_utilizador },
+    },
+  } = useAuth();
   return useMutation({
-    mutationFn: saveHorarioService,
+    mutationFn: (payload: SaveHorarioPayload) =>
+      saveHorarioService(payload, pk_utilizador),
 
     onSuccess: (data) => {
       if (data.sucesso === 0) {

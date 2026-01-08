@@ -64,6 +64,8 @@ const Login = () => {
             description: `Bem-vindo, ${data.user.username ?? "Utilizador"}`,
           });
           navigate("/dashboard");
+
+          console.log("aqui");
         },
         onError: (err: Error) => {
           const message =
