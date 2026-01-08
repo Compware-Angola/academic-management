@@ -1,5 +1,5 @@
-import { useState } from "react";
-import {  Eye, SearchX } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, SearchX, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,40 +16,74 @@ import {
 import { useQueryLogsAccesses } from "@/hooks/acess/use-query-logs-accesses";
 
 type FiltersLogs = {
-  dataInicio: string,
-  dataFim: string
-}
+  dataInicio: string;
+  dataFim: string;
+  utilizadorId?: number;
+  page?: number;
+  limit?: number;
+  search?: string;
+};
 
 export default function LogsAcessos() {
+  // ----- Estados -----
   const [filters, setFilters] = useState<FiltersLogs>({
     dataInicio: "",
-    dataFim: ""
-  })
+    dataFim: "",
+    page: 1,
+    limit: 25,
+    search: "",
+  });
 
-   const [paramsPesquisa, setParamsPesquisa] = useState<typeof filters | null>(null);
+  const [paramsPesquisa, setParamsPesquisa] = useState<FiltersLogs | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
- 
-  const {data:logs, isLoading} = useQueryLogsAccesses(paramsPesquisa)
+  // ----- Query -----
+  const { data: logsResponse, isLoading } = useQueryLogsAccesses(
+    paramsPesquisa && {
+      ...paramsPesquisa,
+      page: currentPage,
+      limit: itemsPerPage,
+    }
+  );
 
+  // ----- Extraindo dados -----
+  const logs = logsResponse?.data ?? [];
+  const total = logsResponse?.total ?? 0;
+  const totalPages = logsResponse?.totalPages ?? 1;
+
+  // ----- Handlers -----
   const handlePesquisar = () => {
+    if (!filters.dataInicio || !filters.dataFim) return;
 
-     if (!filters.dataInicio || !filters.dataFim) return;
+    setCurrentPage(1); // resetar página ao pesquisar
 
-      setParamsPesquisa(filters); 
-      
-  }
+    const params: FiltersLogs = {
+      dataInicio: filters.dataInicio,
+      dataFim: filters.dataFim,
+      page: 1,
+      limit: itemsPerPage,
+    };
+
+    if (filters.search) params.search = filters.search;
+    if (filters.utilizadorId) params.utilizadorId = filters.utilizadorId;
+
+    setParamsPesquisa(params);
+  };
 
   const handleInputChange = (field: keyof FiltersLogs, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
-  //console.log("Logs accesses: ", logs) 
+  const handleItemsPerPageChange = (value: number) => {
+    setItemsPerPage(value);
+    setCurrentPage(1);
+  };
 
-  const logsFilters = logs ?? [];
-
-
+  // ----- JSX -----
   return (
     <div className="flex-1 space-y-6 p-8">
+      {/* Breadcrumb */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <Breadcrumb>
@@ -71,38 +105,50 @@ export default function LogsAcessos() {
         </div>
       </div>
 
+      {/* Filtros */}
       <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-end">
         <div className="flex-1 space-y-2">
           <Label htmlFor="DataInicio">Data Inicio</Label>
-          <Input 
-            type="date" 
+          <Input
+            type="date"
             id="dataInicio"
             value={filters.dataInicio}
             onChange={(e) => handleInputChange("dataInicio", e.target.value)}
-            className="bg-background" 
-            />
+            className="bg-background"
+          />
         </div>
 
         <div className="flex-1 space-y-2">
           <Label htmlFor="DataFim">Data Fim</Label>
-          <Input 
-            type="date" 
+          <Input
+            type="date"
             id="dataFim"
-            onChange={(e) => handleInputChange("dataFim", e.target.value)} 
             value={filters.dataFim}
-            className="bg-background" />
+            onChange={(e) => handleInputChange("dataFim", e.target.value)}
+            className="bg-background"
+          />
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="search">Pesquisar</Label>
+          <Input
+            id="search"
+            placeholder="Nome ou email"
+            value={filters.search ?? ""}
+            onChange={(e) => handleInputChange("search", e.target.value)}
+            className="bg-background"
+          />
         </div>
 
         <div>
           <Button onClick={handlePesquisar}>
-              <SearchX className="mr-2 h-4 w-4" />
-              Pesquisar
+            <SearchX className="mr-2 h-4 w-4" />
+            Pesquisar
           </Button>
         </div>
-
       </div>
 
-
+      {/* Tabela */}
       <div className="rounded-lg border border-border bg-card shadow-sm">
         <Table>
           <TableHeader>
@@ -117,23 +163,26 @@ export default function LogsAcessos() {
               <TableHead className="text-right">PkLogAcesso</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
+              Array.from({ length: itemsPerPage }).map((_, i) => (
                 <TableRow key={i}>
                   {Array.from({ length: 8 }).map((_, j) => (
-                    <TableCell key={j}><Skeleton className="h-6 w-full" /></TableCell>
+                    <TableCell key={j}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : logsFilters.length === 0 ? (
+            ) : logs.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
                   Nenhum registo encontrado
                 </TableCell>
               </TableRow>
             ) : (
-              logsFilters.map((item) => (
+              logs.map((item) => (
                 <TableRow key={item.pkLogAcesso}>
                   <TableCell className="font-medium">{item.descricao}</TableCell>
                   <TableCell>{item.fkAcesso}</TableCell>
@@ -143,9 +192,10 @@ export default function LogsAcessos() {
                   <TableCell>{item.fkUtilizadorResponsavel}</TableCell>
                   <TableCell className="font-mono text-sm">{item.ip}</TableCell>
                   <TableCell>{item.pkLogAcesso}</TableCell>
-                  
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm">
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -153,6 +203,38 @@ export default function LogsAcessos() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Paginação */}
+      {logs.length > 0 && (
+        <div className="flex items-center justify-between p-4">
+          <div className="text-sm text-muted-foreground">
+            Mostrando {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, total)} de {total} registos
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <span className="text-sm px-3 py-1">
+              Página {currentPage} de {totalPages || 1}
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

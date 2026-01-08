@@ -7,9 +7,6 @@ export type UpdatePasswordParams = {
 };
 
 export async function updateUserPassword(params: UpdatePasswordParams): Promise<void> {
-    const user = AuthStorage.getUser();
-
-    if(!user) throw new Error("Usuário não autenticado")
-        //teacher-password
+ 
      await axiosNestGa.put("/acess_management/teacher-password", params)
 }
