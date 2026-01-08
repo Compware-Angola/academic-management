@@ -1,16 +1,15 @@
-
-
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { Navigate, Outlet } from "react-router-dom";
-import { Loader2 } from "lucide-react"; 
+import { Loader2 } from "lucide-react";
 
 export function MainLayout() {
   const { isAuthenticated, user, isLoading } = useAuth();
 
   if (isLoading) {
+    localStorage.removeItem("auth.user");
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -23,12 +22,10 @@ export function MainLayout() {
     );
   }
 
-
   if (!isAuthenticated || !user) {
     return <Navigate to="/" replace />;
   }
 
- 
   return (
     <SidebarProvider>
       <AppSidebar />
