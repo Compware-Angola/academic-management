@@ -35,28 +35,15 @@ export async function fetchLogsAccessos(
 ): Promise<LogsPaginatedResponse> {
   const _params = { ...params, utilizadorId: userId };
 
-<<<<<<< HEAD
-export async function fetchLogsAccessos(params: createLogsParams):Promise<LogsPaginatedResponse>{
-    const userID = 1548 
-    const _params = {...params}
 
-    
-  
-    const {data} = await axiosNestGa.get("/acess_management/logs-acessos-funcionalidade",{params:_params})
-    
-    
-    return data
-}
-=======
-  //console.log("Params no service: ", params)
 
   const { data } = await axiosNestGa.get(
     "/acess_management/logs-acessos-funcionalidade",
     { params: _params }
   );
 
-  //console.log("Dados rerornados da api: ", data)
+
 
   return data;
 }
->>>>>>> develop
+
