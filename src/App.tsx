@@ -103,6 +103,7 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                
                 <Route
                   path="horarios/inscricoes"
                   element={<SchedulesInscription />}

@@ -27,20 +27,25 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  Edit, // Novo ícone
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { useUsers } from "@/hooks/acess/use-query-users"; 
 import { User } from "@/services/access/fect-users.service";
 import { UserPermissionsModal } from "./components/UserPermissionsModal";
+// Nova modal para edição
+import { UserEditModal } from "./components/UserEditModal";
 
 export default function UserAccess() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
+  const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
 
+  // Novo estado para o utilizador a editar
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
   // Passa os parâmetros diretamente para o hook
   const {
@@ -49,7 +54,7 @@ const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
     isError,
     refetch,
   } = useUsers({
-    search: searchTerm || undefined, // só envia se tiver valor
+    search: searchTerm || undefined, 
     page: currentPage,
     limit: itemsPerPage,
     ativo
@@ -121,34 +126,32 @@ const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
             />
           </div>
           <div className="space-y-2">
-  <Label>Estado</Label>
-  <Select
-    value={
-      ativo === undefined ? "all" : ativo ? "active" : "inactive"
-    }
-    onValueChange={(value) => {
-      setCurrentPage(1);
-
-      if (value === "all") {
-        setAtivo(undefined);
-      } else if (value === "active") {
-        setAtivo(true);
-      } else {
-        setAtivo(false);
-      }
-    }}
-  >
-    <SelectTrigger className="w-40">
-      <SelectValue placeholder="Selecionar" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="all">Todos</SelectItem>
-      <SelectItem value="active">Ativos</SelectItem>
-      <SelectItem value="inactive">Inativos</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
-
+            <Label>Estado</Label>
+            <Select
+              value={
+                ativo === undefined ? "all" : ativo ? "active" : "inactive"
+              }
+              onValueChange={(value) => {
+                setCurrentPage(1);
+                if (value === "all") {
+                  setAtivo(undefined);
+                } else if (value === "active") {
+                  setAtivo(true);
+                } else {
+                  setAtivo(false);
+                }
+              }}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Selecionar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="active">Ativos</SelectItem>
+                <SelectItem value="inactive">Inativos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="space-y-2">
             <Label>Itens por página</Label>
@@ -209,7 +212,6 @@ const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
                     <TableHead>Email</TableHead>
                     <TableHead>Telefone</TableHead>
                     <TableHead>Telefone (2)</TableHead>
-
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -224,23 +226,36 @@ const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
                         {user.username}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {user.telefone1 || "N/A"}
-                      </TableCell>
-                       <TableCell className="text-sm text-muted-foreground">
-                        {user.telefone2 || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
                         {user.email || "N/A"}
                       </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {user.telefone1 || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {user.telefone2 || "N/A"}
+                      </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedUser(user)}
-                        >
-                          <Shield className="h-4 w-4 mr-1" />
-                          Permissões
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          {/* Botão Editar */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setUserToEdit(user)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+
+                          {/* Botão Permissões */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedUser(user)}
+                          >
+                            <Shield className="h-4 w-4 mr-1" />
+                            Permissões
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -288,6 +303,20 @@ const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
           user={selectedUser}
           open={!!selectedUser}
           onOpenChange={(open) => !open && setSelectedUser(null)}
+        />
+      )}
+
+      {/* Nova Modal de edição */}
+      {userToEdit && (
+        <UserEditModal
+          user={userToEdit}
+          open={!!userToEdit}
+          onOpenChange={(open) => !open && setUserToEdit(null)}
+          // Opcional: callback após sucesso para refetch
+          onSuccess={() => {
+            refetch();
+            setUserToEdit(null);
+          }}
         />
       )}
     </div>

@@ -36,15 +36,12 @@ export const menuStructure: MenuStructure = {
       items: [
         { title: "Lista  utilizador", url: "/acessos/utilizador" },
         { title: "Lista por grupos", url: "/ver-utilizadores/grupos" },
-        { title: "Alterar senha", url: "/acessos/alterar-senha" },
+       // { title: "Alterar senha", url: "/acessos/alterar-senha" },
         { title: "Criar utilizador", url: "/acessos/criar-utilizador" },
         { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo" },
-        {
-          title: "Funcionalidade por utilizador",
-          url: "/acessos/funcionalidade-utilizador",
-        },
+      //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
         { title: "Acessos (todos) + novos", url: "/acessos/todos" },
-        { title: "Bloquear acesso", url: "/acessos/bloquear" },
+       // { title: "Bloquear acesso", url: "/acessos/bloquear" },
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
