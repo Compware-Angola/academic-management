@@ -81,6 +81,8 @@ import AccessGroup from "./pages/access/AccessGroup";
 import CreateUser from "./pages/access/CreateUser";
 import { ListarAcessos } from "./pages/access/AllAccesses";
 import LogsAcessos from "./pages/access/LogsAccess";
+import DirectorCourseAccess from "./pages/controle-acesso/dir-surso/DiretorCurso";
+import SolicitacoesEncaminhadas from "./pages/controle-acesso/solicitacao/SolicitacoesEncaminhadas";
 
 const App = () => {
   return (
@@ -103,6 +105,8 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/controle-acesso/diretor" element={<ProtectedRoute allowedGroups={["adm", "dct", "rootAdmin"]}><DirectorCourseAccess /></ProtectedRoute>} />
+                 <Route path="/controle-acesso/solicitacoes" element={<ProtectedRoute allowedGroups={["adm", "dct", "rootAdmin"]}><SolicitacoesEncaminhadas /></ProtectedRoute>} />
                 
                 <Route
                   path="horarios/inscricoes"
