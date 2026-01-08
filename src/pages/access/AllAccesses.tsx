@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useState } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import {
   Table,
@@ -9,28 +9,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useQueryAcessos } from "@/hooks/acess/use-query-all-accesses";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useQueryAccesses } from "@/hooks/acess/use-query-accesses";
 
+export function ListarAcessos() {
+  // ----- Paginação -----
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(25);
 
-export  function ListarAcessos() {
-  const { id } = useParams();
-  const grupoId =  id ? Number(id) : undefined;
-
-  //console.log("Utilizador Id: ", utilizadorId)
-  //console.log("Grupo Id", grupoId)
-
-  const { data: acessos, isLoading } = useQueryAcessos({
-    grupoId,
+  // ----- Query -----
+  const { data: acessos, isLoading } = useQueryAccesses({
     apenasAtivos: true,
+    page: currentPage,
+    limit: itemsPerPage,
   });
 
-  console.log("Pagina principal: ", acessos)
+  const data = acessos?.data ?? [];
+  const total = acessos?.total ?? 0;
+  const totalPages = acessos?.totalPages ?? 1;
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Todos Acessos"  
-      />
+      <PageHeader title="Todos Acessos" />
 
       <div className="rounded-lg border bg-card">
         <Table>
@@ -52,8 +53,8 @@ export  function ListarAcessos() {
                   A carregar...
                 </TableCell>
               </TableRow>
-            ) : acessos && acessos.length > 0 ? (
-              acessos.map((acesso) => (
+            ) : data.length > 0 ? (
+              data.map((acesso) => (
                 <TableRow key={acesso.id}>
                   <TableCell>{acesso.id}</TableCell>
                   <TableCell>{acesso.designacao}</TableCell>
@@ -77,6 +78,38 @@ export  function ListarAcessos() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Paginação */}
+      {data.length > 0 && (
+        <div className="flex items-center justify-between p-4">
+          <div className="text-sm text-muted-foreground">
+            Mostrando {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, total)} de {total} registos
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <span className="text-sm px-3 py-1">
+              Página {currentPage} de {totalPages || 1}
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
