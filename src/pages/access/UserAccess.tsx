@@ -120,6 +120,7 @@ export default function UserAccess() {
             <Label htmlFor="search">Pesquisar</Label>
             <Input
               id="search"
+               autoComplete="off"
               placeholder="Nome, username, código..."
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}

@@ -81,57 +81,54 @@ export function UserEditModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 mt-6">
-          <div className="space-y-2">
-            <Label htmlFor="nova-password">Nova password</Label>
-            <div className="relative">
-              <Input
-                id="nova-password"
-                type={mostrarPassword ? "text" : "password"}
-                value={novaPassword}
-                onChange={(e) => setNovaPassword(e.target.value)}
-                placeholder="••••••••"
-                minLength={6}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3"
-                onClick={() => setMostrarPassword(!mostrarPassword)}
-              >
-                {mostrarPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
+       <div className="space-y-6 mt-6">
+  <div className="space-y-2">
+    <Label htmlFor="nova-password">Nova password</Label>
+    <div className="relative">
+      <Input
+        id="nova-password"
+        type={mostrarPassword ? "text" : "password"}
+        value={novaPassword}
+        onChange={(e) => setNovaPassword(e.target.value)}
+        placeholder="••••••••"
+        minLength={6}
+        autoComplete="new-password" // 🔹 mais seguro que "off"
+        name="nova-senha-unique" // 🔹 evita sugestão por nome comum
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="absolute right-0 top-0 h-full px-3"
+        onClick={() => setMostrarPassword(!mostrarPassword)}
+      >
+        {mostrarPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </Button>
+    </div>
+  </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmar-password">Confirmar password</Label>
-            <Input
-              id="confirmar-password"
-              type={mostrarPassword ? "text" : "password"}
-              value={confirmarPassword}
-              onChange={(e) => setConfirmarPassword(e.target.value)}
-              placeholder="••••••••"
-              className={
-                confirmarPassword && novaPassword !== confirmarPassword
-                  ? "border-destructive focus-visible:ring-destructive"
-                  : ""
-              }
-            />
-            {confirmarPassword && novaPassword !== confirmarPassword && (
-              <p className="text-sm text-destructive">As passwords não coincidem</p>
-            )}
-          </div>
+  <div className="space-y-2">
+    <Label htmlFor="confirmar-password">Confirmar password</Label>
+    <Input
+      id="confirmar-password"
+      type={mostrarPassword ? "text" : "password"}
+      value={confirmarPassword}
+      onChange={(e) => setConfirmarPassword(e.target.value)}
+      placeholder="••••••••"
+      autoComplete="new-password" // 🔹 combina com a senha nova
+      name="confirmar-senha-unique"
+      className={
+        confirmarPassword && novaPassword !== confirmarPassword
+          ? "border-destructive focus-visible:ring-destructive"
+          : ""
+      }
+    />
+    {confirmarPassword && novaPassword !== confirmarPassword && (
+      <p className="text-sm text-destructive">As passwords não coincidem</p>
+    )}
+  </div>
+</div>
 
-          <div className="text-sm text-muted-foreground">
-            A password deve ter pelo menos 6 caracteres.
-          </div>
-        </div>
 
         <div className="flex justify-end gap-3 mt-8">
           <Button
