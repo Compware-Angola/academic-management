@@ -46,8 +46,14 @@ import { useCreatePrazo } from "@/hooks/prazos/use-create-prazo";
 import { useUpdatePrazo } from "@/hooks/prazos/use-update-prazo";
 import { useDeletePrazo } from "@/hooks/prazos/use-delete-prazo";
 import { Prazo } from "@/services/prazos/fetchPrazos";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Deadlines() {
+  const {
+    user: {
+      user: { pk_utilizador },
+    },
+  } = useAuth();
   const [prazoId, setPrazoId] = useState<number>(0);
   const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
     useQueryTipoCandidatura();
@@ -144,7 +150,7 @@ export default function Deadlines() {
         data_inicio: `${form.data_inicio}T00:00:00`,
         data_fim: `${form.data_fim}T00:00:00`,
         observacao: form.observacao || null,
-        fk_created_by: AuthStorage.getUser().user_id.toString(),
+        fk_created_by: pk_utilizador.toString(),
       },
     });
 

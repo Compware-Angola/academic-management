@@ -8,9 +8,9 @@ export const useAuth = () => {
     AuthStorage.logout();
     navigate("/");
   };
-  
+
   const isAuthenticated = AuthStorage.isAuthenticated();
-  const { data: user,isError, isLoading } = useCurrentUser('GA');
+  const { data: user, isError, isLoading } = useCurrentUser("GA");
   if (isError) {
     logout();
   }
