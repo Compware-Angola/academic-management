@@ -24,6 +24,8 @@ export  function ListarAcessos() {
     apenasAtivos: true,
   });
 
+  console.log("Pagina principal: ", acessos)
+
   return (
     <div className="space-y-6">
       <PageHeader

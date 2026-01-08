@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {  ChevronLeft, ChevronRight, Key } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryGrupos } from "@/hooks/acess/use-query-grupos";
 
@@ -120,7 +119,7 @@ export default function ListarGrupos() {
                      <TableCell>
                           <Button
                             variant="link"
-                            onClick={() => navigate(`/grupos/${grupo.pkGrupo}/acessos`)}
+                            onClick={() => navigate(`/grupo/${grupo.pkGrupo}/acessos`)}
                             >
                             Ver Acessos
                           </Button>
