@@ -1,10 +1,7 @@
-
 import { AuthResponse } from "@/services/auth/login.service";
-
 
 export class AuthStorage {
   private static TOKEN_KEY = "auth.token";
-
 
   // Salvar informação completa do login
   static saveLogin(data: AuthResponse) {
@@ -15,7 +12,6 @@ export class AuthStorage {
   static getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
-
 
   // Verifica se está autenticado
   static isAuthenticated(): boolean {
@@ -29,6 +25,5 @@ export class AuthStorage {
   // Limpar tudo
   static logout() {
     localStorage.removeItem(this.TOKEN_KEY);
-
   }
 }
