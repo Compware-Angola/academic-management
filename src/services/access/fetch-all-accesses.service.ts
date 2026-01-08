@@ -19,12 +19,11 @@ export type AcessoResponse = {
 export async function fetchAcessos(
   params?: FetchAcessosParams
 ): Promise<AcessoResponse[]> {
-    const user = AuthStorage.isAuthenticated
+    
 
     const queryParams: Record<string, any> = {};
 
-    console.log("User information: ", user)
-    //console.log("Grupo id: ", params.grupoId)
+
 
     if (params?.apenasAtivos !== undefined) {
         queryParams.apenasAtivos = params.apenasAtivos;
