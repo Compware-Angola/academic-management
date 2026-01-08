@@ -6,7 +6,7 @@ export function useQueryAcessos(params?: FetchAcessosParams) {
   return useQuery<AcessoResponse[]>({
     queryKey: ["acessos", params],
     queryFn: () => fetchAcessos(params),
-    enabled: !!params, // só executa quando params existir
+    enabled: !!params,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });

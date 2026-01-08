@@ -21,7 +21,7 @@ export interface CreatePersonUserResponse{
 }
 
 export async function createPersonUser(user: CreatePersonUserRequest): Promise<CreatePersonUserResponse>{
-  const userID = AuthStorage.getUser().user_id
+ 
     const {data} = await axiosNestGa.post("acess_management/create-person-user",user)
 
     return data
