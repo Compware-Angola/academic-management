@@ -33,7 +33,6 @@ import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { FormMultiSelect } from "@/components/common/FormMultiSelect";
-import { AuthStorage } from "@/util/auth-storage";
 import { useMutationCreateCalendar } from "@/hooks/avaliacao/use-mutation-create-calendar";
 import { CreateCalendarPayload } from "@/services/avaliacao/create-calendario-prova";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";

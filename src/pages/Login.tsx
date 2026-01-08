@@ -36,7 +36,6 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 const Login = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const loginMutation = useMutationLogin();
   const { isAuthenticated } = useAuth();
 
@@ -44,7 +43,7 @@ const Login = () => {
     if (isAuthenticated) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -55,27 +54,7 @@ const Login = () => {
 
   const onSubmit = (values: LoginFormData) => {
     const { username, password } = values;
-    loginMutation.mutate(
-      { username, password, platform: "GA" },
-      {
-        onSuccess: (data) => {
-          toast({
-            title: data.mensagem || "Login realizado com sucesso",
-            description: `Bem-vindo, ${data.user.username ?? "Utilizador"}`,
-          });
-          navigate("/dashboard");
-        },
-        onError: (err: Error) => {
-          const message =
-            err.message || "Erro ao autenticar. Verifique credenciais.";
-          toast({
-            title: "Erro ao fazer login",
-            description: message,
-            variant: "destructive",
-          });
-        },
-      }
-    );
+    loginMutation.mutate({ username, password, platform: "GA" });
   };
 
   return (
@@ -156,7 +135,7 @@ const Login = () => {
         </Card>
 
         <div className="mt-8 text-center text-xs text-muted-foreground">
-          <p>© 2025 Portal Académico. Todos os direitos reservados.</p>
+          {/* <p>© 2025 Portal Académico. Todos os direitos reservados.</p> */}
         </div>
       </div>
     </div>

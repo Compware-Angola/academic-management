@@ -1,6 +1,6 @@
 // src/services/assessment/create-assessment-permission.service.ts
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
+
 export type VigilantePayload = {
   codigoUtilizador: number;
   desc: string;
@@ -40,17 +40,18 @@ export interface CreateCalendarResponse {
 }
 
 export async function createCalendar(
+  {
+    codigoUtilizador,
+    descUtilizador,
+  }: { codigoUtilizador: number; descUtilizador: string },
   payload: CreateCalendarPayload
 ): Promise<CreateCalendarResponse> {
-  const userId = AuthStorage.getUser().user_id;
-  const userName = AuthStorage.getUser().nome;
-
   const { data } = await axiosNestGa.post<CreateCalendarResponse>(
     "/assessment/create-calendario-prova",
     {
-      codigoUtilizador: userId,
-      descUtilizador: userName,
-      utilizador: userId,
+      codigoUtilizador,
+      descUtilizador,
+      utilizador: codigoUtilizador,
       ...payload,
     }
   );

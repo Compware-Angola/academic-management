@@ -1,6 +1,5 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-
 export type FetchAcessosParams = {
   grupoId?: number;
   apenasAtivos?: boolean;
@@ -20,10 +19,11 @@ export type AcessoResponse = {
 export async function fetchAcessos(
   params?: FetchAcessosParams
 ): Promise<AcessoResponse[]> {
-    
+    const user = AuthStorage.isAuthenticated
 
     const queryParams: Record<string, any> = {};
 
+    console.log("User information: ", user)
     //console.log("Grupo id: ", params.grupoId)
 
     if (params?.apenasAtivos !== undefined) {
@@ -31,11 +31,10 @@ export async function fetchAcessos(
     }
 
 
-    const response = await axiosNestGa.get<AcessoResponse[]>(
-        "/acess_management/details/all/dropdown",
-         { params: queryParams }
-
-    );
+  const response = await axiosNestGa.get<AcessoResponse[]>(
+    "/acess_management/details/all/dropdown",
+    { params: queryParams }
+  );
 
   return response.data;
 }

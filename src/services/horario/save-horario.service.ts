@@ -1,7 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
-
 export type AulaPayload = {
   diaSemana: number;
   ordemTempo: number;
@@ -25,14 +22,14 @@ export type SaveHorarioPayload = {
   turma: number;
   apenasPrimeiroAno: number;
   sala: number;
-    docente: number;
-      tipoAula: number;
+  docente: number;
+  tipoAula: number;
   obs: string;
   aulas: AulaPayload[];
 };
 
 export type SaveHorarioResponse = {
-  sucesso: number; 
+  sucesso: number;
   mensagem: string;
   horarioId?: number;
   designacao?: string;
@@ -40,9 +37,9 @@ export type SaveHorarioResponse = {
 };
 
 export async function saveHorarioService(
-  payload: SaveHorarioPayload
+  payload: SaveHorarioPayload,
+  userId: number
 ): Promise<SaveHorarioResponse> {
-  const userId = AuthStorage.getUser().user_id;
   const { data } = await axiosNestGa.post(`/schedule/${userId}`, payload);
 
   return data;

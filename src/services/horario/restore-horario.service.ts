@@ -1,14 +1,13 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
 
-interface RestaurarHorarioParams {
+export interface RestaurarHorarioParams {
   codigo: number;
 }
 
-export async function restaurarHorarioService({
-  codigo,
-}: RestaurarHorarioParams) {
-  const utilizadorId = AuthStorage.getUser().user_id;
+export async function restaurarHorarioService(
+  utilizadorId: number,
+  { codigo }: RestaurarHorarioParams
+) {
   const { data } = await axiosNestGa.patch(
     `/schedule/${codigo}/restaurar/${utilizadorId}`
   );

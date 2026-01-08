@@ -1,28 +1,30 @@
-import { axiosNestGa } from "@/lib/axios-nest-ga"
-import { AuthStorage } from "@/util/auth-storage"
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export interface CreatePersonUserRequest {
-  nomeCompleto: string
-  numDocIdentificacao: string
-  email: string
-  dataDeNascimento: number
-  tipoDocumentoId: number
-  sexoId: number
-  estadoCivilId: number
-  nacionalidadeId: number
+  nomeCompleto: string;
+  numDocIdentificacao: string;
+  email: string;
+  dataDeNascimento: number;
+  tipoDocumentoId: number;
+  sexoId: number;
+  estadoCivilId: number;
+  nacionalidadeId: number;
 }
 
-export interface CreatePersonUserResponse{
-  message: string
-  username: string
-  senhaTemporariaGerada: boolean
-  observacao: string
-
+export interface CreatePersonUserResponse {
+  message: string;
+  username: string;
+  senhaTemporariaGerada: boolean;
+  observacao: string;
 }
 
-export async function createPersonUser(user: CreatePersonUserRequest): Promise<CreatePersonUserResponse>{
- 
-    const {data} = await axiosNestGa.post("acess_management/create-person-user",user)
+export async function createPersonUser(
+  user: CreatePersonUserRequest
+): Promise<CreatePersonUserResponse> {
+  const { data } = await axiosNestGa.post(
+    "acess_management/create-person-user",
+    user
+  );
 
-    return data
+  return data;
 }
