@@ -1,12 +1,28 @@
-import { updateSchedule } from "@/services/horario/update-schedule.service";
+import {
+  updateSchedule,
+  UpdateSchedulePayload,
+} from "@/services/horario/update-schedule.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../use-toast";
 
+import { useAuth } from "../use-auth";
+
 export const useUpdateSchedule = () => {
+  const {
+    user: {
+      user: { pk_utilizador },
+    },
+  } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: updateSchedule,
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: number;
+      payload: UpdateSchedulePayload;
+    }) => updateSchedule(pk_utilizador, { id, payload }),
 
     onSuccess: (data) => {
       if (data.sucesso === 0) {
