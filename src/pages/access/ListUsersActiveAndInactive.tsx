@@ -26,6 +26,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { usersQueryActive } from "@/hooks/acess/use-query-users-active";
 import { useUpdateUserPassword } from "@/hooks/acess/use-mutation-updade-user";
 import { AuthStorage } from "@/util/auth-storage";
+import { useAuth } from "@/hooks/use-auth";
 
 const estadosAtivo = [
   { codigo: "true", designacao: "Ativo" },
@@ -53,16 +54,18 @@ interface Utilizador {
 }
 
 export default function ListaUtilizadoresActiveOrInactive() {
-  const navigate = useNavigate()
+  const {
+    user: {
+      user: { pk_utilizador },
+    },
+  } = useAuth();
+  const navigate = useNavigate();
   const [filtro, setFiltro] = useState<FiltroUsuario>({
     ativo: undefined,
   });
 
-  
-
   const { data: users, isLoading } = usersQueryActive(filtro);
   const { mutateAsync: updatePassword } = useUpdateUserPassword();
-  const user = AuthStorage.getUser();
 
   //console.log("Users Filters: ", users)
 
@@ -111,7 +114,7 @@ export default function ListaUtilizadoresActiveOrInactive() {
     //console.log("New Password: ",novaSenha)
 
     await updatePassword({
-      utilizadorId: user.user_id,
+      utilizadorId: pk_utilizador,
       novaSenha: novaSenha,
     });
 
@@ -166,78 +169,87 @@ export default function ListaUtilizadoresActiveOrInactive() {
         </div>
       </div>
 
-        <div className="rounded-lg border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="font-semibold">ID</TableHead>
-                <TableHead className="font-semibold">Nome</TableHead>
-                <TableHead className="font-semibold">Username</TableHead>
-                <TableHead className="font-semibold">Email</TableHead>
-                <TableHead className="font-semibold">Pessoa Ref.</TableHead>
-                <TableHead className="font-semibold">Estado</TableHead>
-                <TableHead className="font-semibold">Criado em</TableHead>
-                <TableHead className="font-semibold">Atualizado em</TableHead>
-                <TableHead className="font-semibold">Ações</TableHead>
+      <div className="rounded-lg border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="font-semibold">ID</TableHead>
+              <TableHead className="font-semibold">Nome</TableHead>
+              <TableHead className="font-semibold">Username</TableHead>
+              <TableHead className="font-semibold">Email</TableHead>
+              <TableHead className="font-semibold">Pessoa Ref.</TableHead>
+              <TableHead className="font-semibold">Estado</TableHead>
+              <TableHead className="font-semibold">Criado em</TableHead>
+              <TableHead className="font-semibold">Atualizado em</TableHead>
+              <TableHead className="font-semibold">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={9}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  Nenhum utilizador encontrado
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={9}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    Nenhum utilizador encontrado
+            ) : (
+              paginatedData.map((utilizador) => (
+                <TableRow key={utilizador.pkUtilizador}>
+                  <TableCell>{utilizador.pkUtilizador}</TableCell>
+                  <TableCell className="font-medium">
+                    {utilizador.nome}
+                  </TableCell>
+                  <TableCell>{utilizador.username}</TableCell>
+                  <TableCell>{utilizador.email}</TableCell>
+                  <TableCell>
+                    <span className="text-sm text-muted-foreground">
+                      {utilizador.refPessoa.desc} (ID: {utilizador.refPessoa.pk}
+                      )
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={utilizador.active ? "default" : "secondary"}
+                    >
+                      {utilizador.active ? "Ativo" : "Inativo"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(utilizador.createdAt)}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(utilizador.updatedAt)}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="link"
+                      onClick={() =>
+                        navigate(
+                          `/acessos/utilizador/${utilizador.pkUtilizador}`
+                        )
+                      }
+                    >
+                      Ver Acessos
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenModal(utilizador)}
+                    >
+                      <Key className="h-4 w-4 mr-1" />
+                      Alterar Senha
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                paginatedData.map((utilizador) => (
-                  <TableRow key={utilizador.pkUtilizador}>
-                    <TableCell>{utilizador.pkUtilizador}</TableCell>
-                    <TableCell className="font-medium">{utilizador.nome}</TableCell>
-                    <TableCell>{utilizador.username}</TableCell>
-                    <TableCell>{utilizador.email}</TableCell>
-                    <TableCell>
-                      <span className="text-sm text-muted-foreground">
-                        {utilizador.refPessoa.desc} (ID: {utilizador.refPessoa.pk})
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={utilizador.active ? "default" : "secondary"}>
-                        {utilizador.active ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(utilizador.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(utilizador.updatedAt)}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="link"
-                        onClick={() => navigate(`/acessos/utilizador/${utilizador.pkUtilizador}`)}
-                          >
-                          Ver Acessos
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenModal(utilizador)}
-                      >
-                        <Key className="h-4 w-4 mr-1" />
-                        Alterar Senha
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between">

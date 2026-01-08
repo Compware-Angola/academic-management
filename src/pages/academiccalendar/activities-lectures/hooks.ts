@@ -8,10 +8,11 @@ import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidat
 import { useMutationfetchCreateActivity } from "@/hooks/academiccalendar/use-mutation-create-activity";
 import { useQueryTypeCalendar } from "@/hooks/academiccalendar/use-query-type-calendar";
 import { AxiosError } from "axios";
-import { AuthStorage } from "@/util/auth-storage";
+
 import { Atividade } from "@/services/fetch-atividade";
 import { Edit } from "lucide-react";
 import { useMutationActivity } from "@/hooks/academiccalendar/use-mutation-update-activity";
+import { useAuth } from "@/hooks/use-auth";
 
 interface FormActivity {
   designacao: string;
@@ -23,6 +24,11 @@ interface FormActivity {
 }
 
 export function useActivitiesLectures() {
+  const {
+    user: {
+      user: { pk_utilizador },
+    },
+  } = useAuth();
   const { toast } = useToast();
 
   // Filtros
@@ -128,7 +134,7 @@ export function useActivitiesLectures() {
       codigo_ano_lectivo: Number(form.codigo_ano_lectivo),
       codigo_tipo_candidatura: Number(form.codigo_tipo_candidatura),
       codigo_tipo_calendario: Number(form.codigo_tipo_calendario),
-      codigo_utilizador: AuthStorage.getUser().user_id,
+      codigo_utilizador: pk_utilizador,
       data_inicio: form.data_inicio,
       data_fim: form.data_fim,
     };

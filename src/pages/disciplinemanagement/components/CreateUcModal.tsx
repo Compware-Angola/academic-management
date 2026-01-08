@@ -27,6 +27,7 @@ import { Discipline } from "@/services/study_plan/fect-discipline.serice";
 import { AnoAcademico } from "@/services/fetch-anos-academico";
 import { Semestre } from "@/services/study_plan/semestre/fecth-semestres";
 import { Departamento } from "@/services/departamento/fetch-departamento";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   open: boolean;
@@ -43,6 +44,11 @@ interface FormValues {
 }
 
 export function CreateUcModal({ open, onClose }: Props) {
+  const {
+    user: {
+      user: { pk_utilizador },
+    },
+  } = useAuth();
   const form = useForm<FormValues>({
     mode: "onSubmit",
   });
@@ -77,7 +83,7 @@ export function CreateUcModal({ open, onClose }: Props) {
         codigo_classe: Number(data.codigo_classe),
         codigo_curso: Number(data.codigo_curso),
         codigo_departamento: Number(data.codigo_departamento),
-        codigo_utilizador: AuthStorage.getUser().user_id,
+        codigo_utilizador: pk_utilizador,
       },
       {
         onSuccess: () => {

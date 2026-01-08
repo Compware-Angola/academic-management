@@ -1,6 +1,4 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
-
 
 export type createLogsParams = {
   dataInicio: string;
@@ -12,16 +10,16 @@ export type createLogsParams = {
 };
 
 export type tipoLogsAccesses = {
-    pkLogAcesso: number,
-    descricao: string,
-    fkAcesso: null,
-    fkFuncionalidade: null,
-    fkUtilizadorResponsavel: number,
-    fkGrupoAfetado: null,
-    fkOperacaoLog: string,
-    createdAt: string,
-    ip: string
-}
+  pkLogAcesso: number;
+  descricao: string;
+  fkAcesso: null;
+  fkFuncionalidade: null;
+  fkUtilizadorResponsavel: number;
+  fkGrupoAfetado: null;
+  fkOperacaoLog: string;
+  createdAt: string;
+  ip: string;
+};
 
 export type LogsPaginatedResponse = {
   data: tipoLogsAccesses[];
@@ -31,19 +29,20 @@ export type LogsPaginatedResponse = {
   totalPages: number;
 };
 
+export async function fetchLogsAccessos(
+  userId: number,
+  params: createLogsParams
+): Promise<LogsPaginatedResponse> {
+  const _params = { ...params, utilizadorId: userId };
 
-export async function fetchLogsAccessos(params: createLogsParams):Promise<LogsPaginatedResponse>{
-    const userID = 1548 //AuthStorage.getUser().user_id.toString()
-    const _params = {...params, utilizadorId:userID}
+  //console.log("Params no service: ", params)
 
-    
-    console.log(" USER ID ", userID)
+  const { data } = await axiosNestGa.get(
+    "/acess_management/logs-acessos-funcionalidade",
+    { params: _params }
+  );
 
-    //console.log("Params no service: ", params)
+  //console.log("Dados rerornados da api: ", data)
 
-    const {data} = await axiosNestGa.get("/acess_management/logs-acessos-funcionalidade",{params:_params})
-    
-    //console.log("Dados rerornados da api: ", data)
-    
-    return data
+  return data;
 }

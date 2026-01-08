@@ -1,5 +1,4 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
 
 export interface SchedulePermissionPayload {
   fkHorario: number;

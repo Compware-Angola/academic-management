@@ -1,7 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
-
 export type AulaPayload = {
   diaSemana: number;
   ordemTempo: number;
