@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { UserPlus, Save, RotateCcw, X } from "lucide-react";
+import { UserPlus, Save, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -20,6 +19,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryNacionalidade } from "@/hooks/acess/use-query-nacionalidade";
 import { useQueryTipoDocumento } from "@/hooks/acess/use-query-tipo-documento";
 import { useQuerySexo } from "@/hooks/acess/use-query-sexo";
+import { useAuth } from "@/hooks/use-auth";
 
 interface FormData {
   nomeCompleto: string;
@@ -30,11 +30,13 @@ interface FormData {
   sexoId: string;
   estadoCivilId: string;
   nacionalidadeId: string;
+  telefone1: string;
+  telefone2: string;
 }
-
 
 export default function CreateUser() {
   const { toast } = useToast();
+
   const [formData, setFormData] = useState<FormData>({
     nomeCompleto: "",
     numDocIdentificacao: "",
@@ -44,20 +46,37 @@ export default function CreateUser() {
     sexoId: "",
     estadoCivilId: "",
     nacionalidadeId: "",
+    telefone1: "",
+    telefone2: "",
   });
-  const  {mutateAsync:CreateUser} = useCreatePersonUser()
 
-const {data:estadosCivis=[], isLoading:isLoadingEstadosCivis} = useQueryEstadoCivil()
-const {data:estadosNacionalidade=[], isLoading:isLoadingNacionalidade} = useQueryNacionalidade()
-const {data:estadosTipoDocumento=[], isLoading:isLoadingTipoDocumento} = useQueryTipoDocumento()
-const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
+  const { mutateAsync: CreateUser } = useCreatePersonUser();
+
+  const { data: estadosCivis = [], isLoading: isLoadingEstadosCivis } =
+    useQueryEstadoCivil();
+  const {
+    data: estadosNacionalidade = [],
+    isLoading: isLoadingNacionalidade,
+  } = useQueryNacionalidade();
+  const {
+    data: estadosTipoDocumento = [],
+    isLoading: isLoadingTipoDocumento,
+  } = useQueryTipoDocumento();
+  const { data: estadosSexo = [], isLoading: isLoadingSexo } = useQuerySexo();
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
- 
-  const  handleSubmit = async () => {
-    if (!formData.nomeCompleto || !formData.numDocIdentificacao || !formData.email || !formData.dataDeNascimento) {
+  const {user:userData} = useAuth()
+  const userId =userData.user.pk_utilizador
+
+  const handleSubmit = async () => {
+    if (
+      !formData.nomeCompleto ||
+      !formData.numDocIdentificacao ||
+      !formData.email ||
+      !formData.dataDeNascimento
+    ) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -66,21 +85,30 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
       return;
     }
 
-    
-    const response = await CreateUser({
-        nomeCompleto: formData.nomeCompleto,
-        numDocIdentificacao: formData.numDocIdentificacao,
-        email: formData.email,
-        dataDeNascimento: Number(formData.dataDeNascimento),
-        tipoDocumentoId: Number(formData.tipoDocumentoId),
-        sexoId: Number(formData.sexoId),
-        estadoCivilId: Number(formData.estadoCivilId),
-        nacionalidadeId: Number(formData.nacionalidadeId),
-    })
-    
+    console.log("Date born: ", formData)
 
-  
-  }
+      const response = await CreateUser(
+        {
+          payload: {
+          nomeCompleto: formData.nomeCompleto,
+          numDocIdentificacao: formData.numDocIdentificacao,
+          email: formData.email,
+          dataDeNascimento: formData.dataDeNascimento,
+          tipoDocumentoId: Number(formData.tipoDocumentoId),
+          sexoId: Number(formData.sexoId),
+          estadoCivilId: Number(formData.estadoCivilId),
+          nacionalidadeId: Number(formData.nacionalidadeId),
+          telefone1: formData.telefone1,
+          telefone2: formData.telefone2,
+        },
+        userLogadoId: userId
+
+        });
+
+        console.log("User: ", response)
+
+    };
+
 
   const handleReset = () => {
     setFormData({
@@ -92,6 +120,8 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
       sexoId: "",
       estadoCivilId: "",
       nacionalidadeId: "",
+      telefone1: "",
+      telefone2: "",
     });
   };
 
@@ -113,8 +143,13 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Criar Utilizador</h1>
-        <p className="text-muted-foreground">Preencha os dados para criar um novo utilizador no sistema.</p>
+
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Criar Utilizador
+        </h1>
+        <p className="text-muted-foreground">
+          Preencha os dados para criar um novo utilizador no sistema.
+        </p>
       </div>
 
       <Card className="max-w-4xl">
@@ -124,6 +159,7 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
             Dados do Utilizador
           </CardTitle>
         </CardHeader>
+
         <CardContent>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-2">
@@ -132,19 +168,23 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
                 id="nomeCompleto"
                 placeholder="Ex: João António da Silva"
                 value={formData.nomeCompleto}
-                onChange={(e) => handleInputChange("nomeCompleto", e.target.value)}
-                className="bg-background"
+                onChange={(e) =>
+                  handleInputChange("nomeCompleto", e.target.value)
+                }
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="numDocIdentificacao">Nº Documento de Identificação *</Label>
+              <Label htmlFor="numDocIdentificacao">
+                Nº Documento de Identificação *
+              </Label>
               <Input
                 id="numDocIdentificacao"
                 placeholder="Ex: 001234567LA047"
                 value={formData.numDocIdentificacao}
-                onChange={(e) => handleInputChange("numDocIdentificacao", e.target.value)}
-                className="bg-background"
+                onChange={(e) =>
+                  handleInputChange("numDocIdentificacao", e.target.value)
+                }
               />
             </div>
 
@@ -156,7 +196,6 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
                 placeholder="Ex: joao.silva@email.com"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className="bg-background"
               />
             </div>
 
@@ -165,64 +204,100 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
               <Input
                 id="dataDeNascimento"
                 type="date"
-                value={formData.dataDeNascimento}
-                onChange={(e) => handleInputChange("dataDeNascimento", e.target.value)}
-                className="bg-background"
+                value={formData.dataDeNascimento || ""}
+                onChange={(e) =>
+                  handleInputChange("dataDeNascimento", e.target.value)
+                }
               />
             </div>
 
-            
-            
-      <FormSelect label="Estado Civil" 
-          options={estadosCivis} 
-          map={(e) => ({
-                      key: e.codigo,
-                      label: e.designacao,
-                      value: e.codigo,
-                    })}
-          onChange={(e) => setFormData({ ...formData, estadoCivilId: e })}
-          disabled={isLoadingEstadosCivis} 
-          loading={isLoadingEstadosCivis} value={formData.estadoCivilId}/>
+            {/* TELEFONE 1 */}
+            <div className="space-y-2">
+              <Label htmlFor="telefone1">Telefone 1</Label>
+              <Input
+                id="telefone1"
+                placeholder="Ex: 923 456 789"
+                value={formData.telefone1}
+                onChange={(e) =>
+                  handleInputChange("telefone1", e.target.value)
+                }
+              />
+            </div>
 
+            {/* TELEFONE 2 */}
+            <div className="space-y-2">
+              <Label htmlFor="telefone2">Telefone 2</Label>
+              <Input
+                id="telefone2"
+                placeholder="Ex: 999 888 777"
+                value={formData.telefone2}
+                onChange={(e) =>
+                  handleInputChange("telefone2", e.target.value)
+                }
+              />
+            </div>
 
+            <FormSelect
+              label="Estado Civil"
+              options={estadosCivis}
+              map={(e) => ({
+                key: e.codigo,
+                label: e.designacao,
+                value: e.codigo,
+              })}
+              value={formData.estadoCivilId}
+              onChange={(e) =>
+                setFormData({ ...formData, estadoCivilId: e })
+              }
+              disabled={isLoadingEstadosCivis}
+              loading={isLoadingEstadosCivis}
+            />
 
-        <FormSelect label="Nacionalidade" 
-          options={estadosNacionalidade} 
-          map={(n) => ({
-                      key: n.codigo,
-                      label: n.designacao,
-                      value: n.codigo,
-                    })}
-          onChange={(n) => setFormData({ ...formData, nacionalidadeId: n })}
-          disabled={isLoadingNacionalidade} 
-          loading={isLoadingNacionalidade} value={formData.nacionalidadeId}/>
+            <FormSelect
+              label="Nacionalidade"
+              options={estadosNacionalidade}
+              map={(n) => ({
+                key: n.codigo,
+                label: n.designacao,
+                value: n.codigo,
+              })}
+              value={formData.nacionalidadeId}
+              onChange={(n) =>
+                setFormData({ ...formData, nacionalidadeId: n })
+              }
+              disabled={isLoadingNacionalidade}
+              loading={isLoadingNacionalidade}
+            />
 
+            <FormSelect
+              label="Sexo"
+              options={estadosSexo}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
+              value={formData.sexoId}
+              onChange={(s) => setFormData({ ...formData, sexoId: s })}
+              disabled={isLoadingSexo}
+              loading={isLoadingSexo}
+            />
 
-              <FormSelect label="Sexo" 
-                options={estadosSexo} 
-                map={(s) => ({
-                            key: s.codigo,
-                            label: s.designacao,
-                            value: s.codigo,
-                          })}
-                onChange={(s) => setFormData({ ...formData, sexoId: s })}
-                disabled={isLoadingNacionalidade} 
-                loading={isLoadingSexo} value={formData.sexoId}/>
-
-                <FormSelect label="Tipo de Documento" 
-                  options={estadosTipoDocumento} 
-                  map={(d) => ({
-                            key: d.codigo,
-                            label: d.designacao,
-                            value: d.codigo,
-                          })}
-                  onChange={(d) => setFormData({ ...formData, tipoDocumentoId: d })}
-                  disabled={isLoadingTipoDocumento} 
-                  loading={isLoadingTipoDocumento} value={formData.tipoDocumentoId}/>
-
-
-
-  
+            <FormSelect
+              label="Tipo de Documento"
+              options={estadosTipoDocumento}
+              map={(d) => ({
+                key: d.codigo,
+                label: d.designacao,
+                value: d.codigo,
+              })}
+              value={formData.tipoDocumentoId}
+              onChange={(d) =>
+                setFormData({ ...formData, tipoDocumentoId: d })
+              }
+              disabled={isLoadingTipoDocumento}
+              loading={isLoadingTipoDocumento}
+            />
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -230,6 +305,7 @@ const {data:estadosSexo=[], isLoading:isLoadingSexo} = useQuerySexo()
               <Save className="mr-2 h-4 w-4" />
               Criar Utilizador
             </Button>
+
             <Button variant="outline" onClick={handleReset}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Limpar
