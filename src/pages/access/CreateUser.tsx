@@ -70,6 +70,8 @@ export default function CreateUser() {
   const {user:userData} = useAuth()
   const userId =userData.user.pk_utilizador
 
+  console.log("User id:", userId)
+
   const handleSubmit = async () => {
     if (
       !formData.nomeCompleto ||
@@ -85,7 +87,6 @@ export default function CreateUser() {
       return;
     }
 
-    console.log("Date born: ", formData)
 
       const response = await CreateUser(
         {
@@ -100,9 +101,7 @@ export default function CreateUser() {
           nacionalidadeId: Number(formData.nacionalidadeId),
           telefone1: formData.telefone1,
           telefone2: formData.telefone2,
-        },
-        userLogadoId: userId
-
+        }
         });
 
         console.log("User: ", response)

@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 
 interface Column {
   header: string;
@@ -18,6 +18,7 @@ interface Column {
 interface DataTableProps {
   columns: Column[];
   data: any[];
+  loading?: boolean;
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
@@ -26,6 +27,7 @@ interface DataTableProps {
 export function DataTable({
   columns,
   data,
+  loading = false,
   currentPage = 1,
   totalPages = 1,
   onPageChange,
@@ -43,8 +45,21 @@ export function DataTable({
               ))}
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {data.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-32 text-center"
+                >
+                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Carregando dados...
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : data.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
@@ -75,24 +90,26 @@ export function DataTable({
           <p className="text-sm text-muted-foreground">
             Página {currentPage} de {totalPages}
           </p>
+
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange?.(currentPage - 1)}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || loading}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 mr-1" />
               Anterior
             </Button>
+
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange?.(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || loading}
             >
               Próxima
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
         </div>

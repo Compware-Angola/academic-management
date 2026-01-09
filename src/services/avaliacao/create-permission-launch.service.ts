@@ -1,6 +1,4 @@
-// src/services/assessment/create-assessment-permission.service.ts
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { AuthStorage } from "@/util/auth-storage";
 
 export interface AssessmentPermissionPayload {
   anoLectivo: number;
@@ -17,10 +15,9 @@ export interface AssessmentPermissionResponse {
 }
 
 export async function createAssessmentPermission(
+  userId: number,
   payload: AssessmentPermissionPayload
 ): Promise<AssessmentPermissionResponse> {
-  const userId = AuthStorage.getUser().user_id;
-
   const { data } = await axiosNestGa.post<AssessmentPermissionResponse>(
     "/assessment/permissoes",
     {

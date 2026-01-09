@@ -3,16 +3,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+
 import { useToast } from "@/hooks/use-toast";
 import { GrupoTable } from "./components/table";
 import { GrupoFormDialog } from "./components/grupo-form-dialog";

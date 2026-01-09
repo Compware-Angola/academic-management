@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, SearchX, ChevronLeft, ChevronRight } from "lucide-react";
+import { SearchX, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ export default function LogsAcessos() {
     limit: 25,
     search: "",
   });
+  
 
   const [paramsPesquisa, setParamsPesquisa] = useState<FiltersLogs | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -192,11 +193,6 @@ export default function LogsAcessos() {
                   <TableCell>{item.fkUtilizadorResponsavel}</TableCell>
                   <TableCell className="font-mono text-sm">{item.ip}</TableCell>
                   <TableCell>{item.pkLogAcesso}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
                 </TableRow>
               ))
             )}

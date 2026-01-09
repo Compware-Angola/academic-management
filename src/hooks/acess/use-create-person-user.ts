@@ -6,7 +6,6 @@ import { createPersonUser, CreatePersonUserRequest } from "@/services/access/cre
 
 type CreatePersonUserMutationInput = {
   payload: CreatePersonUserRequest
-  userLogadoId: number
 }
 
 
@@ -17,7 +16,7 @@ export function useCreatePersonUser() {
 
 
   return useMutation({
-    mutationFn: ({ payload, userLogadoId }: CreatePersonUserMutationInput) => createPersonUser(payload,userLogadoId),
+    mutationFn: ({ payload }: CreatePersonUserMutationInput) => createPersonUser(payload),
 
     onSuccess: () => {
       toast({
