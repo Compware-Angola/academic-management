@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UserPlus, Save, RotateCcw } from "lucide-react";
+import { UserPlus, Save, RotateCcw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,7 +50,7 @@ export default function CreateUser() {
     telefone2: "",
   });
 
-  const { mutateAsync: CreateUser } = useCreatePersonUser();
+  const { mutateAsync: CreateUser,isPending } = useCreatePersonUser();
 
   const { data: estadosCivis = [], isLoading: isLoadingEstadosCivis } =
     useQueryEstadoCivil();
@@ -103,8 +103,13 @@ export default function CreateUser() {
           telefone2: formData.telefone2,
         }
         });
+        if(response){
+          handleReset()
 
-        console.log("User: ", response)
+
+        }
+
+  
 
     };
 
@@ -151,7 +156,7 @@ export default function CreateUser() {
         </p>
       </div>
 
-      <Card className="max-w-4xl">
+      <Card className="max-w-6xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
@@ -300,10 +305,23 @@ export default function CreateUser() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button onClick={handleSubmit}>
-              <Save className="mr-2 h-4 w-4" />
-              Criar Utilizador
-            </Button>
+        <Button 
+  onClick={handleSubmit} 
+  disabled={isPending}
+  className="flex items-center"
+>
+  {isPending ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      A criar...
+    </>
+  ) : (
+    <>
+      <Save className="mr-2 h-4 w-4" />
+      Criar Utilizador
+    </>
+  )}
+</Button>
 
             <Button variant="outline" onClick={handleReset}>
               <RotateCcw className="mr-2 h-4 w-4" />

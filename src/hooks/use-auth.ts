@@ -1,25 +1,11 @@
 import { AuthStorage } from "@/util/auth-storage";
 import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "./mutations/use-mutation-login";
+import { useContext } from "react";
+import { AuthContext } from "@/context/auth.context";
 
 export const useAuth = () => {
-  const navigate = useNavigate();
-  const logout = () => {
-    AuthStorage.logout();
-    navigate("/");
-  };
-
-  const isAuthenticated = AuthStorage.isAuthenticated();
-  const { data: user, isError, isLoading } = useCurrentUser("GA");
-  if (isError) {
-    logout();
-  }
-  const token = AuthStorage.getToken();
-  return {
-    user,
-    token,
-    isAuthenticated,
-    isLoading,
-    logout,
-  };
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
 };

@@ -2,28 +2,23 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { Navigate, Outlet } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Loader } from "@/components/auth/loader";
+import { useEffect } from "react";
 
 export function MainLayout() {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const { isLoading, token, user } = useAuth();
 
+  useEffect(() => {
+    if (!token && !isLoading && !user) {
+      navigate("/", { replace: true });
+    }
+  }, [token, navigate, isLoading, user]);
+
+  if (isLoading) return <Loader />;
   if (isLoading) {
-    localStorage.removeItem("auth.user");
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-lg font-medium text-muted-foreground">
-            Verificando autenticação...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated || !user) {
-    return <Navigate to="/" replace />;
+    return <Loader />;
   }
 
   return (
