@@ -33,6 +33,7 @@ export default function LogsAcessos() {
     limit: 25,
     search: "",
   });
+  
 
   const [paramsPesquisa, setParamsPesquisa] = useState<FiltersLogs | null>(null);
   const [currentPage, setCurrentPage] = useState(1);

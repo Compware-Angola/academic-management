@@ -1,13 +1,22 @@
 // hooks/access-management/useCreatePersonUser.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useToast } from "@/hooks/use-toast"
-import { createPersonUser } from "@/services/access/create-person-user.service"
+import { createPersonUser, CreatePersonUserRequest } from "@/services/access/create-person-user.service"
+
+
+type CreatePersonUserMutationInput = {
+  payload: CreatePersonUserRequest
+}
+
+
+
 export function useCreatePersonUser() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
+
   return useMutation({
-    mutationFn: createPersonUser,
+    mutationFn: ({ payload }: CreatePersonUserMutationInput) => createPersonUser(payload),
 
     onSuccess: () => {
       toast({
