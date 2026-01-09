@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       AuthStorage.logout();
       setToken(null);
       queryClient.clear();
+      navigate("/", { replace: true });
     }
   }, [isError, navigate, queryClient, isLoading]);
 
