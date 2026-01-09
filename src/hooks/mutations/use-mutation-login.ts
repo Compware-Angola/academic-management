@@ -9,32 +9,31 @@ import {
 import { AuthStorage } from "@/util/auth-storage";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../use-toast";
+import { useAuth } from "../use-auth";
 
 export function useMutationLogin() {
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation<AuthResponse, Error, LoginPayload>({
     mutationKey: ["login"],
     mutationFn: loginService,
-    onSuccess: async (data) => {
-      AuthStorage.saveLogin(data);
+    onSuccess: (data) => {
+      login(data);
+
       toast({
         title: data.mensagem || "Login realizado com sucesso",
         description: `Bem-vindo, ${data.user.username ?? "Utilizador"}`,
       });
+
       navigate("/dashboard", { replace: true });
-      await queryClient.resetQueries({
-        queryKey: ["current-user"],
-      });
     },
     onError: (err: Error) => {
-      const message =
-        err.message || "Erro ao autenticar. Verifique credenciais.";
       toast({
         title: "Erro ao fazer login",
-        description: message,
+        description:
+          err.message || "Erro ao autenticar. Verifique credenciais.",
         variant: "destructive",
       });
     },

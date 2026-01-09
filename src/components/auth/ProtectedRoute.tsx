@@ -1,8 +1,10 @@
 // components/auth/ProtectedRoute.tsx
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { useEffect } from "react";
 import { AuthStorage } from "@/util/auth-storage";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader } from "./loader";
 
 type ProtectedRouteProps = {
   allowedGroups: string[];
@@ -13,14 +15,9 @@ export function ProtectedRoute({
   allowedGroups,
   children,
 }: ProtectedRouteProps) {
-  const { data: user, isLoading, isError } = useCurrentUser("GA");
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (isError) {
-      AuthStorage.logout();
-      navigate("/", { replace: true });
-    }
-  }, [isError, navigate]);
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) return <Loader />;
 
   if (!user) {
     return <Navigate to="/" replace />;
