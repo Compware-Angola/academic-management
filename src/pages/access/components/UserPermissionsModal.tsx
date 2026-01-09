@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -39,12 +39,7 @@ export function UserPermissionsModal({
   onOpenChange,
 }: UserPermissionsModalProps) {
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
-
-  // Estado para selecionar acesso para conceder
   const [selectedAccessToGrant, setSelectedAccessToGrant] = useState<number | null>(null);
-
-  // Estado para selecionar acesso para bloquear
-  const [selectedAccessToBlock, setSelectedAccessToBlock] = useState<number | null>(null);
 
   /** Grupos do utilizador */
   const { data: groups = [], isLoading: loadingGroups } = useUserGroups({
@@ -53,28 +48,38 @@ export function UserPermissionsModal({
   });
 
   /** Acessos do grupo selecionado */
-  const {
-    data: groupAccesses = [],
-    isLoading: loadingGroupAccesses,
-    refetch: refetchGroupAccesses,
-    error: errorAccesses,
-  } = useGroupAccesses({
-    groupId: selectedGroup?.codigo || 0,
-    enabled: !!selectedGroup && open,
-  });
+  const { data: groupAccesses = [], isLoading: loadingGroupAccesses, error: errorAccesses } =
+    useGroupAccesses({
+      groupId: selectedGroup?.codigo || 0,
+      enabled: !!selectedGroup && open,
+    });
+
+  /** Estado local — fonte de verdade enquanto o modal estiver aberto */
+  const [localGroupAccesses, setLocalGroupAccesses] = useState<any[]>([]);
+
+  /** Inicializa estado local quando o modal abre ou muda de grupo */
+  useEffect(() => {
+    if (open && selectedGroup) {
+      setLocalGroupAccesses(
+        groupAccesses.map(a => ({
+          ...a,
+          blocking: false,
+        }))
+      );
+    }
+  }, [open, selectedGroup, groupAccesses]);
 
   /** TODOS os acessos do sistema (catálogo) */
   const { data: allAccesses = [], isLoading: loadingAllAccesses } =
     useQueryAcessos({ apenasAtivos: true });
 
   /** Mutação: conceder / reativar acesso */
-  const { mutateAsync: grantAccess, isPending: granting } =
-    useGrantUserAccess();
+  const { mutateAsync: grantAccess, isPending: granting } = useGrantUserAccess();
 
   /** Mutação: bloquear acesso */
-  const { mutateAsync: blockAccess, isPending: blocking } = useBlockUserAccess();
+  const { mutateAsync: blockAccess } = useBlockUserAccess();
 
-  /** Função para conceder acesso */
+  /** Concede novo acesso e atualiza o estado local */
   async function handleGrantAccess() {
     if (!selectedAccessToGrant) return;
 
@@ -83,21 +88,44 @@ export function UserPermissionsModal({
       acessoId: selectedAccessToGrant,
     });
 
+    // Busca dados do acesso no catálogo
+    const acessoInfo = allAccesses.find(a => a.id === selectedAccessToGrant);
+    if (acessoInfo) {
+      setLocalGroupAccesses(prev => [
+        ...prev,
+        {
+          codigo: acessoInfo.id,
+          descricao: acessoInfo.designacao, // Corrige nome do acesso
+          disponibilidade: 1,
+          blocking: false,
+          ["Update at"]: new Date().toISOString(),
+        },
+      ]);
+    }
+
     setSelectedAccessToGrant(null);
-    refetchGroupAccesses();
   }
 
-  /** Função para bloquear acesso */
-  async function handleBlockAccess() {
-    if (!selectedAccessToBlock) return;
+  /** Bloqueia acesso e atualiza estado local */
+  async function handleBlockAccess(accessCodigo: number) {
+    setLocalGroupAccesses(prev =>
+      prev.map(a =>
+        a.codigo === accessCodigo ? { ...a, blocking: true } : a
+      )
+    );
 
     await blockAccess({
       utilizadorId: user.codigo,
-      acessoId: selectedAccessToBlock,
+      acessoId: accessCodigo,
     });
 
-    setSelectedAccessToBlock(null);
-    refetchGroupAccesses();
+    setLocalGroupAccesses(prev =>
+      prev.map(a =>
+        a.codigo === accessCodigo
+          ? { ...a, disponibilidade: 0, blocking: false }
+          : a
+      )
+    );
   }
 
   return (
@@ -122,14 +150,10 @@ export function UserPermissionsModal({
             {loadingGroups ? (
               <Skeleton className="h-32 w-full" />
             ) : (
-              groups.map((group) => (
+              groups.map(group => (
                 <Button
                   key={group.codigo}
-                  variant={
-                    selectedGroup?.codigo === group.codigo
-                      ? "default"
-                      : "outline"
-                  }
+                  variant={selectedGroup?.codigo === group.codigo ? "default" : "outline"}
                   className="w-full justify-between"
                   onClick={() => setSelectedGroup(group)}
                 >
@@ -145,9 +169,7 @@ export function UserPermissionsModal({
             <div className="flex items-center gap-2 text-lg font-semibold">
               <ShieldCheck className="h-5 w-5" />
               Permissões Ativas
-              {selectedGroup && (
-                <Badge className="ml-2">{selectedGroup.descricao}</Badge>
-              )}
+              {selectedGroup && <Badge className="ml-2">{selectedGroup.descricao}</Badge>}
             </div>
 
             {!selectedGroup ? (
@@ -163,128 +185,88 @@ export function UserPermissionsModal({
               </div>
             ) : errorAccesses ? (
               <p className="text-destructive">Erro ao carregar permissões.</p>
-            ) : groupAccesses.length === 0 ? (
+            ) : localGroupAccesses.length === 0 ? (
               <p className="text-muted-foreground italic">
                 Este grupo não tem permissões associadas.
               </p>
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {groupAccesses.map((access) => (
+                {localGroupAccesses.map(access => (
                   <div
                     key={access.codigo}
-                    className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                    className="flex flex-col p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck
-                          className="h-4 w-4 text-green-600"
-                        />
-                        <span className="font-medium text-sm">
-                          {access.codigo} – {access.descricao}
-                        </span>
-                      </div>
-                      {access["Update at"] && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Atualizado em:{" "}
-                          {format(
-                            new Date(access["Update at"]),
-                            "dd/MM/yyyy HH:mm"
-                          )}
-                        </p>
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-green-600" />
+                      <span className="font-medium text-sm">
+                        {access.codigo} – {access.descricao}
+                      </span>
+                    </div>
+
+                    {access["Update at"] && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Atualizado em: {format(new Date(access["Update at"]), "dd/MM/yyyy HH:mm")}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between mt-2">
+                      <Badge variant={access.disponibilidade === 1 ? "default" : "outline"}>
+                        {access.disponibilidade === 1 ? "Ativo" : "Bloqueado"}
+                      </Badge>
+
+                      {access.disponibilidade === 1 && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleBlockAccess(access.codigo)}
+                          disabled={access.blocking}
+                        >
+                          {access.blocking ? "Bloqueando..." : "Bloquear"}
+                        </Button>
                       )}
                     </div>
-                    <Badge
-                      variant={access.disponibilidade === 1 ? "default" : "outline"}
-                    >
-                      {access.disponibilidade === 1 ? "Ativo" : "Bloqueado"}
-                    </Badge>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* COLUNA 3 — Adicionar e Bloquear acesso */}
-          <div className="space-y-8">
-            {/* ADICIONAR ACESSO */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 font-semibold">
-                <Plus className="h-5 w-5" />
-                Adicionar acesso
-              </div>
-
-              {loadingAllAccesses ? (
-                <Skeleton className="h-10 w-full" />
-              ) : (
-                <>
-                  <Select
-                    value={selectedAccessToGrant?.toString()}
-                    onValueChange={(v) => setSelectedAccessToGrant(Number(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecionar acesso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allAccesses?.map((access) => (
-                        <SelectItem key={access.id} value={access.id.toString()}>
-                          {access.id} – {access.designacao}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    className="w-full"
-                    onClick={handleGrantAccess}
-                    disabled={!selectedAccessToGrant || granting}
-                  >
-                    {granting ? "A conceder..." : "Conceder acesso"}
-                  </Button>
-                </>
-              )}
+          {/* COLUNA 3 — Adicionar acesso */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 font-semibold">
+              <Plus className="h-5 w-5" />
+              Adicionar acesso
             </div>
 
-            {/* BLOQUEAR ACESSO */}
-            <div className="space-y-4 pt-6 border-t">
-              <div className="flex items-center gap-2 font-semibold text-destructive">
-                <Shield className="h-5 w-5" />
-                Bloquear acesso
-              </div>
+            {loadingAllAccesses ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <>
+                <Select
+                  value={selectedAccessToGrant?.toString()}
+                  onValueChange={v => setSelectedAccessToGrant(Number(v))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar acesso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allAccesses?.map(access => (
+                      <SelectItem key={access.id} value={access.id.toString()}>
+                        {access.id} – {access.designacao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              {loadingAllAccesses ? (
-                <Skeleton className="h-10 w-full" />
-              ) : (
-                <>
-                  <Select
-                    value={selectedAccessToBlock?.toString()}
-                    onValueChange={(v) => setSelectedAccessToBlock(Number(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecionar acesso" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allAccesses?.map((access) => (
-                        <SelectItem
-                          key={access.id}
-                          value={access.id.toString()}
-                        >
-                          {access.id} – {access.designacao}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    className="w-full"
-                    variant="destructive"
-                    onClick={handleBlockAccess}
-                    disabled={!selectedAccessToBlock || blocking}
-                  >
-                    {blocking ? "Bloqueando..." : "Bloquear acesso"}
-                  </Button>
-                </>
-              )}
-            </div>
+                <Button
+                  className="w-full"
+                  onClick={handleGrantAccess}
+                  disabled={!selectedAccessToGrant || granting}
+                >
+                  {granting ? "A conceder..." : "Conceder acesso"}
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
