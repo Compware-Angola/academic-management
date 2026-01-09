@@ -2,13 +2,6 @@ import { useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -20,18 +13,21 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TabsContent } from "@/components/ui/tabs";
 import { useQueryListarCargosAdministrativo } from "@/hooks/controle-acesso/use-query-listar-cargos-administrativos";
-
-const tiposCargo = [
-  { id: 1, descricao: "Reitor" },
-  { id: 2, descricao: "Vice-Reitor" },
-  { id: 3, descricao: "Decano" },
-  { id: 4, descricao: "Vice-Decano" },
-  { id: 5, descricao: "Diretor de Curso" },
-];
+import { useQueryFetchTipoCargo } from "@/hooks/cargo/use-query-fetch-tipo-cargo";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+const ALL_OPTION = {
+  pk_tipo_cargo: 0,
+  descricao: "Todos",
+};
 export function TabContentAll() {
+  const [filtroCargo, setFiltroCargo] = useState("0");
   const { data: cargos = [], isLoading: isLoadingCargos } =
-    useQueryListarCargosAdministrativo({});
-  const [filtroCargo, setFiltroCargo] = useState("todos");
+    useQueryListarCargosAdministrativo({
+      tipoCargoId:
+        Number(filtroCargo) === Number("0") ? undefined : Number(filtroCargo),
+    });
+  const { data: tipoCargos = [], isLoading: isLoadingTipoCargo } =
+    useQueryFetchTipoCargo();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pt-PT", {
@@ -45,22 +41,18 @@ export function TabContentAll() {
     <TabsContent value="todos" className="mt-4">
       <div className="space-y-4">
         <div className="mt-4 flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-end">
-          <div className="w-full space-y-2 lg:w-64">
-            <label className="text-sm font-medium text-foreground">Cargo</label>
-            <Select value={filtroCargo} onValueChange={setFiltroCargo}>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder="Selecione o cargo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os Cargos</SelectItem>
-                {tiposCargo.map((c) => (
-                  <SelectItem key={c.id} value={c.id.toString()}>
-                    {c.descricao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormCommandSelect
+            disabled={isLoadingCargos}
+            value={filtroCargo}
+            label="Cargos"
+            options={[ALL_OPTION, ...tipoCargos]}
+            map={(c) => ({
+              key: c.pk_tipo_cargo.toString(),
+              value: c.pk_tipo_cargo.toString(),
+              label: c.descricao,
+            })}
+            onChange={setFiltroCargo}
+          />
         </div>
         <div className="rounded-lg border border-border bg-card shadow-sm">
           <Table>
