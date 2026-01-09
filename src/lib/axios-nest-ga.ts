@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ApiError, type ApiErrorResponse } from "@/error";
-import { AuthStorage } from "@/util/auth-storage"; // ← importa o mesmo storage
+import { AuthStorage } from "@/util/auth-storage";
+import { toast } from "sonner";
 
 export const axiosNestGa = axios.create({
   baseURL: import.meta.env.VITE_NEST_GA_API_URL,
@@ -52,6 +53,7 @@ axiosNestGa.interceptors.response.use(
         const parsed = data as ApiErrorResponse;
         errorData = parsed;
         message = parsed.message || parsed.error || message;
+        toast.error(message);
       } catch {
         if (typeof data === "string") {
           message = data.trim() || message;
