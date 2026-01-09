@@ -143,6 +143,7 @@ export default function ScheduleList() {
   const {
     data: ScheduleResponse,
     isLoading: isLoadingSchedule,
+    isError,
     refetch: refetchHorarios,
   } = useQueryHorariosExistentes(queryParams);
 
