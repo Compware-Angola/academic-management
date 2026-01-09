@@ -83,112 +83,152 @@ import { ListarAcessos } from "./pages/access/AllAccesses";
 import LogsAcessos from "./pages/access/LogsAccess";
 import DirectorCourseAccess from "./pages/controle-acesso/dir-surso/DiretorCurso";
 import SolicitacoesEncaminhadas from "./pages/controle-acesso/solicitacao/SolicitacoesEncaminhadas";
+import { AuthProvider } from "./providers/auth.provider";
+import { PublicRoute } from "./components/auth/publicRounte";
 
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+      <BrowserRouter>
         <ReactQueryProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Login />} />
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route element={<PublicRoute />}>
+                  <Route path="/" element={<Login />} />
+                </Route>
 
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<Index />} />
-                <Route
-                  path="/horarios/criar"
-                  element={
-                    <ProtectedRoute allowedGroups={["adm", "dct", "rootAdmin"]}>
-                      <CreateSchedule />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/controle-acesso/diretor" element={<ProtectedRoute allowedGroups={["adm", "dct", "rootAdmin"]}><DirectorCourseAccess /></ProtectedRoute>} />
-                 <Route path="/controle-acesso/solicitacoes" element={<ProtectedRoute allowedGroups={["adm", "dct", "rootAdmin"]}><SolicitacoesEncaminhadas /></ProtectedRoute>} />
-                
-                <Route
-                  path="horarios/inscricoes"
-                  element={<SchedulesInscription />}
-                />
-                <Route path="/horarios/listar" element={<ScheduleList />} />
-                <Route
-                  path="/horarios/eliminados"
-                  element={<ScheduleListEliminated />}
-                />
-                <Route
-                  path="/horarios/permissao"
-                  element={<SchedulesWithPermission />}
-                />
-                <Route path="/schedule/:id/edit" element={<EditSchedule />} />
-                <Route path="horarios/sala" element={<SchedulesByRoom />} />
-                <Route path="/salas/listar" element={<ClassromList />} />
-                <Route
-                  path="/plano/disciplinas"
-                  element={<DisciplineManagementList />}
-                />
-                {/* <Route
+                <Route element={<MainLayout />}>
+                  <Route path="/dashboard" element={<Index />} />
+                  <Route
+                    path="/horarios/criar"
+                    element={
+                      <ProtectedRoute
+                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                      >
+                        <CreateSchedule />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/controle-acesso/diretor"
+                    element={
+                      <ProtectedRoute
+                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                      >
+                        <DirectorCourseAccess />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/controle-acesso/solicitacoes"
+                    element={
+                      <ProtectedRoute
+                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                      >
+                        <SolicitacoesEncaminhadas />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="horarios/inscricoes"
+                    element={<SchedulesInscription />}
+                  />
+                  <Route path="/horarios/listar" element={<ScheduleList />} />
+                  <Route
+                    path="/horarios/eliminados"
+                    element={<ScheduleListEliminated />}
+                  />
+                  <Route
+                    path="/horarios/permissao"
+                    element={<SchedulesWithPermission />}
+                  />
+                  <Route path="/schedule/:id/edit" element={<EditSchedule />} />
+                  <Route path="horarios/sala" element={<SchedulesByRoom />} />
+                  <Route path="/salas/listar" element={<ClassromList />} />
+                  <Route
+                    path="/plano/disciplinas"
+                    element={<DisciplineManagementList />}
+                  />
+                  {/* <Route
                   path="/inscricoes/matriculados"
                   element={<EnrolledList />}
                 /> */}
-                <Route
-                  path="/gestao-docentes/listagem"
-                  element={<GeneralListing />}
-                />
-                {/* <Route
+                  <Route
+                    path="/gestao-docentes/listagem"
+                    element={<GeneralListing />}
+                  />
+                  {/* <Route
                   path="/exame/lista-candidatos"
                   element={<CandidateList />}
                 /> */}
-                <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
-                <Route path="/avaliacoes/controle" element={<ControlNotes />} />
-                <Route path="/avaliacoes/formula-uc" element={<FormulaUC />} />
-                <Route path="/avaliacoes/presenca" element={<PresenceList />} />
-                <Route path="/avaliacoes/pauta" element={<LancamentoPauta />} />
-                <Route path="avaliacoes/pauta-geral" element={<PautaGeral />} />
-                <Route
-                  path="avaliacoes/pauta-uc"
-                  element={<PautaGeralPorUC />}
-                />
-                <Route
-                  path="/avaliacoes/validacao"
-                  element={<ValidationTeacherAgenda />}
-                />
-                <Route
-                  path="/avaliacoes/formula-oral"
-                  element={<FormulaOral />}
-                />
-                <Route
-                  path="/avaliacoes/historico"
-                  element={<LaunchHistoric />}
-                />
-                <Route
-                  path="/avaliacoes/estudantes"
-                  element={<EstudantesInscritos />}
-                />
-                <Route
-                  path="/marcacao-provas/controle"
-                  element={<MarkingAssessment />}
-                />
-                <Route
-                  path="avaliacoes/estatisticas"
-                  element={<StatisticAssessment />}
-                />
-                <Route path="avaliacoes/permissao" element={<Permission />} />
-                <Route path="avaliacoes/visualizar" element={<ViewNotes />} />
-                <Route
-                  path="avaliacoes/parametros"
-                  element={<GeneralParametersAvaluation />}
-                />
-                <Route
-                  path="marcacao-provas/marcacao"
-                  element={<AddMarkingAssessment />}
-                />
-                {/* <Route
+                  <Route path="/avaliacoes/notas" element={<LaunchNotes />} />
+                  <Route
+                    path="/avaliacoes/controle"
+                    element={<ControlNotes />}
+                  />
+                  <Route
+                    path="/avaliacoes/formula-uc"
+                    element={<FormulaUC />}
+                  />
+                  <Route
+                    path="/avaliacoes/presenca"
+                    element={<PresenceList />}
+                  />
+                  <Route
+                    path="/avaliacoes/pauta"
+                    element={<LancamentoPauta />}
+                  />
+                  <Route
+                    path="avaliacoes/pauta-geral"
+                    element={<PautaGeral />}
+                  />
+                  <Route
+                    path="avaliacoes/pauta-uc"
+                    element={<PautaGeralPorUC />}
+                  />
+                  <Route
+                    path="/avaliacoes/validacao"
+                    element={<ValidationTeacherAgenda />}
+                  />
+                  <Route
+                    path="/avaliacoes/formula-oral"
+                    element={<FormulaOral />}
+                  />
+                  <Route
+                    path="/avaliacoes/historico"
+                    element={<LaunchHistoric />}
+                  />
+                  <Route
+                    path="/avaliacoes/estudantes"
+                    element={<EstudantesInscritos />}
+                  />
+                  <Route
+                    path="/marcacao-provas/controle"
+                    element={<MarkingAssessment />}
+                  />
+                  <Route
+                    path="avaliacoes/estatisticas"
+                    element={<StatisticAssessment />}
+                  />
+                  <Route path="avaliacoes/permissao" element={<Permission />} />
+                  <Route path="avaliacoes/visualizar" element={<ViewNotes />} />
+                  <Route
+                    path="avaliacoes/parametros"
+                    element={<GeneralParametersAvaluation />}
+                  />
+                  <Route
+                    path="marcacao-provas/marcacao"
+                    element={<AddMarkingAssessment />}
+                  />
+                  {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
                 /> */}
-                {/*
+                  {/*
                 <Route
                   path="/assiduidade/docente"
                   element={<TeacherAttendance />}
@@ -203,81 +243,88 @@ const App = () => {
                 />
               */}
 
-                <Route path="/acessos/utilizador" element={<UserAccess />} />
-                <Route
-                  path="/acessos/criar-utilizador"
-                  element={<CreateUser />}
-                />
-                <Route
-                  path="/acessos/funcionalidade-utilizador"
-                  element={<UserFunctionality />}
-                />
-                <Route path="/acessos/grupo" element={<AcessGrup />} />
-                <Route
-                  path="/acessos/grupos/utilizadores"
-                  element={<ListarGrupos />}
-                />
-                <Route path="/controle-acesso/grupos" element={<Grupos />} />
-                <Route
-                  path="/ver-utilizadores/grupos"
-                  element={<AccessGroup />}
-                />
-                <Route path="/acessos/logados" element={<LoggedInUsers />} />
-                <Route path="/acessos/bloquear" element={<BlockAccess />} />
-                <Route path="/acessos/todos" element={<ListarAcessos />} />
-                <Route path="/acessos/logs" element={<LogsAcessos />} />
-                <Route
-                  path="/acessos/cargos"
-                  element={<RectoratePositions />}
-                />
-                <Route path="/profile" element={<TeacherProfile />} />
-                <Route path="/horarios/uc" element={<SchedulesByUC />} />
-                <Route
-                  path="/horarios/docente"
-                  element={<TeacherSchedules />}
-                />
-                <Route
-                  path="/horarios/semanais"
-                  element={<HorariosSemanais />}
-                />
-                <Route
-                  path="/horarios/movimentar/estudantes"
-                  element={<MovimentarEstudantes />}
-                />
-                <Route path="/plano/uc-plano" element={<UCManagementPlan />} />
-                <Route
-                  path="/plano/uc-departamento"
-                  element={<UcDepartmentManagement />}
-                />
-                <Route
-                  path="/calendario/atividades"
-                  element={<ActivitiesLecturesLic />}
-                />
-                <Route
-                  path="/calendario/dias-isentos"
-                  element={<ExemptDays />}
-                />
-                <Route path="/calendario/parametros" element={<Parameters />} />
-                <Route path="/calendario/prazos" element={<Deadlines />} />
-                <Route
-                  path="/calendario-pos/atividades"
-                  element={<ActivitiesLecturesPos />}
-                />
-                <Route
-                  path="/calendario-pos/provas"
-                  element={<ExamCalendarPos />}
-                />
-                <Route path="/alunos/novo" element={<UnderConstruction />} />
-                {/* <Route path="*" element={<NotFound />} />*/}
-                <Route path="*" element={<UnderConstruction />} />
-                {/* Finanças */}
-                <Route path="/ajuda" element={<HealpFAQ />} />
-                <Route path="/sem-permissao" element={<AccessDenied />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+                  <Route path="/acessos/utilizador" element={<UserAccess />} />
+                  <Route
+                    path="/acessos/criar-utilizador"
+                    element={<CreateUser />}
+                  />
+                  <Route
+                    path="/acessos/funcionalidade-utilizador"
+                    element={<UserFunctionality />}
+                  />
+                  <Route path="/acessos/grupo" element={<AcessGrup />} />
+                  <Route
+                    path="/acessos/grupos/utilizadores"
+                    element={<ListarGrupos />}
+                  />
+                  <Route path="/controle-acesso/grupos" element={<Grupos />} />
+                  <Route
+                    path="/ver-utilizadores/grupos"
+                    element={<AccessGroup />}
+                  />
+                  <Route path="/acessos/logados" element={<LoggedInUsers />} />
+                  <Route path="/acessos/bloquear" element={<BlockAccess />} />
+                  <Route path="/acessos/todos" element={<ListarAcessos />} />
+                  <Route path="/acessos/logs" element={<LogsAcessos />} />
+                  <Route
+                    path="/acessos/cargos"
+                    element={<RectoratePositions />}
+                  />
+                  <Route path="/profile" element={<TeacherProfile />} />
+                  <Route path="/horarios/uc" element={<SchedulesByUC />} />
+                  <Route
+                    path="/horarios/docente"
+                    element={<TeacherSchedules />}
+                  />
+                  <Route
+                    path="/horarios/semanais"
+                    element={<HorariosSemanais />}
+                  />
+                  <Route
+                    path="/horarios/movimentar/estudantes"
+                    element={<MovimentarEstudantes />}
+                  />
+                  <Route
+                    path="/plano/uc-plano"
+                    element={<UCManagementPlan />}
+                  />
+                  <Route
+                    path="/plano/uc-departamento"
+                    element={<UcDepartmentManagement />}
+                  />
+                  <Route
+                    path="/calendario/atividades"
+                    element={<ActivitiesLecturesLic />}
+                  />
+                  <Route
+                    path="/calendario/dias-isentos"
+                    element={<ExemptDays />}
+                  />
+                  <Route
+                    path="/calendario/parametros"
+                    element={<Parameters />}
+                  />
+                  <Route path="/calendario/prazos" element={<Deadlines />} />
+                  <Route
+                    path="/calendario-pos/atividades"
+                    element={<ActivitiesLecturesPos />}
+                  />
+                  <Route
+                    path="/calendario-pos/provas"
+                    element={<ExamCalendarPos />}
+                  />
+                  <Route path="/alunos/novo" element={<UnderConstruction />} />
+                  {/* <Route path="*" element={<NotFound />} />*/}
+                  <Route path="*" element={<UnderConstruction />} />
+                  {/* Finanças */}
+                  <Route path="/ajuda" element={<HealpFAQ />} />
+                  <Route path="/sem-permissao" element={<AccessDenied />} />
+                </Route>
+              </Routes>
+            </TooltipProvider>
+          </AuthProvider>
         </ReactQueryProvider>
-      </TooltipProvider>
+      </BrowserRouter>
     </ThemeProvider>
   );
 };
