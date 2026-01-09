@@ -1,6 +1,6 @@
 import axios from "axios";
 import { ApiError, type ApiErrorResponse } from "@/error";
-
+import { AuthStorage } from "@/util/auth-storage"; // ← importa o mesmo storage
 
 export const axiosNestGa = axios.create({
   baseURL: import.meta.env.VITE_NEST_GA_API_URL,
@@ -10,19 +10,34 @@ export const axiosNestGa = axios.create({
 });
 
 // ==========================
-// ⭐ Interceptor de resposta
+// ⭐ Interceptor de REQUISIÇÃO (envio do token)
+// ==========================
+axiosNestGa.interceptors.request.use(
+  (config) => {
+    const token = AuthStorage.getToken();
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    // Erro antes de enviar a requisição
+    return Promise.reject(error);
+  }
+);
+
+// ==========================
+// ⭐ Interceptor de RESPOSTA (tratamento de erros)
 // ==========================
 axiosNestGa.interceptors.response.use(
   (response) => {
-    // Se está OK, devolve normalmente
+    // Resposta OK
     return response;
   },
   async (error) => {
-    // Erro sem resposta (network, timeout, CORS, etc)
-
-
-    console.log(error,"TESTE");
-    
+    // Removi o console.log de teste
     if (!error.response) {
       throw new ApiError("Erro de conexão com o servidor.", 0, undefined);
     }
@@ -32,16 +47,12 @@ axiosNestGa.interceptors.response.use(
     let errorData: ApiErrorResponse | undefined;
     let message = `Erro ${status}: ${statusText}`;
 
-    // Tentativa de extrair erro vindo da API
-
     if (data) {
       try {
         const parsed = data as ApiErrorResponse;
-
         errorData = parsed;
         message = parsed.message || parsed.error || message;
       } catch {
-        // Caso seja texto simples
         if (typeof data === "string") {
           message = data.trim() || message;
         }
