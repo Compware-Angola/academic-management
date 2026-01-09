@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { DataTable } from "@/components/common/DataTable";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Search } from "lucide-react";
+import { Check, Eye, Search, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +43,27 @@ const { data, isLoading, isFetching } = useQueryListarSolicitacoes({
   page: currentPage,
   limit: 10,
 });
+function handleAprovar(row: Solicitacao) {
+  const confirmado = window.confirm(
+    `Tem certeza que deseja APROVAR a solicitação nº ${row.codigo}?`
+  );
+
+  if (!confirmado) return;
+
+  // Exemplo de chamada à API
+ 
+}
+
+function handleRejeitar(row: Solicitacao) {
+  const confirmado = window.confirm(
+    `Tem certeza que deseja REJEITAR a solicitação nº ${row.codigo}?`
+  );
+
+  if (!confirmado) return;
+
+  // Exemplo de chamada à API
+
+}
 
 
   /* ---------- MAP DATA ---------- */
@@ -73,19 +94,46 @@ const { data, isLoading, isFetching } = useQueryListarSolicitacoes({
     {
       header: "Ações",
       accessor: "acoes",
-      cell: (row: Solicitacao) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSelectedSolicitacao(row);
-            setShowDetails(true);
-          }}
-        >
-          <Eye className="h-4 w-4 mr-1" />
-          Ver
-        </Button>
-      ),
+     cell: (row: Solicitacao) => (
+  <div className="flex items-center gap-2">
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => {
+        setSelectedSolicitacao(row);
+        setShowDetails(true);
+      }}
+    >
+      <Eye className="h-4 w-4 mr-1" />
+      Ver
+    </Button>
+
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => {
+        setSelectedSolicitacao(row);
+        handleAprovar(row);
+      }}
+    >
+      <Check className="h-4 w-4 mr-1 text-green-600" />
+      Aprovar
+    </Button>
+
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => {
+        setSelectedSolicitacao(row);
+        handleRejeitar(row);
+      }}
+    >
+      <X className="h-4 w-4 mr-1 text-red-600" />
+      Rejeitar
+    </Button>
+  </div>
+),
+
     },
   ];
 
