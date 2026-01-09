@@ -57,7 +57,7 @@ export function FormCommandSelect<T>({
             type="button"
             disabled={disabled}
             className={cn(
-              "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+              "flex h-10 w-full items-center min-w-40! justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
               "placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
               "disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1"
             )}
@@ -72,7 +72,7 @@ export function FormCommandSelect<T>({
         <PopoverContent
           align="start"
           sideOffset={4}
-          className="w-[var(--radix-popover-trigger-width)] p-0"
+          className="w-[var(--radix-popover-trigger-width)]  p-0"
         >
           <Command>
             <CommandInput
