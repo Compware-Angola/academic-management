@@ -1,4 +1,3 @@
-// src/hooks/study_plan/use-cursos.ts
 import { Curso, getCursosDropdown } from "@/services/fetch-course";
 import { useQuery } from "@tanstack/react-query";
 

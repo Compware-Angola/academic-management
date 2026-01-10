@@ -253,10 +253,6 @@ export function TabContentAll() {
 
             <AlertDialogDescription>
               Tem a certeza que deseja remover o ocupante deste cargo?
-              <br />
-              <span className="font-medium text-destructive">
-                Esta ação não pode ser desfeita.
-              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
 
