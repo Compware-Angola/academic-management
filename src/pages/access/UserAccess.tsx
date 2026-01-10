@@ -27,11 +27,12 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
-  Edit, // Novo ícone
+  Edit,
+  Lock, // Novo ícone
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { useUsers } from "@/hooks/acess/use-query-users"; 
+import { useUsers } from "@/hooks/acess/use-query-users";
 import { User } from "@/services/access/fect-users.service";
 import { UserPermissionsModal } from "./components/UserPermissionsModal";
 // Nova modal para edição
@@ -43,7 +44,7 @@ export default function UserAccess() {
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
-
+  const navigate = useNavigate();
   // Novo estado para o utilizador a editar
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
@@ -54,7 +55,7 @@ export default function UserAccess() {
     isError,
     refetch,
   } = useUsers({
-    search: searchTerm || undefined, 
+    search: searchTerm || undefined,
     page: currentPage,
     limit: itemsPerPage,
     ativo
@@ -98,6 +99,10 @@ export default function UserAccess() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+            <Button onClick={() => navigate("/acessos/criar-utilizador")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Criar Utilizador
+        </Button>
           <Button
             variant="outline"
             size="sm"
@@ -120,7 +125,7 @@ export default function UserAccess() {
             <Label htmlFor="search">Pesquisar</Label>
             <Input
               id="search"
-               autoComplete="off"
+              autoComplete="off"
               placeholder="Nome, username, código..."
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
@@ -243,8 +248,8 @@ export default function UserAccess() {
                             size="sm"
                             onClick={() => setUserToEdit(user)}
                           >
-                            <Edit className="h-4 w-4 mr-1" />
-                            Editar
+                            <Lock className="h-4 w-4 mr-1.5" />
+                            Editar Senha
                           </Button>
 
                           {/* Botão Permissões */}
