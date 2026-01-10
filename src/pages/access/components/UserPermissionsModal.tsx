@@ -21,6 +21,9 @@ import { format } from "date-fns";
 import { User } from "@/services/access/fect-users.service";
 import { UserGroup } from "@/services/access/fetch-user-group.service";
 
+import { useAddUserGruop } from "@/hooks/acess/use-add-gruop-user";
+import { useQueryGrupos } from "@/hooks/acess/use-query-grupos";
+
 import { useUserGroups } from "@/hooks/acess/use-user-groups";
 import { useGroupAccesses } from "@/hooks/acess/use-query-group-accesses";
 import { useQueryAcessos } from "@/hooks/acess/use-query-all-accesses";
@@ -40,9 +43,11 @@ export function UserPermissionsModal({
 }: UserPermissionsModalProps) {
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
   const [selectedAccessToGrant, setSelectedAccessToGrant] = useState<number | null>(null);
+  const [selectedGroupToAdd, setSelectedGroupToAdd] = useState<number | null>(null);
+  
 
   /** Grupos do utilizador */
-  const { data: groups = [], isLoading: loadingGroups } = useUserGroups({
+  const { data: groups = [], isLoading: loadingGroups, refetch: refetchUserGroups } = useUserGroups({
     userId: user.codigo,
     enabled: open,
   });
@@ -76,6 +81,10 @@ export function UserPermissionsModal({
   /** Mutação: conceder / reativar acesso */
   const { mutateAsync: grantAccess, isPending: granting } = useGrantUserAccess();
 
+  /** Adicionar grupo ao utilizador */
+  const {data: todosGrupos = [], isPending: loadingTodosGrupos} = useQueryGrupos({ativo: "true"})
+  const {mutateAsync: addGrupoUser} = useAddUserGruop()
+
   /** Mutação: bloquear acesso */
   const { mutateAsync: blockAccess } = useBlockUserAccess();
 
@@ -87,6 +96,7 @@ export function UserPermissionsModal({
       utilizadorId: user.codigo,
       acessoId: selectedAccessToGrant,
     });
+
 
     // Busca dados do acesso no catálogo
     const acessoInfo = allAccesses.find(a => a.id === selectedAccessToGrant);
@@ -128,6 +138,22 @@ export function UserPermissionsModal({
     );
   }
 
+  async function handleAddGroup() {
+  if (!selectedGroupToAdd) return;
+
+  await addGrupoUser({
+    userId: user.codigo,
+    gruopId: selectedGroupToAdd,
+  });
+
+  // Atualiza lista de grupos do utilizador
+  await refetchUserGroups();
+
+  // Limpa seleção
+  setSelectedGroupToAdd(null);
+}
+
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl! w-full! max-h-[90vh] overflow-y-auto">
@@ -162,6 +188,45 @@ export function UserPermissionsModal({
                 </Button>
               ))
             )}
+
+            {/* COLUNA 3 — Adicionar Grupo */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 font-semibold">
+              <Plus className="h-5 w-5" />
+              Adicionar grupo
+            </div>
+
+            {loadingTodosGrupos ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <>
+                <Select
+                  value={selectedGroupToAdd?.toString()}
+                  onValueChange={v => setSelectedGroupToAdd(Number(v))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Adicionar Grupo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {todosGrupos?.map(grupo => (
+                      <SelectItem key={grupo.pkGrupo} value={grupo.pkGrupo.toString()}>
+                        {grupo.pkGrupo} – {grupo.designacao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  className="w-full"
+                  onClick={handleAddGroup}
+                  disabled={!selectedGroupToAdd || loadingTodosGrupos}
+                >
+                  {loadingTodosGrupos ? "A conceder..." : "Conceder grupo"}
+                </Button>
+              </>
+            )}
+          </div>
+
           </div>
 
           {/* COLUNA 2 — Permissões do grupo */}
