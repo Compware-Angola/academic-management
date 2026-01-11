@@ -89,7 +89,7 @@ export function UserPermissionsModal({
   const {data: todosGrupos = [], isPending: loadingTodosGrupos} = useQueryGrupos({ativo: "true"})
   const {mutateAsync: addGrupoUser} = useAddUserGruop()
 
-  console.log("TODOS GRUPOS: ", todosGrupos)
+ 
 
   /** Mutação: bloquear acesso */
   const { mutateAsync: blockAccess } = useBlockUserAccess();
@@ -177,12 +177,10 @@ async function handleRemoveGroup(groupCodigo: number) {
   );
 }
 
-function isGrupoUnitario(groupCodigo:  string | number) {
-  const codigoNumber = Number(groupCodigo);
-
-  const grupo = todosGrupos.find(g => g.pkGrupo === codigoNumber );
-  return grupo?.fkTipoDeGrupo !==  2;
+function isGrupoUnitario(group?: UserGroup): boolean {
+  return group.tipo_grupo === 2;
 }
+
 
 
   return (
@@ -227,7 +225,7 @@ function isGrupoUnitario(groupCodigo:  string | number) {
             <div className="flex items-center gap-2">
               <ChevronRight className="h-4 w-4" />
 
-              {isGrupoUnitario(group.codigo) && (
+              {group.tipo_grupo !=2 && (
                 <X
                   className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
                   onClick={e => {
@@ -335,14 +333,16 @@ function isGrupoUnitario(groupCodigo:  string | number) {
                         {access.disponibilidade === 1 ? "Ativo" : "Bloqueado"}
                       </Badge>
 
-                      {access.disponibilidade === 1 && (
+                      {access.disponibilidade === 1 && isGrupoUnitario(selectedGroup)  && (
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => handleBlockAccess(access.codigo)}
                           disabled={access.blocking}
                         >
-                          {access.blocking ? "Bloqueando..." : "Bloquear"}
+                          
+                          {isGrupoUnitario(selectedGroup) && (access.blocking ? "Bloqueando..." : "Bloquear")}
+
                         </Button>
                       )}
                     </div>
