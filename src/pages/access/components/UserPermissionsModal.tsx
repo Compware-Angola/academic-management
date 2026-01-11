@@ -231,7 +231,7 @@ function isGrupoUnitario(groupCodigo:  string | number) {
                 <X
                   className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
                   onClick={e => {
-                    e.stopPropagation(); // agora funciona de verdade
+                    e.stopPropagation(); 
                     handleRemoveGroup(group.codigo);
                   }}
                 />
