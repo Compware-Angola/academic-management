@@ -208,32 +208,40 @@ function isGrupoUnitario(groupCodigo:  string | number) {
               <Skeleton className="h-32 w-full" />
             ) : (
               groups.map(group => (
-            <Button
-              key={group.codigo}
-              variant={selectedGroup?.codigo === group.codigo ? "default" : "outline"}
-              className="w-full justify-between items-center"
-              onClick={() => setSelectedGroup(group)}
-            >
-              <span>{group.descricao}</span>
+            <div
+            key={group.codigo}
+            role="button"
+            tabIndex={0}
+            onClick={() => setSelectedGroup(group)}
+            className={`
+              w-full flex items-center justify-between
+              px-4 py-2 rounded-md border
+              cursor-pointer transition-colors
+              ${selectedGroup?.codigo === group.codigo
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-muted"}
+            `}
+          >
+            <span>{group.descricao}</span>
 
-              <div className="flex items-center gap-2">
-                <ChevronRight className="h-4 w-4" />
-                
-                {isGrupoUnitario(group.codigo) && (
-                  <X
-                    className="h-4 w-4 text-destructive hover:text-destructive cursor-pointer"
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleRemoveGroup(group.codigo);
-                    }}
-                  
-                  />
-                )}
-              </div>
-            </Button>
-          ))
+            <div className="flex items-center gap-2">
+              <ChevronRight className="h-4 w-4" />
 
-            )}
+              {isGrupoUnitario(group.codigo) && (
+                <X
+                  className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
+                  onClick={e => {
+                    e.stopPropagation(); // agora funciona de verdade
+                    handleRemoveGroup(group.codigo);
+                  }}
+                />
+              )}
+            </div>
+          </div>
+
+                    ))
+
+                      )}
 
             {/* COLUNA 3 — Adicionar Grupo */}
           <div className="space-y-4">
@@ -261,7 +269,6 @@ function isGrupoUnitario(groupCodigo:  string | number) {
                             {grupo.pkGrupo} – {grupo.designacao}
                           </SelectItem>
                       ))}
-
                   </SelectContent>
                 </Select>
 

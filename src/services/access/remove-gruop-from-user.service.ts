@@ -8,7 +8,7 @@ export async function RemoveGruopUser(
 ): Promise<void> {
 
   await axiosNestGa.put(
-    `/acess_management/remove-gruop-from-user/${userId}/acesso/${gruopId}`,
+    `/acess_management/remove-group-from-user/${userId}/${gruopId}`,
     {
     }
   );
