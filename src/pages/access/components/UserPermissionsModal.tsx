@@ -87,7 +87,7 @@ export function UserPermissionsModal({
 
   /** Adicionar grupo ao utilizador */
   const {data: todosGrupos = [], isPending: loadingTodosGrupos} = useQueryGrupos({ativo: "true"})
-  const {mutateAsync: addGrupoUser} = useAddUserGruop()
+  const {mutateAsync: addGrupoUser,isPending:addGroupLoading} = useAddUserGruop()
 
  
 
@@ -228,7 +228,9 @@ function isGrupoUnitario(group?: UserGroup): boolean {
               {group.tipo_grupo !=2 && (
                 <X
                   className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
+                  
                   onClick={e => {
+                    
                     e.stopPropagation(); 
                     handleRemoveGroup(group.codigo);
                   }}
@@ -261,7 +263,7 @@ function isGrupoUnitario(group?: UserGroup): boolean {
                   </SelectTrigger>
                   <SelectContent>
                     {todosGrupos
-                        ?.filter(g => !groups.some(ug => ug.codigo === g.pkGrupo)) // evita duplicados
+                        ?.filter(g => !groups.some(ug => ug.codigo === g.pkGrupo)) 
                         .map(grupo => (
                           <SelectItem key={grupo.pkGrupo} value={grupo.pkGrupo.toString()}>
                             {grupo.pkGrupo} – {grupo.designacao}
@@ -273,9 +275,9 @@ function isGrupoUnitario(group?: UserGroup): boolean {
                 <Button
                   className="w-full"
                   onClick={handleAddGroup}
-                  disabled={!selectedGroupToAdd || loadingTodosGrupos}
+                  disabled={!selectedGroupToAdd || loadingTodosGrupos ||addGroupLoading}
                 >
-                  {loadingTodosGrupos ? "A conceder..." : "Conceder grupo"}
+                  {addGroupLoading ? "A conceder..." : "Conceder grupo"}
                 </Button>
               </>
             )}
