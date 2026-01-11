@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { useMutationDeleteAccess } from "@/hooks/acess/use-mutation-delete-access";
+import { useAuth } from "@/hooks/use-auth";
 
 interface DeleteAccessButtonProps {
   acessoCodigo: number;
@@ -22,11 +23,16 @@ interface DeleteAccessButtonProps {
 export function DeleteAccessButton({ acessoCodigo }: DeleteAccessButtonProps) {
   const [open, setOpen] = useState(false);
   const { mutate: deleteAccess, isPending } = useMutationDeleteAccess();
-
+  const {
+    user: { user },
+  } = useAuth();
   const handleDelete = () => {
-    deleteAccess(acessoCodigo, {
-      onSuccess: () => setOpen(false),
-    });
+    deleteAccess(
+      { grupoId: acessoCodigo, utilizadorId: user.pk_utilizador },
+      {
+        onSuccess: () => setOpen(false),
+      }
+    );
   };
 
   return (
@@ -45,8 +51,9 @@ export function DeleteAccessButton({ acessoCodigo }: DeleteAccessButtonProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Remover permissão?</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja remover o acesso <strong>código {acessoCodigo}</strong> deste grupo?
-            Esta ação não pode ser desfeita.
+            Tem certeza que deseja remover o acesso{" "}
+            <strong>código {acessoCodigo}</strong> deste grupo? Esta ação não
+            pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

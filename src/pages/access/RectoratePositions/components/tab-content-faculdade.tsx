@@ -36,7 +36,11 @@ export function TabContentFaculdade() {
   // Hooks de dados
   const { data: tipoCargos = [], isLoading: isLoadingTipoCargo } =
     useQueryFetchTipoCargo();
-  const { data: usersResponse, isLoading: isLoadingUsers } = useUsers({
+  const {
+    data: usersResponse,
+    isLoading: isLoadingUsers,
+    isFetching: isFetchingUsers,
+  } = useUsers({
     search: debouncedSearch,
   });
   const { data: faculdades = [], isLoading: isLoadingFaculdades } =
@@ -61,88 +65,99 @@ export function TabContentFaculdade() {
   return (
     <TabsContent value="faculdade" className="mt-4">
       <div className="space-y-4">
-        <div className="mt-4 flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-end">
-          <div className="grid md:grid-cols-4 gap-4 md:col-span-2">
-            {/* Cargo */}
-            <FormCommandSelect
-              disabled={isLoadingTipoCargo}
-              value={form.cargo}
-              label="Cargo"
-              options={cargosFaculdade}
-              map={(c) => ({
-                key: c.pk_tipo_cargo.toString(),
-                value: c.pk_tipo_cargo.toString(),
-                label: c.descricao,
-              })}
-              onChange={(value) =>
-                setForm((prev) => ({ ...prev, cargo: value }))
-              }
-            />
+        <div className="mt-4 rounded-xl border border-border bg-card shadow-sm">
+          {/* Filtros */}
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {/* Cargo */}
+              <FormCommandSelect
+                disabled={isLoadingTipoCargo}
+                value={form.cargo}
+                label="Cargo"
+                width="full"
+                options={cargosFaculdade}
+                map={(c) => ({
+                  key: c.pk_tipo_cargo.toString(),
+                  value: c.pk_tipo_cargo.toString(),
+                  label: c.descricao,
+                })}
+                onChange={(value) =>
+                  setForm((prev) => ({ ...prev, cargo: value }))
+                }
+              />
 
-            {/* Novo ocupante */}
-            <FormCommandSelect
-              disabled={isLoadingUsers}
-              value={form.ocupante}
-              label="Novo Ocupante"
-              options={users}
-              map={(u) => ({
-                key: u.codigo.toString(),
-                value: u.codigo.toString(),
-                label: u.nome,
-              })}
-              onChange={(value) =>
-                setForm((prev) => ({ ...prev, ocupante: value }))
-              }
-              onSearchChange={setSearch}
-            />
+              {/* Novo ocupante */}
+              <FormCommandSelect
+                disabled={isLoadingUsers}
+                value={form.ocupante}
+                label="Novo Ocupante"
+                width="full"
+                isLoading={isLoadingUsers || isFetchingUsers}
+                options={users ?? []}
+                map={(u) => ({
+                  key: u.codigo.toString(),
+                  value: u.codigo.toString(),
+                  label: u.nome,
+                })}
+                onChange={(value) =>
+                  setForm((prev) => ({ ...prev, ocupante: value }))
+                }
+                onSearchChange={setSearch}
+              />
 
-            {/* Faculdade */}
-            <FormCommandSelect
-              disabled={isLoadingFaculdades}
-              value={form.faculdade}
-              label="Faculdade"
-              options={faculdades}
-              map={(f) => ({
-                key: f.codigo.toString(),
-                value: f.codigo.toString(),
-                label: f.designacao,
-              })}
-              onChange={(value) =>
-                setForm((prev) => ({ ...prev, faculdade: value }))
-              }
-            />
+              {/* Faculdade */}
+              <FormCommandSelect
+                disabled={isLoadingFaculdades}
+                value={form.faculdade}
+                label="Faculdade"
+                width="full"
+                options={faculdades}
+                map={(f) => ({
+                  key: f.codigo.toString(),
+                  value: f.codigo.toString(),
+                  label: f.designacao,
+                })}
+                onChange={(value) =>
+                  setForm((prev) => ({ ...prev, faculdade: value }))
+                }
+              />
 
-            {/* Curso */}
-            <FormCommandSelect
-              disabled={isLoadingCursos}
-              value={form.curso}
-              label="Curso"
-              options={cursos}
-              map={(c) => ({
-                key: c.codigo.toString(),
-                value: c.codigo.toString(),
-                label: c.designacao,
-              })}
-              onChange={(value) =>
-                setForm((prev) => ({ ...prev, curso: value }))
-              }
-            />
+              {/* Curso */}
+              <FormCommandSelect
+                disabled={isLoadingCursos}
+                value={form.curso}
+                label="Curso"
+                width="full"
+                options={cursos}
+                map={(c) => ({
+                  key: c.codigo.toString(),
+                  value: c.codigo.toString(),
+                  label: c.designacao,
+                })}
+                onChange={(value) =>
+                  setForm((prev) => ({ ...prev, curso: value }))
+                }
+              />
+            </div>
           </div>
 
-          <div className="mt-4 min-w-full lg:min-w-[200px]">
-            <Button
-              className="w-full"
-              disabled={
-                !form.cargo ||
-                !form.ocupante ||
-                !form.faculdade ||
-                !form.curso ||
-                isPending
-              }
-              onClick={() => setConfirmOpen(true)}
-            >
-              {isPending ? "A definir..." : "Definir"}
-            </Button>
+          {/* Ação */}
+          <div className="border-t border-border bg-muted/30 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <Button
+                className="w-full sm:w-auto"
+                disabled={
+                  !form.cargo ||
+                  !form.ocupante ||
+                  !form.faculdade ||
+                  !form.curso ||
+                  isPending
+                }
+                onClick={() => setConfirmOpen(true)}
+              >
+                {isPending ? "A definir..." : "Definir"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

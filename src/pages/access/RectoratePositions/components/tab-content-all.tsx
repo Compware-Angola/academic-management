@@ -65,7 +65,9 @@ export function TabContentAll() {
     });
   const { data: tipoCargos = [], isLoading: isLoadingTipoCargo } =
     useQueryFetchTipoCargo();
-  const { data: usersResponse } = useUsers({ search: debouncedSearch });
+  const { data: usersResponse, isFetching: isFetchingUsers } = useUsers({
+    search: debouncedSearch,
+  });
   const { mutate: updateOcupante, isPending: isUpdating } =
     useUpdateOcupanteCargo();
   const { mutate: deleteOcupante, isPending: isDeleting } =

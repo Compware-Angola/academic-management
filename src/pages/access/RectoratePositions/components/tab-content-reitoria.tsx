@@ -37,40 +37,52 @@ export function TabContentReitoria() {
   return (
     <TabsContent value="reitoria" className="mt-4">
       <div className="space-y-4">
-        <div className="mt-4 flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-end">
-          <div className="grid md:grid-cols-3 items-center gap-4">
-            <div className="grid md:grid-cols-2 gap-4 md:col-span-2">
-              <FormCommandSelect
-                disabled={isLoadingTipoCargo}
-                value={filtroCargo}
-                label="Cargos"
-                options={tipoCargos.filter((c) =>
-                  c.descricao.toLowerCase().includes("reit")
-                )}
-                map={(c) => ({
-                  key: c.pk_tipo_cargo.toString(),
-                  value: c.pk_tipo_cargo.toString(),
-                  label: c.descricao,
-                })}
-                onChange={setFiltroCargo}
-              />
-              <FormCommandSelect
-                disabled={isLoadingUsers}
-                value={novoOcupante}
-                label="Novo Ocupante"
-                options={users}
-                map={(u) => ({
-                  key: u.codigo.toString(),
-                  value: u.codigo.toString(),
-                  label: u.nome,
-                })}
-                onChange={setNovoOcupante}
-                onSearchChange={setSearch}
-              />
+        <div className="mt-4 rounded-xl border border-border bg-card shadow-sm">
+          {/* Conteúdo */}
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {/* Filtros */}
+              <div className="grid grid-cols-1 gap-4 md:col-span-2 md:grid-cols-2">
+                <FormCommandSelect
+                  disabled={isLoadingTipoCargo}
+                  value={filtroCargo}
+                  label="Cargos"
+                  width="full"
+                  options={tipoCargos.filter((c) =>
+                    c.descricao.toLowerCase().includes("reit")
+                  )}
+                  map={(c) => ({
+                    key: c.pk_tipo_cargo.toString(),
+                    value: c.pk_tipo_cargo.toString(),
+                    label: c.descricao,
+                  })}
+                  onChange={setFiltroCargo}
+                />
+
+                <FormCommandSelect
+                  disabled={isLoadingUsers}
+                  value={novoOcupante}
+                  label="Novo Ocupante"
+                  width="full"
+                  isLoading={isLoadingUsers}
+                  options={users}
+                  map={(u) => ({
+                    key: u.codigo.toString(),
+                    value: u.codigo.toString(),
+                    label: u.nome,
+                  })}
+                  onChange={setNovoOcupante}
+                  onSearchChange={setSearch}
+                />
+              </div>
             </div>
-            <div className="mt-4 min-w-full">
+          </div>
+
+          {/* Ação */}
+          <div className="border-t border-border bg-muted/30 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
-                className="w-full"
+                className="w-full sm:w-auto"
                 disabled={!filtroCargo || !novoOcupante || isPending}
                 onClick={() => setConfirmOpen(true)}
               >
