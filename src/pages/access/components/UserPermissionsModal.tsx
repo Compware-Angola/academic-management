@@ -114,7 +114,7 @@ export function UserPermissionsModal({
         ...prev,
         {
           codigo: acessoInfo.id,
-          descricao: acessoInfo.designacao, // Corrige nome do acesso
+          descricao: acessoInfo.designacao,
           disponibilidade: 1,
           blocking: false,
           ["Update at"]: new Date().toISOString(),
