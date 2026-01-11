@@ -181,7 +181,7 @@ function isGrupoUnitario(groupCodigo:  string | number) {
   const codigoNumber = Number(groupCodigo);
 
   const grupo = todosGrupos.find(g => g.pkGrupo === codigoNumber );
-  return grupo?.fkTipoDeGrupo === 2;
+  return grupo?.fkTipoDeGrupo !==  2;
 }
 
 
