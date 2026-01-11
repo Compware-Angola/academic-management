@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -29,6 +30,7 @@ import { useGroupAccesses } from "@/hooks/acess/use-query-group-accesses";
 import { useQueryAcessos } from "@/hooks/acess/use-query-all-accesses";
 import { useGrantUserAccess } from "@/hooks/acess/use-grant-user-access";
 import { useBlockUserAccess } from "@/hooks/acess/use-block-user-access";
+import { useRemoveGruopFromUser } from "@/hooks/acess/use-remove-gruop-from-user";
 
 interface UserPermissionsModalProps {
   user: User;
@@ -51,6 +53,8 @@ export function UserPermissionsModal({
     userId: user.codigo,
     enabled: open,
   });
+
+  console.log("LISTAGENS DE GRUOP: ", groups)
 
   /** Acessos do grupo selecionado */
   const { data: groupAccesses = [], isLoading: loadingGroupAccesses, error: errorAccesses } =
@@ -85,8 +89,13 @@ export function UserPermissionsModal({
   const {data: todosGrupos = [], isPending: loadingTodosGrupos} = useQueryGrupos({ativo: "true"})
   const {mutateAsync: addGrupoUser} = useAddUserGruop()
 
+  console.log("TODOS GRUPOS: ", todosGrupos)
+
   /** Mutação: bloquear acesso */
   const { mutateAsync: blockAccess } = useBlockUserAccess();
+
+  /** Mutação: remover grupo do usuario */
+  const {mutateAsync: removeGruop, isPending: removingGruop} = useRemoveGruopFromUser()
 
   /** Concede novo acesso e atualiza o estado local */
   async function handleGrantAccess() {
@@ -153,6 +162,28 @@ export function UserPermissionsModal({
   setSelectedGroupToAdd(null);
 }
 
+async function handleRemoveGroup(groupCodigo: number) {
+  await removeGruop({
+    userId: user.codigo,
+    gruopId: groupCodigo,
+  });
+
+  // Atualiza grupos do utilizador
+  await refetchUserGroups();
+
+  // Limpa grupo selecionado se foi removido
+  setSelectedGroup(prev =>
+    prev?.codigo === groupCodigo ? null : prev
+  );
+}
+
+function isGrupoUnitario(groupCodigo:  string | number) {
+  const codigoNumber = Number(groupCodigo);
+
+  const grupo = todosGrupos.find(g => g.pkGrupo === codigoNumber );
+  return grupo?.fkTipoDeGrupo === 2;
+}
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -177,16 +208,31 @@ export function UserPermissionsModal({
               <Skeleton className="h-32 w-full" />
             ) : (
               groups.map(group => (
-                <Button
-                  key={group.codigo}
-                  variant={selectedGroup?.codigo === group.codigo ? "default" : "outline"}
-                  className="w-full justify-between"
-                  onClick={() => setSelectedGroup(group)}
-                >
-                  <span>{group?.descricao}</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              ))
+            <Button
+              key={group.codigo}
+              variant={selectedGroup?.codigo === group.codigo ? "default" : "outline"}
+              className="w-full justify-between items-center"
+              onClick={() => setSelectedGroup(group)}
+            >
+              <span>{group.descricao}</span>
+
+              <div className="flex items-center gap-2">
+                <ChevronRight className="h-4 w-4" />
+                
+                {isGrupoUnitario(group.codigo) && (
+                  <X
+                    className="h-4 w-4 text-destructive hover:text-destructive cursor-pointer"
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleRemoveGroup(group.codigo);
+                    }}
+                  
+                  />
+                )}
+              </div>
+            </Button>
+          ))
+
             )}
 
             {/* COLUNA 3 — Adicionar Grupo */}
@@ -208,11 +254,14 @@ export function UserPermissionsModal({
                     <SelectValue placeholder="Adicionar Grupo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {todosGrupos?.map(grupo => (
-                      <SelectItem key={grupo.pkGrupo} value={grupo.pkGrupo.toString()}>
-                        {grupo.pkGrupo} – {grupo.designacao}
-                      </SelectItem>
-                    ))}
+                    {todosGrupos
+                        ?.filter(g => !groups.some(ug => ug.codigo === g.pkGrupo)) // evita duplicados
+                        .map(grupo => (
+                          <SelectItem key={grupo.pkGrupo} value={grupo.pkGrupo.toString()}>
+                            {grupo.pkGrupo} – {grupo.designacao}
+                          </SelectItem>
+                      ))}
+
                   </SelectContent>
                 </Select>
 
