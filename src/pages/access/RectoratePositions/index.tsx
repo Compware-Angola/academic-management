@@ -9,6 +9,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { TabContentAll } from "./components/tab-content-all";
+import { TabContentReitoria } from "./components/tab-content-reitoria";
+import { TabContentFaculdade } from "./components/tab-content-faculdade";
 
 export default function RectoratePositions() {
   const [activeTab, setActiveTab] = useState("todos");
@@ -44,9 +46,9 @@ export default function RectoratePositions() {
           <TabsTrigger value="reitoria">Reitoria</TabsTrigger>
           <TabsTrigger value="faculdade">Faculdade</TabsTrigger>
         </TabsList>
-
         <TabContentAll />
-
+        <TabContentReitoria />
+        <TabContentFaculdade />
         {/* <TabsContent value="reitoria" className="mt-4">
           {renderTable(getFilteredData())}
         </TabsContent>
