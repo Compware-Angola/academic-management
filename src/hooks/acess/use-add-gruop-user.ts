@@ -6,7 +6,7 @@ type AddGruopUserParams = {
   gruopId: number;
 };
 
-export function useGrantUserAccess() {
+export function useAddUserGruop() {
   return useMutation({
     mutationFn: ({ userId, gruopId }: AddGruopUserParams) =>
       addGruopToUser(userId, gruopId),
