@@ -200,7 +200,7 @@ export function useActivitiesLectures() {
     setForm({
       designacao: item.descricao,
       codigo_ano_lectivo: anosLetivos.find(
-        (ano) => ano.designacao === item.ano_lectivo
+        (ano) => ano.designacao === item?.ano_lectivo
       )?.codigo,
       codigo_tipo_candidatura: tiposCandidatura.find(
         (cand) => cand.designacao === item.tipo_candidatura

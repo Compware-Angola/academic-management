@@ -152,7 +152,7 @@ export default function Permission() {
                     {data.map((item, i) => (
                       <TableRow key={item.codigo_permissao}>
                         <TableCell>{item.codigo_permissao}</TableCell>
-                        <TableCell>{item.ano_lectivo}</TableCell>
+                        <TableCell>{item?.ano_lectivo}</TableCell>
                         <TableCell>{item.curso}</TableCell>
                         <TableCell>{item.disciplina}</TableCell>
                         <TableCell>

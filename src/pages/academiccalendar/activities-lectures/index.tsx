@@ -231,7 +231,7 @@ export default function ActivitiesLecturesLic() {
                   </TableCell>
                   <TableCell>{formatarData(item.data_inicio)}</TableCell>
                   <TableCell>{formatarData(item.data_termino)}</TableCell>
-                  <TableCell>{item.ano_lectivo}</TableCell>
+                  <TableCell>{item?.ano_lectivo}</TableCell>
                   <TableCell>{item.tipo_calendario}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
