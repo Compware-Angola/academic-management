@@ -21,6 +21,9 @@ import {
 import { Solicitacao } from "@/services/access/solicitacao/fetch-solicitacao.service";
 import { useQueryListarSolicitacoes } from "@/hooks/acess/use-query-listar-solicitacoes";
 import { ESTADOS, getEstadoBadge } from "./components/estado-badge";
+import { useRejectSolicitacao } from "@/hooks/acess/use-mutation-reject-solicitacao";
+import { useAprovarSolicitacao } from "@/hooks/acess/use-mutation-accept-solicitacao";
+import { useAuth } from "@/hooks/use-auth";
 
 
 
@@ -43,25 +46,33 @@ const { data, isLoading, isFetching } = useQueryListarSolicitacoes({
   page: currentPage,
   limit: 10,
 });
+
+console.log("SOLICITACAO: ", data)
+
+const { mutate: rejectMutate } = useRejectSolicitacao()
+const { mutate: approveMutate } = useAprovarSolicitacao()
+
+const {user:userData} = useAuth()
+const userIdLogado =userData.user.pk_utilizador
+
 function handleAprovar(row: Solicitacao) {
-  const confirmado = window.confirm(
-    `Tem certeza que deseja APROVAR a solicitação nº ${row.codigo}?`
-  );
 
-  if (!confirmado) return;
-
-  // Exemplo de chamada à API
+  approveMutate({
+    solicitacaoId: row.codigo_solicitacao,
+    userId: userIdLogado,
+    descricao:  String(row.descricao ?? row.descricao_servico ?? "")
+  })
  
 }
 
 function handleRejeitar(row: Solicitacao) {
-  const confirmado = window.confirm(
-    `Tem certeza que deseja REJEITAR a solicitação nº ${row.codigo}?`
-  );
 
-  if (!confirmado) return;
-
-  // Exemplo de chamada à API
+  
+  rejectMutate({
+    solicitacaoId: row.codigo_solicitacao,
+    userId: userIdLogado,
+    descricao:  String(row.descricao ?? row.descricao_servico ?? "")
+  })
 
 }
 
@@ -108,29 +119,37 @@ function handleRejeitar(row: Solicitacao) {
       Ver
     </Button>
 
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() => {
-        setSelectedSolicitacao(row);
-        handleAprovar(row);
-      }}
-    >
-      <Check className="h-4 w-4 mr-1 text-green-600" />
-      Aprovar
-    </Button>
+      { row.estado === "solicitacao encaminhada" && (
+        <>
 
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() => {
-        setSelectedSolicitacao(row);
-        handleRejeitar(row);
-      }}
-    >
-      <X className="h-4 w-4 mr-1 text-red-600" />
-      Rejeitar
-    </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedSolicitacao(row);
+              handleAprovar(row);
+            }}
+          >
+          <Check className="h-4 w-4 mr-1 text-green-600" />
+          Aprovar
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setSelectedSolicitacao(row);
+            handleRejeitar(row);
+          }}
+        >
+          <X className="h-4 w-4 mr-1 text-red-600" />
+          Rejeitar
+        </Button>
+
+        </>
+          )
+        }
+
   </div>
 ),
 

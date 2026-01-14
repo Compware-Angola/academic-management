@@ -67,6 +67,7 @@ export default function CreateUser() {
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+  
   const {user:userData} = useAuth()
   const userId =userData.user.pk_utilizador
 
