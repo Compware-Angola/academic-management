@@ -44,7 +44,7 @@ export const menuStructure: MenuStructure = {
        // { title: "Bloquear acesso", url: "/acessos/bloquear" },
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
         { title: "Logs de acessos", url: "/acessos/logs" },
-        { title: "Utilizadores logados", url: "/acessos/logados" },
+      //  { title: "Utilizadores logados", url: "/acessos/logados" },
           { title: "Grupos", url: "/controle-acesso/grupos" },
             {
           title: "Solicitações encaminhadas",
