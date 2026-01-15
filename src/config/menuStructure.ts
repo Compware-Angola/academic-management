@@ -44,7 +44,7 @@ export const menuStructure: MenuStructure = {
        // { title: "Bloquear acesso", url: "/acessos/bloquear" },
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
         { title: "Logs de acessos", url: "/acessos/logs" },
-        { title: "Utilizadores logados", url: "/acessos/logados" },
+      //  { title: "Utilizadores logados", url: "/acessos/logados" },
           { title: "Grupos", url: "/controle-acesso/grupos" },
             {
           title: "Solicitações encaminhadas",
@@ -314,6 +314,10 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Estud. Mensalidades Pagas",
           url: "/financas/mensalidades-pagas",
+        },
+        {
+          title:"Notas de Pagamentos",
+          url:"/financas/notas-pagamento"
         },
         { title: "Estudantes Devedores", url: "/financas/devedores" },
         { title: "Estudantes Inactivos", url: "/financas/inactivos" },

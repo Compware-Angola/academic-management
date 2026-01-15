@@ -12,7 +12,7 @@ export function useQueryAcademicYearParams(
     queryFn: () => fetchAcademicYearParams(codigo!),
     // Mantemos o array, mas extraímos o primeiro item (ou null)
     select: (data: AcademicYearParamsResponse): AcademicYear | null => {
-      const items = data.ano_lectivo ?? [];
+      const items = data?.ano_lectivo ?? [];
       return items.length > 0 ? items[0] : null;
     },
     enabled: enabled && !!codigo && codigo > 0,

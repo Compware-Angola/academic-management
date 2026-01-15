@@ -85,6 +85,7 @@ import DirectorCourseAccess from "./pages/controle-acesso/dir-surso/DiretorCurso
 import SolicitacoesEncaminhadas from "./pages/controle-acesso/solicitacao/SolicitacoesEncaminhadas";
 import { AuthProvider } from "./providers/auth.provider";
 import { PublicRoute } from "./components/auth/publicRounte";
+import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPagamento";
 
 const App = () => {
   return (
@@ -131,7 +132,17 @@ const App = () => {
                         <SolicitacoesEncaminhadas />
                       </ProtectedRoute>
                     }
-                  />
+                  />  
+                     <Route
+                    path="/financas/notas-pagamento"
+                    element={
+                      <ProtectedRoute
+                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                      >
+                        <ListarNotasPagamento />
+                      </ProtectedRoute>
+                    }
+                  /> 
 
                   <Route
                     path="horarios/inscricoes"
