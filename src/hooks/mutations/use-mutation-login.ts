@@ -85,7 +85,7 @@ export function useCurrentUser(platform: "GA") {
     queryKey: ["current-user", platform],
     queryFn: () => getCurrentUserService(platform),
     enabled: !!token,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 1 * 60 * 1000,
     retry: false,
   });
 }
