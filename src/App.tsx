@@ -86,6 +86,8 @@ import SolicitacoesEncaminhadas from "./pages/controle-acesso/solicitacao/Solici
 import { AuthProvider } from "./providers/auth.provider";
 import { PublicRoute } from "./components/auth/publicRounte";
 import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPagamento";
+import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
+import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
 
 const App = () => {
   return (
@@ -132,8 +134,8 @@ const App = () => {
                         <SolicitacoesEncaminhadas />
                       </ProtectedRoute>
                     }
-                  />  
-                     <Route
+                  />
+                  <Route
                     path="/financas/notas-pagamento"
                     element={
                       <ProtectedRoute
@@ -142,7 +144,7 @@ const App = () => {
                         <ListarNotasPagamento />
                       </ProtectedRoute>
                     }
-                  /> 
+                  />
 
                   <Route
                     path="horarios/inscricoes"
@@ -328,6 +330,15 @@ const App = () => {
                   {/* <Route path="*" element={<NotFound />} />*/}
                   <Route path="*" element={<UnderConstruction />} />
                   {/* Finanças */}
+
+                  <Route
+                    path="/financas/pagamento-referencia"
+                    element={<PagamentosReferencia />}
+                  />
+                  <Route
+                    path="/financas/negociacao-divida"
+                    element={<NegociacaoDivida />}
+                  />
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />
                 </Route>
