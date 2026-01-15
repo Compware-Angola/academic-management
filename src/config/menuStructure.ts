@@ -36,17 +36,17 @@ export const menuStructure: MenuStructure = {
       items: [
         { title: "Lista  utilizador", url: "/acessos/utilizador" },
         { title: "Lista por grupos", url: "/ver-utilizadores/grupos" },
-       // { title: "Alterar senha", url: "/acessos/alterar-senha" },
+        // { title: "Alterar senha", url: "/acessos/alterar-senha" },
         { title: "Criar utilizador", url: "/acessos/criar-utilizador" },
         { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo" },
-      //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
+        //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
         { title: "Acessos (todos) + novos", url: "/acessos/todos" },
-       // { title: "Bloquear acesso", url: "/acessos/bloquear" },
+        // { title: "Bloquear acesso", url: "/acessos/bloquear" },
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
-          { title: "Grupos", url: "/controle-acesso/grupos" },
-            {
+        { title: "Grupos", url: "/controle-acesso/grupos" },
+        {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
         },
@@ -56,7 +56,6 @@ export const menuStructure: MenuStructure = {
     // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
-
 
     // ----------------------------------------------------
     // ASSIDUIDADE
@@ -419,6 +418,10 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Estudantes com Desconto",
           url: "/financas/relatorios/descontos",
+        },
+        {
+          title: "Pagamentos por referência",
+          url: "/financas/pagamento-referencia",
         },
         { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
