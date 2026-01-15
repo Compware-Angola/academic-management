@@ -2,13 +2,21 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { Header } from "@/components/layout/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { Navigate, Outlet } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Loader } from "@/components/auth/loader";
+import { useEffect } from "react";
 
 export function MainLayout() {
-  const { isLoading } = useAuth();
+  const navigate = useNavigate();
+  const { isLoading, token, user } = useAuth();
 
+  useEffect(() => {
+    if (!token && !isLoading && !user) {
+      navigate("/", { replace: true });
+    }
+  }, [token, navigate, isLoading, user]);
+
+  if (isLoading) return <Loader />;
   if (isLoading) {
     return <Loader />;
   }

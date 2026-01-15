@@ -19,16 +19,11 @@ export type AcessoResponse = {
 export async function fetchAcessos(
   params?: FetchAcessosParams
 ): Promise<AcessoResponse[]> {
-    
+  const queryParams: Record<string, any> = {};
 
-    const queryParams: Record<string, any> = {};
-
-
-
-    if (params?.apenasAtivos !== undefined) {
-        queryParams.apenasAtivos = params.apenasAtivos;
-    }
-
+  if (params?.apenasAtivos !== undefined) {
+    queryParams.apenasAtivos = params.apenasAtivos;
+  }
 
   const response = await axiosNestGa.get<AcessoResponse[]>(
     "/acess_management/details/all/dropdown",

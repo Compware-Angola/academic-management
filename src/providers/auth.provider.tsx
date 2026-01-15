@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [token, setToken] = useState<string | null>(AuthStorage.getToken());
-  //  localStorage.removeItem("auth.user");
+  localStorage.removeItem("auth.user");
   const {
     data: user,
     isLoading,

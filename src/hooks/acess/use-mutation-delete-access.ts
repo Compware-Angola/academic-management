@@ -2,17 +2,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { deleteGroupAccess } from "@/services/access/fecth-access.service";
+import { useAuth } from "../use-auth";
 
 export function useMutationDeleteAccess() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
   return useMutation({
-    mutationFn: (acessoCodigo: number) => deleteGroupAccess(acessoCodigo),
+    mutationFn: (data: { grupoId: number; utilizadorId: number }) =>
+      deleteGroupAccess(data),
     onSuccess: (_, acessoCodigo) => {
       toast({
         title: "Permissão removida",
-        description: `Acesso código ${acessoCodigo} foi removido com sucesso.`,
+        description: `Acesso foi removido com sucesso.`,
       });
 
       // Invalida todas as queries de acessos de grupos (ou só a do grupo atual se souberes o groupId)

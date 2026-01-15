@@ -314,6 +314,10 @@ export const finaceStructure: MenuStructure = {
           title: "Estud. Mensalidades Pagas",
           url: "/financas/mensalidades-pagas",
         },
+        {
+          title: "Notas de Pagamentos",
+          url: "/financas/notas-pagamento",
+        },
         { title: "Estudantes Devedores", url: "/financas/devedores" },
         { title: "Estudantes Inactivos", url: "/financas/inactivos" },
         {

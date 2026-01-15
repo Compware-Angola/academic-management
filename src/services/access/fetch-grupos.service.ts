@@ -8,7 +8,7 @@ export type GruposResponse = {
     pkGrupo: number
     designacao: string
     sigla: string
-    fkTipoDeGrupo: string
+    fkTipoDeGrupo: number
     activeState: boolean
 }
 

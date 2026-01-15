@@ -85,6 +85,7 @@ import DirectorCourseAccess from "./pages/controle-acesso/dir-surso/DiretorCurso
 import SolicitacoesEncaminhadas from "./pages/controle-acesso/solicitacao/SolicitacoesEncaminhadas";
 import { AuthProvider } from "./providers/auth.provider";
 import { PublicRoute } from "./components/auth/publicRounte";
+import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPagamento";
 import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
 import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
 
@@ -131,6 +132,16 @@ const App = () => {
                         allowedGroups={["adm", "dct", "rootAdmin"]}
                       >
                         <SolicitacoesEncaminhadas />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/notas-pagamento"
+                    element={
+                      <ProtectedRoute
+                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                      >
+                        <ListarNotasPagamento />
                       </ProtectedRoute>
                     }
                   />

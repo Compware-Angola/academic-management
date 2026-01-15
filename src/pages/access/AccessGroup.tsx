@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import {
   RefreshCw,
   Settings,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,12 +37,13 @@ import { useGroups } from "@/hooks/acess/use-query-groups";
 import { useGroupAccesses } from "@/hooks/acess/use-query-group-accesses";
 import { DeleteAccessButton } from "./components/DeleteAccessButton";
 import { formatarData } from "@/util/date-formate";
+import { CreateGroupAccessModal } from "./components/CreateGroupAccessModal";
 
 export default function AccessGroup() {
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
+  const [openCreateModal, setOpenCreateModal] = useState(false);
   // Lista de grupos
   const { data: groups = [], isLoading: loadingGroups } = useGroups();
 
@@ -140,10 +141,15 @@ export default function AccessGroup() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {/* <Button size="sm">
+          <Button
+            size="sm"
+            disabled={!selectedGroupId}
+            onClick={() => setOpenCreateModal(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Atribuir Permissão
-          </Button> */}
+          </Button>
+
           <Button
             variant="outline"
             size="sm"
@@ -307,6 +313,12 @@ export default function AccessGroup() {
           </div>
         )}
       </div>
+      <CreateGroupAccessModal
+        open={openCreateModal}
+        onOpenChange={setOpenCreateModal}
+        groupId={Number(selectedGroupId)}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 }

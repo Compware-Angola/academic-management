@@ -4,6 +4,7 @@ import { axiosApexGa } from "@/lib/axios-apex-ga";
 export type UserGroup = {
   codigo: number;
   descricao: string;
+  tipo_grupo:number;
 };
 
 export type UserGroupsResponse = {
