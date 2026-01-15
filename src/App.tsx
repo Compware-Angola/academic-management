@@ -88,6 +88,7 @@ import { PublicRoute } from "./components/auth/publicRounte";
 import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPagamento";
 import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
 import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
+import ListarCreditoEducacional from "./pages/financas/credito-educacional/ListarCreditoEducacional";
 
 const App = () => {
   return (
@@ -338,6 +339,10 @@ const App = () => {
                   <Route
                     path="/financas/negociacao-divida"
                     element={<NegociacaoDivida />}
+                  />
+                  <Route
+                    path="financas/credito/listar"
+                    element={<ListarCreditoEducacional />}
                   />
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />
