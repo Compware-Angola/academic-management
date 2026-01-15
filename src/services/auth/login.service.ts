@@ -7,6 +7,11 @@ export class LoginPayload {
   password: string;
   platform?: 'GA' | 'PORTAL' = 'GA';
 }
+export class LogoutPayload {
+
+  platform?: 'GA' | 'PORTAL' = 'GA';
+}
+
 
 
 export interface Group {
@@ -44,7 +49,10 @@ export interface AuthResponse {
   groups: Group[];
   mensagem: string;
 }
+export interface logoutResponse {
 
+  mensagem: string;
+}
 
 export interface CurrentUserResponse {
   isAuthenticated: boolean;
@@ -68,6 +76,27 @@ export async function getCurrentUserService(
   const { data } = await axiosNestAuth.get<CurrentUserResponse>("/auth/current-user", {
     params: { platform }, 
   });
+
+  return data;
+}
+export async function logout(variables: { platform: 'GA' }): Promise<logoutResponse> {
+  const { platform } = variables;
+
+  const { data } = await axiosNestAuth.post<logoutResponse>("/auth/logout", {
+    platform, 
+  });
+
+  return data;
+}
+
+export async function makLoggedOut(
+  utilizadorId: number | string,
+  platform: "GA"
+): Promise<logoutResponse> {
+  const { data } = await axiosNestAuth.patch<logoutResponse>(
+    `/auth/mak-logged-out/${utilizadorId}`,
+    { platform }
+  );
 
   return data;
 }
