@@ -21,9 +21,12 @@ export type FetchCreditoEducacionalParams = {
 export async function fetchCreditoEducacional(
   params?: FetchCreditoEducacionalParams
 ): Promise<CreditoEducacionalResponse> {
-  const { data } = await axiosApexGa.get("/financa/credito-educacional", {
-    params,
-  });
+  const { data } = await axiosApexGa.get<CreditoEducacionalResponse>(
+    "/financa/credito-educacional",
+    {
+      params,
+    }
+  );
 
-  return data ?? [];
+  return data;
 }
