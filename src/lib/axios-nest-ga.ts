@@ -3,6 +3,7 @@ import { ApiError, type ApiErrorResponse } from "@/error";
 import { AuthStorage } from "@/util/auth-storage";
 import { toast } from "sonner";
 
+// Aqui usamos window.location para redirecionar para o login
 export const axiosNestGa = axios.create({
   baseURL: import.meta.env.VITE_NEST_GA_API_URL,
   headers: {
@@ -16,29 +17,20 @@ export const axiosNestGa = axios.create({
 axiosNestGa.interceptors.request.use(
   (config) => {
     const token = AuthStorage.getToken();
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
-  (error) => {
-    // Erro antes de enviar a requisição
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // ==========================
 // ⭐ Interceptor de RESPOSTA (tratamento de erros)
 // ==========================
 axiosNestGa.interceptors.response.use(
-  (response) => {
-    // Resposta OK
-    return response;
-  },
+  (response) => response, // Resposta OK
   async (error) => {
-    // Removi o console.log de teste
     if (!error.response) {
       throw new ApiError("Erro de conexão com o servidor.", 0, undefined);
     }
@@ -48,6 +40,7 @@ axiosNestGa.interceptors.response.use(
     let errorData: ApiErrorResponse | undefined;
     let message = `Erro ${status}: ${statusText}`;
 
+    // Tratar mensagem do backend
     if (data) {
       try {
         const parsed = data as ApiErrorResponse;
@@ -59,6 +52,13 @@ axiosNestGa.interceptors.response.use(
           message = data.trim() || message;
         }
       }
+    }
+
+    // ⭐ Redirecionar para login se 401
+    if (status === 401) {
+      
+      window.location.href = "/"; // ou a rota do seu login
+      return; 
     }
 
     throw new ApiError(message, status, errorData);
