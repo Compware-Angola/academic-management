@@ -8,7 +8,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -24,23 +23,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Download, RefreshCw, Loader2, Eye } from "lucide-react";
+import { Home, Search, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useQueryReferenciasPagamento } from "@/hooks/financas/area-financeira/use-query-pagamento-por-referncia";
 import { useState } from "react";
-import { formatarData } from "@/util/date-formate";
 import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
-import { ServiceTypeSelect } from "@/components/common/global-selects/ServiceTypeSelect";
 import { FormSelect } from "@/components/common/FormSelect";
-import { Label } from "@/components/ui/label";
 import { parseFilter } from "@/util/parse-filter";
-import { PagamentoReferenciaStatus } from "./components/PagamentoReferenciaStastus";
 import { PagamentoReferenciaModal } from "./components/PagamentoReferenciaModal";
 import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fetch-pagamento-por-referencia.service";
 import { useQueryNegociacoes } from "@/hooks/financas/area-financeira/use-query-negociacao-divida";
 import { formatNumber } from "@/util/format-number";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 
 export default function NegociacaoDivida() {
   // paginação
@@ -56,43 +51,35 @@ export default function NegociacaoDivida() {
     anoLectivo: "",
     curso: "",
     estado: "",
-    matricula: "",
-    referencia: "",
-    factura: "",
+    faculdade: "",
+    negociacao: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
 
-  const pagamentoStatus = [
+  const tipoNegociacao = [
     {
-      key: "Pending",
-      label: "Pendente",
-      className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+      key: "all",
+      label: "Todos",
     },
     {
-      key: "Success",
-      label: "Sucesso",
-      className: "bg-green-100 text-green-800 hover:bg-green-100",
+      key: "1",
+      label: "100%",
     },
     {
-      key: "Failed",
-      label: "Falhado",
-      className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
-    },
-    {
-      key: "Expired",
-      label: "Expirado",
-      className: "bg-red-100 text-red-800 hover:bg-red-100",
+      key: "2",
+      label: "50%",
     },
   ];
-
   const {
     data: pagamentoResponse,
     refetch,
-    isRefetching,
     isFetching,
   } = useQueryNegociacoes(
     {
       codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
+      codigoCurso: parseFilter(filtersApplied.curso),
+      faculdadeId: parseFilter(filters.faculdade),
+      tipoNegociacaoId: parseFilter(filters.negociacao),
       page,
       limit,
     },
@@ -145,56 +132,27 @@ export default function NegociacaoDivida() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <CourseSelect
+              allOption
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               anoLectivo={filters.anoLectivo}
               value={filters.curso}
             />
+            <FacultySelect
+              allOption
+              value={filters.faculdade}
+              onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+            />
             <FormSelect
-              label="Estados do Pagamento"
-              value={filters.estado}
-              onChange={(v) => setFilters({ ...filters, estado: v })}
-              options={pagamentoStatus}
+              label="% Negociação"
+              value={filters.negociacao}
+              onChange={(v) => setFilters({ ...filters, negociacao: v })}
+              options={tipoNegociacao}
               map={(a) => ({
                 key: a.key,
                 label: a.label,
                 value: a.key,
               })}
             />
-            <div>
-              <Label>Matrícula</Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="Matrícula"
-                  onChange={({ target }) =>
-                    setFilters({ ...filters, matricula: target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Referência</Label>
-              <div className="relative">
-                <Input
-                  placeholder="Referência"
-                  onChange={({ target }) =>
-                    setFilters({ ...filters, referencia: target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Factura</Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="Factura"
-                  onChange={({ target }) =>
-                    setFilters({ ...filters, factura: target.value })
-                  }
-                />
-              </div>
-            </div>
             <div className="flex items-center ">
               <Button
                 onClick={() => {
@@ -248,7 +206,7 @@ export default function NegociacaoDivida() {
                         {item.codigo_matricula}
                       </TableCell>
                       <TableCell>{item.nome}</TableCell>
-                      <TableCell>{item.rn}</TableCell>
+                      <TableCell>{item.faculdade}</TableCell>
                       <TableCell>{item.curso}</TableCell>
                       <TableCell>{item.prestacoes}</TableCell>
                       <TableCell>{item.mes_inicial}</TableCell>

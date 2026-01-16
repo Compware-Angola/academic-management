@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Download, RefreshCw, Loader2, Eye } from "lucide-react";
+import { Home, Search, Loader2, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueryReferenciasPagamento } from "@/hooks/financas/area-financeira/use-query-pagamento-por-referncia";
 import { useState } from "react";
@@ -61,6 +61,10 @@ export default function PagamentosReferencia() {
 
   const pagamentoStatus = [
     {
+      key: "all",
+      label: "Todos",
+    },
+    {
       key: "Pending",
       label: "Pendente",
       className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
@@ -85,7 +89,6 @@ export default function PagamentosReferencia() {
   const {
     data: pagamentoResponse,
     refetch,
-    isRefetching,
     isFetching,
   } = useQueryReferenciasPagamento(
     {
@@ -93,7 +96,8 @@ export default function PagamentosReferencia() {
       codigoFactura: parseFilter(filtersApplied.factura),
       codigoMatricula: parseFilter(filtersApplied.matricula),
       reference: filtersApplied.referencia,
-      status: filtersApplied.estado,
+      status:
+        filtersApplied.estado == "all" ? undefined : filtersApplied.estado,
       codigoproduto: parseFilter(filtersApplied.servico),
       page,
       limit,
@@ -147,6 +151,7 @@ export default function PagamentosReferencia() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <ServiceTypeSelect
+              allOption
               onChangeValue={(v) => setFilters({ ...filters, servico: v })}
               anoLectivo={filters.anoLectivo}
               value={filters.servico}

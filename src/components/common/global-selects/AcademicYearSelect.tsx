@@ -3,7 +3,7 @@ import { FormSelect } from "../FormSelect";
 
 interface AcademicYearSelectProps {
   value: string;
-  onChangeValue(v: string);
+  onChangeValue: (v: string) => void;
 }
 const AcademicYearSelect = ({
   onChangeValue,

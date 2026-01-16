@@ -23,6 +23,7 @@ export type NegociacaoItem = {
   ano_lectivo: number;
   tipo_negociacao_id: number;
   faculdade_id: number;
+  faculdade: number;
   rn: number;
 };
 
