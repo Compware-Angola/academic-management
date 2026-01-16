@@ -89,6 +89,8 @@ import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPa
 import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
 import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
 import ListarCreditoEducacional from "./pages/financas/credito-educacional/ListarCreditoEducacional";
+import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
+import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
 
 const App = () => {
   return (
@@ -143,6 +145,17 @@ const App = () => {
                         allowedGroups={["adm", "dct", "rootAdmin"]}
                       >
                         <ListarNotasPagamento />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/credito/instituicoes"
+                    element={
+                      <ProtectedRoute
+                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                      >
+                        <CreateInstituicao />
                       </ProtectedRoute>
                     }
                   />
@@ -344,6 +357,13 @@ const App = () => {
                     path="financas/credito/listar"
                     element={<ListarCreditoEducacional />}
                   />
+                  <Route
+                    path="financas/credito/instituicoes/todas"
+                    element={<TodasInstituicoes />}
+                  />
+    
+                     
+
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />
                 </Route>
