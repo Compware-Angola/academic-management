@@ -41,6 +41,7 @@ import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fe
 import { useQueryNegociacoes } from "@/hooks/financas/area-financeira/use-query-negociacao-divida";
 import { formatNumber } from "@/util/format-number";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 
 export default function NegociacaoDivida() {
   // paginação
@@ -56,9 +57,8 @@ export default function NegociacaoDivida() {
     anoLectivo: "",
     curso: "",
     estado: "",
-    matricula: "",
-    referencia: "",
-    factura: "",
+    faculdade: "",
+    negociacao: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
 
@@ -84,7 +84,20 @@ export default function NegociacaoDivida() {
       className: "bg-red-100 text-red-800 hover:bg-red-100",
     },
   ];
-
+  const tipoNegociacao = [
+    {
+      key: "all",
+      label: "Todos",
+    },
+    {
+      key: "1",
+      label: "100%",
+    },
+    {
+      key: "2",
+      label: "50%",
+    },
+  ];
   const {
     data: pagamentoResponse,
     refetch,
@@ -93,6 +106,9 @@ export default function NegociacaoDivida() {
   } = useQueryNegociacoes(
     {
       codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
+      codigoCurso: parseFilter(filtersApplied.curso),
+      faculdadeId: parseFilter(filters.faculdade),
+      tipoNegociacaoId: parseFilter(filters.negociacao),
       page,
       limit,
     },
@@ -145,56 +161,27 @@ export default function NegociacaoDivida() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <CourseSelect
+              allOption
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               anoLectivo={filters.anoLectivo}
               value={filters.curso}
             />
+            <FacultySelect
+              allOption
+              value={filters.faculdade}
+              onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+            />
             <FormSelect
-              label="Estados do Pagamento"
-              value={filters.estado}
-              onChange={(v) => setFilters({ ...filters, estado: v })}
-              options={pagamentoStatus}
+              label="% Negociação"
+              value={filters.negociacao}
+              onChange={(v) => setFilters({ ...filters, negociacao: v })}
+              options={tipoNegociacao}
               map={(a) => ({
                 key: a.key,
                 label: a.label,
                 value: a.key,
               })}
             />
-            <div>
-              <Label>Matrícula</Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="Matrícula"
-                  onChange={({ target }) =>
-                    setFilters({ ...filters, matricula: target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Referência</Label>
-              <div className="relative">
-                <Input
-                  placeholder="Referência"
-                  onChange={({ target }) =>
-                    setFilters({ ...filters, referencia: target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Factura</Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="Factura"
-                  onChange={({ target }) =>
-                    setFilters({ ...filters, factura: target.value })
-                  }
-                />
-              </div>
-            </div>
             <div className="flex items-center ">
               <Button
                 onClick={() => {
@@ -248,7 +235,7 @@ export default function NegociacaoDivida() {
                         {item.codigo_matricula}
                       </TableCell>
                       <TableCell>{item.nome}</TableCell>
-                      <TableCell>{item.rn}</TableCell>
+                      <TableCell>{item.faculdade}</TableCell>
                       <TableCell>{item.curso}</TableCell>
                       <TableCell>{item.prestacoes}</TableCell>
                       <TableCell>{item.mes_inicial}</TableCell>
