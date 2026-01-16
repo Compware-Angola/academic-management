@@ -8,7 +8,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -24,18 +23,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Download, RefreshCw, Loader2, Eye } from "lucide-react";
+import { Home, Search, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useQueryReferenciasPagamento } from "@/hooks/financas/area-financeira/use-query-pagamento-por-referncia";
 import { useState } from "react";
-import { formatarData } from "@/util/date-formate";
 import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
-import { ServiceTypeSelect } from "@/components/common/global-selects/ServiceTypeSelect";
 import { FormSelect } from "@/components/common/FormSelect";
-import { Label } from "@/components/ui/label";
 import { parseFilter } from "@/util/parse-filter";
-import { PagamentoReferenciaStatus } from "./components/PagamentoReferenciaStastus";
 import { PagamentoReferenciaModal } from "./components/PagamentoReferenciaModal";
 import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fetch-pagamento-por-referencia.service";
 import { useQueryNegociacoes } from "@/hooks/financas/area-financeira/use-query-negociacao-divida";
@@ -62,28 +56,6 @@ export default function NegociacaoDivida() {
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
 
-  const pagamentoStatus = [
-    {
-      key: "Pending",
-      label: "Pendente",
-      className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-    },
-    {
-      key: "Success",
-      label: "Sucesso",
-      className: "bg-green-100 text-green-800 hover:bg-green-100",
-    },
-    {
-      key: "Failed",
-      label: "Falhado",
-      className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
-    },
-    {
-      key: "Expired",
-      label: "Expirado",
-      className: "bg-red-100 text-red-800 hover:bg-red-100",
-    },
-  ];
   const tipoNegociacao = [
     {
       key: "all",
@@ -101,7 +73,6 @@ export default function NegociacaoDivida() {
   const {
     data: pagamentoResponse,
     refetch,
-    isRefetching,
     isFetching,
   } = useQueryNegociacoes(
     {

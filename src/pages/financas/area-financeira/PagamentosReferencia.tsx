@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Download, RefreshCw, Loader2, Eye } from "lucide-react";
+import { Home, Search, Loader2, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQueryReferenciasPagamento } from "@/hooks/financas/area-financeira/use-query-pagamento-por-referncia";
 import { useState } from "react";
@@ -89,7 +89,6 @@ export default function PagamentosReferencia() {
   const {
     data: pagamentoResponse,
     refetch,
-    isRefetching,
     isFetching,
   } = useQueryReferenciasPagamento(
     {

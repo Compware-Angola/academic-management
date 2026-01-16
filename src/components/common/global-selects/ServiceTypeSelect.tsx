@@ -9,7 +9,7 @@ interface ServiceSelectProps {
   value: string;
   anoLectivo: string;
   allOption?: boolean;
-  onChangeValue(v: string);
+  onChangeValue: (v: string) => void;
 }
 const ServiceTypeSelect = ({
   onChangeValue,

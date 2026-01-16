@@ -5,7 +5,7 @@ import { Faculdade } from "@/services/faculdades/fetch-faculdades.service";
 
 interface FacultySelectProps {
   value: string;
-  onChangeValue(v: string);
+  onChangeValue: (v: string) => void;
   allOption?: boolean;
 }
 const FacultySelect = ({

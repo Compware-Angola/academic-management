@@ -5,7 +5,7 @@ import { Curso } from "@/services/fetch-course";
 
 interface CourseSelectProps {
   value: string;
-  onChangeValue(v: string);
+  onChangeValue: (v: string) => void;
   anoLectivo: string;
   allOption?: boolean;
 }
