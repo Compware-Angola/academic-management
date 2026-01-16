@@ -15,11 +15,12 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeSwitcher } from "../theme-switcher";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
+import { useMutationLogout } from "@/hooks/mutations/use-mutation-login";
 
 
 export function Header() {
   const { logout, user } = useAuth();
-  
+  const { mutate: logoutUser } = useMutationLogout();
     
   const navigate = useNavigate();
   return (
@@ -113,7 +114,7 @@ export function Header() {
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
-                  logout();
+               logoutUser({platform:"GA"});
                 }}
               >
                 <LogOut className="mr-2 h-4 w-4" />

@@ -2,7 +2,7 @@ import { AuthContext } from "@/context/auth.context";
 import {
   AuthResponse,
   getCurrentUserService,
-  LoginPayload,
+
 } from "@/services/auth/login.service";
 import { AuthStorage } from "@/util/auth-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     AuthStorage.saveLogin(payload);
     setToken(token);
     queryClient.invalidateQueries({ queryKey: ["current-user", "GA"] });
-    console.log("aqui");
+  
   };
 
   const logout = () => {
