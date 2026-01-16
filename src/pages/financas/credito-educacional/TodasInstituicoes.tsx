@@ -10,6 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Home, Search, Plus, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { listInstituicao } from "@/services/finance/listar-todas-instituicao.service";
+import { useListInstituicao } from "@/hooks/financa/use-listar-todas-instituicao";
+import { useListInstituicaoTipo } from "@/hooks/financa/use-listar-instituicao";
+import { useCreateInstituicao } from "@/hooks/financa/use-create-instituicao";
 
 export default function TodasInstituicoes() {
   const { toast } = useToast();
@@ -23,19 +27,25 @@ export default function TodasInstituicoes() {
     tipo_instituicao: ""
   });
 
-  const mockData = [
-    { id: 1, codigo: "INST001", nome: "INAGBE", tipo: "Pública", contacto: "222-123-456", status: "Activa" },
-    { id: 2, codigo: "INST002", nome: "Fundação Sonangol", tipo: "Privada", contacto: "222-789-012", status: "Activa" },
-  ];
+  const {
+    data,
+    isLoading: isLoading
+  } = useListInstituicao()
 
-  const tiposInstituicao = [
-    { id: 1, nome: "Pública" },
-    { id: 2, nome: "Privada" },
-    { id: 3, nome: "ONG" },
-    { id: 4, nome: "Internacional" },
-  ];
+  const {
+      data: tiposInstituicao = [],
+      isLoading: isLoadingTipos,
+    } = useListInstituicaoTipo();
 
-  const handleSubmit = () => {
+    const {
+        mutateAsync: createInstituicao,
+        isPending,
+      } = useCreateInstituicao()
+
+    const Instituicoes = data?.items ?? []
+
+
+  const handleSubmit = async () => {
     if (!formData.instituicao || !formData.nif || !formData.sigla || !formData.tipo_instituicao) {
       toast({
         title: "Erro",
@@ -54,7 +64,16 @@ export default function TodasInstituicoes() {
       tipo_instituicao: parseInt(formData.tipo_instituicao)
     };
 
-    console.log("Payload:", payload);
+      await createInstituicao({
+      payload: {
+        instituicao: formData.instituicao,
+        nif: formData.nif,
+        tipoInstituicaoId: Number(formData.tipo_instituicao),
+        contacto: formData.contacto || undefined,
+        endereco: formData.endereco || undefined,
+        sigla: formData.sigla || undefined,
+      },
+    })
     
     toast({
       title: "Sucesso",
@@ -90,13 +109,7 @@ export default function TodasInstituicoes() {
       <p className="text-muted-foreground">Gestão de instituições parceiras de crédito educacional.</p>
 
       <Card>
-        <CardHeader><CardTitle>Pesquisar</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <Input placeholder="Nome da instituição" className="max-w-md" />
-            <Button className="gap-2"><Search className="h-4 w-4" />Pesquisar</Button>
-          </div>
-        </CardContent>
+  
       </Card>
 
       <div className="flex gap-2">
@@ -106,34 +119,64 @@ export default function TodasInstituicoes() {
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Lista de Instituições</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Lista de Instituições</CardTitle>
+        </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Código</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>Tipo</TableHead>
+                <TableHead>Instituição</TableHead>
+                <TableHead>Sigla</TableHead>
+                <TableHead>NIF</TableHead>
                 <TableHead>Contacto</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Endereço</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {mockData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-mono">{item.codigo}</TableCell>
-                  <TableCell>{item.nome}</TableCell>
-                  <TableCell>{item.tipo}</TableCell>
-                  <TableCell>{item.contacto}</TableCell>
-                  <TableCell>{item.status}</TableCell>
-                  <TableCell><Button size="sm" variant="outline"><Edit className="h-3 w-3" /></Button></TableCell>
+              {Instituicoes.map((item) => (
+                <TableRow key={item.codigo}>
+                  <TableCell className="font-mono">
+                    {item.codigo}
+                  </TableCell>
+
+                  <TableCell className="font-medium">
+                    {item.instituicao}
+                  </TableCell>
+
+                  <TableCell>
+                    {item.sigla ?? "-"}
+                  </TableCell>
+
+                  <TableCell className="font-mono">
+                    {item.nif}
+                  </TableCell>
+
+                  <TableCell>
+                    {item.contacto ?? "-"}
+                  </TableCell>
+
+                  <TableCell className="max-w-xs truncate">
+                    {item.endereco ?? "-"}
+                  </TableCell>
+
+                  <TableCell>
+                    <Button size="sm" variant="outline">
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+    </Table>
+  </CardContent>
+</Card>
+
+      
 
       {/* Modal de Criação de Instituição */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -215,9 +258,6 @@ export default function TodasInstituicoes() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancelar
-            </Button>
             <Button onClick={handleSubmit}>
               Criar Instituição
             </Button>

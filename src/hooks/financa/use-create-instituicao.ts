@@ -24,7 +24,7 @@ export function useCreateInstituicao() {
 
       // Se existir lista de instituições, invalida
       queryClient.invalidateQueries({
-        queryKey: ["instituicoes"],
+        queryKey: ["instituicao-todas"],
       });
     },
 
