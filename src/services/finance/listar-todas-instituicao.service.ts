@@ -6,7 +6,7 @@ export type FetchInstituicaoParams = {
 };
 
 export interface Instituicao {
-  codigo: number;
+  codigo?: number;
   instituicao: string;
   nif: string;
   contacto: string | null;

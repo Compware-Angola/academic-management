@@ -52,9 +52,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useListInstituicao } from "@/hooks/financa/use-listar-todas-instituicao";
 import { useListInstituicaoTipo } from "@/hooks/financa/use-listar-instituicao";
 import { useCreateInstituicao } from "@/hooks/financa/use-create-instituicao";
+import { Instituicao } from "@/services/finance/listar-todas-instituicao.service";
+import { InstituitionEditModal } from "../components/InstituitionEditModal";
 
 export default function TodasInstituicoes() {
   const { toast } = useToast();
+
+  const [editInstituition, setEditInstituition] = useState<Instituicao | null>(null);
+  
 
   // ----- Paginação -----
   const [currentPage, setCurrentPage] = useState(1);
@@ -242,7 +247,6 @@ export default function TodasInstituicoes() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
                 <TableHead>Instituição</TableHead>
                 <TableHead>Sigla</TableHead>
                 <TableHead>NIF</TableHead>
@@ -260,18 +264,25 @@ export default function TodasInstituicoes() {
                 </TableRow>
               ) : (
                 instituicoes.map((item) => (
-                  <TableRow key={item.codigo}>
-                    <TableCell>{item.codigo}</TableCell>
+                  <TableRow key={item.nif}>
                     <TableCell>{item.instituicao}</TableCell>
                     <TableCell>{item.sigla ?? "-"}</TableCell>
                     <TableCell>{item.nif}</TableCell>
                     <TableCell>{item.contacto ?? "-"}</TableCell>
                     <TableCell>{item.endereco ?? "-"}</TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    </TableCell>
+                    <TableCell className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                              {/* Botão Editar */}
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setEditInstituition(item)}
+                                              >
+                                                
+                                                Editar
+                                              </Button>
+                                            </div>
+                                          </TableCell>
                   </TableRow>
                 ))
               )}
@@ -387,6 +398,17 @@ export default function TodasInstituicoes() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+
+      {/* Nova Modal de edição */}
+            {editInstituition && (
+              <InstituitionEditModal
+                instituicao={editInstituition}
+                open={!!editInstituition}
+                onOpenChange={(open) => !open && setEditInstituition(null)}
+                // Opcional: callback após sucesso para refetch
+              />
+            )}
     </div>
   );
 }
