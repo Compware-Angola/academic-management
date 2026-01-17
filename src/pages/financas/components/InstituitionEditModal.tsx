@@ -9,8 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { useUpdateInstituicao } from "@/hooks/financa/use-mutation-update-instituition";
 import { UpdateInstituicaoParams } from "@/services/finance/update-instituicao.service";
 
-
-
 export interface Instituition {
   codigo?: number;
   instituicao: string;
@@ -34,6 +32,7 @@ export function InstituitionEditModal({
   onOpenChange,
   onSuccess,
 }: InstituitionEditModalProps) {
+
   const [formData, setFormData] = useState<UpdateInstituicaoParams>({
     instituicao: "",
     nif: "",
@@ -44,7 +43,7 @@ export function InstituitionEditModal({
   });
 
   const { mutateAsync: update } = useUpdateInstituicao();
-  console.log("MODAL: ", instituicao.codigo)
+  
 
   // Preenche o formulário quando abrir o modal
   useEffect(() => {
@@ -68,7 +67,7 @@ export function InstituitionEditModal({
     try {
       await update({ codigo: instituicao.codigo, data: formData });
         
-    
+        
       onSuccess?.();
       onOpenChange(false);
     } catch (err) {

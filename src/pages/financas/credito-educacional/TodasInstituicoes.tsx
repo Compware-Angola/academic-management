@@ -44,7 +44,8 @@ import {
   Plus,
   Edit,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCw
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -86,7 +87,7 @@ export default function TodasInstituicoes() {
   });
 
   // Hooks
-      const { data, isLoading } = useListInstituicao({
+      const { data, isLoading , refetch} = useListInstituicao({
         instituicao: searchParams.instituicao || undefined,
         nif: searchParams.nif || undefined,
         });
@@ -231,12 +232,27 @@ export default function TodasInstituicoes() {
               </Button>
           </div>
 
+      
+        {/* Criar */}
+        <div className="flex flex-wrap gap-2">
 
-      {/* Criar */}
-      <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
-        <Plus className="h-4 w-4" />
-        Nova Instituição
-      </Button>
+                <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                    Nova Instituição
+                </Button>
+              
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => refetch()}
+                  disabled={isLoading}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                  />
+                  Atualizar
+                </Button>
+        </div>
 
       {/* Tabela */}
       <Card>
@@ -271,18 +287,18 @@ export default function TodasInstituicoes() {
                     <TableCell>{item.contacto ?? "-"}</TableCell>
                     <TableCell>{item.endereco ?? "-"}</TableCell>
                     <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                              {/* Botão Editar */}
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => setEditInstituition(item)}
-                                              >
+                      <div className="flex justify-end gap-2">
+                        {/* Botão Editar */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditInstituition(item)}
+                          >
                                                 
-                                                Editar
-                                              </Button>
-                                            </div>
-                                          </TableCell>
+                            Editar
+                        </Button>
+                      </div>
+                  </TableCell>
                   </TableRow>
                 ))
               )}
@@ -407,6 +423,10 @@ export default function TodasInstituicoes() {
                 open={!!editInstituition}
                 onOpenChange={(open) => !open && setEditInstituition(null)}
                 // Opcional: callback após sucesso para refetch
+                onSuccess={() => {
+                  refetch();
+                  setEditInstituition(null);
+                 }}
               />
             )}
     </div>
