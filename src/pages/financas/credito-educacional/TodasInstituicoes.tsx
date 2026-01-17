@@ -1,22 +1,75 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Home, Search, Plus, Edit } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import {
+  Home,
+  Search,
+  Plus,
+  Edit,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 import { Link } from "react-router-dom";
+
 import { useToast } from "@/hooks/use-toast";
-import { listInstituicao } from "@/services/finance/listar-todas-instituicao.service";
 import { useListInstituicao } from "@/hooks/financa/use-listar-todas-instituicao";
 import { useListInstituicaoTipo } from "@/hooks/financa/use-listar-instituicao";
 import { useCreateInstituicao } from "@/hooks/financa/use-create-instituicao";
 
 export default function TodasInstituicoes() {
   const { toast } = useToast();
+
+  // ----- Paginação -----
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25; 
+
+
+  // Pesquisa
+  const [searchType, setSearchType] = useState("instituicao"); // ou "nif"
+  const [searchInput, setSearchInput] = useState("");
+  const [searchParams, setSearchParams] = useState({
+    instituicao: "",
+    nif: ""
+  });
+
+  // Modal e formulário
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     instituicao: "",
@@ -27,26 +80,63 @@ export default function TodasInstituicoes() {
     tipo_instituicao: ""
   });
 
-  const {
-    data,
-    isLoading: isLoading
-  } = useListInstituicao()
+  // Hooks
+      const { data, isLoading } = useListInstituicao({
+        instituicao: searchParams.instituicao || undefined,
+        nif: searchParams.nif || undefined,
+        });
 
-  const {
-      data: tiposInstituicao = [],
-      isLoading: isLoadingTipos,
-    } = useListInstituicaoTipo();
+      const { data: tiposInstituicao = [] } = useListInstituicaoTipo();
+      const { mutateAsync: createInstituicao, isPending } = useCreateInstituicao();
 
-    const {
-        mutateAsync: createInstituicao,
-        isPending,
-      } = useCreateInstituicao()
+      const instituicoes = data?.items ?? [];
+  
+  
+    // Lista completa retornada da API
+      const allItems = data?.items ?? [];
 
-    const Instituicoes = data?.items ?? []
+      // Calcular índices de início e fim
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+
+      // Itens que serão mostrados na tabela
+      const paginatedItems = allItems.slice(startIndex, endIndex);
+
+      // Total de páginas
+      const totalPages = Math.ceil(allItems.length / itemsPerPage);
 
 
+
+
+  // ✅ PESQUISA CORRIGIDA (NÃO ENVIA instituiçao + nif AO MESMO TEMPO)
+  
+        const handleSearch = () => {
+        const value = searchInput.trim();
+
+              if (!value) {
+                setSearchParams({ instituicao: "", nif: "" });
+                setCurrentPage(1);
+                return;
+              }
+
+                  setSearchParams({
+                    instituicao: searchType === "instituicao" ? value : "",
+                    nif: searchType === "nif" ? value : ""
+                  });
+
+                  setCurrentPage(1);
+              };
+
+
+
+  // Criar instituição
   const handleSubmit = async () => {
-    if (!formData.instituicao || !formData.nif || !formData.sigla || !formData.tipo_instituicao) {
+    if (
+      !formData.instituicao ||
+      !formData.nif ||
+      !formData.sigla ||
+      !formData.tipo_instituicao
+    ) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -55,26 +145,17 @@ export default function TodasInstituicoes() {
       return;
     }
 
-    const payload = {
-      instituicao: formData.instituicao,
-      nif: formData.nif,
-      contacto: formData.contacto,
-      endereco: formData.endereco,
-      sigla: formData.sigla,
-      tipo_instituicao: parseInt(formData.tipo_instituicao)
-    };
-
-      await createInstituicao({
+    await createInstituicao({
       payload: {
         instituicao: formData.instituicao,
         nif: formData.nif,
         tipoInstituicaoId: Number(formData.tipo_instituicao),
         contacto: formData.contacto || undefined,
         endereco: formData.endereco || undefined,
-        sigla: formData.sigla || undefined,
-      },
-    })
-    
+        sigla: formData.sigla || undefined
+      }
+    });
+
     toast({
       title: "Sucesso",
       description: "Instituição criada com sucesso!"
@@ -88,41 +169,75 @@ export default function TodasInstituicoes() {
       sigla: "",
       tipo_instituicao: ""
     });
+
     setIsModalOpen(false);
+    setCurrentPage(1);
   };
 
   return (
     <div className="p-6 space-y-6">
+      {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink asChild><Link to="/"><Home className="h-4 w-4" /></Link></BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/">
+                <Home className="h-4 w-4" />
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Finanças</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Finanças</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Gestão de Crédito Educacional</BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Todas Instituições</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Todas Instituições</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="text-2xl font-bold">Todas Instituições</h1>
-      <p className="text-muted-foreground">Gestão de instituições parceiras de crédito educacional.</p>
+      {/* Pesquisa */}
+      
+          <div className="flex gap-2 max-w-lg">
+              <Input
+                placeholder={
+                  searchType === "nif"
+                    ? "Digite o NIF"
+                    : "Digite o nome da instituição"
+                }
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
 
-      <Card>
-  
-      </Card>
+              <Select value={searchType} onValueChange={setSearchType}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="instituicao">Instituição</SelectItem>
+                  <SelectItem value="nif">NIF</SelectItem>
+                </SelectContent>
+              </Select>
 
-      <div className="flex gap-2">
-        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
-          <Plus className="h-4 w-4" />Nova Instituição
-        </Button>
-      </div>
+              <Button onClick={handleSearch}>
+                <Search className="h-4 w-4" />
+              </Button>
+          </div>
 
+
+      {/* Criar */}
+      <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+        <Plus className="h-4 w-4" />
+        Nova Instituição
+      </Button>
+
+      {/* Tabela */}
       <Card>
         <CardHeader>
           <CardTitle>Lista de Instituições</CardTitle>
         </CardHeader>
-
         <CardContent>
           <Table>
             <TableHeader>
@@ -136,130 +251,138 @@ export default function TodasInstituicoes() {
                 <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              {Instituicoes.map((item) => (
-                <TableRow key={item.codigo}>
-                  <TableCell className="font-mono">
-                    {item.codigo}
-                  </TableCell>
-
-                  <TableCell className="font-medium">
-                    {item.instituicao}
-                  </TableCell>
-
-                  <TableCell>
-                    {item.sigla ?? "-"}
-                  </TableCell>
-
-                  <TableCell className="font-mono">
-                    {item.nif}
-                  </TableCell>
-
-                  <TableCell>
-                    {item.contacto ?? "-"}
-                  </TableCell>
-
-                  <TableCell className="max-w-xs truncate">
-                    {item.endereco ?? "-"}
-                  </TableCell>
-
-                  <TableCell>
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-3 w-3" />
-                    </Button>
+              {instituicoes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center">
+                    Nenhum registro encontrado
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                instituicoes.map((item) => (
+                  <TableRow key={item.codigo}>
+                    <TableCell>{item.codigo}</TableCell>
+                    <TableCell>{item.instituicao}</TableCell>
+                    <TableCell>{item.sigla ?? "-"}</TableCell>
+                    <TableCell>{item.nif}</TableCell>
+                    <TableCell>{item.contacto ?? "-"}</TableCell>
+                    <TableCell>{item.endereco ?? "-"}</TableCell>
+                    <TableCell>
+                      <Button size="sm" variant="outline">
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
-    </Table>
-  </CardContent>
-</Card>
+          </Table>
 
-      
+          {/* Paginação */}
+              {instituicoes.length > 0 && (
+              <div className="flex items-center justify-between p-4">
+                <div className="text-sm text-muted-foreground">
+                  Mostrando {(currentPage - 1) * itemsPerPage + 1}–
+                  {Math.min(currentPage * itemsPerPage, instituicoes.length)} de {instituicoes.length} registos
+                </div>
 
-      {/* Modal de Criação de Instituição */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" /> Anterior
+                  </Button>
+
+                  <span className="text-sm px-3 py-1">
+                    Página {currentPage} de {Math.ceil(instituicoes.length / itemsPerPage) || 1}
+                  </span>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= Math.ceil(instituicoes.length / itemsPerPage)}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    Próxima <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+
+        </CardContent>
+      </Card>
+
+      {/* Modal Criar */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Nova Instituição</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="instituicao">Nome da Instituição *</Label>
-              <Input
-                id="instituicao"
-                placeholder="Ex: UNIA"
-                value={formData.instituicao}
-                onChange={(e) => setFormData({ ...formData, instituicao: e.target.value })}
-              />
-            </div>
+          <div className="space-y-3">
+            <Input
+              placeholder="Instituição"
+              value={formData.instituicao}
+              onChange={(e) =>
+                setFormData({ ...formData, instituicao: e.target.value })
+              }
+            />
+            <Input
+              placeholder="Sigla"
+              value={formData.sigla}
+              onChange={(e) =>
+                setFormData({ ...formData, sigla: e.target.value })
+              }
+            />
+            <Input
+              placeholder="Contacto"
+              value={formData.contacto}
+              onChange={(e) =>
+                setFormData({ ...formData, contacto: e.target.value })
+              }
+            />
+            <Input
+              placeholder="NIF"
+              value={formData.nif}
+              onChange={(e) =>
+                setFormData({ ...formData, nif: e.target.value })
+              }
+            />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="sigla">Sigla *</Label>
-                <Input
-                  id="sigla"
-                  placeholder="Ex: HSL"
-                  value={formData.sigla}
-                  onChange={(e) => setFormData({ ...formData, sigla: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nif">NIF *</Label>
-                <Input
-                  id="nif"
-                  placeholder="Ex: 12345678000190"
-                  value={formData.nif}
-                  onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
-                />
-              </div>
-            </div>
+            <Input
+              placeholder="Endereço"
+              value={formData.endereco}
+              onChange={(e) =>
+                setFormData({ ...formData, endereco: e.target.value })
+              }
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="tipo_instituicao">Tipo de Instituição *</Label>
-              <Select
-                value={formData.tipo_instituicao}
-                onValueChange={(value) => setFormData({ ...formData, tipo_instituicao: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tiposInstituicao.map((tipo) => (
-                    <SelectItem key={tipo.id} value={tipo.id.toString()}>
-                      {tipo.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contacto">Contacto</Label>
-              <Input
-                id="contacto"
-                placeholder="Ex: (51) 3333-4444"
-                value={formData.contacto}
-                onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="endereco">Endereço</Label>
-              <Input
-                id="endereco"
-                placeholder="Ex: Av. Atlântica, 1500 - Luanda"
-                value={formData.endereco}
-                onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-              />
-            </div>
+            <Select
+              value={formData.tipo_instituicao}
+              onValueChange={(v) =>
+                setFormData({ ...formData, tipo_instituicao: v })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de Instituição" />
+              </SelectTrigger>
+              <SelectContent>
+                {tiposInstituicao.map((tipo) => (
+                  <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                    {tipo.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter>
-            <Button onClick={handleSubmit}>
-              Criar Instituição
+            <Button onClick={handleSubmit} disabled={isPending}>
+              Criar
             </Button>
           </DialogFooter>
         </DialogContent>

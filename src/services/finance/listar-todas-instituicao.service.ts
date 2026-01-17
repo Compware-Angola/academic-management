@@ -1,34 +1,49 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga"
-import { axiosNestGa } from "@/lib/axios-nest-ga"
+import { axiosApexGa } from "@/lib/axios-apex-ga";
 
-/**
- * Instituição (payload real da API)
- */
+export type FetchInstituicaoParams = {
+  instituicao?: string;
+  nif?: string;
+};
+
 export interface Instituicao {
-  codigo: number
-  instituicao: string
-  nif: string
-  contacto: string | null
-  endereco: string | null
-  sigla: string | null
-  tipo_instituicao: number
+  codigo: number;
+  instituicao: string;
+  nif: string;
+  contacto: string | null;
+  endereco: string | null;
+  sigla: string | null;
+  tipo_instituicao: number;
 }
 
-/**
- * Response da API
- */
 export interface ListInstituicaoResponse {
-  items: Instituicao[]
-  first?: {
-    $ref: string
-  }
+  items: Instituicao[];
 }
 
-/**
- * Service
- */
-export async function listInstituicao(): Promise<ListInstituicaoResponse> {
-  const { data } = await axiosApexGa.get("/financa/instituicao")
+export async function listInstituicao(
+  params: FetchInstituicaoParams = {}
+): Promise<ListInstituicaoResponse> {
 
-  return data
+  const queryParams: Record<string, any> = {};
+
+  if (params.instituicao?.trim()) {
+    queryParams.instituicao = params.instituicao.trim();
+  }
+
+  if (params.nif?.trim()) {
+    queryParams.nif = params.nif.trim();
+  }
+
+
+  const { data } = await axiosApexGa.get<ListInstituicaoResponse>(
+    "/financa/instituicao",
+    {
+      params: queryParams,
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    }
+  );
+
+  return data;
 }
