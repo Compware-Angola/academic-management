@@ -23,7 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2 } from "lucide-react";
+import {
+  Home,
+  Search,
+  Loader2,
+  CheckCircle,
+  Clock,
+  FileText,
+  TrendingUp,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +44,7 @@ import { useQueryNegociacoes } from "@/hooks/financas/area-financeira/use-query-
 import { formatNumber } from "@/util/format-number";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { StatCard } from "@/components/common/StatCard";
 
 export default function NegociacaoDivida() {
   // paginação
@@ -55,6 +64,13 @@ export default function NegociacaoDivida() {
     negociacao: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
+  // Estatísticas mockadas
+  const estatisticas = {
+    totalNegociacoes: 156,
+    valorTotalNegociado: "12.450.000",
+    negociacoesAtivas: 89,
+    taxaRecuperacao: 78.5,
+  };
 
   const tipoNegociacao = [
     {
@@ -90,6 +106,7 @@ export default function NegociacaoDivida() {
   const tableData = pagamentoResponse?.data || [];
   const total = pagamentoResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+  const stats = pagamentoResponse?.stats;
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -120,6 +137,32 @@ export default function NegociacaoDivida() {
       <p className="text-muted-foreground">
         Consultar negociações de divida realizados por alunos.
       </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total de Registros"
+          value={formatNumber(total)}
+          icon={FileText}
+          description="Totla Negociações registadas"
+        />
+        <StatCard
+          title="Total Dividas"
+          value={`${formatNumber(stats?.totalDividas)} Kz`}
+          icon={TrendingUp}
+          description="Valor em dívidas negociadas"
+        />
+        <StatCard
+          title="Total Pago"
+          value={`${formatNumber(stats?.totalPrimeiroValorApagar)} Kz`}
+          icon={Clock}
+          description="Total de negociações pagos"
+        />
+        <StatCard
+          title="Total de Restante"
+          value={`${formatNumber(stats?.totalRestante)} Kz`}
+          icon={CheckCircle}
+          description="Total de negociações Restante"
+        />
+      </div>
 
       <Card>
         <CardHeader>
@@ -153,7 +196,7 @@ export default function NegociacaoDivida() {
                 value: a.key,
               })}
             />
-            <div className="flex items-center ">
+            <div className="flex items-end">
               <Button
                 onClick={() => {
                   setFiltersApplied(filters);

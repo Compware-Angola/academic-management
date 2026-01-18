@@ -9,6 +9,11 @@ export type ObterNegociacoesPayload = {
   limit?: number;
 };
 
+export interface Estatisticas {
+  totalDividas: number;
+  totalPrimeiroValorApagar: number;
+  totalRestante: number;
+}
 export type NegociacaoItem = {
   codigo_matricula: number;
   nome: string;
@@ -33,6 +38,7 @@ export type ObterNegociacoesResponse = {
   page: number;
   limit: number;
   totalPages: number;
+  stats?: Estatisticas;
 };
 
 export async function getNegociacoesService(

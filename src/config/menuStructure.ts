@@ -45,8 +45,8 @@ export const menuStructure: MenuStructure = {
         { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
         { title: "Logs de acessos", url: "/acessos/logs" },
         { title: "Utilizadores logados", url: "/acessos/logados" },
-          { title: "Grupos", url: "/controle-acesso/grupos" },
-            {
+        { title: "Grupos", url: "/controle-acesso/grupos" },
+        {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
         },
@@ -331,10 +331,10 @@ export const finaceStructure: MenuStructure = {
           title: "Isentar Serviços (Antigos)",
           url: "/financas/isentar-antigos",
         },
-        {
-          title: "Pagamentos por Referência",
-          url: "/financas/pagamentos-referencia",
-        },
+        // {
+        //   title: "Pagamentos por Referência",
+        //   url: "/financas/pagamentos-referencia",
+        // },
         { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
         { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },

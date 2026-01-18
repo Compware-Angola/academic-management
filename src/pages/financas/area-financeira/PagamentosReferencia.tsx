@@ -202,7 +202,7 @@ export default function PagamentosReferencia() {
                 />
               </div>
             </div>
-            <div className="flex items-center ">
+            <div className="flex items-end ">
               <Button
                 onClick={() => {
                   setFiltersApplied(filters);
