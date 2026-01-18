@@ -30,7 +30,7 @@ import { useQueryReferenciasPagamento } from "@/hooks/financas/area-financeira/u
 import { useState } from "react";
 import { formatarData } from "@/util/date-formate";
 import { Badge } from "@/components/ui/badge";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+
 import { ServiceTypeSelect } from "@/components/common/global-selects/ServiceTypeSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { PagamentoReferenciaStatus } from "./components/PagamentoReferenciaStastus";
 import { PagamentoReferenciaModal } from "./components/PagamentoReferenciaModal";
 import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fetch-pagamento-por-referencia.service";
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 
 export default function PagamentosReferencia() {
   // paginação
@@ -202,7 +203,7 @@ export default function PagamentosReferencia() {
                 />
               </div>
             </div>
-            <div className="flex items-center ">
+            <div className="flex items-end ">
               <Button
                 onClick={() => {
                   setFiltersApplied(filters);

@@ -20,9 +20,6 @@ import GeneralListing from "./pages/facultymanagement/GeneralListing";
 import CandidateList from "./pages/exam/CandidateList";
 import ScholarshipHoldersList from "./pages/bolsa/ScholarshipHoldersList";
 import LaunchNotes from "./pages/rating(avaliation)/LaunchNotes";
-import TeacherAttendance from "./pages/attendance/TeacherAttendance";
-import AttendanceControl from "./pages/attendance/AttendanceControl";
-import MarkAttendance from "./pages/attendance/MarkAttendance";
 import UserAccess from "./pages/access/UserAccess";
 import LoggedInUsers from "./pages/access/LoggedInUsers";
 //import AccessLogs from "./pages/access/AccessLogs";
@@ -36,10 +33,8 @@ import ActivitiesLecturesLic from "./pages/academiccalendar/activities-lectures"
 
 import ExemptDays from "./pages/academiccalendar/ExemptDays";
 import Parameters from "./pages/academiccalendar/Parameters";
-import ProofDeadlines from "./pages/academiccalendar/ProofDeadlines";
 import ActivitiesLecturesPos from "./pages/calendar-pos/ActivitiesLectures";
 import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
-import DeadlinesPos from "./pages/calendar-pos/Deadlines";
 import { ReactQueryProvider } from "./providers/react-query.provider";
 import Deadlines from "./pages/academiccalendar/Deadlines";
 import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
@@ -48,10 +43,8 @@ import ControlNotes from "./pages/rating(avaliation)/control";
 import FormulaUC from "./pages/rating(avaliation)/formula-uc";
 import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
-import schedulesByUC from "./pages/schedules/SchedulesByUC";
 import SchedulesByUC from "./pages/schedules/SchedulesByUC";
 import TeacherSchedules from "./pages/schedules/TeacherSchedules";
-
 import SchedulesInscription from "./pages/schedules/ScheduleInscription";
 import MovimentarEstudantes from "./pages/schedules/MoveStudents";
 import HorariosSemanais from "./pages/schedules/HorariosSemanais";
@@ -77,7 +70,6 @@ import AccessDenied from "./pages/AccessDenied";
 import Grupos from "./pages/controle-acesso/grupos";
 import ListarGrupos from "./pages/access/ListarTodosGrupos";
 import AccessGroup from "./pages/access/AccessGroup";
-
 import CreateUser from "./pages/access/CreateUser";
 import { ListarAcessos } from "./pages/access/AllAccesses";
 import LogsAcessos from "./pages/access/LogsAccess";
@@ -91,6 +83,9 @@ import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida"
 import ListarCreditoEducacional from "./pages/financas/credito-educacional/ListarCreditoEducacional";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
+import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
+import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+
 
 const App = () => {
   return (
@@ -251,6 +246,11 @@ const App = () => {
                     path="marcacao-provas/marcacao"
                     element={<AddMarkingAssessment />}
                   />
+                    <Route
+                    path="/estudante/:matricula"
+                    element={<PerfilEstudante />}
+                  />
+                
                   {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
@@ -361,8 +361,10 @@ const App = () => {
                     path="financas/credito/instituicoes/todas"
                     element={<TodasInstituicoes />}
                   />
-    
-                     
+                  <Route
+                    path="financas/credito/atribuir"
+                    element={<AtribuirCredito />}
+                  />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />
