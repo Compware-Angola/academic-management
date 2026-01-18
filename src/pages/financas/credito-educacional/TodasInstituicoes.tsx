@@ -1,16 +1,76 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Home, Search, Plus, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TodasInstituicoes() {
+  const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    instituicao: "",
+    nif: "",
+    contacto: "",
+    endereco: "",
+    sigla: "",
+    tipo_instituicao: ""
+  });
+
   const mockData = [
     { id: 1, codigo: "INST001", nome: "INAGBE", tipo: "Pública", contacto: "222-123-456", status: "Activa" },
     { id: 2, codigo: "INST002", nome: "Fundação Sonangol", tipo: "Privada", contacto: "222-789-012", status: "Activa" },
   ];
+
+  const tiposInstituicao = [
+    { id: 1, nome: "Pública" },
+    { id: 2, nome: "Privada" },
+    { id: 3, nome: "ONG" },
+    { id: 4, nome: "Internacional" },
+  ];
+
+  const handleSubmit = () => {
+    if (!formData.instituicao || !formData.nif || !formData.sigla || !formData.tipo_instituicao) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const payload = {
+      instituicao: formData.instituicao,
+      nif: formData.nif,
+      contacto: formData.contacto,
+      endereco: formData.endereco,
+      sigla: formData.sigla,
+      tipo_instituicao: parseInt(formData.tipo_instituicao)
+    };
+
+    console.log("Payload:", payload);
+    
+    toast({
+      title: "Sucesso",
+      description: "Instituição criada com sucesso!"
+    });
+
+    setFormData({
+      instituicao: "",
+      nif: "",
+      contacto: "",
+      endereco: "",
+      sigla: "",
+      tipo_instituicao: ""
+    });
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -40,7 +100,9 @@ export default function TodasInstituicoes() {
       </Card>
 
       <div className="flex gap-2">
-        <Button className="gap-2"><Plus className="h-4 w-4" />Nova Instituição</Button>
+        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+          <Plus className="h-4 w-4" />Nova Instituição
+        </Button>
       </div>
 
       <Card>
@@ -72,6 +134,96 @@ export default function TodasInstituicoes() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Modal de Criação de Instituição */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nova Instituição</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="instituicao">Nome da Instituição *</Label>
+              <Input
+                id="instituicao"
+                placeholder="Ex: UNIA"
+                value={formData.instituicao}
+                onChange={(e) => setFormData({ ...formData, instituicao: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="sigla">Sigla *</Label>
+                <Input
+                  id="sigla"
+                  placeholder="Ex: HSL"
+                  value={formData.sigla}
+                  onChange={(e) => setFormData({ ...formData, sigla: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nif">NIF *</Label>
+                <Input
+                  id="nif"
+                  placeholder="Ex: 12345678000190"
+                  value={formData.nif}
+                  onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tipo_instituicao">Tipo de Instituição *</Label>
+              <Select
+                value={formData.tipo_instituicao}
+                onValueChange={(value) => setFormData({ ...formData, tipo_instituicao: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tiposInstituicao.map((tipo) => (
+                    <SelectItem key={tipo.id} value={tipo.id.toString()}>
+                      {tipo.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contacto">Contacto</Label>
+              <Input
+                id="contacto"
+                placeholder="Ex: (51) 3333-4444"
+                value={formData.contacto}
+                onChange={(e) => setFormData({ ...formData, contacto: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="endereco">Endereço</Label>
+              <Input
+                id="endereco"
+                placeholder="Ex: Av. Atlântica, 1500 - Luanda"
+                value={formData.endereco}
+                onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmit}>
+              Criar Instituição
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

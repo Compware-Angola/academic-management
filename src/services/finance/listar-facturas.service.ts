@@ -21,6 +21,7 @@ export type Factura = {
   descricao: string;
   estado: number;
   nome_aluno: string;
+  ano_lectivo:string;
   curso: string;
   polo: string;
   rn: number;
@@ -56,3 +57,38 @@ export async function listarFacturasService(
 
   return data;
 }
+
+
+/* ---------- RESPONSE ITEM ---------- */
+export type FacturaItem = {
+  codigoitem: number;
+  codigofactura: number;
+  codigoproduto: number;
+  quantidade: number;
+  obs: string | null;
+  preco: number;
+  total: number;
+  descricaoservico: string;
+  codigoservico: number;
+  mesid: number | null;
+  mesdescricao: string | null;
+};
+
+/* ---------- RESPONSE PADRÃO API ---------- */
+export type ListarFacturaItensResponse = {
+  statusCode: number;
+  message: string;
+  data: FacturaItem[];
+};
+
+/* ---------- SERVICE ---------- */
+export async function listarFacturaItensService(
+  facturaId: number | string
+): Promise<ListarFacturaItensResponse> {
+  const { data } = await axiosNestFinance.get<ListarFacturaItensResponse>(
+    `/invoices/${facturaId}/itens`
+  );
+
+  return data;
+}
+

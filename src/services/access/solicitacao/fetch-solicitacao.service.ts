@@ -19,6 +19,7 @@ export type Solicitacao = {
   nome_remetente: string;
   nome_receptor: string;
   codigo_matricula: number;
+  codigo_solicitacao: number;
   descricao: string | null;
   assunto: string;
   data_solicitacao: string;
