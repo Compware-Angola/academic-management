@@ -38,9 +38,9 @@ export type CreditoEducacionalEstudanteResponse = {
   items: CreditoEducacionalEstudante[];
 };
 
-export async function fetchCreditoEducacionalTipo(): Promise<CreditoEducacionalEstudanteResponse> {
+export async function fetchCreditoEducacionalEstudante(): Promise<CreditoEducacionalEstudanteResponse> {
   const { data } = await axiosApexGa.get<CreditoEducacionalEstudanteResponse>(
-    "/financa/credito-educacional/estudante"
+    "/financa/credito-educacional/estudante",
   );
 
   return data;
