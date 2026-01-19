@@ -30,10 +30,9 @@ export type LogsPaginatedResponse = {
 };
 
 export async function fetchLogsAccessos(
-  userId: number,
   params: createLogsParams
 ): Promise<LogsPaginatedResponse> {
-  const _params = { ...params, utilizadorId: userId };
+  const _params = { ...params};
 
 
 

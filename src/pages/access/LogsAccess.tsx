@@ -67,7 +67,7 @@ export default function LogsAcessos() {
     };
 
     if (filters.search) params.search = filters.search;
-    if (filters.utilizadorId) params.utilizadorId = filters.utilizadorId;
+
 
     setParamsPesquisa(params);
   };

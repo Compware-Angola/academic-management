@@ -49,11 +49,20 @@ export type StudentDetail = {
   curso: string;
   periodo: string;
   estado: string;
+
   nome_completo: string;
   bi_aluno: string;
-  email: string;
+
+  email: string | null; // pode vir null
   telefonicos: string;
-  data_nascimento: string; // formato ISO: "1993-01-28T23:00:00.000Z"
+sexo:string;
+  data_nascimento: string; // ISO: "1982-05-24T23:00:00.000Z"
+
+  pai: string;
+  mae: string;
+  naturalidade: string;
+  nacionalidade: string;
+  estado_civil: string;
 };
 
 /* =======================

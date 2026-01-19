@@ -226,11 +226,11 @@ export default function PerfilEstudante() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />
-                    <span>{student.telefonicos || '--'}</span>
+                    <span>{student.telefonicos || 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-4 w-4" />
-                    <span>{estudante.emailInstitucional}</span>
+                    <span>{student.email || 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
@@ -273,23 +273,7 @@ export default function PerfilEstudante() {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <Button variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          Exportar Perfil
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Printer className="h-4 w-4" />
-          Imprimir
-        </Button>
-        <Button variant="outline" className="gap-2" asChild>
-          <Link to="/">
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Link>
-        </Button>
-      </div>
+ 
 
       {/* Tabs with detailed information */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -336,34 +320,33 @@ export default function PerfilEstudante() {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Nome Completo:</span>
-                  <span className="font-medium">{estudante.nome}</span>
+                  <span className="font-medium">{student.nome_completo}</span>
                   
                   <span className="text-muted-foreground">Nome do Pai:</span>
-                  <span className="font-medium">{estudante.nomePai}</span>
+                  <span className="font-medium">{student.pai}</span>
                   
                   <span className="text-muted-foreground">Nome da Mãe:</span>
-                  <span className="font-medium">{estudante.nomeMae}</span>
+                  <span className="font-medium">{student.mae}</span>
                   
                   <span className="text-muted-foreground">Data de Nascimento:</span>
-                  <span className="font-medium">{new Date(estudante.dataNascimento).toLocaleDateString('pt-AO')}</span>
+                  <span className="font-medium">{new Date(student.data_nascimento).toLocaleDateString('pt-AO')}</span>
                   
                   <span className="text-muted-foreground">Nacionalidade:</span>
-                  <span className="font-medium">{estudante.nacionalidade}</span>
+                  <span className="font-medium">{student.nacionalidade}</span>
                   
                   <span className="text-muted-foreground">Naturalidade:</span>
-                  <span className="font-medium">{estudante.naturalidade}</span>
+                  <span className="font-medium">{student.naturalidade}</span>
                   
                   <span className="text-muted-foreground">Género:</span>
-                  <span className="font-medium">{estudante.genero}</span>
+                  <span className="font-medium">{student.sexo}</span>
                   
                   <span className="text-muted-foreground">Estado Civil:</span>
-                  <span className="font-medium">{estudante.estadoCivil}</span>
+                  <span className="font-medium">{student.estado_civil}</span>
                   
                   <span className="text-muted-foreground">BI:</span>
-                  <span className="font-medium">{estudante.bi}</span>
+                  <span className="font-medium">{student.bi}</span>
                   
-                  <span className="text-muted-foreground">NIF:</span>
-                  <span className="font-medium">{estudante.nif}</span>
+             
                 </div>
               </CardContent>
             </Card>
@@ -375,13 +358,12 @@ export default function PerfilEstudante() {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Telefone:</span>
-                  <span className="font-medium">{estudante.telefone}</span>
+                  <span className="font-medium">{student.telefonicos}</span>
                   
                   <span className="text-muted-foreground">Email Pessoal:</span>
-                  <span className="font-medium">{estudante.email}</span>
+                  <span className="font-medium">{student.email}</span>
                   
-                  <span className="text-muted-foreground">Email Institucional:</span>
-                  <span className="font-medium">{estudante.emailInstitucional}</span>
+                
                   
                   <span className="text-muted-foreground">Endereço:</span>
                   <span className="font-medium">{estudante.endereco}</span>
