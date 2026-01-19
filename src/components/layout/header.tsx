@@ -163,7 +163,7 @@ export function Header() {
           <ThemeSwitcher />
 
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger>
               <Button variant="ghost" className="gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg" alt="Utilizador" />

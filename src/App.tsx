@@ -83,9 +83,7 @@ import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida"
 import ListarCreditoEducacional from "./pages/financas/credito-educacional/ListarCreditoEducacional";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
-import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
-
 
 const App = () => {
   return (
@@ -361,10 +359,8 @@ const App = () => {
                     path="financas/credito/instituicoes/todas"
                     element={<TodasInstituicoes />}
                   />
-                  <Route
-                    path="financas/credito/atribuir"
-                    element={<AtribuirCredito />}
-                  />
+    
+                     
 
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />

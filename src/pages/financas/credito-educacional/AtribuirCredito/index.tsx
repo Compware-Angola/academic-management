@@ -8,22 +8,28 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Home, Search, Check } from "lucide-react";
+import { Home, Search, Check, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-
 import { useToast } from "@/hooks/use-toast";
 import { useQueryAlunoMatricula } from "@/hooks/financas/alunos/use-query-fecth-aluno";
 import { useMutationAtribuirCreditoEducacional } from "@/hooks/financas/credito-educacional/use-mutation-atribuir-credito";
-
 import { ConfirmarAlunoModal } from "./components/ConfirmarAlunoModal";
-
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { CreditoEducacionalSelect } from "@/components/common/global-selects/CreditoEducacionalSelect";
 import { useAuth } from "@/hooks/use-auth";
+import { useQueryFetchCreditoEducacionalEstudante } from "@/hooks/financas/credito-educacional/use-query-fetch-credito-educacional-estudante";
 
 function validarPayload(payload: {
   codigoAnoLectivo: string;
@@ -45,18 +51,27 @@ export default function AtribuirCredito() {
   const [pesquisar, setPesquisar] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [canAtribuir, setCanAtribuir] = useState(false);
+  const [filtroNome, setFiltroNome] = useState("");
 
   const {
     user: {
       user: { pk_utilizador },
     },
   } = useAuth();
+
   const [payload, setPayload] = useState({
     codigoAnoLectivo: "",
     semestre: "",
     codigoInstituicao: "",
     codigoCredito: "",
   });
+
+  const {
+    data: creditoEstudantes,
+    isLoading: isLoadingCreditos,
+    isError: isErrorCreditos,
+    error: errorCreditos,
+  } = useQueryFetchCreditoEducacionalEstudante();
 
   const {
     data: aluno,
@@ -67,6 +82,7 @@ export default function AtribuirCredito() {
 
   const { mutateAsync: atribuirCredito, isPending: isAtribuindo } =
     useMutationAtribuirCreditoEducacional();
+
   const resetFormulario = () => {
     setMatricula("");
     setPesquisar(false);
@@ -80,6 +96,7 @@ export default function AtribuirCredito() {
       codigoCredito: "",
     });
   };
+
   useEffect(() => {
     if (aluno) {
       setModalAberto(true);
@@ -97,7 +114,15 @@ export default function AtribuirCredito() {
     }
   }, [isError, error, toast]);
 
-  /* ------------------------ ações ------------------------ */
+  useEffect(() => {
+    if (isErrorCreditos) {
+      toast({
+        title: errorCreditos?.message ?? "Erro ao carregar lista de estudantes",
+        variant: "destructive",
+      });
+    }
+  }, [isErrorCreditos, errorCreditos, toast]);
+
   const pesquisarAluno = () => {
     if (!matricula) return;
     setCanAtribuir(false);
@@ -126,7 +151,11 @@ export default function AtribuirCredito() {
     }
   };
 
-  /* ------------------------ UI ------------------------ */
+  // Filtrar estudantes por nome
+  const estudantesFiltrados = creditoEstudantes?.items.filter((estudante) =>
+    estudante.nome_completo.toLowerCase().includes(filtroNome.toLowerCase()),
+  );
+
   return (
     <div className="p-6 space-y-6">
       {/* Breadcrumb */}
@@ -150,7 +179,7 @@ export default function AtribuirCredito() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Card */}
+      {/* Card de Atribuição */}
       <Card>
         <CardHeader>
           <CardTitle>Pesquisar Estudante</CardTitle>
@@ -220,8 +249,103 @@ export default function AtribuirCredito() {
               {isAtribuindo ? "Atribuindo..." : "Atribuir"}
             </Button>
 
-            <Button variant="outline">Cancelar</Button>
+            <Button onClick={() => resetFormulario()} variant="outline">
+              Cancelar
+            </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Card de Listagem */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Estudantes com Crédito Educacional</CardTitle>
+          <div className="mt-4">
+            <Input
+              placeholder="Filtrar por nome..."
+              value={filtroNome}
+              onChange={(e) => setFiltroNome(e.target.value)}
+              className="max-w-sm"
+            />
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {isLoadingCreditos ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Matrícula</TableHead>
+                    <TableHead className="min-w-[250px]">
+                      Nome Completo
+                    </TableHead>
+                    <TableHead className="w-[150px]">BI</TableHead>
+                    <TableHead className="min-w-[200px]">Curso</TableHead>
+                    <TableHead className="min-w-[200px]">Instituição</TableHead>
+                    <TableHead className="w-[100px]">Ano Letivo</TableHead>
+                    <TableHead className="w-[90px]">Semestre</TableHead>
+                    <TableHead className="w-[120px]">Crédito</TableHead>
+                    <TableHead className="w-[90px]">Desconto</TableHead>
+                    <TableHead className="w-[120px]">Tipo</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {estudantesFiltrados && estudantesFiltrados.length > 0 ? (
+                    estudantesFiltrados.map((estudante) => (
+                      <TableRow key={estudante.codigo}>
+                        <TableCell>{estudante.codigo_matricula}</TableCell>
+                        <TableCell className="font-medium whitespace-nowrap">
+                          {estudante.nome_completo}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {estudante.bilhete_identidade}
+                        </TableCell>
+                        <TableCell>{estudante.curso}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">
+                          {estudante.instituicao}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {estudante.ano_lectivo}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {estudante.semestre ? `${estudante.semestre}º` : "-"}
+                        </TableCell>
+                        <TableCell>{estudante.credito}</TableCell>
+                        <TableCell className="text-center">
+                          {estudante.desconto}
+                          {estudante.tipo_desconto === "PERCENTUAL" ? "%" : ""}
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-xs  px-2 py-1 rounded whitespace-nowrap">
+                            {estudante.tipo_desconto}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={10} className="text-center py-8">
+                        {filtroNome
+                          ? "Nenhum estudante encontrado com esse nome"
+                          : "Nenhum estudante com crédito educacional"}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {estudantesFiltrados && estudantesFiltrados.length > 0 && (
+            <div className="mt-4 text-sm text-muted-foreground">
+              Total: {estudantesFiltrados.length} estudante(s)
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -229,7 +353,7 @@ export default function AtribuirCredito() {
       <ConfirmarAlunoModal
         open={modalAberto}
         aluno={aluno}
-        onClose={() => setModalAberto(false)}
+        onClose={() => resetFormulario()}
         onConfirm={() => {
           setCanAtribuir(true);
           setModalAberto(false);
