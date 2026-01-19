@@ -3,10 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/dasboard/Index";
-import GenericPage from "./pages/GenericPage";
-import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import { menuStructure } from "./config/menuStructure";
+
 
 import { ThemeProvider } from "./hooks/thme-provider";
 import { MainLayout } from "./pages/App";
@@ -15,14 +13,11 @@ import CreateSchedule from "./pages/schedules/CreateSchedule/CreateSchedule";
 import ScheduleList from "./pages/schedules/ScheduleList";
 import ClassromList from "./pages/classroom/ClassromList";
 import DisciplineManagementList from "./pages/disciplinemanagement/DisciplineManagementList";
-import EnrolledList from "./pages/registrations/EnrolledList";
 import GeneralListing from "./pages/facultymanagement/GeneralListing";
-import CandidateList from "./pages/exam/CandidateList";
-import ScholarshipHoldersList from "./pages/bolsa/ScholarshipHoldersList";
+
 import LaunchNotes from "./pages/rating(avaliation)/LaunchNotes";
 import UserAccess from "./pages/access/UserAccess";
 import LoggedInUsers from "./pages/access/LoggedInUsers";
-//import AccessLogs from "./pages/access/AccessLogs";
 import UserFunctionality from "./pages/access/UserFunctionality";
 import RectoratePositions from "./pages/access/RectoratePositions";
 import BlockAccess from "./pages/access/BlockAccess";
