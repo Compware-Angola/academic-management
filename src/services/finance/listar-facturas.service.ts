@@ -6,7 +6,7 @@ import { normalizeParam } from "@/util/normalize-param";
 export type ListarFacturasPayload = {
   search?: string | number;
   anoLectivo?: number | string;
-  status?:number | null
+  status?: number | null;
   page?: number;
   limit?: number;
 };
@@ -21,10 +21,46 @@ export type Factura = {
   descricao: string;
   estado: number;
   nome_aluno: string;
-  ano_lectivo:string;
+  ano_lectivo: string;
   curso: string;
   polo: string;
   rn: number;
+};
+/* ---------- RESPONSE ITEM ---------- */
+export type FacturaDetalhe = {
+  Codigo: number;
+  DataFactura: string;
+  TotalPreco: number;
+  CodigoMatricula: number;
+  Referencia: string;
+  Desconto: number;
+  Troco: number | null;
+  totalIVA: number;
+  TotalMulta: number;
+  totalIncidencia: number | null;
+  totalRetencao: number | null;
+  ValorAPagar: number;
+  ValorEntregue: number | null;
+  ValorAPagarExtenso: string | null;
+  Descricao: string;
+  ValorEntregueMltCX: number;
+  codigoDescricao: number;
+  NextFactura: string | null;
+  next: string | null;
+  textoHash: string;
+  dataVencimento: string;
+  poloId: number;
+  obs: string | null;
+  hashValor: string;
+  contaCorrente: string | null;
+  faturaReference: string | null;
+  canal: number;
+  anoLectivo: number;
+  estado: number;
+  corrente: number;
+  codigoPreinscricao: number;
+  numSequenciaFactura: number;
+  tipoDocumentoFacturaId: number;
 };
 
 /* ---------- RESPONSE COMPLETO ---------- */
@@ -38,26 +74,25 @@ export type ListarFacturasResponse = {
 
 /* ---------- SERVICE ---------- */
 export async function listarFacturasService(
-  payload: ListarFacturasPayload
+  payload: ListarFacturasPayload,
 ): Promise<ListarFacturasResponse> {
-  const { search, anoLectivo, page = 1, limit = 25 ,status} = payload;
+  const { search, anoLectivo, page = 1, limit = 25, status } = payload;
 
   const params = {
     search: normalizeParam(search),
     anoLectivo: normalizeParam(anoLectivo),
-    status:status,
+    status: status,
     page,
     limit,
   };
 
   const { data } = await axiosNestFinance.get<ListarFacturasResponse>(
     "/invoices",
-    { params }
+    { params },
   );
 
   return data;
 }
-
 
 /* ---------- RESPONSE ITEM ---------- */
 export type FacturaItem = {
@@ -83,12 +118,21 @@ export type ListarFacturaItensResponse = {
 
 /* ---------- SERVICE ---------- */
 export async function listarFacturaItensService(
-  facturaId: number | string
+  facturaId: number | string,
 ): Promise<ListarFacturaItensResponse> {
   const { data } = await axiosNestFinance.get<ListarFacturaItensResponse>(
-    `/invoices/${facturaId}/itens`
+    `/invoices/${facturaId}/itens`,
   );
 
   return data;
 }
+export async function buscarFacturaService(
+  facturaId: number | string,
+): Promise<FacturaDetalhe> {
+  console.log(facturaId);
+  const { data } = await axiosNestFinance.get<FacturaDetalhe>(
+    `/invoices/${facturaId}`,
+  );
 
+  return data;
+}

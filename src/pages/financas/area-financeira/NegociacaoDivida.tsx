@@ -31,6 +31,7 @@ import {
   Clock,
   FileText,
   TrendingUp,
+  Eye,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -45,6 +46,8 @@ import { formatNumber } from "@/util/format-number";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { StatCard } from "@/components/common/StatCard";
+import { NegociacaoDividaModal } from "./components/NegociacaoDividaModal";
+import { NegociacaoItem } from "@/services/financas/area-financeira/fetch-negociacao-dividas.service";
 
 export default function NegociacaoDivida() {
   // paginação
@@ -54,8 +57,8 @@ export default function NegociacaoDivida() {
     setOpenModal(false);
   };
   const [limit, setLimit] = useState(25);
-  const [selectedPagamento, setSelectedPagamento] =
-    useState<ReferenciasPagamentoItem>(null);
+  const [selectedNegociacao, setSelectedNegociacao] =
+    useState<NegociacaoItem>(null);
   const [filters, setFilters] = useState({
     anoLectivo: "",
     curso: "",
@@ -101,7 +104,7 @@ export default function NegociacaoDivida() {
     },
     {
       enabled: true,
-    }
+    },
   );
   const tableData = pagamentoResponse?.data || [];
   const total = pagamentoResponse?.total || 0;
@@ -240,6 +243,7 @@ export default function NegociacaoDivida() {
                     <TableHead>1ª Prestações a pagar</TableHead>
                     <TableHead>Valor da Prestações</TableHead>
                     <TableHead>Valor Restante</TableHead>
+                    <TableHead>Acções</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -267,6 +271,18 @@ export default function NegociacaoDivida() {
                       </TableCell>
                       <TableCell>
                         <Badge> {formatNumber(item.valor_restante)} kz</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setOpenModal(true);
+                            setSelectedNegociacao(item);
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -320,10 +336,11 @@ export default function NegociacaoDivida() {
           </div>
         </CardContent>
       </Card>
-      <PagamentoReferenciaModal
+      <NegociacaoDividaModal
+        facturaId="588835"
         isModalOpen={openModal}
         setIsModalOpen={() => closeModal()}
-        selectedPagamento={selectedPagamento}
+        selectedNegociacao={selectedNegociacao}
       />
     </div>
   );
