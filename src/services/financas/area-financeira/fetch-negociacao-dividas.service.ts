@@ -16,6 +16,7 @@ export interface Estatisticas {
 }
 export type NegociacaoItem = {
   codigo_matricula: number;
+  codigo_factura: number;
   nome: string;
   curso: string;
   valor_divida: number;
@@ -42,7 +43,7 @@ export type ObterNegociacoesResponse = {
 };
 
 export async function getNegociacoesService(
-  payload: ObterNegociacoesPayload
+  payload: ObterNegociacoesPayload,
 ): Promise<ObterNegociacoesResponse> {
   const {
     codigoAnoLectivo,
@@ -64,7 +65,7 @@ export async function getNegociacoesService(
         page,
         limit,
       },
-    }
+    },
   );
 
   return data;

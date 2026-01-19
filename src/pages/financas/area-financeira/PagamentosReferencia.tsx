@@ -34,7 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { ServiceTypeSelect } from "@/components/common/global-selects/ServiceTypeSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { Label } from "@/components/ui/label";
-import { parseFilter } from "@/util/parse-filter";
+import { parseDateFilter, parseFilter } from "@/util/parse-filter";
 import { PagamentoReferenciaStatus } from "./components/PagamentoReferenciaStastus";
 import { PagamentoReferenciaModal } from "./components/PagamentoReferenciaModal";
 import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fetch-pagamento-por-referencia.service";
@@ -57,6 +57,8 @@ export default function PagamentosReferencia() {
     matricula: "",
     referencia: "",
     factura: "",
+    dataInicial: "",
+    dataFinal: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
 
@@ -99,13 +101,15 @@ export default function PagamentosReferencia() {
       reference: filtersApplied.referencia,
       status:
         filtersApplied.estado == "all" ? undefined : filtersApplied.estado,
+      dataInicio: parseDateFilter(filtersApplied.dataInicial),
+      dataFinal: parseDateFilter(filtersApplied.dataFinal),
       codigoproduto: parseFilter(filtersApplied.servico),
       page,
       limit,
     },
     {
       enabled: true,
-    }
+    },
   );
   const tableData = pagamentoResponse?.data || [];
   const total = pagamentoResponse?.total || 0;
@@ -199,6 +203,36 @@ export default function PagamentosReferencia() {
                   placeholder="Factura"
                   onChange={({ target }) =>
                     setFilters({ ...filters, factura: target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Data Inicial</Label>
+              <div className="relative">
+                <Input
+                  type="date"
+                  placeholder="Data Inicial"
+                  onChange={({ target }) =>
+                    setFilters({
+                      ...filters,
+                      dataInicial: target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Data Final</Label>
+              <div className="relative">
+                <Input
+                  type="date"
+                  placeholder="Data Final"
+                  onChange={({ target }) =>
+                    setFilters({
+                      ...filters,
+                      dataFinal: target.value,
+                    })
                   }
                 />
               </div>

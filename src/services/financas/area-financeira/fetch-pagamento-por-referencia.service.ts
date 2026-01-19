@@ -40,7 +40,7 @@ export type ObterReferenciasPagamentoResponse = {
 };
 
 export async function getPaymentReferencesService(
-  payload: ObterReferenciasPagamentoPayload
+  payload: ObterReferenciasPagamentoPayload,
 ): Promise<ObterReferenciasPagamentoResponse> {
   const {
     dataInicio,
@@ -54,6 +54,8 @@ export async function getPaymentReferencesService(
     page = 1,
     limit = 10,
   } = payload;
+
+  console.log("payload", payload);
 
   const { data } =
     await axiosNestFinance.get<ObterReferenciasPagamentoResponse>(
@@ -71,7 +73,7 @@ export async function getPaymentReferencesService(
           page,
           limit,
         },
-      }
+      },
     );
 
   return data;
