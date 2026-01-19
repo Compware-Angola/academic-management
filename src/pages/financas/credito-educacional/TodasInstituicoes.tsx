@@ -218,7 +218,7 @@ export default function TodasInstituicoes() {
               />
 
               <Select value={searchType} onValueChange={setSearchType}>
-                <SelectTrigger className="w-[160px]">
+                <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
