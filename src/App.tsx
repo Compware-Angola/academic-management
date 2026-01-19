@@ -241,11 +241,12 @@ const App = () => {
                     path="marcacao-provas/marcacao"
                     element={<AddMarkingAssessment />}
                   />
+                  {/* <Route
                     <Route
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
-                
+                  {/*
                   {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
