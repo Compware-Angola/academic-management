@@ -60,7 +60,7 @@ export default function NegociacaoDivida() {
   const [selectedNegociacao, setSelectedNegociacao] =
     useState<NegociacaoItem>(null);
   const [filters, setFilters] = useState({
-    anoLectivo: "",
+    anoLectivo: "23",
     curso: "",
     estado: "",
     faculdade: "",
