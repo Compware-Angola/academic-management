@@ -475,7 +475,7 @@ export default function ListarNotasPagamento() {
                         <TableRow key={index}>
                         <TableCell>
   {( item.descricaoservico || "—") + 
-   (item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
+   (Number(item.mesid)!=3&& item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
 </TableCell>
                           <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
                           <TableCell className="text-right font-mono">
