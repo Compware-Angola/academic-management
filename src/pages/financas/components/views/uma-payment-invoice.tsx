@@ -261,7 +261,8 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
           {itens.map((item, index) => (
             <View style={styles.tableRow} key={index}>
               <Text style={[styles.tableCell, { width: '55%' }]}>
-                {item.obs || item.descricaoservico || '—'}
+                {( item.descricaoservico || "—") + 
+   (Number(item.mesid)!=3&& item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
               </Text>
               <Text style={[styles.tableCell, { width: '15%', textAlign: 'center' }]}>
                 {item.quantidade ?? 1}
