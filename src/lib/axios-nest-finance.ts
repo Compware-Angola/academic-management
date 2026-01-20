@@ -55,7 +55,7 @@ axiosNestFinance.interceptors.response.use(
     // ⭐ Se token inválido/expirado
     if (status === 401) {
 
-     // window.location.href = "/";
+      window.location.href = "/";
       return;
     }
 
