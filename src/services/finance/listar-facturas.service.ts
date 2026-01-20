@@ -5,8 +5,10 @@ import { normalizeParam } from "@/util/normalize-param";
 
 export type ListarFacturasPayload = {
   search?: string | number;
+  codigoMatricula?: string | number;
+  reference?: string | number;
   anoLectivo?: number | string;
-  status?: number | null;
+  status?: number | null| string;
   page?: number;
   limit?: number;
 };
@@ -22,6 +24,7 @@ export type Factura = {
   estado: number;
   nome_aluno: string;
   ano_lectivo: string;
+  servico:string;
   curso: string;
   polo: string;
   rn: number;
@@ -76,12 +79,14 @@ export type ListarFacturasResponse = {
 export async function listarFacturasService(
   payload: ListarFacturasPayload,
 ): Promise<ListarFacturasResponse> {
-  const { search, anoLectivo, page = 1, limit = 25, status } = payload;
+  const { search, anoLectivo, page = 1, limit = 25, status,codigoMatricula,reference } = payload;
 
   const params = {
     search: normalizeParam(search),
     anoLectivo: normalizeParam(anoLectivo),
-    status: status,
+    codigoMatricula:normalizeParam(codigoMatricula),
+    reference:normalizeParam(reference),
+    status: normalizeParam(status),
     page,
     limit,
   };

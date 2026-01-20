@@ -57,7 +57,10 @@ const estados = [
   { id: "3", label: "Anulado" },
 ];
 
-
+const searchOptions = [
+  { id: "codigoMatricula", label: "Código da Matrícula" },
+  { id: "reference", label: "Referência" },
+];
 
 export default function ListarNotasPagamento() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,6 +68,9 @@ export default function ListarNotasPagamento() {
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [searchBy, setSearchBy] = useState<
+    "codigoMatricula" | "reference"
+  >("codigoMatricula");
   const [filters, setFilters] = useState({
     anoLetivo: "23",
     estado: undefined as string | undefined,
@@ -74,12 +80,23 @@ export default function ListarNotasPagamento() {
 
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
 
+
+
   const { data, isLoading, refetch } = useQueryFacturas({
-    search: searchTerm,
     anoLectivo: filters.anoLetivo,
-    status: filters.estado !== undefined ? Number(filters.estado) : undefined,
+    status: filters.estado,
     page,
     limit,
+
+    codigoMatricula:
+      searchBy === "codigoMatricula" && searchTerm
+        ? searchTerm
+        : undefined,
+
+    reference:
+      searchBy === "reference" && searchTerm
+        ? searchTerm
+        : undefined,
   });
 
   const {
@@ -161,17 +178,21 @@ export default function ListarNotasPagamento() {
         <p className="text-muted-foreground">Listagem de todas as notas de pagamento emitidas.</p>
       </div>
 
+     
       {/* Filtros */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[200px] md:w-64">
+          <div className="flex flex-wrap gap-4 items-end">
+            {/* Ano Lectivo */}
+            <div className="min-w-[200px]">
               <FormSelect
+                label="Ano Letivo"
                 disabled={isLoadingAcademicYear}
                 loading={isLoadingAcademicYear}
-                label="Ano Letivo"
                 value={filters.anoLetivo}
-                onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
+                onChange={(v) =>
+                  setFilters({ ...filters, anoLetivo: v })
+                }
                 options={anosAcademicos}
                 map={(a) => ({
                   key: a.codigo,
@@ -181,42 +202,74 @@ export default function ListarNotasPagamento() {
               />
             </div>
 
-            <div className="flex-1 min-w-[200px] md:w-64">
+            {/* Estado */}
+            <div className="min-w-[180px]">
               <FormSelect
                 label="Estado"
                 value={filters.estado}
-                onChange={(v) => setFilters({ ...filters, estado: v })}
+                onChange={(v) =>
+                  setFilters({ ...filters, estado: v })
+                }
                 options={estados}
-                map={(a) => ({
-                  key: a.id,
-                  label: a.label,
-                  value: a.id,
+                map={(e) => ({
+                  key: e.id,
+                  label: e.label,
+                  value: e.id,
                 })}
               />
             </div>
 
-            <div className="flex-1 min-w-[250px]">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Pesquisar por matrícula ou estudante..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setPage(1);
-                  }}
-                  className="pl-10"
-                />
-              </div>
+            {/* Tipo de Pesquisa */}
+            <div className="min-w-[220px]">
+              <FormSelect
+                label="Pesquisar por"
+                value={searchBy}
+                onChange={(v) => {
+                  setSearchBy(
+                    v as "codigoMatricula" | "reference"
+                  );
+                  setSearchTerm("");
+                  setPage(1);
+                }}
+                options={searchOptions}
+                map={(o) => ({
+                  key: o.id,
+                  label: o.label,
+                  value: o.id,
+                })}
+              />
             </div>
 
-            <Button variant="outline" className="gap-2 whitespace-nowrap" onClick={() => refetch()}>
+            {/* Input Pesquisa */}
+            <div className="flex-1 min-w-[260px] relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-10"
+                placeholder={
+                  searchBy === "codigoMatricula"
+                    ? "Pesquisar por código da matrícula..."
+                    : "Pesquisar por referência..."
+                }
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+
+            <Button
+              variant="outline"
+              onClick={() => refetch()}
+              className="gap-2"
+            >
               <RefreshCw className="h-4 w-4" />
               Actualizar
             </Button>
           </div>
         </CardContent>
       </Card>
+
 
       {/* Tabela principal */}
       <Card>
@@ -420,7 +473,10 @@ export default function ListarNotasPagamento() {
                     <TableBody>
                       {itens.data.map((item: FacturaItem, index: number) => (
                         <TableRow key={index}>
-                          <TableCell>{item.obs || item.descricaoservico || "—"}</TableCell>
+                        <TableCell>
+  {( item.descricaoservico || "—") + 
+   (item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
+</TableCell>
                           <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
                           <TableCell className="text-right font-mono">
                             {formatCurrency(item.preco)}

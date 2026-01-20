@@ -1,3 +1,5 @@
-export function normalizeParam<T>(value: T) {
-  return value === 0 ? undefined : value;
+export function normalizeParam<T>(value: T | undefined | null) {
+  return value === undefined || value === null || value === ""
+    ? undefined
+    : value;
 }
