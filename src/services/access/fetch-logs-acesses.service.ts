@@ -1,28 +1,33 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
+// No arquivo onde defines createLogsParams (provavelmente no hook ou types)
 export type createLogsParams = {
-  dataInicio: string;
-  dataFim: string;
-  utilizadorId?: number;
-  page?: number;
-  limit?: number;
+  dataInicio?: string;   // ← torna opcional com ?
+  dataFim?: string;
   search?: string;
+  page: number;
+  limit: number;
 };
 
-export type tipoLogsAccesses = {
+export type LogsAccesses = {
   pkLogAcesso: number;
   descricao: string;
-  fkAcesso: null;
-  fkFuncionalidade: null;
+  fkAcesso: number | null;
+  fkFuncionalidade: number | null;
   fkUtilizadorResponsavel: number;
-  fkGrupoAfetado: null;
-  fkOperacaoLog: string;
+  fkGrupoAfetado: number | null;
+  fkOperacaoLog: number;         
   createdAt: string;
   ip: string;
+
+  nomeUtilizadorResponsavel?: string;
+  codigoUtilizador?: number;
+  nomeFuncionalidade?: string | null;
+  designacaoAcesso?: string | null;
 };
 
 export type LogsPaginatedResponse = {
-  data: tipoLogsAccesses[];
+  data: LogsAccesses[];
   total: number;
   page: number;
   limit: number;
