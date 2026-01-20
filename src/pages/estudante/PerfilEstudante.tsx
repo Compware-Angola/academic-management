@@ -242,42 +242,14 @@ export default function PerfilEstudante() {
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 md:w-80">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-primary">{estudante.mediaGeral}</p>
-              <p className="text-xs text-muted-foreground">Média Geral</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-primary">{estudante.creditosObtidos}/{estudante.creditosTotais}</p>
-              <p className="text-xs text-muted-foreground">Créditos</p>
-            </CardContent>
-          </Card>
-          <Card className={estudante.saldoDevedor > 0 ? "border-destructive" : ""}>
-            <CardContent className="p-4 text-center">
-              <p className={`text-2xl font-bold ${estudante.saldoDevedor > 0 ? 'text-destructive' : 'text-green-500'}`}>
-                {estudante.saldoDevedor.toLocaleString()} Kz
-              </p>
-              <p className="text-xs text-muted-foreground">Saldo Devedor</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Progress value={(estudante.creditosObtidos / estudante.creditosTotais) * 100} className="mb-2" />
-              <p className="text-xs text-muted-foreground">{Math.round((estudante.creditosObtidos / estudante.creditosTotais) * 100)}% Concluído</p>
-            </CardContent>
-          </Card>
-        </div>
+       
       </div>
 
  
 
       {/* Tabs with detailed information */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 h-auto">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto">
           <TabsTrigger value="geral" className="gap-2">
             <User className="h-4 w-4" />
             <span className="hidden md:inline">Dados Gerais</span>
@@ -303,11 +275,13 @@ export default function PerfilEstudante() {
             <span className="hidden md:inline">Documentos</span>
             <span className="md:hidden">Docs</span>
           </TabsTrigger>
+           {/* 
           <TabsTrigger value="assiduidade" className="gap-2">
             <Calendar className="h-4 w-4" />
             <span className="hidden md:inline">Assiduidade</span>
             <span className="md:hidden">Assid.</span>
           </TabsTrigger>
+          */}
         </TabsList>
 
         {/* Tab: Dados Gerais */}
@@ -389,7 +363,7 @@ export default function PerfilEstudante() {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Curso:</span>
-                  <span className="font-medium">{estudante.curso}</span>
+                  <span className="font-medium">{student.curso}</span>
                   
                   <span className="text-muted-foreground">Faculdade:</span>
                   <span className="font-medium">{estudante.faculdade}</span>
@@ -620,7 +594,7 @@ export default function PerfilEstudante() {
           </Card>
         </TabsContent>
 
-        {/* Tab: Assiduidade */}
+        {/* Tab: Assiduidade 
         <TabsContent value="assiduidade" className="space-y-4">
           <Card>
             <CardHeader>
@@ -653,6 +627,7 @@ export default function PerfilEstudante() {
             </CardContent>
           </Card>
         </TabsContent>
+        */}
       </Tabs>
     </div>
   );
