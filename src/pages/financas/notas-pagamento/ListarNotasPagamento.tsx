@@ -252,7 +252,7 @@ export default function ListarNotasPagamento() {
                   </TableCell>
                 </TableRow>
               ) : (
-                data.data.map((nota) => (
+                data?.data.map((nota) => (
                   <TableRow key={nota.codigo}>
                     <TableCell className="font-mono font-medium">{nota.referencia}</TableCell>
                     <TableCell>{nota.nome_aluno}</TableCell>

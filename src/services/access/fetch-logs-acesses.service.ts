@@ -1,8 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-// No arquivo onde defines createLogsParams (provavelmente no hook ou types)
 export type createLogsParams = {
-  dataInicio?: string;   // ← torna opcional com ?
+  dataInicio?: string;  
   dataFim?: string;
   search?: string;
   page: number;
