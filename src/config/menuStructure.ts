@@ -310,34 +310,34 @@ export const finaceStructure: MenuStructure = {
       icon: BadgeDollarSign,
       items: [
         /* Área Financeira */
-        {
-          title: "Estud. Mensalidades Pagas",
-          url: "/financas/mensalidades-pagas",
-        },
+        // {
+        //   title: "Estud. Mensalidades Pagas",
+        //   url: "/financas/mensalidades-pagas",
+        // },
         {
           title: "Notas de Pagamentos",
           url: "/financas/notas-pagamento",
         },
-        { title: "Estudantes Devedores", url: "/financas/devedores" },
-        { title: "Estudantes Inactivos", url: "/financas/inactivos" },
-        {
-          title: "Estud. Finalistas Inactivos",
-          url: "/financas/finalistas-inactivos",
-        },
-        { title: "Consult. Nº Operação", url: "/financas/num-operacao" },
-        { title: "Controlo Actual. Saldo", url: "/financas/controlo-saldo" },
-        { title: "Isentar Serviços (Novos)", url: "/financas/isentar-novos" },
-        {
-          title: "Isentar Serviços (Antigos)",
-          url: "/financas/isentar-antigos",
-        },
+        // { title: "Estudantes Devedores", url: "/financas/devedores" },
+        // { title: "Estudantes Inactivos", url: "/financas/inactivos" },
+        // {
+        //   title: "Estud. Finalistas Inactivos",
+        //   url: "/financas/finalistas-inactivos",
+        // },
+        // { title: "Consult. Nº Operação", url: "/financas/num-operacao" },
+        // { title: "Controlo Actual. Saldo", url: "/financas/controlo-saldo" },
+        // { title: "Isentar Serviços (Novos)", url: "/financas/isentar-novos" },
+        // {
+        //   title: "Isentar Serviços (Antigos)",
+        //   url: "/financas/isentar-antigos",
+        // },
         // {
         //   title: "Pagamentos por Referência",
         //   url: "/financas/pagamentos-referencia",
         // },
         { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
-        { title: "Talão em Desuso", url: "/financas/talao-desuso" },
-        { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
+        // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
+        // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
 
         /* Crédito Educacional */
         { title: "Instituições", url: "/financas/credito/instituicoes" },
@@ -345,94 +345,94 @@ export const finaceStructure: MenuStructure = {
           title: "Instituições - Todas",
           url: "/financas/credito/instituicoes/todas",
         },
-        {
-          title: "Instituições com Despesa",
-          url: "/financas/credito/instituicoes/despesa",
-        },
-        {
-          title: "Instituições com Receita",
-          url: "/financas/credito/instituicoes/receita",
-        },
-        { title: "Tipo Bolsas", url: "/financas/credito/tipo-bolsas" },
-        {
-          title: "Tipos de Estudantes",
-          url: "/financas/credito/tipo-estudantes",
-        },
+        // {
+        //   title: "Instituições com Despesa",
+        //   url: "/financas/credito/instituicoes/despesa",
+        // },
+        // {
+        //   title: "Instituições com Receita",
+        //   url: "/financas/credito/instituicoes/receita",
+        // },
+        // { title: "Tipo Bolsas", url: "/financas/credito/tipo-bolsas" },
+        // {
+        //   title: "Tipos de Estudantes",
+        //   url: "/financas/credito/tipo-estudantes",
+        // },
         {
           title: "Atribuir Crédito Educacional",
           url: "/financas/credito/atribuir",
         },
-        {
-          title: "Pagamentos Bolseiros",
-          url: "/financas/credito/pag-bolseiros",
-        },
-        {
-          title: "Listar Pagamentos de Bolseiros",
-          url: "/financas/credito/listar-bolseiros",
-        },
+        // {
+        //   title: "Pagamentos Bolseiros",
+        //   url: "/financas/credito/pag-bolseiros",
+        // },
+        // {
+        //   title: "Listar Pagamentos de Bolseiros",
+        //   url: "/financas/credito/listar-bolseiros",
+        // },
         {
           title: "Listar Crédito Educacional",
           url: "/financas/credito/listar",
         },
 
         /* Gestão de Descontos */
-        {
-          title: "Atribuição de Desconto",
-          url: "/financas/descontos/atribuicao",
-        },
-        {
-          title: "Estudantes com Descontos",
-          url: "/financas/descontos/estudantes",
-        },
-        { title: "Listar Descontos", url: "/financas/descontos/listar" },
+        // {
+        //   title: "Atribuição de Desconto",
+        //   url: "/financas/descontos/atribuicao",
+        // },
+        // {
+        //   title: "Estudantes com Descontos",
+        //   url: "/financas/descontos/estudantes",
+        // },
+        // { title: "Listar Descontos", url: "/financas/descontos/listar" },
 
         /* Fecho de Caixa */
-        { title: "Fecho Caixa Diário", url: "/financas/caixa/diario" },
-        { title: "Fecho Caixa Geral", url: "/financas/caixa/geral" },
-        { title: "Fecho Caixa Utilizador", url: "/financas/caixa/utilizador" },
+        // { title: "Fecho Caixa Diário", url: "/financas/caixa/diario" },
+        // { title: "Fecho Caixa Geral", url: "/financas/caixa/geral" },
+        // { title: "Fecho Caixa Utilizador", url: "/financas/caixa/utilizador" },
 
-        /* Outros Recursos */
-        {
-          title: "Pagamentos Docentes",
-          url: "/financas/outros/pagamentos-docentes",
-        },
+        // /* Outros Recursos */
+        // {
+        //   title: "Pagamentos Docentes",
+        //   url: "/financas/outros/pagamentos-docentes",
+        // },
 
-        /* Relatórios */
-        {
-          title: "Estudantes Matriculados",
-          url: "/financas/relatorios/matriculados",
-        },
-        {
-          title: "Listar Estudantes Isentos",
-          url: "/financas/relatorios/isentos",
-        },
-        {
-          title: "Estudantes Matriculadas",
-          url: "/financas/relatorios/matriculadas",
-        },
-        { title: "Listar Todos", url: "/financas/relatorios/todos" },
-        {
-          title: "Estudantes Finalistas",
-          url: "/financas/relatorios/finalistas",
-        },
-        {
-          title: "Estudantes com Crédito Institucional",
-          url: "/financas/relatorios/credito-institucional",
-        },
-        {
-          title: "Estudantes com Desconto",
-          url: "/financas/relatorios/descontos",
-        },
-        {
-          title: "Pagamentos por referência",
-          url: "/financas/pagamento-referencia",
-        },
-        { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
+        // /* Relatórios */
+        // {
+        //   title: "Estudantes Matriculados",
+        //   url: "/financas/relatorios/matriculados",
+        // },
+        // {
+        //   title: "Listar Estudantes Isentos",
+        //   url: "/financas/relatorios/isentos",
+        // },
+        // {
+        //   title: "Estudantes Matriculadas",
+        //   url: "/financas/relatorios/matriculadas",
+        // },
+        // { title: "Listar Todos", url: "/financas/relatorios/todos" },
+        // {
+        //   title: "Estudantes Finalistas",
+        //   url: "/financas/relatorios/finalistas",
+        // },
+        // {
+        //   title: "Estudantes com Crédito Institucional",
+        //   url: "/financas/relatorios/credito-institucional",
+        // },
+        // {
+        //   title: "Estudantes com Desconto",
+        //   url: "/financas/relatorios/descontos",
+        // },
+        // {
+        //   title: "Pagamentos por referência",
+        //   url: "/financas/pagamento-referencia",
+        // },
+        // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
-        /* Serviços Tributários */
-        { title: "Nota de Crédito", url: "/financas/agt/nota-credito" },
-        { title: "Taxa do IVA", url: "/financas/agt/iva" },
-        { title: "Gerar SAFT", url: "/financas/agt/saft" },
+        // /* Serviços Tributários */
+        // { title: "Nota de Crédito", url: "/financas/agt/nota-credito" },
+        // { title: "Taxa do IVA", url: "/financas/agt/iva" },
+        // { title: "Gerar SAFT", url: "/financas/agt/saft" },
       ],
       roles: ["adm", "rootAdmin", "fin"],
     },

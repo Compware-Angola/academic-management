@@ -84,6 +84,7 @@ import ListarCreditoEducacional from "./pages/financas/credito-educacional/Lista
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 
 const App = () => {
   return (
@@ -244,11 +245,11 @@ const App = () => {
                     path="marcacao-provas/marcacao"
                     element={<AddMarkingAssessment />}
                   />
-                    <Route
+                  <Route
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
-                
+
                   {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
@@ -359,8 +360,10 @@ const App = () => {
                     path="financas/credito/instituicoes/todas"
                     element={<TodasInstituicoes />}
                   />
-    
-                     
+                  <Route
+                    path="financas/credito/atribuir"
+                    element={<AtribuirCredito />}
+                  />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />
