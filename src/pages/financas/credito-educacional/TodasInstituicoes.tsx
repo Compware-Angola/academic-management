@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -75,6 +75,30 @@ export default function TodasInstituicoes() {
     nif: ""
   });
 
+  useEffect(() => {
+  const value = searchInput.trim();
+
+  const delay = setTimeout(() => {
+    // Se o input estiver vazio → limpar filtros
+    if (!value) {
+      setSearchParams({ instituicao: "", nif: "" });
+      setCurrentPage(1);
+      return;
+    }
+
+    // Caso contrário, pesquisar dinamicamente
+    setSearchParams({
+      instituicao: searchType === "instituicao" ? value : "",
+      nif: searchType === "nif" ? value : ""
+    });
+
+    setCurrentPage(1);
+  }, 400); // ⏱️ debounce de 400ms
+
+  return () => clearTimeout(delay);
+}, [searchInput, searchType]);
+
+
   // Modal e formulário
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -83,7 +107,6 @@ export default function TodasInstituicoes() {
     contacto: "",
     endereco: "",
     sigla: "",
-    tipo_instituicao: ""
   });
 
   // Hooks
@@ -92,7 +115,7 @@ export default function TodasInstituicoes() {
         nif: searchParams.nif || undefined,
         });
 
-      const { data: tiposInstituicao = [] } = useListInstituicaoTipo();
+      
       const { mutateAsync: createInstituicao, isPending } = useCreateInstituicao();
 
       const instituicoes = data?.items ?? [];
@@ -140,8 +163,7 @@ export default function TodasInstituicoes() {
     if (
       !formData.instituicao ||
       !formData.nif ||
-      !formData.sigla ||
-      !formData.tipo_instituicao
+      !formData.sigla
     ) {
       toast({
         title: "Erro",
@@ -155,7 +177,6 @@ export default function TodasInstituicoes() {
       payload: {
         instituicao: formData.instituicao,
         nif: formData.nif,
-        tipoInstituicaoId: Number(formData.tipo_instituicao),
         contacto: formData.contacto || undefined,
         endereco: formData.endereco || undefined,
         sigla: formData.sigla || undefined
@@ -173,7 +194,6 @@ export default function TodasInstituicoes() {
       contacto: "",
       endereco: "",
       sigla: "",
-      tipo_instituicao: ""
     });
 
     setIsModalOpen(false);
@@ -214,7 +234,6 @@ export default function TodasInstituicoes() {
                 }
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
 
               <Select value={searchType} onValueChange={setSearchType}>
@@ -387,24 +406,6 @@ export default function TodasInstituicoes() {
                 setFormData({ ...formData, endereco: e.target.value })
               }
             />
-
-            <Select
-              value={formData.tipo_instituicao}
-              onValueChange={(v) =>
-                setFormData({ ...formData, tipo_instituicao: v })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Tipo de Instituição" />
-              </SelectTrigger>
-              <SelectContent>
-                {tiposInstituicao.map((tipo) => (
-                  <SelectItem key={tipo.id} value={tipo.id.toString()}>
-                    {tipo.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <DialogFooter>

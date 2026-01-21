@@ -8,7 +8,6 @@ import { axiosApexGa } from "@/lib/axios-apex-ga";
 export interface CreateInstituicaoRequest {
   instituicao: string;
   nif: string;
-  tipoInstituicaoId: number;
   contacto?: string;
   endereco?: string;
   sigla?: string;
@@ -35,7 +34,6 @@ export async function createInstituicao(
     {
       instituicao: payload.instituicao,
       nif: payload.nif,
-      tipo_instituicao: payload.tipoInstituicaoId, // adaptação para o backend
       contacto: payload.contacto,
       endereco: payload.endereco,
       sigla: payload.sigla,
