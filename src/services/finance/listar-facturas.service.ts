@@ -24,11 +24,13 @@ export type Factura = {
   estado: number;
   nome_aluno: string;
   ano_lectivo: string;
-  servico:string;
+  servicos:string;
+
   curso: string;
   polo: string;
   rn: number;
 };
+
 /* ---------- RESPONSE ITEM ---------- */
 export type FacturaDetalhe = {
   Codigo: number;

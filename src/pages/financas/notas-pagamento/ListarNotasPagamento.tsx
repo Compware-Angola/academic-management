@@ -61,12 +61,23 @@ const searchOptions = [
   { id: "codigoMatricula", label: "Código da Matrícula" },
   { id: "reference", label: "Referência" },
 ];
+function truncate(text: string, max = 10) {
+  if (!text) return "";
+  return text.length > max ? text.slice(0, max) + "..." : text;
+}
 
 export default function ListarNotasPagamento() {
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openServicesModal, setOpenServicesModal] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string | null>(null);
+
+  function handleOpenServices(services: string) {
+    setSelectedServices(services);
+    setOpenServicesModal(true);
+  }
 
   const [searchBy, setSearchBy] = useState<
     "codigoMatricula" | "reference"
@@ -178,7 +189,7 @@ export default function ListarNotasPagamento() {
         <p className="text-muted-foreground">Listagem de todas as notas de pagamento emitidas.</p>
       </div>
 
-     
+
       {/* Filtros */}
       <Card>
         <CardContent className="pt-6">
@@ -281,6 +292,7 @@ export default function ListarNotasPagamento() {
             <TableHeader>
               <TableRow>
                 <TableHead>Ref</TableHead>
+                <TableHead>Serviços</TableHead>
                 <TableHead>Estudante</TableHead>
                 <TableHead>Matrícula</TableHead>
                 <TableHead>Curso</TableHead>
@@ -308,6 +320,26 @@ export default function ListarNotasPagamento() {
                 data?.data.map((nota) => (
                   <TableRow key={nota.codigo}>
                     <TableCell className="font-mono font-medium">{nota.referencia}</TableCell>
+                    <TableCell className="font-mono">
+                      {nota.servicos ? (
+                        nota.servicos.length > 10 ? (
+                          <span className="flex items-center gap-1">
+                            {truncate(nota.servicos, 10)}
+                            <button
+                              className="text-blue-500 underline text-xs"
+                              onClick={() => handleOpenServices(nota.servicos)}
+                            >
+                              ver mais
+                            </button>
+                          </span>
+                        ) : (
+                          nota.servicos
+                        )
+                      ) : (
+                        "N/A"
+                      )}
+                    </TableCell>
+
                     <TableCell>{nota.nome_aluno}</TableCell>
                     <TableCell className="font-mono">{nota.codigo_matricula}</TableCell>
                     <TableCell>{nota.curso}</TableCell>
@@ -325,7 +357,7 @@ export default function ListarNotasPagamento() {
                         >
                           <Eye className="h-3 w-3" />
                         </Button>
-                       
+
                       </div>
                     </TableCell>
                   </TableRow>
@@ -413,14 +445,14 @@ export default function ListarNotasPagamento() {
                     <p className="text-sm text-muted-foreground">Curso</p>
                     <p className="font-medium">{selectedFactura.curso || "—"}</p>
                   </div>
-                
+
                   <div>
                     <p className="text-sm text-muted-foreground">Ano Lectivo</p>
                     <p className="font-medium">{selectedFactura.ano_lectivo || "—"}</p>
                   </div>
-                 
-                
-                
+
+
+
                 </div>
               </div>
 
@@ -438,7 +470,7 @@ export default function ListarNotasPagamento() {
                     <p className="text-sm text-muted-foreground">Data de Emissão</p>
                     <p className="font-medium">{formatDate(selectedFactura.data_factura)}</p>
                   </div>
-                 
+
                   <div>
                     <p className="text-sm text-muted-foreground">Status</p>
                     {getStatusBadge(selectedFactura.estado)}
@@ -473,16 +505,16 @@ export default function ListarNotasPagamento() {
                     <TableBody>
                       {itens.data.map((item: FacturaItem, index: number) => (
                         <TableRow key={index}>
-                        <TableCell>
-  {( item.descricaoservico || "—") + 
-   (Number(item.mesid)!=3&& item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
-</TableCell>
+                          <TableCell>
+                            {(item.descricaoservico || "—") +
+                              (Number(item.mesid) != 3 && item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
+                          </TableCell>
                           <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
                           <TableCell className="text-right font-mono">
                             {formatCurrency(item.preco)}
                           </TableCell>
                           <TableCell className="text-right font-mono font-medium">
-                            {formatCurrency(item.total )}
+                            {formatCurrency(item.total)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -499,18 +531,18 @@ export default function ListarNotasPagamento() {
                 )}
               </div>
 
-           
+
               <Separator />
 
               {/* Ações */}
-            <div className="flex gap-3 justify-end">
-  <PaymentNoteActions
-    nota={selectedFactura}
-    itens={itens?.data || []}
-    showDownload={true}
-    showPrint={true}
-  />
-</div>
+              <div className="flex gap-3 justify-end">
+                <PaymentNoteActions
+                  nota={selectedFactura}
+                  itens={itens?.data || []}
+                  showDownload={true}
+                  showPrint={true}
+                />
+              </div>
             </div>
           )}
 
@@ -521,6 +553,25 @@ export default function ListarNotasPagamento() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={openServicesModal} onOpenChange={setOpenServicesModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Serviços da Nota</DialogTitle>
+          </DialogHeader>
+
+          <div className="text-sm whitespace-pre-wrap">
+            {selectedServices}
+          </div>
+
+          <div className="flex justify-end mt-4">
+            <Button variant="outline" onClick={() => setOpenServicesModal(false)}>
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
