@@ -83,7 +83,6 @@ export default function TodasInstituicoes() {
     contacto: "",
     endereco: "",
     sigla: "",
-    tipo_instituicao: ""
   });
 
   // Hooks
@@ -140,8 +139,7 @@ export default function TodasInstituicoes() {
     if (
       !formData.instituicao ||
       !formData.nif ||
-      !formData.sigla ||
-      !formData.tipo_instituicao
+      !formData.sigla
     ) {
       toast({
         title: "Erro",
@@ -155,7 +153,6 @@ export default function TodasInstituicoes() {
       payload: {
         instituicao: formData.instituicao,
         nif: formData.nif,
-        tipoInstituicaoId: Number(formData.tipo_instituicao),
         contacto: formData.contacto || undefined,
         endereco: formData.endereco || undefined,
         sigla: formData.sigla || undefined
@@ -173,7 +170,6 @@ export default function TodasInstituicoes() {
       contacto: "",
       endereco: "",
       sigla: "",
-      tipo_instituicao: ""
     });
 
     setIsModalOpen(false);
@@ -387,24 +383,6 @@ export default function TodasInstituicoes() {
                 setFormData({ ...formData, endereco: e.target.value })
               }
             />
-
-            <Select
-              value={formData.tipo_instituicao}
-              onValueChange={(v) =>
-                setFormData({ ...formData, tipo_instituicao: v })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Tipo de Instituição" />
-              </SelectTrigger>
-              <SelectContent>
-                {tiposInstituicao.map((tipo) => (
-                  <SelectItem key={tipo.id} value={tipo.id.toString()}>
-                    {tipo.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <DialogFooter>
