@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -75,6 +75,30 @@ export default function TodasInstituicoes() {
     nif: ""
   });
 
+  useEffect(() => {
+  const value = searchInput.trim();
+
+  const delay = setTimeout(() => {
+    // Se o input estiver vazio → limpar filtros
+    if (!value) {
+      setSearchParams({ instituicao: "", nif: "" });
+      setCurrentPage(1);
+      return;
+    }
+
+    // Caso contrário, pesquisar dinamicamente
+    setSearchParams({
+      instituicao: searchType === "instituicao" ? value : "",
+      nif: searchType === "nif" ? value : ""
+    });
+
+    setCurrentPage(1);
+  }, 400); // ⏱️ debounce de 400ms
+
+  return () => clearTimeout(delay);
+}, [searchInput, searchType]);
+
+
   // Modal e formulário
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -91,7 +115,7 @@ export default function TodasInstituicoes() {
         nif: searchParams.nif || undefined,
         });
 
-      const { data: tiposInstituicao = [] } = useListInstituicaoTipo();
+      
       const { mutateAsync: createInstituicao, isPending } = useCreateInstituicao();
 
       const instituicoes = data?.items ?? [];
@@ -210,7 +234,6 @@ export default function TodasInstituicoes() {
                 }
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               />
 
               <Select value={searchType} onValueChange={setSearchType}>
