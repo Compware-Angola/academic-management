@@ -339,7 +339,7 @@ export const finaceStructure: MenuStructure = {
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
 
         /* Crédito Educacional */
-        { title: "Instituições", url: "/financas/credito/instituicoes" },
+      //  { title: "Instituições", url: "/financas/credito/instituicoes" },
         {
           title: "Instituições - Todas",
           url: "/financas/credito/instituicoes/todas",
@@ -523,7 +523,7 @@ export const academicStructure: MenuStructure = {
       items: [
         { title: "Criar horário", url: "/horarios/criar" },
         { title: "Horários semanais", url: "/horarios/semanais" },
-        { title: "Substitutos", url: "/horarios/substitutos" },
+      //  { title: "Substitutos", url: "/horarios/substitutos" },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
         {
           title: "Movimentar estudantes",
@@ -543,6 +543,8 @@ export const academicStructure: MenuStructure = {
     // ----------------------------------------------------
     // EXAME DE ACESSO
     // ----------------------------------------------------
+
+    /* 
     {
       title: "Exame de Acesso",
       url: "/exame",
@@ -571,5 +573,6 @@ export const academicStructure: MenuStructure = {
       ],
       roles: ["adm", "rootAdmin", "dct"],
     },
+     */
   ],
 };
