@@ -331,10 +331,7 @@ export const finaceStructure: MenuStructure = {
         //   title: "Isentar Serviços (Antigos)",
         //   url: "/financas/isentar-antigos",
         // },
-        // {
-        //   title: "Pagamentos por Referência",
-        //   url: "/financas/pagamentos-referencia",
-        // },
+     
         { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
         // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
@@ -423,10 +420,10 @@ export const finaceStructure: MenuStructure = {
         //   title: "Estudantes com Desconto",
         //   url: "/financas/relatorios/descontos",
         // },
-        // {
-        //   title: "Pagamentos por referência",
-        //   url: "/financas/pagamento-referencia",
-        // },
+         {
+          title: "Pagamentos por referência",
+           url: "/financas/pagamento-referencia",
+         },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
         // /* Serviços Tributários */

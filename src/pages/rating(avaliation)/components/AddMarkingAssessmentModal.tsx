@@ -111,7 +111,7 @@ export default function AddMarkingAssessmentModal({
       periodo: parseFilter(filters.periodo),
       curso: Number(filters.curso),
       tipoAvaliacao: Number(filters.tipoAvaliacao),
-      tipoHorario: 1,
+      tipoHorario: 2,
       anoCurricular: parseFilter(filters.anoCurricular),
       unidadeCurricular: Number(filters.unidadeCurricular),
       page: 1,
