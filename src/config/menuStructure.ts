@@ -59,7 +59,7 @@ export const menuStructure: MenuStructure = {
 
     // ----------------------------------------------------
     // ASSIDUIDADE
-    // ----------------------------------------------------
+    /* ----------------------------------------------------
     {
       title: "Assiduidade",
       url: "/assiduidade",
@@ -74,6 +74,7 @@ export const menuStructure: MenuStructure = {
       ],
       roles: ["adm", "rootAdmin"],
     },
+    */
 
     // ----------------------------------------------------
     // CALENDÁRIO LIC
@@ -100,7 +101,7 @@ export const menuStructure: MenuStructure = {
 
     // ----------------------------------------------------
     // DOCENTE
-    // ----------------------------------------------------
+    /* ----------------------------------------------------
     {
       title: "Docente",
       url: "/docente",
@@ -154,6 +155,7 @@ export const menuStructure: MenuStructure = {
       ],
       roles: ["adm", "rootAdmin"],
     },
+  
 
     // ----------------------------------------------------
     // INSCRIÇÕES E MATRÍCULA
@@ -183,7 +185,7 @@ export const menuStructure: MenuStructure = {
       ],
       roles: ["adm", "rootAdmin"],
     },
-
+  */
     // ----------------------------------------------------
     // PLANO DE ESTUDO
     // ----------------------------------------------------
@@ -194,7 +196,7 @@ export const menuStructure: MenuStructure = {
       items: [
         // { title: "Gestão de Curso", url: "/plano/cursos" },
         { title: "Gestão de disciplinas", url: "/plano/disciplinas" },
-        { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
+       // { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
 
         {
           title: "Gestão de UC por departamento",
@@ -207,7 +209,7 @@ export const menuStructure: MenuStructure = {
 
     // ----------------------------------------------------
     // PÓS-GRADUAÇÃO
-    // ----------------------------------------------------
+    /* ----------------------------------------------------
     {
       title: "Pós-Graduação",
       url: "/pos-graduacao",
@@ -271,7 +273,7 @@ export const menuStructure: MenuStructure = {
       ],
       roles: ["adm", "rootAdmin"],
     },
-
+*/
     // ----------------------------------------------------
     // SALAS
     // ----------------------------------------------------
