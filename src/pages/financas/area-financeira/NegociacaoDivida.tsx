@@ -81,11 +81,11 @@ export default function NegociacaoDivida() {
       label: "Todos",
     },
     {
-      key: "1",
+      key: "2",
       label: "100%",
     },
     {
-      key: "2",
+      key: "1",
       label: "50%",
     },
   ];
@@ -97,13 +97,13 @@ export default function NegociacaoDivida() {
     {
       codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
       codigoCurso: parseFilter(filtersApplied.curso),
-      faculdadeId: parseFilter(filters.faculdade),
-      tipoNegociacaoId: parseFilter(filters.negociacao),
+      faculdadeId: parseFilter(filtersApplied.faculdade),
+      tipoNegociacaoId: parseFilter(filtersApplied.negociacao),
       page,
       limit,
     },
     {
-      enabled: true,
+      enabled: false,
     },
   );
   const tableData = pagamentoResponse?.data || [];
@@ -177,17 +177,20 @@ export default function NegociacaoDivida() {
               value={filters.anoLectivo}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
-            <CourseSelect
-              allOption
-              onChangeValue={(v) => setFilters({ ...filters, curso: v })}
-              anoLectivo={filters.anoLectivo}
-              value={filters.curso}
-            />
             <FacultySelect
               allOption
               value={filters.faculdade}
               onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
             />
+            <CourseSelect
+              allOption
+              params={{
+                faculdadeId: parseFilter(filters.faculdade),
+              }}
+              onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+              value={filters.curso}
+            />
+
             <FormSelect
               label="% Negociação"
               value={filters.negociacao}
@@ -337,7 +340,6 @@ export default function NegociacaoDivida() {
         </CardContent>
       </Card>
       <NegociacaoDividaModal
-        facturaId="588835"
         isModalOpen={openModal}
         setIsModalOpen={() => closeModal()}
         selectedNegociacao={selectedNegociacao}
