@@ -24,6 +24,7 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { Link } from "react-router-dom";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function FormulaUC() {
   // ===========================
@@ -155,19 +156,21 @@ export default function FormulaUC() {
           />
 
           {/* CURSO */}
-          <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
-            label="Curso"
+
+
+                <CourseSelect
             value={formData.curso}
-            onChange={(v) => setFormData({ ...formData, curso: v })}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
+            onChangeValue={(v) =>
+              setFormData({
+                ...formData,
+                curso: v,
+                classes: "",
+                
+              })
+            }
           />
+
+          
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
