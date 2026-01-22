@@ -5,6 +5,8 @@ export type ObterNegociacoesPayload = {
   codigoCurso?: number;
   tipoNegociacaoId?: number;
   faculdadeId?: number;
+  nome?: string;
+  codigoMatricula?: number;
   page?: number;
   limit?: number;
 };
@@ -50,6 +52,8 @@ export async function getNegociacoesService(
     codigoCurso,
     tipoNegociacaoId,
     faculdadeId,
+    codigoMatricula,
+    nome,
     page = 1,
     limit = 10,
   } = payload;
@@ -62,6 +66,8 @@ export async function getNegociacoesService(
         codigoCurso,
         tipoNegociacaoId,
         faculdadeId,
+        codigoMatricula,
+        nome,
         page,
         limit,
       },

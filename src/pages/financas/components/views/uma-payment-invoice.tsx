@@ -1,4 +1,4 @@
-// src/components/finance/PaymentNotePDF.tsx
+
 import {
   Page,
   Text,
