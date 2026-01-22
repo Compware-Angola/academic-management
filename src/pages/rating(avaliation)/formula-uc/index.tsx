@@ -220,6 +220,8 @@ export default function FormulaUC() {
                 <TableHead className="text-center">P 1F</TableHead>
 
                 <TableHead className="text-center">P 2F</TableHead>
+                <TableHead className="text-center">Definido Por </TableHead>
+              
 
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -257,6 +259,10 @@ export default function FormulaUC() {
                   <TableCell className="text-center">
                     {item.pesoSegundaFreq ?? "-"}
                   </TableCell>
+                   <TableCell className="text-center">
+                {item.definido_por ?? "-"}
+                  </TableCell>
+                  
 
                   <TableCell className="text-right">
                     <Button
