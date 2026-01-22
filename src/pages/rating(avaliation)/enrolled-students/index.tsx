@@ -39,6 +39,7 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
 import { useEstudantesInscritos } from "@/hooks/avaliacao/useEstudantesInscritos";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 type Filters = {
   anoLetivo: string;
@@ -230,21 +231,19 @@ export default function EstudantesInscritos() {
               value: s.codigo,
             })}
           />
-          <FormSelect
-            disabled={loadingCursos}
-            loading={loadingCursos}
-            label="Curso"
-            value={filters.curso}
-            onChange={(v) =>
-              setFilters({ ...filters, curso: v, horarioId: "" })
+
+
+            <CourseSelect
+              value={filters.curso}
+              onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                curso: v,
+                horarioId: "",
+              })
             }
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
           />
+
           <FormSelect
             label="Ano Curricular"
             value={filters.classes}
