@@ -52,6 +52,7 @@ import {
 import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-update-estado-lancamento-pauta";
 import { useQueryEstadoPauta } from "@/hooks/avaliacao/use-query-estado-pauta";
 import { number } from "framer-motion";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function ValidationTeacherAgenda() {
   const { toast } = useToast();
@@ -286,27 +287,22 @@ export default function ValidationTeacherAgenda() {
               value: s.codigo,
             })}
           />
-          <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
-            label="Curso"
-            value={filters.curso}
-            onChange={(v) => {
-              setFilters({
-                ...filters,
-                curso: v,
-                anoCurricular: "",
-                unidadeCurricular: "",
-              });
-              setCurrentPage(1);
-            }}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
-          />
+
+
+
+              <CourseSelect
+                value={filters.curso}
+                onChangeValue={(v) => {
+                  setFilters({
+                    ...filters,
+                    curso: v,
+                    anoCurricular: "",
+                    unidadeCurricular: "",
+                  });
+                  setCurrentPage(1);
+                }}
+              />
+
           <FormSelect
             label="Ano Curricular"
             value={filters.anoCurricular}
