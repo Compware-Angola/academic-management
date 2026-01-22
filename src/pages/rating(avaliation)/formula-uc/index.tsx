@@ -33,17 +33,15 @@ export default function FormulaUC() {
   const [formData, setFormData] = useState({
     anoLetivo: "",
     semestre: "",
-    
-    curso: "",
- 
-    classes: "",
- 
 
+    curso: "",
+
+    classes: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [selectedFormula, setSelectedFormula] = useState<FormulaUCType | null>(
-    null
+    null,
   );
 
   const [openModal, setOpenModal] = useState(false);
@@ -56,9 +54,8 @@ export default function FormulaUC() {
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
 
+  console.log(formData, "DATA");
 
-    console.log(formData,"DATA");
-    
   const {
     data: formulaUC = [],
     isLoading,
@@ -77,7 +74,7 @@ export default function FormulaUC() {
 
   const paginatedData = formulaUC.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   // ===========================
@@ -154,23 +151,10 @@ export default function FormulaUC() {
               value: s.codigo,
             })}
           />
-
-          {/* CURSO */}
-
-
-                <CourseSelect
+          <CourseSelect
             value={formData.curso}
-            onChangeValue={(v) =>
-              setFormData({
-                ...formData,
-                curso: v,
-                classes: "",
-                
-              })
-            }
+            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
           />
-
-          
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
