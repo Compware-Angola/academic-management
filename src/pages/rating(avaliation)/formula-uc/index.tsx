@@ -24,6 +24,7 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { Link } from "react-router-dom";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function FormulaUC() {
   // ===========================
@@ -32,17 +33,15 @@ export default function FormulaUC() {
   const [formData, setFormData] = useState({
     anoLetivo: "",
     semestre: "",
-    
-    curso: "",
- 
-    classes: "",
- 
 
+    curso: "",
+
+    classes: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [selectedFormula, setSelectedFormula] = useState<FormulaUCType | null>(
-    null
+    null,
   );
 
   const [openModal, setOpenModal] = useState(false);
@@ -55,9 +54,8 @@ export default function FormulaUC() {
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
 
+  console.log(formData, "DATA");
 
-    console.log(formData,"DATA");
-    
   const {
     data: formulaUC = [],
     isLoading,
@@ -76,7 +74,7 @@ export default function FormulaUC() {
 
   const paginatedData = formulaUC.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   // ===========================
@@ -153,20 +151,9 @@ export default function FormulaUC() {
               value: s.codigo,
             })}
           />
-
-          {/* CURSO */}
-          <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
-            label="Curso"
+          <CourseSelect
             value={formData.curso}
-            onChange={(v) => setFormData({ ...formData, curso: v })}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
+            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
           />
           <FormSelect
             label="Ano Curricular"
