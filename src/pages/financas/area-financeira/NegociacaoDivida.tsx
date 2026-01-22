@@ -180,7 +180,6 @@ export default function NegociacaoDivida() {
             <CourseSelect
               allOption
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
-              anoLectivo={filters.anoLectivo}
               value={filters.curso}
             />
             <FacultySelect

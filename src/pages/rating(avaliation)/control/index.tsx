@@ -37,6 +37,7 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 type SelectedNotas = {
   turmaOuHorarioId: number;
@@ -67,12 +68,14 @@ export default function ControlNotes() {
     classes: "",
     unidadeCurricular: "",
     tipoAvaliacao: "",
-   
+
     filtro: "0",
   });
 
   // Estado para controlar quando os parâmetros foram enviados para a query
-  const [searchParams, setSearchParams] = useState<typeof formData | null>(null);
+  const [searchParams, setSearchParams] = useState<typeof formData | null>(
+    null,
+  );
 
   // =======================================
   // API QUERIES
@@ -83,12 +86,13 @@ export default function ControlNotes() {
     refetch,
     isFetching,
   } = useQueryDisciplinasProva({
-  
     filtro: Number(searchParams?.filtro || 0),
     gradeSelecionada: searchParams?.unidadeCurricular
       ? Number(searchParams.unidadeCurricular)
       : undefined,
-    cursoSelecionado: searchParams?.curso ? Number(searchParams.curso) : undefined,
+    cursoSelecionado: searchParams?.curso
+      ? Number(searchParams.curso)
+      : undefined,
     anoCurricularSelecionado: searchParams?.classes
       ? Number(searchParams.classes)
       : undefined,
@@ -103,8 +107,10 @@ export default function ControlNotes() {
       : undefined,
   });
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -144,7 +150,7 @@ export default function ControlNotes() {
   const totalPages = Math.ceil(disciplinasProva.length / itemsPerPage);
   const paginatedDisciplinas = disciplinasProva.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   return (
@@ -190,37 +196,60 @@ export default function ControlNotes() {
             options={academicYear}
             loading={isLoadingAcademicYear}
             disabled={isLoadingAcademicYear}
-            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
           />
 
           <FormSelect
             label="Semestre"
             value={formData.semestre}
-            onChange={(v) => setFormData({ ...formData, semestre: v, classes: "", unidadeCurricular: "" })}
+            onChange={(v) =>
+              setFormData({
+                ...formData,
+                semestre: v,
+                classes: "",
+                unidadeCurricular: "",
+              })
+            }
             options={semestres}
             loading={isLoadingSemestres}
             disabled={isLoadingSemestres}
-            map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
           />
 
-          <FormSelect
-            label="Curso"
+          <CourseSelect
             value={formData.curso}
-            onChange={(v) => setFormData({ ...formData, curso: v, classes: "", unidadeCurricular: "" })}
-            options={cursos}
-            loading={isLoadingCurso}
-            disabled={isLoadingCurso}
-            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
+            onChangeValue={(v) =>
+              setFormData({
+                ...formData,
+                curso: v,
+                classes: "",
+                unidadeCurricular: "",
+              })
+            }
           />
 
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
-            onChange={(v) => setFormData({ ...formData, classes: v, unidadeCurricular: "" })}
+            onChange={(v) =>
+              setFormData({ ...formData, classes: v, unidadeCurricular: "" })
+            }
             options={classes}
             loading={isLoadingClasses}
             disabled={isLoadingClasses || !formData.curso}
-            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
           />
 
           <FormSelect
@@ -229,7 +258,12 @@ export default function ControlNotes() {
             onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
             options={unidadesCurriculares}
             loading={isLoadingUC}
-            disabled={isLoadingUC || !formData.semestre || !formData.curso || !formData.classes}
+            disabled={
+              isLoadingUC ||
+              !formData.semestre ||
+              !formData.curso ||
+              !formData.classes
+            }
             map={(u) => ({ key: u.codigo, label: u.descricao, value: u.pk })}
           />
 
@@ -240,17 +274,23 @@ export default function ControlNotes() {
             options={tipoAvaliacao}
             loading={isLoadingTipoAvaliacao}
             disabled={isLoadingTipoAvaliacao}
-            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+              value: u.codigo,
+            })}
           />
-
-      
 
           <FormSelect
             label="Estado"
             value={formData.filtro}
             onChange={(v) => setFormData({ ...formData, filtro: v })}
             options={ESTADO}
-            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo.toString() })}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+              value: u.codigo.toString(),
+            })}
           />
         </div>
       </div>
@@ -291,8 +331,12 @@ export default function ControlNotes() {
               <TableBody>
                 {paginatedDisciplinas.map((item) => (
                   <TableRow key={item.codigoTurmaHorario}>
-                    <TableCell className="font-medium">{item.disciplina}</TableCell>
-                    <TableCell className="font-mono">{item.turmaOuHorario}</TableCell>
+                    <TableCell className="font-medium">
+                      {item.disciplina}
+                    </TableCell>
+                    <TableCell className="font-mono">
+                      {item.turmaOuHorario}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">{item.semestre}</Badge>
                     </TableCell>
@@ -306,7 +350,9 @@ export default function ControlNotes() {
                     </TableCell>
                     <TableCell className="text-center">
                       {item.numNotaPorLancar > 0 ? (
-                        <Badge variant="destructive">{item.numNotaPorLancar}</Badge>
+                        <Badge variant="destructive">
+                          {item.numNotaPorLancar}
+                        </Badge>
                       ) : (
                         <Badge variant="outline">0</Badge>
                       )}
@@ -358,8 +404,8 @@ export default function ControlNotes() {
 
               <span className="text-sm text-muted-foreground">
                 Mostrando {(currentPage - 1) * itemsPerPage + 1}–
-                {Math.min(currentPage * itemsPerPage, disciplinasProva.length)} de{" "}
-                {disciplinasProva.length}
+                {Math.min(currentPage * itemsPerPage, disciplinasProva.length)}{" "}
+                de {disciplinasProva.length}
               </span>
             </div>
 
