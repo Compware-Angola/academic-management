@@ -2,14 +2,15 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 
 export type FormulaUC = {
-    "codigo": number,
-    "disciplina": string,
-    "notaMinPratica": null | number,
-    "notaMinPrimeiraFreq": null | number,
-    "notaMinSegundaFreq": null | number,
-    "pesoPratica": null | number,
-    "pesoPrimeiraFreq": null | number,
-    "pesoSegundaFreq": null | number,
+    codigo: number,
+    disciplina: string,
+    notaMinPratica: null | number,
+    notaMinPrimeiraFreq: null | number,
+    notaMinSegundaFreq: null | number,
+    pesoPratica: null | number,
+    pesoPrimeiraFreq: null | number,
+    pesoSegundaFreq: null | number,
+    definido_por:null| string
 };
 
 
