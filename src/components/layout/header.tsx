@@ -1,4 +1,4 @@
-import { Bell, LogOut, Search, User } from "lucide-react";
+import {  LogOut, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -38,12 +38,12 @@ export function Header() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   /** ---------------------------
-   * DEBOUNCE (500ms)
+   * DEBOUNCE (700ms)
    * --------------------------- */
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search.trim());
-    }, 500);
+    }, 700);
 
     return () => clearTimeout(timer);
   }, [search]);

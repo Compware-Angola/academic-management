@@ -67,7 +67,7 @@ export default function ControlNotes() {
     classes: "",
     unidadeCurricular: "",
     tipoAvaliacao: "",
-    verHoario: "",
+   
     filtro: "0",
   });
 
@@ -83,7 +83,7 @@ export default function ControlNotes() {
     refetch,
     isFetching,
   } = useQueryDisciplinasProva({
-    verHorario: searchParams?.verHoario === "SIM",
+  
     filtro: Number(searchParams?.filtro || 0),
     gradeSelecionada: searchParams?.unidadeCurricular
       ? Number(searchParams.unidadeCurricular)
@@ -243,13 +243,7 @@ export default function ControlNotes() {
             map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
           />
 
-          <FormSelect
-            label="Ver Horário"
-            value={formData.verHoario}
-            onChange={(v) => setFormData({ ...formData, verHoario: v })}
-            options={VER_HORARIO}
-            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
-          />
+      
 
           <FormSelect
             label="Estado"
