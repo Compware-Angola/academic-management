@@ -193,7 +193,6 @@ export default function NegociacaoDivida() {
               onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
             />
             <CourseSelect
-              allOption
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
               }}

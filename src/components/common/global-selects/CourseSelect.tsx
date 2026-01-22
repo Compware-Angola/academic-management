@@ -7,29 +7,10 @@ interface CourseSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
   params?: CursoParams;
-  allOption?: boolean;
 }
-const CourseSelect = ({
-  onChangeValue,
-  value,
-  params,
-  allOption = false,
-}: CourseSelectProps) => {
+const CourseSelect = ({ onChangeValue, value, params }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
-  const [allCursos, setAllCursos] = useState<Curso[]>([]);
-  useEffect(() => {
-    if (allOption) {
-      setAllCursos([
-        {
-          codigo: "all",
-          designacao: "Todos",
-        } as any,
-        ...cursos,
-      ]);
-    } else {
-      setAllCursos(cursos);
-    }
-  }, [allOption, cursos]);
+
   return (
     <>
       <FormCommandSelect
@@ -38,7 +19,7 @@ const CourseSelect = ({
         label="Curso"
         isLoading={loadingCursos}
         width="full"
-        options={allCursos}
+        options={cursos}
         map={(f) => ({
           key: f.codigo.toString(),
           value: f.codigo.toString(),

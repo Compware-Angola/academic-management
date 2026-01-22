@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,6 +25,8 @@ import {
   ChevronRight,
   Eye,
   Search,
+  Printer,
+  Download,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -38,6 +40,8 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+
 
 type SelectedNotas = {
   turmaOuHorarioId: number;
@@ -45,7 +49,6 @@ type SelectedNotas = {
   anoLectivoId: number;
 };
 
-const VER_HORARIO = [{ codigo: "SIM", designacao: "SIM" }];
 const ESTADO = [
   { codigo: 0, designacao: "Todos" },
   { codigo: 1, designacao: "Com Nota" },
@@ -60,7 +63,7 @@ export default function ControlNotes() {
   const [openNotasModal, setOpenNotasModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState<SelectedNotas | null>(null);
 
-  // Filtros (apenas aplicados ao clicar em Pesquisar)
+  // Filtros
   const [formData, setFormData] = useState({
     anoLetivo: "",
     semestre: "",
@@ -68,14 +71,10 @@ export default function ControlNotes() {
     classes: "",
     unidadeCurricular: "",
     tipoAvaliacao: "",
-
     filtro: "0",
   });
 
-  // Estado para controlar quando os parâmetros foram enviados para a query
-  const [searchParams, setSearchParams] = useState<typeof formData | null>(
-    null,
-  );
+  const [searchParams, setSearchParams] = useState<typeof formData | null>(null);
 
   // =======================================
   // API QUERIES
@@ -127,7 +126,99 @@ export default function ControlNotes() {
     useQueryTipoAvaliacao();
 
   // =======================================
-  // VALIDAÇÃO PARA HABILITAR BOTÃO PESQUISAR
+  // Preparação de dados para PDF (memoizado)
+  // =======================================
+  const pdfData = useMemo(() => {
+    if (!disciplinasProva.length) return null;
+
+    const rows = disciplinasProva.map((item) => {
+      const total = item.numeroDeIscritos;
+      const lancadas = item.numNotaLancada;
+      const pendentes = item.numNotaPorLancar;
+      const percent = total > 0 ? ((lancadas / total) * 100).toFixed(1) : "0.0";
+
+      return {
+        disciplina: item.disciplina,
+        turma: item.turmaOuHorario,
+        semestre: item.semestre,
+        inscritos: total,
+        lancadas,
+        pendentes,
+        percentagem: `${percent}%`,
+        status: pendentes === 0 ? "Concluído" : "Pendente",
+      };
+    });
+
+    const totalInscritos = disciplinasProva.reduce((sum, d) => sum + d.numeroDeIscritos, 0);
+    const totalLancadas = disciplinasProva.reduce((sum, d) => sum + d.numNotaLancada, 0);
+    const totalPendentes = disciplinasProva.reduce((sum, d) => sum + d.numNotaPorLancar, 0);
+    const percentGlobal = totalInscritos > 0 ? ((totalLancadas / totalInscritos) * 100).toFixed(1) : "0.0";
+
+    const filtroTexto = searchParams
+      ? `Ano Letivo: ${academicYear?.find(a => a.codigo === Number(searchParams.anoLetivo))?.designacao || "—"} | ` +
+        `Semestre: ${semestres?.find(s => s.codigo === Number(searchParams.semestre))?.designacao || "—"} | ` +
+        `Curso: ${cursos?.find(c => c.codigo === Number(searchParams.curso))?.designacao || "—"} | ` +
+        `Tipo de Avaliação: ${tipoAvaliacao?.find(t => t.codigo === Number(searchParams.tipoAvaliacao))?.designacao || "—"}`
+      : "Filtros não aplicados";
+
+    return {
+      rows,
+      totais: [
+        { label: "Total de Inscritos", value: totalInscritos.toString() },
+        { label: "Total de Notas Lançadas", value: totalLancadas.toString() },
+        { label: "Total de Notas Pendentes", value: totalPendentes.toString() },
+        { label: "Progresso Global", value: `${percentGlobal}%` },
+      ],
+      filtrosAplicados: filtroTexto,
+    };
+  }, [disciplinasProva, searchParams, academicYear, semestres, cursos, tipoAvaliacao]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Controle de Lançamento de Notas"
+      subtitle="Gestão de lançamento de notas"
+      infoSections={[
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtrosAplicados,
+        },
+        {
+          title: "Resumo Geral",
+          content: pdfData.totais.map((t) => `${t.label}: ${t.value}`),
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "disciplina", label: "Disciplina", width: "22%" },
+          { key: "turma", label: "Turma / Horário", width: "28%" },
+          { key: "semestre", label: "Semestre", width: "14%" },
+          { key: "inscritos", label: "Inscritos", width: "10%", align: "center" },
+          { key: "lancadas", label: "Lançadas", width: "10%", align: "center" },
+          { key: "pendentes", label: "Pendentes", width: "10%", align: "center" },
+          { key: "percentagem", label: "% Lançado", width: "10%", align: "center" },
+          { key: "status", label: "Estado", width: "16%", align: "center" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      totals={pdfData.totais}
+      footerNotice={
+        "Relatório gerado automaticamente pelo sistema académico. " +
+        "Pendências devem ser resolvidas conforme regulamento. " +
+        `Data de emissão: ${new Date().toLocaleDateString("pt-AO", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}`
+      }
+      customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
+    />
+  ) : null;
+
+  // =======================================
+  // VALIDAÇÃO E PESQUISA
   // =======================================
   const isFormValid =
     formData.anoLetivo &&
@@ -140,7 +231,7 @@ export default function ControlNotes() {
   const handleSearch = () => {
     if (isFormValid) {
       setSearchParams({ ...formData });
-      setCurrentPage(1); // Reset paginação
+      setCurrentPage(1);
     }
   };
 
@@ -165,18 +256,35 @@ export default function ControlNotes() {
       </nav>
 
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Controle de Lançamento
           </h1>
           <p className="text-muted-foreground">Gestão de lançamento de notas</p>
         </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={handleSearch}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar lista
+          </Button>
+
+
+          {disciplinasProva.length > 0 && pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`Controle_Lancamento_Notas_${new Date().toISOString().slice(0, 10)}.pdf`}
+              showDownload={true}
+              showPrint={true}
+            />
+          )}
+        </div>
       </div>
 
       {/* FILTROS */}
       <div className="bg-card border rounded-lg p-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
           <h3 className="text-lg font-semibold">Filtros</h3>
           <Button
             onClick={handleSearch}
@@ -381,7 +489,7 @@ export default function ControlNotes() {
           </div>
 
           {/* PAGINAÇÃO */}
-          <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center justify-between mt-6 flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <Label className="text-sm">Itens por página:</Label>
               <Select

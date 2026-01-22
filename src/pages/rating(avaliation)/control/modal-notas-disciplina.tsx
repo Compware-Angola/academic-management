@@ -55,13 +55,13 @@ export function ModalNotasDisciplina({
     return data.filter(
       (aluno) =>
         aluno.alunoNome.toLowerCase().includes(termo) ||
-        String(aluno.numeroAluno).includes(termo)
+        String(aluno.numeroAluno).includes(termo),
     );
   }, [search, data]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl!">
         <DialogHeader>
           <DialogTitle>
             Notas lançadas — {alunosFiltrados.length} aluno(s)
