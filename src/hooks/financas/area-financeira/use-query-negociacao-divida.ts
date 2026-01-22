@@ -11,13 +11,15 @@ export const useQueryNegociacoes = (
   filters: ObterNegociacoesPayload,
   options?: {
     enabled?: boolean;
-  }
+  },
 ) => {
   const {
     codigoAnoLectivo,
     codigoCurso,
     tipoNegociacaoId,
     faculdadeId,
+    codigoMatricula,
+    nome,
     page = 1,
     limit = 10,
   } = filters;

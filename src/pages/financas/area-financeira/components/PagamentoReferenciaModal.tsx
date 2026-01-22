@@ -1,21 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -30,14 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Home,
-  Search,
-  Download,
-  RefreshCw,
-  Eye,
   User,
   GraduationCap,
   CreditCard,
@@ -45,13 +21,12 @@ import {
   Phone,
   MapPin,
   Calendar,
-  Printer,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+
 import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fetch-pagamento-por-referencia.service";
 import { PagamentoReferenciaStatus } from "./PagamentoReferenciaStastus";
 import { formatarData } from "@/util/date-formate";
+import { useQueryFacturaItens } from "@/hooks/horario/use-query-invoice";
 
 interface PagamentoReferenciaModalProps {
   selectedPagamento: ReferenciasPagamentoItem;
@@ -63,6 +38,8 @@ export const PagamentoReferenciaModal = ({
   selectedPagamento,
   setIsModalOpen,
 }: PagamentoReferenciaModalProps) => {
+  const { data: facturaItens, isLoading: isLoadingFacturaItens } =
+    useQueryFacturaItens(selectedPagamento?.codigo_factura);
   return (
     <>
       {/* Modal de Detalhes */}
@@ -187,18 +164,22 @@ export const PagamentoReferenciaModal = ({
                       <TableHead>Descrição</TableHead>
                       <TableHead>Factura Referente</TableHead>
                       <TableHead>Valor</TableHead>
+                      <TableHead>Quantidade</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">
-                        {selectedPagamento?.servico_descricao}
-                      </TableCell>
-                      <TableCell className="font-mono">
-                        {selectedPagamento?.codigo_factura}
-                      </TableCell>
-                      <TableCell>{selectedPagamento?.preco}</TableCell>
-                    </TableRow>
+                    {facturaItens?.data?.map((item) => (
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          {item?.descricaoservico} {item?.mesdescricao}
+                        </TableCell>
+                        <TableCell className="font-mono">
+                          {selectedPagamento?.codigo_factura}
+                        </TableCell>
+                        <TableCell>{item?.preco}</TableCell>
+                        <TableCell>{item?.quantidade}</TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
