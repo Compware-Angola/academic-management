@@ -43,6 +43,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { formatarData } from "@/util/date-formate";
 import { Button } from "@/components/ui/button";
 import { useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function ViewNotes() {
   // filtros
@@ -239,31 +240,22 @@ export default function ViewNotes() {
             </div>
 
             {/* Curso */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select
-                value={filters.curso}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    curso: v,
-                    anoCurricular: "",
-                    unidadeCurricular: "",
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                      {c.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+                  <div className="space-y-2">
+                      <CourseSelect
+                          value={filters.curso}
+                          onChangeValue={(v) => {
+                            setFilters({
+                              ...filters,
+                              curso: v,
+                              anoCurricular: "",
+                              unidadeCurricular: "",
+                            });
+                            
+                          }}
+                    />
+                  </div>
+
 
             {/* Ano Curricular */}
             <div className="space-y-2">
@@ -413,7 +405,7 @@ export default function ViewNotes() {
                       <TableHead>Nome Completo</TableHead>
                       <TableHead>Tipo de Avaliação</TableHead>
                       <TableHead>Nota</TableHead>
-                      <TableHead>Nome do Docente</TableHead>
+                      <TableHead>Lançada por</TableHead>
                       <TableHead>Data de Lançamento</TableHead>
                     </TableRow>
                   </TableHeader>
