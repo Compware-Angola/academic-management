@@ -27,6 +27,7 @@ import { useQueryDefinirOral } from "@/hooks/avaliacao/use-query-definir-oral";
 import { DefinirOral } from "@/services/avaliacao/fetch-oral";
 import { Switch } from "@/components/ui/switch";
 import { useMutationUpdateDefinirOral } from "@/hooks/avaliacao/use-mutation-update-definir-oral";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function FormulaOral() {
   const [filters, setFilters] = useState({
@@ -125,16 +126,15 @@ export default function FormulaOral() {
             })}
           />
 
-          <FormSelect
-            label="Curso"
+            
+          <CourseSelect
             value={filters.curso}
-            onChange={(v) => setFilters({ ...filters, curso: v })}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
+            onChangeValue={(v) =>
+              setFilters({
+            ...filters,
+              curso: v,
+              })
+            }
           />
 
           <FormSelect

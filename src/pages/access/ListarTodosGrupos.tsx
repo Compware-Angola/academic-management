@@ -75,7 +75,6 @@ export default function TodasInstituicoes() {
         payload: {
           instituicao: formData.instituicao,
           nif: formData.nif,
-          tipoInstituicaoId: Number(formData.tipo_instituicao),
           contacto: formData.contacto || undefined,
           endereco: formData.endereco || undefined,
           sigla: formData.sigla || undefined,

@@ -46,6 +46,7 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
 import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 type Filters = {
   anoLetivo: string;
   periodo: string;
@@ -286,19 +287,19 @@ export default function PautaGeralPorUC() {
               value: s.codigo,
             })}
           />
-          <FormSelect
-            disabled={loadingCursos}
-            loading={loadingCursos}
-            label="Curso"
-            value={filters.curso}
-            onChange={(v) => setFilters({ ...filters, curso: v })}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
-          />
+
+            <CourseSelect  
+              value={filters.curso}
+              onChangeValue={(v) => {
+                setFilters({
+                  ...filters,
+                  curso: v,
+                  unidadeCurricular: "",
+                });
+                setCurrentPage(1);
+              }}
+            />
+
           <FormSelect
             label="Ano Curricular"
             value={filters.classes}
