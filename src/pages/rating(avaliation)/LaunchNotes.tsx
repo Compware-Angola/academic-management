@@ -46,6 +46,7 @@ import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profil
 import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
@@ -288,19 +289,12 @@ export default function LaunchNotes() {
               value: s.codigo,
             })}
           />
-          <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
-            label="Curso"
-            value={formData.curso}
-            onChange={(v) => setFormData({ ...formData, curso: v })}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
-          />
+
+            <CourseSelect
+              value={formData.curso}
+              onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+            />
+
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
