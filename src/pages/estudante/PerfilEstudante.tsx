@@ -234,7 +234,7 @@ export default function PerfilEstudante() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
-                    <span>{estudante.cidade}, {estudante.provincia}</span>
+                    <span>{student.morada}, {estudante.provincia}</span>
                   </div>
                 </div>
               </div>
@@ -340,7 +340,7 @@ export default function PerfilEstudante() {
                 
                   
                   <span className="text-muted-foreground">Endereço:</span>
-                  <span className="font-medium">{estudante.endereco}</span>
+                  <span className="font-medium">{student.morada}</span>
                   
                   <span className="text-muted-foreground">Cidade:</span>
                   <span className="font-medium">{estudante.cidade}</span>
@@ -366,19 +366,16 @@ export default function PerfilEstudante() {
                   <span className="font-medium">{student.curso}</span>
                   
                   <span className="text-muted-foreground">Faculdade:</span>
-                  <span className="font-medium">{estudante.faculdade}</span>
+                  <span className="font-medium">{student.faculdade}</span>
                   
-                  <span className="text-muted-foreground">Departamento:</span>
-                  <span className="font-medium">{estudante.departamento}</span>
+                 
                   
                   <span className="text-muted-foreground">Grau:</span>
-                  <span className="font-medium">{estudante.grau}</span>
+                  <span className="font-medium">{student.grau}</span>
                   
                   <span className="text-muted-foreground">Regime:</span>
-                  <span className="font-medium">{estudante.regime}</span>
-                  
-                  <span className="text-muted-foreground">Turma:</span>
-                  <span className="font-medium">{estudante.turma}</span>
+                  <span className="font-medium">{student.regime}</span>
+                 
                 </div>
               </CardContent>
             </Card>

@@ -174,16 +174,16 @@ interface PaymentNotePDFProps {
   showPrintButton?: boolean
 }
 
-function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps 
+function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
 ) {
   const statusText =
     nota.estado === 0
       ? 'Pendente'
       : nota.estado === 1
-      ? 'Pago'
-      : nota.estado === 2
-      ? 'Parcelado'
-      : 'Anulado'
+        ? 'Pago'
+        : nota.estado === 2
+          ? 'Parcelado'
+          : 'Anulado'
 
   return (
     <Document>
@@ -225,7 +225,7 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
               <Text style={styles.label}>Data de Emissão:</Text>{' '}
               {format(new Date(nota.data_factura), 'dd/MM/yyyy', { locale: pt })}
             </Text>
-        
+
           </View>
 
           <View style={styles.infoRow}>
@@ -247,7 +247,7 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
           <Text>Matrícula: {nota.codigo_matricula}</Text>
         </View>
 
-      
+
 
         {/* Tabela de itens */}
         <View style={styles.table}>
@@ -261,17 +261,17 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
           {itens.map((item, index) => (
             <View style={styles.tableRow} key={index}>
               <Text style={[styles.tableCell, { width: '55%' }]}>
-                {( item.descricaoservico || "—") + 
-   (Number(item.mesid)!=3&& item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
+                {(item.descricaoservico || "—") +
+                  (Number(item.mesid) != 3 && item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
               </Text>
               <Text style={[styles.tableCell, { width: '15%', textAlign: 'center' }]}>
                 {item.quantidade ?? 1}
               </Text>
-           
+
               <Text style={[styles.tableCell, { width: '15%', textAlign: 'right' }]}>
                 {item.preco?.toFixed(2) || '—'}
               </Text>
-                <Text style={[styles.tableCell, { width: '15%', textAlign: 'right' }]}>
+              <Text style={[styles.tableCell, { width: '15%', textAlign: 'right' }]}>
                 {item.total?.toFixed(2) || '—'}
               </Text>
             </View>

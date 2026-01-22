@@ -350,7 +350,7 @@ export default function ScheduleList() {
         </CardContent>
       </Card>
 
-      {/* Tabela   Pimentel##123!! */}
+      {/* Tabela    */}
       <Card>
         <CardHeader>
           <CardTitle>Horários Encontradas</CardTitle>

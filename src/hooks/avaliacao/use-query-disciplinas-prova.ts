@@ -18,7 +18,7 @@ export function useQueryDisciplinasProva(
   return useQuery<DisciplinaProva[], Error>({
     queryKey: [
       "disciplinas-prova",
-      params.verHorario,
+  
       params.gradeSelecionada,
       params.cursoSelecionado,
       params.anoCurricularSelecionado,

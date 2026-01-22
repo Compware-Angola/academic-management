@@ -7,6 +7,7 @@ export type ListarFacturasPayload = {
   search?: string | number;
   codigoMatricula?: string | number;
   reference?: string | number;
+  codigoFatura?:string | number;
   anoLectivo?: number | string;
   status?: number | null| string;
   page?: number;
@@ -24,11 +25,13 @@ export type Factura = {
   estado: number;
   nome_aluno: string;
   ano_lectivo: string;
-  servico:string;
+  servicos:string;
+
   curso: string;
   polo: string;
   rn: number;
 };
+
 /* ---------- RESPONSE ITEM ---------- */
 export type FacturaDetalhe = {
   Codigo: number;
@@ -79,7 +82,7 @@ export type ListarFacturasResponse = {
 export async function listarFacturasService(
   payload: ListarFacturasPayload,
 ): Promise<ListarFacturasResponse> {
-  const { search, anoLectivo, page = 1, limit = 25, status,codigoMatricula,reference } = payload;
+  const { search, anoLectivo, page = 1, limit = 25, status,codigoMatricula,reference,codigoFatura } = payload;
 
   const params = {
     search: normalizeParam(search),
@@ -87,6 +90,7 @@ export async function listarFacturasService(
     codigoMatricula:normalizeParam(codigoMatricula),
     reference:normalizeParam(reference),
     status: normalizeParam(status),
+    codigoFatura:normalizeParam(codigoFatura),
     page,
     limit,
   };
