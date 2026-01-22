@@ -45,7 +45,6 @@ type SelectedNotas = {
   anoLectivoId: number;
 };
 
-const VER_HORARIO = [{ codigo: "SIM", designacao: "SIM" }];
 const ESTADO = [
   { codigo: 0, designacao: "Todos" },
   { codigo: 1, designacao: "Com Nota" },
