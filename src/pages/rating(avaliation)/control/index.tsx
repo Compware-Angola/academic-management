@@ -25,6 +25,9 @@ import {
   ChevronRight,
   Eye,
   Search,
+  Printer,
+  Download,
+  Plus,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -45,7 +48,6 @@ type SelectedNotas = {
   anoLectivoId: number;
 };
 
-const VER_HORARIO = [{ codigo: "SIM", designacao: "SIM" }];
 const ESTADO = [
   { codigo: 0, designacao: "Todos" },
   { codigo: 1, designacao: "Com Nota" },
@@ -171,6 +173,22 @@ export default function ControlNotes() {
             Controle de Lançamento
           </h1>
           <p className="text-muted-foreground">Gestão de lançamento de notas</p>
+        </div>
+         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleSearch()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar lista
+          </Button>
+          <Button variant="outline" size="sm">
+            <Printer className="h-4 w-4 mr-2" />
+            Imprimir
+          </Button>
+      
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar PDF
+          </Button>
+        
         </div>
       </div>
 
