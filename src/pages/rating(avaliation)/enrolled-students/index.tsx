@@ -173,7 +173,7 @@ export default function EstudantesInscritos() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Estudantes Inscritos
+            ESTUDANTES INSCRITOS POR AVALIAÇÃO
           </h1>
         </div>
       </div>
@@ -353,7 +353,6 @@ export default function EstudantesInscritos() {
                     <TableHead>Unidade Curricular</TableHead>
                     <TableHead>Avaliação</TableHead>
                     <TableHead className="text-center">Estado</TableHead>
-                    <TableHead className="text-center">Info</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -379,17 +378,6 @@ export default function EstudantesInscritos() {
 
                       <TableCell className="text-center">
                         {getEstadoBadge(estudante.estado)}
-                      </TableCell>
-
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          title="Detalhes"
-                        >
-                          <Info className="h-4 w-4 text-muted-foreground" />
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
