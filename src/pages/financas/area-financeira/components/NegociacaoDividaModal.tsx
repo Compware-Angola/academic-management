@@ -50,7 +50,6 @@ import { useQueryFacturaItens } from "@/hooks/horario/use-query-invoice";
 interface NegociacaoDividaModalProps {
   selectedNegociacao: NegociacaoItem;
   isModalOpen: boolean;
-  facturaId: string;
   setIsModalOpen: () => void;
 }
 export const NegociacaoDividaModal = ({

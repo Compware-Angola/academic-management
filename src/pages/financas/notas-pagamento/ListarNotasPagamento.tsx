@@ -59,7 +59,8 @@ const estados = [
 
 const searchOptions = [
   { id: "codigoMatricula", label: "Código da Matrícula" },
-  { id: "reference", label: "Referência" },
+  { id: "reference", label: "Referência da Factura" },
+  { id: "codigoFatura", label: "Codigo da Factura" },
 ];
 function truncate(text: string, max = 10) {
   if (!text) return "";
@@ -80,7 +81,7 @@ export default function ListarNotasPagamento() {
   }
 
   const [searchBy, setSearchBy] = useState<
-    "codigoMatricula" | "reference"
+    "codigoMatricula" | "reference" |"codigoFatura"
   >("codigoMatricula");
   const [filters, setFilters] = useState({
     anoLetivo: "23",
@@ -106,6 +107,10 @@ export default function ListarNotasPagamento() {
 
     reference:
       searchBy === "reference" && searchTerm
+        ? searchTerm
+        : undefined,
+        codigoFatura:
+      searchBy === "codigoFatura" && searchTerm
         ? searchTerm
         : undefined,
   });
@@ -159,6 +164,14 @@ export default function ListarNotasPagamento() {
   };
 
   const selectedFactura = data?.data.find((f) => f.codigo === selectedFacturaCodigo);
+const placeholders: Record<string, string> = {
+  codigoMatricula: "Pesquisar por código da matrícula...",
+  reference: "Pesquisar por referência da factura...",
+  codigoFatura: "Pesquisar por Codigo da factura...",
+};
+
+const placeholderText =
+  placeholders[searchBy] || "Pesquisar...";
 
   return (
     <div className="p-6 space-y-6">
@@ -237,7 +250,7 @@ export default function ListarNotasPagamento() {
                 value={searchBy}
                 onChange={(v) => {
                   setSearchBy(
-                    v as "codigoMatricula" | "reference"
+                    v as "codigoMatricula" | "reference" | "codigoFatura"
                   );
                   setSearchTerm("");
                   setPage(1);
@@ -256,11 +269,7 @@ export default function ListarNotasPagamento() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 className="pl-10"
-                placeholder={
-                  searchBy === "codigoMatricula"
-                    ? "Pesquisar por código da matrícula..."
-                    : "Pesquisar por referência..."
-                }
+                placeholder={placeholderText}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -291,6 +300,7 @@ export default function ListarNotasPagamento() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Codigo</TableHead>
                 <TableHead>Ref</TableHead>
                 <TableHead>Serviços</TableHead>
                 <TableHead>Estudante</TableHead>
@@ -298,7 +308,7 @@ export default function ListarNotasPagamento() {
                 <TableHead>Curso</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Emissão</TableHead>
-                <TableHead>Vencimento</TableHead>
+                
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -319,6 +329,7 @@ export default function ListarNotasPagamento() {
               ) : (
                 data?.data.map((nota) => (
                   <TableRow key={nota.codigo}>
+                    <TableCell className="font-mono font-medium">{nota.codigo}</TableCell>
                     <TableCell className="font-mono font-medium">{nota.referencia}</TableCell>
                     <TableCell className="font-mono">
                       {nota.servicos ? (
@@ -345,7 +356,7 @@ export default function ListarNotasPagamento() {
                     <TableCell>{nota.curso}</TableCell>
                     <TableCell className="font-medium">{formatCurrency(nota.total_preco)}</TableCell>
                     <TableCell>{formatDate(nota.data_factura)}</TableCell>
-                    <TableCell>{formatDate(nota.data_factura || nota.data_factura)}</TableCell>
+                   
                     <TableCell>{getStatusBadge(nota.estado)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">

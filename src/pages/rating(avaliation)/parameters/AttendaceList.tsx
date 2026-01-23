@@ -78,7 +78,7 @@ const AttendaceList = ({ academicYear }: AttendaceListProps) => {
                 <Input readOnly placeholder={parameters.descricao} />
               </div>
               <div>
-                <Label>Utilizador</Label>
+                <Label>Atualizado Por </Label>
                 <Input readOnly placeholder={parameters.atualizadopor} />
               </div>
               <FormSelect

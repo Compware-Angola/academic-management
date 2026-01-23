@@ -22,6 +22,7 @@ import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 import { useQueryCurricularPlanStudent } from "@/hooks/avaliacao/use-query-curriculum-plan-student";
 import { useQueryHistoryNoteRelease } from "@/hooks/avaliacao/use-query-launch-historic";
+import { formatDateForInput } from "@/pages/academiccalendar/activities-lectures/hooks";
 
 export default function LaunchHistoric() {
   const [filters, setFilters] = useState({
@@ -137,8 +138,10 @@ export default function LaunchHistoric() {
               <TableRow>
                 <TableHead>Unidade Curricular</TableHead>
                 <TableHead>Código da Matrícula</TableHead>
-                <TableHead>Nome</TableHead>
+                <TableHead>Nome do Estudante</TableHead>
                 <TableHead className="text-center">Nota</TableHead>
+                <TableHead className="text-center">Data de Lançamento</TableHead>
+                <TableHead className="text-center">Lançado por</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -151,6 +154,8 @@ export default function LaunchHistoric() {
                   <TableCell className="flex justify-center">
                     {item.nota_lancada}
                   </TableCell>
+                    <TableCell> {formatDateForInput(item.datalancada)}</TableCell>
+                      <TableCell>{item.utilizador}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

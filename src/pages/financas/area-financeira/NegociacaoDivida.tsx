@@ -39,8 +39,6 @@ import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
-import { PagamentoReferenciaModal } from "./components/PagamentoReferenciaModal";
-import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fetch-pagamento-por-referencia.service";
 import { useQueryNegociacoes } from "@/hooks/financas/area-financeira/use-query-negociacao-divida";
 import { formatNumber } from "@/util/format-number";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
@@ -48,8 +46,14 @@ import { FacultySelect } from "@/components/common/global-selects/FacultySelect"
 import { StatCard } from "@/components/common/StatCard";
 import { NegociacaoDividaModal } from "./components/NegociacaoDividaModal";
 import { NegociacaoItem } from "@/services/financas/area-financeira/fetch-negociacao-dividas.service";
+import { Input } from "@/components/ui/input";
 
 export default function NegociacaoDivida() {
+  //Options
+  const searchOptions = [
+    { id: "codigoMatricula", label: "Código da Matrícula" },
+    { id: "nome", label: "Nome do Aluno" },
+  ];
   // paginação
   const [page, setPage] = useState(1);
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -57,6 +61,10 @@ export default function NegociacaoDivida() {
     setOpenModal(false);
   };
   const [limit, setLimit] = useState(25);
+  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
+    "codigoMatricula",
+  );
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedNegociacao, setSelectedNegociacao] =
     useState<NegociacaoItem>(null);
   const [filters, setFilters] = useState({
@@ -67,26 +75,25 @@ export default function NegociacaoDivida() {
     negociacao: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
-  // Estatísticas mockadas
-  const estatisticas = {
-    totalNegociacoes: 156,
-    valorTotalNegociado: "12.450.000",
-    negociacoesAtivas: 89,
-    taxaRecuperacao: 78.5,
+  const placeholders: Record<string, string> = {
+    codigoMatricula: "Pesquisar por código da matrícula...",
+    nome: "Nome do Aluno.",
   };
+  const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
   const tipoNegociacao = [
     {
       key: "all",
       label: "Todos",
     },
+
     {
       key: "1",
-      label: "100%",
+      label: "50%",
     },
     {
       key: "2",
-      label: "50%",
+      label: "100%",
     },
   ];
   const {
@@ -97,8 +104,11 @@ export default function NegociacaoDivida() {
     {
       codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
       codigoCurso: parseFilter(filtersApplied.curso),
-      faculdadeId: parseFilter(filters.faculdade),
-      tipoNegociacaoId: parseFilter(filters.negociacao),
+      faculdadeId: parseFilter(filtersApplied.faculdade),
+      tipoNegociacaoId: parseFilter(filtersApplied.negociacao),
+      codigoMatricula:
+        searchBy === "codigoMatricula" ? parseFilter(searchTerm) : null,
+      nome: searchBy === "nome" ? searchTerm : null,
       page,
       limit,
     },
@@ -177,16 +187,17 @@ export default function NegociacaoDivida() {
               value={filters.anoLectivo}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
-            <CourseSelect
-              allOption
-              onChangeValue={(v) => setFilters({ ...filters, curso: v })}
-              anoLectivo={filters.anoLectivo}
-              value={filters.curso}
-            />
             <FacultySelect
               allOption
               value={filters.faculdade}
               onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+            />
+            <CourseSelect
+              params={{
+                faculdadeId: parseFilter(filters.faculdade),
+              }}
+              onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+              value={filters.curso}
             />
             <FormSelect
               label="% Negociação"
@@ -199,6 +210,41 @@ export default function NegociacaoDivida() {
                 value: a.key,
               })}
             />
+            {/* Tipo de Pesquisa */}
+            <div className="min-w-[220px]">
+              <FormSelect
+                label="Pesquisar por"
+                value={searchBy}
+                onChange={(v) => {
+                  setSearchBy(v as "codigoMatricula" | "nome");
+                  setSearchTerm("");
+                  setPage(1);
+                }}
+                options={searchOptions}
+                map={(o) => ({
+                  key: o.id,
+                  label: o.label,
+                  value: o.id,
+                })}
+              />
+            </div>
+
+            {/* Input Pesquisa */}
+            <div className="flex items-end">
+              <div className="flex-1  min-w-[260px] relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-10"
+                  placeholder={placeholderText}
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setPage(1);
+                  }}
+                />
+              </div>
+            </div>
+
             <div className="flex items-end">
               <Button
                 onClick={() => {
@@ -337,7 +383,6 @@ export default function NegociacaoDivida() {
         </CardContent>
       </Card>
       <NegociacaoDividaModal
-        facturaId="588835"
         isModalOpen={openModal}
         setIsModalOpen={() => closeModal()}
         selectedNegociacao={selectedNegociacao}

@@ -1,49 +1,31 @@
 import { useEffect, useState } from "react";
-import { FormSelect } from "../FormSelect";
 import { useCursos } from "@/hooks/use-cursos";
-import { Curso } from "@/services/fetch-course";
+import { Curso, CursoParams } from "@/services/fetch-course";
+import { FormCommandSelect } from "../FormCommandSelect";
 
 interface CourseSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
-  anoLectivo: string;
-  allOption?: boolean;
+  params?: CursoParams;
 }
-const CourseSelect = ({
-  onChangeValue,
-  value,
-  anoLectivo,
-  allOption = false,
-}: CourseSelectProps) => {
-  const { data: cursos = [], isLoading: loadingCursos } = useCursos();
-  const [allCursos, setAllCursos] = useState<Curso[]>([]);
-  useEffect(() => {
-    if (allOption) {
-      setAllCursos([
-        {
-          codigo: "all",
-          designacao: "Todos",
-        } as any,
-        ...cursos,
-      ]);
-    } else {
-      setAllCursos(cursos);
-    }
-  }, [allOption, cursos]);
+const CourseSelect = ({ onChangeValue, value, params }: CourseSelectProps) => {
+  const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
+
   return (
     <>
-      <FormSelect
-        label="Curso"
+      <FormCommandSelect
+        disabled={loadingCursos}
         value={value}
-        disabled={!anoLectivo}
-        loading={loadingCursos}
-        onChange={(v) => onChangeValue(v)}
-        options={allCursos}
-        map={(c) => ({
-          key: c.codigo.toString(),
-          label: c.designacao,
-          value: c.codigo.toString(),
+        label="Curso"
+        isLoading={loadingCursos}
+        width="full"
+        options={cursos}
+        map={(f) => ({
+          key: f.codigo.toString(),
+          value: f.codigo.toString(),
+          label: f.designacao,
         })}
+        onChange={(value) => onChangeValue(value)}
       />
     </>
   );

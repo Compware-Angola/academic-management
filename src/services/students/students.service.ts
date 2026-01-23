@@ -43,19 +43,24 @@ export const fetchStudentsSugestoes = async (
 /* =======================
  * TIPO DE ALUNO DETALHADO (ficha completa / estatística)
  * ======================= */
+
+
 export type StudentDetail = {
   codigo_matricula: number;
   bi: string;
   curso: string;
   periodo: string;
   estado: string;
-
+  faculdade: string;
+  grau: string;
+  regime: string;
+  morada: string;
   nome_completo: string;
   bi_aluno: string;
 
   email: string | null; // pode vir null
   telefonicos: string;
-sexo:string;
+  sexo: string;
   data_nascimento: string; // ISO: "1982-05-24T23:00:00.000Z"
 
   pai: string;

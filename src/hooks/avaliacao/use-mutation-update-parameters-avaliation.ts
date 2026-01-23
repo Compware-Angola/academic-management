@@ -24,6 +24,9 @@ export const useMutationUpdateParametrosAvaliacoesAttendance = () => {
       queryClient.invalidateQueries({
         queryKey: ["assessment-parametros-avaliacoes-attendance-list"],
       });
+       queryClient.invalidateQueries({
+        queryKey: ["assessment-attendance-parametros"],
+      });
     },
   });
 };

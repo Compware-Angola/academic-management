@@ -19,19 +19,25 @@ import { NavAcademic } from "./nav-academic";
 import { filterMenuByGroups } from "@/util/menuFilter";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const mainItems = filterMenuByGroups(menuStructure?.items ?? []);
+  const academicItems = filterMenuByGroups(academicStructure?.items ?? []);
+  const financeItems = filterMenuByGroups(finaceStructure?.items ?? []);
+ // const helpItems = filterMenuByGroups(healpStructure?.items ?? []);
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher />
       </SidebarHeader>
+
       <SidebarContent>
-        <NavMain items={filterMenuByGroups(menuStructure.items)} />
-        <NavAcademic items={filterMenuByGroups(academicStructure.items)} />
-        <NavFinance  items={filterMenuByGroups(finaceStructure.items)} />
-        <NavHealp items={filterMenuByGroups(healpStructure.items)} />
+        <NavMain items={mainItems} />
+        <NavAcademic items={academicItems} />
+       <NavFinance items={financeItems} />
       </SidebarContent>
+
       <SidebarRail />
     </Sidebar>
   );
 }
+

@@ -1,32 +1,32 @@
-import { DisciplinaProva, fetchDisciplinasProva, FilterDisciplinaProvaParams } from "@/services/avaliacao/fetch-disciplinas-prova";
+import {
+  DisciplinaProva,
+  fetchDisciplinasProva,
+  FilterDisciplinaProvaParams,
+} from "@/services/avaliacao/fetch-disciplinas-prova";
 import { useQuery } from "@tanstack/react-query";
 
-
 export function useQueryDisciplinasProva(
-  params: FilterDisciplinaProvaParams = {}
+  params: FilterDisciplinaProvaParams = {},
 ) {
-
   const enabled =
     !!params.gradeSelecionada &&
     !!params.cursoSelecionado &&
     !!params.anoCurricularSelecionado &&
     !!params.semestreSelecionado &&
     !!params.anoLectivoSelecionado &&
-   
     !!params.tipoAvaliacaoSelecionada;
 
   return useQuery<DisciplinaProva[], Error>({
     queryKey: [
       "disciplinas-prova",
-      params.verHorario,
+
       params.gradeSelecionada,
       params.cursoSelecionado,
       params.anoCurricularSelecionado,
       params.semestreSelecionado,
       params.anoLectivoSelecionado,
-
       params.tipoAvaliacaoSelecionada,
-      params.filtro
+      params.filtro,
     ],
 
     queryFn: async () => {
@@ -35,7 +35,7 @@ export function useQueryDisciplinasProva(
     },
 
     enabled,
-    retry:0,
+    retry: 0,
     staleTime: 5 * 60 * 1000,
   });
 }
