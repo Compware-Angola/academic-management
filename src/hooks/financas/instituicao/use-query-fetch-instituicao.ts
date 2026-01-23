@@ -1,14 +1,18 @@
 import {
   FetchInstituicaoParams,
-  fetchInstituicoes,
+  FetchInstituicaoResponse,
+  fetchInstituicaoService,
 } from "@/services/financas/instituicao/fetch-instituicao.service";
 import { useQuery } from "@tanstack/react-query";
 
-export function useQueryFetchInstituicao(params?: FetchInstituicaoParams) {
-  return useQuery({
-    queryKey: ["instituicoes", params],
-    queryFn: () => fetchInstituicoes(params),
-    staleTime: 1000 * 60 * 5,
-    retry: false,
+export function useQueryFetchInstituicao(
+  params?: FetchInstituicaoParams,
+  pageUrl?: string,
+) {
+  return useQuery<FetchInstituicaoResponse>({
+    queryKey: ["instituicao", params, pageUrl],
+    queryFn: () => fetchInstituicaoService(params, pageUrl),
+
+    refetchOnWindowFocus: false,
   });
 }

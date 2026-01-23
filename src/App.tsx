@@ -68,7 +68,6 @@ import GeneralParametersAvaluation from "./pages/rating(avaliation)/parameters";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import AccessDenied from "./pages/AccessDenied";
 import Grupos from "./pages/controle-acesso/grupos";
-import ListarGrupos from "./pages/access/ListarTodosGrupos";
 import AccessGroup from "./pages/access/AccessGroup";
 import CreateUser from "./pages/access/CreateUser";
 import { ListarAcessos } from "./pages/access/AllAccesses";
@@ -279,10 +278,6 @@ const App = () => {
                     element={<UserFunctionality />}
                   />
                   <Route path="/acessos/grupo" element={<AcessGrup />} />
-                  <Route
-                    path="/acessos/grupos/utilizadores"
-                    element={<ListarGrupos />}
-                  />
                   <Route path="/controle-acesso/grupos" element={<Grupos />} />
                   <Route
                     path="/ver-utilizadores/grupos"
