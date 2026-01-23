@@ -179,7 +179,10 @@ export default function LaunchNotes() {
       documentTitle="Lançamento de Notas"
       subtitle="Controle de lançamento por disciplina e turma"
       infoSections={[
-       
+          {
+          title: "Resumo",
+          content: pdfData.filtrosAplicados,
+        },
         {
           title: "Resumo",
           content: pdfData.totais.map(t => `${t.label}: ${t.value}`),
