@@ -5,19 +5,24 @@ interface TipoInstituicaoSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
   disabled?: boolean;
+  label?: string;
+  placeholder?: string;
 }
 
 export function TipoInstituicaoSelect({
   value,
   onChangeValue,
   disabled,
+  label,
+  placeholder,
 }: TipoInstituicaoSelectProps) {
   const { data, isLoading } = useListInstituicaoTipo();
 
   return (
     <FormSelect
-      label="Tipo Instituição"
+      label={label}
       value={value}
+      placeholder={placeholder}
       disabled={disabled || isLoading}
       loading={isLoading}
       options={data ?? []}
