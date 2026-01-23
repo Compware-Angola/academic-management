@@ -1,5 +1,5 @@
 // src/pages/SchedulesByUC.tsx
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -40,6 +40,9 @@ import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { Badge } from "@/components/ui/badge";
 import { FormMultiSelect } from "@/components/common/FormMultiSelect";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 
 export default function StatisticAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,7 +106,7 @@ export default function StatisticAssessment() {
         page: 1,
         limit: 100,
       },
-      { enabled: canLoadTurmas }
+      { enabled: canLoadTurmas },
     );
   const { data: statisticResponse, isLoading: loadingStatistic } =
     useQueryAssessmentStats({
@@ -122,6 +125,172 @@ export default function StatisticAssessment() {
   const schedules = scheduleResponse?.data || [];
   const statistics = statisticResponse?.data || [];
 
+  const pdfData = useMemo(() => {
+    if (!statistics.length) return null;
+
+    const rows = statistics.map((item) => ({
+      curso: item.curso,
+      disciplina: item.disciplina,
+      horario: item.nomehorario,
+      avaliacao: item.avaliacao,
+      inscritos: item.qtdinscrito,
+      avaliados: item.qtdavaliados,
+      aprovados: item.qtdaprovados,
+      reprovados: item.qtdreprovados,
+      taxa_avaliacao: `${item.taxaavaliacao_sobreinscritos.toFixed(1)}%`,
+      taxa_aprovados: `${item.taxaaprovacao_sobreavaliados.toFixed(1)}%`,
+      taxa_reprovados: `${item.taxareprovacao_sobreavaliados.toFixed(1)}%`,
+    }));
+
+    // Totais
+    const totalInscritos = statistics.reduce(
+      (sum, item) => sum + item.qtdinscrito,
+      0,
+    );
+    const totalAvaliados = statistics.reduce(
+      (sum, item) => sum + item.qtdavaliados,
+      0,
+    );
+    const totalAprovados = statistics.reduce(
+      (sum, item) => sum + item.qtdaprovados,
+      0,
+    );
+    const totalReprovados = statistics.reduce(
+      (sum, item) => sum + item.qtdreprovados,
+      0,
+    );
+
+    // Filtros exibidos
+    const anoLetivoNome =
+      anosAcademicos?.find((a) => a.codigo === Number(filters.anoLetivo))
+        ?.designacao || "—";
+    const semestreNome =
+      semestres?.find((s) => s.codigo === Number(filters.semestre))
+        ?.designacao || "—";
+    const periodoNome =
+      periodos?.find((p) => p.codigo === Number(filters.periodo))?.designacao ||
+      "—";
+    const cursoNome =
+      cursos?.find((c) => c.codigo === Number(filters.curso))?.designacao ||
+      "—";
+    const ucNome =
+      unidadesCurriculares.find(
+        (uc) => uc.pk === Number(filters.unidadeCurricular),
+      )?.descricao || "—";
+    const horarioNome =
+      schedules.find((h) => h.codigo === Number(filters.horarioId))
+        ?.designacao || "—";
+    const tipoProvaNome =
+      tipoProva.find((tp) => tp.codigo === Number(filters.tipoProva))
+        ?.designacao || "—";
+
+    const filtrosTexto = [
+      `Ano Letivo: ${anoLetivoNome}`,
+      `Semestre: ${semestreNome}`,
+      `Período: ${periodoNome}`,
+      `Curso: ${cursoNome}`,
+      `UC: ${ucNome}`,
+      `Horário: ${horarioNome}`,
+      `Tipo Prova: ${tipoProvaNome}`,
+      `Tipos Avaliação: ${avaliacoes.length > 0 ? avaliacoes.length : "Todos"} selecionado(s)`,
+    ]
+      .filter(Boolean)
+      .join("  |  ");
+
+    return {
+      rows,
+      filtros: filtrosTexto || "Nenhum filtro específico aplicado",
+      totais: [
+        `Total de registos: ${statistics.length}`,
+        `Total inscritos: ${totalInscritos}`,
+        `Total avaliados: ${totalAvaliados}`,
+        `Total aprovados: ${totalAprovados}`,
+        `Total reprovados: ${totalReprovados}`,
+      ],
+    };
+  }, [
+    statistics,
+    filters,
+    anosAcademicos,
+    semestres,
+    periodos,
+    cursos,
+    unidadesCurriculares,
+    schedules,
+    tipoProva,
+    avaliacoes,
+  ]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Estatística de Notas Lançadas"
+      subtitle="Resumo por unidade curricular, horário e tipo de avaliação"
+      infoSections={[
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros,
+        },
+        {
+          title: "Resumo Geral",
+          content: pdfData.totais,
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "curso", label: "Curso", width: "14%" },
+          { key: "disciplina", label: "Unidade Curricular", width: "22%" },
+          { key: "horario", label: "Horário", width: "12%" },
+          {
+            key: "avaliacao",
+            label: "Avaliação",
+            width: "10%",
+            align: "center",
+          },
+          {
+            key: "inscritos",
+            label: "Inscritos",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "avaliados",
+            label: "Avaliados",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "aprovados",
+            label: "Aprovados",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "reprovados",
+            label: "Reprovados",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "taxa_avaliacao",
+            label: "Taxa Avaliação",
+            width: "10%",
+            align: "center",
+          },
+          {
+            key: "taxa_aprovados",
+            label: "Taxa Aprov.",
+            width: "10%",
+            align: "center",
+          },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#1e40af",
+      }}
+      footerNotice="Estatísticas baseadas nos lançamentos registados até ao momento. Sujeito a alterações."
+      customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
+    />
+  ) : null;
+
   return (
     <div className="p-6 space-y-8">
       {/* Breadcrumb */}
@@ -138,18 +307,33 @@ export default function StatisticAssessment() {
           <BreadcrumbItem>Avaliação</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Estatística</BreadcrumbPage>
+            <BreadcrumbPage>Estatística de notas lançadas</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4">
-        <BookOpen className="h-8 w-8 text-primary" />
-        <div>
-          <h1 className="text-3xl font-bold">Estatística</h1>
-          <p className="text-muted-foreground">Consulte as estatisticas.</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-4">
+          <BookOpen className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-3xl font-bold">
+              Estatística de notas lançadas
+            </h1>
+            <p className="text-muted-foreground">
+              Estatística de notas lançadas por UC e avaliação
+            </p>
+          </div>
         </div>
+
+        {statistics.length > 0 && pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`Estatisticas_Notas_${filters.curso || "geral"}_${new Date().toISOString().slice(0, 10)}.pdf`}
+            showDownload={true}
+            showPrint={true}
+          />
+        )}
       </div>
 
       {/* Filtros */}
@@ -304,10 +488,10 @@ export default function StatisticAssessment() {
                       !filters.curso
                         ? "Selecione curso"
                         : !filters.semestre
-                        ? "Selecione semestre"
-                        : isLoadingUC
-                        ? "Carregando UCs..."
-                        : "Selecionar UC"
+                          ? "Selecione semestre"
+                          : isLoadingUC
+                            ? "Carregando UCs..."
+                            : "Selecionar UC"
                     }
                   />
                 </SelectTrigger>
