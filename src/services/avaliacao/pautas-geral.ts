@@ -1,5 +1,9 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
+/** =========================
+ *  MODELOS
+ *  ========================= */
+
 export type PautaGeral = {
   obs: string[];
   formula: string[];
@@ -27,16 +31,41 @@ export type PautaGeral = {
   unidadeCurricular: string;
 };
 
-export type PautasGeralParams = {
-  anoLectivo: string;
-  gradeCurricular?: string;
-  horario?: string;
-  semestre: string;
-  gradeCurricularTurma?: string;
-  turma?: string;
+/** =========================
+ *  RESPOSTA PAGINADA GENÉRICA
+ *  ========================= */
+export type PaginatedResponse<T> = {
+  data: T[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 };
 
-export type PautasGeralResponse = PautaGeral[];
+/** =========================
+ *  PARAMS
+ *  ========================= */
+export type PautasGeralParams = {
+  anoLectivo: string;
+  semestre: string;
+
+  gradeCurricular?: string;
+  horario?: string;
+  gradeCurricularTurma?: string;
+  turma?: string;
+
+  page?: number;
+  limit?: number;
+};
+
+/** =========================
+ *  RESPONSE
+ *  ========================= */
+export type PautasGeralResponse = PaginatedResponse<PautaGeral>;
+
+/** =========================
+ *  REQUEST
+ *  ========================= */
 export async function getPautasGeral(
   params: PautasGeralParams
 ): Promise<PautasGeralResponse> {

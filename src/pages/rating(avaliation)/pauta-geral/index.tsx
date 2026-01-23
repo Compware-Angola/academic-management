@@ -43,33 +43,30 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
+import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
 import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
-import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+
 type Filters = {
   anoLetivo: string;
   periodo: string;
   semestre: string;
   curso: string;
   classes: string;
-
-  // Fluxo novo (> 2021)
   unidadeCurricular: string;
   horarioId: string;
-
-  // Fluxo antigo (<= 2021)
   turma: string;
   gradeCurricularTurma: string;
 };
+
 export default function PautaGeral() {
   const { toast } = useToast();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
   const [shouldFetch, setShouldFetch] = useState(false);
+
   const [filters, setFilters] = useState<Filters>({
     anoLetivo: "",
     periodo: "",
@@ -81,9 +78,12 @@ export default function PautaGeral() {
     turma: "",
     gradeCurricularTurma: "",
   });
+
   useEffect(() => {
     setShouldFetch(false);
+    setCurrentPage(1); // 🔥 reset página ao mudar filtros
   }, [filters]);
+
   /** ================== QUERIES BASE ================== */
   const { data: academicYear = [], isLoading: loadingYear } =
     useQueryAnoAcademico();
@@ -114,7 +114,6 @@ export default function PautaGeral() {
   }, [academicYearInfo]);
 
   /** ================== FLUXO NOVO (> 2021) ================== */
-
   const { data: schedules, isLoading: loadingSchedules } = useScheduleQuery({
     anoLectivo: Number(filters.anoLetivo),
     semestre: Number(filters.semestre),
@@ -124,23 +123,23 @@ export default function PautaGeral() {
   });
 
   /** ================== FLUXO ANTIGO (<= 2021) ================== */
-  const { data: turmas = [], isLoading: loadingTurmas } = useTeamOldRulesTurmas(
-    {
+  const { data: turmas = [], isLoading: loadingTurmas } =
+    useTeamOldRulesTurmas({
       anoLectivo: filters.anoLetivo,
       classe: filters.classes,
       curso: filters.curso,
       periodo: filters.periodo,
-    }
-  );
+    });
 
-  const { data: ucByTurma = [], isLoading: loadingUcTurma } = useTeamOldRules({
-    anoLectivo: filters.anoLetivo,
-    semestre: filters.semestre,
-    turma: filters.turma,
-  });
+  const { data: ucByTurma = [], isLoading: loadingUcTurma } =
+    useTeamOldRules({
+      anoLectivo: filters.anoLetivo,
+      semestre: filters.semestre,
+      turma: filters.turma,
+    });
 
   /** ================== BUSCA FINAL ================== */
-  const { data: pautaGeral = [], isLoading: loadingPauta } = usePautasGeral(
+  const { data: pautaResponse, isLoading: loadingPauta } = usePautasGeral(
     {
       gradeCurricular: filters.unidadeCurricular,
       horario: filters.horarioId,
@@ -148,9 +147,16 @@ export default function PautaGeral() {
       anoLectivo: filters.anoLetivo,
       turma: filters.turma,
       gradeCurricularTurma: filters.gradeCurricularTurma,
+      page: currentPage,          // 🔥 backend pagination
+      limit: itemsPerPage,        // 🔥 backend pagination
     },
     shouldFetch
   );
+
+  const pautaGeral = pautaResponse?.data ?? [];
+  const totalPages = pautaResponse?.totalPages ?? 1;
+  const total = pautaResponse?.total ?? 0;
+
   const handleSearch = () => {
     if (!filters.anoLetivo || !filters.semestre) {
       toast({
@@ -184,9 +190,10 @@ export default function PautaGeral() {
       });
       return;
     }
-    console.log("aqui", { filters });
+
     setShouldFetch(true);
   };
+
   const getResultadoBadge = (resultado: string) => {
     if (resultado === "Aprovado") {
       return (
@@ -201,12 +208,6 @@ export default function PautaGeral() {
       </Badge>
     );
   };
-
-  const totalPages = Math.ceil(pautaGeral.length / itemsPerPage);
-  const paginatedPautas = pautaGeral.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return (
     <div className="space-y-6">
@@ -232,6 +233,7 @@ export default function PautaGeral() {
       </div>
 
       {/* Filtros */}
+     {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -397,7 +399,7 @@ export default function PautaGeral() {
         </div>
       </div>
 
-      {/* Tabela de resultados */}
+      {/* Resultados */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
 
@@ -437,17 +439,13 @@ export default function PautaGeral() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedPautas.map((pauta) => (
+                  {pautaGeral.map((pauta) => (
                     <TableRow key={pauta.codigoGradeAluno}>
+                      {/* 👇 mantém teu row igual */}
                       <TableCell className="font-medium">
                         {pauta.num_matricula}
                       </TableCell>
-                      <TableCell
-                        className="max-w-[200px] truncate"
-                        title={pauta.nome_completo}
-                      >
-                        {pauta.nome_completo}
-                      </TableCell>
+                      <TableCell>{pauta.nome_completo}</TableCell>
                       <TableCell>{pauta.unidadeCurricular}</TableCell>
                       <TableCell>{pauta.ano}</TableCell>
                       <TableCell className="text-center">
@@ -468,7 +466,7 @@ export default function PautaGeral() {
                       <TableCell>
                         {getResultadoBadge(pauta.resultado)}
                       </TableCell>
-                      <TableCell className="text-center">
+                     <TableCell className="text-center">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button
@@ -577,31 +575,11 @@ export default function PautaGeral() {
               </Table>
             </div>
 
-            {/* Paginação */}
+            {/* Paginação (backend) */}
             <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="items-per-page" className="text-sm">
-                  Itens por página:
-                </Label>
-                <Select
-                  value={itemsPerPage.toString()}
-                  onValueChange={(value) => setItemsPerPage(Number(value))}
-                >
-                  <SelectTrigger id="items-per-page" className="w-20">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="25">25</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                    <SelectItem value="100">100</SelectItem>
-                  </SelectContent>
-                </Select>
-                <span className="text-sm text-muted-foreground ml-4">
-                  Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
-                  {Math.min(currentPage * itemsPerPage, pautaGeral.length)} de{" "}
-                  {pautaGeral.length} registos
-                </span>
+              <div className="text-sm text-muted-foreground">
+                Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
+                {Math.min(currentPage * itemsPerPage, total)} de {total} registos
               </div>
 
               <div className="flex items-center gap-2">
@@ -614,16 +592,18 @@ export default function PautaGeral() {
                   <ChevronLeft className="h-4 w-4" />
                   Anterior
                 </Button>
+
                 <span className="text-sm">
-                  Página {currentPage} de {totalPages || 1}
+                  Página {currentPage} de {totalPages}
                 </span>
+
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() =>
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
-                  disabled={currentPage === totalPages || totalPages === 0}
+                  disabled={currentPage === totalPages}
                 >
                   Próxima
                   <ChevronRight className="h-4 w-4" />
