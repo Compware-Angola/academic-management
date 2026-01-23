@@ -83,7 +83,7 @@ export default function FormulaOral() {
       <header className="flex justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            Definir unidade cunicular com oral
+            DEFINIR UC COM ORAL
           </h1>
           <p className="text-muted-foreground">Ativação por disciplina</p>
         </div>

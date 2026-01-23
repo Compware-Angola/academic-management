@@ -1,4 +1,10 @@
 // src/pages/SchedulesByUC.tsx
+
+import { useMemo } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,6 +136,75 @@ export default function ViewNotes() {
   const schedules = scheduleResponse?.data || [];
   const viewNotes = viewNotesResponse?.data || [];
   const total = viewNotesResponse?.total || 0;
+
+
+const pdfData = useMemo(() => {
+  if (!viewNotes.length) return null;
+
+  const rows = viewNotes.map((item) => ({
+    matricula: item.numero_matricula,
+    nome: item.nome_completo,
+    avaliacao: item.descricao_avaliacao,
+    nota: item.nota ?? "-",
+    docente: item.nome_docente,
+    data: formatarData(item.data_lancamento),
+  }));
+
+  const filtrosTexto = [
+    filters.anoLetivo && `Ano Letivo: ${filters.anoLetivo}`,
+    filters.semestre && `Semestre: ${filters.semestre}`,
+    filters.curso && `Curso: ${filters.curso}`,
+    filters.unidadeCurricular &&
+      `UC: ${filters.unidadeCurricular}`,
+  ]
+    .filter(Boolean)
+    .join("  |  ");
+
+  return {
+    rows,
+    filtros: filtrosTexto || "Nenhum filtro específico aplicado",
+    total: `Total de notas: ${viewNotes.length}`,
+  };
+}, [viewNotes, filters]);
+
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Notas Lançadas"
+    subtitle="Relatório de notas por unidade curricular"
+    infoSections={[
+      {
+        title: "Filtros Aplicados",
+        content: pdfData.filtros,
+      },
+      {
+        title: "Resumo",
+        content: pdfData.total,
+      },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "matricula", label: "Matrícula", width: "14%" },
+        { key: "nome", label: "Nome Completo", width: "26%" },
+        { key: "avaliacao", label: "Avaliação", width: "18%" },
+        {
+          key: "nota",
+          label: "Nota",
+          width: "8%",
+          align: "center",
+        },
+        { key: "docente", label: "Docente", width: "18%" },
+        { key: "data", label: "Data", width: "16%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Relatório gerado a partir do sistema académico."
+    customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
+  />
+) : null;
+
+
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -154,12 +229,24 @@ export default function ViewNotes() {
       </Breadcrumb>
 
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <BookOpen className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">Visualizar</h1>
           <p className="text-muted-foreground">Notas Lançadas.</p>
         </div>
+
+        {viewNotes.length > 0 && pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`Notas_Lancadas_${new Date()
+                .toISOString()
+                .slice(0, 10)}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+
       </div>
 
       {/* Filtros */}
