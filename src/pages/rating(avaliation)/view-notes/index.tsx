@@ -494,6 +494,7 @@ const pdfContent = pdfData ? (
                       <TableHead>Nota</TableHead>
                       <TableHead>Lançada por</TableHead>
                       <TableHead>Data de Lançamento</TableHead>
+                      <TableHead>Data Alteração</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -516,6 +517,10 @@ const pdfContent = pdfData ? (
                         <TableCell>
                           {" "}
                           {formatarData(item.data_lancamento)}{" "}
+                        </TableCell>
+                        <TableCell>
+                          {" "}
+                          {formatarData(item.data_atualizacao)}{" "}
                         </TableCell>
                       </TableRow>
                     ))}
