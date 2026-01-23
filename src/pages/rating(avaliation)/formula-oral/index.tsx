@@ -56,7 +56,7 @@ export default function FormulaOral() {
     isLoading,
     refetch,
   } = useQueryDefinirOral({
-    anoLectivo:filters.anoLetivo? Number(filters.anoLetivo):undefined,
+    anoLectivo: filters.anoLetivo ? Number(filters.anoLetivo) : undefined,
     cursoId: filters.curso ? Number(filters.curso) : undefined,
     anoCurricular: filters.classes ? Number(filters.classes) : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
@@ -67,7 +67,7 @@ export default function FormulaOral() {
 
   const paginated = data.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   return (
@@ -75,12 +75,16 @@ export default function FormulaOral() {
       <nav className="text-sm text-muted-foreground flex gap-2">
         <Link to="/">Início</Link>
         <span>/</span>
-        <span className="text-foreground">Definir Prova Oral</span>
+        <span className="text-foreground">
+          Definir unidade curricular com oral
+        </span>
       </nav>
 
       <header className="flex justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Definir Oral</h1>
+          <h1 className="text-3xl font-bold">
+            Definir unidade cunicular com oral
+          </h1>
           <p className="text-muted-foreground">Ativação por disciplina</p>
         </div>
 
@@ -100,8 +104,7 @@ export default function FormulaOral() {
       {/* ========== FILTROS ========== */}
       <div className="bg-card border rounded-lg p-6">
         <div className="grid grid-cols-4 gap-4">
-
-              <FormSelect
+          <FormSelect
             disabled={isLoadingAcademicYear}
             loading={isLoadingAcademicYear}
             label="Ano Letivo"
@@ -126,13 +129,12 @@ export default function FormulaOral() {
             })}
           />
 
-            
           <CourseSelect
             value={filters.curso}
             onChangeValue={(v) =>
               setFilters({
-            ...filters,
-              curso: v,
+                ...filters,
+                curso: v,
               })
             }
           />
