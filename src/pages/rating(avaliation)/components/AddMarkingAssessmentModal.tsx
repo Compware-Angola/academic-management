@@ -40,6 +40,7 @@ import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 import { useQueryTiposPrazos } from "@/hooks/prazos/use-query-tipo-prazo";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -279,24 +280,18 @@ export default function AddMarkingAssessmentModal({
             />
 
             {/* Curso */}
-            <FormSelect
-              label="Curso"
-              value={filters.curso}
-              onChange={(v) =>
-                setFilters({
-                  ...filters,
-                  curso: v,
-                  anoCurricular: undefined,
-                  unidadeCurricular: undefined,
-                })
-              }
-              options={cursos}
-              map={(c) => ({
-                key: c.codigo,
-                label: c.designacao,
-                value: c.codigo,
-              })}
-            />
+            
+
+              <CourseSelect
+                  value={filters.curso}
+                  onChangeValue={(v) =>
+                    setFilters({
+                      ...filters,
+                        curso: v,
+                        anoCurricular: "all",
+                      })
+                      }
+                      />
 
             {/* Ano Curricular */}
             <FormSelect
