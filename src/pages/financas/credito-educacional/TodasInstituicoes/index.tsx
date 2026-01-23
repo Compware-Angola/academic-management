@@ -42,7 +42,6 @@ export default function TodasInstituicoes() {
     contacto: "",
     endereco: "",
     sigla: "",
-    tipo: "",
   });
   const [pageUrl, setPageUrl] = useState<string | undefined>(undefined);
   const debouncedInstituicao = useDebounce(instituicaoInput, 500);
@@ -67,16 +66,7 @@ export default function TodasInstituicoes() {
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const handleSetFormData = (instituicao: Instituicao) => {
-    setFormData({
-      instituicao: instituicao.instituicao,
-      nif: instituicao.nif,
-      contacto: instituicao.contacto ?? "",
-      endereco: instituicao.endereco ?? "",
-      sigla: instituicao.sigla ?? "",
-      tipo: instituicao.tipo_instituicao.toString() ?? "",
-    });
-  };
+
   const handleResetFormData = () => {
     setFormData({
       instituicao: "",
@@ -84,7 +74,6 @@ export default function TodasInstituicoes() {
       contacto: "",
       endereco: "",
       sigla: "",
-      tipo: "",
     });
   };
   useEffect(() => {

@@ -13,9 +13,7 @@ import { useCreateInstituicao } from "@/hooks/financas/instituicao/use-create-in
 import { useUpdateInstituicao } from "@/hooks/financas/instituicao/use-mutation-update-instituicao.";
 import { TipoInstituicaoSelect } from "@/components/common/global-selects/TipoInstituicaoSelect";
 import { useToast } from "@/hooks/use-toast";
-export type FormData = Omit<Instituicao, "codigo" | "tipo_instituicao"> & {
-  tipo: string;
-};
+export type FormData = Omit<Instituicao, "codigo" | "tipo_instituicao">;
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -51,7 +49,6 @@ export function InstituitionModal({
         contacto: instituicao.contacto ?? "",
         endereco: instituicao.endereco ?? "",
         sigla: instituicao.sigla ?? "",
-        tipo: instituicao.tipo_instituicao.toString(),
       });
     }
   }, [instituicao, setFormData]);
@@ -65,10 +62,6 @@ export function InstituitionModal({
 
     if (!data.nif.trim()) {
       errors.push("NIF");
-    }
-
-    if (!data.tipo) {
-      errors.push("Tipo de instituição");
     }
 
     if (!data.contacto.trim()) {
@@ -104,7 +97,7 @@ export function InstituitionModal({
       await updateInstituicao({
         codigo: instituicao!.codigo,
         contacto: formData.contacto,
-        tipo_instituicao: Number(formData.tipo),
+
         sigla: formData.sigla,
         nif: formData.nif,
         endereco: formData.endereco,
@@ -113,7 +106,7 @@ export function InstituitionModal({
     } else {
       await createInstituicao({
         contacto: formData.contacto,
-        tipo_instituicao: Number(formData.tipo),
+
         sigla: formData.sigla,
         nif: formData.nif,
         endereco: formData.endereco,
@@ -157,12 +150,6 @@ export function InstituitionModal({
             onChange={(e) =>
               setFormData((p) => ({ ...p, sigla: e.target.value }))
             }
-          />
-
-          <TipoInstituicaoSelect
-            value={formData.tipo}
-            placeholder="Tipo Instituição"
-            onChangeValue={(t) => setFormData((p) => ({ ...p, tipo: t }))}
           />
 
           <Input

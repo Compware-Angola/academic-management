@@ -6,7 +6,6 @@ export type UpdateInstituicaoParams = {
   contacto: string;
   endereco: string;
   sigla: string;
-  tipo_instituicao: number;
   codigo: number;
 };
 
@@ -19,6 +18,5 @@ export async function updateInstituicao(
     contacto: params.contacto,
     endereco: params.endereco,
     sigla: params.sigla,
-    tipo_instituicao: params.tipo_instituicao,
   });
 }

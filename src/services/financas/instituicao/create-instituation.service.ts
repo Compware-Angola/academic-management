@@ -6,7 +6,6 @@ export interface CreateInstituicaoPayload {
   contacto: string;
   endereco: string;
   sigla: string;
-  tipo_instituicao: number;
 }
 
 export async function createInstituicao(
