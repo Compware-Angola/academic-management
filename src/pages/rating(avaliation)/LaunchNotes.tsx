@@ -179,10 +179,7 @@ export default function LaunchNotes() {
       documentTitle="Lançamento de Notas"
       subtitle="Controle de lançamento por disciplina e turma"
       infoSections={[
-        {
-          title: "Filtros Aplicados",
-          content: pdfData.filtrosAplicados,
-        },
+       
         {
           title: "Resumo",
           content: pdfData.totais.map(t => `${t.label}: ${t.value}`),
@@ -196,7 +193,7 @@ export default function LaunchNotes() {
           { key: "observacao", label: "Observação", width: "20%" },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af", // azul escuro
+        headerBackground: "#1e40af", 
       }}
       totals={pdfData.totais}
       footerNotice="Documento gerado automaticamente. Notas pendentes devem ser lançadas conforme regulamento académico."

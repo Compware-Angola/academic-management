@@ -62,4 +62,38 @@ export async function fetchLancamentosPauta(
       totalPages: 0,
     }
   );
+
+
+
+  
 }
+
+  //lancamento/uc-sem-pauta
+
+  /**
+ * Busca a lista de lançamentos de pauta com filtros e paginação
+ * Rota: GET /api/assessment/lancamento/pauta
+ */
+export async function fetchLancamentosUcSemPauta(
+  params: FilterLancamentoPautaParams = {}
+): Promise<LancamentoPautaResponse> {
+  const response = await axiosNestGa.get<LancamentoPautaResponse>(
+    "/assessment/lancamento/uc-sem-pauta",
+    { params }
+  );
+
+  return (
+    response.data ?? {
+      data: [],
+      page: params.page ?? 1,
+      limit: params.limit ?? 20,
+      total: 0,
+      totalPages: 0,
+    }
+  );
+
+
+
+  
+}
+
