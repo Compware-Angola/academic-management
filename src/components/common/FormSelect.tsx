@@ -15,7 +15,8 @@ type MapResult = {
 };
 
 type FormSelectProps<T> = {
-  label: string;
+  placeholder?: string;
+  label?: string;
   value?: string;
   options?: T[];
   map: (item: T) => MapResult;
@@ -34,6 +35,7 @@ export function FormSelect<T>({
   onChange,
   disabled = false,
   loading = false,
+  placeholder = "Selecione",
 }: FormSelectProps<T>) {
   return (
     <div className="flex flex-col gap-2">
@@ -46,7 +48,7 @@ export function FormSelect<T>({
               <Loader2 className="h-4 w-4 animate-spin" />
             </div>
           ) : (
-            <SelectValue placeholder="Selecionar" />
+            <SelectValue placeholder={placeholder} />
           )}
         </SelectTrigger>
 
