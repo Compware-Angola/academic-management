@@ -18,40 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Home,
-  Search,
-  Plus,
-  Edit,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw,
-} from "lucide-react";
+import { Home, Plus, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
-
-import { useToast } from "@/hooks/use-toast";
-
-import { useCreateInstituicao } from "@/hooks/financa/use-create-instituicao";
 import { Instituicao } from "@/services/financas/instituicao/fetch-instituicao.service";
-import { InstituitionEditModal } from "../../components/InstituitionEditModal";
 import { useQueryFetchInstituicao } from "@/hooks/financas/instituicao/use-query-fetch-instituicao";
 import { useDebounce } from "@/hooks/use-debounce";
-import { InstituitionModal } from "./components/InstituitionModal";
+import { FormData, InstituitionModal } from "./components/InstituitionModal";
 
 export default function TodasInstituicoes() {
   const [selectedInstituicao, setSelectedInstituicao] =
@@ -62,6 +35,14 @@ export default function TodasInstituicoes() {
   const [filters, setFilters] = useState({
     instituicao: "",
     nif: "",
+  });
+  const [formData, setFormData] = useState<FormData>({
+    instituicao: "",
+    nif: "",
+    contacto: "",
+    endereco: "",
+    sigla: "",
+    tipo: "",
   });
   const [pageUrl, setPageUrl] = useState<string | undefined>(undefined);
   const debouncedInstituicao = useDebounce(instituicaoInput, 500);
@@ -86,7 +67,26 @@ export default function TodasInstituicoes() {
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const handleSetFormData = (instituicao: Instituicao) => {
+    setFormData({
+      instituicao: instituicao.instituicao,
+      nif: instituicao.nif,
+      contacto: instituicao.contacto ?? "",
+      endereco: instituicao.endereco ?? "",
+      sigla: instituicao.sigla ?? "",
+      tipo: instituicao.tipo_instituicao.toString() ?? "",
+    });
+  };
+  const handleResetFormData = () => {
+    setFormData({
+      instituicao: "",
+      nif: "",
+      contacto: "",
+      endereco: "",
+      sigla: "",
+      tipo: "",
+    });
+  };
   useEffect(() => {
     setFilters({
       instituicao: debouncedInstituicao,
@@ -263,10 +263,17 @@ export default function TodasInstituicoes() {
 
       <InstituitionModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            setSelectedInstituicao(null);
+          }
+        }}
         instituicao={selectedInstituicao}
+        formData={formData}
+        setFormData={setFormData}
+        resetFormData={handleResetFormData}
         onSuccess={() => {
-          refetch();
           setIsModalOpen(false);
           setSelectedInstituicao(null);
         }}
