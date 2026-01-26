@@ -31,7 +31,6 @@ export async function fetchInstituicaoService(
   url?: string,
 ): Promise<FetchInstituicaoResponse> {
   if (url) {
-    console.log({ url });
     const { data } = await axiosApexGa.get<FetchInstituicaoResponse>(url);
     return data;
   }
