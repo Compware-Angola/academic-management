@@ -34,10 +34,17 @@ export function NavAcademic({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+    const hasAnyItem = items.some(
+  (item) =>
+    item.url || (item.items && item.items.length > 0)
+);
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Académico</SidebarGroupLabel>
+            {hasAnyItem && (
+    <SidebarGroupLabel>Académico</SidebarGroupLabel>
+  )}
+      
       <SidebarMenu>
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0;
