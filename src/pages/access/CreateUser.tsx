@@ -50,7 +50,7 @@ export default function CreateUser() {
     telefone2: "",
   });
 
-  const { mutateAsync: CreateUser,isPending } = useCreatePersonUser();
+  const { mutateAsync: CreateUser, isPending } = useCreatePersonUser();
 
   const { data: estadosCivis = [], isLoading: isLoadingEstadosCivis } =
     useQueryEstadoCivil();
@@ -67,11 +67,11 @@ export default function CreateUser() {
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-  
-  const {user:userData} = useAuth()
-  const userId =userData.user.pk_utilizador
 
-  console.log("User id:", userId)
+  const { user: userData } = useAuth();
+  const userId = userData.user.pk_utilizador;
+
+  console.log("User id:", userId);
 
   const handleSubmit = async () => {
     if (
@@ -88,32 +88,25 @@ export default function CreateUser() {
       return;
     }
 
+    const response = await CreateUser({
+      payload: {
+        nomeCompleto: formData.nomeCompleto,
+        numDocIdentificacao: formData.numDocIdentificacao,
+        email: formData.email,
+        dataDeNascimento: formData.dataDeNascimento,
+        tipoDocumentoId: Number(formData.tipoDocumentoId),
+        sexoId: Number(formData.sexoId),
+        estadoCivilId: Number(formData.estadoCivilId),
+        nacionalidadeId: Number(formData.nacionalidadeId),
+        telefone1: formData.telefone1,
+        telefone2: formData.telefone2,
+      },
+    });
 
-      const response = await CreateUser(
-        {
-          payload: {
-          nomeCompleto: formData.nomeCompleto,
-          numDocIdentificacao: formData.numDocIdentificacao,
-          email: formData.email,
-          dataDeNascimento: formData.dataDeNascimento,
-          tipoDocumentoId: Number(formData.tipoDocumentoId),
-          sexoId: Number(formData.sexoId),
-          estadoCivilId: Number(formData.estadoCivilId),
-          nacionalidadeId: Number(formData.nacionalidadeId),
-          telefone1: formData.telefone1,
-          telefone2: formData.telefone2,
-        }
-        });
-        if(response){
-          handleReset()
-
-
-        }
-
-  
-
-    };
-
+    if (response) {
+      handleReset();
+    }
+  };
 
   const handleReset = () => {
     setFormData({
@@ -156,6 +149,22 @@ export default function CreateUser() {
           Preencha os dados para criar um novo utilizador no sistema.
         </p>
       </div>
+
+      {/* CARD COM INFORMAÇÃO DA SENHA PADRÃO */}
+      <Card className="w-full max-w-6xl bg-red-50 border border-red-400">
+        <CardHeader>
+          <CardTitle className="text-red-500">Senha Padrão</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-red-900">
+            Todos os novos utilizadores receberão, inicialmente, a senha: <strong>compware@123</strong>
+          </p>
+          <p className="text-sm text-red-800 mt-2">
+            Recomenda-se que o utilizador altere a senha.
+          </p>
+        </CardContent>
+      </Card>
+
 
       <Card className="max-w-6xl">
         <CardHeader>
@@ -306,23 +315,23 @@ export default function CreateUser() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-        <Button 
-  onClick={handleSubmit} 
-  disabled={isPending}
-  className="flex items-center"
->
-  {isPending ? (
-    <>
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      A criar...
-    </>
-  ) : (
-    <>
-      <Save className="mr-2 h-4 w-4" />
-      Criar Utilizador
-    </>
-  )}
-</Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isPending}
+              className="flex items-center"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  A criar...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Criar Utilizador
+                </>
+              )}
+            </Button>
 
             <Button variant="outline" onClick={handleReset}>
               <RotateCcw className="mr-2 h-4 w-4" />

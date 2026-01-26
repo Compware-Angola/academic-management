@@ -22,11 +22,6 @@ interface UserEditModalProps {
   onSuccess?: () => void;
 }
 
-// 🔹 regex para senha forte
-function isStrongPassword(password: string) {
-  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{}|;:',.<>/?~])[A-Za-z\d!@#$%^&*()_+\-=[\]{}|;:',.<>/?~]+$/;
-  return regex.test(password);
-}
 
 // 🔹 função para validar cada requisito individual
 function validatePasswordSteps(password: string) {
