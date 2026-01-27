@@ -4,20 +4,23 @@ export type FetchAcessosParams = {
   utilizadorId?: number;
   grupoId?: number;
   apenasAtivos?: boolean; // true por padrão
+  sigla?: string;
+  designacao?: string;
   page?: number;          // padrão: 1
   limit?: number;         // padrão: 25, máximo 100
 };
 
 export type tipoAccesses = {
-  id: number;
+  pk_acesso: number;
   designacao: string;
   sigla: string;
   moduloId: number;
-  moduloNome: string;
-  tipoAcesso: string;
+  modulonome: string;
+  tipoacesso: string;
   ativo: boolean;
-  dataAtivacao: string;
+  dataativacao: string;
 };
+
 
 export type AccessesPaginatedResponse = {
   data: tipoAccesses[];
@@ -39,6 +42,12 @@ export async function fetchAccesses(
 
   if (params?.grupoId !== undefined) {
     queryParams.grupoId = params.grupoId;
+  }
+  if (params?.sigla !== undefined) {
+    queryParams.sigla = params.sigla;
+  }
+  if (params?.designacao !== undefined) {
+    queryParams.designacao = params.designacao;
   }
 
   // Se não for passado, default é true

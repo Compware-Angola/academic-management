@@ -30,7 +30,7 @@ import { useQueryAcessos } from "@/hooks/acess/use-query-all-accesses";
 import { useGrantUserAccess } from "@/hooks/acess/use-grant-user-access";
 import { useBlockUserAccess } from "@/hooks/acess/use-block-user-access";
 import { useRemoveGruopFromUser } from "@/hooks/acess/use-remove-gruop-from-user";
-import { useQueryClient } from "@tanstack/react-query"; // ← importante
+import { useQueryClient } from "@tanstack/react-query";
 
 interface UserPermissionsModalProps {
   user: User;
@@ -56,25 +56,47 @@ export function UserPermissionsModal({
   });
 
   /** Acessos do grupo selecionado */
-  const { data: groupAccesses = [], isLoading: loadingGroupAccesses, error: errorAccesses ,refetch} =
-    useGroupAccesses({
-      groupId: selectedGroup?.codigo || 0,
-      enabled: !!selectedGroup && open,
-    });
+  const { 
+    data: groupAccesses = [], 
+    isLoading: loadingGroupAccesses, 
+    error: errorAccesses, 
+    refetch: refetchGroupAccesses 
+  } = useGroupAccesses({
+    groupId: selectedGroup?.codigo || 0,
+    enabled: !!selectedGroup && open,
+  });
 
   /** Estado local — fonte de verdade enquanto o modal estiver aberto */
   const [localGroupAccesses, setLocalGroupAccesses] = useState<any[]>([]);
 
+  // Sempre que o grupo selecionado mudar → limpa + força refetch + atualiza estado local
   useEffect(() => {
-    if (open && selectedGroup) {
-      setLocalGroupAccesses(
-        groupAccesses.map(a => ({
-          ...a,
-          blocking: false,
-        }))
-      );
+    if (!open) {
+      // Limpa tudo quando o modal fecha
+      setLocalGroupAccesses([]);
+      setSelectedGroup(null);
+      return;
     }
-  }, [open, selectedGroup, groupAccesses]);
+
+    if (selectedGroup) {
+      // 1. Limpa imediatamente o estado anterior (evita mistura)
+      setLocalGroupAccesses([]);
+
+      // 2. Força recarregamento fresco dos acessos do grupo atual
+      refetchGroupAccesses().then(() => {
+        // 3. Só atualiza o estado local após o fetch terminar
+        setLocalGroupAccesses(
+          groupAccesses.map(a => ({
+            ...a,
+            blocking: false,
+          }))
+        );
+      });
+    } else {
+      // Sem grupo selecionado → limpa a lista
+      setLocalGroupAccesses([]);
+    }
+  }, [open, selectedGroup, refetchGroupAccesses, groupAccesses]);
 
   /** TODOS os acessos do sistema */
   const { data: allAccesses = [], isLoading: loadingAllAccesses } =
@@ -86,7 +108,6 @@ export function UserPermissionsModal({
   const { mutateAsync: blockAccess } = useBlockUserAccess();
   const { mutateAsync: removeGruop, isPending: removingGruop } = useRemoveGruopFromUser();
 
-  /** Concede novo acesso e atualiza estado local */
   async function handleGrantAccess() {
     if (!selectedAccessToGrant) return;
 
@@ -95,11 +116,11 @@ export function UserPermissionsModal({
         utilizadorId: user.codigo,
         acessoId: selectedAccessToGrant,
       });
-refetch();
-      // Invalida acessos do utilizador
+
       queryClient.invalidateQueries({
         queryKey: ["group-accesses", user.codigo],
       });
+      refetchGroupAccesses();
 
       const acessoInfo = allAccesses.find(a => a.id === selectedAccessToGrant);
       if (acessoInfo) {
@@ -121,9 +142,7 @@ refetch();
     }
   }
 
-  /** Bloqueia acesso → remove da lista visual */
   async function handleBlockAccess(accessCodigo: number) {
-    // Marca como "em processo"
     setLocalGroupAccesses(prev =>
       prev.map(a =>
         a.codigo === accessCodigo ? { ...a, blocking: true } : a
@@ -135,19 +154,17 @@ refetch();
         utilizadorId: user.codigo,
         acessoId: accessCodigo,
       });
-      refetch();
 
-      // Invalida acessos do utilizador
       queryClient.invalidateQueries({
         queryKey: ["group-accesses", user.codigo],
       });
+      refetchGroupAccesses();
 
-      // Remove da lista (não mostra mais)
+      // Remove da lista visual
       setLocalGroupAccesses(prev =>
         prev.filter(a => a.codigo !== accessCodigo)
       );
     } catch (err) {
-      // Reverte em caso de erro
       setLocalGroupAccesses(prev =>
         prev.map(a =>
           a.codigo === accessCodigo ? { ...a, blocking: false } : a
