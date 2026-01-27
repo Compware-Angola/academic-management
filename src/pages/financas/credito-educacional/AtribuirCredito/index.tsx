@@ -55,12 +55,8 @@ export default function AtribuirCredito() {
   const [canAtribuir, setCanAtribuir] = useState(false);
   const [filtroNome, setFiltroNome] = useState("");
 
-  const {
-    user: {
-      user: { pk_utilizador },
-    },
-  } = useAuth();
-
+  const { user } = useAuth();
+  const pk_utilizador = user?.user?.pk_utilizador;
   const [payload, setPayload] = useState({
     codigoAnoLectivo: "",
     semestre: "",
