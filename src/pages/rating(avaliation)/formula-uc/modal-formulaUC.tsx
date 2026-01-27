@@ -70,8 +70,18 @@ export function ModalFormulaUC({ open, onClose, data }: Props) {
     }));
   }
 
+  // ✅ só é válido se TODOS os campos tiverem valor
+  const isFormValid = Object.values(form).every(
+    (value) => value !== null && !Number.isNaN(value)
+  );
+
   async function handleSave() {
     if (!data) return;
+
+    if (!isFormValid) {
+      alert("Preencha todos os campos antes de salvar.");
+      return;
+    }
 
     const payload: any = {
       codigo: data.codigo,
@@ -85,7 +95,6 @@ export function ModalFormulaUC({ open, onClose, data }: Props) {
     });
 
     await mutation.mutateAsync(payload);
-
     onClose();
   }
 
@@ -153,7 +162,10 @@ export function ModalFormulaUC({ open, onClose, data }: Props) {
             Cancelar
           </Button>
 
-          <Button onClick={handleSave} disabled={mutation.isPending}>
+          <Button
+            onClick={handleSave}
+            disabled={mutation.isPending || !isFormValid}
+          >
             {mutation.isPending ? "Salvando..." : "Salvar"}
           </Button>
         </div>
