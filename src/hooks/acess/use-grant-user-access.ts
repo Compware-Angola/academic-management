@@ -17,7 +17,7 @@ export function useGrantUserAccess() {
     onSuccess: (_, variables) => {
       // Invalida a lista de acessos desse utilizador específico
       queryClient.invalidateQueries({
-        queryKey: [' user-groups', variables.utilizadorId],
+        queryKey: ["user-groups", variables.utilizadorId],
       });
 
  

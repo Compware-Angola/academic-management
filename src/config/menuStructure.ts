@@ -352,7 +352,7 @@ export const finaceStructure: MenuStructure = {
         //   title: "Instituições com Receita",
         //   url: "/financas/credito/instituicoes/receita",
         // },
-        // { title: "Tipo Bolsas", url: "/financas/credito/tipo-bolsas" },
+        { title: "Bolsas", url: "/financas/credito/bolsa" },
         // {
         //   title: "Tipos de Estudantes",
         //   url: "/financas/credito/tipo-estudantes",

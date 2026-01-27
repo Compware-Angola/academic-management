@@ -13,8 +13,6 @@ export function useGroupAccesses({ groupId, enabled = true }: UseGroupAccessesOp
     queryKey: ["group-accesses", groupId],
     queryFn: () => fetchGroupAccesses(groupId),
     enabled: enabled && groupId > 0,
-    staleTime: 1000 * 60 * 20, 
-
-    retry: 2,
+    
   });
 }

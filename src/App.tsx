@@ -3,10 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/dasboard/Index";
-import GenericPage from "./pages/GenericPage";
-import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
-import { menuStructure } from "./config/menuStructure";
 
 import { ThemeProvider } from "./hooks/thme-provider";
 import { MainLayout } from "./pages/App";
@@ -84,6 +81,7 @@ import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstitu
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
+import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 
 const App = () => {
   return (
@@ -141,7 +139,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/credito/instituicoes"
                     element={
@@ -152,7 +149,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="horarios/inscricoes"
                     element={<SchedulesInscription />}
@@ -248,7 +244,6 @@ const App = () => {
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
-
                   {/* <Route
                   path="/bolsa/bolseiros"
                   element={<ScholarshipHoldersList />}
@@ -267,7 +262,6 @@ const App = () => {
                   element={<MarkAttendance />}
                 />
               */}
-
                   <Route path="/acessos/utilizador" element={<UserAccess />} />
                   <Route
                     path="/acessos/criar-utilizador"
@@ -338,7 +332,6 @@ const App = () => {
                   {/* <Route path="*" element={<NotFound />} />*/}
                   <Route path="*" element={<UnderConstruction />} />
                   {/* Finanças */}
-
                   <Route
                     path="/financas/pagamento-referencia"
                     element={<PagamentosReferencia />}
@@ -347,10 +340,10 @@ const App = () => {
                     path="/financas/negociacao-divida"
                     element={<NegociacaoDivida />}
                   />
-                  <Route
+                  {/* <Route
                     path="financas/credito/listar"
                     element={<ListarCreditoEducacional />}
-                  />
+                  /> */}
                   <Route
                     path="financas/credito/instituicoes/todas"
                     element={<TodasInstituicoes />}
@@ -358,6 +351,10 @@ const App = () => {
                   <Route
                     path="financas/credito/atribuir"
                     element={<AtribuirCredito />}
+                  />
+                  <Route
+                    path="financas/credito/bolsa"
+                    element={<ListarBolsa />}
                   />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />

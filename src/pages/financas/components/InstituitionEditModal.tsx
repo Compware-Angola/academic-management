@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"; // ← importe correto do shadcn/ui
-import { useUpdateInstituicao } from "@/hooks/financa/use-mutation-update-instituition";
-import { UpdateInstituicaoParams } from "@/services/finance/update-instituicao.service";
+import { useUpdateInstituicao } from "@/hooks/financas/instituicao/use-mutation-update-instituicao.";
+import { UpdateInstituicaoParams } from "@/services/financas/instituicao/update-instituicao.service";
 import { useListInstituicaoTipo } from "@/hooks/financa/use-listar-instituicao";
 
 export interface Instituition {
@@ -74,7 +74,7 @@ export function InstituitionEditModal({
 
   const handleChange = (
     field: keyof UpdateInstituicaoParams,
-    value: string | number
+    value: string | number,
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -181,7 +181,7 @@ export function InstituitionEditModal({
               </div>
             ) : (
               <Select
-                value={formData.tipo_instituicao.toString()} 
+                value={formData.tipo_instituicao.toString()}
                 onValueChange={(value) =>
                   handleChange("tipo_instituicao", Number(value))
                 }

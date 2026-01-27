@@ -9,35 +9,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Instituicao } from "@/services/financas/instituicao/fetch-instituicao.service";
-import { useCreateInstituicao } from "@/hooks/financa/use-create-instituicao";
-import { useUpdateInstituicao } from "@/hooks/financa/use-mutation-update-instituition";
+import { useCreateInstituicao } from "@/hooks/financas/instituicao/use-create-instituicao";
+import { useUpdateInstituicao } from "@/hooks/financas/instituicao/use-mutation-update-instituicao.";
 import { TipoInstituicaoSelect } from "@/components/common/global-selects/TipoInstituicaoSelect";
-interface Props {
+import { useToast } from "@/hooks/use-toast";
+export type FormData = Omit<Instituicao, "codigo" | "tipo_instituicao">;
+type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   instituicao?: Instituicao | null;
   onSuccess?: () => void;
-}
+
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  resetFormData: () => void;
+};
+
 export function InstituitionModal({
   open,
   onOpenChange,
   instituicao,
   onSuccess,
+  formData,
+  setFormData,
+  resetFormData,
 }: Props) {
   const isEdit = !!instituicao;
-
-  const [formData, setFormData] = useState({
-    instituicao: "",
-    nif: "",
-    contacto: "",
-    endereco: "",
-    sigla: "",
-    tipo: "",
-  });
-
+  const { toast } = useToast();
   const { mutateAsync: createInstituicao, isPending: creating } =
     useCreateInstituicao();
-
   const { mutateAsync: updateInstituicao, isPending: updating } =
     useUpdateInstituicao();
 
@@ -50,38 +50,84 @@ export function InstituitionModal({
         endereco: instituicao.endereco ?? "",
         sigla: instituicao.sigla ?? "",
       });
-    } else {
-      setFormData({
-        instituicao: "",
-        nif: "",
-        contacto: "",
-        endereco: "",
-        sigla: "",
-      });
     }
-  }, [instituicao]);
+  }, [instituicao, setFormData]);
+
+  function validateForm(data: FormData) {
+    const errors: string[] = [];
+
+    if (!data.instituicao.trim()) {
+      errors.push("Instituição");
+    }
+
+    if (!data.nif.trim()) {
+      errors.push("NIF");
+    }
+
+    if (!data.contacto.trim()) {
+      errors.push("Contacto");
+    }
+
+    if (!data.endereco.trim()) {
+      errors.push("Endereço");
+    }
+
+    if (!data.sigla.trim()) {
+      errors.push("Sigla");
+    }
+
+    if (errors.length > 0) {
+      toast({
+        title: "Campos obrigatórios em falta",
+        description: `Preencha: ${errors.join(", ")}`,
+        variant: "destructive",
+      });
+
+      return false;
+    }
+
+    return true;
+  }
 
   const handleSubmit = async () => {
-    // if (isEdit) {
-    //   await updateInstituicao({
-    //     codigo: instituicao!.codigo,
-    //     payload: {
-    //       ...formData,
-    //     },
-    //   });
-    // } else {
-    //   await createInstituicao({
-    //     payload: {
-    //       ...formData,
-    //     },
-    //   });
-    // }
+    if (!validateForm(formData)) {
+      return;
+    }
+    if (isEdit) {
+      await updateInstituicao({
+        codigo: instituicao!.codigo,
+        contacto: formData.contacto,
 
+        sigla: formData.sigla,
+        nif: formData.nif,
+        endereco: formData.endereco,
+        instituicao: formData.instituicao,
+      });
+    } else {
+      await createInstituicao({
+        contacto: formData.contacto,
+
+        sigla: formData.sigla,
+        nif: formData.nif,
+        endereco: formData.endereco,
+        instituicao: formData.instituicao,
+      });
+    }
+
+    resetFormData();
     onSuccess?.();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          resetFormData();
+        }
+        onOpenChange(open);
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -94,44 +140,45 @@ export function InstituitionModal({
             placeholder="Instituição"
             value={formData.instituicao}
             onChange={(e) =>
-              setFormData({ ...formData, instituicao: e.target.value })
+              setFormData((p) => ({ ...p, instituicao: e.target.value }))
             }
           />
+
           <Input
             placeholder="Sigla"
             value={formData.sigla}
             onChange={(e) =>
-              setFormData({ ...formData, sigla: e.target.value })
+              setFormData((p) => ({ ...p, sigla: e.target.value }))
             }
           />
-          <TipoInstituicaoSelect
-            value={formData.tipo}
-            placeholder="Tipo de Instituição"
-            onChangeValue={(t) => setFormData({ ...formData, tipo: t })}
-          />
+
           <Input
             placeholder="NIF"
             value={formData.nif}
-            onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
+            onChange={(e) =>
+              setFormData((p) => ({ ...p, nif: e.target.value }))
+            }
           />
+
           <Input
             placeholder="Contacto"
             value={formData.contacto}
             onChange={(e) =>
-              setFormData({ ...formData, contacto: e.target.value })
+              setFormData((p) => ({ ...p, contacto: e.target.value }))
             }
           />
+
           <Input
             placeholder="Endereço"
             value={formData.endereco}
             onChange={(e) =>
-              setFormData({ ...formData, endereco: e.target.value })
+              setFormData((p) => ({ ...p, endereco: e.target.value }))
             }
           />
         </div>
 
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={creating || updating}>
+          <Button disabled={creating || updating} onClick={handleSubmit}>
             {isEdit ? "Salvar Alterações" : "Criar Instituição"}
           </Button>
         </DialogFooter>

@@ -30,17 +30,19 @@ import { InstituicaoSelect } from "@/components/common/global-selects/Instituica
 import { CreditoEducacionalSelect } from "@/components/common/global-selects/CreditoEducacionalSelect";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryFetchCreditoEducacionalEstudante } from "@/hooks/financas/credito-educacional/use-query-fetch-credito-educacional-estudante";
+import { useMutationAtribuirBolsa } from "@/hooks/financas/bolsa/use-mutation-atribuir-bolsa";
+import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 
 function validarPayload(payload: {
   codigoAnoLectivo: string;
   semestre: string;
   codigoInstituicao: string;
-  codigoCredito: string;
+  codigoBolsa: string;
 }) {
   if (!payload.codigoAnoLectivo) return "Ano letivo é obrigatório";
   if (!payload.semestre) return "Semestre é obrigatório";
   if (!payload.codigoInstituicao) return "Instituição é obrigatória";
-  if (!payload.codigoCredito) return "Crédito educacional é obrigatório";
+  if (!payload.codigoBolsa) return "Bolsa é obrigatório";
   return null;
 }
 
@@ -53,17 +55,13 @@ export default function AtribuirCredito() {
   const [canAtribuir, setCanAtribuir] = useState(false);
   const [filtroNome, setFiltroNome] = useState("");
 
-  const {
-    user: {
-      user: { pk_utilizador },
-    },
-  } = useAuth();
-
+  const { user } = useAuth();
+  const pk_utilizador = user?.user?.pk_utilizador;
   const [payload, setPayload] = useState({
     codigoAnoLectivo: "",
     semestre: "",
     codigoInstituicao: "",
-    codigoCredito: "",
+    codigoBolsa: "",
   });
 
   const {
@@ -81,7 +79,7 @@ export default function AtribuirCredito() {
   } = useQueryAlunoMatricula(matricula, pesquisar);
 
   const { mutateAsync: atribuirCredito, isPending: isAtribuindo } =
-    useMutationAtribuirCreditoEducacional();
+    useMutationAtribuirBolsa();
 
   const resetFormulario = () => {
     setMatricula("");
@@ -93,7 +91,7 @@ export default function AtribuirCredito() {
       codigoAnoLectivo: "",
       semestre: "",
       codigoInstituicao: "",
-      codigoCredito: "",
+      codigoBolsa: "",
     });
   };
 
@@ -141,7 +139,7 @@ export default function AtribuirCredito() {
         codigoAnoLectivo: Number(payload.codigoAnoLectivo),
         semestre: Number(payload.semestre),
         codigoInstituicao: Number(payload.codigoInstituicao),
-        codigoCredito: Number(payload.codigoCredito),
+        codigoBolsa: Number(payload.codigoBolsa),
         codigoUtilizador: pk_utilizador,
       });
 
@@ -224,11 +222,11 @@ export default function AtribuirCredito() {
               }
             />
 
-            <CreditoEducacionalSelect
+            <BolsaSelect
               disabled={!aluno}
-              value={payload.codigoCredito}
+              value={payload.codigoBolsa}
               onChangeValue={(v) =>
-                setPayload((p) => ({ ...p, codigoCredito: v }))
+                setPayload((p) => ({ ...p, codigoBolsa: v }))
               }
             />
           </div>

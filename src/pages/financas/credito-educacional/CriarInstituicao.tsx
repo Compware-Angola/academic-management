@@ -18,7 +18,7 @@ import {
 
 import { FormSelect } from "@/components/common/FormSelect";
 
-import { useCreateInstituicao } from "@/hooks/financa/use-create-instituicao";
+import { useCreateInstituicao } from "@/hooks/financas/instituicao/use-create-instituicao";
 import { useListInstituicaoTipo } from "@/hooks/financa/use-listar-instituicao";
 
 interface FormData {
@@ -42,27 +42,17 @@ export default function CreateInstituicao() {
     sigla: "",
   });
 
-  const { mutateAsync: createInstituicao, isPending } =
-    useCreateInstituicao();
+  const { mutateAsync: createInstituicao, isPending } = useCreateInstituicao();
 
-  const {
-    data: tiposInstituicao = [],
-    isLoading: isLoadingTipos,
-  } = useListInstituicaoTipo();
+  const { data: tiposInstituicao = [], isLoading: isLoadingTipos } =
+    useListInstituicaoTipo();
 
-  const handleInputChange = (
-    field: keyof FormData,
-    value: string
-  ) => {
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
-    if (
-      !formData.instituicao ||
-      !formData.nif ||
-      !formData.tipoInstituicaoId
-    ) {
+    if (!formData.instituicao || !formData.nif || !formData.tipoInstituicaoId) {
       toast({
         title: "Erro",
         description: "Preencha os campos obrigatórios.",
@@ -71,7 +61,7 @@ export default function CreateInstituicao() {
       return;
     }
 
-      await createInstituicao({
+    await createInstituicao({
       payload: {
         instituicao: formData.instituicao,
         nif: formData.nif,
@@ -82,8 +72,7 @@ export default function CreateInstituicao() {
       },
     });
 
-      handleReset();
-    
+    handleReset();
   };
 
   const handleReset = () => {
@@ -108,9 +97,7 @@ export default function CreateInstituicao() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/financa">
-                Finança
-              </BreadcrumbLink>
+              <BreadcrumbLink href="/financa">Finança</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -119,9 +106,7 @@ export default function CreateInstituicao() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <h1 className="text-3xl font-bold tracking-tight">
-          Criar Instituição
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Criar Instituição</h1>
         <p className="text-muted-foreground">
           Preencha os dados para registar uma nova instituição.
         </p>
@@ -155,9 +140,7 @@ export default function CreateInstituicao() {
               <Input
                 placeholder="Ex: 12345678000190"
                 value={formData.nif}
-                onChange={(e) =>
-                  handleInputChange("nif", e.target.value)
-                }
+                onChange={(e) => handleInputChange("nif", e.target.value)}
               />
             </div>
 
@@ -184,9 +167,7 @@ export default function CreateInstituicao() {
               <Input
                 placeholder="Ex: HSL"
                 value={formData.sigla}
-                onChange={(e) =>
-                  handleInputChange("sigla", e.target.value)
-                }
+                onChange={(e) => handleInputChange("sigla", e.target.value)}
               />
             </div>
 
@@ -196,9 +177,7 @@ export default function CreateInstituicao() {
               <Input
                 placeholder="Ex: 923 456 789"
                 value={formData.contacto}
-                onChange={(e) =>
-                  handleInputChange("contacto", e.target.value)
-                }
+                onChange={(e) => handleInputChange("contacto", e.target.value)}
               />
             </div>
 
@@ -208,23 +187,17 @@ export default function CreateInstituicao() {
               <Input
                 placeholder="Ex: Av. Principal, nº 123"
                 value={formData.endereco}
-                onChange={(e) =>
-                  handleInputChange("endereco", e.target.value)
-                }
+                onChange={(e) => handleInputChange("endereco", e.target.value)}
               />
             </div>
           </div>
 
           {/* Ações */}
           <div className="mt-8 flex gap-3">
-            <Button
-              onClick={handleSubmit}
-              disabled={isPending}
-            >
+            <Button onClick={handleSubmit} disabled={isPending}>
               {isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  A criar...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />A criar...
                 </>
               ) : (
                 <>

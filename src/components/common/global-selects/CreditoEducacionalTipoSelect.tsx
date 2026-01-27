@@ -41,3 +41,5 @@ const CreditoEducacionalTipoSelect = ({
 };
 
 export { CreditoEducacionalTipoSelect };
+// o tipo e uma opção de cadastro
+//
