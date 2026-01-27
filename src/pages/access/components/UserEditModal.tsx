@@ -1,4 +1,3 @@
-// src/pages/components/UserEditModal.tsx
 
 import { useState } from "react";
 import {
@@ -11,18 +10,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Key, Eye, EyeOff } from "lucide-react";
+import { Key, Eye, EyeOff, Check, X } from "lucide-react";
 
 import { User } from "@/services/access/fect-users.service";
 import { useUpdateUserPassword } from "@/hooks/acess/use-mutation-updade-user";
-
-
 
 interface UserEditModalProps {
   user: User;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+}
+
+
+// 🔹 função para validar cada requisito individual
+function validatePasswordSteps(password: string) {
+  return {
+    minLength: password.length >= 8,
+    upperCase: /[A-Z]/.test(password),
+    lowerCase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    symbol: /[!@#$%^&*()_+\-=[\]{}|;:',.<>/?~]/.test(password),
+  };
 }
 
 export function UserEditModal({
@@ -34,33 +43,36 @@ export function UserEditModal({
   const [novaPassword, setNovaPassword] = useState("");
   const [confirmarPassword, setConfirmarPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
-  const { mutateAsync: updatePassword ,isPending} = useUpdateUserPassword();
+  const { mutateAsync: updatePassword, isPending } = useUpdateUserPassword();
 
+  // 🔹 validações
   const passwordsIguais = novaPassword === confirmarPassword && novaPassword !== "";
-  const podeGuardar = passwordsIguais && novaPassword.length >= 6; 
+  const steps = validatePasswordSteps(novaPassword);
+  const senhaForte = Object.values(steps).every(Boolean);
+  const podeGuardar = passwordsIguais && senhaForte;
 
+  // 🔹 handler para alterar a senha
   async function handleChangePassword() {
     if (!podeGuardar) return;
 
     try {
       await updatePassword({
         utilizadorId: user.codigo,
-       novaSenha: novaPassword,
+        novaSenha: novaPassword,
       });
 
       onSuccess?.();
-      onOpenChange(false);
+      handleOpenChange(false);
 
       // Reset campos
       setNovaPassword("");
       setConfirmarPassword("");
     } catch (error) {
       console.error("Erro ao alterar password:", error);
-      // O hook pode lançar toast de erro
     }
   }
 
-  // Reset ao abrir/fechar
+  // 🔹 reset ao abrir/fechar modal
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       setNovaPassword("");
@@ -81,55 +93,84 @@ export function UserEditModal({
           </DialogTitle>
         </DialogHeader>
 
-       <div className="space-y-6 mt-6">
-  <div className="space-y-2">
-    <Label htmlFor="nova-password">Nova password</Label>
-    <div className="relative">
-      <Input
-        id="nova-password"
-        type={mostrarPassword ? "text" : "password"}
-        value={novaPassword}
-        onChange={(e) => setNovaPassword(e.target.value)}
-        placeholder="••••••••"
-        minLength={6}
-        autoComplete="new-password" // 🔹 mais seguro que "off"
-        name="nova-senha-unique" // 🔹 evita sugestão por nome comum
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="absolute right-0 top-0 h-full px-3"
-        onClick={() => setMostrarPassword(!mostrarPassword)}
-      >
-        {mostrarPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-      </Button>
-    </div>
-  </div>
+        <div className="space-y-6 mt-6">
+          {/* Nova senha */}
+          <div className="space-y-2">
+            <Label htmlFor="nova-password">Nova password</Label>
+            <div className="relative">
+              <Input
+                id="nova-password"
+                type={mostrarPassword ? "text" : "password"}
+                value={novaPassword}
+                onChange={(e) => setNovaPassword(e.target.value)}
+                placeholder="••••••••"
+                minLength={8}
+                autoComplete="new-password"
+                name="nova-senha-unique"
+                className={novaPassword && !senhaForte ? "border-destructive focus-visible:ring-destructive" : ""}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3"
+                onClick={() => setMostrarPassword(!mostrarPassword)}
+              >
+                {mostrarPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
 
-  <div className="space-y-2">
-    <Label htmlFor="confirmar-password">Confirmar password</Label>
-    <Input
-      id="confirmar-password"
-      type={mostrarPassword ? "text" : "password"}
-      value={confirmarPassword}
-      onChange={(e) => setConfirmarPassword(e.target.value)}
-      placeholder="••••••••"
-      autoComplete="new-password" // 🔹 combina com a senha nova
-      name="confirmar-senha-unique"
-      className={
-        confirmarPassword && novaPassword !== confirmarPassword
-          ? "border-destructive focus-visible:ring-destructive"
-          : ""
-      }
-    />
-    {confirmarPassword && novaPassword !== confirmarPassword && (
-      <p className="text-sm text-destructive">As passwords não coincidem</p>
-    )}
-  </div>
-</div>
+            {/* 🔹 passos da senha */}
+            {novaPassword && (
+              <ul className="mt-2 space-y-1 text-sm">
+                <li className="flex items-center gap-2">
+                  {steps.minLength ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
+                  Mínimo 8 caracteres
+                </li>
+                <li className="flex items-center gap-2">
+                  {steps.upperCase ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
+                  Pelo menos 1 letra maiúscula
+                </li>
+                <li className="flex items-center gap-2">
+                  {steps.lowerCase ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
+                  Pelo menos 1 letra minúscula
+                </li>
+                <li className="flex items-center gap-2">
+                  {steps.number ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
+                  Pelo menos 1 número
+                </li>
+                <li className="flex items-center gap-2">
+                  {steps.symbol ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
+                  Pelo menos 1 símbolo
+                </li>
+              </ul>
+            )}
+          </div>
 
+          {/* Confirmar senha */}
+          <div className="space-y-2">
+            <Label htmlFor="confirmar-password">Confirmar password</Label>
+            <Input
+              id="confirmar-password"
+              type={mostrarPassword ? "text" : "password"}
+              value={confirmarPassword}
+              onChange={(e) => setConfirmarPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              name="confirmar-senha-unique"
+              className={
+                confirmarPassword && novaPassword !== confirmarPassword
+                  ? "border-destructive focus-visible:ring-destructive"
+                  : ""
+              }
+            />
+            {confirmarPassword && novaPassword !== confirmarPassword && (
+              <p className="text-sm text-destructive">As passwords não coincidem</p>
+            )}
+          </div>
+        </div>
 
+        {/* Ações */}
         <div className="flex justify-end gap-3 mt-8">
           <Button
             variant="outline"

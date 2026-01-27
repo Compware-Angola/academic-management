@@ -34,10 +34,17 @@ export function NavHealp({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+    const hasAnyItem = items.some(
+  (item) =>
+    item.url || (item.items && item.items.length > 0)
+);
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Comunicação & Ajuda </SidebarGroupLabel>
+                {hasAnyItem && (
+     <SidebarGroupLabel>Comunicação & Ajuda </SidebarGroupLabel>
+  )}
+     
       <SidebarMenu>
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0;

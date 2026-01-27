@@ -34,10 +34,17 @@ export function NavMain({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
+    const hasAnyItem = items.some(
+  (item) =>
+    item.url || (item.items && item.items.length > 0)
+);
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Portal</SidebarGroupLabel>
+                     {hasAnyItem && (
+       <SidebarGroupLabel>Portal</SidebarGroupLabel>
+  )}
+   
       <SidebarMenu>
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0;

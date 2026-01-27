@@ -695,7 +695,7 @@ export default function LancamentoPauta() {
                             </Button>
                           )}
 
-                          {/* Botões apenas se pendente */}
+                          {/* Botões apenas se pendente 
                           {pauta.estado_pauta === 1 && (
                             <>
                               <Button
@@ -723,6 +723,7 @@ export default function LancamentoPauta() {
                               </Button>
                             </>
                           )}
+                          */}
                         </div>
                       </TableCell>
                     </TableRow>
