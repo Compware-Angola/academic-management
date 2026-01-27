@@ -47,28 +47,26 @@ import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
 import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+
 type Filters = {
   anoLetivo: string;
   periodo: string;
   semestre: string;
   curso: string;
   classes: string;
-
-  // Fluxo novo (> 2021)
   unidadeCurricular: string;
   horarioId: string;
-
-  // Fluxo antigo (<= 2021)
   turma: string;
   gradeCurricularTurma: string;
 };
+
 export default function PautaGeralPorUC() {
   const { toast } = useToast();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
   const [shouldFetch, setShouldFetch] = useState(false);
+
   const [filters, setFilters] = useState<Filters>({
     anoLetivo: "",
     periodo: "",
@@ -80,9 +78,12 @@ export default function PautaGeralPorUC() {
     turma: "",
     gradeCurricularTurma: "",
   });
+
   useEffect(() => {
     setShouldFetch(false);
+    setCurrentPage(1); // 🔥 reset ao mudar filtros
   }, [filters]);
+
   /** ================== QUERIES BASE ================== */
   const { data: academicYear = [], isLoading: loadingYear } =
     useQueryAnoAcademico();
@@ -149,8 +150,8 @@ export default function PautaGeralPorUC() {
     turma: filters.turma,
   });
 
-  /** ================== BUSCA FINAL ================== */
-  const { data: pautaGeral = [], isLoading: loadingPauta } = usePautasGeral(
+  /** ================== BUSCA FINAL (🔥 PAGINAÇÃO BACKEND) ================== */
+  const { data: pautaResponse, isLoading: loadingPauta } = usePautasGeral(
     {
       gradeCurricular: filters.unidadeCurricular,
       horario: filters.horarioId,
@@ -158,9 +159,16 @@ export default function PautaGeralPorUC() {
       anoLectivo: filters.anoLetivo,
       turma: filters.turma,
       gradeCurricularTurma: filters.gradeCurricularTurma,
+      page: currentPage,        // 🔥
+      limit: itemsPerPage,      // 🔥
     },
     shouldFetch
   );
+
+  const pautaGeral = pautaResponse?.data ?? [];
+  const total = pautaResponse?.total ?? 0;
+  const totalPages = pautaResponse?.totalPages ?? 1;
+
   const handleSearch = () => {
     if (!filters.anoLetivo || !filters.semestre) {
       toast({
@@ -194,9 +202,11 @@ export default function PautaGeralPorUC() {
       });
       return;
     }
-    console.log("aqui", { filters });
+
     setShouldFetch(true);
+    setCurrentPage(1); // 🔥 sempre começa da página 1
   };
+
   const getResultadoBadge = (resultado: string) => {
     if (resultado === "Aprovado") {
       return (
@@ -211,12 +221,6 @@ export default function PautaGeralPorUC() {
       </Badge>
     );
   };
-
-  const totalPages = Math.ceil(pautaGeral.length / itemsPerPage);
-  const paginatedPautas = pautaGeral.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return (
     <div className="space-y-6">
@@ -233,14 +237,12 @@ export default function PautaGeralPorUC() {
 
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Pauta Geral por UC
-          </h1>
-        </div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Pauta Geral por UC
+        </h1>
       </div>
 
-      {/* Filtros */}
+       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -400,7 +402,7 @@ export default function PautaGeralPorUC() {
         </div>
       </div>
 
-      {/* Tabela de resultados */}
+      {/* Resultados */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
 
@@ -440,7 +442,7 @@ export default function PautaGeralPorUC() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedPautas.map((pauta) => (
+                  {pautaGeral.map((pauta) => (
                     <TableRow key={pauta.codigoGradeAluno}>
                       <TableCell className="font-medium">
                         {pauta.num_matricula}
@@ -471,7 +473,7 @@ export default function PautaGeralPorUC() {
                       <TableCell>
                         {getResultadoBadge(pauta.resultado)}
                       </TableCell>
-                      <TableCell className="text-center">
+                    <TableCell className="text-center">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button
@@ -583,14 +585,15 @@ export default function PautaGeralPorUC() {
             {/* Paginação */}
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-2">
-                <Label htmlFor="items-per-page" className="text-sm">
-                  Itens por página:
-                </Label>
+                <Label className="text-sm">Itens por página:</Label>
                 <Select
                   value={itemsPerPage.toString()}
-                  onValueChange={(value) => setItemsPerPage(Number(value))}
+                  onValueChange={(value) => {
+                    setItemsPerPage(Number(value));
+                    setCurrentPage(1); // 🔥 reset ao mudar limite
+                  }}
                 >
-                  <SelectTrigger id="items-per-page" className="w-20">
+                  <SelectTrigger className="w-20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -600,10 +603,11 @@ export default function PautaGeralPorUC() {
                     <SelectItem value="100">100</SelectItem>
                   </SelectContent>
                 </Select>
+
                 <span className="text-sm text-muted-foreground ml-4">
-                  Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
-                  {Math.min(currentPage * itemsPerPage, pautaGeral.length)} de{" "}
-                  {pautaGeral.length} registos
+                  Mostrando{" "}
+                  {Math.min((currentPage - 1) * itemsPerPage + 1, total)} a{" "}
+                  {Math.min(currentPage * itemsPerPage, total)} de {total} registos
                 </span>
               </div>
 
@@ -617,16 +621,18 @@ export default function PautaGeralPorUC() {
                   <ChevronLeft className="h-4 w-4" />
                   Anterior
                 </Button>
+
                 <span className="text-sm">
-                  Página {currentPage} de {totalPages || 1}
+                  Página {currentPage} de {totalPages}
                 </span>
+
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() =>
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
-                  disabled={currentPage === totalPages || totalPages === 0}
+                  disabled={currentPage >= totalPages}
                 >
                   Próxima
                   <ChevronRight className="h-4 w-4" />

@@ -336,7 +336,7 @@ export function EditSchedule() {
           onChange={(v) => setFormData((p) => ({ ...p, modalidade: v }))}
         />
         <FormSelect
-          label="Apenas para primeiro ano"
+          label="Reservada para novos estudantes"
           value={formData.apenasPrimeiroAno}
           options={onlyFirstYear}
           map={(o) => ({

@@ -383,7 +383,7 @@ export default function CreateSchedule() {
             loading={isLoadingModalidade}
           />
           <FormSelect
-            label="Apenas para primeiro ano"
+            label="Reservada para novos estudantes"
             value={formData.apenasPrimeiroAno}
             onChange={(v) => setFormData({ ...formData, apenasPrimeiroAno: v })}
             options={onlyFirstYear}

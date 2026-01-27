@@ -67,6 +67,7 @@ import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-val
 import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
 import { useAuth } from "@/hooks/use-auth";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { es } from "date-fns/locale";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -87,6 +88,7 @@ export default function ScheduleList() {
     curso: "",
     anoCurricular: "",
     unidadeCurricular: "",
+    estado: "",
   });
 
   // Paginação
@@ -121,6 +123,7 @@ export default function ScheduleList() {
     periodo: filters.periodo ? Number(filters.periodo) : undefined,
     curso: filters.curso ? Number(filters.curso) : undefined,
     unidadeCurricular: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
+    estado: filters.estado ? Number(filters.estado) : undefined,
   };
 
   const {
@@ -205,163 +208,181 @@ export default function ScheduleList() {
       </div>
 
       {/* Filtros */}
-    <Card>
-  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-    <div className="flex items-center gap-3">
-      <Search className="h-5 w-5 text-muted-foreground" />
-      <CardTitle>Filtros de Pesquisa</CardTitle>
-    </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-3">
+            <Search className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>Filtros de Pesquisa</CardTitle>
+          </div>
 
-    {/* Botão Limpar Filtros */}
-    <Button
-      variant="default"
-      size="sm"
-      onClick={() => {
-        setFilters({
-          anoLetivo: "",
-          semestre: "",
-          periodo: "",
-          curso: "",
-          anoCurricular: "",
-          unidadeCurricular: "",
-        });
-       
-        setPage(1);
-      }}
-      className=" hover:text-foreground hover:bg-muted/50"
-      disabled={
-        !filters.anoLetivo &&
-        !filters.semestre &&
-        !filters.periodo &&
-        !filters.curso &&
-        !filters.anoCurricular &&
-        !filters.unidadeCurricular
-      }
-    >
-      Limpar Filtros
-    </Button>
-  </CardHeader>
+          {/* Botão Limpar Filtros */}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => {
+              setFilters({
+                anoLetivo: "",
+                semestre: "",
+                periodo: "",
+                curso: "",
+                anoCurricular: "",
+                unidadeCurricular: "",
+                estado: "",
+              });
 
-  <CardContent>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <FormSelect
-        disabled={isLoadingAcademicYear}
-        loading={isLoadingAcademicYear}
-        label="Ano Letivo"
-        value={filters.anoLetivo}
-        onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-        options={anosAcademicos}
-        map={(a) => ({
-          key: a.codigo,
-          label: a.designacao,
-          value: a.codigo,
-        })}
-      />
+              setPage(1);
+            }}
+            className=" hover:text-foreground hover:bg-muted/50"
+            disabled={
+              !filters.anoLetivo &&
+              !filters.semestre &&
+              !filters.periodo &&
+              !filters.curso &&
+              !filters.anoCurricular &&
+              !filters.unidadeCurricular
+            }
+          >
+            Limpar Filtros
+          </Button>
+        </CardHeader>
 
-      <FormSelect
-        disabled={isLoadingSemestres}
-        loading={isLoadingSemestres}
-        label="Semestre"
-        value={filters.semestre}
-        onChange={(v) => setFilters({ ...filters, semestre: v })}
-        options={semestres}
-        map={(s) => ({
-          key: s.codigo,
-          label: s.designacao,
-          value: s.codigo,
-        })}
-      />
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Período</label>
-        <Select
-          value={filters.periodo}
-          onValueChange={(v) => setFilters({ ...filters, periodo: v })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecionar" />
-          </SelectTrigger>
-          <SelectContent>
-            {periodos?.map((p) => (
-              <SelectItem key={p.codigo} value={p.codigo.toString()}>
-                {p.designacao}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <FormCommandSelect
-        value={filters.curso}
-        label="Curso"
-        options={cursos}
-        map={(c) => ({
-          key: c.codigo.toString(),
-          value: c.codigo.toString(),
-          label: c.designacao,
-        })}
-        onChange={(v) =>
-          setFilters({
-            ...filters,
-            curso: v,
-            unidadeCurricular: "",
-          })
-        }
-      />
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Ano Curricular</label>
-        <Select
-          value={filters.anoCurricular}
-          onValueChange={(v) =>
-            setFilters({
-              ...filters,
-              anoCurricular: v,
-              unidadeCurricular: "",
-            })
-          }
-          disabled={!filters.curso}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={filters.curso ? "Todos os anos" : "Selecione curso"}
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <FormSelect
+              disabled={isLoadingAcademicYear}
+              loading={isLoadingAcademicYear}
+              label="Ano Letivo"
+              value={filters.anoLetivo}
+              onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
+              options={anosAcademicos}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
             />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os anos</SelectItem>
-            {anosCurriculares.map((ac) => (
-              <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-                {ac.designacao}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
-      <FormCommandSelect
-        value={filters.unidadeCurricular}
-        label="Unidade Curricular"
-        placeholder={
-          !filters.curso
-            ? "Selecione curso"
-            : !filters.semestre
-            ? "Selecione semestre"
-            : isLoadingUC
-            ? "Carregando UCs..."
-            : "Selecionar UC"
-        }
-        options={unidadesCurriculares}
-        disabled={!canLoadUcs}
-        map={(u) => ({
-          key: u.pk.toString(),
-          value: u.pk.toString(),
-          label: u.descricao,
-        })}
-        onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
-      />
-    </div>
-  </CardContent>
-</Card>
+            <FormSelect
+              disabled={isLoadingSemestres}
+              loading={isLoadingSemestres}
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) => setFilters({ ...filters, semestre: v })}
+              options={semestres}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
+            />
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Período</label>
+              <Select
+                value={filters.periodo}
+                onValueChange={(v) => setFilters({ ...filters, periodo: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {periodos?.map((p) => (
+                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                      {p.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <FormCommandSelect
+              value={filters.curso}
+              label="Curso"
+              options={cursos}
+              map={(c) => ({
+                key: c.codigo.toString(),
+                value: c.codigo.toString(),
+                label: c.designacao,
+              })}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  curso: v,
+                  unidadeCurricular: "",
+                })
+              }
+            />
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Ano Curricular</label>
+              <Select
+                value={filters.anoCurricular}
+                onValueChange={(v) =>
+                  setFilters({
+                    ...filters,
+                    anoCurricular: v,
+                    unidadeCurricular: "",
+                  })
+                }
+                disabled={!filters.curso}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={filters.curso ? "Todos os anos" : "Selecione curso"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os anos</SelectItem>
+                  {anosCurriculares.map((ac) => (
+                    <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
+                      {ac.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <FormCommandSelect
+              value={filters.unidadeCurricular}
+              label="Unidade Curricular"
+              placeholder={
+                !filters.curso
+                  ? "Selecione curso"
+                  : !filters.semestre
+                    ? "Selecione semestre"
+                    : isLoadingUC
+                      ? "Carregando UCs..."
+                      : "Selecionar UC"
+              }
+              options={unidadesCurriculares}
+              disabled={!canLoadUcs}
+              map={(u) => ({
+                key: u.pk.toString(),
+                value: u.pk.toString(),
+                label: u.descricao,
+              })}
+              onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
+            />
+
+            <FormSelect
+              label="Estado do Horário"
+              value={filters.estado || ""}
+              onChange={(v) => setFilters({ ...filters, estado: v })}
+              options={[
+                { codigo: null, designacao: "Todos" },
+                { codigo: "2", designacao: "Pendente" },
+                { codigo: "3", designacao: "Validado" },
+              ]}
+              map={(option) => ({
+                key: option.codigo,
+                label: option.designacao,
+                value: option.codigo,
+              })}
+            />
+
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Tabela */}
       <Card>
@@ -421,7 +442,7 @@ export default function ScheduleList() {
                           <Badge
                             variant={
                               item.estado.toLowerCase().includes("pendente") ||
-                              item.estado.toLowerCase().includes("distribuição")
+                                item.estado.toLowerCase().includes("distribuição")
                                 ? "secondary"
                                 : "default"
                             }
