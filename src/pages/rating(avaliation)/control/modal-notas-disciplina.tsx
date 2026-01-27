@@ -94,7 +94,7 @@ export function ModalNotasDisciplina({
             <Table>
               <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
                 <TableRow>
-                  <TableHead className="w-12">Nº</TableHead>
+                  <TableHead className="text-center w-15">Nº Matricula</TableHead>
                   <TableHead>Aluno</TableHead>
                   <TableHead className="text-center w-20">Nota</TableHead>
                   <TableHead className="text-center w-36">
@@ -106,10 +106,10 @@ export function ModalNotasDisciplina({
               <TableBody>
                 {alunosFiltrados.map((aluno, index) => (
                   <TableRow
-                    key={aluno.alunoId}
+                    key={aluno.numeroAluno || 'NA-' + index}
                     className={index % 2 === 0 ? "bg-muted/40" : ""}
                   >
-                    <TableCell>{aluno.numeroAluno}</TableCell>
+                    <TableCell>{aluno.matricula}</TableCell>
 
                     <TableCell className="font-medium">
                       {aluno.alunoNome}
