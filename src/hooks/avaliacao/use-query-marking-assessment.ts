@@ -11,7 +11,7 @@ export const useQueryMarkingAssessment = (
   filters: GetMarkingAssessmentPayload,
   options?: {
     enabled?: boolean; // permite sobrescrever o enabled automático
-  }
+  },
 ) => {
   const {
     anoLectivo,
@@ -19,7 +19,7 @@ export const useQueryMarkingAssessment = (
     periodo,
     curso,
     anoCurricular,
-    tipoAvaliacao,
+    prazoId,
     tipoHorario,
     horarioId,
     page = 1,
@@ -31,9 +31,8 @@ export const useQueryMarkingAssessment = (
   const enabled =
     typeof options?.enabled === "boolean"
       ? options.enabled
-      : !!anoLectivo && !!semestre && !!curso && !!tipoAvaliacao;
+      : !!anoLectivo && !!semestre && !!curso && !!prazoId;
   !!tipoHorario;
-  console.log({ unidadeCurricular });
   return useQuery<GetMarkingAssessmentResponse>({
     queryKey: [
       "marking-assessment",
@@ -43,7 +42,7 @@ export const useQueryMarkingAssessment = (
         periodo,
         curso,
         anoCurricular,
-        tipoAvaliacao,
+        prazoId,
         tipoHorario,
         horarioId,
         page,
