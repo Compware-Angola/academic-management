@@ -24,13 +24,13 @@ import { UserGroup } from "@/services/access/fetch-user-group.service";
 
 import { useAddUserGruop } from "@/hooks/acess/use-add-gruop-user";
 import { useQueryGrupos } from "@/hooks/acess/use-query-grupos";
-
 import { useUserGroups } from "@/hooks/acess/use-user-groups";
 import { useGroupAccesses } from "@/hooks/acess/use-query-group-accesses";
 import { useQueryAcessos } from "@/hooks/acess/use-query-all-accesses";
 import { useGrantUserAccess } from "@/hooks/acess/use-grant-user-access";
 import { useBlockUserAccess } from "@/hooks/acess/use-block-user-access";
 import { useRemoveGruopFromUser } from "@/hooks/acess/use-remove-gruop-from-user";
+import { useQueryClient } from "@tanstack/react-query"; // ← importante
 
 interface UserPermissionsModalProps {
   user: User;
@@ -43,10 +43,11 @@ export function UserPermissionsModal({
   open,
   onOpenChange,
 }: UserPermissionsModalProps) {
+  const queryClient = useQueryClient();
+
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
   const [selectedAccessToGrant, setSelectedAccessToGrant] = useState<number | null>(null);
   const [selectedGroupToAdd, setSelectedGroupToAdd] = useState<number | null>(null);
-  
 
   /** Grupos do utilizador */
   const { data: groups = [], isLoading: loadingGroups, refetch: refetchUserGroups } = useUserGroups({
@@ -54,10 +55,8 @@ export function UserPermissionsModal({
     enabled: open,
   });
 
-  console.log("LISTAGENS DE GRUOP: ", groups)
-
   /** Acessos do grupo selecionado */
-  const { data: groupAccesses = [], isLoading: loadingGroupAccesses, error: errorAccesses } =
+  const { data: groupAccesses = [], isLoading: loadingGroupAccesses, error: errorAccesses ,refetch} =
     useGroupAccesses({
       groupId: selectedGroup?.codigo || 0,
       enabled: !!selectedGroup && open,
@@ -66,7 +65,6 @@ export function UserPermissionsModal({
   /** Estado local — fonte de verdade enquanto o modal estiver aberto */
   const [localGroupAccesses, setLocalGroupAccesses] = useState<any[]>([]);
 
-  /** Inicializa estado local quando o modal abre ou muda de grupo */
   useEffect(() => {
     if (open && selectedGroup) {
       setLocalGroupAccesses(
@@ -78,110 +76,139 @@ export function UserPermissionsModal({
     }
   }, [open, selectedGroup, groupAccesses]);
 
-  /** TODOS os acessos do sistema (catálogo) */
+  /** TODOS os acessos do sistema */
   const { data: allAccesses = [], isLoading: loadingAllAccesses } =
     useQueryAcessos({ apenasAtivos: true });
 
-  /** Mutação: conceder / reativar acesso */
   const { mutateAsync: grantAccess, isPending: granting } = useGrantUserAccess();
-
-  /** Adicionar grupo ao utilizador */
-  const {data: todosGrupos = [], isPending: loadingTodosGrupos} = useQueryGrupos({ativo: "true"})
-  const {mutateAsync: addGrupoUser,isPending:addGroupLoading} = useAddUserGruop()
-
- 
-
-  /** Mutação: bloquear acesso */
+  const { data: todosGrupos = [], isPending: loadingTodosGrupos } = useQueryGrupos({ ativo: "true" });
+  const { mutateAsync: addGrupoUser, isPending: addGroupLoading } = useAddUserGruop();
   const { mutateAsync: blockAccess } = useBlockUserAccess();
+  const { mutateAsync: removeGruop, isPending: removingGruop } = useRemoveGruopFromUser();
 
-  /** Mutação: remover grupo do usuario */
-  const {mutateAsync: removeGruop, isPending: removingGruop} = useRemoveGruopFromUser()
-
-  /** Concede novo acesso e atualiza o estado local */
+  /** Concede novo acesso e atualiza estado local */
   async function handleGrantAccess() {
     if (!selectedAccessToGrant) return;
 
-    await grantAccess({
-      utilizadorId: user.codigo,
-      acessoId: selectedAccessToGrant,
-    });
+    try {
+      await grantAccess({
+        utilizadorId: user.codigo,
+        acessoId: selectedAccessToGrant,
+      });
+refetch();
+      // Invalida acessos do utilizador
+      queryClient.invalidateQueries({
+        queryKey: ["group-accesses", user.codigo],
+      });
 
+      const acessoInfo = allAccesses.find(a => a.id === selectedAccessToGrant);
+      if (acessoInfo) {
+        setLocalGroupAccesses(prev => [
+          ...prev,
+          {
+            codigo: acessoInfo.id,
+            descricao: acessoInfo.designacao,
+            disponibilidade: 1,
+            blocking: false,
+            ["Update at"]: new Date().toISOString(),
+          },
+        ]);
+      }
 
-    // Busca dados do acesso no catálogo
-    const acessoInfo = allAccesses.find(a => a.id === selectedAccessToGrant);
-    if (acessoInfo) {
-      setLocalGroupAccesses(prev => [
-        ...prev,
-        {
-          codigo: acessoInfo.id,
-          descricao: acessoInfo.designacao,
-          disponibilidade: 1,
-          blocking: false,
-          ["Update at"]: new Date().toISOString(),
-        },
-      ]);
+      setSelectedAccessToGrant(null);
+    } catch (err) {
+      console.error("Erro ao conceder acesso:", err);
     }
-
-    setSelectedAccessToGrant(null);
   }
 
-  /** Bloqueia acesso e atualiza estado local */
+  /** Bloqueia acesso → remove da lista visual */
   async function handleBlockAccess(accessCodigo: number) {
+    // Marca como "em processo"
     setLocalGroupAccesses(prev =>
       prev.map(a =>
         a.codigo === accessCodigo ? { ...a, blocking: true } : a
       )
     );
 
-    await blockAccess({
-      utilizadorId: user.codigo,
-      acessoId: accessCodigo,
-    });
+    try {
+      await blockAccess({
+        utilizadorId: user.codigo,
+        acessoId: accessCodigo,
+      });
+      refetch();
 
-    setLocalGroupAccesses(prev =>
-      prev.map(a =>
-        a.codigo === accessCodigo
-          ? { ...a, disponibilidade: 0, blocking: false }
-          : a
-      )
-    );
+      // Invalida acessos do utilizador
+      queryClient.invalidateQueries({
+        queryKey: ["group-accesses", user.codigo],
+      });
+
+      // Remove da lista (não mostra mais)
+      setLocalGroupAccesses(prev =>
+        prev.filter(a => a.codigo !== accessCodigo)
+      );
+    } catch (err) {
+      // Reverte em caso de erro
+      setLocalGroupAccesses(prev =>
+        prev.map(a =>
+          a.codigo === accessCodigo ? { ...a, blocking: false } : a
+        )
+      );
+      console.error("Erro ao bloquear acesso:", err);
+    }
   }
 
   async function handleAddGroup() {
-  if (!selectedGroupToAdd) return;
+    if (!selectedGroupToAdd) return;
 
-  await addGrupoUser({
-    userId: user.codigo,
-    gruopId: selectedGroupToAdd,
-  });
+    try {
+      await addGrupoUser({
+        userId: user.codigo,
+        gruopId: selectedGroupToAdd,
+      });
 
-  // Atualiza lista de grupos do utilizador
-  await refetchUserGroups();
+      queryClient.invalidateQueries({
+        queryKey: ["user-groups", user.codigo],
+      });
 
-  // Limpa seleção
-  setSelectedGroupToAdd(null);
-}
+      queryClient.invalidateQueries({
+        queryKey: ["group-accesses", selectedGroupToAdd],
+      });
 
-async function handleRemoveGroup(groupCodigo: number) {
-  await removeGruop({
-    userId: user.codigo,
-    gruopId: groupCodigo,
-  });
+      await refetchUserGroups();
+      setSelectedGroupToAdd(null);
+    } catch (err) {
+      console.error("Erro ao adicionar grupo:", err);
+    }
+  }
 
-  // Atualiza grupos do utilizador
-  await refetchUserGroups();
+  async function handleRemoveGroup(groupCodigo: number) {
+    try {
+      await removeGruop({
+        userId: user.codigo,
+        gruopId: groupCodigo,
+      });
 
-  // Limpa grupo selecionado se foi removido
-  setSelectedGroup(prev =>
-    prev?.codigo === groupCodigo ? null : prev
-  );
-}
+      queryClient.invalidateQueries({
+        queryKey: ["user-groups", user.codigo],
+      });
 
-function isGrupoUnitario(group?: UserGroup): boolean {
-  return group.tipo_grupo === 2;
-}
+      queryClient.invalidateQueries({
+        queryKey: ["group-accesses", groupCodigo],
+      });
 
+      await refetchUserGroups();
 
+      setSelectedGroup(prev =>
+        prev?.codigo === groupCodigo ? null : prev
+      );
+    } catch (err) {
+      console.error("Erro ao remover grupo:", err);
+    }
+  }
+
+  function isGrupoUnitario(group?: UserGroup): boolean {
+    return group?.tipo_grupo === 2;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -206,83 +233,78 @@ function isGrupoUnitario(group?: UserGroup): boolean {
               <Skeleton className="h-32 w-full" />
             ) : (
               groups.map(group => (
-            <div
-            key={group.codigo}
-            role="button"
-            tabIndex={0}
-            onClick={() => setSelectedGroup(group)}
-            className={`
-              w-full flex items-center justify-between
-              px-4 py-2 rounded-md border
-              cursor-pointer transition-colors
-              ${selectedGroup?.codigo === group.codigo
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted"}
-            `}
-          >
-            <span>{group.descricao}</span>
-
-            <div className="flex items-center gap-2">
-              <ChevronRight className="h-4 w-4" />
-
-              {group.tipo_grupo !=2 && (
-                <X
-                  className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
-                  
-                  onClick={e => {
-                    
-                    e.stopPropagation(); 
-                    handleRemoveGroup(group.codigo);
-                  }}
-                />
-              )}
-            </div>
-          </div>
-
-                    ))
-
-                      )}
-
-            {/* COLUNA 3 — Adicionar Grupo */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 font-semibold">
-              <Plus className="h-5 w-5" />
-              Adicionar grupo
-            </div>
-
-            {loadingTodosGrupos ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (
-              <>
-                <Select
-                  value={selectedGroupToAdd?.toString()}
-                  onValueChange={v => setSelectedGroupToAdd(Number(v))}
+                <div
+                  key={group.codigo}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedGroup(group)}
+                  className={`
+                    w-full flex items-center justify-between
+                    px-4 py-2 rounded-md border
+                    cursor-pointer transition-colors
+                    ${selectedGroup?.codigo === group.codigo
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted"}
+                  `}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Adicionar Grupo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {todosGrupos
-                        ?.filter(g => !groups.some(ug => ug.codigo === g.pkGrupo)) 
+                  <span>{group.descricao}</span>
+
+                  <div className="flex items-center gap-2">
+                    <ChevronRight className="h-4 w-4" />
+
+                    {group.tipo_grupo !== 2 && (
+                      <X
+                        className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleRemoveGroup(group.codigo);
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+
+            {/* Adicionar Grupo */}
+            <div className="space-y-4 mt-6">
+              <div className="flex items-center gap-2 font-semibold">
+                <Plus className="h-5 w-5" />
+                Adicionar grupo
+              </div>
+
+              {loadingTodosGrupos ? (
+                <Skeleton className="h-10 w-full" />
+              ) : (
+                <>
+                  <Select
+                    value={selectedGroupToAdd?.toString()}
+                    onValueChange={v => setSelectedGroupToAdd(Number(v))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Adicionar Grupo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {todosGrupos
+                        ?.filter(g => !groups.some(ug => ug.codigo === g.pkGrupo))
                         .map(grupo => (
                           <SelectItem key={grupo.pkGrupo} value={grupo.pkGrupo.toString()}>
                             {grupo.pkGrupo} – {grupo.designacao}
                           </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                        ))}
+                    </SelectContent>
+                  </Select>
 
-                <Button
-                  className="w-full"
-                  onClick={handleAddGroup}
-                  disabled={!selectedGroupToAdd || loadingTodosGrupos ||addGroupLoading}
-                >
-                  {addGroupLoading ? "A conceder..." : "Conceder grupo"}
-                </Button>
-              </>
-            )}
-          </div>
-
+                  <Button
+                    className="w-full"
+                    onClick={handleAddGroup}
+                    disabled={!selectedGroupToAdd || loadingTodosGrupos || addGroupLoading}
+                  >
+                    {addGroupLoading ? "A conceder..." : "Conceder grupo"}
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
 
           {/* COLUNA 2 — Permissões do grupo */}
@@ -331,20 +353,18 @@ function isGrupoUnitario(group?: UserGroup): boolean {
                     )}
 
                     <div className="flex items-center justify-between mt-2">
-                      <Badge variant={access.disponibilidade === 1 ? "default" : "outline"}>
+                      <Badge variant={access.disponibilidade === 1 ? "default" : "destructive"}>
                         {access.disponibilidade === 1 ? "Ativo" : "Bloqueado"}
                       </Badge>
 
-                      {access.disponibilidade === 1 && isGrupoUnitario(selectedGroup)  && (
+                      {access.disponibilidade === 1 && isGrupoUnitario(selectedGroup) && (
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => handleBlockAccess(access.codigo)}
                           disabled={access.blocking}
                         >
-                          
-                          {isGrupoUnitario(selectedGroup) && (access.blocking ? "Bloqueando..." : "Bloquear")}
-
+                          {access.blocking ? "Removendo..." : "Remover"}
                         </Button>
                       )}
                     </div>
