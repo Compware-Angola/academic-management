@@ -197,7 +197,6 @@ export default function ListarBolsaEstudante() {
                 Limpar filtros
               </Button>
             </div>
-            ;
           </div>
         </CardContent>
       </Card>
