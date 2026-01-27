@@ -25,6 +25,7 @@ export function InstituicaoSelect({
     tipo: tipoInstituicao,
   });
 
+  console.log(value);
   return (
     <FormCommandSelect
       label="Instituição"
@@ -37,7 +38,7 @@ export function InstituicaoSelect({
       map={(i) => ({
         key: i.codigo.toString(),
         value: i.codigo.toString(),
-        label: `${i.instituicao} (${i.nif})`,
+        label: i.instituicao,
       })}
       onChange={onChangeValue}
     />

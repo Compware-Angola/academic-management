@@ -2,7 +2,6 @@ import { axiosApexGa } from "@/lib/axios-apex-ga";
 
 export interface AtribuirBolsaPayload {
   codigoMatricula: number;
-  codigoInstituicao: number;
   codigoAnoLectivo: number;
   semestre: number;
   codigoBolsa: number;
