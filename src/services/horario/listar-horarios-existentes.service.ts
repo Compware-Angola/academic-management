@@ -31,8 +31,8 @@ export type HorarioExistente = {
   estadoid: number;
   estadocor: string | null;
   disponibilidade: string;
-  criadoPor: string | null;
-  atualizadoPor: string | null;
+  criadopor: string | null;
+  atualizadopor: string | null;
   dataUltimaAtualizacao: string;
   datacriacao: string;
 };

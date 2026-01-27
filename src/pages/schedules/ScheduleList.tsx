@@ -75,8 +75,7 @@ import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 export default function ScheduleList() {
   const { user:userData } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
@@ -127,18 +126,23 @@ export default function ScheduleList() {
     });
 
   // Memorizar parâmetros para evitar re-renders infinitos
-  const queryParams = useMemo(
-    () => ({
-      anoLectivo: Number(filters.anoLetivo),
-      semestre: Number(filters.semestre),
-      periodo: Number(filters.periodo),
-      curso: Number(filters.curso),
-      unidadeCurricular: Number(filters.unidadeCurricular),
-      page,
-      limit,
-    }),
-    [filters, page, limit]
-  );
+const queryParams = useMemo(() => {
+
+
+  const optionalFields = {
+    anoLectivo: filters.anoLetivo,
+    semestre: filters.semestre,
+    periodo: filters.periodo,
+    curso: filters.curso,
+    unidadeCurricular: filters.unidadeCurricular,
+  };
+
+  return Object.fromEntries(
+    Object.entries(optionalFields)
+      .filter(([_, value]) => value && value !== "" && !isNaN(Number(value)))
+      .map(([key, value]) => [key, Number(value)])
+  ) as any; 
+}, [filters, page, limit]);
 
   const {
     data: ScheduleResponse,
@@ -189,7 +193,7 @@ export default function ScheduleList() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-12 space-y-12">
       {/* Breadcrumb */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
@@ -391,6 +395,9 @@ export default function ScheduleList() {
                       <TableHead>Estado</TableHead>
                       <TableHead>Disponibilidade</TableHead>
                       <TableHead>Criado em</TableHead>
+                      <TableHead>Criado por</TableHead>
+                      <TableHead>Atualizado por</TableHead>
+
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -428,6 +435,12 @@ export default function ScheduleList() {
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {item.datacriacao}
+                        </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                          {item.criadopor}
+                        </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                          {item.atualizadopor}
                         </TableCell>
                         <TableCell className="w-40 min-w-40">
                           <div className="flex items-center space-x-2 justify-center">
