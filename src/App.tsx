@@ -82,6 +82,7 @@ import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstitu
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
+import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
 
 const App = () => {
   return (
@@ -355,6 +356,10 @@ const App = () => {
                   <Route
                     path="financas/credito/bolsa"
                     element={<ListarBolsa />}
+                  />
+                  <Route
+                    path="financas/credito/bolsa/estudante"
+                    element={<ListaBolseiro />}
                   />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />
