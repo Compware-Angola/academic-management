@@ -49,7 +49,7 @@ export default function Permission() {
   };
 
   const openUpdatePermissionLaunchModal = (
-    permission: AssessmentPermissionItem
+    permission: AssessmentPermissionItem,
   ) => {
     setIsUpdateModalOpen(true);
     setSelectedPermission(permission);
@@ -141,6 +141,8 @@ export default function Permission() {
                       <TableHead>Curso</TableHead>
                       <TableHead>Disciplina</TableHead>
                       <TableHead>Avaliação</TableHead>
+                      <TableHead>Docente</TableHead>
+                      <TableHead>Utilizador</TableHead>
                       <TableHead>Data Inicio</TableHead>
                       <TableHead>Data Final</TableHead>
                       <TableHead>Estado</TableHead>
@@ -158,6 +160,8 @@ export default function Permission() {
                         <TableCell>
                           <Badge>{item.avaliacao}</Badge>
                         </TableCell>
+                        <TableCell>{item.nome_docente}</TableCell>
+                        <TableCell>{item.utilizador}</TableCell>
                         <TableCell>{formatarData(item.data_inicio)}</TableCell>
                         <TableCell>{formatarData(item.data_fim)}</TableCell>
                         <TableCell>

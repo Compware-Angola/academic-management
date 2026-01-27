@@ -43,6 +43,7 @@ import { formatMillisecondsToHoursMinutes } from "@/util/format-hour";
 import { parseFilter } from "@/util/parse-filter";
 import { convertGuards } from "./convertGuards";
 import MarkingDetailsGuardModal from "../components/MarkingDetailsGuardModal";
+import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 
 export default function MarkingAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,6 +60,7 @@ export default function MarkingAssessment() {
     anoCurricular: "all",
     unidadeCurricular: "",
     tipoAvaliacao: "",
+    prazoId: "",
     tipoHorario: "",
   });
 
@@ -72,8 +74,11 @@ export default function MarkingAssessment() {
   const { data: periodos } = useQueryPeriod();
   const { data: cursos } = useCursos();
 
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
+  const { data: prazos = [], isLoading: isLoadingPrazos } =
+    useQueryMarcacaoProvaPrazo({
+      anoLectivo: parseFilter(filters.anoLetivo),
+      semestre: parseFilter(filters.semestre),
+    });
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -83,7 +88,7 @@ export default function MarkingAssessment() {
     !!filters.anoLetivo &&
     !!filters.semestre &&
     !!filters.curso &&
-    !!filters.tipoAvaliacao &&
+    !!filters.prazoId &&
     !!filters.tipoHorario;
 
   const { data: markingResponse, isLoading: loadingTurmas } =
@@ -93,13 +98,13 @@ export default function MarkingAssessment() {
         semestre: Number(filters.semestre),
         periodo: parseFilter(filters.periodo),
         curso: Number(filters.curso),
-        tipoAvaliacao: Number(filters.tipoAvaliacao),
+        prazoId: Number(filters.prazoId),
         tipoHorario: Number(filters.tipoHorario),
         anoCurricular: parseFilter(filters.anoCurricular),
         page,
         limit,
       },
-      { enabled: canLoadTurmas }
+      { enabled: canLoadTurmas },
     );
 
   const openDetails = (item: string | null) => {
@@ -276,16 +281,16 @@ export default function MarkingAssessment() {
               </Select>
             </div>
             <FormSelect
-              label="Tipo de Avaliação"
-              value={filters.tipoAvaliacao}
-              onChange={(v) => setFilters({ ...filters, tipoAvaliacao: v })}
-              options={tipoAvaliacao}
-              loading={isLoadingTipoAvaliacao}
-              disabled={isLoadingTipoAvaliacao}
+              label="Tipo de Epoca"
+              value={filters.prazoId}
+              onChange={(v) => setFilters({ ...filters, prazoId: v })}
+              options={prazos}
+              loading={isLoadingPrazos}
+              disabled={isLoadingPrazos}
               map={(u) => ({
-                key: u.codigo,
+                key: u.prazoid,
                 label: u.designacao,
-                value: u.codigo,
+                value: u.prazoid,
               })}
             />
             <div className="space-y-2">
@@ -331,6 +336,7 @@ export default function MarkingAssessment() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Curso</TableHead>
+                      <TableHead>Disciplina</TableHead>
                       <TableHead>Ano Lectivo</TableHead>
                       <TableHead>Classe</TableHead>
                       <TableHead>Horario</TableHead>
@@ -347,6 +353,7 @@ export default function MarkingAssessment() {
                     {tableData.map((item, i) => (
                       <TableRow key={i}>
                         <TableCell>{item.curso}</TableCell>
+                        <TableCell>{item.disciplina}</TableCell>
                         <TableCell>{item.anolectivo}</TableCell>
                         <TableCell>{item.classe}</TableCell>
                         <TableCell>{item.horario}</TableCell>
@@ -360,13 +367,15 @@ export default function MarkingAssessment() {
                         <TableCell>{item.horatermino}</TableCell>
                         <TableCell className="text-center">
                           <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openDetails(item.vigilantes)}
-                            >
-                              <Eye className="h-4 w-4 mr-2" /> Ver Vigentes
-                            </Button>
+                            {parseFilter(filters.tipoHorario) == 1 && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openDetails(item.vigilantes)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" /> Ver Vigentes
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

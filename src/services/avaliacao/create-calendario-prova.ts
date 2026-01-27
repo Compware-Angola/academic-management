@@ -23,10 +23,7 @@ export type CreateCalendarPayload = {
   url: string;
 
   Horario: number;
-  descHorario: string;
-
-  tipoPrazo: number;
-  tipoAvaliacao: number;
+  prazoId: number;
   anoLectivo: number;
   tipoCandidatura: number;
   semestre: number;
@@ -40,20 +37,16 @@ export interface CreateCalendarResponse {
 }
 
 export async function createCalendar(
-  {
-    codigoUtilizador,
-    descUtilizador,
-  }: { codigoUtilizador: number; descUtilizador: string },
-  payload: CreateCalendarPayload
+  { codigoUtilizador }: { codigoUtilizador: number },
+  payload: CreateCalendarPayload,
 ): Promise<CreateCalendarResponse> {
   const { data } = await axiosNestGa.post<CreateCalendarResponse>(
     "/assessment/create-calendario-prova",
     {
       codigoUtilizador,
-      descUtilizador,
       utilizador: codigoUtilizador,
       ...payload,
-    }
+    },
   );
 
   return data;

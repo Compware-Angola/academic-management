@@ -44,6 +44,7 @@ import MarkingDetailsGuardModal from "../components/MarkingDetailsGuardModal";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import AddMarkingAssessmentModal from "../components/AddMarkingAssessmentModal";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
+import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 
 export default function AddMarkingAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,7 +61,7 @@ export default function AddMarkingAssessment() {
     curso: "",
     anoCurricular: "",
     unidadeCurricular: "",
-    tipoAvaliacao: "",
+    prazoId: "",
     horarioId: "",
   });
 
@@ -76,6 +77,12 @@ export default function AddMarkingAssessment() {
 
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
+
+  const { data: prazos = [], isLoading: isLoadingPrazos } =
+    useQueryMarcacaoProvaPrazo({
+      anoLectivo: parseFilter(filters.anoLetivo),
+      semestre: parseFilter(filters.semestre),
+    });
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -93,7 +100,7 @@ export default function AddMarkingAssessment() {
     !!filters.anoLetivo &&
     !!filters.semestre &&
     !!filters.curso &&
-    !!filters.tipoAvaliacao;
+    !!filters.prazoId;
 
   const { data: markingResponse, isLoading: loadingTurmas } =
     useQueryMarkingAssessment(
@@ -102,14 +109,14 @@ export default function AddMarkingAssessment() {
         semestre: Number(filters.semestre),
         periodo: parseFilter(filters.periodo),
         curso: Number(filters.curso),
-        tipoAvaliacao: Number(filters.tipoAvaliacao),
+        prazoId: Number(filters.prazoId),
         tipoHorario: 1,
         anoCurricular: parseFilter(filters.anoCurricular),
         horarioId: Number(filters.horarioId),
         page,
         limit,
       },
-      { enabled: canLoadTurmas }
+      { enabled: canLoadTurmas },
     );
 
   const { data: scheduleResponse, isLoading: loadingSchedule } =
@@ -321,10 +328,10 @@ export default function AddMarkingAssessment() {
                       !filters.curso
                         ? "Selecione curso"
                         : !filters.semestre
-                        ? "Selecione semestre"
-                        : isLoadingUC
-                        ? "Carregando UCs..."
-                        : "Selecionar UC"
+                          ? "Selecione semestre"
+                          : isLoadingUC
+                            ? "Carregando UCs..."
+                            : "Selecionar UC"
                     }
                   />
                 </SelectTrigger>
@@ -351,16 +358,16 @@ export default function AddMarkingAssessment() {
               })}
             />
             <FormSelect
-              label="Tipo de Avaliação"
-              value={filters.tipoAvaliacao}
-              onChange={(v) => setFilters({ ...filters, tipoAvaliacao: v })}
-              options={tipoAvaliacao}
-              loading={isLoadingTipoAvaliacao}
-              disabled={isLoadingTipoAvaliacao}
+              label="Tipo de Epoca"
+              value={filters.prazoId}
+              onChange={(v) => setFilters({ ...filters, prazoId: v })}
+              options={prazos}
+              loading={isLoadingPrazos}
+              disabled={isLoadingPrazos}
               map={(u) => ({
-                key: u.codigo,
+                key: u.prazoid,
                 label: u.designacao,
-                value: u.codigo,
+                value: u.prazoid,
               })}
             />
           </div>
@@ -389,6 +396,7 @@ export default function AddMarkingAssessment() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Curso</TableHead>
+                      <TableHead>Disciplina</TableHead>
                       <TableHead>Ano Lectivo</TableHead>
                       <TableHead>Classe</TableHead>
                       <TableHead>Horario</TableHead>
@@ -405,6 +413,7 @@ export default function AddMarkingAssessment() {
                     {tableData.map((item) => (
                       <TableRow key={item.codigoprova}>
                         <TableCell>{item.curso}</TableCell>
+                        <TableCell>{item.disciplina}</TableCell>
                         <TableCell>{item.anolectivo}</TableCell>
                         <TableCell>{item.classe}</TableCell>
                         <TableCell>{item.horario}</TableCell>

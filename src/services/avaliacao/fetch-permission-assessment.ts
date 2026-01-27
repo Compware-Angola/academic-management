@@ -19,6 +19,7 @@ export type AssessmentPermissionItem = {
   disciplina: string;
   data_inicio: string;
   created_at: string;
+  nome_docente?: string;
 };
 
 export type GetAssessmentPermissionsResponse = {
@@ -31,7 +32,7 @@ export type GetAssessmentPermissionsResponse = {
 
 /* ---------- SERVICE ---------- */
 export async function getAssessmentPermissionsService(
-  payload: GetAssessmentPermissionsPayload
+  payload: GetAssessmentPermissionsPayload,
 ): Promise<GetAssessmentPermissionsResponse> {
   const { anoLectivo, page = 1, limit = 25 } = payload;
 
@@ -43,7 +44,7 @@ export async function getAssessmentPermissionsService(
         page,
         limit,
       },
-    }
+    },
   );
 
   return data;

@@ -13,20 +13,13 @@ import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useMutationCreatePermissionLaunch } from "@/hooks/avaliacao/use-mutation-create-permission-launch";
-import { AssessmentPermissionPayload } from "@/services/avaliacao/create-permission-launch.service";
+
 import { Loader } from "lucide-react";
 import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
@@ -37,9 +30,9 @@ import { useMutationCreateCalendar } from "@/hooks/avaliacao/use-mutation-create
 import { CreateCalendarPayload } from "@/services/avaliacao/create-calendario-prova";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQuerySalas } from "@/hooks/salas/use-query-sala";
-import { useQueryTiposPrazos } from "@/hooks/prazos/use-query-tipo-prazo";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -52,7 +45,7 @@ type Filters = {
   curso?: string;
   anoCurricular?: string;
   unidadeCurricular?: string;
-  tipoAvaliacao?: string;
+  prazoId?: string;
   docente?: string;
   dataInicio?: string;
   dataFim?: string;
@@ -104,13 +97,18 @@ export default function AddMarkingAssessmentModal({
       semestre: filters.semestre,
       classe: filters.anoCurricular,
     });
+  const { data: prazos = [], isLoading: isLoadingPrazos } =
+    useQueryMarcacaoProvaPrazo({
+      anoLectivo: parseFilter(filters.anoLetivo),
+      semestre: parseFilter(filters.semestre),
+    });
   const { data: markingResponse, isLoading: loadingMarking } =
     useQueryMarkingAssessment({
       anoLectivo: Number(filters.anoLetivo),
       semestre: Number(filters.semestre),
       periodo: parseFilter(filters.periodo),
       curso: Number(filters.curso),
-      tipoAvaliacao: Number(filters.tipoAvaliacao),
+      prazoId: Number(filters.prazoId),
       tipoHorario: 2,
       anoCurricular: parseFilter(filters.anoCurricular),
       unidadeCurricular: Number(filters.unidadeCurricular),
@@ -145,7 +143,7 @@ export default function AddMarkingAssessmentModal({
     onClose();
   };
   function getMissingFields(
-    fields: Record<string, string | undefined>
+    fields: Record<string, string | undefined>,
   ): string[] {
     return Object.entries(fields)
       .filter(([, value]) => isInvalid(value))
@@ -169,7 +167,7 @@ export default function AddMarkingAssessmentModal({
       toast({
         title: "Erro",
         description: `Faltam preencher os seguintes campos:\n\n• ${missingFields.join(
-          "\n• "
+          "\n• ",
         )}`,
         variant: "destructive",
       });
@@ -179,7 +177,7 @@ export default function AddMarkingAssessmentModal({
       codigoCalendario: 1, // pode vir fixo ou de outro select
       codigoTipoProva: Number(filters.tipoProva),
       codigoModalidade: Number(filters.modalidade),
-      codigoSala: 101, // exemplo (se tiver select depois, é só mapear)
+      codigoSala: Number(filters.sala),
       codigoPeriodo: Number(filters.periodo),
       codigoDisciplina: Number(filters.unidadeCurricular),
       dataProva: filters.dataInicio,
@@ -188,12 +186,7 @@ export default function AddMarkingAssessmentModal({
       horaTermino: filters.horaTermino,
       url: "",
       Horario: Number(filters.horarioId),
-      descHorario:
-        markingSchedules.find(
-          (h) => h.codigo_horario.toString() === filters.horarioId
-        ).horario ?? "",
-      tipoPrazo: 4,
-      tipoAvaliacao: Number(filters.tipoAvaliacao),
+      prazoId: Number(filters.prazoId),
       anoLectivo: Number(filters.anoLetivo),
       tipoCandidatura: Number(filters.tipoCandidatura),
       semestre: Number(filters.semestre),
@@ -347,16 +340,16 @@ export default function AddMarkingAssessmentModal({
               loading={isLoadingModalidade}
             />
             <FormSelect
-              label="Tipo de Avaliação"
-              value={filters.tipoAvaliacao}
-              onChange={(v) => setFilters({ ...filters, tipoAvaliacao: v })}
-              options={tipoAvaliacao}
-              loading={isLoadingTipoAvaliacao}
-              disabled={isLoadingTipoAvaliacao}
+              label="Tipo de Epoca"
+              value={filters.prazoId}
+              onChange={(v) => setFilters({ ...filters, prazoId: v })}
+              options={prazos}
+              loading={isLoadingPrazos}
+              disabled={isLoadingPrazos}
               map={(u) => ({
-                key: u.codigo,
+                key: u.prazoid,
                 label: u.designacao,
-                value: u.codigo,
+                value: u.prazoid,
               })}
             />
             <FormSelect

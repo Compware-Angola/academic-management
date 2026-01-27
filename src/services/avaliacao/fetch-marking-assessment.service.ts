@@ -7,7 +7,7 @@ export type GetMarkingAssessmentPayload = {
   periodo?: number; // ex: 5
   curso?: number; // ex: 18
   anoCurricular?: number; // ex: 1
-  tipoAvaliacao?: number; // ex: "Normal"
+  prazoId?: number; // ex: "Normal"
   tipoHorario?: number; // ex: "Diurno"
   horarioId?: number;
   page?: number;
@@ -46,7 +46,7 @@ export type GetMarkingAssessmentResponse = {
 
 /* ---------- SERVICE ---------- */
 export async function getMarkingAssessmentService(
-  payload: GetMarkingAssessmentPayload
+  payload: GetMarkingAssessmentPayload,
 ): Promise<GetMarkingAssessmentResponse> {
   const {
     anoLectivo,
@@ -54,7 +54,7 @@ export async function getMarkingAssessmentService(
     periodo,
     curso,
     anoCurricular,
-    tipoAvaliacao,
+    prazoId,
     horarioId,
     tipoHorario,
     page = 1,
@@ -71,14 +71,14 @@ export async function getMarkingAssessmentService(
         periodo,
         curso,
         anoCurricular,
-        tipoAvaliacao,
+        prazoId,
         tipoHorario,
         horarioId,
         page,
         limit,
         unidadeCurricular,
       },
-    }
+    },
   );
 
   return data;
