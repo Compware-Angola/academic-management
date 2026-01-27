@@ -19,10 +19,7 @@ export function useMutationCreateCalendar() {
 
   return useMutation({
     mutationFn: (payload: CreateCalendarPayload) =>
-      createCalendar(
-        { codigoUtilizador: pk_utilizador, descUtilizador: nome },
-        payload
-      ),
+      createCalendar({ codigoUtilizador: pk_utilizador }, payload),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["marking-assessment"],

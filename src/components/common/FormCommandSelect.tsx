@@ -67,17 +67,26 @@ export function FormCommandSelect<T>({
 }: FormCommandSelectProps<T>) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  // 🔥 Memorizar o último item selecionado
+  const [lastSelectedItem, setLastSelectedItem] = useState<T | null>(null);
 
   const widthClass = resolveWidthClass(width);
 
   const selectedItem = options.find(
-    (item) => String(map(item).value) === value
+    (item) => String(map(item).value) === value,
   );
+
+  // 🔥 Atualizar lastSelectedItem quando encontrar na lista
+  if (selectedItem && selectedItem !== lastSelectedItem) {
+    setLastSelectedItem(selectedItem);
+  }
+
+  // 🔥 Usar o item memorizado se não estiver na lista atual
+  const displayItem = selectedItem || lastSelectedItem;
 
   function handleOpenChange(isOpen: boolean) {
     setOpen(isOpen);
 
-    // 🔥 sempre que fechar, limpa a pesquisa
     if (!isOpen) {
       setSearchValue("");
       onSearchChange?.("");
@@ -88,7 +97,6 @@ export function FormCommandSelect<T>({
     onChange(value);
     setOpen(false);
 
-    // 🔥 limpa pesquisa após selecionar
     setSearchValue("");
     onSearchChange?.("");
   }
@@ -106,11 +114,11 @@ export function FormCommandSelect<T>({
               "flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              widthClass
+              widthClass,
             )}
           >
             <span className="truncate">
-              {selectedItem ? map(selectedItem).label : placeholder}
+              {displayItem ? map(displayItem).label : placeholder}
             </span>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </button>
@@ -158,7 +166,7 @@ export function FormCommandSelect<T>({
                             "mr-2 h-4 w-4",
                             value === String(mapped.value)
                               ? "opacity-100"
-                              : "opacity-0"
+                              : "opacity-0",
                           )}
                         />
                         {mapped.label}

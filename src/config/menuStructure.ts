@@ -353,6 +353,10 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/credito/instituicoes/receita",
         // },
         { title: "Bolsas", url: "/financas/credito/bolsa" },
+        {
+          title: "Bolsa Estudante",
+          url: "/financas/credito/bolsa/estudante",
+        },
         // {
         //   title: "Tipos de Estudantes",
         //   url: "/financas/credito/tipo-estudantes",
@@ -361,6 +365,7 @@ export const finaceStructure: MenuStructure = {
           title: "Atribuir Crédito Educacional",
           url: "/financas/credito/atribuir",
         },
+
         // {
         //   title: "Pagamentos Bolseiros",
         //   url: "/financas/credito/pag-bolseiros",
@@ -369,10 +374,10 @@ export const finaceStructure: MenuStructure = {
         //   title: "Listar Pagamentos de Bolseiros",
         //   url: "/financas/credito/listar-bolseiros",
         // },
-        {
-          title: "Listar Crédito Educacional",
-          url: "/financas/credito/listar",
-        },
+        // {
+        //   title: "Listar Crédito Educacional",
+        //   url: "/financas/credito/listar",
+        // },
 
         /* Gestão de Descontos */
         // {

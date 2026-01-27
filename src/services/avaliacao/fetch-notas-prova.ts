@@ -3,6 +3,8 @@ export type NotaAlunoApi = {
   alunoId: number;
   alunoNome: string;
   numeroAluno: number;
+  matricula?: number;
+  observacao?: string;
   nota: number;
   dataLancamento: string;
 };
