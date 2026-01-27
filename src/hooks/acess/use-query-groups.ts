@@ -7,7 +7,6 @@ export function useGroups() {
   return useQuery<Group[], Error>({
     queryKey: ["groups-all-dropdown"],         
     queryFn: fetchAllGroupsDropDown,
-    staleTime: 1000 * 60 * 30,      
-    refetchOnWindowFocus: false,
+  
   });
 }

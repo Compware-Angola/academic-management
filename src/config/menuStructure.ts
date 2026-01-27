@@ -155,7 +155,7 @@ export const menuStructure: MenuStructure = {
       ],
       roles: ["adm", "rootAdmin"],
     },
-  
+
 
     // ----------------------------------------------------
     // INSCRIÇÕES E MATRÍCULA
@@ -196,7 +196,7 @@ export const menuStructure: MenuStructure = {
       items: [
         // { title: "Gestão de Curso", url: "/plano/cursos" },
         { title: "Gestão de disciplinas", url: "/plano/disciplinas" },
-       // { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
+        // { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
 
         {
           title: "Gestão de UC por departamento",
@@ -333,13 +333,13 @@ export const finaceStructure: MenuStructure = {
         //   title: "Isentar Serviços (Antigos)",
         //   url: "/financas/isentar-antigos",
         // },
-     
+
         { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
         // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
 
         /* Crédito Educacional */
-      //  { title: "Instituições", url: "/financas/credito/instituicoes" },
+        //  { title: "Instituições", url: "/financas/credito/instituicoes" },
         {
           title: "Instituições - Todas",
           url: "/financas/credito/instituicoes/todas",
@@ -352,7 +352,11 @@ export const finaceStructure: MenuStructure = {
         //   title: "Instituições com Receita",
         //   url: "/financas/credito/instituicoes/receita",
         // },
-        // { title: "Tipo Bolsas", url: "/financas/credito/tipo-bolsas" },
+        { title: "Bolsas", url: "/financas/credito/bolsa" },
+        {
+          title: "Bolsa Estudante",
+          url: "/financas/credito/bolsa/estudante",
+        },
         // {
         //   title: "Tipos de Estudantes",
         //   url: "/financas/credito/tipo-estudantes",
@@ -361,6 +365,7 @@ export const finaceStructure: MenuStructure = {
           title: "Atribuir Crédito Educacional",
           url: "/financas/credito/atribuir",
         },
+
         // {
         //   title: "Pagamentos Bolseiros",
         //   url: "/financas/credito/pag-bolseiros",
@@ -369,10 +374,10 @@ export const finaceStructure: MenuStructure = {
         //   title: "Listar Pagamentos de Bolseiros",
         //   url: "/financas/credito/listar-bolseiros",
         // },
-        {
-          title: "Listar Crédito Educacional",
-          url: "/financas/credito/listar",
-        },
+        // {
+        //   title: "Listar Crédito Educacional",
+        //   url: "/financas/credito/listar",
+        // },
 
         /* Gestão de Descontos */
         // {
@@ -422,10 +427,10 @@ export const finaceStructure: MenuStructure = {
         //   title: "Estudantes com Desconto",
         //   url: "/financas/relatorios/descontos",
         // },
-         {
+        {
           title: "Pagamentos por referência",
-           url: "/financas/pagamento-referencia",
-         },
+          url: "/financas/pagamento-referencia",
+        },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
         // /* Serviços Tributários */
@@ -495,11 +500,17 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/formula-uc",
         },
         {
-          title: "Fórmula para grade com oral",
+          title: "Definir unidade curricular com oral",
           url: "/avaliacoes/formula-oral",
         },
-        { title: "Estatísticas", url: "/avaliacoes/estatisticas" },
-        { title: "Estudantes inscritos", url: "/avaliacoes/estudantes" },
+        {
+          title: "Estatísticas de notas lançadas",
+          url: "/avaliacoes/estatisticas",
+        },
+        {
+          title: "Estudantes inscritos por avaliação",
+          url: "/avaliacoes/estudantes",
+        },
         { title: "Histórico de lançamentos", url: "/avaliacoes/historico" },
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
         { title: "Lançamento de notas", url: "/avaliacoes/notas" },
@@ -523,7 +534,7 @@ export const academicStructure: MenuStructure = {
       items: [
         { title: "Criar horário", url: "/horarios/criar" },
         { title: "Horários semanais", url: "/horarios/semanais" },
-      //  { title: "Substitutos", url: "/horarios/substitutos" },
+        //  { title: "Substitutos", url: "/horarios/substitutos" },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
         {
           title: "Movimentar estudantes",
@@ -544,7 +555,7 @@ export const academicStructure: MenuStructure = {
     // EXAME DE ACESSO
     // ----------------------------------------------------
 
-    /* 
+    /*
     {
       title: "Exame de Acesso",
       url: "/exame",

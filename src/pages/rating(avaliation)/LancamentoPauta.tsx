@@ -50,6 +50,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-update-estado-lancamento-pauta";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function LancamentoPauta() {
   const { toast } = useToast();
@@ -409,12 +410,11 @@ export default function LancamentoPauta() {
               value: s.codigo,
             })}
           />
-          <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
-            label="Curso"
-            value={filters.curso}
-            onChange={(v) => {
+
+
+          <CourseSelect
+              value={filters.curso}
+              onChangeValue={(v) => {
               setFilters({
                 ...filters,
                 curso: v,
@@ -423,13 +423,8 @@ export default function LancamentoPauta() {
               });
               setCurrentPage(1);
             }}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
           />
+
           <FormSelect
             label="Ano Curricular"
             value={filters.anoCurricular}
@@ -700,7 +695,7 @@ export default function LancamentoPauta() {
                             </Button>
                           )}
 
-                          {/* Botões apenas se pendente */}
+                          {/* Botões apenas se pendente 
                           {pauta.estado_pauta === 1 && (
                             <>
                               <Button
@@ -728,6 +723,7 @@ export default function LancamentoPauta() {
                               </Button>
                             </>
                           )}
+                          */}
                         </div>
                       </TableCell>
                     </TableRow>

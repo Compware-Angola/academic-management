@@ -1,3 +1,9 @@
+import { useMemo } from "react";
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -72,6 +78,73 @@ export default function Permission() {
 
   const data = permissionReponse?.data || [];
   const total = permissionReponse?.total || 0;
+
+
+const pdfData = useMemo(() => {
+  if (!data.length) return null;
+
+  const rows = data.map((item) => ({
+    codigo: item.codigo_permissao,
+    ano: item.ano_lectivo,
+    curso: item.curso,
+    disciplina: item.disciplina,
+    avaliacao: item.avaliacao,
+    inicio: formatarData(item.data_inicio),
+    fim: formatarData(item.data_fim),
+    estado: item.estado === 1 ? "Ativa" : "Inativa",
+  }));
+
+  const anoLetivoNome =
+    academicYear?.find((a) => a.codigo === Number(filters.anoLetivo))
+      ?.designacao || "Todos";
+
+  return {
+    filtros: `Ano Letivo: ${anoLetivoNome}`,
+    total: data.length,
+    rows,
+  };
+}, [data, filters, academicYear]);
+
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Permissão de Lançamento Fora do Prazo"
+    subtitle="Lista de permissões registadas no sistema"
+    infoSections={[
+      {
+        title: "Filtros Aplicados",
+        content: pdfData.filtros,
+      },
+      {
+        title: "Resumo",
+        content: [`Total de permissões: ${pdfData.total}`],
+      },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "codigo", label: "Código", width: "8%" },
+        { key: "ano", label: "Ano Letivo", width: "10%" },
+        { key: "curso", label: "Curso", width: "16%" },
+        { key: "disciplina", label: "Disciplina", width: "20%" },
+        { key: "avaliacao", label: "Avaliação", width: "12%" },
+        { key: "inicio", label: "Início", width: "12%" },
+        { key: "fim", label: "Fim", width: "12%" },
+        {
+          key: "estado",
+          label: "Estado",
+          width: "10%",
+          align: "center",
+        },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Permissões sujeitas a alterações conforme decisão administrativa."
+    customFooter="Sistema de Gestão Académica"
+  />
+) : null;
+
+
   const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
@@ -83,11 +156,22 @@ export default function Permission() {
           <span className="text-foreground">Permissão</span>
         </nav>
 
-        <header className="flex justify-between">
+        <header className="flex justify-between items-center flex-wrap gap-3">
           <div>
-            <h1 className="text-3xl font-bold">Permissão</h1>
-            <p className="text-muted-foreground">Fora do Prazo</p>
+            <h1 className="text-3xl font-bold">PERMISSÃO LANÇ. FORA DO PRAZO</h1>
           </div>
+
+          {data.length > 0 && pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`Permissoes_Lancamento_${filters.anoLetivo || "todos"}_${new Date()
+                  .toISOString()
+                  .slice(0, 10)}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
+
 
           <Button
             size="sm"

@@ -34,7 +34,7 @@ export interface InstituicaoTipo {
  */
 export async function listInstituicaoTipo(): Promise<InstituicaoTipo[]> {
   const { data } = await axiosApexGa.get<ListInstituicaoTipoApiResponse>(
-    "/financa/instituicao/tipo"
+    "/financa/instituicao/tipo",
   );
 
   return data.items.map((item) => ({

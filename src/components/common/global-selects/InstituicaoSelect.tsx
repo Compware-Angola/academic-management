@@ -1,5 +1,6 @@
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryFetchInstituicao } from "@/hooks/financas/instituicao/use-query-fetch-instituicao";
+
 import { useDebounce } from "@/hooks/use-debounce";
 import { useState } from "react";
 
@@ -24,6 +25,7 @@ export function InstituicaoSelect({
     tipo: tipoInstituicao,
   });
 
+  console.log(value);
   return (
     <FormCommandSelect
       label="Instituição"
@@ -36,7 +38,7 @@ export function InstituicaoSelect({
       map={(i) => ({
         key: i.codigo.toString(),
         value: i.codigo.toString(),
-        label: `${i.instituicao} (${i.nif})`,
+        label: i.instituicao,
       })}
       onChange={onChangeValue}
     />

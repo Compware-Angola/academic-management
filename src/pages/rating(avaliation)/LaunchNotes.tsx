@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,7 @@ import {
   ChevronRight,
   Unlock,
   Lock,
+  Download,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -46,11 +47,14 @@ import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profil
 import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
+
   const [formData, setFormData] = useState({
     anoLetivo: "",
     semestre: "",
@@ -83,60 +87,48 @@ export default function LaunchNotes() {
     [key: number]: boolean;
   }>({});
 
-  const { data: semestres, isLoading: isLoadingSemestres } =
-    useQuerySemestres();
-  const { user:userData } = useAuth();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-  const year = academicYear?.filter(
-    (ay) => ay.estado.toLowerCase() === "activo"
-  );
-  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } =
-    useQueryTeacherProfile(userData?.user?.pk_utilizador);
-  const {
-    data: turmDataHorario,
-    isLoading: isLoadingTurmaDataHorario,
-    isError,
-  } = useQueryListSchedules({
+  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
+  const { user: userData } = useAuth();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } = useQueryTeacherProfile(userData?.user?.pk_utilizador);
+  const { data: turmDataHorario, isLoading: isLoadingTurmaDataHorario } = useQueryListSchedules({
     teacherId: teacherInfoData?.codigo_docente,
     anoLectivo: Number(formData.anoLetivo),
     semestre: Number(formData.semestre),
   });
-  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
 
-  const { data: classes = [], isLoading: isLoadingClasses } =
-    useQueryClassFilterByCurso({ curso: formData.curso });
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
-  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
-    useQueryTipoProva();
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { data: classes = [], isLoading: isLoadingClasses } = useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } = useQueryTipoAvaliacao();
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } = useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
+
   const upsertNoteMutation = useUpsertNote();
- const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: formData.classes,
-      curso: formData.curso,
-      semestre: formData.semestre,
-    });
-      const canLoadTurmas =
-        !!formData.anoLetivo &&
-        !!formData.semestre &&
-        !!formData.periodo &&
-        !!formData.curso &&
-        !!formData.unidadeCurricular;
-    
-      const { data: scheduleResponse, isLoading: loadingschedule } = useQuerySchedulesByUc(
-        {
-          anoLectivo: Number(formData.anoLetivo),
-          semestre: Number(formData.semestre),
-          periodo: Number(formData.periodo),
-          curso: Number(formData.curso),
-          unidadeCurricular: Number(formData.unidadeCurricular),
-         
-        },
-        { enabled: canLoadTurmas }
-      );
-    
+
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
+    classe: formData.classes,
+    curso: formData.curso,
+    semestre: formData.semestre,
+  });
+
+  const canLoadTurmas =
+    !!formData.anoLetivo &&
+    !!formData.semestre &&
+    !!formData.periodo &&
+    !!formData.curso &&
+    !!formData.unidadeCurricular;
+
+  const { data: scheduleResponse, isLoading: loadingschedule } = useQuerySchedulesByUc(
+    {
+      anoLectivo: Number(formData.anoLetivo),
+      semestre: Number(formData.semestre),
+      periodo: Number(formData.periodo),
+      curso: Number(formData.curso),
+      unidadeCurricular: Number(formData.unidadeCurricular),
+    },
+    { enabled: canLoadTurmas }
+  );
+
   useEffect(() => {
     setLocalStudents(students);
     const initialLocks: { [key: number]: boolean } = {};
@@ -145,6 +137,72 @@ export default function LaunchNotes() {
     });
     setLockedStudents(initialLocks);
   }, [students]);
+
+  // Preparação dos dados para PDF
+  const pdfData = useMemo(() => {
+    if (!localStudents.length) return null;
+
+    const rows = localStudents.map((student) => ({
+      matricula: student.numero_de_matricula,
+      nome: student.nome_completo,
+      nota: student.nota !== null && student.nota !== undefined ? student.nota : "—",
+      observacao: student.observacao || "—",
+    }));
+
+    const totalAlunos = localStudents.length;
+    const notasLancadas = localStudents.filter(s => s.nota !== null && s.nota !== undefined).length;
+    const percentLancadas = totalAlunos > 0 ? ((notasLancadas / totalAlunos) * 100).toFixed(1) : "0.0";
+
+    const filtroTexto = [
+      `Ano Letivo: ${academicYear?.find(a => a.codigo === Number(formData.anoLetivo))?.designacao || "—"}`,
+      `Semestre: ${semestres?.find(s => s.codigo === Number(formData.semestre))?.designacao || "—"}`,
+      `Curso: ${cursos?.find(c => c.codigo === Number(formData.curso))?.designacao || "—"}`,
+      `UC: ${unidadesCurriculares?.find(u => u.pk === Number(formData.unidadeCurricular))?.descricao || "—"}`,
+      `Horário: ${scheduleResponse?.data?.find(h => h.codigo === Number(formData.horarioId))?.designacao || "—"}`,
+      `Tipo Prova: ${tipoProva?.find(t => t.codigo === Number(formData.tipoProva))?.designacao || "—"}`,
+      `Tipo Avaliação: ${tipoAvaliacao?.find(t => t.codigo === Number(formData.tipoAvaliacao))?.designacao || "—"}`,
+    ].filter(Boolean).join(" | ");
+
+    return {
+      rows,
+      totais: [
+        { label: "Total de Alunos", value: totalAlunos.toString() },
+        { label: "Notas Lançadas", value: notasLancadas.toString() },
+        { label: "Progresso", value: `${percentLancadas}%` },
+      ],
+      filtrosAplicados: filtroTexto || "Filtros não selecionados",
+    };
+  }, [localStudents, formData, academicYear, semestres, cursos, unidadesCurriculares, scheduleResponse, tipoProva, tipoAvaliacao]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lançamento de Notas"
+      subtitle="Controle de lançamento por disciplina e turma"
+      infoSections={[
+          {
+          title: "Resumo",
+          content: pdfData.filtrosAplicados,
+        },
+        {
+          title: "Resumo",
+          content: pdfData.totais.map(t => `${t.label}: ${t.value}`),
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: "15%", align: "center" },
+          { key: "nome", label: "Nome do Estudante", width: "50%" },
+          { key: "nota", label: "Nota (0-20)", width: "15%", align: "center" },
+          { key: "observacao", label: "Observação", width: "20%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#1e40af", 
+      }}
+      totals={pdfData.totais}
+      footerNotice="Documento gerado automaticamente. Notas pendentes devem ser lançadas conforme regulamento académico."
+      customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
+    />
+  ) : null;
 
   const totalPages = Math.ceil(localStudents.length / itemsPerPage);
 
@@ -239,6 +297,17 @@ export default function LaunchNotes() {
             Lançar notas de avaliações por UC
           </p>
         </div>
+
+        <div className="flex flex-wrap gap-2">
+          {localStudents.length > 0 && pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`Lancamento_Notas_${formData.unidadeCurricular || "UC"}_${new Date().toISOString().slice(0, 10)}.pdf`}
+              showDownload={true}
+              showPrint={true}
+            />
+          )}
+        </div>
       </div>
 
       {/* Filtros */}
@@ -258,12 +327,9 @@ export default function LaunchNotes() {
               value: a.codigo,
             })}
           />
+
           <FormSelect
-            disabled={
-              isLoadingPeriodos ||
-              isLoadingAcademicYear ||
-              formData.anoLetivo === ""
-            }
+            disabled={isLoadingPeriodos || isLoadingAcademicYear || formData.anoLetivo === ""}
             loading={isLoadingPeriodos}
             label="Período"
             value={formData.periodo}
@@ -275,6 +341,7 @@ export default function LaunchNotes() {
               value: p.codigo,
             })}
           />
+
           <FormSelect
             disabled={isLoadingSemestres}
             loading={isLoadingSemestres}
@@ -288,19 +355,12 @@ export default function LaunchNotes() {
               value: s.codigo,
             })}
           />
-          <FormSelect
-            disabled={isLoadingCurso}
-            loading={isLoadingCurso}
-            label="Curso"
+
+          <CourseSelect
             value={formData.curso}
-            onChange={(v) => setFormData({ ...formData, curso: v })}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
+            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
           />
+
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
@@ -314,7 +374,7 @@ export default function LaunchNotes() {
             })}
             loading={isLoadingClasses}
           />
-               {/* UC */}
+
           <FormSelect
             label="Unidade Curricular"
             value={formData.unidadeCurricular}
@@ -333,14 +393,11 @@ export default function LaunchNotes() {
             })}
             loading={isLoadingUC}
           />
+
           <FormSelectIsaac
-            label="Horario"
+            label="Horário"
             value={formData.horarioId}
-            disabled={
-              loadingschedule ||
-              !formData.semestre ||
-              !formData.classes
-            }
+            disabled={loadingschedule || !formData.semestre || !formData.classes}
             onChange={(v) => setFormData({ ...formData, horarioId: v })}
             options={scheduleResponse?.data}
             map={(u, index) => ({
@@ -350,6 +407,7 @@ export default function LaunchNotes() {
             })}
             loading={loadingschedule}
           />
+
           <FormSelect
             label="Tipo de Prova"
             value={formData.tipoProva}
@@ -363,6 +421,7 @@ export default function LaunchNotes() {
             })}
             loading={isLoadingTipoProva}
           />
+
           <FormSelect
             label="Tipo de Avaliação"
             value={formData.tipoAvaliacao}
@@ -377,7 +436,6 @@ export default function LaunchNotes() {
             loading={isLoadingTipoAvaliacao}
           />
 
-          {/* Botão Listar na mesma linha */}
           <div className="flex items-end">
             <Button
               className="w-full"
@@ -577,61 +635,61 @@ export default function LaunchNotes() {
               </Table>
             </div>
           </div>
+
+          {/* Paginação */}
+          {localStudents.length > 0 && (
+            <div className="flex items-center justify-between mt-6 flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <Label htmlFor="items-per-page" className="text-sm">
+                  Itens por página:
+                </Label>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => setItemsPerPage(Number(value))}
+                >
+                  <SelectTrigger id="items-per-page" className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-sm text-muted-foreground ml-4">
+                  Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
+                  {Math.min(currentPage * itemsPerPage, localStudents.length)} de{" "}
+                  {localStudents.length} registos
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <span className="text-sm">
+                  Página {currentPage} de {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Seguinte
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </>
-      )}
-
-      {/* Paginação */}
-      {localStudents.length > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="items-per-page" className="text-sm">
-              Itens por página:
-            </Label>
-            <Select
-              value={itemsPerPage.toString()}
-              onValueChange={(value) => setItemsPerPage(Number(value))}
-            >
-              <SelectTrigger id="items-per-page" className="w-20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
-            <span className="text-sm text-muted-foreground ml-4">
-              Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
-              {Math.min(currentPage * itemsPerPage, localStudents.length)} de{" "}
-              {localStudents.length} registos
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Anterior
-            </Button>
-            <span className="text-sm">
-              Página {currentPage} de {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Seguinte
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
       )}
     </div>
   );

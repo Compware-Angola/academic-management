@@ -176,7 +176,7 @@ export function Header() {
                     {user?.user?.username || "N/A"}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    Administrador
+                    {user?.user?.email || "N/A"}
                   </span>
                 </div>
               </Button>

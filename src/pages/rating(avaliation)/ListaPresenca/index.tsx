@@ -1,3 +1,8 @@
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -137,6 +142,83 @@ export default function PresenceList() {
 
     setShouldFetch(true);
   };
+
+
+const pdfData = useMemo(() => {
+  if (!presenceAttendanceList.length) return null;
+
+  const rows = presenceAttendanceList.map((item) => ({
+    matricula: item.numero_matricula,
+    nome: item.nome,
+    bolseiro: item.eh_bolseiro ? "Sim" : "Não",
+  }));
+
+  const anoLetivoNome =
+    academicYear.find((a) => a.codigo === Number(formData.anoLetivo))
+      ?.designacao || "—";
+
+  const horarioNome =
+    schedules?.data?.find((h) => h.codigo === Number(formData.horarioId))
+      ?.designacao || "—";
+
+  const tipoAvaliacaoNome =
+    tiposAvaliacao.find(
+      (t) => t.codigo === Number(formData.tiposAvaliacao)
+    )?.designacao || "Todos";
+
+  return {
+    filtros: [
+      `Ano Letivo: ${anoLetivoNome}`,
+      `Horário: ${horarioNome}`,
+      `Tipo de Avaliação: ${tipoAvaliacaoNome}`,
+    ].join("  |  "),
+    total: presenceAttendanceList.length,
+    rows,
+  };
+}, [
+  presenceAttendanceList,
+  formData,
+  academicYear,
+  schedules,
+  tiposAvaliacao,
+]);
+
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Presença"
+    subtitle="Presenças em Avaliações Académicas"
+    infoSections={[
+      {
+        title: "Filtros Aplicados",
+        content: pdfData.filtros,
+      },
+      {
+        title: "Resumo",
+        content: [`Total de estudantes: ${pdfData.total}`],
+      },
+    ]}
+        mainTable={{
+          headers: [
+            { key: "matricula", label: "Matrícula", width: "25%" },
+            { key: "nome", label: "Nome Completo", width: "50%" },
+            {
+              key: "bolseiro",
+              label: "Bolseiro",
+              width: "25%",
+              align: "center",
+            },
+          ],
+          rows: pdfData.rows,
+          headerBackground: "#1e40af",
+        }}
+        footerNotice="Documento gerado automaticamente pelo sistema."
+        customFooter="Sistema de Gestão Académica"
+      />
+    ) : null;
+
+
+
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -163,6 +245,21 @@ export default function PresenceList() {
       <p className="text-muted-foreground">
         Gestão de presenças em avaliações académicas.
       </p>
+
+
+        <div className="flex justify-end">
+            {presenceAttendanceList.length > 0 && pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`Lista_Presenca_${formData.anoLetivo}_${new Date()
+                  .toISOString()
+                  .slice(0, 10)}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
+        </div>
+
 
       <Card>
         <CardHeader>

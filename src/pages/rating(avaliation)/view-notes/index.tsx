@@ -1,4 +1,10 @@
 // src/pages/SchedulesByUC.tsx
+
+import { useMemo } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +49,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { formatarData } from "@/util/date-formate";
 import { Button } from "@/components/ui/button";
 import { useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function ViewNotes() {
   // filtros
@@ -129,6 +136,75 @@ export default function ViewNotes() {
   const schedules = scheduleResponse?.data || [];
   const viewNotes = viewNotesResponse?.data || [];
   const total = viewNotesResponse?.total || 0;
+
+
+const pdfData = useMemo(() => {
+  if (!viewNotes.length) return null;
+
+  const rows = viewNotes.map((item) => ({
+    matricula: item.numero_matricula,
+    nome: item.nome_completo,
+    avaliacao: item.descricao_avaliacao,
+    nota: item.nota ?? "-",
+    docente: item.nome_docente,
+    data: formatarData(item.data_lancamento),
+  }));
+
+  const filtrosTexto = [
+    filters.anoLetivo && `Ano Letivo: ${filters.anoLetivo}`,
+    filters.semestre && `Semestre: ${filters.semestre}`,
+    filters.curso && `Curso: ${filters.curso}`,
+    filters.unidadeCurricular &&
+      `UC: ${filters.unidadeCurricular}`,
+  ]
+    .filter(Boolean)
+    .join("  |  ");
+
+  return {
+    rows,
+    filtros: filtrosTexto || "Nenhum filtro específico aplicado",
+    total: `Total de notas: ${viewNotes.length}`,
+  };
+}, [viewNotes, filters]);
+
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Notas Lançadas"
+    subtitle="Relatório de notas por unidade curricular"
+    infoSections={[
+      {
+        title: "Filtros Aplicados",
+        content: pdfData.filtros,
+      },
+      {
+        title: "Resumo",
+        content: pdfData.total,
+      },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "matricula", label: "Matrícula", width: "14%" },
+        { key: "nome", label: "Nome Completo", width: "26%" },
+        { key: "avaliacao", label: "Avaliação", width: "18%" },
+        {
+          key: "nota",
+          label: "Nota",
+          width: "8%",
+          align: "center",
+        },
+        { key: "docente", label: "Docente", width: "18%" },
+        { key: "data", label: "Data", width: "16%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Relatório gerado a partir do sistema académico."
+    customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
+  />
+) : null;
+
+
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -153,12 +229,24 @@ export default function ViewNotes() {
       </Breadcrumb>
 
       {/* Cabeçalho */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <BookOpen className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-3xl font-bold">Visualizar</h1>
           <p className="text-muted-foreground">Notas Lançadas.</p>
         </div>
+
+        {viewNotes.length > 0 && pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`Notas_Lancadas_${new Date()
+                .toISOString()
+                .slice(0, 10)}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+
       </div>
 
       {/* Filtros */}
@@ -239,31 +327,22 @@ export default function ViewNotes() {
             </div>
 
             {/* Curso */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select
-                value={filters.curso}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    curso: v,
-                    anoCurricular: "",
-                    unidadeCurricular: "",
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                      {c.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+                  <div className="space-y-2">
+                      <CourseSelect
+                          value={filters.curso}
+                          onChangeValue={(v) => {
+                            setFilters({
+                              ...filters,
+                              curso: v,
+                              anoCurricular: "",
+                              unidadeCurricular: "",
+                            });
+                            
+                          }}
+                    />
+                  </div>
+
 
             {/* Ano Curricular */}
             <div className="space-y-2">
@@ -413,8 +492,9 @@ export default function ViewNotes() {
                       <TableHead>Nome Completo</TableHead>
                       <TableHead>Tipo de Avaliação</TableHead>
                       <TableHead>Nota</TableHead>
-                      <TableHead>Nome do Docente</TableHead>
+                      <TableHead>Lançada por</TableHead>
                       <TableHead>Data de Lançamento</TableHead>
+                      <TableHead>Data Alteração</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -437,6 +517,10 @@ export default function ViewNotes() {
                         <TableCell>
                           {" "}
                           {formatarData(item.data_lancamento)}{" "}
+                        </TableCell>
+                        <TableCell>
+                          {" "}
+                          {formatarData(item.data_atualizacao)}{" "}
                         </TableCell>
                       </TableRow>
                     ))}

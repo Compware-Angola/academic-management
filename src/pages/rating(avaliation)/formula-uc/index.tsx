@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +25,9 @@ import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { Link } from "react-router-dom";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 
 export default function FormulaUC() {
   // ===========================
@@ -54,8 +57,6 @@ export default function FormulaUC() {
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
 
-  console.log(formData, "DATA");
-
   const {
     data: formulaUC = [],
     isLoading,
@@ -67,19 +68,123 @@ export default function FormulaUC() {
     cursoId: formData.curso ? Number(formData.curso) : undefined,
   });
 
-  // ===========================
-  // PAGINAÇÃO
-  // ===========================
-  const totalPages = Math.ceil(formulaUC.length / itemsPerPage);
+  // ─── Preparação dos dados para PDF ────────────────────────────────────────
+  const pdfData = useMemo(() => {
+    if (!formulaUC.length) return null;
 
+    const rows = formulaUC.map((item) => ({
+      codigo: item.codigo,
+      disciplina: item.disciplina,
+      notaMinPratica: item.notaMinPratica ?? "—",
+      notaMin1F: item.notaMinPrimeiraFreq ?? "—",
+      notaMin2F: item.notaMinSegundaFreq ?? "—",
+      pesoPratica: item.pesoPratica ?? "—",
+      peso1F: item.pesoPrimeiraFreq ?? "—",
+      peso2F: item.pesoSegundaFreq ?? "—",
+      definido_por: item.definido_por ?? "—",
+    }));
+
+    const cursoNome =
+      cursos?.find((c) => c.codigo === Number(formData.curso))?.designacao ||
+      "—";
+    const anoLetivoNome =
+      academicYear?.find((a) => a.codigo === Number(formData.anoLetivo))
+        ?.designacao || "—";
+    const semestreNome =
+      semestres?.find((s) => s.codigo === Number(formData.semestre))
+        ?.designacao || "—";
+    const anoCurricularNome =
+      classes.find((cl) => cl.codigo === Number(formData.classes))
+        ?.designacao || "—";
+
+    const filtrosTexto = [
+      `Ano Letivo: ${anoLetivoNome}`,
+      `Semestre: ${semestreNome}`,
+      `Curso: ${cursoNome}`,
+      `Ano Curricular: ${anoCurricularNome}`,
+    ]
+      .filter(Boolean)
+      .join("  |  ");
+
+    return {
+      rows,
+      filtros: filtrosTexto || "Nenhum filtro aplicado",
+      totalRegistros: formulaUC.length,
+    };
+  }, [formulaUC, formData, academicYear, semestres, cursos, classes]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Fórmulas das Unidades Curriculares"
+      subtitle="Parâmetros de avaliação por disciplina"
+      infoSections={[
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros,
+        },
+        {
+          title: "Resumo",
+          content: [
+            `Total de Unidades Curriculares: ${pdfData.totalRegistros}`,
+          ],
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "codigo", label: "Código", width: "8%", align: "center" },
+          { key: "disciplina", label: "Disciplina", width: "32%" },
+          {
+            key: "notaMinPratica",
+            label: "NM P",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "notaMin1F",
+            label: "NM 1ª Freq",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "notaMin2F",
+            label: "NM 2ª Freq",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "pesoPratica",
+            label: "Peso Prát.",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "peso1F",
+            label: "Peso 1ª Freq",
+            width: "8%",
+            align: "center",
+          },
+          {
+            key: "peso2F",
+            label: "Peso 2ª Freq",
+            width: "8%",
+            align: "center",
+          },
+          { key: "definido_por", label: "Definido por", width: "12%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#1e40af", // azul escuro (mesmo da outra tela)
+      }}
+      footerNotice="Parâmetros de avaliação sujeitos a regulamento académico da instituição."
+      customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
+    />
+  ) : null;
+
+  // Paginação
+  const totalPages = Math.ceil(formulaUC.length / itemsPerPage);
   const paginatedData = formulaUC.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-
-  // ===========================
-  // RENDER
-  // ===========================
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -102,18 +207,27 @@ export default function FormulaUC() {
             Fórmula das Unidades Curriculares
           </p>
         </div>
-
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={isLoading}
-          onClick={() => refetch()}
-        >
-          <RefreshCw
-            className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-          />
-          Atualizar
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={isLoading}
+            onClick={() => refetch()}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Atualizar
+          </Button>
+          {formulaUC.length > 0 && pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`Formula_UC_${formData.curso || "curso"}_${new Date().toISOString().slice(0, 10)}.pdf`}
+              showDownload={true}
+              showPrint={true}
+            />
+          )}
+        </div>
       </div>
 
       {/* ===========================
@@ -221,7 +335,6 @@ export default function FormulaUC() {
 
                 <TableHead className="text-center">P 2F</TableHead>
                 <TableHead className="text-center">Definido Por </TableHead>
-              
 
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -259,10 +372,9 @@ export default function FormulaUC() {
                   <TableCell className="text-center">
                     {item.pesoSegundaFreq ?? "-"}
                   </TableCell>
-                   <TableCell className="text-center">
-                {item.definido_por ?? "-"}
+                  <TableCell className="text-center">
+                    {item.definido_por ?? "-"}
                   </TableCell>
-                  
 
                   <TableCell className="text-right">
                     <Button

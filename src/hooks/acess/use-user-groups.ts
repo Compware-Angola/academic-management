@@ -12,8 +12,6 @@ export function useUserGroups({ userId, enabled = true }: UseUserGroupsOptions) 
     queryKey: ["user-groups", userId],      // chave única por utilizador
     queryFn: () => fetchUserGroups(userId),
     enabled: enabled && !!userId,           // só executa se userId existir e enabled for true
-    staleTime: 1000 * 60 * 15,              // 15 minutos
-
-    retry: 2,
+ 
   });
 }

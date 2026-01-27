@@ -1,5 +1,5 @@
 // src/pages/SchedulesByUC.tsx
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -34,13 +34,11 @@ import {
   Plus,
   Trash2,
   Check,
-  X,
   Pencil,
 } from "lucide-react";
 
 import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
 
-// Importações para o Dialog de Confirmação
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,7 +48,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"; // Certifique-se de que este caminho está correto
+} from "@/components/ui/alert-dialog";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
@@ -66,32 +64,21 @@ import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-e
 import { useMutationDisponibilidadeHorario } from "@/hooks/horario/use-mutation-update-disponibilidade-horario";
 import { Switch } from "@/components/ui/switch";
 import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-validar-horario-director";
-import { useToast } from "@/hooks/use-toast";
 import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
 import { useAuth } from "@/hooks/use-auth";
-import { useQueryClient } from "@tanstack/react-query";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 export default function ScheduleList() {
-  const { user:userData } = useAuth();
+  const { user: userData } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
 
-  // === Estados para os Diálogos de Confirmação ===
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isValidateDialogOpen, setIsValidateDialogOpen] = useState(false);
   const [itemIdToConfirm, setItemIdToConfirm] = useState<number | null>(null);
-  // ==============================================
 
-  const deleteMutation = useMutationDeletarHorario();
-
-  const mutation = useMutationDisponibilidadeHorario();
-
-  const validarMutation = useMutationValidarHorarioDirector();
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
@@ -106,49 +93,51 @@ export default function ScheduleList() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  // === Dados base ===
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-  const { data: semestres, isLoading: isLoadingSemestres } =
-    useQuerySemestres();
+  // Dados base
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
   const { data: cursos } = useCursos();
+
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe:
-        filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
-    });
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
+    curso: filters.curso,
+    semestre: filters.semestre,
+    classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
+  });
 
-  // Memorizar parâmetros para evitar re-renders infinitos
-  const queryParams = useMemo(
-    () => ({
-      anoLectivo: Number(filters.anoLetivo),
-      semestre: Number(filters.semestre),
-      periodo: Number(filters.periodo),
-      curso: Number(filters.curso),
-      unidadeCurricular: Number(filters.unidadeCurricular),
-      page,
-      limit,
-    }),
-    [filters, page, limit]
-  );
+  // ==============================================
+  // Parâmetros da query - sem useMemo problemático
+  // ==============================================
+  const queryParams = {
+    page,
+    limit,
+    anoLectivo: filters.anoLetivo ? Number(filters.anoLetivo) : undefined,
+    semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    periodo: filters.periodo ? Number(filters.periodo) : undefined,
+    curso: filters.curso ? Number(filters.curso) : undefined,
+    unidadeCurricular: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
+  };
 
   const {
     data: ScheduleResponse,
     isLoading: isLoadingSchedule,
-    isError,
     refetch: refetchHorarios,
   } = useQueryHorariosExistentes(queryParams);
 
-  // === Funções de Ação com Confirmação ===
+  const deleteMutation = useMutationDeletarHorario();
+  const mutation = useMutationDisponibilidadeHorario();
+  const validarMutation = useMutationValidarHorarioDirector();
 
+  const tableData = ScheduleResponse?.data || [];
+  const total = ScheduleResponse?.total || 0;
+  const totalPages = Math.ceil(total / limit);
+
+  // Funções de ação
   const handleDeleteConfirmed = async () => {
     if (itemIdToConfirm) {
       deleteMutation.mutate({
@@ -162,7 +151,7 @@ export default function ScheduleList() {
     if (itemIdToConfirm) {
       validarMutation.mutate({
         horarioId: itemIdToConfirm,
-      userId: userData.user.pk_utilizador,
+        userId: userData.user.pk_utilizador,
       });
     }
   };
@@ -177,20 +166,14 @@ export default function ScheduleList() {
     setIsValidateDialogOpen(true);
   };
 
-  const openDetails = async (turmaId: number) => {
+  const openDetails = (turmaId: number) => {
     setSelectedTurmaId(turmaId);
     setIsModalOpen(true);
   };
 
-  // ========================================
-
-  const tableData = ScheduleResponse?.data || [];
-  const total = ScheduleResponse?.total || 0;
-  const totalPages = Math.ceil(total / limit);
-
   return (
-    <div className="p-6 space-y-8">
-      {/* Breadcrumb */}
+    <div className="p-12 space-y-12">
+      {/* Breadcrumb e título */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <Breadcrumb>
@@ -209,11 +192,10 @@ export default function ScheduleList() {
             </BreadcrumbList>
           </Breadcrumb>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Horário Existentes
+            Horários Existentes
           </h1>
           <p className="text-muted-foreground">
-            Visualize todos os Horário criadas por ano letivo, semestre,
-            período, curso e ano curricular.
+            Visualize todos os horários criados por ano letivo, semestre, período, curso e ano curricular.
           </p>
         </div>
         <Button onClick={() => navigate("/horarios/criar")}>
@@ -223,137 +205,168 @@ export default function ScheduleList() {
       </div>
 
       {/* Filtros */}
+    <Card>
+  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <div className="flex items-center gap-3">
+      <Search className="h-5 w-5 text-muted-foreground" />
+      <CardTitle>Filtros de Pesquisa</CardTitle>
+    </div>
+
+    {/* Botão Limpar Filtros */}
+    <Button
+      variant="default"
+      size="sm"
+      onClick={() => {
+        setFilters({
+          anoLetivo: "",
+          semestre: "",
+          periodo: "",
+          curso: "",
+          anoCurricular: "",
+          unidadeCurricular: "",
+        });
+       
+        setPage(1);
+      }}
+      className=" hover:text-foreground hover:bg-muted/50"
+      disabled={
+        !filters.anoLetivo &&
+        !filters.semestre &&
+        !filters.periodo &&
+        !filters.curso &&
+        !filters.anoCurricular &&
+        !filters.unidadeCurricular
+      }
+    >
+      Limpar Filtros
+    </Button>
+  </CardHeader>
+
+  <CardContent>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <FormSelect
+        disabled={isLoadingAcademicYear}
+        loading={isLoadingAcademicYear}
+        label="Ano Letivo"
+        value={filters.anoLetivo}
+        onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
+        options={anosAcademicos}
+        map={(a) => ({
+          key: a.codigo,
+          label: a.designacao,
+          value: a.codigo,
+        })}
+      />
+
+      <FormSelect
+        disabled={isLoadingSemestres}
+        loading={isLoadingSemestres}
+        label="Semestre"
+        value={filters.semestre}
+        onChange={(v) => setFilters({ ...filters, semestre: v })}
+        options={semestres}
+        map={(s) => ({
+          key: s.codigo,
+          label: s.designacao,
+          value: s.codigo,
+        })}
+      />
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Período</label>
+        <Select
+          value={filters.periodo}
+          onValueChange={(v) => setFilters({ ...filters, periodo: v })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecionar" />
+          </SelectTrigger>
+          <SelectContent>
+            {periodos?.map((p) => (
+              <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                {p.designacao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <FormCommandSelect
+        value={filters.curso}
+        label="Curso"
+        options={cursos}
+        map={(c) => ({
+          key: c.codigo.toString(),
+          value: c.codigo.toString(),
+          label: c.designacao,
+        })}
+        onChange={(v) =>
+          setFilters({
+            ...filters,
+            curso: v,
+            unidadeCurricular: "",
+          })
+        }
+      />
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Ano Curricular</label>
+        <Select
+          value={filters.anoCurricular}
+          onValueChange={(v) =>
+            setFilters({
+              ...filters,
+              anoCurricular: v,
+              unidadeCurricular: "",
+            })
+          }
+          disabled={!filters.curso}
+        >
+          <SelectTrigger>
+            <SelectValue
+              placeholder={filters.curso ? "Todos os anos" : "Selecione curso"}
+            />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os anos</SelectItem>
+            {anosCurriculares.map((ac) => (
+              <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
+                {ac.designacao}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <FormCommandSelect
+        value={filters.unidadeCurricular}
+        label="Unidade Curricular"
+        placeholder={
+          !filters.curso
+            ? "Selecione curso"
+            : !filters.semestre
+            ? "Selecione semestre"
+            : isLoadingUC
+            ? "Carregando UCs..."
+            : "Selecionar UC"
+        }
+        options={unidadesCurriculares}
+        disabled={!canLoadUcs}
+        map={(u) => ({
+          key: u.pk.toString(),
+          value: u.pk.toString(),
+          label: u.descricao,
+        })}
+        onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
+      />
+    </div>
+  </CardContent>
+</Card>
+
+      {/* Tabela */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <Search className="h-5 w-5 text-muted-foreground" />
-            <CardTitle>Filtros de Pesquisa</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            <FormSelect
-              disabled={isLoadingAcademicYear}
-              loading={isLoadingAcademicYear}
-              label="Ano Letivo"
-              value={filters.anoLetivo}
-              onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-              options={anosAcademicos}
-              map={(a) => ({
-                key: a.codigo,
-                label: a.designacao,
-                value: a.codigo,
-              })}
-            />
-            <FormSelect
-              disabled={isLoadingSemestres}
-              loading={isLoadingSemestres}
-              label="Semestre"
-              value={filters.semestre}
-              onChange={(v) => setFilters({ ...filters, semestre: v })}
-              options={semestres}
-              map={(s) => ({
-                key: s.codigo,
-                label: s.designacao,
-                value: s.codigo,
-              })}
-            />
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Período</label>
-              <Select
-                value={filters.periodo}
-                onValueChange={(v) => setFilters({ ...filters, periodo: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {periodos?.map((p) => (
-                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
-                      {p.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <FormCommandSelect
-              value={filters.curso}
-              label="Curso"
-              options={cursos}
-              map={(c) => ({
-                key: c.codigo.toString(),
-                value: c.codigo.toString(),
-                label: c.designacao,
-              })}
-              onChange={(v) =>
-                setFilters({
-                  ...filters,
-                  curso: v,
-
-                  unidadeCurricular: "",
-                })
-              }
-            />
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Curricular</label>
-              <Select
-                value={filters.anoCurricular}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    anoCurricular: v,
-                    unidadeCurricular: "",
-                  })
-                }
-                disabled={!filters.curso}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      filters.curso ? "Todos os anos" : "Selecione curso"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os anos</SelectItem>
-                  {anosCurriculares.map((ac) => (
-                    <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-                      {ac.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <FormCommandSelect
-              value={filters.unidadeCurricular}
-              label="Unidade Curricular"
-              placeholder={
-                !filters.curso
-                  ? "Selecione curso"
-                  : !filters.semestre
-                  ? "Selecione semestre"
-                  : isLoadingUC
-                  ? "Carregando UCs..."
-                  : "Selecionar UC"
-              }
-              options={unidadesCurriculares}
-              disabled={!canLoadUcs}
-              map={(u) => ({
-                key: u.pk.toString(),
-                value: u.pk.toString(),
-                label: u.descricao,
-              })}
-              onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tabela    */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Horários Encontradas</CardTitle>
+          <CardTitle>Horários Encontrados</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoadingSchedule ? (
@@ -391,6 +404,8 @@ export default function ScheduleList() {
                       <TableHead>Estado</TableHead>
                       <TableHead>Disponibilidade</TableHead>
                       <TableHead>Criado em</TableHead>
+                      <TableHead>Criado por</TableHead>
+                      <TableHead>Atualizado por</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -429,15 +444,19 @@ export default function ScheduleList() {
                         <TableCell className="text-sm text-muted-foreground">
                           {item.datacriacao}
                         </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {item.criadopor}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {item.atualizadopor}
+                        </TableCell>
                         <TableCell className="w-40 min-w-40">
                           <div className="flex items-center space-x-2 justify-center">
-                            {/* 1. Botão de Detalhes (Eye) */}
                             <Button
                               variant="outline"
                               size="icon"
                               onClick={() => openDetails(item.codigo)}
                               title="Ver Detalhes"
-                              aria-label="Ver Detalhes"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -445,48 +464,31 @@ export default function ScheduleList() {
                               variant="outline"
                               size="icon"
                               title="Editar horário"
-                              onClick={() =>
-                                navigate(`/schedule/${item.codigo}/edit`)
-                              }
+                              onClick={() => navigate(`/schedule/${item.codigo}/edit`)}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-
                             <Button
                               variant="destructive"
                               size="icon"
                               onClick={() => openDeleteDialog(item.codigo)}
-                              title="Excluir Horário"
-                              aria-label="Excluir Horário"
-                              disabled={
-                                deleteMutation.isPending &&
-                                itemIdToConfirm === item.codigo
-                              }
+                              disabled={deleteMutation.isPending && itemIdToConfirm === item.codigo}
                             >
-                              {deleteMutation.isPending &&
-                              itemIdToConfirm === item.codigo ? (
+                              {deleteMutation.isPending && itemIdToConfirm === item.codigo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
                               )}
                             </Button>
-
-                            {/* 3. Botão de Validar (Check) - Abre o Dialog se PENDENTE */}
-                            {Number(item.estadoid) == 2 && (
+                            {Number(item.estadoid) === 2 && (
                               <Button
                                 variant="default"
                                 size="icon"
                                 onClick={() => openValidateDialog(item.codigo)}
-                                disabled={
-                                  validarMutation.isPending &&
-                                  itemIdToConfirm === item.codigo
-                                }
-                                title="Validar Horário"
-                                aria-label="Validar Horário"
-                                className="bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
+                                disabled={validarMutation.isPending && itemIdToConfirm === item.codigo}
+                                className="bg-green-500 hover:bg-green-600"
                               >
-                                {validarMutation.isPending &&
-                                itemIdToConfirm === item.codigo ? (
+                                {validarMutation.isPending && itemIdToConfirm === item.codigo ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                   <Check className="h-4 w-4" />
@@ -502,24 +504,26 @@ export default function ScheduleList() {
               </div>
 
               {/* Paginação */}
-              <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center justify-between mt-6">
                 <p className="text-sm text-muted-foreground">
-                  A mostrar {tableData.length} de {total} registos
+                  Mostrando {tableData.length} de {total} registos
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <Button
                     variant="outline"
+                    size="sm"
                     disabled={page === 1}
                     onClick={() => setPage((p) => p - 1)}
                   >
                     Anterior
                   </Button>
-                  <span>
-                    Página {page} de {totalPages}
+                  <span className="text-sm font-medium">
+                    Página {page} de {totalPages || 1}
                   </span>
                   <Button
                     variant="outline"
-                    disabled={page === totalPages}
+                    size="sm"
+                    disabled={page >= totalPages}
                     onClick={() => setPage((p) => p + 1)}
                   >
                     Próxima
@@ -529,10 +533,10 @@ export default function ScheduleList() {
                     value={String(limit)}
                     onValueChange={(v) => {
                       setLimit(Number(v));
-                      setPage(1);
+                      setPage(1); // reset para página 1 ao mudar limite
                     }}
                   >
-                    <SelectTrigger className="w-20">
+                    <SelectTrigger className="w-20 h-9">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -549,7 +553,7 @@ export default function ScheduleList() {
         </CardContent>
       </Card>
 
-      {/* Modal de Detalhes */}
+      {/* Modal e Dialogs */}
       <ScheduleDetailsModal
         horarioId={selectedTurmaId}
         isOpen={isModalOpen}
@@ -559,33 +563,20 @@ export default function ScheduleList() {
         }}
       />
 
-      {/* === Diálogo de Confirmação de Exclusão === */}
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Tem certeza que deseja excluir?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta ação é irreversível. O horário selecionado será removido
-              permanentemente do servidor.
+              Esta ação é irreversível. O horário será removido permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setIsDeleteDialogOpen(false);
-                setItemIdToConfirm(null);
-              }}
-              disabled={deleteMutation.isPending}
-            >
-              Cancelar
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirmed}
               disabled={deleteMutation.isPending}
-              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+              className="bg-red-600 hover:bg-red-700"
             >
               {deleteMutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -597,47 +588,32 @@ export default function ScheduleList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* ======================================== */}
 
-      {/* === Diálogo de Confirmação de Validação === */}
-      <AlertDialog
-        open={isValidateDialogOpen}
-        onOpenChange={setIsValidateDialogOpen}
-      >
+      <AlertDialog open={isValidateDialogOpen} onOpenChange={setIsValidateDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Deseja validar este Horário?</AlertDialogTitle>
             <AlertDialogDescription>
-              Ao validar, você confirma que o horário está correto e pode ser
-              usado. Esta ação não pode ser desfeita facilmente.
+              Ao validar, você confirma que o horário está correto e pode ser usado.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                setIsValidateDialogOpen(false);
-                setItemIdToConfirm(null);
-              }}
-              disabled={validarMutation.isPending}
-            >
-              Cancelar
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={validarMutation.isPending}>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleValidateConfirmed}
               disabled={validarMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+              className="bg-green-600 hover:bg-green-700"
             >
               {validarMutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Check className="mr-2 h-4 w-4" />
               )}
-              Validar Horário
+              Validar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* ========================================== */}
     </div>
   );
 }
