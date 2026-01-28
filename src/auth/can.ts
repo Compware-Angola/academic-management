@@ -1,3 +1,5 @@
+import { PermissionTypeDetails } from "@/constants/permission.type";
+
 export function can(
   userPermissions: string[],
   required?: string | string[]
@@ -5,7 +7,7 @@ export function can(
   if (!required) return true;
 
   // FULL ACCESS bypass
-  if (userPermissions.includes("full.access")) return true;
+  if (userPermissions.includes(PermissionTypeDetails.FULL_ACCESS.sigla)) return true;
 
   if (Array.isArray(required)) {
     return required.some((perm) => userPermissions.includes(perm));
