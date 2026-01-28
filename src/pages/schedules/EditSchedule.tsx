@@ -23,6 +23,16 @@ import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-dispo
 import ScheduleGridEdit from "./components/ScheduleGridEdit";
 import { AulaPayload } from "@/services/horario/save-horario.service";
 import { useNextScheduleDesignation } from "@/hooks/horario/use-next-schedule-designation";
+import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
+import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
   { key: "capacidade", label: "Capacidade" }, // 👈
@@ -58,6 +68,9 @@ export function EditSchedule() {
     apenasPrimeiroAno: "1",
     designacao: "",
     capacidade: "",
+    docente: "",
+    tipoAula: "",
+    sala: "",
   });
 
   const [aulas, setAulas] = useState<AulaPayload[]>([]);
@@ -79,7 +92,7 @@ export function EditSchedule() {
 
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
-
+  const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       curso: formData.curso,
@@ -108,18 +121,27 @@ export function EditSchedule() {
       Number(formData.periodo),
       Number(formData.anoLetivo),
     );
+  const { data: teachers = [], isLoading: isLoadingTeacher } =
+    useQueryTeacherByUC(formData.unidadeCurricular);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       designacao: designacao || "",
     }));
   }, [designacao]);
+  const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
+    anoLectivo: Number(formData.anoLetivo),
+
+    tipoAula: Number(formData?.tipoAula),
+    periodo: Number(formData?.periodo),
+  });
   /* ------------------------- LOAD INICIAL ------------------------- */
 
   useEffect(() => {
     if (!data) return;
 
     const mapped = mapScheduleToFormData(data);
+    console.log({ mapped });
 
     // 🔹 Campos independentes
     setFormData((prev) => ({
@@ -132,6 +154,9 @@ export function EditSchedule() {
       apenasPrimeiroAno: mapped.apenasPrimeiroAno,
       designacao: mapped.designacao,
       capacidade: mapped.capacidade,
+      sala: mapped.sala,
+      tipoAula: mapped.tipoAula,
+      docente: mapped.docente || "",
     }));
 
     // 🔹 Campos dependentes (guardados)
@@ -143,19 +168,16 @@ export function EditSchedule() {
     // 🔹 Aulas
     const slots: AulaPayload[] =
       data.aulas?.map((a: any) => ({
-        docente: a.docenteId,
-        tipoAula: a.tipoAulaId,
-        sala: a.salaid,
-        diaSemana: a.diaSemanaId,
-        ordemTempo: a.ordem,
-        hora_inicio: a.horaInicio,
-        hora_fim: a.horaTermino,
-        obs: a.observacoes || "",
+        diaSemana: a.diaSemana,
+        ordemTempo: a.ordemTempo,
+        hora_fim: a.hora_fim,
+        hora_inicio: a.hora_inicio,
+        obs: a.obs ?? "",
       })) || [];
 
     setAulas(slots);
   }, [data]);
-
+  console.log({ aulas });
   /* ------------------------- APPLY CLASSES ------------------------- */
 
   useEffect(() => {
@@ -386,6 +408,76 @@ export function EditSchedule() {
             }
           />
         </div>
+        <FormSelect
+          label="Docente"
+          value={formData.docente}
+          disabled={isLoadingTeacher}
+          onChange={(v) => setFormData({ ...formData, docente: v })}
+          options={teachers}
+          map={(t) => ({
+            key: t.pk,
+            label: t.nomeCompleto,
+            value: t.pk,
+          })}
+          loading={isLoadingTeacher}
+        />
+        <div>
+          <Label>Tipo de Aula</Label>
+          <Select
+            value={formData.tipoAula}
+            onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
+          >
+            <SelectTrigger className="w-full ">
+              <SelectValue placeholder="Escolha o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              {tipoDeSalas.map((tipo) => (
+                <SelectItem
+                  key={tipo.pkTipoAula}
+                  value={tipo.pkTipoAula.toString()}
+                >
+                  {tipo.designacao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* SALA */}
+        <div>
+          <Label>Sala</Label>
+          <Select
+            value={formData.sala}
+            onValueChange={(v) => setFormData({ ...formData, sala: v })}
+          >
+            <SelectTrigger
+              disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
+              className="w-full "
+            >
+              <SelectValue
+                placeholder={
+                  <>
+                    {" "}
+                    {isLoadingSala ? (
+                      <span className="flex gap-2 items-center">
+                        Carregando <Loader2 className="animate-spin" />
+                      </span>
+                    ) : (
+                      "Selecione Salas"
+                    )}
+                  </>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {salas?.map((sala) => (
+                <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
+                  {sala.sala}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {temposDisponiveis.length > 0 && (
@@ -419,6 +511,7 @@ export function EditSchedule() {
 /* ------------------------------------------------------------------ */
 
 function mapScheduleToFormData(schedule: any) {
+  const primeiraAula = schedule.aulas?.[0];
   return {
     anoLetivo: String(schedule.fk_ano_lectivo || ""),
     semestre: String(schedule.semestre || ""),
@@ -426,7 +519,10 @@ function mapScheduleToFormData(schedule: any) {
     curso: String(schedule.cursoId || ""),
     classes: extrairAnoCurricular(schedule.ano || ""),
     unidadeCurricular: String(schedule.unidadeCurricularId || ""),
-    modalidade: String(schedule.aulas?.[0]?.modalidadeId || ""),
+    modalidade: String(primeiraAula?.modalidadeId || ""),
+    docente: String(primeiraAula?.docenteId || ""),
+    tipoAula: String(primeiraAula?.tipoAulaId || ""),
+    sala: String(primeiraAula?.salaid || ""),
     apenasPrimeiroAno: schedule.ano?.startsWith("1") ? "0" : "1",
     designacao: schedule.designacao || "",
     capacidade: String(schedule.capacidade || ""),

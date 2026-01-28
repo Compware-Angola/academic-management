@@ -5,15 +5,11 @@ type AvailableRoomsParams = {
   anoLectivo?: number;
   periodo?: number;
   tipoAula?: number;
-
 };
 
 export function useAvailableRooms(params?: AvailableRoomsParams) {
   const enabled = Boolean(
-      params?.anoLectivo &&
-      params?.periodo &&
-      params?.tipoAula
-  
+    params?.anoLectivo && params?.periodo && params?.tipoAula,
   );
 
   return useQuery({
@@ -24,7 +20,7 @@ export function useAvailableRooms(params?: AvailableRoomsParams) {
         periodo: params.periodo,
         tipoAula: params.tipoAula,
       }),
-    staleTime: 1000 * 60 * 5,
+
     enabled,
   });
 }

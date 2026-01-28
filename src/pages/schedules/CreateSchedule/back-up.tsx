@@ -1,53 +1,7 @@
-// // src/pages/horarios/ScheduleList.tsx
-// import React, { useState } from "react";
+// import { useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom";
-// import {
-//   Plus,
-//   RefreshCw,
-//   Search,
-//   File,
-//   ChevronFirst,
-//   ChevronLast,
-//   ChevronLeft,
-//   ChevronRight,
-//   MoreVertical,
-//   Eye,
-//   Edit,
-//   Copy,
-//   Trash2,
-//   Check,
-// } from "lucide-react";
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-// } from "@/components/ui/alert-dialog";
+// import { Save, X, AlertCircle, Loader2, List } from "lucide-react";
 // import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import {
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableHead,
-//   TableHeader,
-//   TableRow,
-// } from "@/components/ui/table";
-// import { Badge } from "@/components/ui/badge";
-// import { Skeleton } from "@/components/ui/skeleton";
-// import { Alert, AlertDescription } from "@/components/ui/alert";
-// import { useToast } from "@/hooks/use-toast";
 // import {
 //   Breadcrumb,
 //   BreadcrumbItem,
@@ -56,293 +10,486 @@
 //   BreadcrumbPage,
 //   BreadcrumbSeparator,
 // } from "@/components/ui/breadcrumb";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuLabel,
-//   DropdownMenuSeparator,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
+// import { useToast } from "@/hooks/use-toast";
+// import ScheduleGrid from "./ScheduleGrid";
 // import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 // import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-// import { useQueryPeriod } from "@/hooks/period/use-query-period";
 // import { useCursos } from "@/hooks/use-cursos";
+// import { useQueryPeriod } from "@/hooks/period/use-query-period";
+// import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-disponiveis";
+// import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+// import { FormSelect } from "../../../components/common/FormSelect";
+// import { useSaveHorario } from "@/hooks/horario/use-save-horario";
 // import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-// import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-existentes";
-// import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
-// import { Switch } from "@/components/ui/switch";
-// import { useMutationDisponibilidadeHorario } from "@/hooks/horario/use-mutation-update-disponibilidade-horario";
-// import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-validar-horario-director";
-// import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
-// type Item = {
-//   id: string | number;
-//   nome: string;
+// import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
+// import {
+//   AulaPayload,
+//   SaveHorarioPayload,
+// } from "@/services/horario/save-horario.service";
 
-//   // outros campos...
-// };
-// export default function ScheduleList() {
+// import { Input } from "@/components/ui/input";
+// import { useNextScheduleDesignation } from "@/hooks/horario/use-next-schedule-designation";
+// import { Label } from "@/components/ui/label";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+// import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
+// import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
+
+// /* -----------------------------------
+//    CONSTANTES E UTILS
+// ----------------------------------- */
+
+// const requiredFields = [
+//   { key: "designacao", label: "Designação do Horário" },
+//   { key: "capacidade", label: "Capacidade" },
+//   { key: "anoLetivo", label: "Ano Letivo" },
+//   { key: "semestre", label: "Semestre" },
+//   { key: "periodo", label: "Período" },
+//   { key: "curso", label: "Curso" },
+//   { key: "docente", label: "Docente" },
+//   { key: "tipoAula", label: "Tipo de Aula" },
+//   { key: "sala", label: "Sala" },
+//   { key: "unidadeCurricular", label: "Unidade Curricular" },
+//   { key: "modalidade", label: "Modalidade" },
+// ];
+
+// const isEmpty = (v: unknown) => v === null || v === undefined || v === "";
+
+// export default function CreateSchedule() {
 //   const navigate = useNavigate();
 //   const { toast } = useToast();
-//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-//   const deleteMutation = useMutationDeletarHorario();
-//   // Aqui tu recebes o item inteiro ou só o ID – como quiseres
-//   const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
-//   const mutation = useMutationDisponibilidadeHorario();
-//   async function handleDeleteConfirmed(item: number) {
-//     try {
-//       deleteMutation.mutate({ p_horario_id: item });
-//     } catch (error) {
-//       const message =
-//         error instanceof Error ? error.name : "Não foi possível excluir.";
-//       toast({
-//         title: "Erro",
-//         description: message,
-//         variant: "destructive",
-//       });
-//     }
-//   }
-//   const [page, setPage] = useState(1);
-//   const itemsPerPage = 15;
-//   const [filters, setFilters] = useState({
+
+//   /* ---------- STATES ----------- */
+//   const [formData, setFormData] = useState({
 //     anoLetivo: "",
 //     semestre: "",
 //     periodo: "",
 //     curso: "",
-//     anoCurricular: "",
-//     search: "",
-//   });
-//   const { data: Schedule, isLoading: isLoadingSchedule } = useScheduleQuery({
-//     anoLectivo: filters.anoLetivo,
-//     curso: filters.curso,
-//     anoCurricular: filters.anoCurricular,
-//     semestre: filters.semestre,
-//     periodo: filters.periodo,
-//     page: page.toString(),
+//     unidadeCurricular: "",
+//     modalidade: "",
+//     classes: "",
+//     apenasPrimeiroAno: "",
+//     designacao: "",
+//     capacidade: "",
+//     docente: "",
+//     tipoAula: "",
+//     sala: "",
 //   });
 
-//   // Queries dos filtros
-//   const { data: anosAcademicos, isLoading: loadingAnos } =
+//   const [aulas, setAulas] = useState<AulaPayload[]>([]);
+
+//   /* ---------- QUERIES ----------- */
+//   const { data: academicYear, isLoading: isLoadingAcademicYear } =
 //     useQueryAnoAcademico();
-//   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
-//   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
-//   const { data: cursos, isLoading: loadingCursos } = useCursos();
+//   const { data: teachers = [], isLoading: isLoadingTeacher } =
+//     useQueryTeacherByUC(formData.unidadeCurricular);
+//   const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
+//   const { data: semestres, isLoading: isLoadingSemestres } =
+//     useQuerySemestres();
+//   const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
+//     anoLectivo: Number(formData.anoLetivo),
 
-//   const { data: anosCurriculares = [], isLoading: loadingAnosCurriculares } =
-//     useQueryClassFilterByCurso({ curso: filters.curso });
-
-//   const {
-//     data: horarios = [],
-//     isLoading: isLoadingHorarios,
-//     error,
-//     refetch,
-//   } = useQueryHorariosExistentes({
-//     p_ano_lectivo: filters.anoLetivo,
-//     p_semestre: filters.semestre,
-//     p_periodo: filters.periodo,
-//     p_curso: filters.curso,
-//     p_ano_curricular:
-//       filters.anoCurricular && filters.anoCurricular !== "todos"
-//         ? filters.anoCurricular
-//         : undefined,
+//     tipoAula: Number(formData?.tipoAula),
+//     periodo: Number(formData?.periodo),
 //   });
-//   const validarMutation = useMutationValidarHorarioDirector();
+//   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+//   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
-//   // Filtro local por texto
-//   const filteredHorarios = horarios.filter(
-//     (h) =>
-//       filters.search === "" ||
-//       h.designacao.toLowerCase().includes(filters.search.toLowerCase()) ||
-//       h.unidadeCurricular
-//         .toLowerCase()
-//         .includes(filters.search.toLowerCase()) ||
-//       h.curso.toLowerCase().includes(filters.search.toLowerCase()) ||
-//       h.ano.toLowerCase().includes(filters.search.toLowerCase())
+//   const { data: temposDisponiveis = [] } = useQueryTemposDisponiveis({
+//     anoLectivo: Number(formData.anoLetivo),
+//     periodo: Number(formData.periodo),
+//   });
+
+//   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+//     useQueryDisciplinaWithFilter({
+//       classe: formData.classes,
+//       curso: formData.curso,
+//       semestre: formData.semestre,
+//     });
+//   const { data: designacao } = useNextScheduleDesignation(
+//     formData.curso
+//       ? gerarSiglaCurso(
+//           cursos.find((c) => c.codigo.toString() === formData.curso)
+//             ?.designacao || "",
+//         )
+//       : undefined,
+//     formData.classes,
+//     formData.unidadeCurricular
+//       ? unidadesCurriculares.find(
+//           (c) => c.pk.toString() === formData.unidadeCurricular,
+//         )?.codigo || ""
+//       : "",
+//     Number(formData.periodo),
+//     Number(formData.anoLetivo),
 //   );
 
-//   // Paginação lógica
-//   const totalItems = filteredHorarios.length;
-//   const totalPages = Math.ceil(totalItems / itemsPerPage);
-//   const startIndex = (page - 1) * itemsPerPage;
-//   const endIndex = startIndex + itemsPerPage;
-//   const currentItems = filteredHorarios.slice(startIndex, endIndex);
+//   const { data: classes = [], isLoading: isLoadingClasses } =
+//     useQueryClassFilterByCurso({ curso: formData.curso });
+//   const { data: modalidade = [], isLoading: isLoadingModalidade } =
+//     useQueryModalidade();
+//   /* ---------- COLISÃO ----------- */
 
-//   const handleRefresh = () => {
-//     refetch();
-//     toast({ description: "Lista atualizada com sucesso." });
+//   const saveHorario = useSaveHorario();
+//   useEffect(() => {}, [formData, aulas]);
+
+//   useEffect(() => {
+//     setFormData((prev) => ({
+//       ...prev,
+//       designacao: designacao || "",
+//     }));
+//   }, [designacao]);
+
+//   /* ---------- VALIDAR FORM ----------- */
+//   const validateForm = () => {
+//     for (const field of requiredFields) {
+//       if (isEmpty(formData[field.key as keyof typeof formData])) {
+//         toast({
+//           variant: "destructive",
+//           title: "Campo obrigatório",
+//           description: `Preencha: ${field.label}`,
+//         });
+//         return false;
+//       }
+//     }
+
+//     if (!aulas.length) {
+//       toast({
+//         variant: "destructive",
+//         title: "Horário vazio",
+//         description: "Selecione pelo menos uma aula.",
+//       });
+//       return false;
+//     }
+
+//     return true;
 //   };
 
-//   // Resetar página ao mudar filtros
-//   const resetPageOnFilterChange = () => {
-//     setPage(1);
+//   const isFormComplete =
+//     requiredFields.every(
+//       (f) => !isEmpty(formData[f.key as keyof typeof formData]),
+//     ) && aulas.length > 0;
+
+//   /* ---------- SUBMIT ----------- */
+//   const handleResetHorario = () => {
+//     setFormData({
+//       anoLetivo: "",
+//       semestre: "",
+//       periodo: "",
+//       curso: "",
+//       unidadeCurricular: "",
+//       modalidade: "",
+//       classes: "",
+//       apenasPrimeiroAno: "",
+//       capacidade: "",
+//       designacao: "",
+//       docente: "",
+//       tipoAula: "",
+//       sala: "",
+//     });
+//     setAulas([]);
+//   };
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+
+//     if (!validateForm()) return;
+
+//     const payload: SaveHorarioPayload = {
+//       anoLectivo: Number(formData.anoLetivo),
+//       semestre: Number(formData.semestre),
+//       periodo: Number(formData.periodo),
+//       curso: Number(formData.curso),
+//       unidadeCurricular: Number(formData.unidadeCurricular),
+//       modalidade: Number(formData.modalidade),
+//       aulas,
+//       apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
+//       capacidade: Number(formData.capacidade),
+//       designacao: formData.designacao,
+//       estadoHorario: 2,
+//       docente: Number(formData.docente),
+//       tipoAula: Number(formData.tipoAula),
+//       sala: Number(formData.sala),
+//       turma: 0,
+//       obs: "",
+//     };
+
+//     try {
+//       await saveHorario.mutateAsync(payload);
+
+//       toast({
+//         title: "Sucesso",
+//         description: "Horário criado com sucesso",
+//       });
+
+//       navigate("/horarios/listar");
+//     } catch (error) {
+//       toast({
+//         variant: "destructive",
+//         title: "Erro ao criar horário",
+//         description: "Verifique os dados e tente novamente",
+//       });
+//     }
 //   };
 
-//   // Monitora mudanças nos filtros para resetar a página
-//   React.useEffect(() => {
-//     resetPageOnFilterChange();
-//   }, [filters]);
-
+//   /* ---------- UI ----------- */
 //   return (
 //     <div className="flex-1 space-y-6 p-8">
-//       {/* Header */}
-//       <div className="flex items-center justify-between">
-//         <div className="space-y-1">
-//           <Breadcrumb>
-//             <BreadcrumbList>
-//               <BreadcrumbItem>
-//                 <BreadcrumbLink href="/">Home</BreadcrumbLink>
-//               </BreadcrumbItem>
-//               <BreadcrumbSeparator />
-//               <BreadcrumbItem>
-//                 <BreadcrumbLink href="/horarios">Horários</BreadcrumbLink>
-//               </BreadcrumbItem>
-//               <BreadcrumbSeparator />
-//               <BreadcrumbItem>
-//                 <BreadcrumbPage>Listar</BreadcrumbPage>
-//               </BreadcrumbItem>
-//             </BreadcrumbList>
-//           </Breadcrumb>
-//           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-//             Horário Existentes
-//           </h1>
-//           <p className="text-muted-foreground">
-//             Visualize todos os Horário criadas por ano letivo, semestre,
-//             período, curso e ano curricular.
-//           </p>
-//         </div>
-//         <Button onClick={() => navigate("/horarios/criar")}>
-//           <Plus className="mr-2 h-4 w-4" />
-//           Criar Horário
-//         </Button>
-//       </div>
+//       {/* BREADCRUMB */}
+//       <Breadcrumb>
+//         <BreadcrumbList>
+//           <BreadcrumbItem>
+//             <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+//           </BreadcrumbItem>
 
-//       {/* Filtros */}
-//       <div className="rounded-lg border bg-card p-6 shadow-sm">
-//         <div className="mb-4 flex items-center gap-2">
-//           <Search className="h-5 w-5 text-muted-foreground" />
-//           <h3 className="text-lg font-semibold">Filtros</h3>
-//         </div>
+//           <BreadcrumbSeparator />
 
-//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-//           {/* Ano Letivo */}
-//           <div className="space-y-2">
-//             <label className="text-sm font-medium">Ano Letivo</label>
-//             <Select
-//               value={filters.anoLetivo}
-//               onValueChange={(v) =>
-//                 setFilters({ ...filters, anoLetivo: v, anoCurricular: "" })
+//           <BreadcrumbItem>
+//             <BreadcrumbLink href="/horarios">Horários</BreadcrumbLink>
+//           </BreadcrumbItem>
+
+//           <BreadcrumbSeparator />
+
+//           <BreadcrumbItem>
+//             <BreadcrumbPage>Criar Horário</BreadcrumbPage>
+//           </BreadcrumbItem>
+//         </BreadcrumbList>
+//       </Breadcrumb>
+
+//       {/* FORM */}
+//       <form onSubmit={handleSubmit} className="space-y-6">
+//         {/* GRID DE CAMPOS */}
+//         <div className="grid md:grid-cols-4 gap-4">
+//           {/* ANO */}
+//           <FormSelect
+//             disabled={isLoadingAcademicYear}
+//             loading={isLoadingAcademicYear}
+//             label="Ano Letivo"
+//             value={formData.anoLetivo}
+//             onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+//             options={academicYear?.filter(
+//               (ay) => ay.estado.toLowerCase() === "activo",
+//             )}
+//             map={(a) => ({
+//               key: a.codigo,
+//               label: a.designacao,
+//               value: a.codigo,
+//             })}
+//           />
+//           <FormSelect
+//             disabled={
+//               isLoadingPeriodos ||
+//               isLoadingAcademicYear ||
+//               formData.anoLetivo === ""
+//             }
+//             loading={isLoadingPeriodos}
+//             label="Período"
+//             value={formData.periodo}
+//             onChange={(v) => setFormData({ ...formData, periodo: v })}
+//             options={periodos}
+//             map={(p) => ({
+//               key: p.codigo,
+//               label: p.designacao,
+//               value: p.codigo,
+//             })}
+//           />
+
+//           {/* SEMESTRE */}
+//           <FormSelect
+//             disabled={isLoadingSemestres}
+//             loading={isLoadingSemestres}
+//             label="Semestre"
+//             value={formData.semestre}
+//             onChange={(v) => setFormData({ ...formData, semestre: v })}
+//             options={semestres}
+//             map={(s) => ({
+//               key: s.codigo,
+//               label: s.designacao,
+//               value: s.codigo,
+//             })}
+//           />
+
+//           {/* CURSO */}
+//           <FormSelect
+//             disabled={isLoadingCurso}
+//             loading={isLoadingCurso}
+//             label="Curso"
+//             value={formData.curso}
+//             onChange={(v) =>
+//               setFormData({
+//                 ...formData,
+//                 curso: v,
+//                 unidadeCurricular: "",
+//                 designacao: "",
+//                 classes: "",
+//               })
+//             }
+//             options={cursos}
+//             map={(c) => ({
+//               key: c.codigo,
+//               label: c.designacao,
+//               value: c.codigo,
+//             })}
+//           />
+//           <FormSelect
+//             label="Ano Curricular"
+//             value={formData.classes}
+//             disabled={isLoadingClasses || !formData.curso}
+//             onChange={(v) => setFormData({ ...formData, classes: v })}
+//             options={classes}
+//             map={(c) => ({
+//               key: c.codigo,
+//               label: c.designacao,
+//               value: c.codigo,
+//             })}
+//             loading={isLoadingClasses}
+//           />
+
+//           {/* PERÍODO */}
+
+//           {/* UC */}
+//           <FormSelect
+//             label="Unidade Curricular"
+//             value={formData.unidadeCurricular}
+//             disabled={
+//               isLoadingUC ||
+//               !formData.semestre ||
+//               !formData.curso ||
+//               !formData.classes
+//             }
+//             onChange={(v) =>
+//               setFormData({ ...formData, unidadeCurricular: v, designacao: "" })
+//             }
+//             options={unidadesCurriculares}
+//             map={(u) => ({
+//               key: u.pk,
+//               label: u.descricao,
+//               value: u.pk,
+//             })}
+//             loading={isLoadingUC}
+//           />
+
+//           {/* MODALIDADE */}
+//           <FormSelect
+//             label="Modalidade"
+//             value={formData.modalidade}
+//             disabled={isLoadingModalidade}
+//             onChange={(v) => setFormData({ ...formData, modalidade: v })}
+//             options={modalidade}
+//             map={(m) => ({
+//               key: m.pkModalidade,
+//               label: m.designacao,
+//               value: m.pkModalidade,
+//             })}
+//             loading={isLoadingModalidade}
+//           />
+//           <FormSelect
+//             label="Reservada para novos estudantes"
+//             value={formData.apenasPrimeiroAno}
+//             onChange={(v) => setFormData({ ...formData, apenasPrimeiroAno: v })}
+//             options={onlyFirstYear}
+//             map={(m) => ({
+//               key: m.value,
+//               label: m.label,
+//               value: m.value,
+//             })}
+//           />
+//           <div className="">
+//             <Label>Designação do Horário</Label>
+//             <Input
+//               readOnly
+//               placeholder="Ex: Horário LEI 1º Ano - Manhã"
+//               value={formData.designacao}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, designacao: e.target.value })
 //               }
-//               disabled={loadingAnos}
-//             >
-//               <SelectTrigger>
-//                 <SelectValue
-//                   placeholder={loadingAnos ? "A carregar..." : "Selecionar"}
-//                 />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 {anosAcademicos?.map((ano) => (
-//                   <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-//                     {ano.designacao}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
+//             />
 //           </div>
 
-//           {/* Semestre */}
-//           <div className="space-y-2">
-//             <label className="text-sm font-medium">Semestre</label>
-//             <Select
-//               value={filters.semestre}
-//               onValueChange={(v) => setFilters({ ...filters, semestre: v })}
-//               disabled={loadingSemestres}
-//             >
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Selecionar" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 {semestres?.map((s) => (
-//                   <SelectItem key={s.codigo} value={s.codigo.toString()}>
-//                     {s.designacao}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-//           </div>
-
-//           {/* Período */}
-//           <div className="space-y-2">
-//             <label className="text-sm font-medium">Período</label>
-//             <Select
-//               value={filters.periodo}
-//               onValueChange={(v) => setFilters({ ...filters, periodo: v })}
-//               disabled={loadingPeriodos}
-//             >
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Selecionar" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 {periodos?.map((p) => (
-//                   <SelectItem key={p.codigo} value={p.codigo.toString()}>
-//                     {p.designacao}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-//           </div>
-
-//           {/* Curso */}
-//           <div className="space-y-2">
-//             <label className="text-sm font-medium">Curso</label>
-//             <Select
-//               value={filters.curso}
-//               onValueChange={(v) =>
-//                 setFilters({ ...filters, curso: v, anoCurricular: "" })
+//           {/* CAPACIDADE */}
+//           <div>
+//             <Label>Capacidade</Label>
+//             <Input
+//               type="number"
+//               min={0}
+//               placeholder="Ex: 40"
+//               value={formData.capacidade}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, capacidade: e.target.value })
 //               }
-//               disabled={loadingCursos}
+//             />
+//           </div>
+//           <FormSelect
+//             label="Docente"
+//             value={formData.docente}
+//             disabled={isLoadingTeacher}
+//             onChange={(v) => setFormData({ ...formData, docente: v })}
+//             options={teachers}
+//             map={(t) => ({
+//               key: t.pk,
+//               label: t.nomeCompleto,
+//               value: t.pk,
+//             })}
+//             loading={isLoadingTeacher}
+//           />
+
+//           {/* TIPO DE AULA */}
+//           <div>
+//             <Label>Tipo de Aula</Label>
+//             <Select
+//               value={formData.tipoAula}
+//               onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
 //             >
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Selecionar" />
+//               <SelectTrigger className="w-full ">
+//                 <SelectValue placeholder="Escolha o tipo" />
 //               </SelectTrigger>
 //               <SelectContent>
-//                 {cursos?.map((c) => (
-//                   <SelectItem key={c.codigo} value={c.codigo.toString()}>
-//                     {c.designacao}
+//                 {tipoDeSalas.map((tipo) => (
+//                   <SelectItem
+//                     key={tipo.pkTipoAula}
+//                     value={tipo.pkTipoAula.toString()}
+//                   >
+//                     {tipo.designacao}
 //                   </SelectItem>
 //                 ))}
 //               </SelectContent>
 //             </Select>
 //           </div>
 
-//           {/* Ano Curricular */}
-//           <div className="space-y-2">
-//             <label className="text-sm font-medium">Ano Curricular</label>
+//           {/* SALA */}
+//           <div>
+//             <Label>Sala</Label>
 //             <Select
-//               value={filters.anoCurricular || "todos"}
-//               onValueChange={(v) =>
-//                 setFilters({
-//                   ...filters,
-//                   anoCurricular: v === "todos" ? "" : v,
-//                 })
-//               }
-//               disabled={loadingAnosCurriculares || !filters.curso}
+//               value={formData.sala}
+//               onValueChange={(v) => setFormData({ ...formData, sala: v })}
 //             >
-//               <SelectTrigger>
+//               <SelectTrigger
+//                 disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
+//                 className="w-full "
+//               >
 //                 <SelectValue
 //                   placeholder={
-//                     loadingAnosCurriculares
-//                       ? "A carregar..."
-//                       : !filters.curso
-//                       ? "Selecione um curso"
-//                       : "Todos os anos"
+//                     <>
+//                       {" "}
+//                       {isLoadingSala ? (
+//                         <span className="flex gap-2 items-center">
+//                           Carregando <Loader2 className="animate-spin" />
+//                         </span>
+//                       ) : (
+//                         "Selecione Salas"
+//                       )}
+//                     </>
 //                   }
 //                 />
 //               </SelectTrigger>
 //               <SelectContent>
-//                 <SelectItem value="all">Todos os anos</SelectItem>
-//                 {anosCurriculares?.map((ac) => (
-//                   <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-//                     {ac.designacao}
+//                 {salas?.map((sala) => (
+//                   <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
+//                     {sala.sala}
 //                   </SelectItem>
 //                 ))}
 //               </SelectContent>
@@ -350,255 +497,66 @@
 //           </div>
 //         </div>
 
-//         <div className="mt-6">
-//           <Input
-//             placeholder="Pesquisar por turma, UC, curso ou ano..."
-//             value={filters.search}
-//             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-//             className="max-w-md"
-//           />
-//         </div>
-//       </div>
+//         {/* GRID DE HORÁRIOS */}
+//         {temposDisponiveis.length > 0 &&
+//           !!formData.anoLetivo &&
+//           !!formData.anoLetivo &&
+//           !!formData.periodo &&
+//           !!formData.semestre &&
+//           !!formData.unidadeCurricular &&
+//           !!formData.modalidade && (
+//             <ScheduleGrid
+//               scheduleData={temposDisponiveis}
+//               onChange={setAulas}
+//             />
+//           )}
 
-//       {/* Ações */}
-//       <div className="flex items-center justify-between">
-//         <Button
-//           onClick={handleRefresh}
-//           variant="outline"
-//           disabled={isLoadingHorarios}
-//         >
-//           <RefreshCw
-//             className={`mr-2 h-4 w-4 ${
-//               isLoadingHorarios ? "animate-spin" : ""
-//             }`}
-//           />
-//           Atualizar Lista
-//         </Button>
+//         {/* BOTÕES */}
+//         <div className="flex justify-end gap-3 pt-6 border-t">
+//           <Button
+//             type="button"
+//             variant="outline"
+//             onClick={() => {
+//               navigate("/horarios/listar");
+//             }}
+//           >
+//             <List className="mr-2 h-4 w-4" />
+//             Listar Horário
+//           </Button>
+//           <Button type="button" variant="outline" onClick={handleResetHorario}>
+//             <X className="mr-2 h-4 w-4" />
+//             Cancelar
+//           </Button>
 
-//         {totalItems > 0 && (
-//           <p className="text-sm text-muted-foreground">
-//             Mostrando {startIndex + 1}-{Math.min(endIndex, totalItems)} de{" "}
-//             {totalItems} turmas
-//           </p>
-//         )}
-//       </div>
-
-//       {/* Tabela + Paginação */}
-//       <div className="rounded-lg border bg-card shadow-sm">
-//         {isLoadingHorarios ? (
-//           <div className="p-8 space-y-4">
-//             {[...Array(6)].map((_, i) => (
-//               <Skeleton key={i} className="h-16 w-full" />
-//             ))}
-//           </div>
-//         ) : error ? (
-//           <Alert variant="destructive" className="m-6">
-//             <AlertDescription>
-//               Erro ao carregar Horário. Tente novamente.
-//             </AlertDescription>
-//           </Alert>
-//         ) : filteredHorarios.length === 0 ? (
-//           <div className="flex flex-col items-center justify-center p-16 text-center">
-//             <div className="rounded-full bg-muted p-6 mb-4">
-//               <File className="h-12 w-12 text-muted-foreground" />
-//             </div>
-//             <h3 className="text-xl font-semibold mb-2">
-//               Nenhum Horário encontrado
-//             </h3>
-//             <p className="text-muted-foreground max-w-md mb-6">
-//               {filters.anoLetivo && filters.curso
-//                 ? "Não existem Horários criadas com os filtros aplicados."
-//                 : "Preencha os filtros para visualizar os Horários."}
-//             </p>
-//             <Button onClick={() => navigate("/horarios/criar")}>
-//               <Plus className="mr-2 h-4 w-4" />
-//               Criar Horário
-//             </Button>
-//           </div>
-//         ) : (
-//           <>
-//             <div className="overflow-x-auto">
-//               <Table>
-//                 <TableHeader>
-//                   <TableRow className="bg-muted/50">
-//                     <TableHead>Turma</TableHead>
-//                     <TableHead>Curso</TableHead>
-//                     <TableHead>Unidade Curricular</TableHead>
-//                     <TableHead>Ano Curricular</TableHead>
-//                     <TableHead>Capacidade</TableHead>
-//                     <TableHead>Estado</TableHead>
-//                     <TableHead>Disponibilidade</TableHead>
-//                     <TableHead>Criado em</TableHead>
-//                     <TableHead>Acção</TableHead>
-//                   </TableRow>
-//                 </TableHeader>
-//                 <TableBody>
-//                   {currentItems.map((h) => (
-//                     <TableRow
-//                       key={h.codigo}
-//                       className="hover:bg-muted/50 cursor-pointer"
-//                     >
-//                       <TableCell className="font-semibold text-primary">
-//                         {h.designacao}
-//                       </TableCell>
-//                       <TableCell>{h.curso}</TableCell>
-//                       <TableCell>{h.unidadeCurricular}</TableCell>
-//                       <TableCell className="font-medium">{h.ano}</TableCell>
-//                       <TableCell>{h.capacidade}</TableCell>
-//                       <TableCell>
-//                         <Badge
-//                           variant={
-//                             h.estado.toLowerCase().includes("pendente") ||
-//                             h.estado.toLowerCase().includes("distribuição")
-//                               ? "secondary"
-//                               : "default"
-//                           }
-//                         >
-//                           {h.estado}
-//                         </Badge>
-//                       </TableCell>
-//                       <TableCell align="center">
-//                         <Switch
-//                           checked={h.disponibilidade === "Disponivel"}
-//                           disabled={mutation.isPending}
-//                           onCheckedChange={() => {
-//                             mutation.mutate({
-//                               p_horario_id: h.codigo,
-//                             });
-//                           }}
-//                         />
-//                       </TableCell>
-//                       <TableCell className="text-sm text-muted-foreground">
-//                         {new Date(h.dataCriacao).toLocaleDateString("pt-AO")}
-//                       </TableCell>
-//                       <TableCell className="w-10">
-//                         <DropdownMenu>
-//                           <DropdownMenuTrigger asChild>
-//                             <button className="h-8 w-8 rounded-md p-0 hover:bg-muted inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors">
-//                               <MoreVertical className="h-4 w-4" />
-//                               <span className="sr-only">Ações</span>
-//                             </button>
-//                           </DropdownMenuTrigger>
-
-//                           <DropdownMenuContent align="end">
-//                             {/*
-//                             <DropdownMenuItem onClick={() => console.log("ver", h.id)}>
-//                               <Eye className="mr-2 h-4 w-4" /> Ver
-//                             </DropdownMenuItem>
-
-//                             <DropdownMenuItem onClick={() => console.log("editar", item.id)}>
-//                               <Edit className="mr-2 h-4 w-4" /> Editar
-//                             </DropdownMenuItem>
-
-//                             <DropdownMenuItem onClick={() => console.log("duplicar", item.id)}>
-//                               <Copy className="mr-2 h-4 w-4" /> Duplicar
-//                             </DropdownMenuItem>
-//            */}
-//                             <DropdownMenuItem
-//                               onSelect={(e) => e.preventDefault()} // evita fechar o menu
-//                               onClick={() => {
-//                                 handleDeleteConfirmed(h.codigo);
-//                               }}
-//                               className="text-destructive focus:text-destructive"
-//                             >
-//                               <Trash2 className="mr-2 h-4 w-4" /> Excluir
-//                             </DropdownMenuItem>
-//                             <DropdownMenuItem
-//                               disabled={
-//                                 validarMutation.isPending ||
-//                                 !h.estado.toLowerCase().includes("pendente")
-//                               }
-//                               onClick={() => {
-//                                 validarMutation.mutate({
-//                                   p_horario_id: h.codigo,
-//                                 });
-//                               }}
-//                               className="text-green-500 focus:text-green-500 disabled:opacity-50"
-//                             >
-//                               <Check className="mr-2 h-4 w-4" /> Validar
-//                             </DropdownMenuItem>
-//                           </DropdownMenuContent>
-//                         </DropdownMenu>
-//                       </TableCell>
-//                     </TableRow>
-//                   ))}
-//                 </TableBody>
-//               </Table>
-//             </div>
-
-//             {/* Paginação */}
-//             {totalPages > 1 && (
-//               <div className="flex items-center justify-between border-t bg-muted/20 px-4 py-3">
-//                 <div className="flex items-center gap-2">
-//                   <Button
-//                     variant="outline"
-//                     size="icon"
-//                     onClick={() => setPage(1)}
-//                     disabled={page === 1}
-//                   >
-//                     <ChevronFirst className="h-4 w-4" />
-//                   </Button>
-//                   <Button
-//                     variant="outline"
-//                     size="icon"
-//                     onClick={() => setPage((p) => Math.max(1, p - 1))}
-//                     disabled={page === 1}
-//                   >
-//                     <ChevronLeft className="h-4 w-4" />
-//                   </Button>
-
-//                   <span className="text-sm text-muted-foreground px-4">
-//                     Página <strong>{page}</strong> de{" "}
-//                     <strong>{totalPages}</strong>
-//                   </span>
-
-//                   <Button
-//                     variant="outline"
-//                     size="icon"
-//                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-//                     disabled={page === totalPages}
-//                   >
-//                     <ChevronRight className="h-4 w-4" />
-//                   </Button>
-//                   <Button
-//                     variant="outline"
-//                     size="icon"
-//                     onClick={() => setPage(totalPages)}
-//                     disabled={page === totalPages}
-//                   >
-//                     <ChevronLast className="h-4 w-4" />
-//                   </Button>
-//                 </div>
-//               </div>
+//           <Button
+//             type="submit"
+//             disabled={!isFormComplete || saveHorario.isPending}
+//           >
+//             {saveHorario.isPending ? (
+//               <>
+//                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando
+//               </>
+//             ) : (
+//               <>
+//                 <Save className="mr-2 h-4 w-4" /> Guardar Horário
+//               </>
 //             )}
-//           </>
-//         )}
-//       </div>
-//       {/* Modal de confirmação de exclusão */}
-//       {/* <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-//         <AlertDialogContent>
-//           <AlertDialogHeader>
-//             <AlertDialogTitle>Tens a certeza absoluta?</AlertDialogTitle>
-//             <AlertDialogDescription>
-//               Esta ação é irreversível. Vais excluir permanentemente o item:{" "}
-//               <span className="font-bold text-foreground">
-//                 {itemToDelete?.nome}
-//               </span>
-//             </AlertDialogDescription>
-//           </AlertDialogHeader>
-//           <AlertDialogFooter>
-//             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-//             <AlertDialogAction
-//               onClick={() =>
-//                 itemToDelete && handleDeleteConfirmed(itemToDelete)
-//               }
-//               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-//             >
-//               Sim, excluir
-//             </AlertDialogAction>
-//           </AlertDialogFooter>
-//         </AlertDialogContent>
-//       </AlertDialog> */}
+//           </Button>
+//         </div>
+//       </form>
 //     </div>
 //   );
+// }
+// const onlyFirstYear = [
+//   { value: 0, label: "Sim" },
+//   { value: 1, label: "Não" },
+// ];
+// const STOP_WORDS = ["e", "de", "do", "da", "dos", "das"];
+
+// function gerarSiglaCurso(nome: string) {
+//   return nome
+//     .split(" ")
+//     .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
+//     .map((p) => p[0].toUpperCase())
+//     .join("");
 // }
