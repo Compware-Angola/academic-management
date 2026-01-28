@@ -57,7 +57,8 @@ export interface logoutResponse {
 export interface CurrentUserResponse {
   isAuthenticated: boolean;
   user: User;
-  groups?: Group[];       
+  groups?: Group[]; 
+  permissions?: string[] 
   message: string;
   platform?: 'GA' | 'PORTAL'; 
 }

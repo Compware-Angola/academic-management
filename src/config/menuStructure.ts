@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export const menuStructure: MenuStructure = {
   items: [
@@ -34,24 +35,25 @@ export const menuStructure: MenuStructure = {
       url: "/acessos",
       icon: Shield,
       items: [
-        { title: "Lista  utilizador", url: "/acessos/utilizador" },
-        { title: "Lista por grupos", url: "/ver-utilizadores/grupos" },
+        { title: "Lista  utilizador", url: "/acessos/utilizador", permission: [PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla,PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla] },
+        { title: "Lista por grupos", url: "/ver-utilizadores/grupos", permission: [PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla,PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla] },
         // { title: "Alterar senha", url: "/acessos/alterar-senha" },
-        { title: "Criar utilizador", url: "/acessos/criar-utilizador" },
+        { title: "Criar utilizador", url: "/acessos/criar-utilizador", permission: [PermissionTypeDetails.CRIAR_UTILIZADOR.sigla] },
         { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo" },
         //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
-        { title: "Acessos (todos) + novos", url: "/acessos/todos" },
+        { title: "Acessos (todos) + novos", url: "/acessos/todos" , permission: [PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla,PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla]},
         // { title: "Bloquear acesso", url: "/acessos/bloquear" },
-        { title: "Cargos Reitoria administrativo", url: "/acessos/cargos" },
-        { title: "Logs de acessos", url: "/acessos/logs" },
-        { title: "Utilizadores logados", url: "/acessos/logados" },
-        { title: "Grupos", url: "/controle-acesso/grupos" },
+        { title: "Cargos Reitoria administrativo", url: "/acessos/cargos", permission: [PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla,PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla] },
+        { title: "Logs de acessos", url: "/acessos/logs", permission: [PermissionTypeDetails.LISTAR_LOGS_ACESSO.sigla] },
+        { title: "Utilizadores logados", url: "/acessos/logados", permission: [PermissionTypeDetails.LISTAR_UTILIZADORES_LOGADOS.sigla] },
+        { title: "Grupos", url: "/controle-acesso/grupos", },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
         },
       ],
-      roles: ["adm", "rootAdmin", "dct"],
+
+      permission: [],
     },
     // ----------------------------------------------------
     // CONTROLE DE ACESSO
@@ -72,7 +74,8 @@ export const menuStructure: MenuStructure = {
         { title: "Marcar assiduidade", url: "/assiduidade/marcar" },
         { title: "Marcar assiduidade prova", url: "/assiduidade/prova" },
       ],
-      roles: ["adm", "rootAdmin"],
+      
+      permission: ["adm", "rootAdmin"],
     },
     */
 
@@ -113,7 +116,8 @@ export const menuStructure: MenuStructure = {
         { title: "Validação do programa", url: "/docente/validacao" },
         { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
-      roles: ["adm", "rootAdmin", "dct"],
+      
+      permission: ["adm", "rootAdmin", "dct"],
     },
 
     // ----------------------------------------------------
@@ -128,7 +132,8 @@ export const menuStructure: MenuStructure = {
         { title: "Orientadores", url: "/tfc/orientadores" },
         { title: "Pagamentos TFC", url: "/tfc/pagamentos" },
       ],
-      roles: ["adm", "rootAdmin"],
+      
+      permission: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -153,7 +158,8 @@ export const menuStructure: MenuStructure = {
         { title: "Salário", url: "/gestao-docentes/salario" },
         { title: "Validação docente", url: "/gestao-docentes/validacao" },
       ],
-      roles: ["adm", "rootAdmin"],
+      
+      permission: ["adm", "rootAdmin"],
     },
 
 
@@ -183,7 +189,8 @@ export const menuStructure: MenuStructure = {
           url: "/inscricoes/mensalidades-curso",
         },
       ],
-      roles: ["adm", "rootAdmin"],
+      
+      permission: ["adm", "rootAdmin"],
     },
   */
     // ----------------------------------------------------
@@ -204,7 +211,8 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Gestão de UC no plano", url: "/plano/uc-plano" },
       ],
-      roles: ["adm", "rootAdmin"],
+
+      permission: [],
     },
 
     // ----------------------------------------------------
@@ -233,7 +241,8 @@ export const menuStructure: MenuStructure = {
         { title: "Lista de presença", url: "/pos-graduacao/presenca" },
         { title: "TFC", url: "/pos-graduacao/tfc" },
       ],
-      roles: ["adm", "rootAdmin"],
+      
+      permission: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -244,7 +253,8 @@ export const menuStructure: MenuStructure = {
       url: "/sumario",
       icon: FileText,
       items: [{ title: "Parâmetros", url: "/sumario/parametros" }],
-      roles: ["adm", "rootAdmin"],
+      
+      permission: ["adm", "rootAdmin"],
     },
 
     // ----------------------------------------------------
@@ -271,7 +281,8 @@ export const menuStructure: MenuStructure = {
         },
         { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
       ],
-      roles: ["adm", "rootAdmin"],
+      
+      permission: ["adm", "rootAdmin"],
     },
 */
     // ----------------------------------------------------
@@ -282,7 +293,8 @@ export const menuStructure: MenuStructure = {
       url: "/salas",
       icon: Building,
       items: [{ title: "Listar salas", url: "/salas/listar" }],
-      roles: ["adm", "rootAdmin"],
+
+      permission: [],
     },
 
     // ----------------------------------------------------
@@ -296,7 +308,8 @@ export const menuStructure: MenuStructure = {
         { title: "Controle", url: "/marcacao-provas/controle" },
         { title: "Marcação", url: "/marcacao-provas/marcacao" },
       ],
-      roles: ["adm", "rootAdmin", "dct"],
+
+      permission: [],
     },
   ],
 };
@@ -319,6 +332,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Notas de Pagamentos",
           url: "/financas/notas-pagamento",
+          permission: [PermissionTypeDetails.FACTURAS.sigla],
         },
         // { title: "Estudantes Devedores", url: "/financas/devedores" },
         // { title: "Estudantes Inactivos", url: "/financas/inactivos" },
@@ -334,7 +348,7 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/isentar-antigos",
         // },
 
-        { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
+        { title: "Negociação de Dívida", url: "/financas/negociacao-divida", },
         // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
 
@@ -352,10 +366,11 @@ export const finaceStructure: MenuStructure = {
         //   title: "Instituições com Receita",
         //   url: "/financas/credito/instituicoes/receita",
         // },
-        { title: "Bolsas", url: "/financas/credito/bolsa" },
+        { title: "Bolsas", url: "/financas/credito/bolsas" },
         {
           title: "Bolsa Estudante",
           url: "/financas/credito/bolsa/estudante",
+          permission: [PermissionTypeDetails.LISTAR_BOLSEIROS.sigla] 
         },
         // {
         //   title: "Tipos de Estudantes",
@@ -438,7 +453,8 @@ export const finaceStructure: MenuStructure = {
         // { title: "Taxa do IVA", url: "/financas/agt/iva" },
         // { title: "Gerar SAFT", url: "/financas/agt/saft" },
       ],
-      roles: ["adm", "rootAdmin", "fin"],
+
+      permission: [],
     },
   ],
 };
@@ -450,18 +466,20 @@ export const healpStructure: MenuStructure = {
       url: "/comunicacao",
       icon: MessageSquare,
       items: [
-        { title: "Avisos", url: "/comunicacao/avisos" },
+        { title: "Avisos", url: "/comunicacao/avisos", permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla] },
         { title: "Imagens de abertura", url: "/comunicacao/imagens" },
         { title: "Solicitações", url: "/comunicacao/solicitacoes" },
       ],
-      roles: ["adm", "rootAdmin"],
+
+      permission: [],
     },
     {
       title: "Ajuda",
       url: "/ajuda",
       icon: HelpCircle,
       items: [],
-      roles: ["adm", "rootAdmin", "healp", "dct", "fin"],
+
+      permission: [],
     },
   ],
 };
@@ -482,7 +500,8 @@ export const academicStructure: MenuStructure = {
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
-      roles: ["adm", "rootAdmin", "dct"],
+
+      permission: [],
     }, // ----------------------------------------------------
     // AVALIAÇÕES
     // ----------------------------------------------------
@@ -523,7 +542,8 @@ export const academicStructure: MenuStructure = {
         { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
         { title: "Parâmetros gerais", url: "/avaliacoes/parametros" },
       ],
-      roles: ["adm", "rootAdmin", "dct"],
+
+      permission: [],
     }, // ----------------------------------------------------
     // HORÁRIOS
     // ----------------------------------------------------
@@ -532,7 +552,7 @@ export const academicStructure: MenuStructure = {
       url: "/horarios",
       icon: Calendar,
       items: [
-        { title: "Criar horário", url: "/horarios/criar" },
+        { title: "Criar horário", url: "/horarios/criar" , permission: [PermissionTypeDetails.CRIAR_HORARIO.sigla]},
         { title: "Horários semanais", url: "/horarios/semanais" },
         //  { title: "Substitutos", url: "/horarios/substitutos" },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
@@ -540,16 +560,17 @@ export const academicStructure: MenuStructure = {
           title: "Movimentar estudantes",
           url: "/horarios/movimentar/estudantes",
         },
-        { title: "Permissão editar", url: "/horarios/permissao" },
-        { title: "Horários por docente", url: "/horarios/docente" },
-        { title: "Inscrições por horário", url: "/horarios/inscricoes" },
-        { title: "Listar horário", url: "/horarios/listar" },
+        { title: "Permissão editar", url: "/horarios/permissao",  permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla]},
+        { title: "Horários por docente", url: "/horarios/docente",  permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla]},
+        { title: "Inscrições por horário", url: "/horarios/inscricoes", permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla]},
+        { title: "Listar horário", url: "/horarios/listar" , permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla]},
         { title: "Eliminados", url: "/horarios/eliminados" },
-        { title: "Horários por sala", url: "/horarios/sala" },
+        { title: "Horários por sala", url: "/horarios/sala", permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla]},
         { title: "Horários por UC", url: "/horarios/uc" },
         { title: "Parâmetros", url: "/horarios/parametros" },
       ],
-      roles: ["adm", "rootAdmin", "dct"],
+
+      permission: [],
     },
     // ----------------------------------------------------
     // EXAME DE ACESSO
@@ -582,7 +603,8 @@ export const academicStructure: MenuStructure = {
         { title: "Resetar prova", url: "/exame/resetar" },
         { title: "Lista de presença", url: "/exame/presenca" },
       ],
-      roles: ["adm", "rootAdmin", "dct"],
+      
+      permission: ["adm", "rootAdmin", "dct"],
     },
      */
   ],

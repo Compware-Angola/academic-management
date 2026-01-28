@@ -1,19 +1,28 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/hooks/use-auth";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
+import { can } from "@/auth/can";
 
 type ProtectedRouteProps = {
-  allowedGroups: string[];
+  allowedPermissions: string[]; 
   children: React.ReactNode;
 };
 
 export function ProtectedRoute({
-  allowedGroups,
+  allowedPermissions,
   children,
 }: ProtectedRouteProps) {
-  const { user } = useAuth();
+  const { data: user, isError } = useCurrentUser("GA");
 
-  const userGroups = user?.groups?.map((g) => g.sigla) || [];
-  const hasAccess = allowedGroups.some((group) => userGroups.includes(group));
+  if (isError || !user) {
+    return <Navigate to="/sem-permissao" replace />;
+  }
+
+  const userPermissions = user?.permissions || [];
+
+  // verifica se alguma permissão do allowedPermissions está no userPermissions
+  const hasAccess = allowedPermissions.some((permission) =>
+    can(userPermissions, permission)
+  );
 
   if (!hasAccess) {
     return <Navigate to="/sem-permissao" replace />;

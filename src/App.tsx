@@ -83,6 +83,8 @@ import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
+import { P } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
+import { PermissionTypeDetails } from "./constants/permission.type";
 
 const App = () => {
   return (
@@ -103,9 +105,7 @@ const App = () => {
                   <Route
                     path="/horarios/criar"
                     element={
-                      <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
-                      >
+                      <ProtectedRoute allowedPermissions={[PermissionTypeDetails.CRIAR_HORARIO.sigla!]}>
                         <CreateSchedule />
                       </ProtectedRoute>
                     }
@@ -114,7 +114,7 @@ const App = () => {
                     path="/controle-acesso/diretor"
                     element={
                       <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                        allowedPermissions={[]}
                       >
                         <DirectorCourseAccess />
                       </ProtectedRoute>
@@ -124,7 +124,7 @@ const App = () => {
                     path="/controle-acesso/solicitacoes"
                     element={
                       <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                        allowedPermissions={[]}
                       >
                         <SolicitacoesEncaminhadas />
                       </ProtectedRoute>
@@ -134,7 +134,7 @@ const App = () => {
                     path="/financas/notas-pagamento"
                     element={
                       <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                        allowedPermissions={[]}
                       >
                         <ListarNotasPagamento />
                       </ProtectedRoute>
@@ -144,7 +144,7 @@ const App = () => {
                     path="/financas/credito/instituicoes"
                     element={
                       <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                        allowedPermissions={[]}
                       >
                         <CreateInstituicao />
                       </ProtectedRoute>
@@ -263,7 +263,13 @@ const App = () => {
                   element={<MarkAttendance />}
                 />
               */}
-                  <Route path="/acessos/utilizador" element={<UserAccess />} />
+                  <Route path="/acessos/utilizador"    element={
+                      <ProtectedRoute
+                        allowedPermissions={[]}
+                      >
+                        <UserAccess />
+                      </ProtectedRoute>
+                    }  />
                   <Route
                     path="/acessos/criar-utilizador"
                     element={<CreateUser />}
