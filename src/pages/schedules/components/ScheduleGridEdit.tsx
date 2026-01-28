@@ -168,8 +168,10 @@ export default function ScheduleGridEdit({
                     type="button"
                     onClick={() => toggleSlot(item.diaSemana, tempo)}
                     variant={filled ? "default" : "outline"}
-                    className={`w-full justify-start py-3 ${
-                      filled ? "bg-green-50 text-green-900" : ""
+                    className={`w-full justify-start h-auto py-3 transition ${
+                      filled
+                        ? "bg-green-50 text-green-900 hover:bg-green-100"
+                        : ""
                     }`}
                   >
                     <Clock

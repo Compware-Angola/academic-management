@@ -13,22 +13,100 @@ import { useToast } from "@/hooks/use-toast";
 type SlotKey = string;
 
 type ScheduleGridProps = {
+  ocupadas: Set<string>;
   scheduleData: TempoDisponivelItem[];
   onChange: (aulas: AulaPayload[]) => void;
 };
 
 export default function ScheduleGrid({
+  ocupadas,
   scheduleData,
   onChange,
 }: ScheduleGridProps) {
   const { toast } = useToast();
 
   const [slotData, setSlotData] = useState<Record<SlotKey, AulaPayload>>({});
+  const isOcupada = (diaId: number, ordem: number) =>
+    ocupadas.has(`${diaId}-${ordem}`);
 
   /* ---------- FUNÇÕES ---------- */
+
+  const toggleAllForDay = (dia: DiaSemana, tempos: Tempo[]) => {
+    const updated = { ...slotData };
+
+    // Pegando somente os tempos disponíveis (não ocupados)
+    const temposDisponiveis = tempos.filter(
+      (tempo) => !isOcupada(dia.pkDiaDaSemana, tempo.ordem),
+    );
+
+    if (temposDisponiveis.length === 0) {
+      // Nenhum tempo disponível → não faz nada
+      toast({
+        variant: "destructive",
+        title: "Dia cheio",
+        description: `Todos os tempos de ${dia.designacao} estão ocupados.`,
+      });
+      return;
+    }
+
+    // Verifica se todos os tempos disponíveis já estão selecionados
+    const allDisponiveisSelected = temposDisponiveis.every((tempo) =>
+      Boolean(updated[`${dia.pkDiaDaSemana}-${tempo.ordem}`]),
+    );
+
+    if (allDisponiveisSelected) {
+      // Remove todos os selecionados
+      temposDisponiveis.forEach((tempo) => {
+        const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
+        delete updated[key];
+      });
+
+      toast({
+        title: "Todos desmarcados",
+        description: `Todos os tempos disponíveis de ${dia.designacao} foram removidos.`,
+      });
+    } else {
+      // Adiciona todos os tempos disponíveis
+      temposDisponiveis.forEach((tempo) => {
+        const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
+        if (!updated[key]) {
+          updated[key] = {
+            diaSemana: dia.pkDiaDaSemana,
+            ordemTempo: tempo.ordem,
+            hora_inicio: tempo.horaInicio,
+            hora_fim: tempo.horaFim,
+            obs: "",
+          };
+        }
+      });
+
+      toast({
+        title: "Todos selecionados",
+        description: `Todos os tempos disponíveis de ${dia.designacao} foram adicionados.`,
+      });
+    }
+
+    setSlotData(updated);
+    onChange(Object.values(updated));
+  };
+
+  const hasData = (diaId: number, ordem: number) =>
+    Boolean(slotData[`${diaId}-${ordem}`]);
+
+  const days = scheduleData.filter((item) => item.diaSemana);
   const toggleSlot = (dia: DiaSemana, tempo: Tempo) => {
     const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
 
+    if (isOcupada(dia.pkDiaDaSemana, tempo.ordem)) {
+      toast({
+        variant: "destructive",
+        title: "Sala ocupada",
+        description: "Não é possível marcar este horário.",
+      });
+      return;
+    }
+
+    // Se já está selecionado → remove
     if (slotData[key]) {
       const updated = { ...slotData };
       delete updated[key];
@@ -42,6 +120,7 @@ export default function ScheduleGrid({
       return;
     }
 
+    // Se não está → adiciona
     const novaAula: AulaPayload = {
       diaSemana: dia.pkDiaDaSemana,
       ordemTempo: tempo.ordem,
@@ -59,54 +138,6 @@ export default function ScheduleGrid({
       description: "Tempo adicionado ao horário.",
     });
   };
-
-  const toggleAllForDay = (dia: DiaSemana, tempos: Tempo[]) => {
-    const allSelected = tempos.every((tempo) =>
-      Boolean(slotData[`${dia.pkDiaDaSemana}-${tempo.ordem}`]),
-    );
-
-    const updated = { ...slotData };
-
-    if (allSelected) {
-      // Remove todos
-      tempos.forEach((tempo) => {
-        const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
-        delete updated[key];
-      });
-
-      toast({
-        title: "Todos removidos",
-        description: `Todos os tempos de ${dia.designacao} foram desmarcados.`,
-      });
-    } else {
-      // Adiciona todos
-      tempos.forEach((tempo) => {
-        const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
-        if (!updated[key]) {
-          updated[key] = {
-            diaSemana: dia.pkDiaDaSemana,
-            ordemTempo: tempo.ordem,
-            hora_inicio: tempo.horaInicio,
-            hora_fim: tempo.horaFim,
-            obs: "",
-          };
-        }
-      });
-
-      toast({
-        title: "Todos selecionados",
-        description: `Todos os tempos de ${dia.designacao} foram adicionados.`,
-      });
-    }
-
-    setSlotData(updated);
-    onChange(Object.values(updated));
-  };
-
-  const hasData = (diaId: number, ordem: number) =>
-    Boolean(slotData[`${diaId}-${ordem}`]);
-
-  const days = scheduleData.filter((item) => item.diaSemana);
 
   /* ---------- RENDER ---------- */
   return (
@@ -156,23 +187,35 @@ export default function ScheduleGrid({
           <CardContent className="p-3 space-y-2">
             {item.tempos.map((tempo) => {
               const filled = hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem);
+              console.log({ filled });
+              const ocupada = isOcupada(
+                item.diaSemana.pkDiaDaSemana,
+                tempo.ordem,
+              );
 
               return (
                 <Button
                   key={tempo.ordem}
                   type="button"
+                  disabled={ocupada}
                   onClick={() => toggleSlot(item.diaSemana, tempo)}
                   variant={filled ? "default" : "outline"}
                   className={`w-full justify-start h-auto py-3 transition ${
-                    filled
-                      ? "bg-green-50 text-green-900 hover:bg-green-100"
-                      : ""
+                    ocupada
+                      ? "bg-red-100 text-red-700 cursor-not-allowed"
+                      : filled
+                        ? "bg-green-50 text-green-900 hover:bg-green-100"
+                        : ""
                   }`}
                 >
                   <Clock
                     size={16}
                     className={
-                      filled ? "text-green-600" : "text-muted-foreground"
+                      ocupada
+                        ? "text-red-600"
+                        : filled
+                          ? "text-green-600"
+                          : "text-muted-foreground"
                     }
                   />
                   <span className="ml-2 text-sm font-semibold">
