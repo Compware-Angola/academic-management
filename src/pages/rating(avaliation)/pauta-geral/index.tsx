@@ -311,7 +311,6 @@ const pdfContent = pdfData ? (
           </p>
         </div>
 
-                   {/* 👉 AQUI FICAM OS BOTÕES DE EXPORTAR / IMPRIMIR */}
           {pautaGeral.length > 0 && pdfContent && (
             <PDFActions
               document={pdfContent}
