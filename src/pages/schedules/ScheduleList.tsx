@@ -67,7 +67,7 @@ import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-val
 import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
 import { useAuth } from "@/hooks/use-auth";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { es } from "date-fns/locale";
+import { es, is } from "date-fns/locale";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -89,6 +89,7 @@ export default function ScheduleList() {
     anoCurricular: "",
     unidadeCurricular: "",
     estado: "",
+    afetacaoDocente: ""
   });
 
   // Paginação
@@ -123,7 +124,17 @@ export default function ScheduleList() {
     periodo: filters.periodo ? Number(filters.periodo) : undefined,
     curso: filters.curso ? Number(filters.curso) : undefined,
     unidadeCurricular: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
-    estado: filters.estado ? Number(filters.estado) : undefined,
+ ...(filters.afetacaoDocente != null &&
+    filters.afetacaoDocente !== "" &&
+    !isNaN(Number(filters.afetacaoDocente)) && {
+      afetacaoDocente: Number(filters.afetacaoDocente),
+    }),
+
+  ...(filters.estado != null &&
+    filters.estado !== "" &&
+    !isNaN(Number(filters.estado)) && {
+      estado: Number(filters.estado),
+    }),
   };
 
   const {
@@ -228,6 +239,7 @@ export default function ScheduleList() {
                 anoCurricular: "",
                 unidadeCurricular: "",
                 estado: "",
+                afetacaoDocente: "",
               });
 
               setPage(1);
@@ -366,12 +378,29 @@ export default function ScheduleList() {
 
             <FormSelect
               label="Estado do Horário"
+              disabled={isLoadingSchedule || isLoadingAcademicYear}
               value={filters.estado || ""}
               onChange={(v) => setFilters({ ...filters, estado: v })}
               options={[
                 { codigo: null, designacao: "Todos" },
                 { codigo: "2", designacao: "Pendente" },
                 { codigo: "3", designacao: "Validado" },
+              ]}
+              map={(option) => ({
+                key: option.codigo,
+                label: option.designacao,
+                value: option.codigo,
+              })}
+            />
+              <FormSelect
+              label="Docente"
+                disabled={isLoadingSchedule || isLoadingAcademicYear}
+              value={filters.afetacaoDocente || ""}
+              onChange={(v) => setFilters({ ...filters, afetacaoDocente: v })}
+              options={[
+                { codigo: null, designacao: "Todos" },
+                { codigo: "1", designacao: "Com Docente" },
+                { codigo: "2", designacao: "Sem Docente" },
               ]}
               map={(option) => ({
                 key: option.codigo,
