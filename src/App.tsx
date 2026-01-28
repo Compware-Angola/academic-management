@@ -12,10 +12,7 @@ import CreateSchedule from "./pages/schedules/CreateSchedule/CreateSchedule";
 import ScheduleList from "./pages/schedules/ScheduleList";
 import ClassromList from "./pages/classroom/ClassromList";
 import DisciplineManagementList from "./pages/disciplinemanagement/DisciplineManagementList";
-import EnrolledList from "./pages/registrations/EnrolledList";
 import GeneralListing from "./pages/facultymanagement/GeneralListing";
-import CandidateList from "./pages/exam/CandidateList";
-import ScholarshipHoldersList from "./pages/bolsa/ScholarshipHoldersList";
 import LaunchNotes from "./pages/rating(avaliation)/LaunchNotes";
 import UserAccess from "./pages/access/UserAccess";
 import LoggedInUsers from "./pages/access/LoggedInUsers";
@@ -265,7 +262,7 @@ const App = () => {
               */}
                   <Route path="/acessos/utilizador"    element={
                       <ProtectedRoute
-                        allowedPermissions={[]}
+                        allowedPermissions={[PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla!, PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla!]}
                       >
                         <UserAccess />
                       </ProtectedRoute>
