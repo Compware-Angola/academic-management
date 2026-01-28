@@ -494,7 +494,7 @@ const pdfContent = pdfData ? (
                       <TableHead>Nota</TableHead>
                       <TableHead>Lançada por</TableHead>
                       <TableHead>Data de Lançamento</TableHead>
-                      <TableHead>Data Alteração</TableHead>
+                      
                     </TableRow>
                   </TableHeader>
                   <TableBody>
