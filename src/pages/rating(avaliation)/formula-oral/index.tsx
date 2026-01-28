@@ -1,3 +1,8 @@
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useEffect, useMemo } from "react";
+
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -30,6 +35,9 @@ import { useMutationUpdateDefinirOral } from "@/hooks/avaliacao/use-mutation-upd
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function FormulaOral() {
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
+
   const [filters, setFilters] = useState({
     anoLetivo: "",
     semestre: "",
@@ -62,13 +70,33 @@ export default function FormulaOral() {
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
   });
 
-  // PAGINAÇÃO
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  // ===========================
+// FILTRO LOCAL (DISCIPLINA)
+// ===========================
+const filteredData = useMemo(() => {
+  if (!debouncedSearch) return data;
 
-  const paginated = data.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const searchLower = debouncedSearch.toLowerCase();
+
+  return data.filter((item) =>
+  item.disciplina?.toLowerCase().includes(searchLower)
+);
+}, [data, debouncedSearch]);
+
+// ===========================
+// PAGINAÇÃO (COM FILTRO)
+// ===========================
+const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+const paginated = filteredData.slice(
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage,
+);
+
+useEffect(() => {
+  setCurrentPage(1);
+}, [debouncedSearch]);
+
 
   return (
     <div className="space-y-6">
@@ -159,17 +187,29 @@ export default function FormulaOral() {
         [...Array(5)].map((_, i) => (
           <Skeleton key={i} className="h-10 w-full" />
         ))
-      ) : paginated.length === 0 ? (
+      ) :  filteredData.length === 0 ? (
         <div className="bg-card border rounded-lg text-center py-10">
           <Shield className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
           <p>Nenhum registro encontrado</p>
         </div>
       ) : (
-        <div className="bg-card border rounded-lg overflow-hidden">
+
+
+            <div  className="space-y-4">
+
+
+               <div className="flex justify-end max-w-md ml-auto">
+                <Input
+                  placeholder="Filtrar por Unidade Curricular..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+
+          <div className="bg-card border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
                 <TableHead>Disciplina</TableHead>
                 <TableHead className="text-center">Oral</TableHead>
               </TableRow>
@@ -178,7 +218,6 @@ export default function FormulaOral() {
             <TableBody>
               {paginated.map((item) => (
                 <TableRow key={item.codigoGrade}>
-                  <TableCell>{item.codigoGrade}</TableCell>
 
                   <TableCell>{item.disciplina}</TableCell>
 
@@ -200,6 +239,11 @@ export default function FormulaOral() {
             </TableBody>
           </Table>
         </div>
+
+
+
+            </div>
+
       )}
 
       {/* ========== PAGINAÇÃO ========== */}
