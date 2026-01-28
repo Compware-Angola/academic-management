@@ -36,15 +36,7 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla,
           ],
         },
-        {
-          title: "Lista por grupos",
-          url: "/ver-utilizadores/grupos",
-          permission: [
-            PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla,
-            PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla,
-          ],
-        },
-        // { title: "Alterar senha", url: "/acessos/alterar-senha" },
+        
         {
           title: "Criar utilizador",
           url: "/acessos/criar-utilizador",
