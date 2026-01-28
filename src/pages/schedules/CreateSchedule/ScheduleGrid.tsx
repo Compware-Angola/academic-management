@@ -62,7 +62,7 @@ export default function ScheduleGrid({
 
   const toggleAllForDay = (dia: DiaSemana, tempos: Tempo[]) => {
     const allSelected = tempos.every((tempo) =>
-      Boolean(slotData[`${dia.pkDiaDaSemana}-${tempo.ordem}`])
+      Boolean(slotData[`${dia.pkDiaDaSemana}-${tempo.ordem}`]),
     );
 
     const updated = { ...slotData };
@@ -110,41 +110,46 @@ export default function ScheduleGrid({
 
   /* ---------- RENDER ---------- */
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {days.map((item) => (
-        <Card key={item.diaSemana.pkDiaDaSemana} className="rounded-none border-0">
+        <Card
+          key={item.diaSemana.pkDiaDaSemana}
+          className="rounded-none border-0"
+        >
           <CardHeader className="bg-linear-to-r from-primary to-primary text-white flex justify-between items-center">
-            <CardTitle className="text-center text-sm">{item.diaSemana.designacao}</CardTitle>
+            <CardTitle className="text-center text-sm">
+              {item.diaSemana.designacao}
+            </CardTitle>
 
             <div className="flex gap-2">
-            <Button type="button"
-  size="sm"
-  variant="outline"
-  onClick={() => toggleAllForDay(item.diaSemana, item.tempos)}
-   className={`w-full justify-start h-auto py-3 transition ${
-                      hasData(item.diaSemana.pkDiaDaSemana, item.tempos[0].ordem) &&
-                      item.tempos.every((tempo) =>
-                        hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem)
-                      )
-                      ? "bg-green-50 text-green-900 hover:bg-green-100"
-                      : "bg-white text-muted-foreground hover:bg-gray-50"
-                  }`}
->
-  {item.tempos.every((tempo) =>
-    hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem)
-  ) ? (
-    <>
-      <CheckSquare size={16} className="mr-1" />
-      Desmarcar Todos
-    </>
-  ) : (
-    <>
-      <Square size={16} className="mr-1" />
-      Selecionar Todos
-    </>
-  )}
-</Button>
-
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => toggleAllForDay(item.diaSemana, item.tempos)}
+                className={`w-full justify-start h-auto py-3 transition ${
+                  hasData(item.diaSemana.pkDiaDaSemana, item.tempos[0].ordem) &&
+                  item.tempos.every((tempo) =>
+                    hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem),
+                  )
+                    ? "bg-green-50 text-green-900 hover:bg-green-100"
+                    : "bg-white text-muted-foreground hover:bg-gray-50"
+                }`}
+              >
+                {item.tempos.every((tempo) =>
+                  hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem),
+                ) ? (
+                  <>
+                    <CheckSquare size={16} className="mr-1" />
+                    Desmarcar Todos
+                  </>
+                ) : (
+                  <>
+                    <Square size={16} className="mr-1" />
+                    Selecionar Todos
+                  </>
+                )}
+              </Button>
             </div>
           </CardHeader>
 
@@ -166,7 +171,9 @@ export default function ScheduleGrid({
                 >
                   <Clock
                     size={16}
-                    className={filled ? "text-green-600" : "text-muted-foreground"}
+                    className={
+                      filled ? "text-green-600" : "text-muted-foreground"
+                    }
                   />
                   <span className="ml-2 text-sm font-semibold">
                     {tempo.horaInicio} - {tempo.horaFim}

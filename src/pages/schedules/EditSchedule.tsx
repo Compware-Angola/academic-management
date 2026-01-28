@@ -96,17 +96,17 @@ export function EditSchedule() {
       formData.curso
         ? gerarSiglaCurso(
             cursos.find((c) => c.codigo.toString() === formData.curso)
-              ?.designacao || ""
+              ?.designacao || "",
           )
         : undefined,
       formData.classes,
       formData.unidadeCurricular
         ? unidadesCurriculares.find(
-            (c) => c.pk.toString() === formData.unidadeCurricular
+            (c) => c.pk.toString() === formData.unidadeCurricular,
           )?.codigo || ""
         : "",
       Number(formData.periodo),
-      Number(formData.anoLetivo)
+      Number(formData.anoLetivo),
     );
   useEffect(() => {
     setFormData((prev) => ({
@@ -163,7 +163,7 @@ export function EditSchedule() {
     if (isLoadingClasses) return;
 
     const exists = classes.some(
-      (c) => String(c.codigo) === pendingSelects.classes
+      (c) => String(c.codigo) === pendingSelects.classes,
     );
 
     if (exists) {
@@ -183,7 +183,7 @@ export function EditSchedule() {
     if (isLoadingUC) return;
 
     const exists = unidadesCurriculares.some(
-      (u) => String(u.pk) === pendingSelects.unidadeCurricular
+      (u) => String(u.pk) === pendingSelects.unidadeCurricular,
     );
 
     if (exists) {
@@ -226,7 +226,7 @@ export function EditSchedule() {
   /* ------------------------- UI ------------------------- */
   const isFormComplete =
     requiredFields.every(
-      (f) => !isEmpty(formData[f.key as keyof typeof formData])
+      (f) => !isEmpty(formData[f.key as keyof typeof formData]),
     ) && aulas.length > 0;
   if (isLoading) {
     return (
@@ -393,8 +393,6 @@ export function EditSchedule() {
           scheduleData={temposDisponiveis}
           aulasExistentes={aulas}
           onChange={setAulas}
-          anoLetivo={formData.anoLetivo}
-          unidadeCurricular={formData.unidadeCurricular}
         />
       )}
 
