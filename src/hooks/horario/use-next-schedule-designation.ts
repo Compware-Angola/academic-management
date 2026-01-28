@@ -9,7 +9,7 @@ export const useNextScheduleDesignation = (
   ano?: string,
   codigoUC?: string,
   periodo?: number,
-  anoLectivo?: number
+  anoLectivo?: number,
 ) => {
   const base =
     cursoSigla && ano && codigoUC
@@ -17,12 +17,7 @@ export const useNextScheduleDesignation = (
       : undefined;
 
   return useQuery({
-    queryKey: [
-      "next-schedule-designation",
-      base,
-      periodo,
-      anoLectivo,
-    ],
+    queryKey: ["next-schedule-designation", base, periodo, anoLectivo],
     queryFn: async () => {
       if (!base || !periodo || !anoLectivo) {
         return base ? `${base}-H1` : "";
@@ -37,7 +32,6 @@ export const useNextScheduleDesignation = (
       return gerarDesignacao(base, response);
     },
     enabled: !!base && !!periodo && !!anoLectivo,
-    staleTime: 1000 * 60 * 10,
     retry: 1,
   });
 };

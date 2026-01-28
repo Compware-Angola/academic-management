@@ -30,6 +30,5 @@ export function useQueryAulasOcupadas(params: UseAulasOcupadasParams = {}) {
       });
     },
     enabled: !!params.salaId && !!params.anoLectivo && !!params.periodo,
-    staleTime: 5 * 60 * 1000,
   });
 }
