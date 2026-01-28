@@ -535,7 +535,7 @@ export const academicStructure: MenuStructure = {
       url: "/calendario",
       icon: Calendar,
       items: [
-        { title: "Atividades letivas", url: "/calendario/atividades" },
+        { title: "Atividades letivas", url: "/calendario/atividades" ,permission: []},
         { title: "Prazos", url: "/calendario/prazos" },
         //{ title: "Calendário de provas", url: "/calendario/provas" },
         { title: "Dias isentos", url: "/calendario/dias-isentos" },

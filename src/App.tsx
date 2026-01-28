@@ -80,7 +80,6 @@ import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
-import { P } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 import { PermissionTypeDetails } from "./constants/permission.type";
 
 const App = () => {

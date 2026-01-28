@@ -28,7 +28,7 @@ export const filterMenuByPermission = (items: any[]) => {
           items: filteredSubItems,
         };
       })
-      .filter(Boolean) as any[]; // Remove itens nulos
+      .filter(Boolean) as any[]; 
   };
 
   return filterItems(items);
