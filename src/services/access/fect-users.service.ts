@@ -1,8 +1,8 @@
-// src/services/users.service.ts (ou o caminho que preferir)
+// src/services/users.service.ts
 
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-// Tipagem do usuário conforme o novo retorno da API
+// Tipagem do usuário conforme o retorno da API
 export type User = {
   codigo: number;
   nome: string;
@@ -27,18 +27,22 @@ export type UsersResponse = {
   totalPages: number;
 };
 
+// Tipagem da resposta sem paginação
+export type UsersListResponse = {
+  data: User[];
+  total: number;
+};
+
 // Parâmetros opcionais da busca
 export type FetchUsersParams = {
-  ativo?: boolean;     // filtra por utilizadores ativos (default: true)
-  page?: number;       // página atual (default: 1)
-  limit?: number;      // quantos por página (default: 25)
+  ativo?: boolean;     // filtra por utilizadores ativos
+  page?: number;       // página atual
+  limit?: number;      // quantos por página
   search?: string;     // busca por nome ou username
 };
 
 /**
- * Busca lista de utilizadores da nova API de acess_management
- * @param params Filtros opcionais (ativo, paginação, busca)
- * @returns Objeto com dados paginados
+ * Busca lista de utilizadores da API de acess_management (com paginação)
  */
 export async function fetchUsers(params: FetchUsersParams = {}): Promise<UsersResponse> {
   try {
@@ -58,7 +62,6 @@ export async function fetchUsers(params: FetchUsersParams = {}): Promise<UsersRe
       },
     });
 
-    // Garante valores padrão caso a API retorne algo inesperado
     return {
       data: data.data ?? [],
       total: data.total ?? 0,
@@ -68,7 +71,6 @@ export async function fetchUsers(params: FetchUsersParams = {}): Promise<UsersRe
     };
   } catch (error) {
     console.error("Erro ao carregar utilizadores:", error);
-    // Retorna estrutura vazia para não quebrar a UI
     return {
       data: [],
       total: 0,
@@ -80,9 +82,46 @@ export async function fetchUsers(params: FetchUsersParams = {}): Promise<UsersRe
 }
 
 /**
- * Versão simplificada: só retorna o array de users (útil para selects, autocomplete, etc)
+ * Busca todos os utilizadores da API de acess_management (sem paginação)
+ */
+export async function fetchUsersNoPagination(params: FetchUsersParams = {}): Promise<UsersListResponse> {
+  try {
+    const { ativo, search = "" } = params;
+
+    const { data } = await axiosNestGa.get<UsersListResponse>("/acess_management/users-no-pagination", {
+      params: {
+        ativo,
+        ...(search && { search }),
+      },
+    });
+
+    return {
+      data: data.data ?? [],
+      total: data.total ?? 0,
+    };
+  } catch (error) {
+    console.error("Erro ao carregar utilizadores sem paginação:", error);
+    return {
+      data: [],
+      total: 0,
+    };
+  }
+}
+
+/**
+ * Versão simplificada para autocomplete/select:
+ * - Com paginação retorna só o array de users
  */
 export async function fetchUsersList(params?: FetchUsersParams): Promise<User[]> {
   const response = await fetchUsers(params);
+  return response.data;
+}
+
+/**
+ * Versão simplificada para autocomplete/select:
+ * - Sem paginação retorna só o array de users
+ */
+export async function fetchUsersListNoPagination(params?: FetchUsersParams): Promise<User[]> {
+  const response = await fetchUsersNoPagination(params);
   return response.data;
 }
