@@ -82,6 +82,7 @@ import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa"
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
 import { PermissionTypeDetails } from "./constants/permission.type";
 
+
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -109,11 +110,7 @@ const App = () => {
                   <Route
                     path="/controle-acesso/diretor"
                     element={
-                      <ProtectedRoute
-                        allowedPermissions={[]}
-                      >
-                        <DirectorCourseAccess />
-                      </ProtectedRoute>
+                      <DirectorCourseAccess />
                     }
                   />
                   <Route
@@ -130,7 +127,7 @@ const App = () => {
                     path="/financas/notas-pagamento"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[]}
+                        allowedPermissions={[PermissionTypeDetails.FACTURAS.sigla!]}
                       >
                         <ListarNotasPagamento />
                       </ProtectedRoute>
@@ -140,7 +137,7 @@ const App = () => {
                     path="/financas/credito/instituicoes"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[]}
+                        allowedPermissions={[PermissionTypeDetails.INSTITUICOES.sigla!]}
                       >
                         <CreateInstituicao />
                       </ProtectedRoute>

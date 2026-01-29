@@ -1,8 +1,3 @@
-
-import PDFActions, {
-  GenericPDFDocument,
-} from "@/components/views/pdf/GenericPDFDocument";
-
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,7 +9,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,87 +24,80 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import {
-  Home,
-  Search,
-  Download,
-  RefreshCw,
-  Printer,
-  Check,
-  X,
-  Save,
-  FileText,
-} from "lucide-react";
+import { Home, Search, RefreshCw, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { FormSelect } from "@/components/common/FormSelect";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
-import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
-import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
-import { Estudante, ListaEstudantesPDF } from "@/components/list-student";
-import { usePresenceAttendance } from "@/hooks/avaliacao/use-presence-attendance";
-import { useScheduleQuery } from "@/hooks/horario/use=query-fetch-schedule";
+
 import { Skeleton } from "@/components/ui/skeleton";
+import { PeriodoSelect } from "@/components/common/global-selects/PeriodoSelect";
+import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
+import { parseFilter } from "@/util/parse-filter";
+import { usePresenceAttendance } from "@/hooks/avaliacao/use-presence-attendance";
+import { useQueryAssessmentAttendanceParameters } from "@/hooks/avaliacao/use-query-assessment-attendance-parameters";
+import { useQueryMesTemp } from "@/hooks/avaliacao/use-query-mes-temp";
 
 type Filters = {
   anoLetivo: string;
   horarioId: string;
+  periodo: string;
+  semestre: string;
+  anoCurricular: string;
   tiposAvaliacao: string;
+  curso: string;
+  unidadeCurricular: string;
+  situacaoFinanceira: string;
 };
 export default function PresenceList() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
   const [formData, setFormData] = useState<Filters>({
     anoLetivo: "",
     horarioId: "",
     tiposAvaliacao: "",
+    periodo: "",
+    semestre: "",
+    curso: "",
+    anoCurricular: "",
+    unidadeCurricular: "",
+    situacaoFinanceira: "2",
   });
+  const { data: parameterResponse, isLoading: isLoadingParameters } =
+    useQueryAssessmentAttendanceParameters();
 
   const [shouldFetch, setShouldFetch] = useState(false);
+  const situationOption = [
+    {
+      key: 1,
+      label: "Situação Regularizada de Pagamento",
+    },
+    {
+      key: 2,
+      label: "Situação Irregular (Pagamento Pendente)",
+    },
+  ];
 
-  const [situacaoFinanceira, setSituacaoFinanceira] = useState(2);
-  const { data: tiposAvaliacao = [], isLoading: loadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
   const { data: academicYear = [], isLoading: loadingYear } =
     useQueryAnoAcademico();
-  const { data: schedules, isLoading: loadingSchedules } = useScheduleQuery({
-    anoLectivo: Number(formData.anoLetivo),
-  });
+
   const {
     data: presenceAttendanceList = [],
     isLoading: loadingPresenceAttendanceList,
     error,
   } = usePresenceAttendance(
     {
-      anoLectivo:
-        formData.anoLetivo === "" ? undefined : Number(formData.anoLetivo),
-      horarioPk:
-        formData.horarioId === "" ? undefined : Number(formData.horarioId),
-      situacao_financeira: situacaoFinanceira,
-      tipo_avaliacao:
-        formData.tiposAvaliacao === ""
-          ? undefined
-          : Number(formData.tiposAvaliacao),
+      anoLectivo: parseFilter(formData.anoLetivo),
+      horarioPk: parseFilter(formData.horarioId),
+      situacao_financeira: parseFilter(formData.situacaoFinanceira),
+      tipo_avaliacao: 1,
     },
-    shouldFetch
+    shouldFetch,
   );
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return presenceAttendanceList.slice(start, end);
-  }, [presenceAttendanceList, currentPage, itemsPerPage]);
-
-  const totalPages = Math.ceil(presenceAttendanceList.length / itemsPerPage);
 
   useEffect(() => {
     setShouldFetch(false);
@@ -143,81 +130,32 @@ export default function PresenceList() {
     setShouldFetch(true);
   };
 
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      curso: formData.curso,
+      semestre: formData.semestre,
+      classe: formData.anoCurricular,
+    });
+  const canLoadUcs = !!formData.curso && !!formData.semestre;
 
-const pdfData = useMemo(() => {
-  if (!presenceAttendanceList.length) return null;
+  const { data: scheduleResponse, isLoading: loadingSchedule } =
+    useQuerySchedulesByUc({
+      anoLectivo: parseInt(formData.anoLetivo),
+      semestre: parseInt(formData.semestre),
+      periodo: parseInt(formData.periodo),
+      curso: parseInt(formData.curso),
+      unidadeCurricular: parseInt(formData.unidadeCurricular),
+      page: 1,
+      limit: 100,
+    });
+  const schedules = scheduleResponse?.data || [];
+  const parameters = parameterResponse?.[0];
+  console.log(parameterResponse);
+  const { data: mesTemp = [] } = useQueryMesTemp({
+    id: parseFilter(parameters?.observacao),
+  });
 
-  const rows = presenceAttendanceList.map((item) => ({
-    matricula: item.numero_matricula,
-    nome: item.nome,
-    bolseiro: item.eh_bolseiro ? "Sim" : "Não",
-  }));
-
-  const anoLetivoNome =
-    academicYear.find((a) => a.codigo === Number(formData.anoLetivo))
-      ?.designacao || "—";
-
-  const horarioNome =
-    schedules?.data?.find((h) => h.codigo === Number(formData.horarioId))
-      ?.designacao || "—";
-
-  const tipoAvaliacaoNome =
-    tiposAvaliacao.find(
-      (t) => t.codigo === Number(formData.tiposAvaliacao)
-    )?.designacao || "Todos";
-
-  return {
-    filtros: [
-      `Ano Letivo: ${anoLetivoNome}`,
-      `Horário: ${horarioNome}`,
-      `Tipo de Avaliação: ${tipoAvaliacaoNome}`,
-    ].join("  |  "),
-    total: presenceAttendanceList.length,
-    rows,
-  };
-}, [
-  presenceAttendanceList,
-  formData,
-  academicYear,
-  schedules,
-  tiposAvaliacao,
-]);
-
-
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Lista de Presença"
-    subtitle="Presenças em Avaliações Académicas"
-    infoSections={[
-      {
-        title: "Filtros Aplicados",
-        content: pdfData.filtros,
-      },
-      {
-        title: "Resumo",
-        content: [`Total de estudantes: ${pdfData.total}`],
-      },
-    ]}
-        mainTable={{
-          headers: [
-            { key: "matricula", label: "Matrícula", width: "25%" },
-            { key: "nome", label: "Nome Completo", width: "50%" },
-            {
-              key: "bolseiro",
-              label: "Bolseiro",
-              width: "25%",
-              align: "center",
-            },
-          ],
-          rows: pdfData.rows,
-          headerBackground: "#1e40af",
-        }}
-        footerNotice="Documento gerado automaticamente pelo sistema."
-        customFooter="Sistema de Gestão Académica"
-      />
-    ) : null;
-
-
+  const mesDescricao = mesTemp[0]?.designacao;
 
   return (
     <div className="p-6 space-y-6">
@@ -245,22 +183,9 @@ const pdfContent = pdfData ? (
       <p className="text-muted-foreground">
         Gestão de presenças em avaliações académicas.
       </p>
-
-
-        <div className="flex justify-end">
-            {presenceAttendanceList.length > 0 && pdfContent && (
-              <PDFActions
-                document={pdfContent}
-                fileName={`Lista_Presenca_${formData.anoLetivo}_${new Date()
-                  .toISOString()
-                  .slice(0, 10)}.pdf`}
-                showDownload
-                showPrint
-              />
-            )}
-        </div>
-
-
+      <h2 className="text-base font-bold text-primary">
+        {`Mês de referência: ${mesDescricao == undefined ? "*" : mesDescricao}`}{" "}
+      </h2>
       <Card>
         <CardHeader>
           <CardTitle>Filtros de Pesquisa</CardTitle>
@@ -282,36 +207,84 @@ const pdfContent = pdfData ? (
                 value: a.codigo,
               })}
             />
+            <SemestreSelect
+              onChangeValue={(v) => setFormData({ ...formData, semestre: v })}
+              value={formData.semestre}
+            />
+            <PeriodoSelect
+              onChangeValue={(v) => setFormData({ ...formData, periodo: v })}
+              value={formData.periodo}
+            />
+            <CourseSelect
+              onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+              value={formData.curso}
+            />
+            <AnoCurricularSelect
+              curso={formData.curso}
+              onChangeValue={(v) =>
+                setFormData({ ...formData, anoCurricular: v })
+              }
+              value={formData.anoCurricular}
+            />
+            {/* Unidade Curricular */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Unidade Curricular</label>
+              <Select
+                value={formData.unidadeCurricular}
+                onValueChange={(v) =>
+                  setFormData({ ...formData, unidadeCurricular: v })
+                }
+                disabled={!canLoadUcs}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      !formData.curso
+                        ? "Selecione curso"
+                        : !formData.semestre
+                          ? "Selecione semestre"
+                          : isLoadingUC
+                            ? "Carregando UCs..."
+                            : "Selecionar UC"
+                    }
+                  />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {unidadesCurriculares.map((uc) => (
+                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
+                      {uc.descricao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <FormSelect
               label="Horario"
               value={formData.horarioId}
-              disabled={loadingSchedules}
+              disabled={loadingSchedule}
               onChange={(v) => setFormData({ ...formData, horarioId: v })}
-              options={schedules?.data}
+              options={schedules}
               map={(u) => ({
                 key: u.codigo,
                 value: u.codigo,
                 label: `${u.designacao}`,
               })}
-              loading={loadingSchedules}
+              loading={loadingSchedule}
             />
             <FormSelect
-              label="Tipo de Avaliação"
-              value={formData.tiposAvaliacao}
-              disabled={loadingTipoAvaliacao}
+              label="Situação Financeira"
+              value={formData.situacaoFinanceira}
+              disabled={loadingSchedule}
               onChange={(v) =>
-                setFormData({
-                  ...formData,
-                  tiposAvaliacao: v,
-                })
+                setFormData({ ...formData, situacaoFinanceira: v })
               }
-              options={tiposAvaliacao}
+              options={situationOption}
               map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo,
+                key: u.key,
+                value: u.key,
+                label: `${u.label}`,
               })}
-              loading={loadingTipoAvaliacao}
             />
 
             {/* Botão Listar na mesma linha */}
