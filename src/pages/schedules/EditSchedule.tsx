@@ -35,6 +35,7 @@ import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
 import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 import { AulasOcupadasPorDia } from "@/services/horario/fetch-aulas-ocupadas.service";
 import { useQueryAulasOcupadas } from "@/hooks/horario/use-query-aulas-ocupadas";
+import { isBlank } from "@/util/is-blank";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
   { key: "capacidade", label: "Capacidade" },
@@ -156,7 +157,6 @@ export function EditSchedule() {
     if (!data) return;
 
     const mapped = mapScheduleToFormData(data);
-    console.log({ mapped });
 
     // 🔹 Campos independentes
     setFormData((prev) => ({
@@ -185,7 +185,7 @@ export function EditSchedule() {
 
     setAulas(slots);
   }, [data]);
-  console.log({ aulas });
+
   /* ------------------------- APPLY CLASSES ------------------------- */
 
   useEffect(() => {
@@ -225,11 +225,58 @@ export function EditSchedule() {
       setPendingSelects((p) => ({ ...p, unidadeCurricular: undefined }));
     }
   }, [unidadesCurriculares, isLoadingUC, pendingSelects.unidadeCurricular]);
+  const validateForm = () => {
+    for (const field of requiredFields) {
+      if (isBlank(formData[field.key as keyof typeof formData])) {
+        toast({
+          variant: "destructive",
+          title: "Campo obrigatório",
+          description: `Preencha: ${field.label}`,
+        });
+        return false;
+      }
+    }
 
-  /* ------------------------- SAVE ------------------------- */
+    if (!aulas.length) {
+      toast({
+        variant: "destructive",
+        title: "Horário vazio",
+        description: "Selecione pelo menos uma aula.",
+      });
+      return false;
+    }
 
+    return true;
+  };
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    validateForm();
+    const aulasSemConflito = aulas.filter((aula) => {
+      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      return !ocupadasSet.has(key);
+    });
+
+    const aulasComConflito = aulas.filter((aula) => {
+      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      return ocupadasSet.has(key);
+    });
+
+    if (aulasComConflito.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Conflito de horários detectado",
+        description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
+      });
+    }
+
+    if (aulasSemConflito.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nenhuma aula válida",
+        description: "Remova os conflitos antes de guardar o horário.",
+      });
+      return;
+    }
 
     await updateSchedule.mutateAsync({
       id: scheduleId,
@@ -248,7 +295,7 @@ export function EditSchedule() {
         tipoAula: Number(formData.tipoAula),
         sala: Number(formData.sala),
         docente: Number(formData.docente),
-        aulas,
+        aulas: aulasSemConflito,
       },
     });
 

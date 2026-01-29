@@ -16,6 +16,7 @@ export interface UpdateSchedulePayload {
   tipoAula?: number;
   obs?: string;
   aulas: AulaPayload[];
+  docente: number;
   sala: number;
 }
 
