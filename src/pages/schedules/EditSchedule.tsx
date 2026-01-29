@@ -246,6 +246,8 @@ export function EditSchedule() {
         estadoHorario: 2,
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
         tipoAula: Number(formData.tipoAula),
+        sala: Number(formData.sala),
+        docente: Number(formData.docente),
         aulas,
       },
     });
