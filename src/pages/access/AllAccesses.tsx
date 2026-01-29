@@ -1,3 +1,9 @@
+import { useMemo } from "react";
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+
 import { useState } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import {
@@ -29,10 +35,12 @@ export function ListarAcessos() {
   // ----- Filtros -----
   const [filterType, setFilterType] = useState<"sigla" | "designacao">("sigla");
   const [filterValue, setFilterValue] = useState("");
+  const [apenasAtivos, setApenasAtivos] = useState<boolean>(true);
+
 
   // ----- Query -----
   const { data: acessos, isLoading } = useQueryAccesses({
-    apenasAtivos: true,
+    apenasAtivos,
     page: currentPage,
     limit: itemsPerPage,
     sigla: filterType === "sigla" ? filterValue : undefined,
@@ -43,13 +51,88 @@ export function ListarAcessos() {
   const total = acessos?.total ?? 0;
   const totalPages = acessos?.totalPages ?? 1;
 
+
+  const pdfData = useMemo(() => {
+  if (!data.length) return null;
+
+  const rows = data.map((a) => ({
+    id: a.pk_acesso,
+    designacao: a.designacao,
+    sigla: a.sigla,
+    modulo: a.modulonome,
+    tipo: a.tipoacesso,
+    data: a.dataativacao,
+    estado: a.ativo ? "Ativo" : "Inativo",
+  }));
+
+  return {
+    filtros: [
+      `Filtro: ${filterType}`,
+      `Valor: ${filterValue || "—"}`,
+      `Estado: ${apenasAtivos ? "Ativos" : "Inativos"}`,
+    ].join("  |  "),
+    total: data.length,
+    rows,
+  };
+}, [data, filterType, filterValue, apenasAtivos]);
+
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Acessos"
+    subtitle="Registos de acessos do sistema"
+    infoSections={[
+      {
+        title: "Filtros Aplicados",
+        content: pdfData.filtros,
+      },
+      {
+        title: "Resumo",
+        content: [`Total de acessos: ${pdfData.total}`],
+      },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "id", label: "ID", width: "6%" },
+        { key: "designacao", label: "Designação", width: "26%" },
+        { key: "sigla", label: "Sigla", width: "10%" },
+        { key: "modulo", label: "Módulo", width: "18%" },
+        { key: "tipo", label: "Tipo", width: "12%" },
+        { key: "data", label: "Data Ativação", width: "14%" },
+        {
+          key: "estado",
+          label: "Estado",
+          width: "14%",
+          align: "center",
+        },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+    customFooter="Sistema de Gestão de Acessos"
+  />
+) : null;
+
+
   const handleSearch = () => {
     setCurrentPage(1); 
   };
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Todos Acessos" />
+      <div className="flex items-center justify-between">
+        <PageHeader title="Todos Acessos" />
+
+        {data.length > 0 && pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`Acessos_${new Date().toISOString().slice(0, 10)}.pdf`}
+            showDownload
+            showPrint
+          />
+        )}
+      </div>
 
       {/* 🔎 Filtros */}
       <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
@@ -65,6 +148,24 @@ export function ListarAcessos() {
             <SelectContent>
               <SelectItem value="sigla">Sigla</SelectItem>
               <SelectItem value="designacao">Designação</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-full md:w-48">
+          <label className="text-sm font-medium">Estado</label>
+          <Select
+            value={apenasAtivos ? "true" : "false"}
+            onValueChange={(v) => {
+              setApenasAtivos(v === "true");
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">Ativos</SelectItem>
+              <SelectItem value="false">Inativos</SelectItem>
             </SelectContent>
           </Select>
         </div>
