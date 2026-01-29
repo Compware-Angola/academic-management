@@ -16,6 +16,7 @@ export interface UpdateSchedulePayload {
   tipoAula?: number;
   obs?: string;
   aulas: AulaPayload[];
+  sala: number;
 }
 
 export const updateSchedule = async (
@@ -26,7 +27,7 @@ export const updateSchedule = async (
   }: {
     id: number;
     payload: UpdateSchedulePayload;
-  }
+  },
 ) => {
   const response = await axiosNestGa.put(`/schedule/${userId}/${id}`, payload);
   return response.data;
