@@ -82,7 +82,6 @@ import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa"
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
 import { PermissionTypeDetails } from "./constants/permission.type";
 
-
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -102,7 +101,11 @@ const App = () => {
                   <Route
                     path="/horarios/criar"
                     element={
-                      <ProtectedRoute allowedPermissions={[PermissionTypeDetails.CRIAR_HORARIO.sigla!]}>
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CRIAR_HORARIO.sigla!,
+                        ]}
+                      >
                         <CreateSchedule />
                       </ProtectedRoute>
                     }
@@ -110,15 +113,15 @@ const App = () => {
                   <Route
                     path="/controle-acesso/diretor"
                     element={
-                      <DirectorCourseAccess />
+                      <ProtectedRoute allowedPermissions={[]}>
+                        <DirectorCourseAccess />
+                      </ProtectedRoute>
                     }
                   />
                   <Route
                     path="/controle-acesso/solicitacoes"
                     element={
-                      <ProtectedRoute
-                        allowedPermissions={[]}
-                      >
+                      <ProtectedRoute allowedPermissions={[]}>
                         <SolicitacoesEncaminhadas />
                       </ProtectedRoute>
                     }
@@ -127,7 +130,9 @@ const App = () => {
                     path="/financas/notas-pagamento"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.FACTURAS.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.FACTURAS.sigla!,
+                        ]}
                       >
                         <ListarNotasPagamento />
                       </ProtectedRoute>
@@ -137,7 +142,9 @@ const App = () => {
                     path="/financas/credito/instituicoes"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.INSTITUICOES.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSTITUICOES.sigla!,
+                        ]}
                       >
                         <CreateInstituicao />
                       </ProtectedRoute>
@@ -256,13 +263,19 @@ const App = () => {
                   element={<MarkAttendance />}
                 />
               */}
-                  <Route path="/acessos/utilizador"    element={
+                  <Route
+                    path="/acessos/utilizador"
+                    element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla!, PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla!,
+                          PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla!,
+                        ]}
                       >
                         <UserAccess />
                       </ProtectedRoute>
-                    }  />
+                    }
+                  />
                   <Route
                     path="/acessos/criar-utilizador"
                     element={<CreateUser />}
@@ -334,11 +347,27 @@ const App = () => {
                   {/* Finanças */}
                   <Route
                     path="/financas/pagamento-referencia"
-                    element={<PagamentosReferencia />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PAGAMENTOS.sigla!,
+                        ]}
+                      >
+                        <PagamentosReferencia />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/financas/negociacao-divida"
-                    element={<NegociacaoDivida />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla!,
+                        ]}
+                      >
+                        <NegociacaoDivida />
+                      </ProtectedRoute>
+                    }
                   />
                   {/* <Route
                     path="financas/credito/listar"
@@ -346,7 +375,15 @@ const App = () => {
                   /> */}
                   <Route
                     path="financas/credito/instituicoes/todas"
-                    element={<TodasInstituicoes />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSTITUICOES.sigla!,
+                        ]}
+                      >
+                        <TodasInstituicoes />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="financas/credito/atribuir"
