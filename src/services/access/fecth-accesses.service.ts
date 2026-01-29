@@ -3,7 +3,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type FetchAcessosParams = {
   utilizadorId?: number;
   grupoId?: number;
-  apenasAtivos?: boolean; // true por padrão
+  apenasAtivos?: string; 
   sigla?: string;
   designacao?: string;
   page?: number;          // padrão: 1
@@ -51,7 +51,10 @@ export async function fetchAccesses(
   }
 
   // Se não for passado, default é true
-  queryParams.apenasAtivos = params?.apenasAtivos ?? true;
+    if (params?.apenasAtivos !== undefined) {
+  queryParams.apenasAtivos = params.apenasAtivos;
+}
+
 
   // Defaults para paginação
   queryParams.page = params?.page ?? 1;

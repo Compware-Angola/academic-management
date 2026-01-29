@@ -1,4 +1,7 @@
 import { useMemo } from "react";
+import { Switch } from "@/components/ui/switch";
+
+import { useAuth } from "@/hooks/use-auth";
 
 import PDFActions, {
   GenericPDFDocument,
@@ -26,8 +29,15 @@ import {
 } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useQueryAccesses } from "@/hooks/acess/use-query-accesses";
+import { useMutationUpdateEstadoAcesso }
+from "@/hooks/acess/use-mutation-update-estado.ts";
+
+
 
 export function ListarAcessos() {
+  const { user: userData } = useAuth();
+  const estadoMutation = useMutationUpdateEstadoAcesso();
+
   // ----- Paginação -----
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
@@ -35,16 +45,19 @@ export function ListarAcessos() {
   // ----- Filtros -----
   const [filterType, setFilterType] = useState<"sigla" | "designacao">("sigla");
   const [filterValue, setFilterValue] = useState("");
-  const [apenasAtivos, setApenasAtivos] = useState<boolean>(true);
+  const [apenasAtivos, setApenasAtivos] = useState<"all" | "true" | "false">("all"); 
+// "" = todos | "true" = ativos | "false" = inativos
+;
 
 
   // ----- Query -----
   const { data: acessos, isLoading } = useQueryAccesses({
-    apenasAtivos,
+    
     page: currentPage,
     limit: itemsPerPage,
     sigla: filterType === "sigla" ? filterValue : undefined,
     designacao: filterType === "designacao" ? filterValue : undefined,
+     ...(apenasAtivos !== "all" && { apenasAtivos }),
   });
 
   const data = acessos?.data ?? [];
@@ -154,9 +167,9 @@ const pdfContent = pdfData ? (
         <div className="w-full md:w-48">
           <label className="text-sm font-medium">Estado</label>
           <Select
-            value={apenasAtivos ? "true" : "false"}
+            value={apenasAtivos}
             onValueChange={(v) => {
-              setApenasAtivos(v === "true");
+              setApenasAtivos(v as "all" | "true" | "false");
               setCurrentPage(1);
             }}
           >
@@ -164,6 +177,7 @@ const pdfContent = pdfData ? (
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="true">Ativos</SelectItem>
               <SelectItem value="false">Inativos</SelectItem>
             </SelectContent>
@@ -215,9 +229,18 @@ const pdfContent = pdfData ? (
                   <TableCell>{acesso.tipoacesso}</TableCell>
                   <TableCell>{acesso.dataativacao}</TableCell>
                   <TableCell>
-                    <Badge variant={acesso.ativo ? "default" : "secondary"}>
-                      {acesso.ativo ? "Ativo" : "Inativo"}
-                    </Badge>
+                    <TableCell>
+                      <Switch
+                        checked={Boolean(acesso.ativo)}
+                        disabled={estadoMutation.isPending}
+                        onCheckedChange={() =>
+                          estadoMutation.mutate({
+                            acessoId: acesso.pk_acesso,
+                            userId: userData.user.pk_utilizador,
+                          })
+                        }
+                      />
+                    </TableCell>
                   </TableCell>
                 </TableRow>
               ))
