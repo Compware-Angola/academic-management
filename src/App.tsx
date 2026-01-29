@@ -129,7 +129,11 @@ const App = () => {
                   <Route
                     path="/financas/notas-pagamento"
                     element={
-                      <ProtectedRoute allowedPermissions={[]}>
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.FACTURAS.sigla!,
+                        ]}
+                      >
                         <ListarNotasPagamento />
                       </ProtectedRoute>
                     }
@@ -137,7 +141,11 @@ const App = () => {
                   <Route
                     path="/financas/credito/instituicoes"
                     element={
-                      <ProtectedRoute allowedPermissions={[]}>
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSTITUICOES.sigla!,
+                        ]}
+                      >
                         <CreateInstituicao />
                       </ProtectedRoute>
                     }

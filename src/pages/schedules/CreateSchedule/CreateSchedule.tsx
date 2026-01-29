@@ -211,6 +211,33 @@ export default function CreateSchedule() {
 
     if (!validateForm()) return;
 
+    const aulasSemConflito = aulas.filter((aula) => {
+      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      return !ocupadasSet.has(key);
+    });
+
+    const aulasComConflito = aulas.filter((aula) => {
+      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      return ocupadasSet.has(key);
+    });
+
+    if (aulasComConflito.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Conflito de horários detectado",
+        description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
+      });
+    }
+
+    if (aulasSemConflito.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nenhuma aula válida",
+        description: "Remova os conflitos antes de guardar o horário.",
+      });
+      return;
+    }
+
     const payload: SaveHorarioPayload = {
       anoLectivo: Number(formData.anoLetivo),
       semestre: Number(formData.semestre),
@@ -218,7 +245,7 @@ export default function CreateSchedule() {
       curso: Number(formData.curso),
       unidadeCurricular: Number(formData.unidadeCurricular),
       modalidade: Number(formData.modalidade),
-      aulas,
+      aulas: aulasSemConflito,
       apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
       capacidade: Number(formData.capacidade),
       designacao: formData.designacao,

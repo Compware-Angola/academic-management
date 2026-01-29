@@ -44,7 +44,6 @@ export default function ScheduleGridEdit({
   const toggleSlot = (dia: DiaSemana, tempo: Tempo) => {
     const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
 
-    // 🚫 BLOQUEIO IGUAL AO DE CRIAR
     if (isOcupada(dia.pkDiaDaSemana, tempo.ordem)) {
       toast({
         variant: "destructive",
