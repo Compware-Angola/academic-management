@@ -1,3 +1,7 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -157,6 +161,81 @@ export default function PautaGeral() {
   const totalPages = pautaResponse?.totalPages ?? 1;
   const total = pautaResponse?.total ?? 0;
 
+  const pdfData = useMemo(() => {
+  if (!pautaGeral.length) return null;
+
+  const rows = pautaGeral.map((p) => ({
+    matricula: p.num_matricula,
+    nome: p.nome_completo,
+    uc: p.unidadeCurricular,
+    ano: p.ano,
+    freq1: p.nota1f ?? "-",
+    freq2: p.nota2f ?? "-",
+    exame: p.notaEx ?? "-",
+    recurso: p.notaRec ?? "-",
+    media: p.media,
+    resultado: p.resultado,
+  }));
+
+  const anoLetivoNome =
+    academicYear.find((a) => a.codigo.toString() === filters.anoLetivo)
+      ?.designacao || "—";
+
+  const semestreNome =
+    semestres.find((s) => s.codigo.toString() === filters.semestre)
+      ?.designacao || "—";
+
+  const cursoNome =
+    cursos.find((c) => c.codigo.toString() === filters.curso)
+      ?.designacao || "—";
+
+  return {
+    filtros: [
+      `Ano Letivo: ${anoLetivoNome}`,
+      `Semestre: ${semestreNome}`,
+      `Curso: ${cursoNome}`,
+    ].join("  |  "),
+    total: pautaGeral.length,
+    rows,
+  };
+}, [pautaGeral, filters, academicYear, semestres, cursos]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Pauta Geral"
+    subtitle="Resultados finais de avaliação académica"
+    infoSections={[
+      {
+        title: "Filtros Aplicados",
+        content: pdfData.filtros,
+      },
+      {
+        title: "Resumo",
+        content: [`Total de estudantes: ${pdfData.total}`],
+      },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "matricula", label: "Matrícula", width: "10%" },
+        { key: "nome", label: "Nome", width: "20%" },
+        { key: "uc", label: "UC", width: "18%" },
+        { key: "ano", label: "Ano", width: "6%", align: "center" },
+        { key: "freq1", label: "1ª Freq", width: "6%", align: "center" },
+        { key: "freq2", label: "2ª Freq", width: "6%", align: "center" },
+        { key: "exame", label: "Exame", width: "6%", align: "center" },
+        { key: "recurso", label: "Recurso", width: "7%", align: "center" },
+        { key: "media", label: "Média", width: "6%", align: "center" },
+        { key: "resultado", label: "Resultado", width: "15%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento oficial para consulta académica."
+    customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
+  />
+) : null;
+
+
   const handleSearch = () => {
     if (!filters.anoLetivo || !filters.semestre) {
       toast({
@@ -224,12 +303,25 @@ export default function PautaGeral() {
 
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Pauta Geral</h1>
           <p className="text-muted-foreground mt-1">
             Consulte as pautas de avaliação dos estudantes
           </p>
         </div>
+
+          {pautaGeral.length > 0 && pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`Pauta_Geral_${filters.anoLetivo}_${filters.semestre}_${new Date()
+                .toISOString()
+                .slice(0, 10)}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+
       </div>
 
       {/* Filtros */}

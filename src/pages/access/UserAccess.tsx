@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { useUsers } from "@/hooks/acess/use-query-users";
+import { useUsers, useUsersNoPagination } from "@/hooks/acess/use-query-users";
 import { User } from "@/services/access/fect-users.service";
 import { UserPermissionsModal } from "./components/UserPermissionsModal";
 // Nova modal para edição
@@ -60,6 +60,8 @@ export default function UserAccess() {
     limit: itemsPerPage,
     ativo
   });
+
+  const { data: usersNoPagination } = useUsersNoPagination();
 
   // Dados extraídos da resposta paginada
   const users = usersResponse?.data ?? [];
