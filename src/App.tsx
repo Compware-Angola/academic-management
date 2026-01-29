@@ -101,7 +101,11 @@ const App = () => {
                   <Route
                     path="/horarios/criar"
                     element={
-                      <ProtectedRoute allowedPermissions={[PermissionTypeDetails.CRIAR_HORARIO.sigla!]}>
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CRIAR_HORARIO.sigla!,
+                        ]}
+                      >
                         <CreateSchedule />
                       </ProtectedRoute>
                     }
@@ -109,9 +113,7 @@ const App = () => {
                   <Route
                     path="/controle-acesso/diretor"
                     element={
-                      <ProtectedRoute
-                        allowedPermissions={[]}
-                      >
+                      <ProtectedRoute allowedPermissions={[]}>
                         <DirectorCourseAccess />
                       </ProtectedRoute>
                     }
@@ -119,9 +121,7 @@ const App = () => {
                   <Route
                     path="/controle-acesso/solicitacoes"
                     element={
-                      <ProtectedRoute
-                        allowedPermissions={[]}
-                      >
+                      <ProtectedRoute allowedPermissions={[]}>
                         <SolicitacoesEncaminhadas />
                       </ProtectedRoute>
                     }
@@ -129,9 +129,7 @@ const App = () => {
                   <Route
                     path="/financas/notas-pagamento"
                     element={
-                      <ProtectedRoute
-                        allowedPermissions={[]}
-                      >
+                      <ProtectedRoute allowedPermissions={[]}>
                         <ListarNotasPagamento />
                       </ProtectedRoute>
                     }
@@ -139,9 +137,7 @@ const App = () => {
                   <Route
                     path="/financas/credito/instituicoes"
                     element={
-                      <ProtectedRoute
-                        allowedPermissions={[]}
-                      >
+                      <ProtectedRoute allowedPermissions={[]}>
                         <CreateInstituicao />
                       </ProtectedRoute>
                     }
@@ -259,13 +255,19 @@ const App = () => {
                   element={<MarkAttendance />}
                 />
               */}
-                  <Route path="/acessos/utilizador"    element={
+                  <Route
+                    path="/acessos/utilizador"
+                    element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla!, PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla!,
+                          PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla!,
+                        ]}
                       >
                         <UserAccess />
                       </ProtectedRoute>
-                    }  />
+                    }
+                  />
                   <Route
                     path="/acessos/criar-utilizador"
                     element={<CreateUser />}
@@ -337,11 +339,27 @@ const App = () => {
                   {/* Finanças */}
                   <Route
                     path="/financas/pagamento-referencia"
-                    element={<PagamentosReferencia />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PAGAMENTOS.sigla!,
+                        ]}
+                      >
+                        <PagamentosReferencia />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/financas/negociacao-divida"
-                    element={<NegociacaoDivida />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla!,
+                        ]}
+                      >
+                        <NegociacaoDivida />
+                      </ProtectedRoute>
+                    }
                   />
                   {/* <Route
                     path="financas/credito/listar"
@@ -349,7 +367,15 @@ const App = () => {
                   /> */}
                   <Route
                     path="financas/credito/instituicoes/todas"
-                    element={<TodasInstituicoes />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSTITUICOES.sigla!,
+                        ]}
+                      >
+                        <TodasInstituicoes />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="financas/credito/atribuir"

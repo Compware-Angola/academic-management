@@ -36,7 +36,7 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla,
           ],
         },
-        
+
         {
           title: "Criar utilizador",
           url: "/acessos/criar-utilizador",
@@ -373,7 +373,11 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/isentar-antigos",
         // },
 
-        { title: "Negociação de Dívida", url: "/financas/negociacao-divida" },
+        {
+          title: "Negociação de Dívida",
+          url: "/financas/negociacao-divida",
+          permission: [PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla],
+        },
         // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
 
@@ -382,6 +386,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Instituições - Todas",
           url: "/financas/credito/instituicoes/todas",
+          permission: [PermissionTypeDetails.INSTITUICOES.sigla],
         },
         // {
         //   title: "Instituições com Despesa",
@@ -470,6 +475,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Pagamentos por referência",
           url: "/financas/pagamento-referencia",
+          permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
@@ -520,7 +526,11 @@ export const academicStructure: MenuStructure = {
       url: "/calendario",
       icon: Calendar,
       items: [
-        { title: "Atividades letivas", url: "/calendario/atividades" ,permission: []},
+        {
+          title: "Atividades letivas",
+          url: "/calendario/atividades",
+          permission: [],
+        },
         { title: "Prazos", url: "/calendario/prazos" },
         //{ title: "Calendário de provas", url: "/calendario/provas" },
         { title: "Dias isentos", url: "/calendario/dias-isentos" },
