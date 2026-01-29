@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader2, Save, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { FormSelect } from "@/components/common/FormSelect";
 import { Button } from "@/components/ui/button";
@@ -33,13 +33,18 @@ import {
 } from "@/components/ui/select";
 import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
 import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
+import { AulasOcupadasPorDia } from "@/services/horario/fetch-aulas-ocupadas.service";
+import { useQueryAulasOcupadas } from "@/hooks/horario/use-query-aulas-ocupadas";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" }, // 👈
+  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
+  { key: "docente", label: "Docente" },
+  { key: "tipoAula", label: "Tipo de Aula" },
+  { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
   { key: "modalidade", label: "Modalidade" },
 ];
@@ -135,6 +140,16 @@ export function EditSchedule() {
     tipoAula: Number(formData?.tipoAula),
     periodo: Number(formData?.periodo),
   });
+
+  const { data: aulasOcupadas = [] } = useQueryAulasOcupadas({
+    salaId: formData.sala,
+    anoLectivo: formData.anoLetivo,
+    periodo: formData.periodo,
+  });
+  const ocupadasSet = useMemo(
+    () => mapOcupacaoPorChave(aulasOcupadas),
+    [aulasOcupadas],
+  );
   /* ------------------------- LOAD INICIAL ------------------------- */
 
   useEffect(() => {
@@ -476,6 +491,7 @@ export function EditSchedule() {
 
       {temposDisponiveis.length > 0 && (
         <ScheduleGridEdit
+          ocupadas={ocupadasSet}
           scheduleData={temposDisponiveis}
           aulasExistentes={aulas}
           onChange={setAulas}
@@ -551,4 +567,19 @@ function mapBackendAulasToGrid(aulasBackend: any[]): AulaPayload[] {
       hora_fim: a.horaTermino,
       obs: a.observacoes ?? "",
     }));
+}
+
+export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
+  const ocupadas = new Set<string>();
+
+  aulas.forEach((dia) => {
+    dia.tempos.forEach((tempo, index) => {
+      // backend não manda ordem, então usamos índice + 1
+      const ordem = index + 1;
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+      ocupadas.add(key);
+    });
+  });
+
+  return ocupadas;
 }

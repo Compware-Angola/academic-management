@@ -13,18 +13,22 @@ import { useToast } from "@/hooks/use-toast";
 type SlotKey = string;
 
 type ScheduleGridEditProps = {
+  ocupadas: Set<string>;
   scheduleData: TempoDisponivelItem[];
   aulasExistentes: AulaPayload[];
   onChange: (aulas: AulaPayload[]) => void;
 };
 
 export default function ScheduleGridEdit({
+  ocupadas,
   scheduleData,
   aulasExistentes,
   onChange,
 }: ScheduleGridEditProps) {
   const { toast } = useToast();
   const [slotData, setSlotData] = useState<Record<SlotKey, AulaPayload>>({});
+  const isOcupada = (diaId: number, ordem: number) =>
+    ocupadas.has(`${diaId}-${ordem}`);
 
   useEffect(() => {
     const initial: Record<SlotKey, AulaPayload> = {};
@@ -39,11 +43,21 @@ export default function ScheduleGridEdit({
 
   const toggleSlot = (dia: DiaSemana, tempo: Tempo) => {
     const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
+
+    // 🚫 BLOQUEIO IGUAL AO DE CRIAR
+    if (isOcupada(dia.pkDiaDaSemana, tempo.ordem)) {
+      toast({
+        variant: "destructive",
+        title: "Sala ocupada",
+        description: "Não é possível marcar este horário.",
+      });
+      return;
+    }
+
     const updated = { ...slotData };
 
     if (updated[key]) {
       delete updated[key];
-
       toast({
         title: "Tempo removido",
         description: `${dia.designacao} ${tempo.horaInicio} removido.`,
@@ -56,7 +70,6 @@ export default function ScheduleGridEdit({
         hora_fim: tempo.horaFim,
         obs: "",
       };
-
       toast({
         title: "Tempo adicionado",
         description: `${dia.designacao} ${tempo.horaInicio} adicionado.`,
@@ -67,25 +80,32 @@ export default function ScheduleGridEdit({
     onChange(Object.values(updated));
   };
 
-  /* ---------- TOGGLE TODOS DO DIA ---------- */
   const toggleAllForDay = (dia: DiaSemana, tempos: Tempo[]) => {
     const updated = { ...slotData };
 
-    const allSelected = tempos.every((tempo) =>
+    const temposDisponiveis = tempos.filter(
+      (tempo) => !isOcupada(dia.pkDiaDaSemana, tempo.ordem),
+    );
+
+    if (temposDisponiveis.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Dia cheio",
+        description: `Todos os tempos de ${dia.designacao} estão ocupados.`,
+      });
+      return;
+    }
+
+    const allSelected = temposDisponiveis.every((tempo) =>
       Boolean(updated[`${dia.pkDiaDaSemana}-${tempo.ordem}`]),
     );
 
     if (allSelected) {
-      tempos.forEach((tempo) => {
+      temposDisponiveis.forEach((tempo) => {
         delete updated[`${dia.pkDiaDaSemana}-${tempo.ordem}`];
       });
-
-      toast({
-        title: "Tempos removidos",
-        description: `Todos tempos de ${dia.designacao} removidos.`,
-      });
     } else {
-      tempos.forEach((tempo) => {
+      temposDisponiveis.forEach((tempo) => {
         const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
         if (!updated[key]) {
           updated[key] = {
@@ -96,11 +116,6 @@ export default function ScheduleGridEdit({
             obs: "",
           };
         }
-      });
-
-      toast({
-        title: "Tempos adicionados",
-        description: `Todos tempos de ${dia.designacao} selecionados.`,
       });
     }
 
@@ -161,23 +176,34 @@ export default function ScheduleGridEdit({
                   item.diaSemana.pkDiaDaSemana,
                   tempo.ordem,
                 );
+                const ocupada = isOcupada(
+                  item.diaSemana.pkDiaDaSemana,
+                  tempo.ordem,
+                );
 
                 return (
                   <Button
                     key={tempo.ordem}
                     type="button"
+                    disabled={ocupada}
                     onClick={() => toggleSlot(item.diaSemana, tempo)}
                     variant={filled ? "default" : "outline"}
                     className={`w-full justify-start h-auto py-3 transition ${
-                      filled
-                        ? "bg-green-50 text-green-900 hover:bg-green-100"
-                        : ""
+                      ocupada
+                        ? "bg-red-100 text-red-700 cursor-not-allowed"
+                        : filled
+                          ? "bg-green-50 text-green-900 hover:bg-green-100"
+                          : ""
                     }`}
                   >
                     <Clock
                       size={16}
                       className={
-                        filled ? "text-green-600" : "text-muted-foreground"
+                        ocupada
+                          ? "text-red-600"
+                          : filled
+                            ? "text-green-600"
+                            : "text-muted-foreground"
                       }
                     />
                     <span className="ml-2 text-sm font-semibold">
