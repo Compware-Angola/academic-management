@@ -8,12 +8,12 @@ export function useMutationDeleteAccess() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: (data: { grupoId: number; utilizadorId: number }) =>
+    mutationFn: (data: { grupoId: number; acessoId: number }) =>
       deleteGroupAccess(data),
     onSuccess: (_, acessoCodigo) => {
       toast({
         title: "Permissão removida",
-        description: `Acesso foi removido com sucesso.`,
+        description: `Acesso foi removido com sucesso`,
       });
 
       // Invalida todas as queries de acessos de grupos (ou só a do grupo atual se souberes o groupId)

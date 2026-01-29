@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader2, Save, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { FormSelect } from "@/components/common/FormSelect";
 import { Button } from "@/components/ui/button";
@@ -23,13 +23,29 @@ import { useQueryTemposDisponiveis } from "@/hooks/tempos/use-query-tempos-dispo
 import ScheduleGridEdit from "./components/ScheduleGridEdit";
 import { AulaPayload } from "@/services/horario/save-horario.service";
 import { useNextScheduleDesignation } from "@/hooks/horario/use-next-schedule-designation";
+import { useQueryTeacherByUC } from "@/hooks/teacher/use-query-teacher-uc";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQueryTipoDeSalas } from "@/hooks/salas/use-query-tipo-de-sala";
+import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
+import { AulasOcupadasPorDia } from "@/services/horario/fetch-aulas-ocupadas.service";
+import { useQueryAulasOcupadas } from "@/hooks/horario/use-query-aulas-ocupadas";
+import { isBlank } from "@/util/is-blank";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" }, // 👈
+  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
+  { key: "docente", label: "Docente" },
+  { key: "tipoAula", label: "Tipo de Aula" },
+  { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
   { key: "modalidade", label: "Modalidade" },
 ];
@@ -58,6 +74,9 @@ export function EditSchedule() {
     apenasPrimeiroAno: "1",
     designacao: "",
     capacidade: "",
+    docente: "",
+    tipoAula: "",
+    sala: "",
   });
 
   const [aulas, setAulas] = useState<AulaPayload[]>([]);
@@ -79,7 +98,7 @@ export function EditSchedule() {
 
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
-
+  const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       curso: formData.curso,
@@ -96,24 +115,42 @@ export function EditSchedule() {
       formData.curso
         ? gerarSiglaCurso(
             cursos.find((c) => c.codigo.toString() === formData.curso)
-              ?.designacao || ""
+              ?.designacao || "",
           )
         : undefined,
       formData.classes,
       formData.unidadeCurricular
         ? unidadesCurriculares.find(
-            (c) => c.pk.toString() === formData.unidadeCurricular
+            (c) => c.pk.toString() === formData.unidadeCurricular,
           )?.codigo || ""
         : "",
       Number(formData.periodo),
-      Number(formData.anoLetivo)
+      Number(formData.anoLetivo),
     );
+  const { data: teachers = [], isLoading: isLoadingTeacher } =
+    useQueryTeacherByUC(formData.unidadeCurricular);
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
       designacao: designacao || "",
     }));
   }, [designacao]);
+  const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
+    anoLectivo: Number(formData.anoLetivo),
+
+    tipoAula: Number(formData?.tipoAula),
+    periodo: Number(formData?.periodo),
+  });
+
+  const { data: aulasOcupadas = [] } = useQueryAulasOcupadas({
+    salaId: formData.sala,
+    anoLectivo: formData.anoLetivo,
+    periodo: formData.periodo,
+  });
+  const ocupadasSet = useMemo(
+    () => mapOcupacaoPorChave(aulasOcupadas),
+    [aulasOcupadas],
+  );
   /* ------------------------- LOAD INICIAL ------------------------- */
 
   useEffect(() => {
@@ -132,6 +169,9 @@ export function EditSchedule() {
       apenasPrimeiroAno: mapped.apenasPrimeiroAno,
       designacao: mapped.designacao,
       capacidade: mapped.capacidade,
+      sala: mapped.sala,
+      tipoAula: mapped.tipoAula,
+      docente: mapped.docente || "",
     }));
 
     // 🔹 Campos dependentes (guardados)
@@ -141,17 +181,7 @@ export function EditSchedule() {
     });
 
     // 🔹 Aulas
-    const slots: AulaPayload[] =
-      data.aulas?.map((a: any) => ({
-        docente: a.docenteId,
-        tipoAula: a.tipoAulaId,
-        sala: a.salaid,
-        diaSemana: a.diaSemanaId,
-        ordemTempo: a.ordem,
-        hora_inicio: a.horaInicio,
-        hora_fim: a.horaTermino,
-        obs: a.observacoes || "",
-      })) || [];
+    const slots: AulaPayload[] = mapBackendAulasToGrid(data.aulas) ?? [];
 
     setAulas(slots);
   }, [data]);
@@ -163,7 +193,7 @@ export function EditSchedule() {
     if (isLoadingClasses) return;
 
     const exists = classes.some(
-      (c) => String(c.codigo) === pendingSelects.classes
+      (c) => String(c.codigo) === pendingSelects.classes,
     );
 
     if (exists) {
@@ -183,7 +213,7 @@ export function EditSchedule() {
     if (isLoadingUC) return;
 
     const exists = unidadesCurriculares.some(
-      (u) => String(u.pk) === pendingSelects.unidadeCurricular
+      (u) => String(u.pk) === pendingSelects.unidadeCurricular,
     );
 
     if (exists) {
@@ -195,11 +225,58 @@ export function EditSchedule() {
       setPendingSelects((p) => ({ ...p, unidadeCurricular: undefined }));
     }
   }, [unidadesCurriculares, isLoadingUC, pendingSelects.unidadeCurricular]);
+  const validateForm = () => {
+    for (const field of requiredFields) {
+      if (isBlank(formData[field.key as keyof typeof formData])) {
+        toast({
+          variant: "destructive",
+          title: "Campo obrigatório",
+          description: `Preencha: ${field.label}`,
+        });
+        return false;
+      }
+    }
 
-  /* ------------------------- SAVE ------------------------- */
+    if (!aulas.length) {
+      toast({
+        variant: "destructive",
+        title: "Horário vazio",
+        description: "Selecione pelo menos uma aula.",
+      });
+      return false;
+    }
 
+    return true;
+  };
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    validateForm();
+    const aulasSemConflito = aulas.filter((aula) => {
+      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      return !ocupadasSet.has(key);
+    });
+
+    const aulasComConflito = aulas.filter((aula) => {
+      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      return ocupadasSet.has(key);
+    });
+
+    if (aulasComConflito.length > 0) {
+      toast({
+        variant: "destructive",
+        title: "Conflito de horários detectado",
+        description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
+      });
+    }
+
+    if (aulasSemConflito.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Nenhuma aula válida",
+        description: "Remova os conflitos antes de guardar o horário.",
+      });
+      return;
+    }
 
     await updateSchedule.mutateAsync({
       id: scheduleId,
@@ -215,7 +292,10 @@ export function EditSchedule() {
         turma: Number(formData.classes),
         estadoHorario: 2,
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
-        aulas,
+        tipoAula: Number(formData.tipoAula),
+        sala: Number(formData.sala),
+        docente: Number(formData.docente),
+        aulas: aulasSemConflito,
       },
     });
 
@@ -226,7 +306,7 @@ export function EditSchedule() {
   /* ------------------------- UI ------------------------- */
   const isFormComplete =
     requiredFields.every(
-      (f) => !isEmpty(formData[f.key as keyof typeof formData])
+      (f) => !isEmpty(formData[f.key as keyof typeof formData]),
     ) && aulas.length > 0;
   if (isLoading) {
     return (
@@ -386,15 +466,84 @@ export function EditSchedule() {
             }
           />
         </div>
+        <FormSelect
+          label="Docente"
+          value={formData.docente}
+          disabled={isLoadingTeacher}
+          onChange={(v) => setFormData({ ...formData, docente: v })}
+          options={teachers}
+          map={(t) => ({
+            key: t.pk,
+            label: t.nomeCompleto,
+            value: t.pk,
+          })}
+          loading={isLoadingTeacher}
+        />
+        <div>
+          <Label>Tipo de Aula</Label>
+          <Select
+            value={formData.tipoAula}
+            onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
+          >
+            <SelectTrigger className="w-full ">
+              <SelectValue placeholder="Escolha o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              {tipoDeSalas.map((tipo) => (
+                <SelectItem
+                  key={tipo.pkTipoAula}
+                  value={tipo.pkTipoAula.toString()}
+                >
+                  {tipo.designacao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* SALA */}
+        <div>
+          <Label>Sala</Label>
+          <Select
+            value={formData.sala}
+            onValueChange={(v) => setFormData({ ...formData, sala: v })}
+          >
+            <SelectTrigger
+              disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
+              className="w-full "
+            >
+              <SelectValue
+                placeholder={
+                  <>
+                    {" "}
+                    {isLoadingSala ? (
+                      <span className="flex gap-2 items-center">
+                        Carregando <Loader2 className="animate-spin" />
+                      </span>
+                    ) : (
+                      "Selecione Salas"
+                    )}
+                  </>
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {salas?.map((sala) => (
+                <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
+                  {sala.sala}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {temposDisponiveis.length > 0 && (
         <ScheduleGridEdit
+          ocupadas={ocupadasSet}
           scheduleData={temposDisponiveis}
           aulasExistentes={aulas}
           onChange={setAulas}
-          anoLetivo={formData.anoLetivo}
-          unidadeCurricular={formData.unidadeCurricular}
         />
       )}
 
@@ -421,6 +570,7 @@ export function EditSchedule() {
 /* ------------------------------------------------------------------ */
 
 function mapScheduleToFormData(schedule: any) {
+  const primeiraAula = schedule.aulas?.[0];
   return {
     anoLetivo: String(schedule.fk_ano_lectivo || ""),
     semestre: String(schedule.semestre || ""),
@@ -428,7 +578,10 @@ function mapScheduleToFormData(schedule: any) {
     curso: String(schedule.cursoId || ""),
     classes: extrairAnoCurricular(schedule.ano || ""),
     unidadeCurricular: String(schedule.unidadeCurricularId || ""),
-    modalidade: String(schedule.aulas?.[0]?.modalidadeId || ""),
+    modalidade: String(primeiraAula?.modalidadeId || ""),
+    docente: String(primeiraAula?.docenteId || ""),
+    tipoAula: String(primeiraAula?.tipoAulaId || ""),
+    sala: String(primeiraAula?.salaid || ""),
     apenasPrimeiroAno: schedule.ano?.startsWith("1") ? "0" : "1",
     designacao: schedule.designacao || "",
     capacidade: String(schedule.capacidade || ""),
@@ -450,4 +603,32 @@ function gerarSiglaCurso(nome: string) {
     .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
     .map((p) => p[0].toUpperCase())
     .join("");
+}
+function mapBackendAulasToGrid(aulasBackend: any[]): AulaPayload[] {
+  if (!aulasBackend) return [];
+
+  return aulasBackend
+    .filter((a) => a.ativo)
+    .map((a) => ({
+      diaSemana: a.diaSemanaId,
+      ordemTempo: a.ordem,
+      hora_inicio: a.horaInicio,
+      hora_fim: a.horaTermino,
+      obs: a.observacoes ?? "",
+    }));
+}
+
+export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
+  const ocupadas = new Set<string>();
+
+  aulas.forEach((dia) => {
+    dia.tempos.forEach((tempo, index) => {
+      // backend não manda ordem, então usamos índice + 1
+      const ordem = index + 1;
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+      ocupadas.add(key);
+    });
+  });
+
+  return ocupadas;
 }

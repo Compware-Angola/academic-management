@@ -32,12 +32,12 @@ export async function fetchGroupAccesses(groupId: number): Promise<Access[]> {
 
 export async function deleteGroupAccess({
   grupoId,
-  utilizadorId,
+  acessoId,
 }: {
-  utilizadorId: number;
   grupoId: number;
+  acessoId: number;
 }): Promise<void> {
   await axiosNestGa.delete(
-    `acess_management/grupo/${utilizadorId}/acesso/${grupoId}`
+    `acess_management/grupo/${grupoId}/acesso/${acessoId}`
   );
 }

@@ -12,10 +12,7 @@ import CreateSchedule from "./pages/schedules/CreateSchedule/CreateSchedule";
 import ScheduleList from "./pages/schedules/ScheduleList";
 import ClassromList from "./pages/classroom/ClassromList";
 import DisciplineManagementList from "./pages/disciplinemanagement/DisciplineManagementList";
-import EnrolledList from "./pages/registrations/EnrolledList";
 import GeneralListing from "./pages/facultymanagement/GeneralListing";
-import CandidateList from "./pages/exam/CandidateList";
-import ScholarshipHoldersList from "./pages/bolsa/ScholarshipHoldersList";
 import LaunchNotes from "./pages/rating(avaliation)/LaunchNotes";
 import UserAccess from "./pages/access/UserAccess";
 import LoggedInUsers from "./pages/access/LoggedInUsers";
@@ -83,6 +80,8 @@ import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
+import { PermissionTypeDetails } from "./constants/permission.type";
+
 
 const App = () => {
   return (
@@ -103,9 +102,7 @@ const App = () => {
                   <Route
                     path="/horarios/criar"
                     element={
-                      <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
-                      >
+                      <ProtectedRoute allowedPermissions={[PermissionTypeDetails.CRIAR_HORARIO.sigla!]}>
                         <CreateSchedule />
                       </ProtectedRoute>
                     }
@@ -113,18 +110,14 @@ const App = () => {
                   <Route
                     path="/controle-acesso/diretor"
                     element={
-                      <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
-                      >
-                        <DirectorCourseAccess />
-                      </ProtectedRoute>
+                      <DirectorCourseAccess />
                     }
                   />
                   <Route
                     path="/controle-acesso/solicitacoes"
                     element={
                       <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                        allowedPermissions={[]}
                       >
                         <SolicitacoesEncaminhadas />
                       </ProtectedRoute>
@@ -134,7 +127,7 @@ const App = () => {
                     path="/financas/notas-pagamento"
                     element={
                       <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                        allowedPermissions={[PermissionTypeDetails.FACTURAS.sigla!]}
                       >
                         <ListarNotasPagamento />
                       </ProtectedRoute>
@@ -144,7 +137,7 @@ const App = () => {
                     path="/financas/credito/instituicoes"
                     element={
                       <ProtectedRoute
-                        allowedGroups={["adm", "dct", "rootAdmin"]}
+                        allowedPermissions={[PermissionTypeDetails.INSTITUICOES.sigla!]}
                       >
                         <CreateInstituicao />
                       </ProtectedRoute>
@@ -263,7 +256,13 @@ const App = () => {
                   element={<MarkAttendance />}
                 />
               */}
-                  <Route path="/acessos/utilizador" element={<UserAccess />} />
+                  <Route path="/acessos/utilizador"    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.LISTA_DE_UTILIZADORES2.sigla!, PermissionTypeDetails.LISTA_DE_UTILIZADORES.sigla!]}
+                      >
+                        <UserAccess />
+                      </ProtectedRoute>
+                    }  />
                   <Route
                     path="/acessos/criar-utilizador"
                     element={<CreateUser />}

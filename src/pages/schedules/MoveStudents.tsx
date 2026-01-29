@@ -34,7 +34,7 @@ import { toast } from "sonner";
 export default function MovimentarEstudantes() {
   //Hooks
   const { user } = useAuth();
-  const moveStudentsMutation = useMutationMoveStudents(user.user_id);
+  const moveStudentsMutation = useMutationMoveStudents(user.user.pk_utilizador);
 
   const [selectedSchedule, setSelectedSchedule] = useState<number | undefined>(
     undefined
