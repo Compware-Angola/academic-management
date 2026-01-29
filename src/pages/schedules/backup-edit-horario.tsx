@@ -166,8 +166,7 @@ export function EditSchedule() {
     });
 
     // 🔹 Aulas
-    const slots: AulaPayload[] = mapBackendAulasToGrid(data.aulas) ?? [];
-
+    const slots = mapBackendAulasToGrid(data.aulas);
     setAulas(slots);
   }, [data]);
   console.log({ aulas });
@@ -230,7 +229,6 @@ export function EditSchedule() {
         turma: Number(formData.classes),
         estadoHorario: 2,
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
-        tipoAula: Number(formData.tipoAula),
         aulas,
       },
     });
