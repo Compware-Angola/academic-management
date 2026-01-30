@@ -32,9 +32,7 @@ export const fetchStudentsSugestoes = async (
 
   const response = await axiosNestGa.get<StudentSugestao[]>(
     "/students/find/sugestoes",
-    {
-      params: queryParams,
-    }
+    { params: queryParams }
   );
 
   return response.data;
@@ -43,8 +41,6 @@ export const fetchStudentsSugestoes = async (
 /* =======================
  * TIPO DE ALUNO DETALHADO (ficha completa / estatística)
  * ======================= */
-
-
 export type StudentDetail = {
   codigo_matricula: number;
   bi: string;
@@ -76,11 +72,80 @@ export type StudentDetail = {
 export const fetchStudentEstatisticas = async (
   codigoMatricula: number | string
 ): Promise<StudentDetail> => {
-  // Garante que o valor seja string na URL (o axios converte automaticamente, mas fica explícito)
   const id = String(codigoMatricula).trim();
 
   const response = await axiosNestGa.get<StudentDetail>(
     `/students/estatistic/${id}`
+  );
+
+  return response.data;
+};
+
+/* =======================
+ * TIPOS - Disciplinas / Cadeiras matriculadas
+ * ======================= */
+export type DisciplinaMatricula = {
+  disciplina: string;
+  codigo_disciplina: string;
+  semestre: string;       // ex: "I SEMESTRE", "II SEMESTRE"
+  duracao: string;        // ex: "Semestral", "Anual"
+  classe: string;         // ex: "1º ano", "2º ano"
+  ano_lectivo: string;    // ex: "2023-2024"
+  horario: string;        // ex: "CARDIO.1.BIOQUI.D-H5"
+  sala: string;           // ex: "U-107", "I-103"
+};
+
+export type DisciplinasResponse = {
+  data: DisciplinaMatricula[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+/* =======================
+ * PARAMS - Disciplinas matriculadas
+ * ======================= */
+export type FetchDisciplinasMatriculadasParams = {
+  matriculaId: number | string;
+  anoLectivo?: string | number;   // ex: "2023-2024" ou 2023
+  semestre?: string | number;     // ex: "1", "I", "2", "II", "I SEMESTRE"
+  page?: number;
+  limit?: number;
+};
+
+/* =======================
+ * FETCH - Disciplinas / Cadeiras do aluno (matrícula atual ou histórica)
+ * ======================= */
+export const fetchDisciplinasMatriculadas = async (
+  params: FetchDisciplinasMatriculadasParams
+): Promise<DisciplinasResponse> => {
+  const {
+    matriculaId,
+    anoLectivo,
+    semestre,
+    page = 1,
+    limit = 25,
+  } = params;
+
+  // Monta query params apenas com os valores fornecidos
+  const queryParams: Record<string, string | number> = {
+    matriculaId: String(matriculaId).trim(),
+    page: page,
+    limit: limit,
+  };
+
+  if (anoLectivo !== undefined && anoLectivo !== null) {
+    queryParams.anoLectivo = String(anoLectivo).trim();
+  }
+
+  if (semestre !== undefined && semestre !== null) {
+    queryParams.semestre = String(semestre).trim();
+  }
+
+  const response = await axiosNestGa.get<DisciplinasResponse>(
+    "/discipline",
+    { params: queryParams }
   );
 
   return response.data;

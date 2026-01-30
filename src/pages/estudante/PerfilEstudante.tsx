@@ -41,7 +41,9 @@ import {
   Clock,
   AlertTriangle,
 } from "lucide-react";
-import { useStudentDetail } from "@/hooks/tudents/use-query-students";
+import { useStudentDetail, useStudentDisciplinas } from "@/hooks/tudents/use-query-students";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mock data for a complete student profile
 const mockEstudante = {
@@ -117,25 +119,43 @@ const mockDocumentos = [
   { id: 4, tipo: "Comprovativo de Pagamento", dataEmissao: "2025-12-15", estado: "Disponível" },
 ];
 
-const mockAssiduidade = [
-  { disciplina: "Inteligência Artificial", presencas: 28, total: 30, percentagem: 93 },
-  { disciplina: "Sistemas Distribuídos", presencas: 25, total: 30, percentagem: 83 },
-  { disciplina: "Segurança Informática", presencas: 12, total: 15, percentagem: 80 },
-  { disciplina: "Projecto Final", presencas: 8, total: 10, percentagem: 80 },
-];
+
 
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
   const [activeTab, setActiveTab] = useState("geral");
-  
-  // In a real app, you would fetch the student data based on matricula
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10); 
+
     const {
       data: student,
       isLoading,
       isFetching,
       error
     } = useStudentDetail(matricula);
+const {
+    data: response,
+    isLoading: isDisciplinasLoading,
+    isError,
+  } = useStudentDisciplinas({
+    matriculaId: matricula ?? '',
+    anoLectivo: 23,   // ← descomente e ajuste se quiser filtrar por ano
+    // semestre: 1,               // ← descomente se quiser filtrar por semestre
+    page,
+    limit,
+  });
 
+  const disciplinas = response?.data ?? [];
+  const total = response?.total ?? 0;
+  const totalPages = response?.totalPages ?? 1;
+
+  const handlePrevious = () => {
+    if (page > 1) setPage((prev) => prev - 1);
+  };
+
+  const handleNext = () => {
+    if (page < totalPages) setPage((prev) => prev + 1);
+  };
 
      if (!matricula) {
     return <div>Matrícula inválida</div>;
@@ -420,50 +440,138 @@ export default function PerfilEstudante() {
         </TabsContent>
 
         {/* Tab: Disciplinas */}
-        <TabsContent value="disciplinas" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Histórico de Disciplinas</CardTitle>
-              <CardDescription>Lista de todas as disciplinas cursadas e em curso</CardDescription>
-            </CardHeader>
-            <CardContent>
+      <TabsContent value="disciplinas" className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Histórico de Disciplinas</CardTitle>
+          <CardDescription>
+            Lista de todas as disciplinas cursadas e em curso
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : isError ? (
+            <div className="text-center text-destructive py-8">
+              Erro ao carregar as disciplinas. Tente novamente.
+            </div>
+          ) : disciplinas.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              Nenhuma disciplina encontrada para este aluno.
+            </div>
+          ) : (
+            <>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Código</TableHead>
                     <TableHead>Disciplina</TableHead>
-                    <TableHead className="text-center">Ano</TableHead>
-                    <TableHead className="text-center">Créditos</TableHead>
-                    <TableHead className="text-center">Nota</TableHead>
+                    <TableHead className="text-center">Ano / Classe</TableHead>
+                    <TableHead className="text-center">Semestre</TableHead>
+                    <TableHead className="text-center">Sala / Horário</TableHead>
                     <TableHead className="text-center">Estado</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockDisciplinas.map((disc) => (
-                    <TableRow key={disc.codigo}>
-                      <TableCell className="font-mono">{disc.codigo}</TableCell>
-                      <TableCell className="font-medium">{disc.nome}</TableCell>
-                      <TableCell className="text-center">{disc.ano}º</TableCell>
-                      <TableCell className="text-center">{disc.creditos}</TableCell>
-                      <TableCell className="text-center font-semibold">
-                        {disc.nota !== null ? disc.nota : "-"}
+                  {disciplinas.map((disc) => (
+                    <TableRow key={disc.codigo_disciplina}>
+                      <TableCell className="font-mono text-sm">
+                        {disc.codigo_disciplina}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {disc.disciplina}
                       </TableCell>
                       <TableCell className="text-center">
-                        {disc.estado === "Aprovado" ? (
-                          <Badge className="bg-green-500 hover:bg-green-600">{disc.estado}</Badge>
-                        ) : disc.estado === "Em Curso" ? (
-                          <Badge className="bg-blue-500 hover:bg-blue-600">{disc.estado}</Badge>
-                        ) : (
-                          <Badge variant="destructive">{disc.estado}</Badge>
-                        )}
+                        {disc.classe}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {disc.semestre}
+                      </TableCell>
+                      <TableCell className="text-center text-sm text-muted-foreground">
+                        {disc.sala} • {disc.horario}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {/* 
+                          Aqui você pode melhorar a lógica de estado 
+                          (baseado no que a API realmente retorna)
+                        */}
+                        <Badge
+                          variant={
+                            disc.ano_lectivo === "2024-2025" // exemplo: atual
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {disc.ano_lectivo.includes("2024") ? "Em Curso" : "Concluído"}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
+              {/* Controles de Paginação */}
+              <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t">
+                <div className="text-sm text-muted-foreground">
+                  Mostrando {disciplinas.length} de {total} disciplinas
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">Itens por página:</span>
+                    <Select
+                      value={String(limit)}
+                      onValueChange={(val) => {
+                        setLimit(Number(val));
+                        setPage(1); // reset para página 1 ao mudar limite
+                      }}
+                    >
+                      <SelectTrigger className="w-[70px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="25">25</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevious}
+                      disabled={page === 1 || isLoading}
+                    >
+                      Anterior
+                    </Button>
+                    <span className="text-sm">
+                      Página {page} de {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNext}
+                      disabled={page === totalPages || isLoading}
+                    >
+                      Próximo
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </TabsContent>
+  
 
         {/* Tab: Finanças */}
         <TabsContent value="financas" className="space-y-4">
