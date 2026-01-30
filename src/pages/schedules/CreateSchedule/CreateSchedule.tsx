@@ -662,8 +662,8 @@ export default function CreateSchedule() {
   );
 }
 const onlyFirstYear = [
-  { value: 0, label: "Sim" },
-  { value: 1, label: "Não" },
+  { value: 1, label: "Sim" },
+  { value: 0, label: "Não" },
 ];
 const STOP_WORDS = ["e", "de", "do", "da", "dos", "das"];
 
