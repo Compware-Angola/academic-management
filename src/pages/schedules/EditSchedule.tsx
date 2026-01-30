@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Loader2, Save, X } from "lucide-react";
+import { AlertTriangle, Loader2, LucideLoader2, Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { FormSelect } from "@/components/common/FormSelect";
@@ -36,6 +36,17 @@ import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 import { AulasOcupadasPorDia } from "@/services/horario/fetch-aulas-ocupadas.service";
 import { useQueryAulasOcupadas } from "@/hooks/horario/use-query-aulas-ocupadas";
 import { isBlank } from "@/util/is-blank";
+import { useQueryScheduleCreationPrompt } from "@/hooks/academiccalendar/use-query-schedule-creation-prompt";
+import { ScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
   { key: "capacidade", label: "Capacidade" },
@@ -90,7 +101,23 @@ export function EditSchedule() {
 
   const { data, isLoading, isError } = useQueryScheduleDetails(scheduleId);
 
-  const { data: academicYear = [] } = useQueryAnoAcademico();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+
+  // encontra o ano activo
+  const activeAcademicYear = academicYear?.find(
+    (year) => year.estado.toLowerCase() === "activo",
+  );
+
+  // extrai só o código
+  const activeAcademicYearId = activeAcademicYear?.codigo;
+
+  // busca o prazo usando o código encontrado
+  const {
+    data: scheduleCreationPrompt,
+    isLoading: isLoadingScheduleCreationPrompt,
+  } = useQueryScheduleCreationPrompt(activeAcademicYearId!);
+
   const { data: semestres = [] } = useQuerySemestres();
   const { data: periodos = [] } = useQueryPeriod();
   const { data: cursos = [] } = useCursos();
@@ -308,262 +335,334 @@ export function EditSchedule() {
     requiredFields.every(
       (f) => !isEmpty(formData[f.key as keyof typeof formData]),
     ) && aulas.length > 0;
-  if (isLoading) {
+  if (isLoadingAcademicYear || isLoadingScheduleCreationPrompt || isLoading) {
     return (
-      <div className="p-6 flex items-center gap-2">
-        <Loader2 className="animate-spin" /> Carregando horário…
+      <div className="flex justify-center items-center">
+        <LucideLoader2 className="animate-spin text-primary" />
       </div>
     );
   }
-
   if (isError) {
     return <div className="p-6 text-red-500">Erro ao carregar horário</div>;
   }
 
+  const isWithinPeriod = isWithinScheduleCreationPeriod(scheduleCreationPrompt);
   return (
-    <form onSubmit={handleSave} className="p-6 space-y-6">
-      <h1 className="text-xl font-semibold">Editar Horário</h1>
+    <div className="flex-1 space-y-6 p-8">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+          </BreadcrumbItem>
 
-      <div className="grid md:grid-cols-4 gap-4">
-        <FormSelect
-          label="Ano Letivo"
-          value={formData.anoLetivo}
-          options={academicYear}
-          map={(a) => ({
-            key: a.codigo,
-            label: a.designacao,
-            value: String(a.codigo),
-          })}
-          onChange={(v) => setFormData((p) => ({ ...p, anoLetivo: v }))}
-        />
+          <BreadcrumbSeparator />
 
-        <FormSelect
-          label="Semestre"
-          value={formData.semestre}
-          options={semestres}
-          map={(s) => ({
-            key: s.codigo,
-            label: s.designacao,
-            value: String(s.codigo),
-          })}
-          onChange={(v) => setFormData((p) => ({ ...p, semestre: v }))}
-        />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Editar Horário</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <form onSubmit={handleSave} className="p-6 space-y-6">
+        {!scheduleCreationPrompt ? (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-5 w-5" />
+            <AlertTitle>
+              Nenhum Prazo de Criação de Horários Definido
+            </AlertTitle>
+            <AlertDescription>
+              Ainda não foi definido um período para criação de horários.
+              Contacte a administração.
+            </AlertDescription>
+          </Alert>
+        ) : !isWithinPeriod ? (
+          <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <AlertTitle className="text-amber-800 dark:text-amber-400 font-semibold">
+              Fora do Prazo de Criação de Horários
+            </AlertTitle>
+            <AlertDescription>
+              O período para criação de horários é de{" "}
+              <strong>
+                {new Date(
+                  scheduleCreationPrompt.data_inicio,
+                ).toLocaleDateString("pt-AO")}
+              </strong>{" "}
+              a{" "}
+              <strong>
+                {new Date(scheduleCreationPrompt.data_fim).toLocaleDateString(
+                  "pt-AO",
+                )}
+              </strong>
+              .
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
-        <FormSelect
-          label="Período"
-          value={formData.periodo}
-          options={periodos}
-          map={(p) => ({
-            key: p.codigo,
-            label: p.designacao,
-            value: String(p.codigo),
-          })}
-          onChange={(v) => setFormData((p) => ({ ...p, periodo: v }))}
-        />
+        <div className="grid md:grid-cols-4 gap-4">
+          <FormSelect
+            disabled={!isWithinPeriod}
+            label="Ano Letivo"
+            value={formData.anoLetivo}
+            options={academicYear}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: String(a.codigo),
+            })}
+            onChange={(v) => setFormData((p) => ({ ...p, anoLetivo: v }))}
+          />
 
-        <FormSelect
-          label="Curso"
-          value={formData.curso}
-          options={cursos}
-          map={(c) => ({
-            key: c.codigo,
-            label: c.designacao,
-            value: String(c.codigo),
-          })}
-          onChange={(v) =>
-            setFormData((p) => ({
-              ...p,
-              curso: v,
-              classes: "",
-              unidadeCurricular: "",
-            }))
-          }
-        />
+          <FormSelect
+            label="Semestre"
+            value={formData.semestre}
+            options={semestres}
+            disabled={!isWithinPeriod}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: String(s.codigo),
+            })}
+            onChange={(v) => setFormData((p) => ({ ...p, semestre: v }))}
+          />
 
-        <FormSelect
-          label="Ano Curricular"
-          value={formData.classes}
-          options={classes}
-          loading={isLoadingClasses}
-          map={(c) => ({
-            key: c.codigo,
-            label: c.designacao,
-            value: String(c.codigo),
-          })}
-          onChange={(v) =>
-            setFormData((p) => ({ ...p, classes: v, unidadeCurricular: "" }))
-          }
-        />
+          <FormSelect
+            label="Período"
+            disabled={!isWithinPeriod}
+            value={formData.periodo}
+            options={periodos}
+            map={(p) => ({
+              key: p.codigo,
+              label: p.designacao,
+              value: String(p.codigo),
+            })}
+            onChange={(v) => setFormData((p) => ({ ...p, periodo: v }))}
+          />
 
-        <FormSelect
-          label="Unidade Curricular"
-          value={formData.unidadeCurricular}
-          options={unidadesCurriculares}
-          loading={isLoadingUC}
-          map={(u) => ({ key: u.pk, label: u.descricao, value: String(u.pk) })}
-          onChange={(v) => setFormData((p) => ({ ...p, unidadeCurricular: v }))}
-        />
-
-        <FormSelect
-          label="Modalidade"
-          value={formData.modalidade}
-          options={modalidade}
-          map={(m) => ({
-            key: m.pkModalidade,
-            label: m.designacao,
-            value: String(m.pkModalidade),
-          })}
-          onChange={(v) => setFormData((p) => ({ ...p, modalidade: v }))}
-        />
-        <FormSelect
-          label="Reservada para novos estudantes"
-          value={formData.apenasPrimeiroAno}
-          options={onlyFirstYear}
-          map={(o) => ({
-            key: o.value,
-            label: o.label,
-            value: o.value,
-          })}
-          onChange={(v) =>
-            setFormData((prev) => ({ ...prev, apenasPrimeiroAno: v }))
-          }
-        />
-        <div className="space-y-1">
-          <Label htmlFor="designacao">Designação</Label>
-
-          <div className="relative">
-            <Input
-              id="designacao"
-              readOnly
-              disabled={isLoadindeNextScheduleDesignation}
-              value={formData.designacao}
-              placeholder={
-                isLoadindeNextScheduleDesignation
-                  ? "A gerar designação automaticamente…"
-                  : "Designação do horário"
-              }
-              className="pr-10"
-            />
-
-            {isLoadindeNextScheduleDesignation && (
-              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-            )}
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            A designação é gerada automaticamente com base no curso, UC e
-            modalidade.
-          </p>
-        </div>
-
-        <div>
-          <Label>Capacidade</Label>
-          <Input
-            type="number"
-            value={formData.capacidade}
-            onChange={(e) =>
-              setFormData((p) => ({ ...p, capacidade: e.target.value }))
+          <FormSelect
+            disabled={!isWithinPeriod}
+            label="Curso"
+            value={formData.curso}
+            options={cursos}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: String(c.codigo),
+            })}
+            onChange={(v) =>
+              setFormData((p) => ({
+                ...p,
+                curso: v,
+                classes: "",
+                unidadeCurricular: "",
+              }))
             }
           />
-        </div>
-        <FormSelect
-          label="Docente"
-          value={formData.docente}
-          disabled={isLoadingTeacher}
-          onChange={(v) => setFormData({ ...formData, docente: v })}
-          options={teachers}
-          map={(t) => ({
-            key: t.pk,
-            label: t.nomeCompleto,
-            value: t.pk,
-          })}
-          loading={isLoadingTeacher}
-        />
-        <div>
-          <Label>Tipo de Aula</Label>
-          <Select
-            value={formData.tipoAula}
-            onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
-          >
-            <SelectTrigger className="w-full ">
-              <SelectValue placeholder="Escolha o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {tipoDeSalas.map((tipo) => (
-                <SelectItem
-                  key={tipo.pkTipoAula}
-                  value={tipo.pkTipoAula.toString()}
-                >
-                  {tipo.designacao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
-        {/* SALA */}
-        <div>
-          <Label>Sala</Label>
-          <Select
-            value={formData.sala}
-            onValueChange={(v) => setFormData({ ...formData, sala: v })}
-          >
-            <SelectTrigger
-              disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
-              className="w-full "
-            >
-              <SelectValue
+          <FormSelect
+            disabled={!isWithinPeriod}
+            label="Ano Curricular"
+            value={formData.classes}
+            options={classes}
+            loading={isLoadingClasses}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: String(c.codigo),
+            })}
+            onChange={(v) =>
+              setFormData((p) => ({ ...p, classes: v, unidadeCurricular: "" }))
+            }
+          />
+
+          <FormSelect
+            disabled={!isWithinPeriod}
+            label="Unidade Curricular"
+            value={formData.unidadeCurricular}
+            options={unidadesCurriculares}
+            loading={isLoadingUC}
+            map={(u) => ({
+              key: u.pk,
+              label: u.descricao,
+              value: String(u.pk),
+            })}
+            onChange={(v) =>
+              setFormData((p) => ({ ...p, unidadeCurricular: v }))
+            }
+          />
+
+          <FormSelect
+            disabled={!isWithinPeriod}
+            label="Modalidade"
+            value={formData.modalidade}
+            options={modalidade}
+            map={(m) => ({
+              key: m.pkModalidade,
+              label: m.designacao,
+              value: String(m.pkModalidade),
+            })}
+            onChange={(v) => setFormData((p) => ({ ...p, modalidade: v }))}
+          />
+          <FormSelect
+            disabled={!isWithinPeriod}
+            label="Reservada para novos estudantes"
+            value={formData.apenasPrimeiroAno}
+            options={onlyFirstYear}
+            map={(o) => ({
+              key: o.value,
+              label: o.label,
+              value: o.value,
+            })}
+            onChange={(v) =>
+              setFormData((prev) => ({ ...prev, apenasPrimeiroAno: v }))
+            }
+          />
+          <div className="space-y-1">
+            <Label htmlFor="designacao">Designação</Label>
+
+            <div className="relative">
+              <Input
+                id="designacao"
+                readOnly
+                disabled={isLoadindeNextScheduleDesignation}
+                value={formData.designacao}
                 placeholder={
-                  <>
-                    {" "}
-                    {isLoadingSala ? (
-                      <span className="flex gap-2 items-center">
-                        Carregando <Loader2 className="animate-spin" />
-                      </span>
-                    ) : (
-                      "Selecione Salas"
-                    )}
-                  </>
+                  isLoadindeNextScheduleDesignation
+                    ? "A gerar designação automaticamente…"
+                    : "Designação do horário"
                 }
+                className="pr-10"
               />
-            </SelectTrigger>
-            <SelectContent>
-              {salas?.map((sala) => (
-                <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
-                  {sala.sala}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
+              {isLoadindeNextScheduleDesignation && (
+                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+              )}
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              A designação é gerada automaticamente com base no curso, UC e
+              modalidade.
+            </p>
+          </div>
+
+          <div>
+            <Label>Capacidade</Label>
+            <Input
+              disabled={!isWithinPeriod}
+              type="number"
+              value={formData.capacidade}
+              onChange={(e) =>
+                setFormData((p) => ({ ...p, capacidade: e.target.value }))
+              }
+            />
+          </div>
+          <FormSelect
+            label="Docente"
+            value={formData.docente}
+            disabled={isLoadingTeacher || !isWithinPeriod}
+            onChange={(v) => setFormData({ ...formData, docente: v })}
+            options={teachers}
+            map={(t) => ({
+              key: t.pk,
+              label: t.nomeCompleto,
+              value: t.pk,
+            })}
+            loading={isLoadingTeacher}
+          />
+          <div>
+            <Label>Tipo de Aula</Label>
+            <Select
+              disabled={!isWithinPeriod}
+              value={formData.tipoAula}
+              onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
+            >
+              <SelectTrigger className="w-full ">
+                <SelectValue placeholder="Escolha o tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                {tipoDeSalas.map((tipo) => (
+                  <SelectItem
+                    key={tipo.pkTipoAula}
+                    value={tipo.pkTipoAula.toString()}
+                  >
+                    {tipo.designacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* SALA */}
+          <div>
+            <Label>Sala</Label>
+            <Select
+              disabled={!isWithinPeriod}
+              value={formData.sala}
+              onValueChange={(v) => setFormData({ ...formData, sala: v })}
+            >
+              <SelectTrigger
+                disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
+                className="w-full "
+              >
+                <SelectValue
+                  placeholder={
+                    <>
+                      {" "}
+                      {isLoadingSala ? (
+                        <span className="flex gap-2 items-center">
+                          Carregando <Loader2 className="animate-spin" />
+                        </span>
+                      ) : (
+                        "Selecione Salas"
+                      )}
+                    </>
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {salas?.map((sala) => (
+                  <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
+                    {sala.sala}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
 
-      {temposDisponiveis.length > 0 && (
-        <ScheduleGridEdit
-          ocupadas={ocupadasSet}
-          scheduleData={temposDisponiveis}
-          aulasExistentes={aulas}
-          onChange={setAulas}
-        />
-      )}
+        {temposDisponiveis.length > 0 ||
+          (!isWithinPeriod && (
+            <ScheduleGridEdit
+              ocupadas={ocupadasSet}
+              scheduleData={temposDisponiveis}
+              aulasExistentes={aulas}
+              onChange={setAulas}
+            />
+          ))}
 
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={() => navigate(-1)}>
-          <X className="mr-2 h-4 w-4" /> Cancelar
-        </Button>
-        <Button
-          type="submit"
-          disabled={!isFormComplete || updateSchedule.isPending}
-        >
-          {updateSchedule.isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
-          {updateSchedule.isPending ? "A guardar..." : "Guardar"}
-        </Button>
-      </div>
-    </form>
+        {isWithinPeriod && (
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(-1)}
+            >
+              <X className="mr-2 h-4 w-4" /> Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={!isFormComplete || updateSchedule.isPending}
+            >
+              {updateSchedule.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              {updateSchedule.isPending ? "A guardar..." : "Guardar"}
+            </Button>
+          </div>
+        )}
+      </form>
+    </div>
   );
 }
 
@@ -631,4 +730,16 @@ export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   });
 
   return ocupadas;
+}
+
+function isWithinScheduleCreationPeriod(
+  prompt: ScheduleCreationPrompt | null | undefined,
+) {
+  if (!prompt) return false;
+
+  const now = new Date();
+  const start = new Date(prompt.data_inicio);
+  const end = new Date(prompt.data_fim);
+
+  return now >= start && now <= end;
 }

@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, X, AlertCircle, Loader2, List } from "lucide-react";
+import {
+  Save,
+  X,
+  AlertCircle,
+  Loader2,
+  List,
+  AlertTriangle,
+  LucideLoader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -43,6 +51,9 @@ import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 import { isBlank } from "@/util/is-blank";
 import { useQueryAulasOcupadas } from "@/hooks/horario/use-query-aulas-ocupadas";
 import { AulasOcupadasPorDia } from "@/services/horario/fetch-aulas-ocupadas.service";
+import { useQueryScheduleCreationPrompt } from "@/hooks/academiccalendar/use-query-schedule-creation-prompt";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -88,6 +99,20 @@ export default function CreateSchedule() {
   /* ---------- QUERIES ----------- */
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
+
+  // encontra o ano activo
+  const activeAcademicYear = academicYear?.find(
+    (year) => year.estado.toLowerCase() === "activo",
+  );
+
+  // extrai só o código
+  const activeAcademicYearId = activeAcademicYear?.codigo;
+
+  // busca o prazo usando o código encontrado
+  const {
+    data: scheduleCreationPrompt,
+    isLoading: isLoadingScheduleCreationPrompt,
+  } = useQueryScheduleCreationPrompt(activeAcademicYearId!);
   const { data: teachers = [], isLoading: isLoadingTeacher } =
     useQueryTeacherByUC(formData.unidadeCurricular);
   const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
@@ -275,7 +300,16 @@ export default function CreateSchedule() {
     }
   };
 
-  /* ---------- UI ----------- */
+  if (isLoadingAcademicYear || isLoadingScheduleCreationPrompt) {
+    return (
+      <div className="flex justify-center items-center">
+        <LucideLoader2 className="animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const isWithinPeriod = isWithinScheduleCreationPeriod(scheduleCreationPrompt);
+
   return (
     <div className="flex-1 space-y-6 p-8">
       {/* BREADCRUMB */}
@@ -284,13 +318,6 @@ export default function CreateSchedule() {
           <BreadcrumbItem>
             <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
           </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/horarios">Horários</BreadcrumbLink>
-          </BreadcrumbItem>
-
           <BreadcrumbSeparator />
 
           <BreadcrumbItem>
@@ -299,13 +326,46 @@ export default function CreateSchedule() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* FORM */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* GRID DE CAMPOS */}
+        {!scheduleCreationPrompt ? (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-5 w-5" />
+            <AlertTitle>
+              Nenhum Prazo de Criação de Horários Definido
+            </AlertTitle>
+            <AlertDescription>
+              Ainda não foi definido um período para criação de horários.
+              Contacte a administração.
+            </AlertDescription>
+          </Alert>
+        ) : !isWithinPeriod ? (
+          <Alert className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <AlertTitle className="text-amber-800 dark:text-amber-400 font-semibold">
+              Fora do Prazo de Criação de Horários
+            </AlertTitle>
+            <AlertDescription>
+              O período para criação de horários é de{" "}
+              <strong>
+                {new Date(
+                  scheduleCreationPrompt.data_inicio,
+                ).toLocaleDateString("pt-AO")}
+              </strong>{" "}
+              a{" "}
+              <strong>
+                {new Date(scheduleCreationPrompt.data_fim).toLocaleDateString(
+                  "pt-AO",
+                )}
+              </strong>
+              .
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
         <div className="grid md:grid-cols-4 gap-4">
           {/* ANO */}
           <FormSelect
-            disabled={isLoadingAcademicYear}
+            disabled={isLoadingAcademicYear || !isWithinPeriod}
             loading={isLoadingAcademicYear}
             label="Ano Letivo"
             value={formData.anoLetivo}
@@ -323,7 +383,8 @@ export default function CreateSchedule() {
             disabled={
               isLoadingPeriodos ||
               isLoadingAcademicYear ||
-              formData.anoLetivo === ""
+              formData.anoLetivo === "" ||
+              !isWithinPeriod
             }
             loading={isLoadingPeriodos}
             label="Período"
@@ -339,7 +400,7 @@ export default function CreateSchedule() {
 
           {/* SEMESTRE */}
           <FormSelect
-            disabled={isLoadingSemestres}
+            disabled={isLoadingSemestres || !isWithinPeriod}
             loading={isLoadingSemestres}
             label="Semestre"
             value={formData.semestre}
@@ -354,7 +415,7 @@ export default function CreateSchedule() {
 
           {/* CURSO */}
           <FormSelect
-            disabled={isLoadingCurso}
+            disabled={isLoadingCurso || !isWithinPeriod}
             loading={isLoadingCurso}
             label="Curso"
             value={formData.curso}
@@ -377,7 +438,7 @@ export default function CreateSchedule() {
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
-            disabled={isLoadingClasses || !formData.curso}
+            disabled={isLoadingClasses || !formData.curso || !isWithinPeriod}
             onChange={(v) => setFormData({ ...formData, classes: v })}
             options={classes}
             map={(c) => ({
@@ -398,7 +459,8 @@ export default function CreateSchedule() {
               isLoadingUC ||
               !formData.semestre ||
               !formData.curso ||
-              !formData.classes
+              !formData.classes ||
+              !isWithinPeriod
             }
             onChange={(v) =>
               setFormData({ ...formData, unidadeCurricular: v, designacao: "" })
@@ -416,7 +478,7 @@ export default function CreateSchedule() {
           <FormSelect
             label="Modalidade"
             value={formData.modalidade}
-            disabled={isLoadingModalidade}
+            disabled={isLoadingModalidade || !isWithinPeriod}
             onChange={(v) => setFormData({ ...formData, modalidade: v })}
             options={modalidade}
             map={(m) => ({
@@ -429,6 +491,7 @@ export default function CreateSchedule() {
           <FormSelect
             label="Reservada para novos estudantes"
             value={formData.apenasPrimeiroAno}
+            disabled={!isWithinPeriod}
             onChange={(v) => setFormData({ ...formData, apenasPrimeiroAno: v })}
             options={onlyFirstYear}
             map={(m) => ({
@@ -453,6 +516,7 @@ export default function CreateSchedule() {
           <div>
             <Label>Capacidade</Label>
             <Input
+              disabled={!isWithinPeriod}
               type="number"
               min={0}
               placeholder="Ex: 40"
@@ -465,7 +529,7 @@ export default function CreateSchedule() {
           <FormSelect
             label="Docente"
             value={formData.docente}
-            disabled={isLoadingTeacher}
+            disabled={isLoadingTeacher || !isWithinPeriod}
             onChange={(v) => setFormData({ ...formData, docente: v })}
             options={teachers}
             map={(t) => ({
@@ -480,6 +544,7 @@ export default function CreateSchedule() {
           <div>
             <Label>Tipo de Aula</Label>
             <Select
+              disabled={!isWithinPeriod}
               value={formData.tipoAula}
               onValueChange={(v) => setFormData({ ...formData, tipoAula: v })}
             >
@@ -503,6 +568,7 @@ export default function CreateSchedule() {
           <div>
             <Label>Sala</Label>
             <Select
+              disabled={!isWithinPeriod}
               value={formData.sala}
               onValueChange={(v) => setFormData({ ...formData, sala: v })}
             >
@@ -553,44 +619,51 @@ export default function CreateSchedule() {
           )}
 
         {/* BOTÕES */}
-        <div className="flex justify-end gap-3 pt-6 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              navigate("/horarios/listar");
-            }}
-          >
-            <List className="mr-2 h-4 w-4" />
-            Listar Horário
-          </Button>
-          <Button type="button" variant="outline" onClick={handleResetHorario}>
-            <X className="mr-2 h-4 w-4" />
-            Cancelar
-          </Button>
 
-          <Button
-            type="submit"
-            disabled={!isFormComplete || saveHorario.isPending}
-          >
-            {saveHorario.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" /> Guardar Horário
-              </>
-            )}
-          </Button>
-        </div>
+        {isWithinPeriod && (
+          <div className="flex justify-end gap-3 pt-6 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                navigate("/horarios/listar");
+              }}
+            >
+              <List className="mr-2 h-4 w-4" />
+              Listar Horário
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleResetHorario}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancelar
+            </Button>
+
+            <Button
+              type="submit"
+              disabled={!isFormComplete || saveHorario.isPending}
+            >
+              {saveHorario.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" /> Guardar Horário
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );
 }
 const onlyFirstYear = [
-  { value: 0, label: "Sim" },
-  { value: 1, label: "Não" },
+  { value: 1, label: "Sim" },
+  { value: 0, label: "Não" },
 ];
 const STOP_WORDS = ["e", "de", "do", "da", "dos", "das"];
 
@@ -619,4 +692,15 @@ export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   });
 
   return ocupadas;
+}
+function isWithinScheduleCreationPeriod(
+  prompt: ScheduleCreationPrompt | null | undefined,
+) {
+  if (!prompt) return false;
+
+  const now = new Date();
+  const start = new Date(prompt.data_inicio);
+  const end = new Date(prompt.data_fim);
+
+  return now >= start && now <= end;
 }
