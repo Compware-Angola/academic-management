@@ -19,7 +19,7 @@ export interface NoteUpsertPayload {
   observacao: string | null;
   status: number;
   notaAnterior: number;
-  refUtilizador: RefUtilizador;
+ 
   codigo_grade_avaliacao_aluno?: number | null; 
 }
 

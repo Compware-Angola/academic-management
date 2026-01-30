@@ -247,12 +247,7 @@ export default function LaunchNotes() {
       observacao: student.observacao || null,
       status: 2,
       notaAnterior: student.notaFinalAnterior || 0,
-      refUtilizador: {
-        pk: teacherInfoData?.codigo_docente,
-        desc: teacherInfoData?.nome,
-        corLetra: "black",
-        disponivel: true,
-      },
+     
       codigo_grade_avaliacao_aluno:
         student.codigo_grade_avaliacao_aluno || undefined,
     };
