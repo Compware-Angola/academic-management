@@ -48,7 +48,12 @@ import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-tea
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import { GradesCreationPrompt } from "@/services/academiccalendar/get-grades-creation-prompt";
+import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
@@ -87,29 +92,37 @@ export default function LaunchNotes() {
     [key: number]: boolean;
   }>({});
 
-  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
   const { user: userData } = useAuth();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } = useQueryTeacherProfile(userData?.user?.pk_utilizador);
-  const { data: turmDataHorario, isLoading: isLoadingTurmaDataHorario } = useQueryListSchedules({
-    teacherId: teacherInfoData?.codigo_docente,
-    anoLectivo: Number(formData.anoLetivo),
-    semestre: Number(formData.semestre),
-  });
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } =
+    useQueryTeacherProfile(userData?.user?.pk_utilizador);
+  const { data: turmDataHorario, isLoading: isLoadingTurmaDataHorario } =
+    useQueryListSchedules({
+      teacherId: teacherInfoData?.codigo_docente,
+      anoLectivo: Number(formData.anoLetivo),
+      semestre: Number(formData.semestre),
+    });
 
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
-  const { data: classes = [], isLoading: isLoadingClasses } = useQueryClassFilterByCurso({ curso: formData.curso });
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } = useQueryTipoAvaliacao();
-  const { data: tipoProva = [], isLoading: isLoadingTipoProva } = useQueryTipoProva();
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
+    useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const upsertNoteMutation = useUpsertNote();
 
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
-    classe: formData.classes,
-    curso: formData.curso,
-    semestre: formData.semestre,
-  });
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: formData.classes,
+      curso: formData.curso,
+      semestre: formData.semestre,
+    });
 
   const canLoadTurmas =
     !!formData.anoLetivo &&
@@ -118,17 +131,27 @@ export default function LaunchNotes() {
     !!formData.curso &&
     !!formData.unidadeCurricular;
 
-  const { data: scheduleResponse, isLoading: loadingschedule } = useQuerySchedulesByUc(
-    {
-      anoLectivo: Number(formData.anoLetivo),
-      semestre: Number(formData.semestre),
-      periodo: Number(formData.periodo),
-      curso: Number(formData.curso),
-      unidadeCurricular: Number(formData.unidadeCurricular),
-    },
-    { enabled: canLoadTurmas }
-  );
+  const { data: scheduleResponse, isLoading: loadingschedule } =
+    useQuerySchedulesByUc(
+      {
+        anoLectivo: Number(formData.anoLetivo),
+        semestre: Number(formData.semestre),
+        periodo: Number(formData.periodo),
+        curso: Number(formData.curso),
+        unidadeCurricular: Number(formData.unidadeCurricular),
+      },
+      { enabled: canLoadTurmas },
+    );
+  const activeAcademicYearId = academicYear?.find(
+    (y) => y.estado.toLowerCase() === "activo",
+  )?.codigo;
 
+  const { data: gradesPrompt, isLoading: isLoadingGradesPrompt } =
+    useQueryGradesCreationPrompt({
+      anoLectivo: parseFilter(formData.anoLetivo),
+      semestre: parseFilter(formData.semestre),
+      typeAvaliation: parseFilter(formData.tipoAvaliacao),
+    });
   useEffect(() => {
     setLocalStudents(students);
     const initialLocks: { [key: number]: boolean } = {};
@@ -145,23 +168,33 @@ export default function LaunchNotes() {
     const rows = localStudents.map((student) => ({
       matricula: student.numero_de_matricula,
       nome: student.nome_completo,
-      nota: student.nota !== null && student.nota !== undefined ? student.nota : "—",
+      nota:
+        student.nota !== null && student.nota !== undefined
+          ? student.nota
+          : "—",
       observacao: student.observacao || "—",
     }));
 
     const totalAlunos = localStudents.length;
-    const notasLancadas = localStudents.filter(s => s.nota !== null && s.nota !== undefined).length;
-    const percentLancadas = totalAlunos > 0 ? ((notasLancadas / totalAlunos) * 100).toFixed(1) : "0.0";
+    const notasLancadas = localStudents.filter(
+      (s) => s.nota !== null && s.nota !== undefined,
+    ).length;
+    const percentLancadas =
+      totalAlunos > 0
+        ? ((notasLancadas / totalAlunos) * 100).toFixed(1)
+        : "0.0";
 
     const filtroTexto = [
-      `Ano Letivo: ${academicYear?.find(a => a.codigo === Number(formData.anoLetivo))?.designacao || "—"}`,
-      `Semestre: ${semestres?.find(s => s.codigo === Number(formData.semestre))?.designacao || "—"}`,
-      `Curso: ${cursos?.find(c => c.codigo === Number(formData.curso))?.designacao || "—"}`,
-      `UC: ${unidadesCurriculares?.find(u => u.pk === Number(formData.unidadeCurricular))?.descricao || "—"}`,
-      `Horário: ${scheduleResponse?.data?.find(h => h.codigo === Number(formData.horarioId))?.designacao || "—"}`,
-      `Tipo Prova: ${tipoProva?.find(t => t.codigo === Number(formData.tipoProva))?.designacao || "—"}`,
-      `Tipo Avaliação: ${tipoAvaliacao?.find(t => t.codigo === Number(formData.tipoAvaliacao))?.designacao || "—"}`,
-    ].filter(Boolean).join(" | ");
+      `Ano Letivo: ${academicYear?.find((a) => a.codigo === Number(formData.anoLetivo))?.designacao || "—"}`,
+      `Semestre: ${semestres?.find((s) => s.codigo === Number(formData.semestre))?.designacao || "—"}`,
+      `Curso: ${cursos?.find((c) => c.codigo === Number(formData.curso))?.designacao || "—"}`,
+      `UC: ${unidadesCurriculares?.find((u) => u.pk === Number(formData.unidadeCurricular))?.descricao || "—"}`,
+      `Horário: ${scheduleResponse?.data?.find((h) => h.codigo === Number(formData.horarioId))?.designacao || "—"}`,
+      `Tipo Prova: ${tipoProva?.find((t) => t.codigo === Number(formData.tipoProva))?.designacao || "—"}`,
+      `Tipo Avaliação: ${tipoAvaliacao?.find((t) => t.codigo === Number(formData.tipoAvaliacao))?.designacao || "—"}`,
+    ]
+      .filter(Boolean)
+      .join(" | ");
 
     return {
       rows,
@@ -172,31 +205,46 @@ export default function LaunchNotes() {
       ],
       filtrosAplicados: filtroTexto || "Filtros não selecionados",
     };
-  }, [localStudents, formData, academicYear, semestres, cursos, unidadesCurriculares, scheduleResponse, tipoProva, tipoAvaliacao]);
+  }, [
+    localStudents,
+    formData,
+    academicYear,
+    semestres,
+    cursos,
+    unidadesCurriculares,
+    scheduleResponse,
+    tipoProva,
+    tipoAvaliacao,
+  ]);
 
   const pdfContent = pdfData ? (
     <GenericPDFDocument
       documentTitle="Lançamento de Notas"
       subtitle="Controle de lançamento por disciplina e turma"
       infoSections={[
-          {
+        {
           title: "Resumo",
           content: pdfData.filtrosAplicados,
         },
         {
           title: "Resumo",
-          content: pdfData.totais.map(t => `${t.label}: ${t.value}`),
+          content: pdfData.totais.map((t) => `${t.label}: ${t.value}`),
         },
       ]}
       mainTable={{
         headers: [
-          { key: "matricula", label: "Nº Matrícula", width: "15%", align: "center" },
+          {
+            key: "matricula",
+            label: "Nº Matrícula",
+            width: "15%",
+            align: "center",
+          },
           { key: "nome", label: "Nome do Estudante", width: "50%" },
           { key: "nota", label: "Nota (0-20)", width: "15%", align: "center" },
           { key: "observacao", label: "Observação", width: "20%" },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af", 
+        headerBackground: "#1e40af",
       }}
       totals={pdfData.totais}
       footerNotice="Documento gerado automaticamente. Notas pendentes devem ser lançadas conforme regulamento académico."
@@ -209,7 +257,7 @@ export default function LaunchNotes() {
   const handleNotaChange = (
     id: number,
     field: "nota" | "observacao",
-    value: string
+    value: string,
   ) => {
     let newValue: number | string | null = value === "" ? null : value;
 
@@ -224,8 +272,8 @@ export default function LaunchNotes() {
 
     setLocalStudents((prev) =>
       prev.map((s) =>
-        s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s
-      )
+        s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s,
+      ),
     );
   };
 
@@ -247,7 +295,7 @@ export default function LaunchNotes() {
       observacao: student.observacao || null,
       status: 2,
       notaAnterior: student.notaFinalAnterior || 0,
-     
+
       codigo_grade_avaliacao_aluno:
         student.codigo_grade_avaliacao_aluno || undefined,
     };
@@ -268,6 +316,22 @@ export default function LaunchNotes() {
       },
     });
   };
+  const gradesPeriodStatus = useMemo(() => {
+    if (!formData.anoLetivo) return "NO_YEAR_SELECTED";
+    if (isLoadingGradesPrompt) return "LOADING";
+    if (!gradesPrompt) return "NOT_DEFINED";
+
+    const now = new Date();
+    const start = new Date(gradesPrompt.data_inicio);
+    const end = new Date(gradesPrompt.data_fim);
+
+    return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
+  }, [formData.anoLetivo, gradesPrompt, isLoadingGradesPrompt]);
+  const shouldBlockGradesActions =
+    gradesPeriodStatus === "LOADING" ||
+    gradesPeriodStatus === "NOT_DEFINED" ||
+    gradesPeriodStatus === "OUT_OF_PERIOD" ||
+    gradesPeriodStatus === "NO_YEAR_SELECTED";
 
   return (
     <div className="space-y-6">
@@ -324,7 +388,11 @@ export default function LaunchNotes() {
           />
 
           <FormSelect
-            disabled={isLoadingPeriodos || isLoadingAcademicYear || formData.anoLetivo === ""}
+            disabled={
+              isLoadingPeriodos ||
+              isLoadingAcademicYear ||
+              formData.anoLetivo === ""
+            }
             loading={isLoadingPeriodos}
             label="Período"
             value={formData.periodo}
@@ -392,7 +460,9 @@ export default function LaunchNotes() {
           <FormSelectIsaac
             label="Horário"
             value={formData.horarioId}
-            disabled={loadingschedule || !formData.semestre || !formData.classes}
+            disabled={
+              loadingschedule || !formData.semestre || !formData.classes
+            }
             onChange={(v) => setFormData({ ...formData, horarioId: v })}
             options={scheduleResponse?.data}
             map={(u, index) => ({
@@ -453,6 +523,70 @@ export default function LaunchNotes() {
           </div>
         </div>
       </div>
+      {gradesPeriodStatus === "LOADING" && (
+        <div className="bg-muted border rounded-lg p-4 text-sm">
+          A verificar período de lançamento de notas...
+        </div>
+      )}
+
+      {gradesPeriodStatus === "NOT_DEFINED" && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="font-semibold text-red-700">
+            Nenhum prazo definido para lançamento de notas
+          </p>
+          <p className="text-sm text-red-600">
+            Não existe um período configurado para{" "}
+            <strong>{gradesPrompt.tipo_avaliacao_nome}</strong>. Contacte a
+            administração.
+          </p>
+        </div>
+      )}
+
+      {gradesPeriodStatus === "NO_YEAR_SELECTED" && (
+        <div className="bg-muted border rounded-lg p-4 text-sm">
+          Selecione o ano letivo para verificar o prazo de lançamento.
+        </div>
+      )}
+
+      {gradesPeriodStatus === "LOADING" && (
+        <div className="bg-muted border rounded-lg p-4 text-sm">
+          A verificar prazo de lançamento de notas...
+        </div>
+      )}
+
+      {gradesPeriodStatus === "NOT_DEFINED" && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="font-semibold text-red-700">Nenhum prazo configurado</p>
+          <p className="text-sm text-red-600">
+            Não existe período definido para os filtros selecionados.
+          </p>
+        </div>
+      )}
+
+      {gradesPeriodStatus === "OUT_OF_PERIOD" && gradesPrompt && (
+        <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
+          <p className="font-semibold text-amber-800">
+            Fora do prazo —{" "}
+            {gradesPrompt.tipo_avaliacao_nome ?? "Lançamento de Notas"}
+          </p>
+          <p className="text-sm text-amber-700">
+            Permitido de{" "}
+            <strong>
+              {new Date(gradesPrompt.data_inicio).toLocaleDateString("pt-AO")}
+            </strong>{" "}
+            até{" "}
+            <strong>
+              {new Date(gradesPrompt.data_fim).toLocaleDateString("pt-AO")}
+            </strong>
+          </p>
+        </div>
+      )}
+
+      {gradesPeriodStatus === "ALLOWED" && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 text-sm">
+          Dentro do prazo para lançamento de notas ✔
+        </div>
+      )}
 
       {/* Tabela */}
       {loadingNoteRelease ? (
@@ -497,7 +631,7 @@ export default function LaunchNotes() {
                   {localStudents
                     .slice(
                       (currentPage - 1) * itemsPerPage,
-                      currentPage * itemsPerPage
+                      currentPage * itemsPerPage,
                     )
                     .map((student) => {
                       const hasNota =
@@ -526,7 +660,7 @@ export default function LaunchNotes() {
                                 handleNotaChange(
                                   student.codigo_grade_aluno,
                                   "observacao",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               className="w-full mx-auto text-left"
@@ -546,7 +680,7 @@ export default function LaunchNotes() {
                                 handleNotaChange(
                                   student.codigo_grade_aluno,
                                   "nota",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               className="w-24 mx-auto text-center"
@@ -570,6 +704,7 @@ export default function LaunchNotes() {
                           <TableCell className="text-center flex justify-center gap-2">
                             <Button
                               size="sm"
+                              disabled={shouldBlockGradesActions}
                               variant="ghost"
                               onClick={() =>
                                 toggleLock(student.codigo_grade_aluno)
@@ -583,6 +718,7 @@ export default function LaunchNotes() {
                             </Button>
 
                             <Button
+                              disabled={shouldBlockGradesActions}
                               size="sm"
                               variant={hasNota ? "default" : "outline"}
                               onClick={() => {
@@ -654,8 +790,8 @@ export default function LaunchNotes() {
                 </Select>
                 <span className="text-sm text-muted-foreground ml-4">
                   Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
-                  {Math.min(currentPage * itemsPerPage, localStudents.length)} de{" "}
-                  {localStudents.length} registos
+                  {Math.min(currentPage * itemsPerPage, localStudents.length)}{" "}
+                  de {localStudents.length} registos
                 </span>
               </div>
 
@@ -675,7 +811,9 @@ export default function LaunchNotes() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages}
                 >
                   Seguinte
@@ -688,4 +826,16 @@ export default function LaunchNotes() {
       )}
     </div>
   );
+}
+
+export function isWithinGradesLaunchPeriod(
+  prompt: GradesCreationPrompt | null | undefined,
+) {
+  if (!prompt) return false;
+
+  const now = new Date();
+  const start = new Date(prompt.data_inicio);
+  const end = new Date(prompt.data_fim);
+
+  return now >= start && now <= end;
 }
