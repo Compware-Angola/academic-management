@@ -178,6 +178,12 @@ const {
         return <Badge variant="secondary">{estado}</Badge>;
     }
   };
+  const getEstadoLabel = (estado: string | undefined) => {
+  if (!estado) return "—";
+  if (estado === "Fez com Sucesso") return "Aprovado";
+  if (estado === "Pendente") return "Pendente";
+  return estado; // mantém o original se aparecer algo novo
+};
   
   const getPagamentoEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -480,7 +486,7 @@ const {
         </div>
       ) : disciplinas.length === 0 ? (
         <div className="text-center text-muted-foreground py-10">
-          Nenhuma disciplina encontrada {anoLetivo ? `para ${anoLetivo}` : 'para este aluno'}.
+          Nenhuma disciplina encontrada Para Este ano .
         </div>
       ) : (
         <>
@@ -507,15 +513,9 @@ const {
                       {disc.sala} • {disc.horario}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge
-                        variant={
-                          disc.ano_lectivo?.includes("2024") || disc.ano_lectivo?.includes("2025")
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {disc.ano_lectivo?.includes("2025") ? "Em Curso" : "Concluído"}
-                      </Badge>
+                   <Badge variant={disc.estado === "Aprovado" ? "default" : "secondary"}>
+  {getEstadoLabel(disc.estado)}
+</Badge>
                     </TableCell>
                   </TableRow>
                 ))}

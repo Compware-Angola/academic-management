@@ -92,7 +92,9 @@ export type DisciplinaMatricula = {
   classe: string;         // ex: "1º ano", "2º ano"
   ano_lectivo: string;    // ex: "2023-2024"
   horario: string;        // ex: "CARDIO.1.BIOQUI.D-H5"
-  sala: string;           // ex: "U-107", "I-103"
+  sala: string;   
+  codigo_horario: number;   // ex: 20373
+  estado: string;        // ex: "Aprovado", "Matriculado", etc.
 };
 
 export type DisciplinasResponse = {
