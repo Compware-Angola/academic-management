@@ -1,29 +1,32 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-export type PresencaEstudante = {
+export type MesPago = {
+  mes_temp_id: number;
+  factura: number;
+};
+export type PresencaApiItem = {
   numero_matricula: number;
   nome: string;
-  primeira_frequencia: number;
-  segunda_frequencia: number;
-  exame: number;
-  meses_obrigatorios: number;
-  meses_pagos: number;
-  eh_bolseiro: number;
+  is_bolseiro: number;
+  mes_pago: MesPago[];
+};
+
+export type PresencaEstudante = {
+  data: PresencaApiItem[];
+  prestacao: number;
 };
 
 export type PresencaQuery = {
   anoLectivo: number;
   horarioPk: number;
-  situacao_financeira: number;
-  tipo_avaliacao: number;
 };
 
 export async function getPresenceAttendanceService(
-  params: PresencaQuery
-): Promise<PresencaEstudante[]> {
-  const { data } = await axiosNestGa.get<PresencaEstudante[]>(
+  params: PresencaQuery,
+): Promise<PresencaEstudante> {
+  const { data } = await axiosNestGa.get<PresencaEstudante>(
     "/assessment/list-presence-attendance",
-    { params }
+    { params },
   );
 
   return data;
