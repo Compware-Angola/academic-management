@@ -31,10 +31,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useQueryAccesses } from "@/hooks/acess/use-query-accesses";
 import { useMutationUpdateEstadoAcesso }
 from "@/hooks/acess/use-mutation-update-estado.ts";
-
-
+import { AcessoFormDialog } from "./components/CreateAcessModal";
 
 export function ListarAcessos() {
+  const [createOpen, setCreateOpen] = useState(false);
+
   const { user: userData } = useAuth();
   const estadoMutation = useMutationUpdateEstadoAcesso();
 
@@ -135,7 +136,10 @@ const pdfContent = pdfData ? (
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <PageHeader title="Todos Acessos" />
+        <div className="flex items-center justify-between">
+          <PageHeader title="Todos Acessos" />
+        </div>
+
 
         {data.length > 0 && pdfContent && (
           <PDFActions
@@ -195,6 +199,11 @@ const pdfContent = pdfData ? (
         </div>
 
         <Button onClick={handleSearch}>Pesquisar</Button>
+        <Button
+            onClick={() => setCreateOpen(true)}
+          >
+            Criar Acesso
+          </Button>
       </div>
 
       {/* 📋 Tabela */}
@@ -287,6 +296,10 @@ const pdfContent = pdfData ? (
           </div>
         </div>
       )}
+      <AcessoFormDialog
+      open={createOpen}
+      onClose={() => setCreateOpen(false)}
+    />
     </div>
   );
 }
