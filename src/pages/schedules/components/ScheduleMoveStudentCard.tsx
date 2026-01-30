@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useQueryRegistrationDetailsBySchedule } from "@/hooks/horario/use-query-schedule-inscription-details";
 import { RegistrationDetailItem } from "@/services/horario/fetch-schedule-inscription-details.service";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, BookOpen, Users } from "lucide-react";
+import { Loader2, Users, SquareCheckBig, SquareX } from "lucide-react";
 
 interface ScheduleMoveSudentCardProps {
   isMovedCard?: boolean;
@@ -29,7 +29,7 @@ export const ScheduleMoveStudentCard = ({
     },
     {
       enabled: !!scheduleId,
-    }
+    },
   );
 
   const tableData: RegistrationDetailItem[] = data ?? [];
@@ -45,7 +45,7 @@ export const ScheduleMoveStudentCard = ({
     const normalizedSearch = normalize(searchTerm);
 
     return tableData.filter((student) =>
-      normalize(student.nome_completo).includes(normalizedSearch)
+      normalize(student.nome_completo).includes(normalizedSearch),
     );
   }, [searchTerm, tableData]);
   return (
@@ -64,10 +64,10 @@ export const ScheduleMoveStudentCard = ({
             {!scheduleId
               ? "Selecione um horário para visualizar os estudantes."
               : searchTerm
-              ? "Nenhum estudante corresponde à pesquisa."
-              : isMovedCard
-              ? "Nenhum estudante movido para este horário."
-              : "Nenhum estudante disponível neste horário."}
+                ? "Nenhum estudante corresponde à pesquisa."
+                : isMovedCard
+                  ? "Nenhum estudante movido para este horário."
+                  : "Nenhum estudante disponível neste horário."}
           </p>
         </div>
       ) : (
@@ -76,7 +76,7 @@ export const ScheduleMoveStudentCard = ({
             <h4 className="font-semibold">
               Estudantes no Horário ({tableData.length})
             </h4>
-            <div className="flex gap-2">
+            <div className="flex  gap-2">
               <Input
                 type="search"
                 placeholder="Pesquisar por aluno"
@@ -92,14 +92,14 @@ export const ScheduleMoveStudentCard = ({
                       size="sm"
                       onClick={() => onHandleToggleSelecteAll(filteredData)}
                     >
-                      Selecionar Todos
+                      <SquareCheckBig />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onHandleToggleSelecteAll([])}
                     >
-                      Desmarcar Todos
+                      <SquareX />
                     </Button>
                   </>
                 )}
@@ -121,7 +121,7 @@ export const ScheduleMoveStudentCard = ({
                 {!isMovedCard && (
                   <Checkbox
                     checked={selectedStudents.includes(
-                      student.numero_de_matricula
+                      student.numero_de_matricula,
                     )}
                     onCheckedChange={() => handleToggleStudent(student)}
                   />
