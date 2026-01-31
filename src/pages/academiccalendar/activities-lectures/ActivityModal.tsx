@@ -18,11 +18,13 @@ import {
 } from "@/components/ui/select";
 import { Dispatch, SetStateAction } from "react";
 import { Loader2 } from "lucide-react";
+import { FormSelect } from "@/components/common/FormSelect";
 
 // Tipos esperados pela API
 interface AnoAcademico {
   codigo: number;
   designacao: string;
+  estado: string;
 }
 
 interface TipoCandidatura {
@@ -102,31 +104,21 @@ export function ActivityModal({
           </div>
 
           <div className="space-y-2">
-            <Label>Ano Letivo *</Label>
-            <Select
-              value={form.codigo_ano_lectivo?.toString() || ""}
-              onValueChange={(v) =>
-                setForm({ ...form, codigo_ano_lectivo: Number(v) })
-              }
-              disabled={loadingAnosLetivos || !!editId}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    loadingAnosLetivos
-                      ? "Carregando anos..."
-                      : "Selecione o ano letivo"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {anosLetivos.map((ano) => (
-                  <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-                    {ano.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+             <FormSelect
+                       
+          
+                          label="Ano Letivo"
+                          value={form.codigo_ano_lectivo?.toString() || ""}
+                          onChange={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
+                          options={anosLetivos?.filter(
+                            (ay) => ay.estado.toLowerCase() === "activo",
+                          )}
+                          map={(a) => ({
+                            key: a.codigo,
+                            label: a.designacao,
+                            value: a.codigo,
+                          })}
+                        />
           </div>
 
           {/* Tipo de Candidatura */}

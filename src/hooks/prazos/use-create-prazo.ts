@@ -10,7 +10,7 @@ export function useCreatePrazo() {
     mutationFn: createPrazo,
     onSuccess: () => {
       toast({ title: "Prazo criado com sucesso!" });
-      queryClient.invalidateQueries({ queryKey: ["prazos"] });
+  queryClient.invalidateQueries({ queryKey: ["prazos"] });
     },
     onError: () => {
       toast({
