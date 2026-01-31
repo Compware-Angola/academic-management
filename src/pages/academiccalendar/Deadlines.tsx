@@ -48,6 +48,7 @@ import { useDeletePrazo } from "@/hooks/prazos/use-delete-prazo";
 import { Prazo } from "@/services/prazos/fetchPrazos";
 import { useAuth } from "@/hooks/use-auth";
 import { FormSelect } from "@/components/common/FormSelect";
+import { set } from "date-fns";
 
 export default function Deadlines() {
   const {
@@ -596,6 +597,17 @@ const handleCriarPrazo = async () => {
               onClick={() => {
                 setOpenModal(false);
                 setIsEditing(false);
+                setForm({
+                  fk_tipo_prazo: "",
+                  fk_tipo_avaliacao: "",
+                  fk_semestre: "",
+                  data_inicio: "",
+                  data_fim: "",
+                  observacao: "",
+                  fk_created_by: pk_utilizador.toString(),
+                  anoletivo: "",
+                  tipoCandidaturaId: "",
+                });
               }}
             >
               Cancelar
