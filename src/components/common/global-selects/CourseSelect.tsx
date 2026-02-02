@@ -5,10 +5,11 @@ import { FormCommandSelect } from "../FormCommandSelect";
 
 interface CourseSelectProps {
   value: string;
+  labelMode?: "inside" | "outside"; // 👈 decisão sobe
   onChangeValue: (v: string) => void;
   params?: CursoParams;
 }
-const CourseSelect = ({ onChangeValue, value, params }: CourseSelectProps) => {
+const CourseSelect = ({ onChangeValue, value, params,labelMode = "outside", }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
 
   return (
@@ -17,6 +18,7 @@ const CourseSelect = ({ onChangeValue, value, params }: CourseSelectProps) => {
         disabled={loadingCursos}
         value={value}
         label="Curso"
+        labelMode={labelMode}  // 👈 repassa decisão
         isLoading={loadingCursos}
         width="full"
         options={cursos}
