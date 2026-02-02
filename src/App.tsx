@@ -81,6 +81,7 @@ import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredit
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
 import { PermissionTypeDetails } from "./constants/permission.type";
+import ServicosEmolumentos from "./pages/financas/area-financeira/ServicosEmolumentos";
 
 const App = () => {
   return (
@@ -138,6 +139,19 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                         <Route
+                    path="/financas/servicos-emolumentos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.SERVICOS_PRECARIOS.sigla!,
+                        ]}
+                      >
+                        <ServicosEmolumentos />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   <Route
                     path="/financas/credito/instituicoes"
                     element={
