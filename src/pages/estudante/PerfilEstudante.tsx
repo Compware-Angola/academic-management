@@ -40,8 +40,14 @@ import {
   XCircle,
   Clock,
   AlertTriangle,
+  Eye,
 } from "lucide-react";
-import { useStudentDetail } from "@/hooks/tudents/use-query-students";
+import { useStudentDetail, useStudentDisciplinas } from "@/hooks/tudents/use-query-students";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { FormSelect } from "@/components/common/FormSelect";
+import ScheduleDetailsModal from "../schedules/components/ScheduleDetailsModal";
 
 // Mock data for a complete student profile
 const mockEstudante = {
@@ -58,7 +64,7 @@ const mockEstudante = {
   bi: "005123456LA042",
   nif: "123456789",
   foto: "/placeholder.svg",
-  
+
   // Contactos
   telefone: "+244 923 456 789",
   email: "joao.costa@email.com",
@@ -66,7 +72,7 @@ const mockEstudante = {
   endereco: "Rua da Liberdade, Nº 45, Maianga",
   cidade: "Luanda",
   provincia: "Luanda",
-  
+
   // Dados Académicos
   curso: "Engenharia Informática",
   faculdade: "Faculdade de Engenharia",
@@ -81,7 +87,7 @@ const mockEstudante = {
   creditosObtidos: 180,
   creditosTotais: 240,
   estado: "Activo",
-  
+
   // Dados Financeiros
   saldoDevedor: 45000,
   mensalidadesEmDia: false,
@@ -92,15 +98,6 @@ const mockEstudante = {
   bolseiro: false,
 };
 
-const mockDisciplinas = [
-  { codigo: "INF401", nome: "Inteligência Artificial", creditos: 6, nota: 16, estado: "Aprovado", ano: 4 },
-  { codigo: "INF402", nome: "Sistemas Distribuídos", creditos: 6, nota: 14, estado: "Aprovado", ano: 4 },
-  { codigo: "INF403", nome: "Segurança Informática", creditos: 5, nota: null, estado: "Em Curso", ano: 4 },
-  { codigo: "INF404", nome: "Projecto Final", creditos: 12, nota: null, estado: "Em Curso", ano: 4 },
-  { codigo: "INF301", nome: "Base de Dados II", creditos: 6, nota: 15, estado: "Aprovado", ano: 3 },
-  { codigo: "INF302", nome: "Redes de Computadores", creditos: 6, nota: 13, estado: "Aprovado", ano: 3 },
-  { codigo: "INF303", nome: "Engenharia de Software", creditos: 6, nota: 17, estado: "Aprovado", ano: 3 },
-];
 
 const mockPagamentos = [
   { id: 1, referencia: "REF-2025-001", descricao: "Mensalidade Janeiro 2026", valor: 25000, data: "2025-01-10", estado: "Pago" },
@@ -117,27 +114,53 @@ const mockDocumentos = [
   { id: 4, tipo: "Comprovativo de Pagamento", dataEmissao: "2025-12-15", estado: "Disponível" },
 ];
 
-const mockAssiduidade = [
-  { disciplina: "Inteligência Artificial", presencas: 28, total: 30, percentagem: 93 },
-  { disciplina: "Sistemas Distribuídos", presencas: 25, total: 30, percentagem: 83 },
-  { disciplina: "Segurança Informática", presencas: 12, total: 15, percentagem: 80 },
-  { disciplina: "Projecto Final", presencas: 8, total: 10, percentagem: 80 },
-];
+
 
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
   const [activeTab, setActiveTab] = useState("geral");
-  
-  // In a real app, you would fetch the student data based on matricula
-    const {
-      data: student,
-      isLoading,
-      isFetching,
-      error
-    } = useStudentDetail(matricula);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [anoLetivo, setAnoLetivo] = useState<string | undefined>("23");
+  const {
+    data: student,
+    isLoading,
+    isFetching,
+    error
+  } = useStudentDetail(matricula);
+  const {
+    data: response,
+    isLoading: isDisciplinasLoading,
+    isError,
+  } = useStudentDisciplinas({
+    matriculaId: matricula ?? '',
+    anoLectivo: Number(anoLetivo),   // ← descomente e ajuste se quiser filtrar por ano
+    // semestre: 1,               // ← descomente se quiser filtrar por semestre
+    page,
+    limit,
+  });
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
 
-     if (!matricula) {
+  const openDetails = (turmaId: number) => {
+    setSelectedTurmaId(turmaId);
+    setIsModalOpen(true);
+  };
+  const disciplinas = response?.data ?? [];
+  const total = response?.total ?? 0;
+  const totalPages = response?.totalPages ?? 1;
+
+  const handlePrevious = () => {
+    if (page > 1) setPage((prev) => prev - 1);
+  };
+
+  const handleNext = () => {
+    if (page < totalPages) setPage((prev) => prev + 1);
+  };
+
+  if (!matricula) {
     return <div>Matrícula inválida</div>;
   }
 
@@ -150,7 +173,7 @@ export default function PerfilEstudante() {
   }
 
   const estudante = mockEstudante;
-  
+
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
       case "Activo":
@@ -163,7 +186,13 @@ export default function PerfilEstudante() {
         return <Badge variant="secondary">{estado}</Badge>;
     }
   };
-  
+  const getEstadoLabel = (estado: string | undefined) => {
+    if (!estado) return "—";
+    if (estado === "Fez com Sucesso") return "Aprovado";
+    if (estado === "Pendente") return "Pendente";
+    return estado; // mantém o original se aparecer algo novo
+  };
+
   const getPagamentoEstadoBadge = (estado: string) => {
     switch (estado) {
       case "Pago":
@@ -204,13 +233,13 @@ export default function PerfilEstudante() {
                 <AvatarImage src={estudante.foto} alt={student.nome_completo} />
                 <AvatarFallback className="text-3xl">{student?.nome_completo?.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
               </Avatar>
-              
+
               <div className="flex-1 space-y-4">
                 <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
                   <h1 className="text-2xl font-bold">{student.nome_completo}</h1>
                   {getEstadoBadge(student.estado)}
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <GraduationCap className="h-4 w-4" />
@@ -222,7 +251,7 @@ export default function PerfilEstudante() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span><strong>Ano:</strong> {estudante.anoCurricular}º Ano</span>
+                    <span><strong>Ano:</strong> { '-'}º Ano</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />
@@ -242,10 +271,10 @@ export default function PerfilEstudante() {
           </CardContent>
         </Card>
 
-       
+
       </div>
 
- 
+
 
       {/* Tabs with detailed information */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -275,7 +304,7 @@ export default function PerfilEstudante() {
             <span className="hidden md:inline">Documentos</span>
             <span className="md:hidden">Docs</span>
           </TabsTrigger>
-           {/* 
+          {/* 
           <TabsTrigger value="assiduidade" className="gap-2">
             <Calendar className="h-4 w-4" />
             <span className="hidden md:inline">Assiduidade</span>
@@ -295,32 +324,32 @@ export default function PerfilEstudante() {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Nome Completo:</span>
                   <span className="font-medium">{student.nome_completo}</span>
-                  
+
                   <span className="text-muted-foreground">Nome do Pai:</span>
                   <span className="font-medium">{student.pai}</span>
-                  
+
                   <span className="text-muted-foreground">Nome da Mãe:</span>
                   <span className="font-medium">{student.mae}</span>
-                  
+
                   <span className="text-muted-foreground">Data de Nascimento:</span>
                   <span className="font-medium">{new Date(student.data_nascimento).toLocaleDateString('pt-AO')}</span>
-                  
+
                   <span className="text-muted-foreground">Nacionalidade:</span>
                   <span className="font-medium">{student.nacionalidade}</span>
-                  
+
                   <span className="text-muted-foreground">Naturalidade:</span>
                   <span className="font-medium">{student.naturalidade}</span>
-                  
+
                   <span className="text-muted-foreground">Género:</span>
                   <span className="font-medium">{student.sexo}</span>
-                  
+
                   <span className="text-muted-foreground">Estado Civil:</span>
                   <span className="font-medium">{student.estado_civil}</span>
-                  
+
                   <span className="text-muted-foreground">BI:</span>
                   <span className="font-medium">{student.bi}</span>
-                  
-             
+
+
                 </div>
               </CardContent>
             </Card>
@@ -333,18 +362,18 @@ export default function PerfilEstudante() {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Telefone:</span>
                   <span className="font-medium">{student.telefonicos}</span>
-                  
+
                   <span className="text-muted-foreground">Email Pessoal:</span>
                   <span className="font-medium">{student.email}</span>
-                  
-                
-                  
+
+
+
                   <span className="text-muted-foreground">Endereço:</span>
                   <span className="font-medium">{student.morada}</span>
-                  
+
                   <span className="text-muted-foreground">Cidade:</span>
                   <span className="font-medium">{estudante.cidade}</span>
-                  
+
                   <span className="text-muted-foreground">Província:</span>
                   <span className="font-medium">{estudante.provincia}</span>
                 </div>
@@ -364,18 +393,18 @@ export default function PerfilEstudante() {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Curso:</span>
                   <span className="font-medium">{student.curso}</span>
-                  
+
                   <span className="text-muted-foreground">Faculdade:</span>
                   <span className="font-medium">{student.faculdade}</span>
-                  
-                 
-                  
+
+
+
                   <span className="text-muted-foreground">Grau:</span>
                   <span className="font-medium">{student.grau}</span>
-                  
+
                   <span className="text-muted-foreground">Regime:</span>
                   <span className="font-medium">{student.regime}</span>
-                 
+
                 </div>
               </CardContent>
             </Card>
@@ -385,28 +414,34 @@ export default function PerfilEstudante() {
                 <CardTitle className="text-lg">Progresso Académico</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                 <div className="text-center text-muted-foreground py-10">
+            A funcionalidade  estará disponível em breve.
+          </div>
+                 {/* 
+
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Ano de Ingresso:</span>
                   <span className="font-medium">{estudante.anoIngresso}</span>
-                  
+
                   <span className="text-muted-foreground">Ano Curricular:</span>
                   <span className="font-medium">{estudante.anoCurricular}º Ano</span>
-                  
+
                   <span className="text-muted-foreground">Semestre Atual:</span>
                   <span className="font-medium">{estudante.semestre}</span>
-                  
+
                   <span className="text-muted-foreground">Média Geral:</span>
                   <span className="font-medium text-primary text-lg">{estudante.mediaGeral}</span>
-                  
+
                   <span className="text-muted-foreground">Créditos Obtidos:</span>
                   <span className="font-medium">{estudante.creditosObtidos} / {estudante.creditosTotais}</span>
-                  
+
                   <span className="text-muted-foreground">Estado:</span>
                   <span>{getEstadoBadge(estudante.estado)}</span>
                 </div>
-                
+
+               
                 <Separator className="my-4" />
-                
+
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Progresso do Curso</p>
                   <Progress value={(estudante.creditosObtidos / estudante.creditosTotais) * 100} className="h-3" />
@@ -414,6 +449,7 @@ export default function PerfilEstudante() {
                     {Math.round((estudante.creditosObtidos / estudante.creditosTotais) * 100)}% concluído
                   </p>
                 </div>
+                */}
               </CardContent>
             </Card>
           </div>
@@ -424,49 +460,166 @@ export default function PerfilEstudante() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Histórico de Disciplinas</CardTitle>
-              <CardDescription>Lista de todas as disciplinas cursadas e em curso</CardDescription>
+              <CardDescription>
+                Lista de todas as disciplinas cursadas e em curso
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Disciplina</TableHead>
-                    <TableHead className="text-center">Ano</TableHead>
-                    <TableHead className="text-center">Créditos</TableHead>
-                    <TableHead className="text-center">Nota</TableHead>
-                    <TableHead className="text-center">Estado</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockDisciplinas.map((disc) => (
-                    <TableRow key={disc.codigo}>
-                      <TableCell className="font-mono">{disc.codigo}</TableCell>
-                      <TableCell className="font-medium">{disc.nome}</TableCell>
-                      <TableCell className="text-center">{disc.ano}º</TableCell>
-                      <TableCell className="text-center">{disc.creditos}</TableCell>
-                      <TableCell className="text-center font-semibold">
-                        {disc.nota !== null ? disc.nota : "-"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {disc.estado === "Aprovado" ? (
-                          <Badge className="bg-green-500 hover:bg-green-600">{disc.estado}</Badge>
-                        ) : disc.estado === "Em Curso" ? (
-                          <Badge className="bg-blue-500 hover:bg-blue-600">{disc.estado}</Badge>
-                        ) : (
-                          <Badge variant="destructive">{disc.estado}</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
+
+            <CardContent className="space-y-6">
+              {/* Filtro de Ano Letivo – agora dentro do CardContent */}
+              <div className="flex flex-wrap items-end gap-4">
+                <div className="min-w-[200px] max-w-[300px] w-full sm:w-auto">
+                  <FormSelect
+                    label="Ano Letivo"
+                    disabled={isLoadingAcademicYear}
+                    loading={isLoadingAcademicYear}
+                    value={anoLetivo ?? ""}           // ajuste se "todos" for uma string vazia ou "todos"
+                    onChange={(v) => setAnoLetivo(v)}
+                    options={anosAcademicos}
+                    map={(a) => ({
+                      key: a.codigo,
+                      label: a.designacao,
+                      value: a.codigo,
+                    })}
+                  />
+                </div>
+
+                {/* Aqui pode adicionar mais filtros no futuro, ex: semestre */}
+                {/* <div className="min-w-[180px]"> ... </div> */}
+              </div>
+
+              {/* Loading / Error / Empty / Tabela */}
+              {isLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full rounded" />
                   ))}
-                </TableBody>
-              </Table>
+                </div>
+              ) : isError ? (
+                <div className="text-center text-destructive py-10">
+                  Erro ao carregar as disciplinas. Tente novamente.
+                </div>
+              ) : disciplinas.length === 0 ? (
+                <div className="text-center text-muted-foreground py-10">
+                  Nenhuma disciplina encontrada Para Este ano .
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Código</TableHead>
+                          <TableHead>Disciplina</TableHead>
+                          <TableHead className="text-center">Ano / Classe</TableHead>
+                          <TableHead className="text-center">Semestre</TableHead>
+                          <TableHead className="text-center">Sala / Horário</TableHead>
+                          <TableHead className="text-center">Estado</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {disciplinas.map((disc) => (
+                          <TableRow key={disc.codigo_disciplina}>
+                            <TableCell className="font-mono text-sm">{disc.codigo_disciplina}</TableCell>
+                            <TableCell className="font-medium">{disc.disciplina}</TableCell>
+                            <TableCell className="text-center">{disc.classe}</TableCell>
+                            <TableCell className="text-center">{disc.semestre}</TableCell>
+                            <TableCell className="text-center text-sm text-muted-foreground">
+                              {disc.sala} • {disc.horario}
+                              {disc.codigo_horario && (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="ml-2"
+                                  onClick={() => openDetails(disc.codigo_horario!)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant={disc.estado === "Aprovado" ? "default" : "secondary"}>
+                                {getEstadoLabel(disc.estado)}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Paginação */}
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
+                    <div className="text-sm text-muted-foreground order-2 sm:order-1">
+                      Mostrando {disciplinas.length} de {total} disciplinas
+                    </div>
+
+                    <div className="flex items-center gap-6 order-1 sm:order-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm whitespace-nowrap">Por página:</span>
+                        <Select
+                          value={String(limit)}
+                          onValueChange={(val) => {
+                            setLimit(Number(val));
+                            setPage(1);
+                          }}
+                        >
+                          <SelectTrigger className="w-[70px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="20">20</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handlePrevious}
+                          disabled={page === 1 || isLoading}
+                        >
+                          Anterior
+                        </Button>
+                        <span className="text-sm min-w-[90px] text-center">
+                          Página {page} de {totalPages}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleNext}
+                          disabled={page === totalPages || isLoading}
+                        >
+                          Próximo
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
+        <ScheduleDetailsModal
+          horarioId={selectedTurmaId}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedTurmaId(null);
+          }}
+        />
+
+
         {/* Tab: Finanças */}
         <TabsContent value="financas" className="space-y-4">
+   {/* Tab: Finanças 
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className={estudante.saldoDevedor > 0 ? "border-destructive" : "border-green-500"}>
               <CardHeader className="pb-2">
@@ -542,10 +695,16 @@ export default function PerfilEstudante() {
               </Table>
             </CardContent>
           </Card>
+*/}  
+    <div className="text-center text-muted-foreground py-10">
+            A funcionalidade de Finanças estará disponível em breve.
+          </div>
+
         </TabsContent>
 
         {/* Tab: Documentos */}
         <TabsContent value="documentos" className="space-y-4">
+           {/*
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Documentos Disponíveis</CardTitle>
@@ -589,6 +748,10 @@ export default function PerfilEstudante() {
               </Table>
             </CardContent>
           </Card>
+          */}
+          <div className="text-center text-muted-foreground py-10">
+            A funcionalidade de documentos estará disponível em breve.
+          </div>
         </TabsContent>
 
         {/* Tab: Assiduidade 

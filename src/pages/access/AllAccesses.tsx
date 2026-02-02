@@ -1,5 +1,9 @@
-import { useState } from "react";
-import { PageHeader } from "@/components/common/PageHeader";
+import { useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -8,9 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,38 +19,145 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+import { PageHeader } from "@/components/common/PageHeader";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+
+import { useAuth } from "@/hooks/use-auth";
 import { useQueryAccesses } from "@/hooks/acess/use-query-accesses";
+import { useMutationUpdateEstadoAcesso } from "@/hooks/acess/use-mutation-update-estado";
+import { AcessoFormDialog } from "./components/CreateAcessModal";
 
 export function ListarAcessos() {
-  // ----- Paginação -----
+  // 🔐 Senha fixa (front)
+  const PASSWORD = "123456";
+
+  const { user: userData } = useAuth();
+  const estadoMutation = useMutationUpdateEstadoAcesso();
+
+  // 📌 Modais
+  const [createOpen, setCreateOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+
+  // 🔐 Senha
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  // 📄 Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
 
-  // ----- Filtros -----
-  const [filterType, setFilterType] = useState<"sigla" | "designacao">("sigla");
+  // 🔎 Filtros
+  const [filterType, setFilterType] =
+    useState<"sigla" | "designacao">("sigla");
   const [filterValue, setFilterValue] = useState("");
+  const [apenasAtivos, setApenasAtivos] =
+    useState<"all" | "true" | "false">("all");
 
-  // ----- Query -----
+  // 🔍 Pesquisar
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
+
+  // 🔐 Confirmar senha
+  function handleConfirmPassword() {
+    if (password === PASSWORD) {
+      setPassword("");
+      setPasswordError("");
+      setPasswordModalOpen(false);
+      setCreateOpen(true);
+    } else {
+      setPasswordError("Senha incorreta");
+    }
+  }
+
+  // 📡 Query
   const { data: acessos, isLoading } = useQueryAccesses({
-    apenasAtivos: true,
     page: currentPage,
     limit: itemsPerPage,
     sigla: filterType === "sigla" ? filterValue : undefined,
     designacao: filterType === "designacao" ? filterValue : undefined,
+    ...(apenasAtivos !== "all" && { apenasAtivos }),
   });
 
   const data = acessos?.data ?? [];
   const total = acessos?.total ?? 0;
   const totalPages = acessos?.totalPages ?? 1;
 
-  const handleSearch = () => {
-    setCurrentPage(1); 
-  };
+  // 📄 PDF
+  const pdfData = useMemo(() => {
+    if (!data.length) return null;
+
+    return {
+      filtros: [
+        `Filtro: ${filterType}`,
+        `Valor: ${filterValue || "—"}`,
+        `Estado: ${apenasAtivos}`,
+      ].join(" | "),
+      total: data.length,
+      rows: data.map((a) => ({
+        id: a.pk_acesso,
+        designacao: a.designacao,
+        sigla: a.sigla,
+        modulo: a.modulonome,
+        tipo: a.tipoacesso,
+        data: a.dataativacao,
+        estado: a.ativo ? "Ativo" : "Inativo",
+      })),
+    };
+  }, [data, filterType, filterValue, apenasAtivos]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lista de Acessos"
+      subtitle="Registos de acessos do sistema"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de acessos: ${pdfData.total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "id", label: "ID", width: "6%" },
+          { key: "designacao", label: "Designação", width: "26%" },
+          { key: "sigla", label: "Sigla", width: "10%" },
+          { key: "modulo", label: "Módulo", width: "18%" },
+          { key: "tipo", label: "Tipo", width: "12%" },
+          { key: "data", label: "Data Ativação", width: "14%" },
+          { key: "estado", label: "Estado", width: "14%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#1e40af",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Todos Acessos" />
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <PageHeader title="Todos Acessos" />
+
+        {data.length > 0 && pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`Acessos_${new Date()
+              .toISOString()
+              .slice(0, 10)}.pdf`}
+            showDownload
+            showPrint
+          />
+        )}
+      </div>
 
       {/* 🔎 Filtros */}
       <div className="flex flex-col md:flex-row gap-3 items-start md:items-end">
@@ -57,14 +165,36 @@ export function ListarAcessos() {
           <label className="text-sm font-medium">Filtrar por</label>
           <Select
             value={filterType}
-            onValueChange={(v) => setFilterType(v as "sigla" | "designacao")}
+            onValueChange={(v) =>
+              setFilterType(v as "sigla" | "designacao")
+            }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Tipo de filtro" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="sigla">Sigla</SelectItem>
               <SelectItem value="designacao">Designação</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="w-full md:w-48">
+          <label className="text-sm font-medium">Estado</label>
+          <Select
+            value={apenasAtivos}
+            onValueChange={(v) => {
+              setApenasAtivos(v as "all" | "true" | "false");
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="true">Ativos</SelectItem>
+              <SelectItem value="false">Inativos</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -80,6 +210,10 @@ export function ListarAcessos() {
         </div>
 
         <Button onClick={handleSearch}>Pesquisar</Button>
+
+        <Button onClick={() => setPasswordModalOpen(true)}>
+          Criar Acesso
+        </Button>
       </div>
 
       {/* 📋 Tabela */}
@@ -114,9 +248,16 @@ export function ListarAcessos() {
                   <TableCell>{acesso.tipoacesso}</TableCell>
                   <TableCell>{acesso.dataativacao}</TableCell>
                   <TableCell>
-                    <Badge variant={acesso.ativo ? "default" : "secondary"}>
-                      {acesso.ativo ? "Ativo" : "Inativo"}
-                    </Badge>
+                    <Switch
+                      checked={Boolean(acesso.ativo)}
+                      disabled={estadoMutation.isPending}
+                      onCheckedChange={() =>
+                        estadoMutation.mutate({
+                          acessoId: acesso.pk_acesso,
+                          userId: userData.user.pk_utilizador,
+                        })
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -136,8 +277,9 @@ export function ListarAcessos() {
         <div className="flex items-center justify-between p-4">
           <div className="text-sm text-muted-foreground">
             Mostrando {(currentPage - 1) * itemsPerPage + 1}–
-            {Math.min(currentPage * itemsPerPage, total)} de {total} registos
+            {Math.min(currentPage * itemsPerPage, total)} de {total}
           </div>
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -163,6 +305,49 @@ export function ListarAcessos() {
           </div>
         </div>
       )}
+
+      {/* 🔐 Modal Senha */}
+      <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmação de Segurança</DialogTitle>
+          </DialogHeader>
+
+          <Input
+            type="password"
+            placeholder="Digite a senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoFocus
+          />
+
+          {passwordError && (
+            <p className="text-sm text-red-500">{passwordError}</p>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPassword("");
+                setPasswordError("");
+                setPasswordModalOpen(false);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmPassword}>
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ➕ Modal Criar Acesso */}
+      <AcessoFormDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+      />
     </div>
   );
 }

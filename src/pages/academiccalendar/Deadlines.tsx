@@ -47,6 +47,9 @@ import { useUpdatePrazo } from "@/hooks/prazos/use-update-prazo";
 import { useDeletePrazo } from "@/hooks/prazos/use-delete-prazo";
 import { Prazo } from "@/services/prazos/fetchPrazos";
 import { useAuth } from "@/hooks/use-auth";
+import { FormSelect } from "@/components/common/FormSelect";
+import { set } from "date-fns";
+import { MCALTipoAvaliacoesSelectSelect } from "@/components/common/global-selects/MCALTipoAvaliacoesSelect";
 
 export default function Deadlines() {
   const {
@@ -88,7 +91,7 @@ export default function Deadlines() {
     data_inicio: "",
     data_fim: "",
     observacao: "",
-    fk_created_by: "1397",
+    fk_created_by: pk_utilizador.toString(),
     anoletivo: "",
     tipoCandidaturaId: "",
   });
@@ -135,26 +138,47 @@ export default function Deadlines() {
 
     setOpenModal(false);
   };
-  const handleCriarPrazo = () => {
-    criarPrazo({
-      anoLetivoId: form.anoletivo,
-      tipoPrazoId: form.fk_tipo_prazo,
-      tipoCandidaturaId: form.tipoCandidaturaId,
-      payload: {
-        fk_tipo_prazo: Number(form.fk_tipo_prazo),
+  const handleCriarPrazo = async () => {
+    try {
+      await criarPrazo({
         fk_tipo_avaliacao:
           Number(form.fk_tipo_prazo) === 5
-            ? null
+            ? Number(form.fk_tipo_avaliacao) || 0
             : Number(form.fk_tipo_avaliacao),
-        fk_semestre: Number(form.fk_semestre),
-        data_inicio: `${form.data_inicio}T00:00:00`,
-        data_fim: `${form.data_fim}T00:00:00`,
-        observacao: form.observacao || null,
-        fk_created_by: pk_utilizador.toString(),
-      },
-    });
 
-    setOpenModal(false);
+        fk_semestre: Number(form.fk_semestre),
+        fk_tipo_prazo: Number(form.fk_tipo_prazo),
+        fk_ano_lectivo: Number(form.anoletivo),
+
+        data_inicio: `${form.data_inicio}T00:00:00`,
+        data_fim: `${form.data_fim}T23:59:59`,
+
+        observacao: form.observacao || undefined,
+
+        fk_created_by: Number(pk_utilizador),
+
+        tipo_candidatura: form.tipoCandidaturaId,
+      });
+
+      // ✅ Só se executa se deu sucesso
+      setForm({
+        fk_tipo_prazo: "",
+        fk_tipo_avaliacao: "",
+        fk_semestre: "",
+        data_inicio: "",
+        data_fim: "",
+        observacao: "",
+        fk_created_by: pk_utilizador.toString(),
+        anoletivo: "",
+        tipoCandidaturaId: "",
+      });
+
+      setIsEditing(false);
+      setOpenModal(false);
+    } catch (error: any) {
+      // ❌ Modal NÃO fecha, mostra o erro
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -162,7 +186,7 @@ export default function Deadlines() {
       return;
     }
     const anoAcademicoAtivo = anosAcademicos.filter((ano) =>
-      ano.estado.toLowerCase().startsWith("activ")
+      ano.estado.toLowerCase().startsWith("activ"),
     );
     setAnoLetivoId(anoAcademicoAtivo[0].codigo.toString());
   }, [isLoadingAnosAcademicos, anosAcademicos]);
@@ -183,7 +207,7 @@ export default function Deadlines() {
   const totalPages = Math.ceil(prazos.length / itemsPerPage);
   const paginated = prazos.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   return (
@@ -410,74 +434,43 @@ export default function Deadlines() {
             {/* Tipo de Avaliação */}
             {form.fk_tipo_prazo.toString() === "3" && (
               <div className="space-y-2">
-                <Label>Tipo de Avaliação *</Label>
-                <Select
-                  value={form.fk_tipo_avaliacao}
-                  onValueChange={(v) =>
+                <MCALTipoAvaliacoesSelectSelect
+                  onChangeValue={(v) =>
                     setForm({ ...form, fk_tipo_avaliacao: v })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposAvaliacao.map((t) => (
-                      <SelectItem key={t.codigo} value={t.codigo.toString()}>
-                        {t.designacao} ({t.sigla})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  value={form.fk_tipo_avaliacao}
+                />
               </div>
             )}
 
             {/*Tipo epoca avalicaoes */}
             {form.fk_tipo_prazo.toString() === "4" && (
               <div className="space-y-2">
-                <Label>Tipo epoca avalicaoes *</Label>
-                <Select
-                  value={form.fk_tipo_avaliacao}
-                  onValueChange={(v) =>
+                <MCALTipoAvaliacoesSelectSelect
+                  onChangeValue={(v) =>
                     setForm({ ...form, fk_tipo_avaliacao: v })
                   }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposEpocaAvaliacao.map((t) => (
-                      <SelectItem key={t.codigo} value={t.codigo.toString()}>
-                        {t.descricao}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  value={form.fk_tipo_avaliacao}
+                />
               </div>
             )}
 
             {/* Ano Letivo */}
             <div className="space-y-2">
-              <Label>Ano Lectivo *</Label>
-              <Select
+              <FormSelect
                 disabled={isEditing ? true : false}
+                label="Ano Letivo"
                 value={form.anoletivo}
-                onValueChange={(v) => setForm({ ...form, anoletivo: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      semestres.length === 0 ? "Carregando..." : "Selecione"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosAcademicos.map((s) => (
-                    <SelectItem key={s.codigo} value={s.codigo.toString()}>
-                      {s.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(v) => setForm({ ...form, anoletivo: v })}
+                options={anosAcademicos?.filter(
+                  (ay) => ay.estado.toLowerCase() === "activo",
+                )}
+                map={(a) => ({
+                  key: a.codigo,
+                  label: a.designacao,
+                  value: a.codigo,
+                })}
+              />
             </div>
 
             {/* Tipo de Candidatura */}
@@ -574,6 +567,17 @@ export default function Deadlines() {
               onClick={() => {
                 setOpenModal(false);
                 setIsEditing(false);
+                setForm({
+                  fk_tipo_prazo: "",
+                  fk_tipo_avaliacao: "",
+                  fk_semestre: "",
+                  data_inicio: "",
+                  data_fim: "",
+                  observacao: "",
+                  fk_created_by: pk_utilizador.toString(),
+                  anoletivo: "",
+                  tipoCandidaturaId: "",
+                });
               }}
             >
               Cancelar

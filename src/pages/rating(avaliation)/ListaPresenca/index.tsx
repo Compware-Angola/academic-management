@@ -43,6 +43,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { usePresenceAttendance } from "@/hooks/avaliacao/use-presence-attendance";
 import { useQueryAssessmentAttendanceParameters } from "@/hooks/avaliacao/use-query-assessment-attendance-parameters";
 import { useQueryMesTemp } from "@/hooks/avaliacao/use-query-mes-temp";
+import { verificarPagamento } from "@/util/aparecer-lista-presenca";
 
 type Filters = {
   anoLetivo: string;
@@ -86,15 +87,13 @@ export default function PresenceList() {
     useQueryAnoAcademico();
 
   const {
-    data: presenceAttendanceList = [],
+    data: presenceAttendanceList,
     isLoading: loadingPresenceAttendanceList,
     error,
   } = usePresenceAttendance(
     {
       anoLectivo: parseFilter(formData.anoLetivo),
       horarioPk: parseFilter(formData.horarioId),
-      situacao_financeira: parseFilter(formData.situacaoFinanceira),
-      tipo_avaliacao: 1,
     },
     shouldFetch,
   );
@@ -150,12 +149,14 @@ export default function PresenceList() {
     });
   const schedules = scheduleResponse?.data || [];
   const parameters = parameterResponse?.[0];
-  console.log(parameterResponse);
+
   const { data: mesTemp = [] } = useQueryMesTemp({
     id: parseFilter(parameters?.observacao),
   });
 
   const mesDescricao = mesTemp[0]?.designacao;
+  const students = presenceAttendanceList?.data || [];
+  const prestacao = presenceAttendanceList?.prestacao;
 
   return (
     <div className="p-6 space-y-6">
@@ -320,7 +321,7 @@ export default function PresenceList() {
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
-        ) : presenceAttendanceList.length === 0 ? (
+        ) : students.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-2">
@@ -342,17 +343,25 @@ export default function PresenceList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {presenceAttendanceList.map((estudante) => (
-                    <TableRow key={estudante.numero_matricula}>
-                      <TableCell className="font-mono">
-                        {estudante.numero_matricula}
-                      </TableCell>
-                      <TableCell>{estudante.nome}</TableCell>
-                      <TableCell>
-                        {getBolseiroBadge(estudante.eh_bolseiro.toString())}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {students
+                    .filter((t) =>
+                      verificarPagamento({
+                        mesPagos: t.mes_pago,
+                        prestacao,
+                        situacao: parseFilter(formData.situacaoFinanceira),
+                      }),
+                    )
+                    .map((student) => (
+                      <TableRow key={student.numero_matricula}>
+                        <TableCell className="font-mono">
+                          {student.numero_matricula}
+                        </TableCell>
+                        <TableCell>{student.nome}</TableCell>
+                        <TableCell>
+                          {getBolseiroBadge(student.is_bolseiro.toString())}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </div>

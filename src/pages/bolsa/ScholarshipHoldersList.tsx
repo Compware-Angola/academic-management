@@ -283,7 +283,7 @@ export default function ScholarshipHoldersList() {
             <div className="flex items-center gap-2">
               <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
               <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
-                <SelectTrigger id="items-per-page" className="w-[80px]">
+                <SelectTrigger id="items-per-page" className="w-20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

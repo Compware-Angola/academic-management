@@ -1,30 +1,46 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-interface CreatePrazoPayload {
-  fk_tipo_prazo: number;
-  fk_tipo_avaliacao: number | null;
+/**
+ * Payload para criação de prazo académico
+ * (alinhado com CreateAcademicActivitiesTermsDto - Backend)
+ */
+export interface CreatePrazoPayload {
+  /** Tipo de avaliação */
+  fk_tipo_avaliacao: number;
+
+  /** Semestre */
   fk_semestre: number;
+
+  /** Tipo de prazo */
+  fk_tipo_prazo: number;
+
+  /** Ano lectivo */
+  fk_ano_lectivo: number;
+
+  /** Data de início (ISO 8601) */
   data_inicio: string;
+
+  /** Data de fim (ISO 8601) */
   data_fim: string;
-  observacao?: string | null;
-  fk_created_by: string;
+
+  /** Observação (opcional) */
+  observacao?: string;
+
+  /** Utilizador que cria o prazo */
+  fk_created_by: number;
+
+  /** Tipo de candidatura (ex: N, R, E, etc.) */
+  tipo_candidatura: string;
 }
 
-interface CreatePrazoParams {
-  anoLetivoId: string;
-  tipoPrazoId: string;
-  tipoCandidaturaId: string;
-  payload: CreatePrazoPayload;
-}
-
-export async function createPrazo({
-  anoLetivoId,
-  tipoPrazoId,
-  tipoCandidaturaId,
-  payload,
-}: CreatePrazoParams) {
-  await axiosApexGa.post(
-    `ga/academic-calendar/deadlines/${anoLetivoId}/${tipoPrazoId}/${tipoCandidaturaId}`,
+/**
+ * Criar prazo académico
+ */
+export async function createPrazo(payload: CreatePrazoPayload) {
+  const response = await axiosNestGa.post(
+    "/academic-activities/terms",
     payload
   );
+
+  return response.data;
 }

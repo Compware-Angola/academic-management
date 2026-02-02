@@ -7,16 +7,14 @@ import {
 
 export function usePresenceAttendance(
   params: Partial<PresencaQuery>,
-  enabled: boolean
+  enabled: boolean,
 ) {
-  return useQuery<PresencaEstudante[]>({
-    queryKey: ["presence-attendance", params],
+  return useQuery<PresencaEstudante>({
+    queryKey: ["presence-attendance", params.anoLectivo, params.horarioPk],
     queryFn: () =>
       getPresenceAttendanceService({
         anoLectivo: params.anoLectivo,
         horarioPk: params.horarioPk,
-        situacao_financeira: params.situacao_financeira,
-        tipo_avaliacao: params.tipo_avaliacao,
       }),
     enabled,
   });
