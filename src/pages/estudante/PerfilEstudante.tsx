@@ -251,7 +251,7 @@ export default function PerfilEstudante() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span><strong>Ano:</strong> {estudante.anoCurricular}º Ano</span>
+                    <span><strong>Ano:</strong> { '-'}º Ano</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />
@@ -414,6 +414,11 @@ export default function PerfilEstudante() {
                 <CardTitle className="text-lg">Progresso Académico</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                 <div className="text-center text-muted-foreground py-10">
+            A funcionalidade  estará disponível em breve.
+          </div>
+                 {/* 
+
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Ano de Ingresso:</span>
                   <span className="font-medium">{estudante.anoIngresso}</span>
@@ -434,6 +439,7 @@ export default function PerfilEstudante() {
                   <span>{getEstadoBadge(estudante.estado)}</span>
                 </div>
 
+               
                 <Separator className="my-4" />
 
                 <div>
@@ -443,6 +449,7 @@ export default function PerfilEstudante() {
                     {Math.round((estudante.creditosObtidos / estudante.creditosTotais) * 100)}% concluído
                   </p>
                 </div>
+                */}
               </CardContent>
             </Card>
           </div>
