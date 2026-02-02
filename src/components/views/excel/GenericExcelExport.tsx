@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 
 // ──────────────────────────────────────────────
-// Tipos (mantidos iguais ao PDF, com pequenas adaptações)
+// Tipos (mantidos o mais próximo possível do PDF)
 export interface EntityHeader {
-  logoSrc?: string;           // opcional – não usado diretamente
+  logoSrc?: string;           // opcional – não usado diretamente no Excel
   name: string;
   details: string[];
   primaryColor?: string;
@@ -32,9 +32,9 @@ export const defaultHeader: EntityHeader = {
 export interface TableColumn {
   key: string;
   label: string;
-  width?: number;             // em caracteres (aproximado) – equivalente ao width % do PDF
+  width?: number;
   align?: 'left' | 'center' | 'right';
-  format?: (value: any, row: any) => string | number;  // equivalente ao render, mas texto puro
+  format?: (value: any, row: any) => string | number;
 }
 
 export interface TableData {
@@ -44,15 +44,14 @@ export interface TableData {
 }
 
 // ──────────────────────────────────────────────
-// "Estilos" base (adaptados para SheetJS)
+// Configurações base (inspiradas no PDF)
 const baseExcelConfig = {
-  fontFamily: 'Calibri', // Helvetica não é nativa, Calibri é próximo e padrão
-  defaultFontSize: 11,
+  entityNameSize: 16,
+  entityDetailSize: 11,
+  titleSize: 18,
+  subtitleSize: 12,
+  sectionTitleSize: 13,
   headerFontSize: 10,
-  titleFontSize: 16,
-  subtitleFontSize: 12,
-  sectionTitleFontSize: 13,
-  padding: 6,             // aproximado em pontos
   primaryColorDefault: '#0d1b48',
 };
 
@@ -75,7 +74,7 @@ interface GenericExcelProps {
 }
 
 // ──────────────────────────────────────────────
-// Geração do conteúdo Excel
+// Geração do Excel
 export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
   const {
     header = defaultHeader,
@@ -89,7 +88,7 @@ export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
     primaryColor,
   } = props;
 
-  const color = (primaryColor || header.primaryColor || baseExcelConfig.primaryColorDefault)
+  const colorHex = (primaryColor || header.primaryColor || baseExcelConfig.primaryColorDefault)
     .replace('#', '')
     .toUpperCase();
 
@@ -99,7 +98,7 @@ export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
   const wsData: any[][] = [];
 
-  // Cabeçalho entidade
+  // Cabeçalho entidade (dados brutos primeiro)
   wsData.push([header.name]);
   header.details.forEach(line => wsData.push([line]));
   wsData.push([]);
@@ -110,7 +109,7 @@ export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
   wsData.push([]);
 
   // Secções de informação
-  infoSections.forEach((section, idx) => {
+  infoSections.forEach(section => {
     if (section.title) wsData.push([section.title]);
     if (Array.isArray(section.content)) {
       section.content.forEach(line => wsData.push([line]));
@@ -141,7 +140,7 @@ export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
   totals.forEach(t => wsData.push([`${t.label}: ${t.value}`]));
   if (totals.length) wsData.push([]);
 
-  // Aviso / Notice
+  // Aviso
   if (footerNotice) {
     wsData.push(['Aviso']);
     wsData.push([footerNotice]);
@@ -153,52 +152,74 @@ export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
     `Emitido em ${emittedDate} — ${header.name} © ${year}`;
   wsData.push([footerText]);
 
+  // Cria o worksheet APENAS AGORA
   const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-  // ─── Aplicação de "estilos" ───────────────────────────────
-  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+  // ─── ESTILOS (depois de ws existir) ───────────────────────────────
 
-  // Título (merge + estilo grande)
+  // 1. Nome da entidade – grande, negrito, com cor primária
+  const entityNameRow = 0;
+  const nameCellAddr = XLSX.utils.encode_cell({ r: entityNameRow, c: 0 });
+  ws[nameCellAddr] = {
+    v: header.name,
+    t: 's',
+    s: {
+      font: {
+        sz: baseExcelConfig.entityNameSize,
+        bold: true,
+        color: { rgb: colorHex },
+      },
+      alignment: { horizontal: 'left', vertical: 'center' },
+    },
+  };
+
+  // 2. Detalhes da entidade – menor, cinza
+  header.details.forEach((_, i) => {
+    const row = 1 + i;
+    const cellAddr = XLSX.utils.encode_cell({ r: row, c: 0 });
+    if (ws[cellAddr]) {
+      ws[cellAddr].s = {
+        font: {
+          sz: baseExcelConfig.entityDetailSize,
+          color: { rgb: '444444' },
+        },
+        alignment: { horizontal: 'left', vertical: 'center' },
+      };
+    }
+  });
+
+  // 3. Título com merge e estilo
   const titleRowIdx = header.details.length + 2;
   if (wsData[titleRowIdx]?.[0] === documentTitle.toUpperCase()) {
     ws['!merges'] = ws['!merges'] || [];
     ws['!merges'].push({
       s: { r: titleRowIdx, c: 0 },
-      e: { r: titleRowIdx, c: Math.max(6, range.e.c) },
+      e: { r: titleRowIdx, c: 6 },
     });
 
     const titleCell = XLSX.utils.encode_cell({ r: titleRowIdx, c: 0 });
-    ws[titleCell] = {
-      v: documentTitle.toUpperCase(),
-      t: 's',
-      s: {
-        font: { sz: baseExcelConfig.titleFontSize, bold: true },
-        alignment: { horizontal: 'center', vertical: 'center' },
-      },
+    ws[titleCell].s = {
+      font: { sz: baseExcelConfig.titleSize, bold: true },
+      alignment: { horizontal: 'center', vertical: 'center' },
     };
   }
 
-  // Cabeçalho da tabela (fundo colorido, texto branco, bold)
+  // 4. Cabeçalho da tabela
   if (mainTable) {
     for (let c = 0; c < mainTable.headers.length; c++) {
       const cellAddr = XLSX.utils.encode_cell({ r: tableStartRow, c });
-      if (!ws[cellAddr]) continue;
-
-      ws[cellAddr].s = {
-        font: { bold: true, color: { rgb: 'FFFFFF' } },
-        fill: { fgColor: { rgb: color } },
-        alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
-      };
+      if (ws[cellAddr]) {
+        ws[cellAddr].s = {
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          fill: { fgColor: { rgb: colorHex } },
+          alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+        };
+      }
     }
 
-    // Larguras das colunas
-    ws['!cols'] = mainTable.headers.map(col => ({
-      wch: col.width || 15,
-    }));
-  }
+    ws['!cols'] = mainTable.headers.map(col => ({ wch: col.width || 15 }));
 
-  // Opcional: alinhamento geral das células da tabela
-  if (mainTable) {
+    // Alinhamento das células de dados
     for (let r = tableStartRow + 1; r < tableStartRow + 1 + mainTable.rows.length; r++) {
       for (let c = 0; c < mainTable.headers.length; c++) {
         const cellAddr = XLSX.utils.encode_cell({ r, c });
@@ -206,10 +227,7 @@ export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
           const col = mainTable.headers[c];
           ws[cellAddr].s = {
             ...ws[cellAddr].s,
-            alignment: {
-              horizontal: col.align || 'left',
-              vertical: 'center',
-            },
+            alignment: { horizontal: col.align || 'left', vertical: 'center' },
           };
         }
       }
@@ -222,7 +240,7 @@ export function generateGenericExcel(props: GenericExcelProps): XLSX.WorkBook {
 }
 
 // ──────────────────────────────────────────────
-// Ações – apenas download (sem equivalente a print)
+// Ações – apenas download
 interface ExcelActionsProps {
   excelProps: GenericExcelProps;
   fileName: string;
