@@ -48,6 +48,7 @@ import { Schedule } from "@/services/horario/fetch-schedule.service";
 import { useScheduleWithPermissionQuery } from "@/hooks/horario/use-query-schedule-with-permission";
 import { formatarData } from "@/util/date-formate";
 import { ScheduleWithPermissao } from "@/services/horario/fetch-schedule-with-permission.service";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function SchedulesWithPermission() {
   const navigate = useNavigate();
@@ -265,24 +266,20 @@ export default function SchedulesWithPermission() {
                 </SelectContent>
               </Select>
             </div>
-            <FormSelect
-              label="Curso"
-              value={filters.curso}
-              options={cursos}
-              map={(c) => ({
-                key: c.codigo,
-                label: c.designacao,
-                value: c.codigo,
-              })}
-              onChange={(v) =>
-                setFilters({
-                  ...filters,
-                  curso: v,
-                  anoCurricular: "",
-                  unidadeCurricular: "",
-                })
-              }
-            />
+            <CourseSelect
+                                                          
+                                                        
+                                                          value={filters.curso}
+                                                          onChangeValue={(v) => {
+                                                          setFilters({
+                                                          ...filters,
+                                                            curso: v,
+                                                            anoCurricular: "",
+                                                            unidadeCurricular: "",
+                                                            });
+                                                                                    
+                                                            }}
+                                                              />
             <FormSelect
               label="Ano Curricular"
               value={filters.anoCurricular}

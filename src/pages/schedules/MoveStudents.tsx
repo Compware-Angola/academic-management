@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { useMutationMoveStudents } from "@/hooks/horario/use-mutation-move-student";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function MovimentarEstudantes() {
   //Hooks
@@ -231,28 +232,21 @@ export default function MovimentarEstudantes() {
                 </SelectContent>
               </Select>
               {/* Curso */}
-              <Select
-                value={filters.curso}
-                onValueChange={(v) =>
-                  setFilters({
+                  <CourseSelect
+                    labelMode="inside"
+                  
+                    value={filters.curso}
+                    onChangeValue={(v) => {
+                    setFilters({
                     ...filters,
-                    curso: v,
-                    anoCurricular: "",
-                    unidadeCurricular: "",
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Curso" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                      {c.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      curso: v,
+                      anoCurricular: "",
+                      unidadeCurricular: "",
+                      });
+                                              
+                      }}
+                        />
+
 
               {/* Ano Curricular */}
               <Select

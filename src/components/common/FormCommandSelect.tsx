@@ -26,8 +26,11 @@ type MapResult = {
 
 type WidthPreset = "auto" | "sm" | "md" | "lg" | "full";
 
+type LabelMode = "outside" | "inside";
+
 type FormCommandSelectProps<T> = {
   label?: string;
+  labelMode?: LabelMode;
   value?: string;
   options?: T[];
   map: (item: T) => MapResult;
@@ -55,6 +58,7 @@ function resolveWidthClass(width?: WidthPreset | string) {
 
 export function FormCommandSelect<T>({
   label,
+  labelMode = "outside", // 👈 PADRÃO,
   value,
   options = [],
   map,
@@ -103,7 +107,14 @@ export function FormCommandSelect<T>({
 
   return (
     <div className="flex flex-col gap-2">
-      {label && <Label>{label}</Label>}
+      
+
+        {/* LABEL EXTERNO: só se mandarem */}
+          {label && labelMode === "outside" && (
+            <Label>{label}</Label>
+          )}
+
+
 
       <Popover open={open} onOpenChange={handleOpenChange} modal>
         <PopoverTrigger asChild>
@@ -118,7 +129,11 @@ export function FormCommandSelect<T>({
             )}
           >
             <span className="truncate">
-              {displayItem ? map(displayItem).label : placeholder}
+              {displayItem && map(displayItem).label}
+
+              {!displayItem && labelMode === "inside" && label}
+
+              {!displayItem && labelMode === "outside" && placeholder}
             </span>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </button>

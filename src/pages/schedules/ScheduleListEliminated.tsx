@@ -46,6 +46,7 @@ import { useRestaurarHorario } from "@/hooks/horario/use-restaurar-horario";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { HorarioEliminado } from "@/services/horario/listar-horarios-existentes-eliminado.service";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 export default function ScheduleListEliminated() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -222,26 +223,20 @@ export default function ScheduleListEliminated() {
             })}
           />
 
-          <FormSelect
-            label="Curso"
-            value={filters.curso}
-            disabled={!filters.anoLectivo}
-            loading={loadingCursos}
-            onChange={(v) =>
-              setFilters({
-                ...filters,
-                curso: v,
-                anoCurricular: "",
-                unidadeCurricular: "",
-              })
-            }
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
-          />
+          <CourseSelect
+                              labelMode="inside"
+                            
+                              value={filters.curso}
+                              onChangeValue={(v) => {
+                              setFilters({
+                              ...filters,
+                                curso: v,
+                                anoCurricular: "",
+                                unidadeCurricular: "",
+                                });
+                                                        
+                                }}
+                                  />
 
           <FormSelect
             label="Ano Curricular"
