@@ -417,7 +417,7 @@ export default function CreateSchedule() {
           {/* CURSO */}
 
             <CourseSelect
-                                labelMode="inside"
+                                
                               
                                 value={formData.curso}
                                 onChangeValue={(v) => {

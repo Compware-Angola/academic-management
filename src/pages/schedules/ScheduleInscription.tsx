@@ -36,6 +36,7 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQueryRegistrationBySchedule } from "@/hooks/horario/use-query-schedule-inscription";
 import { RegistrationScheduleItem } from "@/services/horario/fetch-schedule-inscription.service";
 import ScheduleDetailsSchoolModal from "./components/ScheduleDetailsStudentModal";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function SchedulesInscription() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -236,30 +237,20 @@ export default function SchedulesInscription() {
 
             {/* Curso */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select
-                value={filters.curso}
-                onValueChange={(v) =>
-                  setFilters({
-                    ...filters,
-                    curso: v,
-                    anoCurricular: "all",
-                    unidadeCurricular: "all",
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os Cursos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                      {c.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+               <CourseSelect
+                              
+                            
+                              value={filters.curso}
+                              onChangeValue={(v) => {
+                              setFilters({
+                              ...filters,
+                                curso: v,
+                                anoCurricular: "",
+                                unidadeCurricular: "",
+                                });
+                                                        
+                                }}
+                                  />
             </div>
 
             {/* Ano Curricular */}
