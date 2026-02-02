@@ -54,6 +54,7 @@ import { AulasOcupadasPorDia } from "@/services/horario/fetch-aulas-ocupadas.ser
 import { useQueryScheduleCreationPrompt } from "@/hooks/academiccalendar/use-query-schedule-creation-prompt";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -414,27 +415,23 @@ export default function CreateSchedule() {
           />
 
           {/* CURSO */}
-          <FormSelect
-            disabled={isLoadingCurso || !isWithinPeriod}
-            loading={isLoadingCurso}
-            label="Curso"
-            value={formData.curso}
-            onChange={(v) =>
-              setFormData({
-                ...formData,
-                curso: v,
-                unidadeCurricular: "",
-                designacao: "",
-                classes: "",
-              })
-            }
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
-          />
+
+            <CourseSelect
+                                
+                              
+                                value={formData.curso}
+                                onChangeValue={(v) => {
+                                  setFormData({
+                                    ...formData,
+                                    curso: v,
+                                    unidadeCurricular: "",
+                                    designacao: "",
+                                    classes: "",
+                                  })
+
+                                  }}
+                                    />
+
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}

@@ -30,6 +30,7 @@ import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQuerySchedulesByDayOfWeek } from "@/hooks/horario/use-query-schedules-by-week";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 const DIAS_SEMANA = [
   { id: 1, label: "Domingo" },
@@ -212,28 +213,23 @@ const HorariosSemanais = () => {
             </Select>
 
             {/* Curso */}
-            <Select
-              value={filters.curso}
-              onValueChange={(v) =>
-                setFilters({
-                  ...filters,
-                  curso: v,
-                  anoCurricular: "all",
-                  unidadeCurricular: "",
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Curso" />
-              </SelectTrigger>
-              <SelectContent>
-                {cursos?.map((c) => (
-                  <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                    {c.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+                <CourseSelect
+                                              
+                                            labelMode="inside"
+                                              value={filters.curso}
+                                              onChangeValue={(v) => {
+                                              setFilters({
+                                              ...filters,
+                                                curso: v,
+                                                anoCurricular: "",
+                                                unidadeCurricular: "",
+                                                });
+                                                                        
+                                                }}
+                                                  />
+
+            
 
             {/* Ano Curricular */}
             <Select

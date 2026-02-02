@@ -42,6 +42,7 @@ import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function SchedulesByUC() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -210,20 +211,20 @@ const openDetails = (turmaId: number) => {
 
             {/* Curso */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select
-                value={filters.curso}
-                onValueChange={(v) => setFilters({ ...filters, curso: v, anoCurricular: "all", unidadeCurricular: "" })}
-              >
-                <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                <SelectContent>
-                  {cursos?.map((c) => (
-                    <SelectItem key={c.codigo} value={c.codigo.toString()}>
-                      {c.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <CourseSelect
+                              
+                            
+                              value={filters.curso}
+                              onChangeValue={(v) => {
+                              setFilters({
+                              ...filters,
+                                curso: v,
+                                anoCurricular: "",
+                                unidadeCurricular: "",
+                                });
+                                                        
+                                }}
+                                  />
             </div>
 
             {/* Ano Curricular */}
