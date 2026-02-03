@@ -17,8 +17,8 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 export default function ServicosEmolumentos() {
-    const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+
   const [filters, setFilters] = useState({
     anoLetivo: "",
   });
@@ -130,21 +130,21 @@ export default function ServicosEmolumentos() {
         </BreadcrumbList>
       </Breadcrumb>
 
-   
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-           <h1 className="text-2xl font-bold">Serviços e Emolumentos</h1>
-         
-      <p className="text-muted-foreground">Gestão de serviços, emolumentos e mensalidades por curso.</p>
+          <h1 className="text-2xl font-bold">Serviços e Emolumentos</h1>
+
+          <p className="text-muted-foreground">Gestão de serviços, emolumentos e mensalidades por curso.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-       <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
-              <Plus className="h-4 w-4" />Novo Serviço
-            </Button>
+          <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+            <Plus className="h-4 w-4" />Novo Serviço
+          </Button>
         </div>
       </div>
-  
-          
+
+
       <Tabs defaultValue="servicos" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="servicos" className="gap-2">
@@ -158,52 +158,52 @@ export default function ServicosEmolumentos() {
         </TabsList>
 
         <TabsContent value="servicos" className="space-y-4 mt-4">
-    <Card>
-  <CardHeader>
-    <CardTitle>Pesquisar Serviço</CardTitle>
-  </CardHeader>
+          <Card>
+            <CardHeader>
+              <CardTitle>Pesquisar Serviço</CardTitle>
+            </CardHeader>
 
-  <CardContent>
-    <div className="flex flex-col gap-4 md:flex-row md:items-end">
-      
-      {/* Ano Letivo */}
-      <div className="min-w-[200px]">
-        <FormSelect
-          label="Ano Letivo"
-          disabled={isLoadingAcademicYear}
-          loading={isLoadingAcademicYear}
-          value={filters.anoLetivo}
-          onChange={(v) =>
-            setFilters({ ...filters, anoLetivo: v })
-          }
-          options={anosAcademicos}
-          map={(a) => ({
-            key: a.codigo,
-            label: a.designacao,
-            value: a.codigo,
-          })}
-        />
-      </div>
+            <CardContent>
+              <div className="flex flex-col gap-4 md:flex-row md:items-end">
 
-      {/* Descrição */}
-      <div className="flex-1">
-        <Input
-          placeholder="Descrição do serviço"
-        />
-      </div>
+                {/* Ano Letivo */}
+                <div className="min-w-[200px]">
+                  <FormSelect
+                    label="Ano Letivo"
+                    disabled={isLoadingAcademicYear}
+                    loading={isLoadingAcademicYear}
+                    value={filters.anoLetivo}
+                    onChange={(v) =>
+                      setFilters({ ...filters, anoLetivo: v })
+                    }
+                    options={anosAcademicos}
+                    map={(a) => ({
+                      key: a.codigo,
+                      label: a.designacao,
+                      value: a.codigo,
+                    })}
+                  />
+                </div>
 
-      {/* Botão */}
-      <Button className="gap-2">
-        <Search className="h-4 w-4" />
-        Pesquisar
-      </Button>
+                {/* Descrição */}
+                <div className="flex-1">
+                  <Input
+                    placeholder="Descrição do serviço"
+                  />
+                </div>
 
-    </div>
-  </CardContent>
-</Card>
+                {/* Botão */}
+                <Button className="gap-2">
+                  <Search className="h-4 w-4" />
+                  Pesquisar
+                </Button>
+
+              </div>
+            </CardContent>
+          </Card>
 
 
-       
+
 
           <Card>
             <CardHeader><CardTitle>Lista de Serviços</CardTitle></CardHeader>
@@ -239,50 +239,50 @@ export default function ServicosEmolumentos() {
 
         <TabsContent value="mensalidades" className="space-y-4 mt-4">
           <Card>
- <CardHeader><CardTitle>Pesquisar Mensalidade</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Pesquisar Mensalidade</CardTitle></CardHeader>
 
-  <CardContent>
-    <div className="flex flex-col gap-4 md:flex-row md:items-end">
-      
-      {/* Ano Letivo */}
-      <div className="min-w-[200px]">
-        <FormSelect
-          label="Ano Letivo"
-          disabled={isLoadingAcademicYear}
-          loading={isLoadingAcademicYear}
-          value={filters.anoLetivo}
-          onChange={(v) =>
-            setFilters({ ...filters, anoLetivo: v })
-          }
-          options={anosAcademicos}
-          map={(a) => ({
-            key: a.codigo,
-            label: a.designacao,
-            value: a.codigo,
-          })}
-        />
-      </div>
+            <CardContent>
+              <div className="flex flex-col gap-4 md:flex-row md:items-end">
 
-      {/* Descrição */}
-      <div className="flex-1">
-        <Input
-          placeholder="Nome do curso"
-        />
-      </div>
+                {/* Ano Letivo */}
+                <div className="min-w-[200px]">
+                  <FormSelect
+                    label="Ano Letivo"
+                    disabled={isLoadingAcademicYear}
+                    loading={isLoadingAcademicYear}
+                    value={filters.anoLetivo}
+                    onChange={(v) =>
+                      setFilters({ ...filters, anoLetivo: v })
+                    }
+                    options={anosAcademicos}
+                    map={(a) => ({
+                      key: a.codigo,
+                      label: a.designacao,
+                      value: a.codigo,
+                    })}
+                  />
+                </div>
 
-      {/* Botão */}
-      <Button className="gap-2">
-        <Search className="h-4 w-4" />
-        Pesquisar
-      </Button>
+                {/* Descrição */}
+                <div className="flex-1">
+                  <Input
+                    placeholder="Nome do curso"
+                  />
+                </div>
 
-    </div>
-  </CardContent>
-</Card>
+                {/* Botão */}
+                <Button className="gap-2">
+                  <Search className="h-4 w-4" />
+                  Pesquisar
+                </Button>
 
-     
+              </div>
+            </CardContent>
+          </Card>
 
-        
+
+
+
 
           <Card>
             <CardHeader><CardTitle>Mensalidades por Curso</CardTitle></CardHeader>
@@ -330,8 +330,8 @@ export default function ServicosEmolumentos() {
               {/* Descrição */}
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="descricao">Descrição *</Label>
-                <Input 
-                  id="descricao" 
+                <Input
+                  id="descricao"
                   placeholder="Ex: Propina Mensal"
                   value={formData.descricao}
                   onChange={(e) => handleInputChange("descricao", e.target.value)}
@@ -341,8 +341,8 @@ export default function ServicosEmolumentos() {
               {/* Sigla */}
               <div className="space-y-2">
                 <Label htmlFor="sigla">Sigla</Label>
-                <Input 
-                  id="sigla" 
+                <Input
+                  id="sigla"
                   placeholder="Ex: PROP"
                   value={formData.sigla}
                   onChange={(e) => handleInputChange("sigla", e.target.value)}
@@ -366,8 +366,8 @@ export default function ServicosEmolumentos() {
               {/* Preço */}
               <div className="space-y-2">
                 <Label htmlFor="preco">Preço (Kz) *</Label>
-                <Input 
-                  id="preco" 
+                <Input
+                  id="preco"
                   type="number"
                   placeholder="25000"
                   value={formData.preco}
@@ -378,8 +378,8 @@ export default function ServicosEmolumentos() {
               {/* Valor Anterior */}
               <div className="space-y-2">
                 <Label htmlFor="valorAnterior">Valor Anterior (Kz)</Label>
-                <Input 
-                  id="valorAnterior" 
+                <Input
+                  id="valorAnterior"
                   type="number"
                   placeholder="20000"
                   value={formData.valorAnterior}
@@ -403,8 +403,8 @@ export default function ServicosEmolumentos() {
               {/* Motivo Isenção IVA */}
               <div className="space-y-2">
                 <Label htmlFor="motivoIsencaoIvaCodigo">Código Motivo Isenção IVA</Label>
-                <Input 
-                  id="motivoIsencaoIvaCodigo" 
+                <Input
+                  id="motivoIsencaoIvaCodigo"
                   type="number"
                   placeholder="101"
                   value={formData.motivoIsencaoIvaCodigo}
@@ -415,8 +415,8 @@ export default function ServicosEmolumentos() {
               {/* Data */}
               <div className="space-y-2">
                 <Label htmlFor="data">Data</Label>
-                <Input 
-                  id="data" 
+                <Input
+                  id="data"
                   type="date"
                   value={formData.data}
                   onChange={(e) => handleInputChange("data", e.target.value)}
@@ -465,8 +465,8 @@ export default function ServicosEmolumentos() {
               {/* Código Grade Curricular */}
               <div className="space-y-2">
                 <Label htmlFor="codigoGradeCurricular">Código Grade Curricular</Label>
-                <Input 
-                  id="codigoGradeCurricular" 
+                <Input
+                  id="codigoGradeCurricular"
                   type="number"
                   placeholder="202"
                   value={formData.codigoGradeCurricular}
@@ -504,8 +504,8 @@ export default function ServicosEmolumentos() {
               <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t">
                 <div className="flex items-center justify-between space-x-2">
                   <Label htmlFor="estado">Estado Activo</Label>
-                  <Switch 
-                    id="estado" 
+                  <Switch
+                    id="estado"
                     checked={formData.estado}
                     onCheckedChange={(checked) => handleInputChange("estado", checked)}
                   />
@@ -513,8 +513,8 @@ export default function ServicosEmolumentos() {
 
                 <div className="flex items-center justify-between space-x-2">
                   <Label htmlFor="disponibilizarAluno">Disponibilizar ao Aluno</Label>
-                  <Switch 
-                    id="disponibilizarAluno" 
+                  <Switch
+                    id="disponibilizarAluno"
                     checked={formData.disponibilizarAluno}
                     onCheckedChange={(checked) => handleInputChange("disponibilizarAluno", checked)}
                   />
@@ -522,8 +522,8 @@ export default function ServicosEmolumentos() {
 
                 <div className="flex items-center justify-between space-x-2">
                   <Label htmlFor="visualizarNoPortal">Visualizar no Portal</Label>
-                  <Switch 
-                    id="visualizarNoPortal" 
+                  <Switch
+                    id="visualizarNoPortal"
                     checked={formData.visualizarNoPortal}
                     onCheckedChange={(checked) => handleInputChange("visualizarNoPortal", checked)}
                   />
@@ -531,8 +531,8 @@ export default function ServicosEmolumentos() {
 
                 <div className="flex items-center justify-between space-x-2">
                   <Label htmlFor="mestrado">Mestrado</Label>
-                  <Switch 
-                    id="mestrado" 
+                  <Switch
+                    id="mestrado"
                     checked={formData.mestrado}
                     onCheckedChange={(checked) => handleInputChange("mestrado", checked)}
                   />
@@ -540,8 +540,8 @@ export default function ServicosEmolumentos() {
 
                 <div className="flex items-center justify-between space-x-2">
                   <Label htmlFor="cacuaco">Cacuaco</Label>
-                  <Switch 
-                    id="cacuaco" 
+                  <Switch
+                    id="cacuaco"
                     checked={formData.cacuaco}
                     onCheckedChange={(checked) => handleInputChange("cacuaco", checked)}
                   />
