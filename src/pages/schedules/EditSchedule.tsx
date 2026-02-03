@@ -47,6 +47,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
   { key: "capacidade", label: "Capacidade" },
@@ -438,26 +439,20 @@ export function EditSchedule() {
             onChange={(v) => setFormData((p) => ({ ...p, periodo: v }))}
           />
 
-          <FormSelect
-            disabled={!isWithinPeriod}
-            label="Curso"
-            value={formData.curso}
-            options={cursos}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: String(c.codigo),
-            })}
-            onChange={(v) =>
-              setFormData((p) => ({
+              <CourseSelect
+                                                            
+                                                          
+                  value={formData.curso}
+                  onChangeValue={(v) => {
+                  setFormData((p) => ({
                 ...p,
                 curso: v,
                 classes: "",
                 unidadeCurricular: "",
               }))
-            }
-          />
-
+                                                                                      
+                                                              }}
+                                                                />
           <FormSelect
             disabled={!isWithinPeriod}
             label="Ano Curricular"

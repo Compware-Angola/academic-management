@@ -359,6 +359,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/notas-pagamento",
           permission: [PermissionTypeDetails.FACTURAS.sigla],
         },
+        {
+          title: "Serviços e Emolumentos",
+          url: "/financas/servicos-emolumentos",
+          permission: [PermissionTypeDetails.SERVICOS_PRECARIOS.sigla],
+        },
         // { title: "Estudantes Devedores", url: "/financas/devedores" },
         // { title: "Estudantes Inactivos", url: "/financas/inactivos" },
         // {
