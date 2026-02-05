@@ -95,15 +95,17 @@ export default function CreateUser() {
           nacionalidadeId: Number(formData.nacionalidadeId) || undefined,
           telefone1: formData.telefone1.trim() || undefined,
           telefone2: formData.telefone2.trim() || undefined,
-          senha: DEFAULT_PASSWORD,           // ← sempre esta senha
+          senha: formData.numDocIdentificacao,           // ← sempre esta senha
         },
       });
 
       toast({
         title: "Utilizador criado",
-        description: `Sucesso! Senha inicial definida como Compware@123 (padrão)`,
+        description:
+          "O utilizador foi criado com sucesso. A senha inicial será o número do documento e deverá ser alterada no primeiro acesso.",
         variant: "default",
       });
+
 
       handleReset();
     } catch (error: any) {
@@ -158,21 +160,22 @@ export default function CreateUser() {
       </div>
 
       {/* Card informativo – agora mais direto */}
-      <Card className="w-full max-w-6xl bg-amber-50 border border-amber-400">
+        <Card className="w-full max-w-6xl bg-amber-50 border border-amber-400">
         <CardHeader>
           <CardTitle className="text-amber-800">Senha Inicial</CardTitle>
         </CardHeader>
         <CardContent className="text-amber-900 space-y-2">
           <p>
-            Todos os novos utilizadores serão criados com a senha padrão:
-            <br />
-            <strong className="text-lg">Compware@123</strong>
+            A senha inicial do utilizador será definida automaticamente com base
+            no <strong>Número do Documento de Identificação</strong>.
           </p>
           <p className="text-sm text-amber-800">
-            O utilizador deve alterar esta senha no primeiro acesso.
+            Por motivos de segurança, o utilizador será obrigado a alterar a senha
+            no primeiro acesso ao sistema.
           </p>
         </CardContent>
       </Card>
+
 
       <Card className="max-w-6xl">
         <CardHeader>
