@@ -1,3 +1,8 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,38 +56,136 @@ export function GrupoTable(props: GrupoTableProps) {
   const total = response?.total ?? 0;
   const totalPages = response?.totalPages ?? 1;
 
+  const pdfData = useMemo(() => {
+  if (!tableData.length) return null;
+
+  return {
+    filtros: [
+      debouncedSearch && `Pesquisa: ${debouncedSearch}`,
+      typeGroup && `Tipo Grupo: ${typeGroup === 1 ? "Multiutilizador" : "Unitário"}`,
+    ]
+      .filter(Boolean)
+      .join(" | ") || "Sem filtros",
+
+    total,
+
+    rows: tableData.map((g) => ({
+      designacao: g.designacao,
+      sigla: g.sigla,
+      utilizadores: g.user_count,
+      estado: g.active_state === 1 ? "Ativo" : "Inativo",
+      criadoEm: new Date(g.created_at).toLocaleDateString(),
+    })),
+  };
+}, [tableData, total, debouncedSearch, typeGroup]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Grupos de Acesso"
+    subtitle="Listagem de grupos do sistema"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de grupos: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "designacao", label: "Designação", width: "30%" },
+        { key: "sigla", label: "Sigla", width: "10%" },
+        { key: "utilizadores", label: "Utilizadores", width: "15%" },
+        { key: "estado", label: "Estado", width: "15%" },
+        { key: "criadoEm", label: "Criado em", width: "20%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Grupos de Acesso",
+      subtitle: "Listagem de grupos do sistema",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de grupos: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "designacao", label: "Designação", width: 30 },
+          { key: "sigla", label: "Sigla", width: 10 },
+          { key: "utilizadores", label: "Utilizadores", width: 15 },
+          { key: "estado", label: "Estado", width: 15 },
+          { key: "criadoEm", label: "Criado em", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+  const baseFileName = `Grupos_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
+
+
   return (
     <Card>
       <CardHeader className="space-y-4">
-        <CardTitle>Grupos de Acesso</CardTitle>
+  {/* Título + Ações */}
+  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <CardTitle>Grupos de Acesso</CardTitle>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Input
-            placeholder="Pesquisar grupo..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
+    {pdfData && excelProps && (
+      <div className="flex flex-wrap gap-2">
+        {pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
           />
+        )}
 
-          <Select
-            value={String(typeGroup)}
-            onValueChange={(value) => {
-              setTypeGroup(Number(value));
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder="Tipo de grupo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">Multiutilizador</SelectItem>
-              <SelectItem value="2">Unitário</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </CardHeader>
+        <ExcelActions
+          excelProps={excelProps}
+          fileName={`${baseFileName}.xlsx`}
+          showDownload
+        />
+      </div>
+    )}
+  </div>
+
+  {/* Filtros */}
+  <div className="flex flex-col sm:flex-row gap-4">
+    <Input
+      placeholder="Pesquisar grupo..."
+      value={search}
+      onChange={(e) => {
+        setSearch(e.target.value);
+        setPage(1);
+      }}
+    />
+
+    <Select
+      value={String(typeGroup)}
+      onValueChange={(value) => {
+        setTypeGroup(Number(value));
+        setPage(1);
+      }}
+    >
+      <SelectTrigger className="w-full sm:w-64">
+        <SelectValue placeholder="Tipo de grupo" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="1">Multiutilizador</SelectItem>
+        <SelectItem value="2">Unitário</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</CardHeader>
+
 
       <CardContent>
         {isLoading ? (
