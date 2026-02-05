@@ -27,11 +27,11 @@ export function useMutationLogin() {
   onSuccess: (data) => {
   
 
-  if (data.first_login == 1) {
+  if (data.first_login != 0) {
     toast({
       title: "Primeiro acesso detectado",
       description: "Vamos configurar a sua senha. Verifique o seu email em seguida.",
-      duration: 6000, // um pouco mais longo
+      duration: 6000,
     });
     navigate("/primeiro-acesso", { replace: true });
   } else {
