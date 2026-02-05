@@ -34,7 +34,6 @@ interface FormData {
   telefone2: string;
 }
 
-const DEFAULT_PASSWORD = "Compware@123";
 
 export default function CreateUser() {
   const { toast } = useToast();
