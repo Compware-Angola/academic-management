@@ -24,16 +24,25 @@ export function useMutationLogin() {
   return useMutation<AuthResponse, Error, LoginPayload>({
     mutationKey: ["login"],
     mutationFn: loginService,
-    onSuccess: (data) => {
-      login(data);
+  onSuccess: (data) => {
+  
 
-      toast({
-        title: data.mensagem || "Login realizado com sucesso",
-        description: `Bem-vindo, ${data.user.username ?? "Utilizador"}`,
-      });
-
-      navigate("/dashboard", { replace: true });
-    },
+  if (data.first_login != 0) {
+    toast({
+      title: "Primeiro acesso detectado",
+      description: "Vamos configurar a sua senha. Verifique o seu email em seguida.",
+      duration: 6000,
+    });
+    navigate("/primeiro-acesso", { replace: true });
+  } else {
+    login(data);
+    toast({
+      title: data.mensagem || "Login realizado com sucesso",
+      description: `Bem-vindo, ${data.user?.username ?? "Utilizador"}!`,
+    });
+    navigate("/dashboard", { replace: true });
+  }
+},
     onError: (err: Error) => {
       toast({
         title: "Erro ao fazer login",

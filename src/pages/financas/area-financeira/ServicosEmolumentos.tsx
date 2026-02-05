@@ -59,7 +59,10 @@ import {
   useCreateTipoServico,
   useUpdateTipoServico,
 } from "@/hooks/financas/use-query-create-and-update-service";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@radix-ui/react-select";
+import { usePoloDropdown } from "@/hooks/shared/use-query-fetch-polo";
+import { useTipoTaxaDropdown } from "@/hooks/shared/use-query-fetch-tipo-taxa";
+import { useMotivoIsencaoDropdown } from "@/hooks/shared/use-query-fetch-motivo-insencao";
+
 
 type ServicoFormData = {
   descricao: string;
@@ -111,8 +114,8 @@ export default function ServicosEmolumentos() {
     useQueryAnoAcademico();
 
   // Filtros SEPARADOS para cada aba
-  const [servicosFilters, setServicosFilters] = useState({ anoLetivo: "", descricao: "" });
-  const [mensalidadesFilters, setMensalidadesFilters] = useState({ anoLetivo: "", descricao: "" });
+  const [servicosFilters, setServicosFilters] = useState({ anoLetivo: "", descricao: "", polo: "" });
+  const [mensalidadesFilters, setMensalidadesFilters] = useState({ anoLetivo: "", descricao: "", polo: "" });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState<ServicoFormData>(initialForm);
@@ -127,6 +130,7 @@ export default function ServicosEmolumentos() {
   // Query para SERVIÇOS (usa servicosFilters)
   const { data: tiposServico, isLoading: isLoadingServicos } = useQueryTiposServicoAll({
     codigoAnoLectivo: servicosFilters.anoLetivo ? Number(servicosFilters.anoLetivo) : undefined,
+    polo: servicosFilters.polo ? Number(servicosFilters.polo) : undefined,
     descricao: servicosFilters.descricao.trim() || undefined,
     page: servicosPage,
     limit: pageLimit,
@@ -135,10 +139,20 @@ export default function ServicosEmolumentos() {
   // Query para MENSALIDADES (usa mensalidadesFilters)
   const { data: mensalidades, isLoading: isLoadingMensalidades } = useQueryMonthlyFeeTipoServico({
     codigoAnoLectivo: mensalidadesFilters.anoLetivo ? Number(mensalidadesFilters.anoLetivo) : undefined,
+    polo: mensalidadesFilters.polo ? Number(mensalidadesFilters.polo) : undefined,
     descricao: mensalidadesFilters.descricao.trim() || undefined,
     page: mensalidadesPage,
     limit: pageLimit,
   });
+  //Query Polo
+  const { data: polos, isLoading: LoadingPolo } = usePoloDropdown()
+
+  //Query Taxa 
+  const { data: taxa, isLoading: LoadingTaxa } = useTipoTaxaDropdown()
+
+  // Query Motivo insenção
+
+  const { data: motivos, isLoading: LoadingMotivos } = useMotivoIsencaoDropdown()
 
   const createMutation = useCreateTipoServico();
   const updateMutation = useUpdateTipoServico(editingCodigo ?? 0);
@@ -168,17 +182,17 @@ export default function ServicosEmolumentos() {
       descricao: item.descricao || "",
       preco: Number(item.preco) || 0,
       sigla: item.sigla || (item.descricao ? item.descricao.slice(0, 4).toUpperCase() : ""),
-      tipoServico: item.tipoServico || item.tiposervico || "ENSINO",
+      tipoServico: item.tiposervico ,
       estado:
         item.estado === "Ativo" ||
         item.estado === true ||
         String(item.estado || "").toLowerCase() === "ativo",
-      poloId: item.polo_id || item.poloId || 1,
+      poloId: item.polo_id || 1,
       codigoAnoLectivo: item.codigo_ano_lectivo || 0,
-      taxaIvaId: item.taxaIvaId || 1,
-      motivoIsencaoIvaCodigo: item.motivoIsencaoIvaCodigo || 0,
-      disponibilizarAluno: item.disponibilizarAluno ?? true,
-      visualizarNoPortal: item.visualizarNoPortal ?? true,
+      taxaIvaId: item.taxa_iva_id || 1,
+      motivoIsencaoIvaCodigo: item.motivo_isencao_iva_codigo || 0,
+      disponibilizarAluno: item.disponibilizar_aluno ?? true,
+      visualizarNoPortal: item.visualizar_no_portal ?? true,
       canal: item.canal || 1,
       mestrado: item.mestrado ?? false,
       cacuaco: item.cacuaco ?? false,
@@ -231,6 +245,7 @@ export default function ServicosEmolumentos() {
         codigoAnoLectivo: formData.codigoAnoLectivo,
         taxaIvaId: formData.taxaIvaId,
         motivoIsencaoIvaCodigo: formData.motivoIsencaoIvaCodigo,
+        tipoServico:formData.tipoServico
       };
 
       updateMutation.mutate(payload, {
@@ -350,6 +365,24 @@ export default function ServicosEmolumentos() {
                     placeholder="Selecione o ano..."
                   />
                 </div>
+                <div className="min-w-[220px]">
+                  <FormSelect
+                    label="Polo"
+                    value={servicosFilters.polo}
+                    onChange={(v) => {
+                      setServicosFilters((prev) => ({ ...prev, polo: v }));
+                      setServicosPage(1);
+                    }}
+                    options={polos ?? []}
+                    map={(a) => ({
+                      key: String(a.id),
+                      label: a.designacao,
+                      value: String(a.id),
+                    })}
+                    disabled={LoadingPolo}
+                    placeholder="Selecione o Campus..."
+                  />
+                </div>
 
                 <div className="flex-1 min-w-[300px]">
                   <Label>Descrição</Label>
@@ -383,6 +416,7 @@ export default function ServicosEmolumentos() {
                     <TableHead>Descrição</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Categoria</TableHead>
+                    <TableHead>Campus</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -406,6 +440,7 @@ export default function ServicosEmolumentos() {
                         <TableCell>{item.descricao}</TableCell>
                         <TableCell>{Number(item.preco).toLocaleString()} kz</TableCell>
                         <TableCell>{item.tiposervico || "—"}</TableCell>
+                        <TableCell>{item.polo || "—"}</TableCell>
                         <TableCell className="text-right flex justify-end gap-2">
                           <Button
                             size="sm"
@@ -414,9 +449,11 @@ export default function ServicosEmolumentos() {
                           >
                             <Edit className="h-3.5 w-3.5" />
                           </Button>
+                          {/* 
                           <Button size="sm" variant="destructive">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
+                          */}
                         </TableCell>
                       </TableRow>
                     ))
@@ -474,6 +511,24 @@ export default function ServicosEmolumentos() {
                     disabled={isLoadingAcademicYear}
                   />
                 </div>
+                <div className="min-w-[220px]">
+                  <FormSelect
+                    label="Polo"
+                    value={mensalidadesFilters.polo}
+                    onChange={(v) => {
+                      setMensalidadesFilters((prev) => ({ ...prev, polo: v }));
+                      setMensalidadesPage(1);
+                    }}
+                    options={polos ?? []}
+                    map={(a) => ({
+                      key: String(a.id),
+                      label: a.designacao,
+                      value: String(a.id),
+                    })}
+                    disabled={LoadingPolo}
+                    placeholder="Selecione o Campus..."
+                  />
+                </div>
 
                 <div className="flex-1 min-w-[300px]">
                   <Label>Descrição / Curso</Label>
@@ -526,7 +581,7 @@ export default function ServicosEmolumentos() {
                         <TableCell>{item.mestrado ? "Mestrado" : "Licenciatura"}</TableCell>
                         <TableCell>{Number(item.preco).toLocaleString()} kz</TableCell>
                         <TableCell>{Number(item.preco * 10).toLocaleString()} kz</TableCell>
-                        <TableCell>{item.polo_id || "—"}</TableCell>
+                        <TableCell>{item.polo || "—"}</TableCell>
                         <TableCell className="text-right">
                           <Button
                             size="sm"
@@ -569,248 +624,238 @@ export default function ServicosEmolumentos() {
       </Tabs>
 
       {/* Modal */}
-   <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-  <DialogContent className="max-w-4xl! max-h-[92vh]! overflow-hidden">
-    <DialogHeader>
-      <DialogTitle>
-        {isEditing
-          ? currentContext === "servico"
-            ? "Editar Serviço"
-            : "Editar Mensalidade"
-          : "Criar Novo Serviço"}
-      </DialogTitle>
-      {isEditing && (
-        <p className="text-sm text-muted-foreground mt-1">
-          {currentContext === "servico" ? "Serviço" : "Mensalidade"} – Código: {editingCodigo}
-        </p>
-      )}
-    </DialogHeader>
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-4xl! max-h-[92vh]! overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditing
+                ? currentContext === "servico"
+                  ? "Editar Serviço"
+                  : "Editar Mensalidade"
+                : "Criar Novo Serviço"}
+            </DialogTitle>
+            {isEditing && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {currentContext === "servico" ? "Serviço" : "Mensalidade"} – Código: {editingCodigo}
+              </p>
+            )}
+          </DialogHeader>
 
-    <ScrollArea className="max-h-[68vh] pr-4 -mr-4">
-      <div className="grid gap-6 py-4 md:grid-cols-2">
-        <div className="space-y-5">
-          <div>
-            <Label htmlFor="descricao">Descrição *</Label>
-            <Input
-              id="descricao"
-              value={formData.descricao}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, descricao: e.target.value }))
-              }
-              placeholder={
-                currentContext === "mensalidade"
-                  ? "Ex: Propina Mensal - Licenciatura em Engenharia Informática"
-                  : "Ex: Matrícula 2025/2026, Taxa de Exame Especial, etc"
-              }
-            />
-          </div>
+          <ScrollArea className="max-h-[68vh] pr-4 -mr-4">
+            <div className="grid gap-6 py-4 md:grid-cols-2">
+              {/* Coluna esquerda */}
+              <div className="space-y-5">
+                {/* Descrição - sempre visível */}
+                <div>
+                  <Label htmlFor="descricao">Descrição *</Label>
+                  <Input
+                    id="descricao"
+                    value={formData.descricao}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))}
+                    placeholder={
+                      currentContext === "mensalidade"
+                        ? "Ex: Propina Mensal - Licenciatura em Engenharia Informática"
+                        : "Ex: Matrícula 2025/2026, Taxa de Exame Especial, etc"
+                    }
+                  />
+                </div>
 
-          <div>
-            <Label htmlFor="preco">Preço (Kz) *</Label>
-            <Input
-              id="preco"
-              type="number"
-              min={0}
-              step={100}
-              value={formData.preco}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, preco: Number(e.target.value) || 0 }))
-              }
-            />
-          </div>
+                {/* Preço - sempre visível */}
+                <div>
+                  <Label htmlFor="preco">Preço (Kz) *</Label>
+                  <Input
+                    id="preco"
+                    type="number"
+                    min={0}
+                    step={100}
+                    value={formData.preco}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, preco: Number(e.target.value) || 0 }))}
+                  />
+                </div>
 
-          {/* Campo SIGLA (mantido) */}
-          <div>
-            <Label htmlFor="sigla">
-              Sigla {isEditing && currentContext === "mensalidade" && "(não editável)"}
-            </Label>
-            <Input
-              id="sigla"
-              maxLength={10}
-              value={formData.sigla}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, sigla: e.target.value.toUpperCase() }))
-              }
-              placeholder={
-                isEditing && currentContext === "mensalidade"
-                  ? "Sigla definida pelo sistema"
-                  : "Ex: PROP, MATR, EXAM"
-              }
-              disabled={isEditing && currentContext === "mensalidade"}
-              className={
-                isEditing && currentContext === "mensalidade"
-                  ? "bg-gray-100 cursor-not-allowed"
-                  : ""
-              }
-            />
-          </div>
+                {/* Sigla - só aparece ao criar */}
+                {!isEditing && (
+                  <div>
+                    <Label htmlFor="sigla">Sigla</Label>
+                    <Input
+                      id="sigla"
+                      maxLength={10}
+                      value={formData.sigla}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, sigla: e.target.value.toUpperCase() }))}
+                      placeholder="Ex: PROP, MATR, EXAM"
+                    />
+                  </div>
+                )}
 
-          {/* Novo campo: SELECT para tipoServico */}
-          <div>
-            <Label>Tipo de Serviço *</Label>
-             
-            <FormSelect
-              value={String(formData.tipoServico || "")}
-              onChange={(v) =>
-                setFormData((prev) => ({ ...prev, tipoServico:v || ""}))
-              }
-              options={[{
-                codigo:1,
-                label:"Mensal",
-                value:"MENSAL"
-              },{
-                codigo:2,
-                label:"Anual",
-                value:"ANUAL"
-              }]}
-              map={(a) => ({
-                key: String(a.codigo),
-                label: a.label,
-                value: String(a.value),
-              })}
-              placeholder="Selecione o tipo de Serviço"
-            />
-          </div>
+                {/* Tipo de Serviço - só aparece ao criar */}
+               
+                  <div>
+                    <Label>Tipo de Serviço *</Label>
+                    <FormSelect
+                      value={String(formData.tipoServico || "")}
+                      onChange={(v) => setFormData((prev) => ({ ...prev, tipoServico: v || "" }))}
+                      options={[
+                        { codigo: 1, label: "Mensal", value: "MENSAL" },
+                        { codigo: 2, label: "Anual", value: "ANUAL" },
+                        { codigo: 3, label: "Semestral", value: "SEMESTRAL" },
+                      ]}
+                      map={(a) => ({
+                        key: String(a.codigo),
+                        label: a.label,
+                        value: String(a.value),
+                      })}
+                      placeholder="Selecione a Periodicidade"
+                    />
+                  </div>
+               
 
-          <div>
-            <Label>Ano Letivo *</Label>
-            <FormSelect
-              value={String(formData.codigoAnoLectivo || "")}
-              onChange={(v) =>
-                setFormData((prev) => ({ ...prev, codigoAnoLectivo: Number(v) || 0 }))
-              }
-              options={anosAcademicos ?? []}
-              map={(a) => ({
-                key: String(a.codigo),
-                label: a.designacao,
-                value: String(a.codigo),
-              })}
-              placeholder="Selecione o ano letivo"
-            />
-          </div>
+                {/* Ano Letivo */}
+                <div>
+                  <Label>Ano Letivo *</Label>
+                  <FormSelect
+                    value={String(formData.codigoAnoLectivo || "")}
+                    onChange={(v) => setFormData((prev) => ({ ...prev, codigoAnoLectivo: Number(v) || 0 }))}
+                    options={anosAcademicos ?? []}
+                    map={(a) => ({
+                      key: String(a.codigo),
+                      label: a.designacao,
+                      value: String(a.codigo),
+                    })}
+                    placeholder="Selecione o ano letivo"
+                  // disabled={isEditing && currentContext === "mensalidade"} // opcional: travar se for mensalidade
+                  />
+                </div>
 
-          <div>
-            <Label htmlFor="poloId">Polo / Campus</Label>
-            <Input
-              id="poloId"
-              type="number"
-              value={formData.poloId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, poloId: Number(e.target.value) || 1 }))
-              }
-            />
-          </div>
-        </div>
+                {/* Polo / Campus */}
+                <div>
+                  <Label htmlFor="poloId">Polo / Campus</Label>
+                  <FormSelect
+                    value={String(formData.poloId || "")}
+                    onChange={(v) => setFormData((prev) => ({ ...prev, poloId: Number(v) || 0 }))}
+                    options={polos ?? []}
+                    map={(a) => ({
+                      key: String(a.id),
+                      label: a.designacao,
+                      value: String(a.id),
+                    })}
+                    placeholder="Selecione o campus"
+                  // disabled={isEditing && currentContext === "mensalidade"} // opcional: travar se for mensalidade
+                  />
+                </div>
+              </div>
 
-        {/* Coluna direita - switches e outros campos */}
-        <div className="space-y-5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="estado">Ativo</Label>
-            <Switch
-              id="estado"
-              checked={formData.estado}
-              onCheckedChange={(checked) =>
-                setFormData((prev) => ({ ...prev, estado: checked }))
-              }
-            />
-          </div>
+              {/* Coluna direita */}
+              <div className="space-y-5">
+                {/* Estado (Ativo/Inativo) */}
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="estado">Ativo</Label>
+                  <Switch
+                    id="estado"
+                    checked={formData.estado}
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, estado: checked }))}
+                  />
+                </div>
 
-          <div className="flex items-center justify-between">
-            <Label>Disponibilizar ao Aluno</Label>
-            <Switch
-              checked={formData.disponibilizarAluno}
-              onCheckedChange={(v) =>
-                setFormData((p) => ({ ...p, disponibilizarAluno: v }))
-              }
-            />
-          </div>
+                {/* Campos que aparecem SOMENTE no modo EDIÇÃO */}
+                {isEditing && (
+                  <>
+                    <div>
+                      <Label htmlFor="taxaIva">Taxa IVA ID</Label>
 
-          <div className="flex items-center justify-between">
-            <Label>Visualizar no Portal</Label>
-            <Switch
-              checked={formData.visualizarNoPortal}
-              onCheckedChange={(v) =>
-                setFormData((p) => ({ ...p, visualizarNoPortal: v }))
-              }
-            />
-          </div>
+                      <FormSelect
+                        value={String(formData.taxaIvaId || "")}
+                        onChange={(v) => setFormData((prev) => ({ ...prev, taxaIvaId: Number(v) || 0 }))}
+                        options={taxa ?? []}
+                        map={(a) => ({
+                          key: String(a.id),
+                          label: a.descricao,
+                          value: String(a.id),
+                        })}
+                        placeholder="Selecione a Taxa"
+                     
+                      />
+                    </div>
 
-          <div className="flex items-center justify-between">
-            <Label>Mestrado</Label>
-            <Switch
-              checked={formData.mestrado}
-              onCheckedChange={(v) => setFormData((p) => ({ ...p, mestrado: v }))}
-            />
-          </div>
+                    <div>
+                      <Label htmlFor="motivoIsencao">Motivo Isenção IVA</Label>
 
-          <div>
-            <Label htmlFor="valorAnterior">Valor Anterior</Label>
-            <Input
-              id="valorAnterior"
-              type="number"
-              value={formData.valorAnterior}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  valorAnterior: Number(e.target.value) || 0,
-                }))
-              }
-            />
-          </div>
+                      <FormSelect
+                        value={String(formData.motivoIsencaoIvaCodigo || "")}
+                        onChange={(v) => setFormData((prev) => ({ ...prev, motivoIsencaoIvaCodigo: Number(v) || 0 }))}
+                        options={motivos ?? []}
+                        map={(a) => ({
+                          key: String(a.codigo),
+                          label: a.descricao,
+                          value: String(a.codigo),
+                        })}
+                        placeholder="Selecione a Taxa"
+                      
+                      />
+                    </div>
+                  </>
+                )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="taxaIva">Taxa IVA ID</Label>
-              <Input
-                id="taxaIva"
-                type="number"
-                value={formData.taxaIvaId}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    taxaIvaId: Number(e.target.value) || 0,
-                  }))
-                }
-              />
+                {/* Campos que SÓ aparecem ao CRIAR */}
+                {!isEditing && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <Label>Disponibilizar ao Aluno</Label>
+                      <Switch
+                        checked={formData.disponibilizarAluno}
+                        onCheckedChange={(v) => setFormData((p) => ({ ...p, disponibilizarAluno: v }))}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label>Visualizar no Portal</Label>
+                      <Switch
+                        checked={formData.visualizarNoPortal}
+                        onCheckedChange={(v) => setFormData((p) => ({ ...p, visualizarNoPortal: v }))}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <Label>Mestrado</Label>
+                      <Switch
+                        checked={formData.mestrado}
+                        onCheckedChange={(v) => setFormData((p) => ({ ...p, mestrado: v }))}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="valorAnterior">Valor Anterior</Label>
+                      <Input
+                        id="valorAnterior"
+                        type="number"
+                        value={formData.valorAnterior}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, valorAnterior: Number(e.target.value) || 0 }))}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-            <div>
-              <Label htmlFor="motivoIsencao">Motivo Isenção IVA</Label>
-              <Input
-                id="motivoIsencao"
-                type="number"
-                value={formData.motivoIsencaoIvaCodigo}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    motivoIsencaoIvaCodigo: Number(e.target.value) || 0,
-                  }))
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </ScrollArea>
+          </ScrollArea>
 
-    <DialogFooter className="gap-3 sm:gap-0">
-      <Button variant="outline" onClick={() => setModalOpen(false)}>
-        Cancelar
-      </Button>
-      <Button
-        onClick={handleSubmit}
-        disabled={createMutation.isPending || updateMutation.isPending}
-      >
-        {createMutation.isPending || updateMutation.isPending
-          ? "A guardar..."
-          : isEditing
-          ? currentContext === "servico"
-            ? "Atualizar Serviço"
-            : "Atualizar Mensalidade"
-          : "Criar Serviço"}
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+          <DialogFooter className="gap-3 sm:gap-0">
+            <Button variant="outline" onClick={() => setModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending
+                ? "A guardar..."
+                : isEditing
+                  ? currentContext === "servico"
+                    ? "Atualizar Serviço"
+                    : "Atualizar Mensalidade"
+                  : "Criar Serviço"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
