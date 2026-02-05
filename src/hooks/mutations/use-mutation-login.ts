@@ -27,7 +27,7 @@ export function useMutationLogin() {
   onSuccess: (data) => {
   
 
-  if (data.first_login != 0) {
+  if (data?.user?.primeiro_log != 0) {
     toast({
       title: "Primeiro acesso detectado",
       description: "Vamos configurar a sua senha. Verifique o seu email em seguida.",
