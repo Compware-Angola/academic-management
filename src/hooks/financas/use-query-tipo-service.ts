@@ -68,6 +68,7 @@ export const useQueryTiposServicoAll = (
     estado,
     tipoServico,
     visualizarNoPortal,
+    polo,
     page,
     limit,
   } = filters;
@@ -82,6 +83,7 @@ export const useQueryTiposServicoAll = (
         sigla,
         descricao,
         codigoAnoLectivo,
+        polo,
         estado,
         tipoServico,
         visualizarNoPortal,
@@ -91,8 +93,8 @@ export const useQueryTiposServicoAll = (
     ],
     queryFn: () => fetchTiposServicoAll(filters),
     enabled,
-    staleTime: 1000 * 60 * 10, // 10 minutos
-    gcTime: 1000 * 60 * 30, // 30 minutos
+    staleTime: 1000 * 60 * 10, 
+    gcTime: 1000 * 60 * 30, 
     retry: 2,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
@@ -110,6 +112,7 @@ export const useQueryMonthlyFeeTipoServico = (
     estado,
     descricao,
     tipoServico,
+    polo,
     visualizarNoPortal,
     page,
     limit,
@@ -125,6 +128,7 @@ export const useQueryMonthlyFeeTipoServico = (
         codigoAnoLectivo,
         estado,
         descricao,
+        polo,
         tipoServico,
         visualizarNoPortal,
         page,

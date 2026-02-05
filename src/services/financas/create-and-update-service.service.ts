@@ -31,6 +31,7 @@ export type UpdateTipoServicoPayload = {
   estado?: boolean;
   poloId?: number;
   codigoAnoLectivo?: number;
+  tipoServico?:string;
 };
 
 // -------------------- RESPONSE --------------------
