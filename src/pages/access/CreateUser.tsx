@@ -19,7 +19,6 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryNacionalidade } from "@/hooks/acess/use-query-nacionalidade";
 import { useQueryTipoDocumento } from "@/hooks/acess/use-query-tipo-documento";
 import { useQuerySexo } from "@/hooks/acess/use-query-sexo";
-import { useAuth } from "@/hooks/use-auth";
 
 interface FormData {
   nomeCompleto: string;
@@ -34,11 +33,11 @@ interface FormData {
   telefone2: string;
 }
 
-const DEFAULT_PASSWORD = "Compware@123";
+
 
 export default function CreateUser() {
   const { toast } = useToast();
-  const { user: userData } = useAuth();
+ 
 
   const [formData, setFormData] = useState<FormData>({
     nomeCompleto: "",
@@ -95,7 +94,7 @@ export default function CreateUser() {
           nacionalidadeId: Number(formData.nacionalidadeId) || undefined,
           telefone1: formData.telefone1.trim() || undefined,
           telefone2: formData.telefone2.trim() || undefined,
-          senha: formData.numDocIdentificacao,           // ← sempre esta senha
+                
         },
       });
 

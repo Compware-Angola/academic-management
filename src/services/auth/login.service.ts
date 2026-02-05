@@ -48,6 +48,7 @@ export interface AuthResponse {
   user: User;
   groups: Group[];
   mensagem: string;
+  first_login:number
 }
 export interface logoutResponse {
 
@@ -100,4 +101,13 @@ export async function makLoggedOut(
   );
 
   return data;
+}
+export async function requestPasswordReset(email: string): Promise<void> {
+  await axiosNestAuth
+    .post('auth/send-change-password', { email, platform: 'GA'})
+}
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  await axiosNestAuth
+    .post('auth/reset-password', { token, newPassword, platform: 'GA' 
+    })
 }

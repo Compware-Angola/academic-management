@@ -11,7 +11,7 @@ export interface CreatePersonUserRequest {
   nacionalidadeId: number;
   telefone1: string;
   telefone2: string;
-  senha?: string;
+
 }
 
 export interface CreatePersonUserResponse {
