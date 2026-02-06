@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GraduationCap, Lock, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
+import { GraduationCap, Lock, Eye, EyeOff, Check, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
