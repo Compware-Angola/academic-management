@@ -13,6 +13,9 @@ export type TipoServicoItem = {
   disponibilizar_aluno: string | null;
   visualizar_no_portal: string;
   polo_id: number;
+  polo:string;
+  taxa_iva_id:number;
+  motivo_isencao_iva_codigo:number;
   canal: number;
   mestrado: string;
   codigo_grade_currilular: number | null;
@@ -58,6 +61,7 @@ export type FetchTipoServicoPayloadPaginated = {
   sigla?: string;
   descricao?: string;
   codigoAnoLectivo?: number;
+  polo?:number;
   estado?: string;
   tipoServico?: string;
   visualizarNoPortal?: string;
@@ -73,6 +77,7 @@ export async function fetchTiposServicoAll(
       descricao: payload.descricao,
       codigoAnoLectivo: payload.codigoAnoLectivo,
       estado: payload.estado,
+      polo:payload.polo,
       tipoServico: payload.tipoServico,
       visualizarNoPortal: payload.visualizarNoPortal,
       page: payload.page ?? 1,
@@ -92,6 +97,7 @@ export async function fetchMonthlyFeeTipoServico(
       estado: payload.estado,
        descricao: payload.descricao,
       tipoServico: payload.tipoServico,
+      polo:payload.polo,
       visualizarNoPortal: payload.visualizarNoPortal,
       page: payload.page ?? 1,
       limit: payload.limit ?? 10,

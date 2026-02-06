@@ -72,10 +72,7 @@ export const menuStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_UTILIZADORES_LOGADOS.sigla],
         },
         { title: "Grupos", url: "/controle-acesso/grupos" },
-        {
-          title: "Solicitações encaminhadas",
-          url: "/controle-acesso/solicitacoes",
-        },
+       
       ],
 
       permission: [],
@@ -502,17 +499,26 @@ export const healpStructure: MenuStructure = {
       url: "/comunicacao",
       icon: MessageSquare,
       items: [
+        /*
         {
           title: "Avisos",
           url: "/comunicacao/avisos",
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
-        { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-        { title: "Solicitações", url: "/comunicacao/solicitacoes" },
+        */
+       // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
+       // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
+         {
+          title: "Solicitações encaminhadas",
+          url: "/controle-acesso/solicitacoes",
+          permission:[]
+        }
       ],
 
       permission: [],
     },
+
+    /*
     {
       title: "Ajuda",
       url: "/ajuda",
@@ -521,6 +527,7 @@ export const healpStructure: MenuStructure = {
 
       permission: [],
     },
+    */
   ],
 };
 

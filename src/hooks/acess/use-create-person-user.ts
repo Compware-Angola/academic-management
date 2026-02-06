@@ -11,7 +11,7 @@ type CreatePersonUserMutationInput = {
 
 
 export function useCreatePersonUser() {
-  const queryClient = useQueryClient()
+ 
   const { toast } = useToast()
 
 

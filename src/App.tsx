@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/dasboard/Index";
-import Login from "./pages/Login";
+import Login from "./pages/auth/Login";
 
 import { ThemeProvider } from "./hooks/thme-provider";
 import { MainLayout } from "./pages/App";
@@ -82,6 +82,8 @@ import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa"
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
 import { PermissionTypeDetails } from "./constants/permission.type";
 import ServicosEmolumentos from "./pages/financas/area-financeira/ServicosEmolumentos";
+import PrimeiroAcessoEmail from "./pages/auth/PrimeiroAcessoEmail";
+import RedefinirSenhaPrimeiroAcesso from "./pages/auth/RedefinirSenhaPrimeiroAcesso";
 
 const App = () => {
   return (
@@ -96,6 +98,15 @@ const App = () => {
                 <Route element={<PublicRoute />}>
                   <Route path="/" element={<Login />} />
                 </Route>
+                <Route element={<PublicRoute />}>
+                  <Route path="/primeiro-acesso" element={<PrimeiroAcessoEmail />} />
+                </Route>
+                <Route element={<PublicRoute />}>
+                  <Route path="/auth/primeiro-acesso/redefinir/:token" element={<RedefinirSenhaPrimeiroAcesso />} />
+                </Route>
+
+
+
 
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
@@ -122,9 +133,9 @@ const App = () => {
                   <Route
                     path="/controle-acesso/solicitacoes"
                     element={
-                      <ProtectedRoute allowedPermissions={[]}>
-                        <SolicitacoesEncaminhadas />
-                      </ProtectedRoute>
+
+                      <SolicitacoesEncaminhadas />
+
                     }
                   />
                   <Route
@@ -139,7 +150,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                         <Route
+                  <Route
                     path="/financas/servicos-emolumentos"
                     element={
                       <ProtectedRoute
@@ -267,16 +278,10 @@ const App = () => {
                 <Route
                   path="/assiduidade/docente"
                   element={<TeacherAttendance />}
-                />
-                <Route
-                  path="/assiduidade/controle"
-                  element={<AttendanceControl />}
-                />
-                <Route
-                  path="/assiduidade/marcar"
-                  element={<MarkAttendance />}
-                />
-              */}
+                />*/}
+
+
+
                   <Route
                     path="/acessos/utilizador"
                     element={
