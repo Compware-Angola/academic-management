@@ -98,16 +98,16 @@ const App = () => {
                 <Route element={<PublicRoute />}>
                   <Route path="/" element={<Login />} />
                 </Route>
-                 <Route element={<PublicRoute />}>
+                <Route element={<PublicRoute />}>
                   <Route path="/primeiro-acesso" element={<PrimeiroAcessoEmail />} />
                 </Route>
-                 <Route element={<PublicRoute />}>
+                <Route element={<PublicRoute />}>
                   <Route path="/auth/primeiro-acesso/redefinir/:token" element={<RedefinirSenhaPrimeiroAcesso />} />
                 </Route>
 
 
 
-               
+
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
                   <Route
@@ -133,9 +133,9 @@ const App = () => {
                   <Route
                     path="/controle-acesso/solicitacoes"
                     element={
-                      <ProtectedRoute allowedPermissions={[]}>
-                        <SolicitacoesEncaminhadas />
-                      </ProtectedRoute>
+
+                      <SolicitacoesEncaminhadas />
+
                     }
                   />
                   <Route
@@ -150,7 +150,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                         <Route
+                  <Route
                     path="/financas/servicos-emolumentos"
                     element={
                       <ProtectedRoute
@@ -279,9 +279,9 @@ const App = () => {
                   path="/assiduidade/docente"
                   element={<TeacherAttendance />}
                 />*/}
-              
-             
-              
+
+
+
                   <Route
                     path="/acessos/utilizador"
                     element={

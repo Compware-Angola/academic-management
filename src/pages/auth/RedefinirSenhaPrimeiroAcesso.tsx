@@ -1,6 +1,5 @@
-
-import { useEffect } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GraduationCap, Lock, AlertCircle } from "lucide-react";
+import { GraduationCap, Lock, Eye, EyeOff, Check, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,24 +25,29 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 
-
-
 import { APP_ENV, isDevelop, isPrePrd } from "@/config/env";
 import { resetPassword } from "@/services/auth/login.service";
 
+// ────────────────────────────────────────────────
+// Validação em tempo real (igual ao UserEditModal)
+// ────────────────────────────────────────────────
+function validatePasswordSteps(password: string) {
+  return {
+    minLength: password.length >= 8,
+    upperCase: /[A-Z]/.test(password),
+    lowerCase: /[a-z]/.test(password),
+    number: /\d/.test(password),
+    symbol: /[!@#$%^&*()_+\-=[\]{}|;:',.<>/?~]/.test(password),
+  };
+}
+
 const resetSchema = z
   .object({
-    newPassword: z
-      .string()
-      .min(8, "Mínimo 8 caracteres")
-      .regex(/[A-Z]/, "Pelo menos 1 maiúscula")
-      .regex(/[a-z]/, "Pelo menos 1 minúscula")
-      .regex(/[0-9]/, "Pelo menos 1 número")
-      .regex(/[^A-Za-z0-9]/, "Pelo menos 1 símbolo"),
+    newPassword: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Senhas não coincidem",
+    message: "As senhas não coincidem",
     path: ["confirmPassword"],
   });
 
@@ -51,7 +55,9 @@ type ResetFormData = z.infer<typeof resetSchema>;
 
 const RedefinirSenhaPrimeiroAcesso = () => {
   const navigate = useNavigate();
-  const { token } = useParams<{ token: string }>()
+  const { token } = useParams<{ token: string }>();
+
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -63,7 +69,16 @@ const RedefinirSenhaPrimeiroAcesso = () => {
   const form = useForm<ResetFormData>({
     resolver: zodResolver(resetSchema),
     defaultValues: { newPassword: "", confirmPassword: "" },
+    mode: "onChange",
   });
+
+  const newPasswordValue = form.watch("newPassword");
+
+  const steps = validatePasswordSteps(newPasswordValue);
+  const isStrongPassword = Object.values(steps).every(Boolean);
+  const passwordsMatch = newPasswordValue === form.watch("confirmPassword") && newPasswordValue !== "";
+
+  const canSubmit = isStrongPassword && passwordsMatch;
 
   const resetMutation = useMutation({
     mutationFn: ({ newPassword }: { newPassword: string }) =>
@@ -81,7 +96,7 @@ const RedefinirSenhaPrimeiroAcesso = () => {
         title: "Erro",
         description: err?.message || "Link inválido, expirado ou já utilizado.",
       });
-      navigate("/primeiro-acesso"); // ou /login
+     
     },
   });
 
@@ -114,18 +129,89 @@ const RedefinirSenhaPrimeiroAcesso = () => {
 
           <CardContent>
             <Form {...form}>
-              <form onSubmit={onSubmit} className="space-y-5">
+              <form onSubmit={onSubmit} className="space-y-6">
                 <FormField
                   control={form.control}
                   name="newPassword"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nova Senha</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
-                      </FormControl>
-                      <FormDescription className="text-xs">
-                        Mínimo 8 caracteres, com maiúscula, minúscula, número e símbolo.
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="••••••••"
+                            autoComplete="new-password"
+                            {...field}
+                            className={
+                              field.value && !isStrongPassword
+                                ? "border-destructive focus-visible:ring-destructive"
+                                : ""
+                            }
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+
+                      {field.value && (
+                        <ul className="mt-3 space-y-1 text-sm">
+                          <li className="flex items-center gap-2">
+                            {steps.minLength ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <X className="h-4 w-4 text-red-500" />
+                            )}
+                            Mínimo 8 caracteres
+                          </li>
+                          <li className="flex items-center gap-2">
+                            {steps.upperCase ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <X className="h-4 w-4 text-red-500" />
+                            )}
+                            Pelo menos 1 letra maiúscula
+                          </li>
+                          <li className="flex items-center gap-2">
+                            {steps.lowerCase ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <X className="h-4 w-4 text-red-500" />
+                            )}
+                            Pelo menos 1 letra minúscula
+                          </li>
+                          <li className="flex items-center gap-2">
+                            {steps.number ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <X className="h-4 w-4 text-red-500" />
+                            )}
+                            Pelo menos 1 número
+                          </li>
+                          <li className="flex items-center gap-2">
+                            {steps.symbol ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <X className="h-4 w-4 text-red-500" />
+                            )}
+                            Pelo menos 1 símbolo
+                          </li>
+                        </ul>
+                      )}
+
+                      <FormDescription className="text-xs mt-2">
+                        A senha deve conter pelo menos 8 caracteres, incluindo maiúscula, minúscula, número e símbolo.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -139,8 +225,19 @@ const RedefinirSenhaPrimeiroAcesso = () => {
                     <FormItem>
                       <FormLabel>Confirmar Senha</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          autoComplete="new-password"
+                          {...field}
+                          className={
+                            field.value && !passwordsMatch
+                              ? "border-destructive focus-visible:ring-destructive"
+                              : ""
+                          }
+                        />
                       </FormControl>
+                   
                       <FormMessage />
                     </FormItem>
                   )}
@@ -149,32 +246,26 @@ const RedefinirSenhaPrimeiroAcesso = () => {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={form.formState.isSubmitting || resetMutation.isPending || !form.formState.isValid}
+                  disabled={
+                    resetMutation.isPending ||
+                    !canSubmit ||
+                    form.formState.isSubmitting
+                  }
                 >
                   {resetMutation.isPending ? "A guardar..." : "Definir Senha"}
                 </Button>
               </form>
             </Form>
 
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg text-sm flex items-start gap-2 text-muted-foreground">
-              <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-medium">Regras da senha:</p>
-                <ul className="list-disc pl-5 space-y-1 mt-1">
-                  <li>Pelo menos 8 caracteres</li>
-                  <li>Uma letra maiúscula</li>
-                  <li>Uma letra minúscula</li>
-                  <li>Um número</li>
-                  <li>Um símbolo especial</li>
-                </ul>
-              </div>
-            </div>
+      
           </CardContent>
         </Card>
 
-        <div className="mt-8 text-center text-xs text-muted-foreground/60">
-          {showEnvLabel && <p>{isDevelop ? "Desenvolvimento" : "Pré-produção"} • v{APP_ENV}</p>}
-        </div>
+        {showEnvLabel && (
+          <div className="mt-8 text-center text-xs text-muted-foreground/60">
+            <p>{isDevelop ? "Desenvolvimento" : "Pré-produção"} • v{APP_ENV}</p>
+          </div>
+        )}
       </div>
     </div>
   );
