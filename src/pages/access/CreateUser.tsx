@@ -33,10 +33,6 @@ interface FormData {
   telefone2: string;
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 982f3949924b51d883afd210330e797b4d65041e
 
 export default function CreateUser() {
   const { toast } = useToast();
