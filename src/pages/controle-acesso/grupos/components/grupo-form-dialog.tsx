@@ -1,4 +1,5 @@
 // src/pages/grupos/components/grupo-form-dialog.tsx
+import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -76,22 +77,51 @@ export function GrupoFormDialog({ open, onClose, mode, initialData }: Props) {
         sigla,
         fkTipoDeGrupo: Number(tipoGrupo),
         active_state: 1,
-      });
+        },
+        {
+        onSuccess: () => {
+          toast.success("Grupo cadastrado com sucesso");
+          onClose();
+          resetForm();
+          },
+
+        onError: (error: any) => {
+            toast.error(
+              error?.response?.data?.message ??
+                "Erro ao cadastrar grupo. Tente novamente."
+            );
+          },
+        },
+
+      );
     }
 
     if (mode === "edit" && initialData?.id) {
-      editarMutation.mutate({
+      editarMutation.mutate(
+        {
         id: initialData.id,
         designacao,
         descricao,
         sigla,
         fkTipoDeGrupo: Number(tipoGrupo),
         active_state: 1,
-      });
-    }
+        },
+        {
+          onSuccess: () => {
+            toast.success("Grupo editado com sucesso");
+            onClose();
+            resetForm();
+          },
 
-    onClose();
-    resetForm();
+          onError: (error: any) => {
+            toast.error(
+              error?.response?.data?.message ??
+                "Erro ao editar grupo. Tente novamente."
+            );
+          },
+        }
+      );
+    }
   };
 
   const isLoading = criarMutation.isPending || editarMutation.isPending;

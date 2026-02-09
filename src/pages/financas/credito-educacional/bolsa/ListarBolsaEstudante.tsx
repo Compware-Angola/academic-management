@@ -29,6 +29,8 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
+import { useCursos } from "@/hooks/use-cursos";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function ListarBolsaEstudante() {
   const [resetKey, setResetKey] = useState(0);
@@ -53,6 +55,7 @@ export default function ListarBolsaEstudante() {
   const [pageUrl, setPageUrl] = useState<string | undefined>(undefined);
 
   const { data, isLoading } = useQueryFetchBolsaEstudante(filters, pageUrl);
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const estudantes = data?.items ?? [];
 
   // ================= SEMESTRES =================
@@ -151,12 +154,12 @@ export default function ListarBolsaEstudante() {
               </div>
 
               <div className="">
-                <Label>Curso</Label>
-                <Input
-                  placeholder="Pesquisar por curso"
-                  value={cursoInput}
-                  onChange={(e) => setCursoInput(e.target.value)}
-                />
+                <CourseSelect
+                            value={filters.curso}
+                            onChangeValue={(v) =>
+                              setFilters({ ...filters, curso: v})
+                            }
+                          />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
