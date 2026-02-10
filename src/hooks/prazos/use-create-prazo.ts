@@ -1,22 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPrazo } from "@/services/prazos/createPrazo";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+
 
 export function useCreatePrazo() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+
 
   return useMutation({
     mutationFn: createPrazo,
     onSuccess: () => {
-      toast({ title: "Prazo criado com sucesso!" });
+      toast.success("Prazo criado com sucesso!", { id: "create-prazo-success" })
       queryClient.invalidateQueries({ queryKey: ["prazos"] });
     },
     onError: () => {
-      toast({
-        title: "Erro ao criar prazo",
-        variant: "destructive",
-      });
+      toast.error("Erro ao criar prazo", { id: "create-prazo-error" })
     },
   });
 }
