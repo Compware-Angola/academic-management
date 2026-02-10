@@ -1,3 +1,9 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useMemo } from "react"; 
+
 import { useState } from "react";
 import {
   RefreshCw,
@@ -96,42 +102,138 @@ export default function AccessGroup() {
     currentPage * itemsPerPage
   );
 
+const pdfData = useMemo(() => {
+  if (!selectedGroup || activeAccesses.length === 0) return null;
+
+  return {
+    filtros: [
+      `Grupo: ${selectedGroup.descricao}`,
+    ].join(" | "),
+
+    total: activeAccesses.length,
+
+    rows: activeAccesses.map((a) => ({
+      codigo: a.codigo,
+      descricao: a.descricao,
+      estado: "Ativo",
+      atualizadoEm: a["Update at"]
+        ? formatarData(a["Update at"])
+        : "—",
+    })),
+  };
+}, [selectedGroup, activeAccesses]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Permissões por Grupo"
+    subtitle="Acessos atribuídos a grupos"
+    infoSections={[
+      { title: "Grupo", content: selectedGroup?.descricao ?? "—" },
+      { title: "Resumo", content: [`Total de permissões: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "codigo", label: "Código", width: "15%" },
+        { key: "descricao", label: "Funcionalidade", width: "45%" },
+        { key: "estado", label: "Estado", width: "15%" },
+        { key: "atualizadoEm", label: "Última Atualização", width: "25%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Permissões por Grupo",
+      subtitle: "Acessos atribuídos a grupos",
+      infoSections: [
+        { title: "Grupo", content: selectedGroup?.descricao ?? "—" },
+        { title: "Resumo", content: [`Total de permissões: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "codigo", label: "Código", width: 15 },
+          { key: "descricao", label: "Funcionalidade", width: 45 },
+          { key: "estado", label: "Estado", width: 15 },
+          { key: "atualizadoEm", label: "Última Atualização", width: 25 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+  const baseFileName = selectedGroup
+  ? `Acessos_Grupo_${selectedGroup.codigo}_${new Date()
+      .toISOString()
+      .slice(0, 10)}`
+  : "Acessos_Grupo";
+
+
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
     <div className="flex-1 space-y-6 p-8">
-      {/* Breadcrumb + Título */}
-      <div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/acessos">Acessos</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Acesso por Grupo</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      
+      {/* Breadcrumb + Título + Ações */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/acessos">Acessos</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Acesso por Grupo</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-        <div className="mt-2">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Acesso Funcionalidade por Grupo
-          </h1>
-          {selectedGroup && (
-            <p className="text-muted-foreground mt-1">
-              Permissões do grupo:{" "}
-              <strong>{selectedGroup.descricao}</strong> (
-              {totalItems} permissões ativas)
-            </p>
-          )}
+          <div className="mt-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Acesso Funcionalidade por Grupo
+            </h1>
+            {selectedGroup && (
+              <p className="text-muted-foreground mt-1">
+                Permissões do grupo:{" "}
+                <strong>{selectedGroup.descricao}</strong> (
+                {activeAccesses.length} permissões ativas)
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* AÇÕES */}
+        {pdfData && excelProps && (
+          <div className="flex flex-wrap gap-2">
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`${baseFileName}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
+
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          </div>
+        )}
       </div>
+
 
       {/* Select + Botões */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">

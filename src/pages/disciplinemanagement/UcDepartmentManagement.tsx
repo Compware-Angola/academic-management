@@ -47,6 +47,7 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-query-departamento-uc";
 import { CreateUcModal } from "./components/CreateUcModal";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 interface UnidadeCurricular {
   id: number;
@@ -175,19 +176,13 @@ export default function UcDepartmentManagement() {
             value: a.codigo,
           })}
         />
-        <FormSelect
-          disabled={loadingCursos}
-          loading={loadingCursos}
-          label="Curso"
-          value={formData.curso}
-          onChange={(v) => setFormData({ ...formData, curso: v })}
-          options={cursos}
-          map={(a) => ({
-            key: a.codigo,
-            label: a.designacao,
-            value: a.codigo,
-          })}
-        />
+
+        
+          <CourseSelect
+            value={formData.curso}
+            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+          />
+        
         <FormSelect
           label="Ano Curricular"
           value={formData.classes}
