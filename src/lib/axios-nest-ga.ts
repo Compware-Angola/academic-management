@@ -54,11 +54,11 @@ axiosNestGa.interceptors.response.use(
       }
     }
 
-    // ⭐ Redirecionar para login se 401
+
     if (status === 401) {
-      
-      window.location.href = "/"; // ou a rota do seu login
-      return; 
+      AuthStorage.logout();
+      window.location.href = "/";
+      return;
     }
 
     throw new ApiError(message, status, errorData);

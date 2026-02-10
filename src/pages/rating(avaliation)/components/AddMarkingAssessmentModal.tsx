@@ -36,7 +36,7 @@ import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-pr
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { DocenteSelect } from "@/components/common/global-selects/DocenteSelect";
 import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
-import { GradesCreationPrompt } from "@/services/academiccalendar/get-grades-creation-prompt";
+
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
