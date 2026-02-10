@@ -54,11 +54,9 @@ import { set } from "date-fns";
 import { MCALTipoAvaliacoesSelectSelect } from "@/components/common/global-selects/MCALTipoAvaliacoesSelect";
 
 export default function Deadlines() {
-  const {
-    user: {
-      user: { pk_utilizador },
-    },
-  } = useAuth();
+
+  const pk_utilizador = useAuth()?.user?.user?.pk_utilizador;
+
   const [prazoId, setPrazoId] = useState<number>(0);
   const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
     useQueryTipoCandidatura();
@@ -93,7 +91,7 @@ export default function Deadlines() {
     data_inicio: "",
     data_fim: "",
     observacao: "",
-    fk_created_by: pk_utilizador.toString(),
+    fk_created_by: pk_utilizador?.toString(),
     anoletivo: "",
     tipoCandidaturaId: "",
   });
@@ -104,20 +102,20 @@ export default function Deadlines() {
 
   const handleDeletePrazo = async (prazoId: number) => {
 
-    try{
+    try {
 
       await removerPrazo(prazoId);
       toast.success("Prazo removido com sucesso");
 
-    }catch(error: any){
+    } catch (error: any) {
 
       toast.error(
         error?.response?.data?.message ||
-          "Erro ao remover prazo"
+        "Erro ao remover prazo"
       );
 
     }
-    
+
   };
 
   const handleSelecionarPrazo = (prazo: Prazo) => {
@@ -157,7 +155,7 @@ export default function Deadlines() {
 
     setOpenModal(false);
   };
-  
+
   const handleCriarPrazo = async () => {
     try {
       await criarPrazo({
