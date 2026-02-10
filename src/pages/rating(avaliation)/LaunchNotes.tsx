@@ -333,7 +333,7 @@ export default function LaunchNotes() {
     gradesPeriodStatus === "NOT_DEFINED" ||
     gradesPeriodStatus === "OUT_OF_PERIOD" ||
     gradesPeriodStatus === "NO_YEAR_SELECTED";
-  console.log(TIPO_AVALIACAO[formData.tipoAvaliacao], "HEREE")
+
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
