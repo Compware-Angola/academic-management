@@ -1,4 +1,4 @@
-import { useMemo, useState, } from "react";
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -117,10 +117,13 @@ export default function AddMarkingAssessmentModal({
       page: 1,
       limit: 100,
     });
-  const { data: gradesCreationPrompt, isLoading: isLoadingGradesPrompt } = useQueryGradesCreationPrompt({
-    anoLectivo: Number(filters.anoLetivo), semestre: Number(filters.semestre),
-    typeAvaliation: prazos.find((p) => p.prazoid === Number(filters.prazoId))?.tipoavaliacao
-  })
+  const { data: gradesCreationPrompt, isLoading: isLoadingGradesPrompt } =
+    useQueryGradesCreationPrompt({
+      anoLectivo: Number(filters.anoLetivo),
+      semestre: Number(filters.semestre),
+      typeAvaliation: prazos.find((p) => p.prazoid === Number(filters.prazoId))
+        ?.tipoavaliacao,
+    });
   const gradesPeriodStatus = useMemo(() => {
     if (!filters.anoLetivo) return "NO_YEAR_SELECTED";
     if (isLoadingGradesPrompt) return "LOADING";
@@ -254,8 +257,8 @@ export default function AddMarkingAssessmentModal({
                 </p>
                 <p className="text-sm text-red-600">
                   Não existe um período configurado para{" "}
-                  <strong>{gradesCreationPrompt?.tipo_avaliacao_nome}</strong>. Contacte a
-                  administração.
+                  <strong>{gradesCreationPrompt?.tipo_avaliacao_nome}</strong>.
+                  Contacte a administração.
                 </p>
               </div>
             )}
@@ -274,7 +277,9 @@ export default function AddMarkingAssessmentModal({
 
             {gradesPeriodStatus === "NOT_DEFINED" && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="font-semibold text-red-700">Nenhum prazo configurado</p>
+                <p className="font-semibold text-red-700">
+                  Nenhum prazo configurado
+                </p>
                 <p className="text-sm text-red-600">
                   Não existe período definido para os filtros selecionados.
                 </p>
@@ -285,16 +290,21 @@ export default function AddMarkingAssessmentModal({
               <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
                 <p className="font-semibold text-amber-800">
                   Fora do prazo —{" "}
-                  {gradesCreationPrompt.tipo_avaliacao_nome ?? "Lançamento de Notas"}
+                  {gradesCreationPrompt.tipo_avaliacao_nome ??
+                    "Lançamento de Notas"}
                 </p>
                 <p className="text-sm text-amber-700">
                   Permitido de{" "}
                   <strong>
-                    {new Date(gradesCreationPrompt.data_inicio).toLocaleDateString("pt-AO")}
+                    {new Date(
+                      gradesCreationPrompt.data_inicio,
+                    ).toLocaleDateString("pt-AO")}
                   </strong>{" "}
                   até{" "}
                   <strong>
-                    {new Date(gradesCreationPrompt.data_fim).toLocaleDateString("pt-AO")}
+                    {new Date(gradesCreationPrompt.data_fim).toLocaleDateString(
+                      "pt-AO",
+                    )}
                   </strong>
                 </p>
               </div>
@@ -305,9 +315,8 @@ export default function AddMarkingAssessmentModal({
                 Dentro do prazo para lançamento de notas ✔
               </div>
             )}
-
-          </div>)
-        }
+          </div>
+        )}
 
         <div className="flex-1 min-w-full    py-6 min-h-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  gap-4">
@@ -465,6 +474,7 @@ export default function AddMarkingAssessmentModal({
 
             <DocenteSelect
               values={teacher}
+              label="Vigilante"
               onChange={handleVigilantesChange}
               max={2}
             />
