@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -101,7 +103,21 @@ export default function Deadlines() {
   const itemsPerPage = 10;
 
   const handleDeletePrazo = async (prazoId: number) => {
-    await removerPrazo(prazoId);
+
+    try{
+
+      await removerPrazo(prazoId);
+      toast.success("Prazo removido com sucesso");
+
+    }catch(error: any){
+
+      toast.error(
+        error?.response?.data?.message ||
+          "Erro ao remover prazo"
+      );
+
+    }
+    
   };
 
   const handleSelecionarPrazo = (prazo: Prazo) => {
@@ -125,6 +141,7 @@ export default function Deadlines() {
   };
 
   const handleActualizarPrazo = async () => {
+
     await actualizarPrazo({
       pk_prazo: prazoId,
       observacao: form.observacao,
@@ -136,8 +153,11 @@ export default function Deadlines() {
       tipo_candidatura: form.tipoCandidaturaId,
     });
 
+    toast.success("Prazo atualizado com sucesso");
+
     setOpenModal(false);
   };
+  
   const handleCriarPrazo = async () => {
     try {
       await criarPrazo({
@@ -159,6 +179,8 @@ export default function Deadlines() {
 
         tipo_candidatura: form.tipoCandidaturaId,
       });
+
+      toast.success("Prazo criado com sucesso");
 
       // ✅ Só se executa se deu sucesso
       setForm({

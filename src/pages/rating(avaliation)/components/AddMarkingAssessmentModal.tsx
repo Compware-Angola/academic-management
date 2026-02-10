@@ -34,6 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { DocenteSelect } from "@/components/common/global-selects/DocenteSelect";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -373,19 +374,11 @@ export default function AddMarkingAssessmentModal({
               })}
             />
 
-            <FormMultiSelect
-              search={false}
-              label="Docentes"
-              values={teacher}
-              onChange={handleVigilantesChange}
-              map={(t) => ({
-                key: t.codigo,
-                label: t.nome,
-                value: t.codigo.toString(),
-              })}
-              options={docentes}
-              loading={isLoadingDocente}
-            />
+            <DocenteSelect
+                values={teacher}
+                onChange={handleVigilantesChange}
+                max={2}
+              />
 
             <FormSelect
               label="Horarios"

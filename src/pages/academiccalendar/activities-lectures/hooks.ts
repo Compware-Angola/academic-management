@@ -141,19 +141,37 @@ export function useActivitiesLectures() {
 
     try {
       if (editId) {
-        updateAtividadeMutation.mutateAsync({
+        await updateAtividadeMutation.mutateAsync({
           codigo: editId,
           data_inicio: form.data_inicio,
           data_termino: form.data_fim,
           descricao: form.designacao,
         });
+
+        toast({
+          title: "Sucesso",
+          description: "Atividade atualizada com sucesso",
+        });
+
+        setOpenModal(false);
+        resetForm();
+        refetchAtividades();
+
         return;
       }
+
       await criarAtividadeMutation.mutateAsync(payload);
+
+      toast({
+        title: "Sucesso",
+        description: "Atividade criada com sucesso",
+      });
+
 
       setOpenModal(false);
       resetForm();
       refetchAtividades();
+
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         toast({
@@ -165,11 +183,13 @@ export function useActivitiesLectures() {
         });
         return;
       }
+
       toast({
         title: "Erro ao criar atividade",
         description: "Verifique os dados e tente novamente",
         variant: "destructive",
       });
+      
     } finally {
       setIsSubmitting(false);
     }
