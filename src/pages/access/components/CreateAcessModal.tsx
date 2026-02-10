@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 import { useState } from "react";
 import {
   Dialog,
@@ -26,29 +28,41 @@ export function AcessoFormDialog({ open, onClose }: Props) {
   const [sigla, setSigla] = useState("");
 
   const handleSubmit = () => {
-    console.log("ACESSO", designacao,descricao,sigla)
     if (!designacao || !sigla) return;
 
-    mutate({
-      designacao,
-      descricao,
-      sigla,
-      icone: "",
-      fkModulo: 1,
-      fkSubmenu: 1,
-      fkPagina: 1,
-      fkTipoAcesso: 1,
-      obs: "",
-      ordem: 1,
-      activeDate: new Date().toISOString().slice(0, 10),
-      activeState: true,
-    });
+        mutate(
+          {
+            designacao,
+            descricao,
+            sigla,
+            icone: "",
+            fkModulo: 1,
+            fkSubmenu: 1,
+            fkPagina: 1,
+            fkTipoAcesso: 1,
+            obs: "",
+            ordem: 1,
+            activeDate: new Date().toISOString().slice(0, 10),
+            activeState: true,
+          },
+          {
+            onSuccess: () => {
+              toast.success("Acesso criado com sucesso");
+              onClose();
+              setDesignacao("");
+              setDescricao("");
+              setSigla("");
+            },
+            onError: (error: any) => {
+              toast.error(
+                error?.response?.data?.message ??
+                  "Erro ao criar acesso. Tente novamente."
+              );
+            },
+          }
+        );
+      };
 
-    onClose();
-    setDesignacao("");
-    setDescricao("");
-    setSigla("");
-  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

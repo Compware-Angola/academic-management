@@ -31,6 +31,8 @@ import { useGrantUserAccess } from "@/hooks/acess/use-grant-user-access";
 import { useBlockUserAccess } from "@/hooks/acess/use-block-user-access";
 import { useRemoveGruopFromUser } from "@/hooks/acess/use-remove-gruop-from-user";
 import { useQueryClient } from "@tanstack/react-query";
+import { GroupSelect } from "@/components/common/global-selects/GroupSelect";
+import { AccessSelect } from "@/components/common/global-selects/AccessSelect";
 
 interface UserPermissionsModalProps {
   user: User;
@@ -294,23 +296,13 @@ export function UserPermissionsModal({
                 <Skeleton className="h-10 w-full" />
               ) : (
                 <>
-                  <Select
-                    value={selectedGroupToAdd?.toString()}
-                    onValueChange={v => setSelectedGroupToAdd(Number(v))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Adicionar Grupo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {todosGrupos
-                        ?.filter(g => !groups.some(ug => ug.codigo === g.pkGrupo))
-                        .map(grupo => (
-                          <SelectItem key={grupo.pkGrupo} value={grupo.pkGrupo.toString()}>
-                            {grupo.pkGrupo} – {grupo.designacao}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                  <GroupSelect
+                    value={selectedGroupToAdd?.toString() ?? ""}
+                    onChangeValue={v => setSelectedGroupToAdd(Number(v))}
+                    excludeGroups={groups}
+                    labelMode="inside"
+                  />
+
 
                   <Button
                     className="w-full"
@@ -402,21 +394,12 @@ export function UserPermissionsModal({
               <Skeleton className="h-10 w-full" />
             ) : (
               <>
-                <Select
-                  value={selectedAccessToGrant?.toString()}
-                  onValueChange={v => setSelectedAccessToGrant(Number(v))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecionar acesso" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {allAccesses?.map(access => (
-                      <SelectItem key={access.id} value={access.id.toString()}>
-                        {access.id} – {access.designacao}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AccessSelect
+                    value={selectedAccessToGrant?.toString() ?? ""}
+                    onChangeValue={v => setSelectedAccessToGrant(Number(v))}
+                    labelMode="inside"
+                  />
+
 
                 <Button
                   className="w-full"

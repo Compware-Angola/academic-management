@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -127,17 +129,31 @@ export function CreateSalaModal({
         { id: sala.codigo.toString(), ...payload },
         {
           onSuccess: () => {
+            toast.success("Sala atualizada com sucesso");
             onOpenChange(false);
             onSuccess?.();
           },
+          onError: (error: any) => {
+          toast.error(
+            error?.response?.data?.message ??
+              "Erro ao atualizar a sala. Tente novamente."
+          );
+        },
         }
       );
     } else {
       create(payload, {
         onSuccess: () => {
+          toast.success("Sala criada com sucesso");
           onOpenChange(false);
           onSuccess?.();
         },
+        onError: (error: any) => {
+          toast.error(
+            error?.response?.data?.message ??
+              "Erro ao criar a sala. Tente novamente."
+          );
+      },
       });
     }
   };

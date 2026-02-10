@@ -1,3 +1,8 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -29,6 +34,8 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
+import { useCursos } from "@/hooks/use-cursos";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function ListarBolsaEstudante() {
   const [resetKey, setResetKey] = useState(0);
@@ -53,6 +60,7 @@ export default function ListarBolsaEstudante() {
   const [pageUrl, setPageUrl] = useState<string | undefined>(undefined);
 
   const { data, isLoading } = useQueryFetchBolsaEstudante(filters, pageUrl);
+  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const estudantes = data?.items ?? [];
 
   // ================= SEMESTRES =================
@@ -105,6 +113,98 @@ export default function ListarBolsaEstudante() {
 
   const cellStyle = "whitespace-nowrap truncate max-w-[220px] font-medium";
 
+  const pdfData = useMemo(() => {
+  if (!estudantes.length) return null;
+
+  return {
+    filtros: [
+      filters.nome && `Nome: ${filters.nome}`,
+      filters.curso && `Curso: ${filters.curso}`,
+      filters.codigoAnoLectivo && `Ano Letivo: ${filters.codigoAnoLectivo}`,
+      filters.codigoInstituicao && `Instituição: ${filters.codigoInstituicao}`,
+      filters.codigoBolsa && `Bolsa: ${filters.codigoBolsa}`,
+    ]
+      .filter(Boolean)
+      .join(" | ") || "Sem filtros",
+
+    total: estudantes.length,
+
+    rows: estudantes.map((e) => ({
+      matricula: e.codigo_matricula,
+      nome: e.nome_completo,
+      bi: e.bilhete_identidade,
+      curso: e.curso,
+      instituicao: e.instituicao,
+      anoLetivo: e.ano_lectivo,
+      semestre: semestreMap.get(e.semestre) ?? "-",
+      desconto: formatDesconto(e.valor_desconto, e.tipo_desconto),
+      tipoCredito: e.tipo_credito,
+      bolsa: e.bolsa,
+    })),
+  };
+}, [estudantes, filters, semestreMap]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Estudantes com Bolsa"
+    subtitle="Lista de estudantes com créditos ou bolsas aplicadas"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de estudantes: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "matricula", label: "Matrícula", width: "10%" },
+        { key: "nome", label: "Nome", width: "20%" },
+        { key: "bi", label: "BI", width: "10%" },
+        { key: "curso", label: "Curso", width: "15%" },
+        { key: "instituicao", label: "Instituição", width: "15%" },
+        { key: "anoLetivo", label: "Ano Letivo", width: "8%" },
+        { key: "semestre", label: "Semestre", width: "8%" },
+        { key: "desconto", label: "Desconto", width: "8%" },
+        { key: "tipoCredito", label: "Tipo Crédito", width: "10%" },
+        { key: "bolsa", label: "Bolsa", width: "10%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Estudantes com Bolsa",
+      subtitle: "Lista de estudantes com créditos ou bolsas aplicadas",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de estudantes: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Matrícula", width: 18 },
+          { key: "nome", label: "Nome", width: 35 },
+          { key: "bi", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "instituicao", label: "Instituição", width: 25 },
+          { key: "anoLetivo", label: "Ano Letivo", width: 15 },
+          { key: "semestre", label: "Semestre", width: 18 },
+          { key: "desconto", label: "Desconto", width: 20 },
+          { key: "tipoCredito", label: "Tipo Crédito", width: 22 },
+          { key: "bolsa", label: "Bolsa", width: 25 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+const baseFileName = `Estudantes_Bolsa_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
+
+
   return (
     <div className="p-6 space-y-6">
       {/* BREADCRUMB */}
@@ -128,10 +228,34 @@ export default function ListarBolsaEstudante() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="text-2xl font-bold">Estudantes com Bolsa</h1>
-      <p className="text-muted-foreground">
-        Lista completa de estudantes com créditos ou bolsas aplicadas.
-      </p>
+     <div className="flex items-center justify-between">
+  <div>
+    <h1 className="text-2xl font-bold">Estudantes com Bolsa</h1>
+    <p className="text-muted-foreground">
+      Lista completa de estudantes com créditos ou bolsas aplicadas.
+    </p>
+  </div>
+
+  {pdfData && excelProps && (
+    <div className="flex gap-2">
+      {pdfContent && (
+        <PDFActions
+          document={pdfContent}
+          fileName={`${baseFileName}.pdf`}
+          showDownload
+          showPrint
+        />
+      )}
+
+      <ExcelActions
+        excelProps={excelProps}
+        fileName={`${baseFileName}.xlsx`}
+        showDownload
+      />
+    </div>
+  )}
+</div>
+
 
       {/* ================= FILTROS ================= */}
       <Card>
@@ -151,12 +275,12 @@ export default function ListarBolsaEstudante() {
               </div>
 
               <div className="">
-                <Label>Curso</Label>
-                <Input
-                  placeholder="Pesquisar por curso"
-                  value={cursoInput}
-                  onChange={(e) => setCursoInput(e.target.value)}
-                />
+                <CourseSelect
+                            value={filters.curso}
+                            onChangeValue={(v) =>
+                              setFilters({ ...filters, curso: v })
+                            }
+                          />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
