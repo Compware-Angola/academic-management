@@ -173,13 +173,39 @@ const excelProps = pdfData
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">
-          Início
-        </Link>
-        <span>/</span>
-        <span className="text-foreground">Acessos por utilizador</span>
-      </nav>
+      
+
+  <div className="flex items-center justify-between flex-wrap gap-3">
+  {/* Breadcrumb */}
+  <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+    <Link to="/" className="hover:text-foreground">
+      Início
+    </Link>
+    <span>/</span>
+    <span className="text-foreground">Acessos por utilizador</span>
+  </nav>
+
+  {/* Exportações */}
+  {pdfData && excelProps && (
+    <div className="flex gap-2">
+      {pdfContent && (
+        <PDFActions
+          document={pdfContent}
+          fileName={`${baseFileName}.pdf`}
+          showDownload
+          showPrint
+        />
+      )}
+
+      <ExcelActions
+        excelProps={excelProps}
+        fileName={`${baseFileName}.xlsx`}
+        showDownload
+      />
+    </div>
+  )}
+</div>
+
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
   <div>
@@ -208,26 +234,7 @@ const excelProps = pdfData
       />
       Atualizar
     </Button>
-
-    {pdfData && excelProps && (
-      <>
-        {pdfContent && (
-          <PDFActions
-            document={pdfContent}
-            fileName={`${baseFileName}.pdf`}
-            showDownload
-            showPrint
-          />
-        )}
-
-        <ExcelActions
-          excelProps={excelProps}
-          fileName={`${baseFileName}.xlsx`}
-          showDownload
-        />
-      </>
-    )}
-  </div>
+    </div>
 </div>
 
 
