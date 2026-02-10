@@ -77,7 +77,6 @@ export default function AddMarkingAssessmentModal({
   const { data: anosAcademicos, isLoading: isLoadingAnosAcademicos } =
     useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
-  const { data: cursos } = useCursos();
   const { data: modalidade = [], isLoading: isLoadingModalidade } =
     useQueryModalidade();
   const { data: docentes = [], isLoading: isLoadingDocente } =
@@ -94,7 +93,6 @@ export default function AddMarkingAssessmentModal({
     useQueryTipoProva();
   const { data: salas = [], isLoading: isLoadingSala } = useQuerySalas();
   const { data: period = [], isLoading: isLoadingPeriod } = useQueryPeriod();
-  const canLoadUcs = !!filters.curso && !!filters.semestre;
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       curso: filters.curso,
@@ -134,7 +132,7 @@ export default function AddMarkingAssessmentModal({
 
     return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
   }, [filters.anoLetivo, gradesCreationPrompt, isLoadingGradesPrompt]);
-  const shouldBlockGradesActions =
+  const shouldDisable =
     gradesPeriodStatus === "LOADING" ||
     gradesPeriodStatus === "NOT_DEFINED" ||
     gradesPeriodStatus === "OUT_OF_PERIOD" ||
@@ -198,7 +196,7 @@ export default function AddMarkingAssessmentModal({
       return;
     }
     const payload: CreateCalendarPayload = {
-      codigoCalendario: 1, // pode vir fixo ou de outro select
+      codigoCalendario: 1,
       codigoTipoProva: Number(filters.tipoProva),
       codigoModalidade: Number(filters.modalidade),
       codigoSala: Number(filters.sala),
@@ -241,73 +239,76 @@ export default function AddMarkingAssessmentModal({
           <DialogTitle className="text-2xl">Marcação de Prova</DialogTitle>
         </DialogHeader>
         <DialogDescription></DialogDescription>
-        <div className="space-y-2">
-          {gradesPeriodStatus === "LOADING" && (
-            <div className="bg-muted border rounded-lg p-4 text-sm">
-              A verificar período de lançamento de notas...
-            </div>
-          )}
+        {filters.anoLetivo && filters.semestre && (
+          <div className="space-y-2">
+            {gradesPeriodStatus === "LOADING" && (
+              <div className="bg-muted border rounded-lg p-4 text-sm">
+                A verificar período de lançamento de notas...
+              </div>
+            )}
 
-          {gradesPeriodStatus === "NOT_DEFINED" && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="font-semibold text-red-700">
-                Nenhum prazo definido para lançamento de notas
-              </p>
-              <p className="text-sm text-red-600">
-                Não existe um período configurado para{" "}
-                <strong>{gradesCreationPrompt?.tipo_avaliacao_nome}</strong>. Contacte a
-                administração.
-              </p>
-            </div>
-          )}
+            {gradesPeriodStatus === "NOT_DEFINED" && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="font-semibold text-red-700">
+                  Nenhum prazo definido para lançamento de notas
+                </p>
+                <p className="text-sm text-red-600">
+                  Não existe um período configurado para{" "}
+                  <strong>{gradesCreationPrompt?.tipo_avaliacao_nome}</strong>. Contacte a
+                  administração.
+                </p>
+              </div>
+            )}
 
-          {gradesPeriodStatus === "NO_YEAR_SELECTED" && (
-            <div className="bg-muted border rounded-lg p-4 text-sm">
-              Selecione o ano letivo para verificar o prazo de lançamento.
-            </div>
-          )}
+            {gradesPeriodStatus === "NO_YEAR_SELECTED" && (
+              <div className="bg-muted border rounded-lg p-4 text-sm">
+                Selecione o ano letivo para verificar o prazo de lançamento.
+              </div>
+            )}
 
-          {gradesPeriodStatus === "LOADING" && (
-            <div className="bg-muted border rounded-lg p-4 text-sm">
-              A verificar prazo de lançamento de notas...
-            </div>
-          )}
+            {gradesPeriodStatus === "LOADING" && (
+              <div className="bg-muted border rounded-lg p-4 text-sm">
+                A verificar prazo de lançamento de notas...
+              </div>
+            )}
 
-          {gradesPeriodStatus === "NOT_DEFINED" && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="font-semibold text-red-700">Nenhum prazo configurado</p>
-              <p className="text-sm text-red-600">
-                Não existe período definido para os filtros selecionados.
-              </p>
-            </div>
-          )}
+            {gradesPeriodStatus === "NOT_DEFINED" && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="font-semibold text-red-700">Nenhum prazo configurado</p>
+                <p className="text-sm text-red-600">
+                  Não existe período definido para os filtros selecionados.
+                </p>
+              </div>
+            )}
 
-          {gradesPeriodStatus === "OUT_OF_PERIOD" && gradesCreationPrompt && (
-            <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
-              <p className="font-semibold text-amber-800">
-                Fora do prazo —{" "}
-                {gradesCreationPrompt.tipo_avaliacao_nome ?? "Lançamento de Notas"}
-              </p>
-              <p className="text-sm text-amber-700">
-                Permitido de{" "}
-                <strong>
-                  {new Date(gradesCreationPrompt.data_inicio).toLocaleDateString("pt-AO")}
-                </strong>{" "}
-                até{" "}
-                <strong>
-                  {new Date(gradesCreationPrompt.data_fim).toLocaleDateString("pt-AO")}
-                </strong>
-              </p>
-            </div>
-          )}
+            {gradesPeriodStatus === "OUT_OF_PERIOD" && gradesCreationPrompt && (
+              <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
+                <p className="font-semibold text-amber-800">
+                  Fora do prazo —{" "}
+                  {gradesCreationPrompt.tipo_avaliacao_nome ?? "Lançamento de Notas"}
+                </p>
+                <p className="text-sm text-amber-700">
+                  Permitido de{" "}
+                  <strong>
+                    {new Date(gradesCreationPrompt.data_inicio).toLocaleDateString("pt-AO")}
+                  </strong>{" "}
+                  até{" "}
+                  <strong>
+                    {new Date(gradesCreationPrompt.data_fim).toLocaleDateString("pt-AO")}
+                  </strong>
+                </p>
+              </div>
+            )}
 
-          {gradesPeriodStatus === "ALLOWED" && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 text-sm">
-              Dentro do prazo para lançamento de notas ✔
-            </div>
-          )}
+            {gradesPeriodStatus === "ALLOWED" && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 text-sm">
+                Dentro do prazo para lançamento de notas ✔
+              </div>
+            )}
 
-        </div>
+          </div>)
+        }
+
         <div className="flex-1 min-w-full    py-6 min-h-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  gap-4">
             <FormSelect
@@ -569,7 +570,7 @@ export default function AddMarkingAssessmentModal({
             Fechar
           </Button>
           <Button
-            disabled={isCreateLoadingCalendar || isFormInvalid || shouldBlockGradesActions}
+            disabled={isCreateLoadingCalendar || isFormInvalid || shouldDisable}
             onClick={handleCreateCalendarioProva}
             size="lg"
           >
@@ -579,15 +580,4 @@ export default function AddMarkingAssessmentModal({
       </DialogContent>
     </Dialog>
   );
-}
-export function isWithinGradesLaunchPeriod(
-  prompt: GradesCreationPrompt | null | undefined,
-) {
-  if (!prompt) return false;
-
-  const now = new Date();
-  const start = new Date(prompt.data_inicio);
-  const end = new Date(prompt.data_fim);
-
-  return now >= start && now <= end;
 }
