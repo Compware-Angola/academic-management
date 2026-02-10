@@ -44,6 +44,8 @@ import { usePresenceAttendance } from "@/hooks/avaliacao/use-presence-attendance
 import { useQueryAssessmentAttendanceParameters } from "@/hooks/avaliacao/use-query-assessment-attendance-parameters";
 import { useQueryMesTemp } from "@/hooks/avaliacao/use-query-mes-temp";
 import { verificarPagamento } from "@/util/aparecer-lista-presenca";
+import { ListaPresencaPaginacao } from "./components/ListaPresencaPaginacao";
+import { Input } from "@/components/ui/input";
 
 type Filters = {
   anoLetivo: string;
@@ -57,6 +59,24 @@ type Filters = {
   situacaoFinanceira: string;
 };
 export default function PresenceList() {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
+    "codigoMatricula",
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const placeholders: Record<string, string> = {
+    codigoMatricula: "Pesquisar por código da matrícula...",
+    nome: "Nome do Aluno.",
+  };
+  const placeholderText = placeholders[searchBy] || "Pesquisar...";
+
+  //Options
+  const searchOptions = [
+    { id: "codigoMatricula", label: "Código da Matrícula" },
+    { id: "nome", label: "Nome do Aluno" },
+  ];
+
   const [formData, setFormData] = useState<Filters>({
     anoLetivo: "",
     horarioId: "",
@@ -71,7 +91,12 @@ export default function PresenceList() {
   const { data: parameterResponse, isLoading: isLoadingParameters } =
     useQueryAssessmentAttendanceParameters();
 
-  const [shouldFetch, setShouldFetch] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<Filters | null>(null);
+  const [searchApplied, setSearchApplied] = useState({
+    searchBy: "codigoMatricula" as "codigoMatricula" | "nome",
+    searchTerm: "",
+  });
+
   const situationOption = [
     {
       key: 1,
@@ -92,30 +117,22 @@ export default function PresenceList() {
     error,
   } = usePresenceAttendance(
     {
-      anoLectivo: parseFilter(formData.anoLetivo),
-      horarioPk: parseFilter(formData.horarioId),
+      anoLectivo: parseFilter(appliedFilters?.anoLetivo),
+      horarioPk: parseFilter(appliedFilters?.horarioId),
+      situacao_financeira: parseFilter(appliedFilters?.situacaoFinanceira),
+      semestre: parseFilter(appliedFilters?.semestre),
+      codigoMatricula:
+        searchApplied.searchBy === "codigoMatricula"
+          ? parseFilter(searchApplied.searchTerm)
+          : null,
+
+      nome: searchApplied.searchBy === "nome" ? searchApplied.searchTerm : null,
+      page,
+      limit,
     },
-    shouldFetch,
+    !!appliedFilters,
   );
 
-  useEffect(() => {
-    setShouldFetch(false);
-  }, [formData]);
-  const getBolseiroBadge = (situacao: string) => {
-    switch (situacao) {
-      case "0":
-        return (
-          <Badge variant="default" className="bg-green-600">
-            Nao
-          </Badge>
-        );
-      case "1":
-        return <Badge variant="destructive">Sim</Badge>;
-
-      default:
-        return <Badge variant="outline">n/a</Badge>;
-    }
-  };
   const handleSearch = () => {
     if (!isValidFilters(formData)) {
       toast({
@@ -125,8 +142,12 @@ export default function PresenceList() {
       });
       return;
     }
-
-    setShouldFetch(true);
+    setPage(1);
+    setAppliedFilters({ ...formData });
+    setSearchApplied({
+      searchBy,
+      searchTerm,
+    });
   };
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -156,8 +177,9 @@ export default function PresenceList() {
 
   const mesDescricao = mesTemp[0]?.designacao;
   const students = presenceAttendanceList?.data || [];
-  const prestacao = presenceAttendanceList?.prestacao;
-
+  const hasNext = presenceAttendanceList?.hasNextPage || false;
+  const loadingSearchButton =
+    loadingPresenceAttendanceList || isLoadingParameters;
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -287,14 +309,45 @@ export default function PresenceList() {
                 label: `${u.label}`,
               })}
             />
+            {/* Tipo de Pesquisa */}
+            <div className="min-w-[220px]">
+              <FormSelect
+                label="Pesquisar por"
+                value={searchBy}
+                onChange={(v) => {
+                  setSearchBy(v as "codigoMatricula" | "nome");
+                  setSearchTerm("");
+                  setPage(1);
+                }}
+                options={searchOptions}
+                map={(o) => ({
+                  key: o.id,
+                  label: o.label,
+                  value: o.id,
+                })}
+              />
+            </div>
+
+            {/* Input Pesquisa */}
+            <div className="flex items-end">
+              <div className="flex-1  min-w-[260px] relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-10"
+                  placeholder={placeholderText}
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setPage(1);
+                  }}
+                />
+              </div>
+            </div>
 
             {/* Botão Listar na mesma linha */}
             <div className="flex items-end">
-              <Button
-                onClick={handleSearch}
-                disabled={loadingPresenceAttendanceList}
-              >
-                {loadingPresenceAttendanceList ? (
+              <Button onClick={handleSearch} disabled={loadingSearchButton}>
+                {loadingSearchButton ? (
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Search className="h-4 w-4 mr-2" />
@@ -337,33 +390,34 @@ export default function PresenceList() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Curso</TableHead>
+                    <TableHead>Ano Curricular</TableHead>
+                    <TableHead>Periodo</TableHead>
                     <TableHead>Numero da Matricula</TableHead>
                     <TableHead>Nome Completo</TableHead>
-                    <TableHead>Bolseiro</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students
-                    .filter((t) =>
-                      verificarPagamento({
-                        mesPagos: t.mes_pago,
-                        prestacao,
-                        situacao: parseFilter(formData.situacaoFinanceira),
-                      }),
-                    )
-                    .map((student) => (
-                      <TableRow key={student.numero_matricula}>
-                        <TableCell className="font-mono">
-                          {student.numero_matricula}
-                        </TableCell>
-                        <TableCell>{student.nome}</TableCell>
-                        <TableCell>
-                          {getBolseiroBadge(student.is_bolseiro.toString())}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                  {students.map((student) => (
+                    <TableRow key={student.numero_matricula}>
+                      <TableCell>{student.curso}</TableCell>
+                      <TableCell>{student.classe}</TableCell>
+                      <TableCell>{student.periodo}</TableCell>
+                      <TableCell className="font-mono">
+                        {student.numero_matricula}
+                      </TableCell>
+                      <TableCell>{student.nome}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
+              <ListaPresencaPaginacao
+                hasNext={hasNext}
+                limit={limit}
+                page={page}
+                setLimit={setLimit}
+                setPage={setPage}
+              />
             </div>
           </>
         )}
