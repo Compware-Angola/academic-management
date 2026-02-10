@@ -3,6 +3,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type MarcacaoProvaPrazo = {
   prazoid: number;
   designacao: string;
+  tipoavaliacao: number
 };
 export type FilterMarcacaoProvaPrazoParams = {
   anoLectivo: number;
@@ -21,3 +22,4 @@ export async function fetchMarcacaoProvaPrazo(
 
   return data?.data ?? [];
 }
+

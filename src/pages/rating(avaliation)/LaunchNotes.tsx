@@ -54,6 +54,7 @@ import PDFActions, {
 import { GradesCreationPrompt } from "@/services/academiccalendar/get-grades-creation-prompt";
 import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
 import { parseFilter } from "@/util/parse-filter";
+import { TIPO_AVALIACAO } from "@/constants/tipo-avalicao";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
@@ -150,7 +151,7 @@ export default function LaunchNotes() {
     useQueryGradesCreationPrompt({
       anoLectivo: parseFilter(formData.anoLetivo),
       semestre: parseFilter(formData.semestre),
-      typeAvaliation: parseFilter(formData.tipoAvaliacao),
+      typeAvaliation: TIPO_AVALIACAO[formData.tipoAvaliacao],
     });
   useEffect(() => {
     setLocalStudents(students);
@@ -496,7 +497,7 @@ export default function LaunchNotes() {
             map={(u) => ({
               key: u.codigo,
               label: u.designacao,
-              value: u.codigo,
+              value: u.designacao,
             })}
             loading={isLoadingTipoAvaliacao}
           />

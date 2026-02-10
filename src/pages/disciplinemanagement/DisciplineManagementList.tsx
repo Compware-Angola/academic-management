@@ -1,4 +1,12 @@
 // src/pages/DisciplineManagementList.tsx (ou onde estiver)
+import { useMemo } from "react";
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -126,6 +134,87 @@ export default function DisciplineManagementList() {
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, filteredData.length);
 
+  const pdfData = useMemo(() => {
+  if (!filteredData.length) return null;
+
+  return {
+    filtros: [
+      searchTerm && `Pesquisa: ${searchTerm}`,
+      naturezaFilter !== "all" &&
+        `Natureza: ${
+          naturezaFilter === "TP"
+            ? "Teórico-Prática"
+            : naturezaFilter === "T"
+            ? "Teórica"
+            : "Prática"
+        }`,
+      tipoFilter !== "all" && `Tipo UC: ${tipoFilter}`,
+    ]
+      .filter(Boolean)
+      .join(" | ") || "Sem filtros",
+
+    total: filteredData.length,
+
+    rows: filteredData.map((d) => ({
+      codigo: d.codigo,
+      nome: d.desginacao,
+      tipo: d.tipo_descricao,
+      natureza: d.natureza,
+    })),
+  };
+}, [filteredData, searchTerm, naturezaFilter, tipoFilter]);
+
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Gestão de Disciplinas"
+    subtitle="Lista de disciplinas e unidades curriculares"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de disciplinas: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "codigo", label: "Código", width: "10%" },
+        { key: "nome", label: "Nome da Disciplina", width: "45%" },
+        { key: "tipo", label: "Tipo", width: "25%" },
+        { key: "natureza", label: "Natureza", width: "20%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Gestão de Disciplinas",
+      subtitle: "Lista de disciplinas e unidades curriculares",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de disciplinas: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "codigo", label: "Código", width: 10 },
+          { key: "nome", label: "Nome da Disciplina", width: 40 },
+          { key: "tipo", label: "Tipo", width: 25 },
+          { key: "natureza", label: "Natureza", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+const baseFileName = `Disciplinas_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
+
+
   const handleFilterChange = () => setCurrentPage(1);
   const handleConfirmDelete = () => {
     if (!selectedDiscipline) return;
@@ -161,20 +250,48 @@ export default function DisciplineManagementList() {
       </nav>
 
       {/* Cabeçalho */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Gestão de disciplinas
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gestão completa de disciplinas e unidades curriculares
-          </p>
-        </div>
-        <Button size="sm" onClick={() => setCreateModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova disciplina
-        </Button>
+      
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+  {/* Título */}
+  <div>
+    <h1 className="text-3xl font-bold tracking-tight">
+      Gestão de disciplinas
+    </h1>
+    <p className="text-muted-foreground mt-1">
+      Gestão completa de disciplinas e unidades curriculares
+    </p>
+  </div>
+
+  {/* Ações (em coluna) */}
+  <div className="flex flex-col items-end gap-2">
+    {/* Exportações */}
+    {pdfData && excelProps && (
+      <div className="flex flex-wrap gap-2">
+        {pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
+          />
+        )}
+
+        <ExcelActions
+          excelProps={excelProps}
+          fileName={`${baseFileName}.xlsx`}
+          showDownload
+        />
       </div>
+    )}
+
+    {/* Botão principal mantém posição */}
+    <Button size="sm" onClick={() => setCreateModalOpen(true)}>
+      <Plus className="h-4 w-4 mr-2" />
+      Nova disciplina
+    </Button>
+  </div>
+</div>
+
 
       {/* Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

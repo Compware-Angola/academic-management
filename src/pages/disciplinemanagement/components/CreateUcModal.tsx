@@ -28,6 +28,7 @@ import { AnoAcademico } from "@/services/fetch-anos-academico";
 import { Semestre } from "@/services/study_plan/semestre/fecth-semestres";
 import { Departamento } from "@/services/departamento/fetch-departamento";
 import { useAuth } from "@/hooks/use-auth";
+import { CourseCommandSelectRHF } from "@/components/common/global-selects/CourseCommandSelectRHF";
 
 interface Props {
   open: boolean;
@@ -103,18 +104,11 @@ export function CreateUcModal({ open, onClose }: Props) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-            <FormSelectRHF<FormValues, Curso>
-              control={form.control}
-              name="codigo_curso"
-              label="Curso"
-              options={cursos}
-              loading={loadingCursos}
-              map={(c) => ({
-                key: String(c.codigo),
-                label: c.designacao,
-                value: String(c.codigo),
-              })}
-            />
+
+            <CourseCommandSelectRHF<FormValues>
+                control={form.control}
+                name="codigo_curso"
+                />
 
             <FormSelectRHF<FormValues, Classes>
               control={form.control}
