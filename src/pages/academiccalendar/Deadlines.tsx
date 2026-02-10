@@ -264,7 +264,10 @@ export default function Deadlines() {
           {/* Tipo de Prazo */}
           <div className="space-y-2">
             <Label>Tipo de Prazo</Label>
-            <Select value={tipoPrazoId} onValueChange={setTipoPrazoId}>
+            <Select value={tipoPrazoId} onValueChange={(v) => {
+              setTipoPrazoId(v)
+              setForm({ ...form, fk_tipo_prazo: v })
+            }}>
               <SelectTrigger>
                 <SelectValue
                   placeholder={
@@ -413,7 +416,10 @@ export default function Deadlines() {
               <Label>Tipo de Prazo *</Label>
               <Select
                 value={form.fk_tipo_prazo}
-                onValueChange={(v) => setForm({ ...form, fk_tipo_prazo: v })}
+                onValueChange={(v) => {
+                  setTipoPrazoId(v)
+                  setForm({ ...form, fk_tipo_prazo: v })
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo de prazo" />
