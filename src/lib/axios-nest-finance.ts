@@ -10,9 +10,7 @@ export const axiosNestFinance = axios.create({
   },
 });
 
-// ==========================
-// ⭐ Interceptor de REQUISIÇÃO (envio do token)
-// ==========================
+
 axiosNestFinance.interceptors.request.use(
   (config) => {
     const token = AuthStorage.getToken();
@@ -24,9 +22,7 @@ axiosNestFinance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ==========================
-// ⭐ Interceptor de RESPOSTA (tratamento de erros)
-// ==========================
+
 axiosNestFinance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -52,9 +48,9 @@ axiosNestFinance.interceptors.response.use(
       }
     }
 
-    // ⭐ Se token inválido/expirado
-    if (status === 401) {
 
+    if (status === 401) {
+      AuthStorage.logout();
       window.location.href = "/";
       return;
     }

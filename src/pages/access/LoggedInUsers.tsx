@@ -1,3 +1,11 @@
+import { useMemo } from "react";
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
+
 import { useState } from "react";
 import {
   RefreshCw,
@@ -82,42 +90,149 @@ export default function LoggedInUsers() {
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 1;
 
+  const pdfData = useMemo(() => {
+  if (!data?.data?.length) return null;
+
+  return {
+    filtros: [
+      `Estado: ${
+        estado === "1" ? "Logados" : estado === "0" ? "Não logados" : "Todos"
+      }`,
+      search && `Pesquisa: ${search}`,
+    ]
+      .filter(Boolean)
+      .join(" | "),
+
+    total,
+
+    rows: data.data.map((u: UserLogadoItem) => ({
+      codigo: u.codigo,
+      nome: u.nome,
+      username: u.username,
+      email: u.email || "—",
+      ip: u.ip,
+      ultimaatividade: u.ultimaatividade || "—",
+      estado: u.logado === 1 ? "Logado" : "Deslogado",
+    })),
+  };
+}, [data, total, estado, search]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Utilizadores Logados"
+    subtitle="Sessões ativas no sistema"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de utilizadores: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "codigo", label: "Código", width: "8%" },
+        { key: "nome", label: "Nome", width: "20%" },
+        { key: "username", label: "Username", width: "15%" },
+        { key: "email", label: "Email", width: "18%" },
+        { key: "ip", label: "IP", width: "15%" },
+        { key: "ultimaatividade", label: "Última Atividade", width: "14%" },
+        { key: "estado", label: "Estado", width: "10%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Utilizadores Logados",
+      subtitle: "Sessões ativas no sistema",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de utilizadores: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "codigo", label: "Código", width: 10 },
+          { key: "nome", label: "Nome", width: 25 },
+          { key: "username", label: "Username", width: 20 },
+          { key: "email", label: "Email", width: 30 },
+          { key: "ip", label: "IP", width: 20 },
+          { key: "ultimaatividade", label: "Última Atividade", width: 20 },
+          { key: "estado", label: "Estado", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+  const baseFileName = `Utilizadores_Logados_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
+
+
   return (
     <div className="flex-1 space-y-6 p-8">
       {/* Cabeçalho */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/acessos">Acessos</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Utilizadores Logados</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+      {/* Cabeçalho */}
+<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div className="space-y-1">
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/acessos">Acessos</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Utilizadores Logados</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
 
-          <h1 className="text-3xl font-bold tracking-tight">
-            Utilizadores Logados
-          </h1>
+    <h1 className="text-3xl font-bold tracking-tight">
+      Utilizadores Logados
+    </h1>
 
-          <p className="text-muted-foreground">
-            Total: {isLoading ? "..." : total} utilizadores
-            {isFetching && " (atualizando...)"}
-          </p>
-        </div>
+    <p className="text-muted-foreground">
+      Total: {isLoading ? "..." : total} utilizadores
+      {isFetching && " (atualizando...)"}
+    </p>
+  </div>
 
-        <Button onClick={ ()=>refetch()} variant="outline" size="sm">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Atualizar
-        </Button>
-      </div>
+  <div className="flex flex-wrap gap-2">
+    <Button onClick={() => refetch()} variant="outline" size="sm">
+      <RefreshCw
+        className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+      />
+      Atualizar
+    </Button>
+
+    {pdfData && excelProps && (
+      <>
+        {pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
+          />
+        )}
+
+        <ExcelActions
+          excelProps={excelProps}
+          fileName={`${baseFileName}.xlsx`}
+          showDownload
+        />
+      </>
+    )}
+  </div>
+</div>
+
 
       {/* Filtros */}
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 lg:flex-row lg:items-end">

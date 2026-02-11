@@ -54,11 +54,15 @@ import PDFActions, {
 import { GradesCreationPrompt } from "@/services/academiccalendar/get-grades-creation-prompt";
 import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
 import { parseFilter } from "@/util/parse-filter";
+import { TIPO_AVALIACAO } from "@/constants/tipo-avalicao";
+import { useQueryPromptGetPermissionLaunch } from "@/hooks/avaliacao/use-query-prompt-get-permission-launch";
+import { GetAssessmentNotasItem, GetAssessmentNotasResponse } from "@/services/avaliacao/prompt-get-permission-launch.service";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
+
 
   const [formData, setFormData] = useState({
     anoLetivo: "",
@@ -150,7 +154,7 @@ export default function LaunchNotes() {
     useQueryGradesCreationPrompt({
       anoLectivo: parseFilter(formData.anoLetivo),
       semestre: parseFilter(formData.semestre),
-      typeAvaliation: parseFilter(formData.tipoAvaliacao),
+      typeAvaliation: TIPO_AVALIACAO[formData.tipoAvaliacao],
     });
   useEffect(() => {
     setLocalStudents(students);
@@ -316,6 +320,14 @@ export default function LaunchNotes() {
       },
     });
   };
+  const { data: promptPermissionLaunch, isLoading: isLoadingPromptPermissionLaunch } = useQueryPromptGetPermissionLaunch({
+    anoLectivo: parseFilter(formData.anoLetivo),
+    grade: parseFilter(formData.unidadeCurricular),
+    tipoAvaliacao: TIPO_AVALIACAO[formData.tipoAvaliacao],
+    utilizadorId: userData?.user?.pk_utilizador,
+  });
+
+
   const gradesPeriodStatus = useMemo(() => {
     if (!formData.anoLetivo) return "NO_YEAR_SELECTED";
     if (isLoadingGradesPrompt) return "LOADING";
@@ -327,11 +339,15 @@ export default function LaunchNotes() {
 
     return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
   }, [formData.anoLetivo, gradesPrompt, isLoadingGradesPrompt]);
-  const shouldBlockGradesActions =
-    gradesPeriodStatus === "LOADING" ||
-    gradesPeriodStatus === "NOT_DEFINED" ||
-    gradesPeriodStatus === "OUT_OF_PERIOD" ||
-    gradesPeriodStatus === "NO_YEAR_SELECTED";
+
+  const hasSpecialPermission = teacherHasPermissionToLaunchNotes(promptPermissionLaunch?.data?.[0]);
+
+
+  const isGlobalPeriodActive = gradesPeriodStatus === "ALLOWED";
+
+
+  const shouldBlockGradesActions = !hasSpecialPermission && !isGlobalPeriodActive;
+
 
   return (
     <div className="space-y-6">
@@ -496,7 +512,7 @@ export default function LaunchNotes() {
             map={(u) => ({
               key: u.codigo,
               label: u.designacao,
-              value: u.codigo,
+              value: u.designacao,
             })}
             loading={isLoadingTipoAvaliacao}
           />
@@ -528,65 +544,12 @@ export default function LaunchNotes() {
           A verificar período de lançamento de notas...
         </div>
       )}
+      <StatusBanner
+        gradesPeriodStatus={gradesPeriodStatus}
+        gradesPrompt={gradesPrompt}
+        hasSpecialPermission={hasSpecialPermission}
+      />
 
-      {gradesPeriodStatus === "NOT_DEFINED" && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="font-semibold text-red-700">
-            Nenhum prazo definido para lançamento de notas
-          </p>
-          <p className="text-sm text-red-600">
-            Não existe um período configurado para{" "}
-            <strong>{gradesPrompt.tipo_avaliacao_nome}</strong>. Contacte a
-            administração.
-          </p>
-        </div>
-      )}
-
-      {gradesPeriodStatus === "NO_YEAR_SELECTED" && (
-        <div className="bg-muted border rounded-lg p-4 text-sm">
-          Selecione o ano letivo para verificar o prazo de lançamento.
-        </div>
-      )}
-
-      {gradesPeriodStatus === "LOADING" && (
-        <div className="bg-muted border rounded-lg p-4 text-sm">
-          A verificar prazo de lançamento de notas...
-        </div>
-      )}
-
-      {gradesPeriodStatus === "NOT_DEFINED" && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="font-semibold text-red-700">Nenhum prazo configurado</p>
-          <p className="text-sm text-red-600">
-            Não existe período definido para os filtros selecionados.
-          </p>
-        </div>
-      )}
-
-      {gradesPeriodStatus === "OUT_OF_PERIOD" && gradesPrompt && (
-        <div className="bg-amber-50 border border-amber-300 rounded-lg p-4">
-          <p className="font-semibold text-amber-800">
-            Fora do prazo —{" "}
-            {gradesPrompt.tipo_avaliacao_nome ?? "Lançamento de Notas"}
-          </p>
-          <p className="text-sm text-amber-700">
-            Permitido de{" "}
-            <strong>
-              {new Date(gradesPrompt.data_inicio).toLocaleDateString("pt-AO")}
-            </strong>{" "}
-            até{" "}
-            <strong>
-              {new Date(gradesPrompt.data_fim).toLocaleDateString("pt-AO")}
-            </strong>
-          </p>
-        </div>
-      )}
-
-      {gradesPeriodStatus === "ALLOWED" && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 text-sm">
-          Dentro do prazo para lançamento de notas ✔
-        </div>
-      )}
 
       {/* Tabela */}
       {loadingNoteRelease ? (
@@ -828,14 +791,89 @@ export default function LaunchNotes() {
   );
 }
 
-export function isWithinGradesLaunchPeriod(
-  prompt: GradesCreationPrompt | null | undefined,
+
+
+function teacherHasPermissionToLaunchNotes(
+  promptPermissionLaunch: GetAssessmentNotasItem | null | undefined,
 ) {
-  if (!prompt) return false;
+  if (!promptPermissionLaunch) return false;
 
   const now = new Date();
-  const start = new Date(prompt.data_inicio);
-  const end = new Date(prompt.data_fim);
+  const start = new Date(promptPermissionLaunch.DATAINICIAL);
+  const end = new Date(promptPermissionLaunch.DATAFIM);
 
   return now >= start && now <= end;
 }
+
+
+interface StatusBannerProps {
+  gradesPeriodStatus: string;
+  gradesPrompt?: {
+    tipo_avaliacao_nome?: string;
+    data_inicio: string;
+    data_fim: string;
+  } | null;
+  hasSpecialPermission: boolean;
+}
+
+const StatusBanner: React.FC<StatusBannerProps> = ({
+  gradesPeriodStatus,
+  gradesPrompt,
+  hasSpecialPermission,
+}) => {
+
+  if (hasSpecialPermission) {
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm flex items-center gap-2">
+        <span className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
+        Possui permissão especial de lançamento ativa ✔
+      </div>
+    );
+  }
+
+
+  const configs: Record<string, { className: string; title?: string; content: React.ReactNode }> = {
+    LOADING: {
+      className: "bg-muted border text-muted-foreground text-sm",
+      content: "A verificar prazo de lançamento de notas...",
+    },
+    NO_YEAR_SELECTED: {
+      className: "bg-muted border text-muted-foreground text-sm",
+      content: "Selecione o ano letivo para verificar o prazo de lançamento.",
+    },
+    NOT_DEFINED: {
+      className: "bg-red-50 border border-red-200 text-red-700",
+      title: "Nenhum prazo configurado",
+      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"}. Contacte a administração.`,
+    },
+    OUT_OF_PERIOD: {
+      className: "bg-amber-50 border border-amber-300 text-amber-800",
+      title: `Fora do prazo — ${gradesPrompt?.tipo_avaliacao_nome ?? "Lançamento de Notas"}`,
+      content: gradesPrompt ? (
+        <>
+          O lançamento está permitido apenas de{" "}
+          <strong>{new Date(gradesPrompt.data_inicio).toLocaleDateString("pt-AO")}</strong> até{" "}
+          <strong>{new Date(gradesPrompt.data_fim).toLocaleDateString("pt-AO")}</strong>.
+        </>
+      ) : null,
+    },
+    ALLOWED: {
+      className: "bg-green-50 border border-green-200 text-green-800 text-sm",
+      content: "Dentro do prazo para lançamento de notas ✔",
+    },
+  };
+
+  const config = configs[gradesPeriodStatus];
+
+  if (!config) return null;
+
+  return (
+    <div className={`${config.className} rounded-lg p-4 transition-all duration-300`}>
+      {config.title && <p className="font-semibold mb-1">{config.title}</p>}
+      <div className={config.title ? "text-sm opacity-90" : ""}>
+        {config.content}
+      </div>
+    </div>
+  );
+};
+

@@ -7,18 +7,13 @@ import { ApiError, type ApiErrorResponse } from "@/error";
 
 const VITE_API_URL_UPLOAD = import.meta.env.VITE_API_URL_UPLOAD;
 
-// ==========================
-// 🚀 Instância Axios
-// ==========================
+
 export const uploadApi: AxiosInstance = axios.create({
   baseURL: VITE_API_URL_UPLOAD,
   timeout: 0, // sem retry / sem timeout forçado
 });
 
-// ==========================
-// ⭐ Interceptor de resposta
-// (equivalente ao afterResponse do ky)
-// ==========================
+
 uploadApi.interceptors.response.use(
   (response: AxiosResponse) => {
     // Resposta OK → devolve normalmente
@@ -39,9 +34,7 @@ uploadApi.interceptors.response.use(
     let errorData: ApiErrorResponse | undefined;
     let message = `Erro ${status}: ${statusText}`;
 
-    // ==========================
-    // 🔍 Tratamento do corpo do erro
-    // ==========================
+
     if (data) {
       // Axios já parseia JSON automaticamente
       if (typeof data === "object") {
@@ -62,9 +55,7 @@ uploadApi.interceptors.response.use(
       }
     }
 
-    // ==========================
-    // ❌ Lança erro padronizado
-    // ==========================
+
     throw new ApiError(message, status ?? 0, errorData);
   }
 );

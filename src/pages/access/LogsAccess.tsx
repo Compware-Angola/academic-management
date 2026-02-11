@@ -1,4 +1,10 @@
-import { useState, useEffect } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
+
+import { useState, useEffect, useMemo } from "react";
 import { SearchX, ChevronLeft, ChevronRight, User, Calendar, Globe, Info, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -70,6 +76,14 @@ export default function LogsAcessos() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
 
+  const formatDate = (dateStr: string) => {
+    try {
+      return format(new Date(dateStr), "dd/MM/yyyy HH:mm", { locale: ptBR });
+    } catch {
+      return dateStr;
+    }
+  };
+
   // Atualiza automaticamente quando o search muda (pesquisa instantânea)
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -118,6 +132,88 @@ export default function LogsAcessos() {
   const total = logsResponse?.total ?? 0;
   const totalPages = logsResponse?.totalPages ?? 1;
 
+
+  const pdfData = useMemo(() => {
+  if (!logs.length) return null;
+
+  return {
+    filtros: [
+      filters.dataInicio && `Data início: ${filters.dataInicio}`,
+      filters.dataFim && `Data fim: ${filters.dataFim}`,
+      filters.search && `Pesquisa: ${filters.search}`,
+    ]
+      .filter(Boolean)
+      .join(" | ") || "Sem filtros",
+
+    total: logs.length,
+
+    rows: logs.map((l) => ({
+      id: l.pkLogAcesso,
+      descricao: l.descricao,
+      utilizador: l.nomeUtilizadorResponsavel ?? "—",
+      funcionalidade: l.nomeFuncionalidade ?? "—",
+      ip: l.ip,
+      data: formatDate(l.createdAt),
+    })),
+  };
+}, [logs, filters]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Logs de Acessos"
+    subtitle="Registo de atividades e acessos do sistema"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "id", label: "ID", width: "8%" },
+        { key: "descricao", label: "Descrição", width: "32%" },
+        { key: "utilizador", label: "Utilizador", width: "18%" },
+        { key: "funcionalidade", label: "Funcionalidade", width: "18%" },
+        { key: "ip", label: "IP", width: "12%" },
+        { key: "data", label: "Data/Hora", width: "12%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = {
+  documentTitle: "Logs de Acessos",
+  subtitle: "Registo de atividades e acessos do sistema",
+  infoSections: [
+    { title: "Filtros Aplicados", content: pdfData?.filtros ?? "Sem filtros" },
+    { title: "Resumo", content: [`Total de registos: ${logs.length}`] },
+  ],
+  mainTable: {
+    headers: [
+      { key: "id", label: "ID", width: 10 },
+      { key: "descricao", label: "Descrição", width: 50 },
+      { key: "utilizador", label: "Utilizador", width: 25 },
+      { key: "funcionalidade", label: "Funcionalidade", width: 25 },
+      { key: "ip", label: "IP", width: 20 },
+      { key: "data", label: "Data/Hora", width: 22 },
+    ],
+    rows: logs.map(l => ({
+      id: l.pkLogAcesso,
+      descricao: l.descricao,
+      utilizador: l.nomeUtilizadorResponsavel ?? "—",
+      funcionalidade: l.nomeFuncionalidade ?? "—",
+      ip: l.ip,
+      data: formatDate(l.createdAt),
+    })),
+  },
+  footerNotice: "Documento gerado automaticamente pelo sistema.",
+  primaryColor: "#1e40af",
+};
+
+const baseFileName = `Logs_Acessos_${new Date().toISOString().slice(0, 10)}`;
+
+
   // Handlers
   const handlePesquisar = () => {
     setCurrentPage(1);
@@ -138,13 +234,6 @@ export default function LogsAcessos() {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
 
-  const formatDate = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), "dd/MM/yyyy HH:mm", { locale: ptBR });
-    } catch {
-      return dateStr;
-    }
-  };
 
   // Render
   return (
@@ -172,6 +261,26 @@ export default function LogsAcessos() {
             Registo de todas as ações e acessos realizados no sistema
           </p>
         </div>
+
+        {logs.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+
+          <ExcelActions
+            excelProps={excelProps}
+            fileName={`${baseFileName}.xlsx`}
+            showDownload
+          />
+              </div>
+            )}
+
       </div>
 
       {/* Filtros */}

@@ -34,7 +34,6 @@ interface FormData {
 }
 
 
-
 export default function CreateUser() {
   const { toast } = useToast();
  
