@@ -190,7 +190,18 @@ const App = () => {
                   />
                   <Route path="/schedule/:id/edit" element={<EditSchedule />} />
                   <Route path="horarios/sala" element={<SchedulesByRoom />} />
-                  <Route path="/salas/listar" element={<ClassromList />} />
+                  <Route path="/salas/listar"
+                  
+                  element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_SALAS.sigla!,
+                        ]}
+                      >
+                        <ClassromList />
+                      </ProtectedRoute>
+                    }
+                 />
                   <Route
                     path="/plano/disciplinas"
 

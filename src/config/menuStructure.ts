@@ -315,7 +315,9 @@ export const menuStructure: MenuStructure = {
       title: "Gestão de Salas",
       url: "/salas",
       icon: Building,
-      items: [{ title: "Listar salas", url: "/salas/listar" }],
+      items: [
+        { title: "Listar salas", url: "/salas/listar", permission:[PermissionTypeDetails.LISTAR_SALAS.sigla] }
+      ],
 
       permission: [],
     },
