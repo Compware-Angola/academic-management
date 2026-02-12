@@ -11,6 +11,9 @@ export type TipoCreditoFilters = {
   page?: number;
   limit?: number;
   search?: string;
+  status?: number;
+  deleted?: boolean;
+
 };
 
 export type CreditoEducacionalTipoResponse = {

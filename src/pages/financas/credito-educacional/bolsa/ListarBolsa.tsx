@@ -25,7 +25,7 @@ import { Link } from "react-router-dom";
 
 import { useDebounce } from "@/hooks/use-debounce";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateCreditoEducacional } from "@/hooks/financas/credito-educacional/use-create-credito-educacional";
+import { useCreateCreditoEducacional } from "@/hooks/financas/credito-educacional/use-create-tipo-credito-educacional";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { FetchBolsaParams } from "@/services/financas/bolsa/fetch-bolsa.service";

@@ -13,7 +13,7 @@ const CreditoEducacionalTipoSelect = ({
   enabledDefaultSelectItem,
 }: CreditoEducacionalTipoSelectProps) => {
   const id = useId();
-  const { data, isLoading } = useQueryFetchCreditoEducacionalTipo();
+  const { data, isLoading } = useQueryFetchCreditoEducacionalTipo({ deleted: false, status: 1 });
   const creditoEducacionalTipo = data?.data ?? [];
   const defaultSelectItem = enabledDefaultSelectItem
     ? [

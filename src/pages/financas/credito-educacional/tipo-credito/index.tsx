@@ -5,7 +5,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -18,29 +17,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Label } from "@/components/ui/label";
-import { FileText, Home, Pencil, Plus } from "lucide-react";
+import { FileText, Home, Pencil, Plus, Trash } from "lucide-react";
 import { Link } from "react-router-dom";
-
-import { useQueryFetchCreditoEducacional } from "@/hooks/financas/credito-educacional/use-query-fetch-credito-educacional";
-import { FetchCreditoEducacionalParams } from "@/services/financas/credito-educacional/fetch-credito-educacional.service";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useToast } from "@/hooks/use-toast";
-import { useCreateCreditoEducacional } from "@/hooks/financas/credito-educacional/use-create-credito-educacional";
 import { TipoCreditoDialog } from "./tipo-credito-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryFetchCreditoEducacionalTipo } from "@/hooks/financas/credito-educacional/use-query-fetch-credito-educacional-tipo";
 import { Badge } from "@/components/ui/badge";
 import { CreditoEducacionalTipo } from "@/services/financas/credito-educacional/fetch-credito-educacional-tipo.service";
+import { useDeleteTipoCreditoEducacional } from "@/hooks/financas/credito-educacional/use-delete-tipo-credito";
 const setDefaultValue = (value: string) =>
   value === "all" ? undefined : value;
 
 export default function TipoCredito() {
-  const { toast } = useToast();
-  const { mutateAsync, isPending } = useCreateCreditoEducacional();
+  const { mutate: deleteTipoCreditoEducacional } = useDeleteTipoCreditoEducacional();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [search, setSearch] = useState<string | undefined>(undefined);
   const debouncedSearch = useDebounce(search, 500);
 
@@ -48,33 +40,8 @@ export default function TipoCredito() {
     search: setDefaultValue(debouncedSearch),
   });
   const creditoEducacional = creditoEducacionalTipoResponse?.data ?? [];
-  const [formData, setFormData] = useState({
-    designacao: "",
-    codigoTipoDesconto: "",
-    valorDesconto: "",
-    codigoTipoCredito: "",
-  });
   const [selectedTipoCredito, setSelectedTipoCredito] = useState<CreditoEducacionalTipo | undefined>(undefined);
-  const handleSubmit = async () => {
-    await mutateAsync({
-      designacao: formData.designacao,
-      codigoTipoCredito: Number(formData.codigoTipoCredito),
-      codigoTipoDesconto: Number(formData.codigoTipoDesconto),
-      valorDesconto: Number(formData.valorDesconto),
-    });
 
-    toast({
-      title: "Crédito criado com sucesso",
-    });
-
-    setIsModalOpen(false);
-    setFormData({
-      designacao: "",
-      codigoTipoCredito: "",
-      codigoTipoDesconto: "",
-      valorDesconto: "",
-    });
-  };
   const handleSelectTipoCredito = (tipoCredito?: CreditoEducacionalTipo) => {
     if (!tipoCredito) {
       setSelectedTipoCredito(undefined);
@@ -88,6 +55,10 @@ export default function TipoCredito() {
   const handleOpenModal = () => {
     setSelectedTipoCredito(undefined);
     setIsModalOpen(true);
+  }
+
+  const handleDeleteTipoCreditoEducacional = (id: number) => {
+    deleteTipoCreditoEducacional({ id });
   }
 
   return (
@@ -188,7 +159,7 @@ export default function TipoCredito() {
                         {item.status === 1 ? "Ativo" : "Inativo"}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="space-x-2">
                       <Button
                         className="cursor-pointer"
                         variant="outline"
@@ -196,6 +167,14 @@ export default function TipoCredito() {
                         onClick={() => handleSelectTipoCredito(item)}
                       >
                         <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        className="cursor-pointer"
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => handleDeleteTipoCreditoEducacional(item.codigo)}
+                      >
+                        <Trash className="h-4 w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -211,8 +190,6 @@ export default function TipoCredito() {
         onOpenChange={setIsModalOpen}
         selectedTipoCredito={selectedTipoCredito}
         onSelectTipoCredito={handleSelectTipoCredito}
-      // onSubmit={handleSubmit}
-      // isSubmitting={isPending}
       />
     </div>
   );

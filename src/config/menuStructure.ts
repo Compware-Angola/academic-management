@@ -385,7 +385,7 @@ export const finaceStructure: MenuStructure = {
         },
         {
           title: "Tipos Credito", url: "/financas/credito/tipos",
-          //permission: [PermissionTypeDetails.LISTAR_BOLSEIROS.sigla]
+          permission: [PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla]
         },
         // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
