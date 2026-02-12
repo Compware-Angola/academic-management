@@ -73,7 +73,7 @@ import { PublicRoute } from "./components/auth/publicRounte";
 import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPagamento";
 import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
 import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
-import ListarCreditoEducacional from "./pages/financas/credito-educacional/ListarCreditoEducacional";
+import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
@@ -190,10 +190,31 @@ const App = () => {
                   />
                   <Route path="/schedule/:id/edit" element={<EditSchedule />} />
                   <Route path="horarios/sala" element={<SchedulesByRoom />} />
-                  <Route path="/salas/listar" element={<ClassromList />} />
+                  <Route path="/salas/listar"
+                  
+                  element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_SALAS.sigla!,
+                        ]}
+                      >
+                        <ClassromList />
+                      </ProtectedRoute>
+                    }
+                 />
                   <Route
                     path="/plano/disciplinas"
-                    element={<DisciplineManagementList />}
+
+                       element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla!,
+                        ]}
+                      >
+                        <DisciplineManagementList />
+                      </ProtectedRoute>
+                    }
+                   
                   />
                   {/* <Route
                   path="/inscricoes/matriculados"
@@ -405,12 +426,37 @@ const App = () => {
                     path="/acessos/criar-utilizador"
                     element={<CreateUser />}
                   />
+                  {/* 
                   <Route
                     path="/acessos/funcionalidade-utilizador"
                     element={<UserFunctionality />}
                   />
-                  <Route path="/acessos/grupo" element={<AcessGrup />} />
-                  <Route path="/controle-acesso/grupos" element={<Grupos />} />
+                  */}
+                  <Route path="/acessos/grupo" 
+                  
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla!,
+                          
+                        ]}
+                      >
+                        <AcessGrup />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="/controle-acesso/grupos"
+                  
+                  element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GRUPOS.sigla!,
+                          
+                        ]}
+                      >
+                        <Grupos />
+                      </ProtectedRoute>
+                    }  />
                   <Route
                     path="/ver-utilizadores/grupos"
                     element={<AccessGroup />}
@@ -439,11 +485,32 @@ const App = () => {
                   />
                   <Route
                     path="/plano/uc-plano"
-                    element={<UCManagementPlan />}
+                      element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla!,
+                          
+                        ]}
+                      >
+                        <UCManagementPlan />
+                      </ProtectedRoute>
+                    }
+                  
                   />
                   <Route
                     path="/plano/uc-departamento"
-                    element={<UcDepartmentManagement />}
+
+                       element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_DEPARTAMENTO.sigla!,
+                          
+                        ]}
+                      >
+                        <UcDepartmentManagement />
+                      </ProtectedRoute>
+                    }
+                  
                   />
                   <Route
                     path="/calendario/atividades"
@@ -494,10 +561,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route
-                    path="financas/credito/listar"
-                    element={<ListarCreditoEducacional />}
-                  /> */}
+                  <Route
+                    path="financas/credito/tipos"
+                    element={<TipoCredito />}
+                  />
                   <Route
                     path="financas/credito/instituicoes/todas"
                     element={

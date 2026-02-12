@@ -5,7 +5,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -18,71 +17,49 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Label } from "@/components/ui/label";
-import { FileText, Home, Plus } from "lucide-react";
+import { FileText, Home, Pencil, Plus, Trash } from "lucide-react";
 import { Link } from "react-router-dom";
-
-import { useQueryFetchCreditoEducacional } from "@/hooks/financas/credito-educacional/use-query-fetch-credito-educacional";
-import { CreditoEducacionalTipoSelect } from "@/components/common/global-selects/CreditoEducacionalTipoSelect";
-import { CreditoEducacionalTipoDescontoSelect } from "@/components/common/global-selects/CreditoEducacionalTipoDescontoSelect";
-import { FetchCreditoEducacionalParams } from "@/services/financas/credito-educacional/fetch-credito-educacional.service";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useToast } from "@/hooks/use-toast";
-import { useCreateCreditoEducacional } from "@/hooks/financas/credito-educacional/use-create-credito-educacional";
-import { CreateCreditoEducacionalDialog } from "./CreateCreditoEducacionalDialog";
+import { TipoCreditoDialog } from "./tipo-credito-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQueryFetchCreditoEducacionalTipo } from "@/hooks/financas/credito-educacional/use-query-fetch-credito-educacional-tipo";
+import { Badge } from "@/components/ui/badge";
+import { CreditoEducacionalTipo } from "@/services/financas/credito-educacional/fetch-credito-educacional-tipo.service";
+import { useDeleteTipoCreditoEducacional } from "@/hooks/financas/credito-educacional/use-delete-tipo-credito";
 const setDefaultValue = (value: string) =>
   value === "all" ? undefined : value;
 
-export default function ListarCreditoEducacional() {
-  const { toast } = useToast();
-  const { mutateAsync, isPending } = useCreateCreditoEducacional();
+export default function TipoCredito() {
+  const { mutate: deleteTipoCreditoEducacional } = useDeleteTipoCreditoEducacional();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filters, setFilters] = useState<FetchCreditoEducacionalParams>({
-    codigoTipoCredito: "all",
-    codigoTipoDesconto: "all",
-    designacao: "all",
-  });
   const [search, setSearch] = useState<string | undefined>(undefined);
   const debouncedSearch = useDebounce(search, 500);
-  const {
-    data: creditoEducacionalResponse,
-    isLoading: isLoadingCreditoEducational,
-  } = useQueryFetchCreditoEducacional({
-    codigoTipoCredito: setDefaultValue(filters.codigoTipoCredito),
-    codigoTipoDesconto: setDefaultValue(filters.codigoTipoDesconto),
-    designacao: setDefaultValue(debouncedSearch),
+
+  const { data: creditoEducacionalTipoResponse, isLoading: isLoadingCreditoEducationalTipo } = useQueryFetchCreditoEducacionalTipo({
+    search: setDefaultValue(debouncedSearch),
   });
+  const creditoEducacional = creditoEducacionalTipoResponse?.data ?? [];
+  const [selectedTipoCredito, setSelectedTipoCredito] = useState<CreditoEducacionalTipo | undefined>(undefined);
 
-  const creditoEducacional = creditoEducacionalResponse?.items ?? [];
-  const [formData, setFormData] = useState({
-    designacao: "",
-    codigoTipoDesconto: "",
-    valorDesconto: "",
-    codigoTipoCredito: "",
-  });
+  const handleSelectTipoCredito = (tipoCredito?: CreditoEducacionalTipo) => {
+    if (!tipoCredito) {
+      setSelectedTipoCredito(undefined);
+      setIsModalOpen(false);
+      return
+    }
+    setSelectedTipoCredito(tipoCredito);
+    setIsModalOpen(true);
+  }
 
-  const handleSubmit = async () => {
-    await mutateAsync({
-      designacao: formData.designacao,
-      codigoTipoCredito: Number(formData.codigoTipoCredito),
-      codigoTipoDesconto: Number(formData.codigoTipoDesconto),
-      valorDesconto: Number(formData.valorDesconto),
-    });
+  const handleOpenModal = () => {
+    setSelectedTipoCredito(undefined);
+    setIsModalOpen(true);
+  }
 
-    toast({
-      title: "Crédito criado com sucesso",
-    });
-
-    setIsModalOpen(false);
-    setFormData({
-      designacao: "",
-      codigoTipoCredito: "",
-      codigoTipoDesconto: "",
-      valorDesconto: "",
-    });
-  };
+  const handleDeleteTipoCreditoEducacional = (id: number) => {
+    deleteTipoCreditoEducacional({ id });
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -101,18 +78,15 @@ export default function ListarCreditoEducacional() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>Gestão de Crédito Educacional</BreadcrumbLink>
+            <BreadcrumbLink>Tipos de Crédito</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Listar Crédito Educacional</BreadcrumbPage>
-          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="text-2xl font-bold">Listar Crédito Educacional</h1>
+      <h1 className="text-2xl font-bold">Tipos de Crédito</h1>
       <p className="text-muted-foreground">
-        Lista completa de créditos educacionais atribuídos.
+        Tipos de crédito educacional.
       </p>
 
       <Card>
@@ -132,27 +106,12 @@ export default function ListarCreditoEducacional() {
                 }}
               />
             </div>
-
-            <CreditoEducacionalTipoSelect
-              enabledDefaultSelectItem
-              value={filters.codigoTipoCredito}
-              onChangeValue={(v) => {
-                setFilters((f) => ({ ...filters, codigoTipoCredito: v }));
-              }}
-            />
-            <CreditoEducacionalTipoDescontoSelect
-              enabledDefaultSelectItem
-              value={filters.codigoTipoDesconto}
-              onChangeValue={(v) => {
-                setFilters((f) => ({ ...filters, codigoTipoDesconto: v }));
-              }}
-            />
           </div>
         </CardContent>
       </Card>
 
       <div className="flex gap-2">
-        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+        <Button className="gap-2" onClick={handleOpenModal}>
           <Plus className="h-4 w-4" />
           Novo Crédito
         </Button>
@@ -160,7 +119,7 @@ export default function ListarCreditoEducacional() {
 
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
-        {isLoadingCreditoEducational ? (
+        {isLoadingCreditoEducationalTipo ? (
           <div className="space-y-3">
             {Array.from({ length: 10 }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
@@ -183,14 +142,41 @@ export default function ListarCreditoEducacional() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Designação</TableHead>
-                  <TableHead>Valor</TableHead>
+                  <TableHead>Sigla</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {creditoEducacional.map((item) => (
                   <TableRow key={item.codigo}>
                     <TableCell>{item.designacao}</TableCell>
-                    <TableCell>{item.valor_desconto}</TableCell>
+                    <TableCell>{item.sigla}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={item.status === 1 ? "default" : "secondary"}
+                      >
+                        {item.status === 1 ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="space-x-2">
+                      <Button
+                        className="cursor-pointer"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleSelectTipoCredito(item)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        className="cursor-pointer"
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => handleDeleteTipoCreditoEducacional(item.codigo)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -199,13 +185,11 @@ export default function ListarCreditoEducacional() {
         )}
       </div>
 
-      <CreateCreditoEducacionalDialog
+      <TipoCreditoDialog
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        formData={formData}
-        onChange={setFormData}
-        onSubmit={handleSubmit}
-        isSubmitting={isPending}
+        selectedTipoCredito={selectedTipoCredito}
+        onSelectTipoCredito={handleSelectTipoCredito}
       />
     </div>
   );

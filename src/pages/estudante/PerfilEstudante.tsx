@@ -152,7 +152,7 @@ export default function PerfilEstudante() {
    "reference" | "codigoFatura"
   >("codigoFatura");
   const [filters, setFilters] = useState({
-    anoLetivo: "23",
+    anoLetivo: "",
     estado: undefined as string | undefined,
   });
 
@@ -168,6 +168,7 @@ export default function PerfilEstudante() {
     codigoMatricula: matricula, 
     reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
     codigoFatura: searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
+    
   });
 
   const {

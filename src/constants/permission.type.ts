@@ -2,7 +2,6 @@ export enum PermissionType {
   FULL_ACCESS = "FULL_ACCESS",
   ATRIBUIR_PROVA = "ATRIBUIR_PROVA",
   LANCAMENTO_NOTAS_AVALIACOES = "LANCAMENTO_NOTAS_AVALIACOES",
-  TESTE = "TESTE",
   ESTATISTICA_CANDIDATOS_INSCRITOS = "ESTATISTICA_CANDIDATOS_INSCRITOS",
   ESTATISTICA_CANDIDATOS_POR_DIA = "ESTATISTICA_CANDIDATOS_POR_DIA",
   MOVIMENTAR_ESTUDANTES_POR_HORARIO = "MOVIMENTAR_ESTUDANTES_POR_HORARIO",
@@ -243,6 +242,7 @@ export enum PermissionType {
   ALTERAR_TIPO_DE_CANDIDATURA = "ALTERAR_TIPO_DE_CANDIDATURA",
 
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
+  LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL"
 }
 
 export const PermissionTypeDetails = {
@@ -982,6 +982,10 @@ export const PermissionTypeDetails = {
     designacao: "Listar A negociação de dividas",
     sigla: "m_lis_ndiv",
   },
+  LISTAR_TIPO_CREDITO_EDUCACIONAL: {
+    deseginacao: "Listar tipo de credito educacional",
+    sigla: "list_tpe"
+  }
 } as const;
 
 export type PermissionDetail = {

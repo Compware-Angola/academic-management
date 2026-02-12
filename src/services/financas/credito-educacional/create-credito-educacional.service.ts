@@ -1,16 +1,15 @@
 import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestFinance } from "@/lib/axios-nest-finance";
 
-export type CreateCreditoEducacionalBody = {
+export type CreateTipoCreditoEducacionalBody = {
   designacao: string;
-  codigoTipoDesconto: number;
-  valorDesconto: number;
-  codigoTipoCredito: number;
+  sigla: string
 };
 
-export async function createCreditoEducacional(
-  body: CreateCreditoEducacionalBody
+export async function createTipoCreditoEducacional(
+  body: CreateTipoCreditoEducacionalBody
 ) {
-  const { data } = await axiosApexGa.post("/financa/credito-educacional", body);
+  const { data } = await axiosNestFinance.post("/tipos-credito", body);
 
   return data;
 }
