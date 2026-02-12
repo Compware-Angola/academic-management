@@ -242,6 +242,7 @@ export enum PermissionType {
   ALTERAR_TIPO_DE_CANDIDATURA = "ALTERAR_TIPO_DE_CANDIDATURA",
 
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
+  LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL"
 }
 
 export const PermissionTypeDetails = {
@@ -981,6 +982,10 @@ export const PermissionTypeDetails = {
     designacao: "Listar A negociação de dividas",
     sigla: "m_lis_ndiv",
   },
+  LISTAR_TIPO_CREDITO_EDUCACIONAL: {
+    deseginacao: "Listar tipo de credito educacional",
+    sigla: "list_tpe"
+  }
 } as const;
 
 export type PermissionDetail = {

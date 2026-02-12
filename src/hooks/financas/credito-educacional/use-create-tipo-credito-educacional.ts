@@ -1,19 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  createCreditoEducacional,
-  CreateCreditoEducacionalBody,
+  CreateTipoCreditoEducacionalBody, createTipoCreditoEducacional
 } from "@/services/financas/credito-educacional/create-credito-educacional.service";
 
-export function useCreateCreditoEducacional() {
+export function useCreateTipoCreditoEducacional() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: CreateCreditoEducacionalBody) =>
-      createCreditoEducacional(body),
+    mutationFn: (body: CreateTipoCreditoEducacionalBody) =>
+      createTipoCreditoEducacional(body),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["credito-educacional"],
+        queryKey: ["credito-educacional-tipo"],
       });
     },
   });
