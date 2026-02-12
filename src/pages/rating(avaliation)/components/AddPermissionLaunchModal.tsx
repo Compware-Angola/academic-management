@@ -83,6 +83,7 @@ export default function AddPermissionLaunchModal({
     onClose();
   };
   const handleCreatePermission = async () => {
+
     const payload: AssessmentPermissionPayload = {
       anoLectivo: Number(filters.anoLetivo),
       dataFim: filters.dataFim,
@@ -91,6 +92,7 @@ export default function AddPermissionLaunchModal({
       tipoAvalacaoId: Number(filters.tipoAvaliacao),
       unidadeCurricular: Number(filters.unidadeCurricular),
     };
+
     createPermission(payload, {
       onSuccess: () => {
         onClose();
@@ -275,12 +277,12 @@ export default function AddPermissionLaunchModal({
                 placeholder="Data Início"
                 value={filters.dataInicio}
                 onChange={(e) =>
-                  setFilters({
-                    ...filters,
+                  setFilters((prev) => ({
+                    ...prev,
                     dataInicio: e.target.value,
-                  })
+                  }))
                 }
-              />
+                              />
             </div>
             <div className="space-y-2">
               <Label>Data Final</Label>
@@ -288,12 +290,14 @@ export default function AddPermissionLaunchModal({
                 type="date"
                 placeholder="Data Fim"
                 value={filters.dataFim}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    dataFim: e.target.value,
-                  })
-                }
+                onChange={(e) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  dataFim: e.target.value,
+                }));
+              }}
+
+                
               />
             </div>
           </div>
@@ -304,6 +308,7 @@ export default function AddPermissionLaunchModal({
             Fechar
           </Button>
           <Button
+          type="button"
             disabled={isCreateLoadingPermission}
             onClick={handleCreatePermission}
             size="lg"
