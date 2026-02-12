@@ -186,7 +186,18 @@ const App = () => {
                   />
                   <Route
                     path="/horarios/permissao"
-                    element={<SchedulesWithPermission />}
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla!,
+                        ]}
+                      >
+                        <SchedulesWithPermission />
+                      </ProtectedRoute>
+                    }
+
+                    
                   />
                   <Route path="/schedule/:id/edit" element={<EditSchedule />} />
                   <Route path="horarios/sala" element={<SchedulesByRoom />} />
@@ -473,11 +484,31 @@ const App = () => {
                   <Route path="/horarios/uc" element={<SchedulesByUC />} />
                   <Route
                     path="/horarios/docente"
-                    element={<TeacherSchedules />}
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
+                        ]}
+                      >
+                        <TeacherSchedules />
+                      </ProtectedRoute>
+                    }
+
+                    
                   />
                   <Route
                     path="/horarios/semanais"
-                    element={<HorariosSemanais />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
+                        ]}
+                      >
+                        <HorariosSemanais />
+                      </ProtectedRoute>
+                    }
+                    
                   />
                   <Route
                     path="/horarios/movimentar/estudantes"
