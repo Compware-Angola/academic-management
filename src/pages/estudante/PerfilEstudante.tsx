@@ -41,6 +41,8 @@ import {
   Clock,
   AlertTriangle,
   Eye,
+  RefreshCw,
+  Search,
 } from "lucide-react";
 import { useStudentDetail, useStudentDisciplinas } from "@/hooks/tudents/use-query-students";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,6 +50,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
 import ScheduleDetailsModal from "../schedules/components/ScheduleDetailsModal";
+import { useQueryFacturaItens, useQueryFacturas } from "@/hooks/horario/use-query-invoice";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { PaymentNoteActions } from "../financas/components/views/uma-payment-invoice";
 
 // Mock data for a complete student profile
 const mockEstudante = {
@@ -98,14 +104,24 @@ const mockEstudante = {
   bolseiro: false,
 };
 
-
-const mockPagamentos = [
-  { id: 1, referencia: "REF-2025-001", descricao: "Mensalidade Janeiro 2026", valor: 25000, data: "2025-01-10", estado: "Pago" },
-  { id: 2, referencia: "REF-2025-002", descricao: "Mensalidade Dezembro 2025", valor: 25000, data: "2025-12-15", estado: "Pago" },
-  { id: 3, referencia: "REF-2025-003", descricao: "Mensalidade Novembro 2025", valor: 25000, data: "2025-11-08", estado: "Pago" },
-  { id: 4, referencia: "REF-2025-004", descricao: "Mensalidade Outubro 2025", valor: 25000, data: null, estado: "Pendente" },
-  { id: 5, referencia: "REF-2025-005", descricao: "Propinas 2024/2025", valor: 15000, data: "2024-10-01", estado: "Pago" },
+const estados = [
+  { id: undefined, label: "Todos" },
+  { id: "0", label: "Pendente" },
+  { id: "1", label: "Pago" },
+  { id: "2", label: "Parcelado" },
+  { id: "3", label: "Anulado" },
 ];
+
+const searchOptions = [
+
+  { id: "reference", label: "Referência da Factura" },
+  { id: "codigoFatura", label: "Codigo da Factura" },
+];
+
+function truncate(text: string, max = 10) {
+  if (!text) return "";
+  return text.length > max ? text.slice(0, max) + "..." : text;
+}
 
 const mockDocumentos = [
   { id: 1, tipo: "Declaração de Matrícula", dataEmissao: "2025-09-01", estado: "Disponível" },
@@ -114,40 +130,130 @@ const mockDocumentos = [
   { id: 4, tipo: "Comprovativo de Pagamento", dataEmissao: "2025-12-15", estado: "Disponível" },
 ];
 
-
-
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
   const [activeTab, setActiveTab] = useState("geral");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [anoLetivo, setAnoLetivo] = useState<string | undefined>("23");
+  const [searchTerm, setSearchTerm] = useState("");
+  
+  const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openServicesModal, setOpenServicesModal] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string | null>(null);
+
+  function handleOpenServices(services: string) {
+    setSelectedServices(services);
+    setOpenServicesModal(true);
+  }
+
+  const [searchBy, setSearchBy] = useState<
+   "reference" | "codigoFatura"
+  >("codigoFatura");
+  const [filters, setFilters] = useState({
+    anoLetivo: "23",
+    estado: undefined as string | undefined,
+  });
+
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+
+  const { data, isLoading: LoadingFactura, 
+  isError: isErrorFacturas, 
+  error: errorFacturas, refetch } = useQueryFacturas({
+    anoLectivo: filters.anoLetivo,
+    status: filters.estado,
+    page,
+    limit,
+    codigoMatricula: matricula, 
+    reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
+    codigoFatura: searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
+  });
+
+  const {
+    data: itens,
+    isLoading: isLoadingItens,
+    isFetching: isFetchingItens,
+  } = useQueryFacturaItens(selectedFacturaCodigo ?? undefined);
+
+  const getStatusBadge = (status: number) => {
+    switch (status) {
+      case 0:
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pendente</Badge>;
+      case 1:
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Pago</Badge>;
+      case 2:
+        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Parcelado</Badge>;
+      case 3:
+        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Anulado</Badge>;
+      default:
+        return <Badge>Desconhecido</Badge>;
+    }
+  };
+
+  const formatCurrency = (value: number | undefined) => {
+    if (value === undefined) return "—";
+    return new Intl.NumberFormat("pt-AO", {
+      style: "currency",
+      currency: "AOA",
+      minimumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "—";
+    return new Date(dateStr).toLocaleDateString("pt-AO");
+  };
+
+  const handleViewDetails = (codigo: number) => {
+    setSelectedFacturaCodigo(codigo);
+    setIsModalOpen(true);
+  };
+
+  const handleNextPage = () => {
+    if (data && page < data.totalPages) setPage(page + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) setPage(page - 1);
+  };
+
+  const selectedFactura = data?.data.find((f) => f.codigo === selectedFacturaCodigo);
+
+  const placeholders: Record<string, string> = {
+   
+    reference: "Pesquisar por referência da factura...",
+    codigoFatura: "Pesquisar por Codigo da factura...",
+  };
+
+  const placeholderText = placeholders[searchBy] || "Pesquisar...";
+
   const {
     data: student,
     isLoading,
     isFetching,
     error
   } = useStudentDetail(matricula);
+
   const {
     data: response,
     isLoading: isDisciplinasLoading,
     isError,
   } = useStudentDisciplinas({
     matriculaId: matricula ?? '',
-    anoLectivo: Number(anoLetivo),   // ← descomente e ajuste se quiser filtrar por ano
-    // semestre: 1,               // ← descomente se quiser filtrar por semestre
+    anoLectivo: Number(anoLetivo),
     page,
     limit,
   });
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenDisciplina, setIsModalOpenDisciplina] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
 
   const openDetails = (turmaId: number) => {
     setSelectedTurmaId(turmaId);
-    setIsModalOpen(true);
+    setIsModalOpenDisciplina(true);
   };
+
   const disciplinas = response?.data ?? [];
   const total = response?.total ?? 0;
   const totalPages = response?.totalPages ?? 1;
@@ -186,11 +292,12 @@ export default function PerfilEstudante() {
         return <Badge variant="secondary">{estado}</Badge>;
     }
   };
+
   const getEstadoLabel = (estado: string | undefined) => {
     if (!estado) return "—";
     if (estado === "Fez com Sucesso") return "Aprovado";
     if (estado === "Pendente") return "Pendente";
-    return estado; // mantém o original se aparecer algo novo
+    return estado;
   };
 
   const getPagamentoEstadoBadge = (estado: string) => {
@@ -251,7 +358,7 @@ export default function PerfilEstudante() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Calendar className="h-4 w-4" />
-                    <span><strong>Ano:</strong> { '-'}º Ano</span>
+                    <span><strong>Ano:</strong> {'-'}º Ano</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />
@@ -270,11 +377,7 @@ export default function PerfilEstudante() {
             </div>
           </CardContent>
         </Card>
-
-
       </div>
-
-
 
       {/* Tabs with detailed information */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -304,13 +407,6 @@ export default function PerfilEstudante() {
             <span className="hidden md:inline">Documentos</span>
             <span className="md:hidden">Docs</span>
           </TabsTrigger>
-          {/* 
-          <TabsTrigger value="assiduidade" className="gap-2">
-            <Calendar className="h-4 w-4" />
-            <span className="hidden md:inline">Assiduidade</span>
-            <span className="md:hidden">Assid.</span>
-          </TabsTrigger>
-          */}
         </TabsList>
 
         {/* Tab: Dados Gerais */}
@@ -348,8 +444,6 @@ export default function PerfilEstudante() {
 
                   <span className="text-muted-foreground">BI:</span>
                   <span className="font-medium">{student.bi}</span>
-
-
                 </div>
               </CardContent>
             </Card>
@@ -365,8 +459,6 @@ export default function PerfilEstudante() {
 
                   <span className="text-muted-foreground">Email Pessoal:</span>
                   <span className="font-medium">{student.email}</span>
-
-
 
                   <span className="text-muted-foreground">Endereço:</span>
                   <span className="font-medium">{student.morada}</span>
@@ -397,14 +489,11 @@ export default function PerfilEstudante() {
                   <span className="text-muted-foreground">Faculdade:</span>
                   <span className="font-medium">{student.faculdade}</span>
 
-
-
                   <span className="text-muted-foreground">Grau:</span>
                   <span className="font-medium">{student.grau}</span>
 
                   <span className="text-muted-foreground">Regime:</span>
                   <span className="font-medium">{student.regime}</span>
-
                 </div>
               </CardContent>
             </Card>
@@ -414,42 +503,9 @@ export default function PerfilEstudante() {
                 <CardTitle className="text-lg">Progresso Académico</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                 <div className="text-center text-muted-foreground py-10">
-            A funcionalidade  estará disponível em breve.
-          </div>
-                 {/* 
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <span className="text-muted-foreground">Ano de Ingresso:</span>
-                  <span className="font-medium">{estudante.anoIngresso}</span>
-
-                  <span className="text-muted-foreground">Ano Curricular:</span>
-                  <span className="font-medium">{estudante.anoCurricular}º Ano</span>
-
-                  <span className="text-muted-foreground">Semestre Atual:</span>
-                  <span className="font-medium">{estudante.semestre}</span>
-
-                  <span className="text-muted-foreground">Média Geral:</span>
-                  <span className="font-medium text-primary text-lg">{estudante.mediaGeral}</span>
-
-                  <span className="text-muted-foreground">Créditos Obtidos:</span>
-                  <span className="font-medium">{estudante.creditosObtidos} / {estudante.creditosTotais}</span>
-
-                  <span className="text-muted-foreground">Estado:</span>
-                  <span>{getEstadoBadge(estudante.estado)}</span>
+                <div className="text-center text-muted-foreground py-10">
+                  A funcionalidade estará disponível em breve.
                 </div>
-
-               
-                <Separator className="my-4" />
-
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">Progresso do Curso</p>
-                  <Progress value={(estudante.creditosObtidos / estudante.creditosTotais) * 100} className="h-3" />
-                  <p className="text-xs text-muted-foreground mt-1 text-right">
-                    {Math.round((estudante.creditosObtidos / estudante.creditosTotais) * 100)}% concluído
-                  </p>
-                </div>
-                */}
               </CardContent>
             </Card>
           </div>
@@ -466,14 +522,13 @@ export default function PerfilEstudante() {
             </CardHeader>
 
             <CardContent className="space-y-6">
-              {/* Filtro de Ano Letivo – agora dentro do CardContent */}
               <div className="flex flex-wrap items-end gap-4">
                 <div className="min-w-[200px] max-w-[300px] w-full sm:w-auto">
                   <FormSelect
                     label="Ano Letivo"
                     disabled={isLoadingAcademicYear}
                     loading={isLoadingAcademicYear}
-                    value={anoLetivo ?? ""}           // ajuste se "todos" for uma string vazia ou "todos"
+                    value={anoLetivo ?? ""}
                     onChange={(v) => setAnoLetivo(v)}
                     options={anosAcademicos}
                     map={(a) => ({
@@ -483,13 +538,9 @@ export default function PerfilEstudante() {
                     })}
                   />
                 </div>
-
-                {/* Aqui pode adicionar mais filtros no futuro, ex: semestre */}
-                {/* <div className="min-w-[180px]"> ... </div> */}
               </div>
 
-              {/* Loading / Error / Empty / Tabela */}
-              {isLoading ? (
+              {isDisciplinasLoading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <Skeleton key={i} className="h-12 w-full rounded" />
@@ -548,7 +599,6 @@ export default function PerfilEstudante() {
                     </Table>
                   </div>
 
-                  {/* Paginação */}
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
                     <div className="text-sm text-muted-foreground order-2 sm:order-1">
                       Mostrando {disciplinas.length} de {total} disciplinas
@@ -582,7 +632,7 @@ export default function PerfilEstudante() {
                           variant="outline"
                           size="sm"
                           onClick={handlePrevious}
-                          disabled={page === 1 || isLoading}
+                          disabled={page === 1 || isDisciplinasLoading}
                         >
                           Anterior
                         </Button>
@@ -593,7 +643,7 @@ export default function PerfilEstudante() {
                           variant="outline"
                           size="sm"
                           onClick={handleNext}
-                          disabled={page === totalPages || isLoading}
+                          disabled={page === totalPages || isDisciplinasLoading}
                         >
                           Próximo
                         </Button>
@@ -604,22 +654,19 @@ export default function PerfilEstudante() {
               )}
             </CardContent>
           </Card>
+
+          <ScheduleDetailsModal
+            horarioId={selectedTurmaId}
+            isOpen={isModalOpenDisciplina}
+            onClose={() => {
+              setIsModalOpenDisciplina(false);
+              setSelectedTurmaId(null);
+            }}
+          />
         </TabsContent>
 
-        <ScheduleDetailsModal
-          horarioId={selectedTurmaId}
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedTurmaId(null);
-          }}
-        />
-
-
-        {/* Tab: Finanças */}
+        {/* Tab: Finanças - Aqui está a parte substituída */}
         <TabsContent value="financas" className="space-y-4">
-   {/* Tab: Finanças 
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className={estudante.saldoDevedor > 0 ? "border-destructive" : "border-green-500"}>
               <CardHeader className="pb-2">
@@ -627,7 +674,7 @@ export default function PerfilEstudante() {
               </CardHeader>
               <CardContent>
                 <p className={`text-3xl font-bold ${estudante.saldoDevedor > 0 ? 'text-destructive' : 'text-green-500'}`}>
-                  {estudante.saldoDevedor.toLocaleString()} Kz
+                 ---
                 </p>
                 {estudante.saldoDevedor > 0 && (
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
@@ -643,9 +690,9 @@ export default function PerfilEstudante() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Mensalidade</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-primary">{estudante.valorMensalidade.toLocaleString()} Kz</p>
+                <p className="text-3xl font-bold text-primary">---</p>
                 {estudante.desconto > 0 && (
-                  <p className="text-xs text-green-500 mt-1">Desconto de {estudante.desconto}% aplicado</p>
+                  <p className="text-xs text-green-500 mt-1">Desconto de  0 % aplicado</p>
                 )}
               </CardContent>
             </Card>
@@ -655,7 +702,7 @@ export default function PerfilEstudante() {
                 <CardTitle className="text-sm font-medium text-muted-foreground">Último Pagamento</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">{new Date(estudante.ultimoPagamento).toLocaleDateString('pt-AO')}</p>
+                <p className="text-3xl font-bold">{formatDate(estudante.ultimoPagamento)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{estudante.tipoPagamento}</p>
               </CardContent>
             </Card>
@@ -663,131 +710,325 @@ export default function PerfilEstudante() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Histórico de Pagamentos</CardTitle>
-              <CardDescription>Registo de todos os pagamentos efetuados</CardDescription>
+              <CardTitle className="text-lg">Histórico de Facturas</CardTitle>
+              <CardDescription>Registo de todas as notas de pagamento deste estudante</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Referência</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead className="text-right">Valor</TableHead>
-                    <TableHead className="text-center">Data</TableHead>
-                    <TableHead className="text-center">Estado</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockPagamentos.map((pag) => (
-                    <TableRow key={pag.id}>
-                      <TableCell className="font-mono">{pag.referencia}</TableCell>
-                      <TableCell>{pag.descricao}</TableCell>
-                      <TableCell className="text-right font-medium">{pag.valor.toLocaleString()} Kz</TableCell>
-                      <TableCell className="text-center">
-                        {pag.data ? new Date(pag.data).toLocaleDateString('pt-AO') : "-"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getPagamentoEstadoBadge(pag.estado)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <CardContent className="space-y-6">
+              {/* Filtros mantidos (sem pesquisa por matrícula/referência/código) */}
+              <div className="flex flex-wrap gap-4 items-end">
+                <div className="min-w-[200px]">
+                  <FormSelect
+                    label="Ano Letivo"
+                    disabled={isLoadingAcademicYear}
+                    loading={isLoadingAcademicYear}
+                    value={filters.anoLetivo ?? ""}
+                    onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
+                    options={anosAcademicos}
+                    map={(a) => ({
+                      key: a.codigo,
+                      label: a.designacao,
+                      value: a.codigo,
+                    })}
+                  />
+                </div>
+
+                <div className="min-w-[180px]">
+                  <FormSelect
+                    label="Estado"
+                    value={filters.estado}
+                    onChange={(v) => setFilters({ ...filters, estado: v })}
+                    options={estados}
+                    map={(e) => ({
+                      key: e.id,
+                      label: e.label,
+                      value: e.id,
+                    })}
+                  />
+                </div>
+
+            {/* Tipo de Pesquisa */}
+            <div className="min-w-[220px]">
+              <FormSelect
+                label="Pesquisar por"
+                value={searchBy}
+                onChange={(v) => {
+                  setSearchBy(
+                    v as | "reference" | "codigoFatura"
+                  );
+                  setSearchTerm("");
+                  setPage(1);
+                }}
+                options={searchOptions}
+                map={(o) => ({
+                  key: o.id,
+                  label: o.label,
+                  value: o.id,
+                })}
+              />
+            </div>
+
+            {/* Input Pesquisa */}
+            <div className="flex-1 min-w-[260px] relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-10"
+                placeholder={placeholderText}
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+
+                <Button variant="outline"   onClick={() => refetch()} className="gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Actualizar
+                </Button>
+              </div>
+
+            {LoadingFactura ? (
+    <div className="text-center py-10 text-muted-foreground flex flex-col items-center gap-3">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      A carregar facturas...
+    </div>
+  ) : isErrorFacturas ? (
+    <div className="text-center py-10 text-destructive border border-destructive/30 rounded-md bg-destructive/5">
+      <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-destructive" />
+      <p className="font-medium mb-1">Erro ao carregar as facturas</p>
+      <p className="text-sm text-muted-foreground mb-4">
+        {errorFacturas?.message || "Ocorreu um erro inesperado ao tentar obter os dados."}
+      </p>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={() => refetch()}
+        className="gap-2"
+      >
+        <RefreshCw className="h-4 w-4" />
+        Tentar novamente
+      </Button>
+    </div>
+  ) : data?.data?.length === 0 ? (
+    <div className="text-center py-10 text-muted-foreground border rounded-md bg-muted/30">
+      <FileText className="h-10 w-10 mx-auto mb-3 opacity-60" />
+      <p className="font-medium">Nenhuma factura encontrada</p>
+      <p className="text-sm mt-1">
+        {filters.anoLetivo 
+          ? `para o ano lectivo seleccionado` 
+          : "para este estudante neste momento"}
+      </p>
+    </div>
+  ) : (
+                <>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Código</TableHead>
+                          <TableHead>Referência</TableHead>
+                          <TableHead>Serviços</TableHead>
+                          <TableHead className="text-right">Valor</TableHead>
+                          <TableHead className="text-center">Emissão</TableHead>
+                          <TableHead className="text-center">Estado</TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data?.data?.map((nota) => (
+                          <TableRow key={nota.codigo}>
+                            <TableCell className="font-mono">{nota.codigo}</TableCell>
+                            <TableCell className="font-mono">{nota.referencia || "—"}</TableCell>
+                            <TableCell>
+                              {nota.servicos ? (
+                                nota.servicos.length > 40 ? (
+                                  <>
+                                    {truncate(nota.servicos, 40)}
+                                    <button
+                                      className="ml-2 text-blue-600 hover:underline text-xs"
+                                      onClick={() => handleOpenServices(nota.servicos)}
+                                    >
+                                      ver mais
+                                    </button>
+                                  </>
+                                ) : (
+                                  nota.servicos
+                                )
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatCurrency(nota.total_preco)}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {formatDate(nota.data_factura)}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {getStatusBadge(nota.estado)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleViewDetails(nota.codigo)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  <div className="flex justify-between items-center flex-wrap gap-4 pt-4">
+                    <div className="text-sm text-muted-foreground">
+                      Mostrando {data?.data?.length} de {data?.total}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handlePrevPage}
+                        disabled={page === 1}
+                      >
+                        Anterior
+                      </Button>
+                      <span className="text-sm">
+                        Página {page} de {data?.totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleNextPage}
+                        disabled={page >= data?.totalPages}
+                      >
+                        Próximo
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
-*/}  
-    <div className="text-center text-muted-foreground py-10">
-            A funcionalidade de Finanças estará disponível em breve.
-          </div>
 
+          {/* Modal de detalhes */}
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogContent className="max-w-4xl! max-h-[90vh]! overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Detalhes da Nota de Pagamento</DialogTitle>
+              </DialogHeader>
+
+              {selectedFactura && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-4">
+                      {getStatusBadge(selectedFactura.estado)}
+                      <span className="text-sm text-muted-foreground">
+                        Referência: {selectedFactura.referencia || selectedFactura.codigo}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Total</p>
+                      <p className="text-2xl font-bold">{formatCurrency(selectedFactura.total_preco)}</p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Estudante</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Matrícula</p>
+                        <p className="font-medium">{selectedFactura.codigo_matricula}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-muted-foreground">Nome</p>
+                        <p className="font-medium">{selectedFactura.nome_aluno}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Itens</h3>
+                    {isLoadingItens ? (
+                      <p className="text-center py-8">A carregar itens...</p>
+                    ) : !itens?.data?.length ? (
+                      <p className="text-center py-8 text-muted-foreground">Nenhum item encontrado</p>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Descrição</TableHead>
+                            <TableHead className="text-center">Qtd</TableHead>
+                            <TableHead className="text-right">Valor Unit.</TableHead>
+                            <TableHead className="text-right">Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {itens.data.map((item, idx) => (
+                            <TableRow key={idx}>
+                              <TableCell>
+                                {item.descricaoservico || "—"}
+                                {item.mesdescricao ? ` (${item.mesdescricao})` : ""}
+                              </TableCell>
+                              <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
+                              <TableCell className="text-right">{formatCurrency(item.preco)}</TableCell>
+                              <TableCell className="text-right font-medium">{formatCurrency(item.total)}</TableCell>
+                            </TableRow>
+                          ))}
+                          <TableRow className="bg-muted/50">
+                            <TableCell colSpan={3} className="text-right font-semibold">Total</TableCell>
+                            <TableCell className="text-right font-bold">{formatCurrency(selectedFactura.total_preco)}</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    )}
+                  </div>
+                   <Separator />
+                
+                              {/* Ações */}
+                              <div className="flex gap-3 justify-end">
+                                <PaymentNoteActions
+                                  nota={selectedFactura}
+                                  itens={itens?.data || []}
+                                  showDownload={true}
+                                  showPrint={true}
+                                />
+                              </div>
+                </div>
+                
+              )}
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={openServicesModal} onOpenChange={setOpenServicesModal}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Serviços / Descrição Completa</DialogTitle>
+              </DialogHeader>
+              <div className="py-4 text-sm whitespace-pre-wrap">
+                {selectedServices || "Sem descrição adicional"}
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setOpenServicesModal(false)}>
+                  Fechar
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         {/* Tab: Documentos */}
         <TabsContent value="documentos" className="space-y-4">
-           {/*
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Documentos Disponíveis</CardTitle>
-              <CardDescription>Documentos académicos e administrativos do estudante</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tipo de Documento</TableHead>
-                    <TableHead className="text-center">Data de Emissão</TableHead>
-                    <TableHead className="text-center">Estado</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {mockDocumentos.map((doc) => (
-                    <TableRow key={doc.id}>
-                      <TableCell className="font-medium">{doc.tipo}</TableCell>
-                      <TableCell className="text-center">
-                        {doc.dataEmissao ? new Date(doc.dataEmissao).toLocaleDateString('pt-AO') : "-"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {doc.estado === "Disponível" ? (
-                          <Badge className="bg-green-500 hover:bg-green-600">{doc.estado}</Badge>
-                        ) : (
-                          <Badge variant="secondary">{doc.estado}</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {doc.estado === "Disponível" && (
-                          <Button variant="outline" size="sm" className="gap-2">
-                            <Download className="h-4 w-4" />
-                            Download
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-          */}
           <div className="text-center text-muted-foreground py-10">
             A funcionalidade de documentos estará disponível em breve.
           </div>
         </TabsContent>
-
-        {/* Tab: Assiduidade 
-        <TabsContent value="assiduidade" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Registo de Assiduidade</CardTitle>
-              <CardDescription>Presenças por disciplina no semestre atual</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockAssiduidade.map((item) => (
-                  <div key={item.disciplina} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{item.disciplina}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {item.presencas}/{item.total} presenças ({item.percentagem}%)
-                      </span>
-                    </div>
-                    <Progress 
-                      value={item.percentagem} 
-                      className={`h-2 ${item.percentagem < 75 ? '[&>div]:bg-destructive' : ''}`}
-                    />
-                    {item.percentagem < 75 && (
-                      <p className="text-xs text-destructive flex items-center gap-1">
-                        <XCircle className="h-3 w-3" />
-                        Assiduidade abaixo do mínimo exigido (75%)
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        */}
       </Tabs>
     </div>
   );
