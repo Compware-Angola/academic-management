@@ -159,7 +159,7 @@ export default function AddMarkingAssessment() {
           <BreadcrumbItem>Marcação</BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Controle</BreadcrumbPage>
+            <BreadcrumbPage>Marcação de Prova</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -170,7 +170,7 @@ export default function AddMarkingAssessment() {
           <BookOpen className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold">Marcação de Prova</h1>
-            <p className="text-muted-foreground">Controle de Nota</p>
+            <p className="text-muted-foreground">Marcação de Prova</p>
           </div>
         </div>
         <Button size="sm" onClick={() => openAddMarkingModal()}>
@@ -412,7 +412,7 @@ export default function AddMarkingAssessment() {
                         <TableCell>
                           {formatarData(item.tcp_data_prova)}
                         </TableCell>
-                        <TableCell>{item.duracaoprova}</TableCell>
+                        <TableCell>{item.duracaoprova} min</TableCell>
                         <TableCell>{item.tcp_hora_prova}</TableCell>
                         <TableCell>{item.horatermino}</TableCell>
                         <TableCell className="text-center">
@@ -422,7 +422,7 @@ export default function AddMarkingAssessment() {
                               variant="outline"
                               onClick={() => openDetails(item.vigilantes)}
                             >
-                              <Eye className="h-4 w-4 mr-2" /> Ver Vigentes
+                              <Eye className="h-4 w-4 mr-2" /> Ver Vigilantes
                             </Button>
                           </div>
                         </TableCell>

@@ -20,7 +20,7 @@ export function useQueryGradesCreationPrompt({
         semestre: semestre,
         typeAvaliation: typeAvaliation,
       }),
-    enabled: !!anoLectivo,
+    enabled: !!anoLectivo && !!semestre && !!typeAvaliation,
     staleTime: 1000 * 60 * 5,
   });
 }

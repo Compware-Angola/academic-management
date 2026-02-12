@@ -1,3 +1,11 @@
+import { useMemo } from "react";
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -113,6 +121,103 @@ export default function PagamentosReferencia() {
   );
   const tableData = pagamentoResponse?.data || [];
   const total = pagamentoResponse?.total || 0;
+
+  const pdfData = useMemo(() => {
+  if (!tableData.length) return null;
+
+  return {
+    filtros: [
+      filtersApplied.anoLectivo && `Ano letivo: ${filtersApplied.anoLectivo}`,
+      filtersApplied.servico && `Serviço: ${filtersApplied.servico}`,
+      filtersApplied.estado && `Estado: ${filtersApplied.estado}`,
+      filtersApplied.matricula && `Matrícula: ${filtersApplied.matricula}`,
+      filtersApplied.referencia && `Referência: ${filtersApplied.referencia}`,
+      filtersApplied.factura && `Factura: ${filtersApplied.factura}`,
+      filtersApplied.dataInicial &&
+        `Data inicial: ${filtersApplied.dataInicial}`,
+      filtersApplied.dataFinal && `Data final: ${filtersApplied.dataFinal}`,
+    ]
+      .filter(Boolean)
+      .join(" | ") || "Sem filtros",
+
+    total,
+
+    rows: tableData.map((p) => ({
+      matricula: p.codigo_matricula,
+      aluno: p.nome,
+      factura: p.codigo_factura,
+      entidade: p.entidade,
+      referencia: p.referencia,
+      valor: p.preco,
+      dataReferencia: formatarData(p.data_inicio),
+      dataExpiracao: formatarData(p.data_final),
+      dataPagamento: formatarData(p.data_pagamento),
+      estado: p.estado,
+    })),
+  };
+}, [tableData, filtersApplied, total]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Pagamentos por Referência"
+    subtitle="Lista de pagamentos realizados por referência bancária"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "matricula", label: "Matrícula", width: "10%" },
+        { key: "aluno", label: "Aluno", width: "18%" },
+        { key: "factura", label: "Factura", width: "10%" },
+        { key: "entidade", label: "Entidade", width: "10%" },
+        { key: "referencia", label: "Referência", width: "12%" },
+        { key: "valor", label: "Valor", width: "10%" },
+        { key: "dataReferencia", label: "Data Ref.", width: "10%" },
+        { key: "dataExpiracao", label: "Expiração", width: "10%" },
+        { key: "dataPagamento", label: "Pagamento", width: "10%" },
+        { key: "estado", label: "Estado", width: "10%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Pagamentos por Referência",
+      subtitle: "Lista de pagamentos realizados por referência bancária",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Matrícula", width: 18 },
+          { key: "aluno", label: "Aluno", width: 30 },
+          { key: "factura", label: "Factura", width: 20 },
+          { key: "entidade", label: "Entidade", width: 20 },
+          { key: "referencia", label: "Referência", width: 22 },
+          { key: "valor", label: "Valor", width: 18 },
+          { key: "dataReferencia", label: "Data Referência", width: 22 },
+          { key: "dataExpiracao", label: "Data Expiração", width: 22 },
+          { key: "dataPagamento", label: "Data Pagamento", width: 22 },
+          { key: "estado", label: "Estado", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+const baseFileName = `Pagamentos_Referencia_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
+
+
   const totalPages = Math.ceil(total / limit);
   return (
     <div className="p-6 space-y-6">
@@ -252,9 +357,32 @@ export default function PagamentosReferencia() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader>
+                
+     <CardHeader className="space-y-2">
+          {/* Exportações */}
+          {pdfData && excelProps && (
+            <div className="flex justify-end gap-2">
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
+
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            </div>
+          )}
+
           <CardTitle>Lista de Pagamentos</CardTitle>
         </CardHeader>
+
+
         <CardContent>
           {isFetching ? (
             <div className="flex flex-col items-center justify-center py-16">

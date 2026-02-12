@@ -1,3 +1,9 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -87,28 +93,134 @@ export default function TodasInstituicoes() {
 
   const instituicoes = data?.items ?? [];
 
+  const exportData = instituicoes.map((item) => ({
+  instituicao: item.instituicao,
+  sigla: item.sigla ?? "-",
+  nif: item.nif,
+  contacto: item.contacto ?? "-",
+  endereco: item.endereco ?? "-",
+}));
+
+const baseFileName = `Instituicoes_${new Date().toISOString().slice(0, 10)}`;
+
+const pdfData = exportData.length
+  ? {
+      filtros: [
+        filters.instituicao && `Instituição: ${filters.instituicao}`,
+        filters.nif && `NIF: ${filters.nif}`,
+      ]
+        .filter(Boolean)
+        .join(" | ") || "Sem filtros",
+
+      total: exportData.length,
+
+      rows: exportData.map((item, index) => ({
+        id: index + 1,
+        instituicao: item.instituicao,
+        sigla: item.sigla,
+        nif: item.nif,
+        contacto: item.contacto,
+        endereco: item.endereco,
+      })),
+    }
+  : null;
+
+  const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Instituições"
+    subtitle="Instituições registadas no sistema"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de instituições: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "id", label: "#", width: "6%" },
+        { key: "instituicao", label: "Instituição", width: "30%" },
+        { key: "sigla", label: "Sigla", width: "10%" },
+        { key: "nif", label: "NIF", width: "18%" },
+        { key: "contacto", label: "Contacto", width: "16%" },
+        { key: "endereco", label: "Endereço", width: "20%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = {
+  documentTitle: "Lista de Instituições",
+  subtitle: "Instituições registadas no sistema",
+  infoSections: [
+    { title: "Filtros Aplicados", content: pdfData?.filtros ?? "Sem filtros" },
+    { title: "Resumo", content: [`Total de instituições: ${exportData.length}`] },
+  ],
+  mainTable: {
+    headers: [
+      { key: "instituicao", label: "Instituição", width: 40 },
+      { key: "sigla", label: "Sigla", width: 15 },
+      { key: "nif", label: "NIF", width: 25 },
+      { key: "contacto", label: "Contacto", width: 25 },
+      { key: "endereco", label: "Endereço", width: 40 },
+    ],
+    rows: exportData,
+  },
+  footerNotice: "Documento gerado automaticamente pelo sistema.",
+  primaryColor: "#1e40af",
+};
+
+
   return (
     <div className="p-6 space-y-6">
       {/* Breadcrumb */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/">
-                <Home className="h-4 w-4" />
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink>Finanças</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Todas Instituições</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div className="space-y-1">
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-4 w-4" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink>Finanças</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Todas Instituições</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+
+    <h1 className="text-2xl font-bold tracking-tight">
+      Todas Instituições
+    </h1>
+  </div>
+
+  {instituicoes.length > 0 && (
+    <div className="flex flex-wrap gap-2">
+      {pdfContent && (
+        <PDFActions
+          document={pdfContent}
+          fileName={`${baseFileName}.pdf`}
+          showDownload
+          showPrint
+        />
+      )}
+
+      <ExcelActions
+        excelProps={excelProps}
+        fileName={`${baseFileName}.xlsx`}
+        showDownload
+      />
+    </div>
+  )}
+</div>
+
 
       <Card>
         <CardHeader>

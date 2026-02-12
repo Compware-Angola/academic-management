@@ -1,4 +1,10 @@
 // src/pages/UserAccess.tsx
+import { useMemo } from "react";
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -68,6 +74,90 @@ export default function UserAccess() {
   const total = usersResponse?.total ?? 0;
   const totalPages = usersResponse?.totalPages ?? 1;
 
+  
+  const pdfData = useMemo(() => {
+  if (!users.length) return null;
+
+  return {
+    filtros: [
+      ativo === undefined
+        ? "Estado: Todos"
+        : ativo
+        ? "Estado: Ativos"
+        : "Estado: Inativos",
+      searchTerm && `Pesquisa: ${searchTerm}`,
+    ]
+      .filter(Boolean)
+      .join(" | "),
+
+    total,
+
+    rows: users.map((u: User) => ({
+      codigo: u.codigo,
+      nome: u.nome,
+      username: u.username,
+      email: u.email || "N/A",
+      telefone1: u.telefone1 || "N/A",
+      telefone2: u.telefone2 || "N/A",
+    })),
+  };
+}, [users, total, ativo, searchTerm]);
+
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Acessos por Utilizador"
+    subtitle="Listagem de utilizadores do sistema"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de utilizadores: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "codigo", label: "Código", width: "8%" },
+        { key: "nome", label: "Nome", width: "22%" },
+        { key: "username", label: "Username", width: "15%" },
+        { key: "email", label: "Email", width: "20%" },
+        { key: "telefone1", label: "Telefone", width: "15%" },
+        { key: "telefone2", label: "Telefone (2)", width: "15%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Acessos por Utilizador",
+      subtitle: "Listagem de utilizadores do sistema",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de utilizadores: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "codigo", label: "Código", width: 10 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "username", label: "Username", width: 20 },
+          { key: "email", label: "Email", width: 30 },
+          { key: "telefone1", label: "Telefone", width: 20 },
+          { key: "telefone2", label: "Telefone (2)", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+
+  const baseFileName = `Utilizadores_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
+
+
   // Atualiza página ao mudar itens por página
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
@@ -92,32 +182,54 @@ export default function UserAccess() {
       </nav>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Acessos por utilizador
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gestão de permissões por utilizador
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-            <Button onClick={() => navigate("/acessos/criar-utilizador")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Criar Utilizador
-        </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isLoading}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-            />
-            Atualizar
-          </Button>
-        </div>
-      </div>
+  <div>
+    <h1 className="text-3xl font-bold tracking-tight">
+      Acessos por utilizador
+    </h1>
+    <p className="text-muted-foreground mt-1">
+      Gestão de permissões por utilizador
+    </p>
+  </div>
+
+  <div className="flex flex-wrap gap-2">
+    <Button onClick={() => navigate("/acessos/criar-utilizador")}>
+      <Plus className="mr-2 h-4 w-4" />
+      Criar Utilizador
+    </Button>
+
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => refetch()}
+      disabled={isLoading}
+    >
+      <RefreshCw
+        className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+      />
+      Atualizar
+    </Button>
+
+    {pdfData && excelProps && (
+      <>
+        {pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
+          />
+        )}
+
+        <ExcelActions
+          excelProps={excelProps}
+          fileName={`${baseFileName}.xlsx`}
+          showDownload
+        />
+      </>
+    )}
+  </div>
+</div>
+
 
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">

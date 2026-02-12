@@ -93,7 +93,7 @@ const App = () => {
           <AuthProvider>
             <TooltipProvider>
               <Toaster />
-              <Sonner />
+              <Sonner position="top-center" closeButton richColors />
               <Routes>
                 <Route element={<PublicRoute />}>
                   <Route path="/" element={<Login />} />
