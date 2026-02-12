@@ -114,6 +114,7 @@ export function TipoCreditoDialog({
             onClick={handleSubmit}
             disabled={
               isCreating ||
+              isUpdating ||
               !formData.designacao ||
               !formData.sigla
             }

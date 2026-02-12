@@ -5,6 +5,9 @@ export type CreditoEducacionalTipo = {
   codigo: number;
   sigla: string;
   status: number;
+  deleteat: string;
+  createdat: string;
+  updatedat: string;
 };
 
 export type TipoCreditoFilters = {
