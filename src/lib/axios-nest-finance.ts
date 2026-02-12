@@ -40,6 +40,7 @@ axiosNestFinance.interceptors.response.use(
         const parsed = data as ApiErrorResponse;
         errorData = parsed;
         message = parsed.message || parsed.error || message;
+        toast.dismiss()
         toast.error(message);
       } catch {
         if (typeof data === "string") {
