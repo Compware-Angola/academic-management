@@ -31,7 +31,7 @@ export const useStudentSugestoes = (search: string = '') => {
    Detalhes completos / estatísticas de um aluno
    ============================================= */
 export const useStudentDetail = (codigoMatricula?: number | string) => {
-  const queryClient = useQueryClient();
+
 
   return useQuery<StudentDetail, Error>({
     queryKey: ['student-detail', String(codigoMatricula ?? '').trim()],

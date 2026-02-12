@@ -54,6 +54,7 @@ import { useQueryFacturaItens, useQueryFacturas } from "@/hooks/horario/use-quer
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { PaymentNoteActions } from "../financas/components/views/uma-payment-invoice";
+import { buildImageAssets } from "@/util/build-image-assets";
 
 // Mock data for a complete student profile
 const mockEstudante = {
@@ -301,17 +302,8 @@ export default function PerfilEstudante() {
     return estado;
   };
 
-  const getPagamentoEstadoBadge = (estado: string) => {
-    switch (estado) {
-      case "Pago":
-        return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="h-3 w-3 mr-1" />Pago</Badge>;
-      case "Pendente":
-        return <Badge variant="destructive"><Clock className="h-3 w-3 mr-1" />Pendente</Badge>;
-      default:
-        return <Badge variant="secondary">{estado}</Badge>;
-    }
-  };
 
+ const currentPhotoUrl = buildImageAssets(student.foto)
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -337,10 +329,27 @@ export default function PerfilEstudante() {
         <Card className="flex-1">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-6">
-              <Avatar className="h-32 w-32">
-                <AvatarImage src={estudante.foto} alt={student.nome_completo} />
-                <AvatarFallback className="text-3xl">{student?.nome_completo?.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
-              </Avatar>
+             <Avatar className="h-32 w-32">
+  <AvatarImage 
+    src={currentPhotoUrl} 
+    alt={student.nome_completo || "Foto do estudante"}
+    // Opcional: força recarregamento se a URL mudar
+   key={currentPhotoUrl}
+  />
+  
+  <AvatarFallback 
+    className="text-3xl font-medium bg-linear-to-br from-gray-100 to-gray-200 text-gray-600"
+  >
+    {student?.nome_completo
+      ? student.nome_completo
+          .trim()
+          .split(/\s+/)
+          .map(n => n[0]?.toUpperCase() ?? '')
+          .join('')
+          .slice(0, 2)
+      : "??"}  {/* fallback caso nome esteja vazio */}
+  </AvatarFallback>
+</Avatar>
 
               <div className="flex-1 space-y-4">
                 <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
@@ -668,47 +677,77 @@ export default function PerfilEstudante() {
 
         {/* Tab: Finanças - Aqui está a parte substituída */}
         <TabsContent value="financas" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className={estudante.saldoDevedor > 0 ? "border-destructive" : "border-green-500"}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Saldo Devedor</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className={`text-3xl font-bold ${estudante.saldoDevedor > 0 ? 'text-destructive' : 'text-green-500'}`}>
-                 ---
-                </p>
-                {estudante.saldoDevedor > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3 text-destructive" />
-                    Pagamento pendente
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+  {/* Novo Card - Saldo do Estudante */}
+  <Card className={student.saldo_atual >= 0 ? "border-green-500" : "border-amber-500"}>
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium text-muted-foreground">Saldo Atual</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className={`text-3xl font-bold ${student.saldo_atual > 0 ? 'text-green-600' : 
+        student.saldo_atual < 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+        {student.saldo_atual >= 0 ? '+' : ''}{formatCurrency(student.saldo_atual || 0)}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        {student.saldo_atual > 0 
+          ? "Crédito disponível" 
+          : student.saldo_atual < 0 
+            ? "Saldo negativo (ver detalhes)" 
+            : "Sem saldo"}
+      </p>
+    </CardContent>
+  </Card>
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Mensalidade</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold text-primary">---</p>
-                {estudante.desconto > 0 && (
-                  <p className="text-xs text-green-500 mt-1">Desconto de  0 % aplicado</p>
-                )}
-              </CardContent>
-            </Card>
+  {/* Saldo Devedor */}
+  <Card className={estudante.saldoDevedor > 0 ? "border-destructive" : "border-green-500"}>
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium text-muted-foreground">Saldo Devedor</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className={`text-3xl font-bold ${estudante.saldoDevedor > 0 ? 'text-destructive' : 'text-green-500'}`}>
+      ---
+      </p>
+      {estudante.saldoDevedor > 0 && (
+        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3 text-destructive" />
+          Pagamento pendente
+        </p>
+      )}
+    </CardContent>
+  </Card>
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Último Pagamento</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{formatDate(estudante.ultimoPagamento)}</p>
-                <p className="text-xs text-muted-foreground mt-1">{estudante.tipoPagamento}</p>
-              </CardContent>
-            </Card>
-          </div>
+  {/* Mensalidade */}
+  <Card>
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium text-muted-foreground">Mensalidade</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-3xl font-bold text-primary">
+        ---
+      </p>
+      {estudante.desconto > 0 && (
+        <p className="text-xs text-green-500 mt-1">
+          Desconto de 0 % aplicado
+        </p>
+      )}
+    </CardContent>
+  </Card>
 
+  {/* Último Pagamento */}
+  <Card>
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium text-muted-foreground">Último Pagamento</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-3xl font-bold">
+        {formatDate(estudante.ultimoPagamento)}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        {estudante.tipoPagamento || "—"}
+      </p>
+    </CardContent>
+  </Card>
+</div>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Histórico de Facturas</CardTitle>
