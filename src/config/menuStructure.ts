@@ -7,7 +7,7 @@ import {
   Building,
   HomeIcon,
   BadgeDollarSign,
-  HelpCircle,
+ 
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
@@ -42,7 +42,7 @@ export const menuStructure: MenuStructure = {
           url: "/acessos/criar-utilizador",
           permission: [PermissionTypeDetails.CRIAR_UTILIZADOR.sigla],
         },
-        { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo" },
+        { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo",permission:[PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla] },
         //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
         {
           title: "Acessos (todos) + novos",
@@ -71,7 +71,7 @@ export const menuStructure: MenuStructure = {
           url: "/acessos/logados",
           permission: [PermissionTypeDetails.LISTAR_UTILIZADORES_LOGADOS.sigla],
         },
-        { title: "Grupos", url: "/controle-acesso/grupos" },
+        { title: "Grupos", url: "/controle-acesso/grupos", permission:[PermissionTypeDetails.GRUPOS.sigla] },
        
       ],
 
@@ -224,14 +224,15 @@ export const menuStructure: MenuStructure = {
       icon: BookOpen,
       items: [
         // { title: "Gestão de Curso", url: "/plano/cursos" },
-        { title: "Gestão de disciplinas", url: "/plano/disciplinas" },
+        { title: "Gestão de disciplinas", url: "/plano/disciplinas",permission:[PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla] },
         // { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
 
         {
           title: "Gestão de UC por departamento",
           url: "/plano/uc-departamento",
+          permission:[PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_DEPARTAMENTO.sigla]
         },
-        { title: "Gestão de UC no plano", url: "/plano/uc-plano" },
+        { title: "Gestão de UC no plano", url: "/plano/uc-plano" ,permission:[PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla]},
       ],
 
       permission: [],
