@@ -72,7 +72,7 @@ export const menuStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_UTILIZADORES_LOGADOS.sigla],
         },
         { title: "Grupos", url: "/controle-acesso/grupos" },
-       
+
       ],
 
       permission: [],
@@ -380,6 +380,10 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/negociacao-divida",
           permission: [PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla],
         },
+        {
+          title: "Tipos Credito", url: "/financas/credito/tipos",
+          //permission: [PermissionTypeDetails.LISTAR_BOLSEIROS.sigla]
+        },
         // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
 
@@ -390,6 +394,7 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/credito/instituicoes/todas",
           permission: [PermissionTypeDetails.INSTITUICOES.sigla],
         },
+
         // {
         //   title: "Instituições com Despesa",
         //   url: "/financas/credito/instituicoes/despesa",
@@ -398,7 +403,7 @@ export const finaceStructure: MenuStructure = {
         //   title: "Instituições com Receita",
         //   url: "/financas/credito/instituicoes/receita",
         // },
-        { title: "Bolsas", url: "financas/credito/bolsa" },
+        { title: "Bolsas", url: "/financas/credito/bolsa" },
         {
           title: "Bolsa Estudante",
           url: "/financas/credito/bolsa/estudante",
@@ -506,12 +511,12 @@ export const healpStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
         */
-       // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-       // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
-         {
+        // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
+        // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
+        {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
-          permission:[]
+          permission: []
         }
       ],
 

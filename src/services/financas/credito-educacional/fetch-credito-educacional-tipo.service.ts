@@ -1,17 +1,32 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestFinance } from "@/lib/axios-nest-finance";
 
 export type CreditoEducacionalTipo = {
   designacao: string;
   codigo: number;
+  sigla: string;
+  status: number;
+};
+
+export type TipoCreditoFilters = {
+  page?: number;
+  limit?: number;
+  search?: string;
 };
 
 export type CreditoEducacionalTipoResponse = {
-  items: CreditoEducacionalTipo[];
+  data: CreditoEducacionalTipo[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 };
 
-export async function fetchCreditoEducacionalTipo(): Promise<CreditoEducacionalTipoResponse> {
-  const { data } = await axiosApexGa.get<CreditoEducacionalTipoResponse>(
-    "/financa/credito-educacional/tipo"
+export async function fetchCreditoEducacionalTipo(filters?: TipoCreditoFilters): Promise<CreditoEducacionalTipoResponse> {
+  const { data } = await axiosNestFinance.get<CreditoEducacionalTipoResponse>(
+    "/tipos-credito",
+    {
+      params: filters,
+    }
   );
 
   return data;

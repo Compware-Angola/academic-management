@@ -30,7 +30,7 @@ import { useCreateCreditoEducacional } from "@/hooks/financas/credito-educaciona
 import { Skeleton } from "@/components/ui/skeleton";
 import { FetchBolsaParams } from "@/services/financas/bolsa/fetch-bolsa.service";
 import { useQueryFetchBolsa } from "@/hooks/financas/bolsa/use-query-fetch-bolsa";
-import { CreateCreditoEducacionalDialog } from "../ListarCreditoEducacional/CreateCreditoEducacionalDialog";
+import { CreateCreditoEducacionalDialog } from "../tipo-credito/tipo-credito-dialog";
 import { CreateBolsaDialog, CreateBolsaFormData } from "./CreateBolsaDialog";
 import { useMutationCreateBolsa } from "@/hooks/financas/bolsa/use-mutation-create-bolsa";
 const setDefaultValue = (value: string) =>

@@ -73,7 +73,7 @@ import { PublicRoute } from "./components/auth/publicRounte";
 import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPagamento";
 import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
 import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
-import ListarCreditoEducacional from "./pages/financas/credito-educacional/ListarCreditoEducacional";
+import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
@@ -388,10 +388,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route
-                    path="financas/credito/listar"
-                    element={<ListarCreditoEducacional />}
-                  /> */}
+                  <Route
+                    path="financas/credito/tipos"
+                    element={<TipoCredito />}
+                  />
                   <Route
                     path="financas/credito/instituicoes/todas"
                     element={
