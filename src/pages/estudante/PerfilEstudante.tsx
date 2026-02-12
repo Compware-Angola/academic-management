@@ -333,7 +333,7 @@ export default function PerfilEstudante() {
   <AvatarImage 
     src={currentPhotoUrl} 
     alt={student.nome_completo || "Foto do estudante"}
-    // Opcional: força recarregamento se a URL mudar
+   
    key={currentPhotoUrl}
   />
   
@@ -347,7 +347,7 @@ export default function PerfilEstudante() {
           .map(n => n[0]?.toUpperCase() ?? '')
           .join('')
           .slice(0, 2)
-      : "??"}  {/* fallback caso nome esteja vazio */}
+      : "??"}  
   </AvatarFallback>
 </Avatar>
 
@@ -750,7 +750,7 @@ export default function PerfilEstudante() {
 </div>
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Histórico de Facturas</CardTitle>
+              <CardTitle className="text-lg">Histórico de Notas de Pagamento </CardTitle>
               <CardDescription>Registo de todas as notas de pagamento deste estudante</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
