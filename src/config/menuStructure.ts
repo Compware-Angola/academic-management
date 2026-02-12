@@ -398,7 +398,7 @@ export const finaceStructure: MenuStructure = {
         //   title: "Instituições com Receita",
         //   url: "/financas/credito/instituicoes/receita",
         // },
-        { title: "Bolsas", url: "financas/credito/bolsa" },
+        { title: "Bolsas", url: "financas/credito/bolsa" , permission:[PermissionTypeDetails.HISTORICO_BOLSAS.sigla]},
         {
           title: "Bolsa Estudante",
           url: "/financas/credito/bolsa/estudante",
@@ -411,6 +411,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Atribuir Crédito Educacional",
           url: "/financas/credito/atribuir",
+          permission:[PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla]
         },
 
         // {

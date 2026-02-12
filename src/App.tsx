@@ -406,11 +406,30 @@ const App = () => {
                   />
                   <Route
                     path="financas/credito/atribuir"
-                    element={<AtribuirCredito />}
+                   
+                       element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <AtribuirCredito />
+                      </ProtectedRoute>
+                    }
+                    
                   />
                   <Route
                     path="financas/credito/bolsa"
-                    element={<ListarBolsa />}
+                      element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.HISTORICO_BOLSAS.sigla!,
+                        ]}
+                      >
+                        <ListarBolsa />
+                      </ProtectedRoute>
+                    }
+                   
                   />
                   <Route
                     path="financas/credito/bolsa/estudante"
