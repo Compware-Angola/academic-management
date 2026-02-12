@@ -351,9 +351,9 @@ export default function MarkingAssessment() {
                         <TableCell>
                           {formatarData(item.tcp_data_prova)}
                         </TableCell>
-                        <TableCell>{item.duracaoprova}</TableCell>
+                        <TableCell>{item.duracaoprova} min</TableCell>
                         <TableCell>{item.tcp_hora_prova}</TableCell>
-                        <TableCell>{item.horatermino}</TableCell>
+                        <TableCell>{item.horatermino} </TableCell>
                         <TableCell className="text-center">
                           <div className="flex space-x-2">
                             {parseFilter(filters.tipoHorario) == 1 && (
@@ -362,7 +362,7 @@ export default function MarkingAssessment() {
                                 variant="outline"
                                 onClick={() => openDetails(item.vigilantes)}
                               >
-                                <Eye className="h-4 w-4 mr-2" /> Ver Vigentes
+                                <Eye className="h-4 w-4 mr-2" /> Ver Vigilantes
                               </Button>
                             )}
                           </div>
