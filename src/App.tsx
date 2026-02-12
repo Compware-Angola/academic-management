@@ -214,39 +214,126 @@ const App = () => {
                   />
                   <Route
                     path="/avaliacoes/formula-uc"
-                    element={<FormulaUC />}
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+                        ]}
+                      >
+                        <FormulaUC />
+                      </ProtectedRoute>
+                    }
+                   
                   />
                   <Route
                     path="/avaliacoes/presenca"
-                    element={<PresenceList />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_PRESENCA.sigla!,
+                        ]}
+                      >
+                        <PresenceList />
+                      </ProtectedRoute>
+                    }
+
                   />
                   <Route
                     path="/avaliacoes/pauta"
-                    element={<LancamentoPauta />}
+                    
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAMENTO_PAUTA.sigla!,
+                        ]}
+                      >
+                        <LancamentoPauta />
+                      </ProtectedRoute>
+                    }
+
                   />
                   <Route
                     path="avaliacoes/pauta-geral"
-                    element={<PautaGeral />}
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PAUTA_GERAL.sigla!,
+                        ]}
+                      >
+                        <PautaGeral />
+                      </ProtectedRoute>
+                    }
+
                   />
                   <Route
                     path="avaliacoes/pauta-uc"
-                    element={<PautaGeralPorUC />}
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!,
+                        ]}
+                      >
+                        <PautaGeralPorUC />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/avaliacoes/validacao"
-                    element={<ValidationTeacherAgenda />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAMENTO_PAUTA.sigla!,
+                        ]}
+                      >
+                        <ValidationTeacherAgenda />
+                      </ProtectedRoute>
+                    }
+                    
                   />
                   <Route
                     path="/avaliacoes/formula-oral"
-                    element={<FormulaOral />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+                        ]}
+                      >
+                        <FormulaOral />
+                      </ProtectedRoute>
+                    }
+                    
                   />
                   <Route
                     path="/avaliacoes/historico"
-                    element={<LaunchHistoric />}
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!,
+                        ]}
+                      >
+                        <LaunchHistoric />
+                      </ProtectedRoute>
+                    }
+
+                    
                   />
                   <Route
                     path="/avaliacoes/estudantes"
-                    element={<EstudantesInscritos />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ESTUDANTES_INSCRITOS_POR_AVALIACAO.sigla!,
+                        ]}
+                      >
+                        <EstudantesInscritos />
+                      </ProtectedRoute>
+                    }
+
+                    
                   />
                   <Route
                     path="/marcacao-provas/controle"
@@ -257,10 +344,29 @@ const App = () => {
                     element={<StatisticAssessment />}
                   />
                   <Route path="avaliacoes/permissao" element={<Permission />} />
-                  <Route path="avaliacoes/visualizar" element={<ViewNotes />} />
+                  <Route path="avaliacoes/visualizar"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_AVALIACOES.sigla!,
+                        ]}
+                      >
+                        <ViewNotes />
+                      </ProtectedRoute>
+                    }
+                   />
                   <Route
                     path="avaliacoes/parametros"
-                    element={<GeneralParametersAvaluation />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PARAMETROS_GERAIS_AVALIACAO.sigla!,
+                        ]}
+                      >
+                        <GeneralParametersAvaluation />
+                      </ProtectedRoute>
+                    }
+                    
                   />
                   <Route
                     path="marcacao-provas/marcacao"
