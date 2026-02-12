@@ -14,15 +14,15 @@ const CreditoEducacionalTipoSelect = ({
 }: CreditoEducacionalTipoSelectProps) => {
   const id = useId();
   const { data, isLoading } = useQueryFetchCreditoEducacionalTipo();
-  const creditoEducacionalTipo = data?.items ?? [];
+  const creditoEducacionalTipo = data?.data ?? [];
   const defaultSelectItem = enabledDefaultSelectItem
     ? [
-        {
-          label: "Todos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
   return (
     <>

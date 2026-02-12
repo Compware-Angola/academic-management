@@ -17,12 +17,12 @@ const CreditoEducacionalTipoDescontoSelect = ({
   const creditoEducacionalTipoDesconto = data?.items ?? [];
   const defaultSelectItem = enabledDefaultSelectItem
     ? [
-        {
-          label: "Todos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
   return (
     <>
