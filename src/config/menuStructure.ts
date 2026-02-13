@@ -658,12 +658,12 @@ export const academicStructure: MenuStructure = {
         {
           title: "Permissão editar",
           url: "/horarios/permissao",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
+          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla],
         },
         {
           title: "Horários por docente",
           url: "/horarios/docente",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
+          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla],
         },
         {
           title: "Inscrições por horário",

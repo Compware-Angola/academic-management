@@ -190,20 +190,20 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla!,
+                          PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla
                         ]}
                       >
                         <SchedulesWithPermission />
                       </ProtectedRoute>
                     }
 
-                    
+
                   />
                   <Route path="/schedule/:id/edit" element={<EditSchedule />} />
                   <Route path="horarios/sala" element={<SchedulesByRoom />} />
                   <Route path="/salas/listar"
-                  
-                  element={
+
+                    element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTAR_SALAS.sigla!,
@@ -212,11 +212,11 @@ const App = () => {
                         <ClassromList />
                       </ProtectedRoute>
                     }
-                 />
+                  />
                   <Route
                     path="/plano/disciplinas"
 
-                       element={
+                    element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla!,
@@ -225,7 +225,7 @@ const App = () => {
                         <DisciplineManagementList />
                       </ProtectedRoute>
                     }
-                   
+
                   />
                   {/* <Route
                   path="/inscricoes/matriculados"
@@ -256,7 +256,7 @@ const App = () => {
                         <FormulaUC />
                       </ProtectedRoute>
                     }
-                   
+
                   />
                   <Route
                     path="/avaliacoes/presenca"
@@ -273,7 +273,7 @@ const App = () => {
                   />
                   <Route
                     path="/avaliacoes/pauta"
-                    
+
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
@@ -323,7 +323,7 @@ const App = () => {
                         <ValidationTeacherAgenda />
                       </ProtectedRoute>
                     }
-                    
+
                   />
                   <Route
                     path="/avaliacoes/formula-oral"
@@ -336,7 +336,7 @@ const App = () => {
                         <FormulaOral />
                       </ProtectedRoute>
                     }
-                    
+
                   />
                   <Route
                     path="/avaliacoes/historico"
@@ -351,7 +351,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
 
-                    
+
                   />
                   <Route
                     path="/avaliacoes/estudantes"
@@ -365,7 +365,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
 
-                    
+
                   />
                   <Route
                     path="/marcacao-provas/controle"
@@ -386,7 +386,7 @@ const App = () => {
                         <ViewNotes />
                       </ProtectedRoute>
                     }
-                   />
+                  />
                   <Route
                     path="avaliacoes/parametros"
                     element={
@@ -398,7 +398,7 @@ const App = () => {
                         <GeneralParametersAvaluation />
                       </ProtectedRoute>
                     }
-                    
+
                   />
                   <Route
                     path="marcacao-provas/marcacao"
@@ -443,31 +443,31 @@ const App = () => {
                     element={<UserFunctionality />}
                   />
                   */}
-                  <Route path="/acessos/grupo" 
-                  
+                  <Route path="/acessos/grupo"
+
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla!,
-                          
+
                         ]}
                       >
                         <AcessGrup />
                       </ProtectedRoute>
-                    } 
+                    }
                   />
                   <Route path="/controle-acesso/grupos"
-                  
-                  element={
+
+                    element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GRUPOS.sigla!,
-                          
+
                         ]}
                       >
                         <Grupos />
                       </ProtectedRoute>
-                    }  />
+                    } />
                   <Route
                     path="/ver-utilizadores/grupos"
                     element={<AccessGroup />}
@@ -487,15 +487,13 @@ const App = () => {
 
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
-                        ]}
+                        allowedPermissions={[PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla]}
                       >
                         <TeacherSchedules />
                       </ProtectedRoute>
                     }
 
-                    
+
                   />
                   <Route
                     path="/horarios/semanais"
@@ -508,7 +506,7 @@ const App = () => {
                         <HorariosSemanais />
                       </ProtectedRoute>
                     }
-                    
+
                   />
                   <Route
                     path="/horarios/movimentar/estudantes"
@@ -516,32 +514,32 @@ const App = () => {
                   />
                   <Route
                     path="/plano/uc-plano"
-                      element={
+                    element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla!,
-                          
+
                         ]}
                       >
                         <UCManagementPlan />
                       </ProtectedRoute>
                     }
-                  
+
                   />
                   <Route
                     path="/plano/uc-departamento"
 
-                       element={
+                    element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_DEPARTAMENTO.sigla!,
-                          
+
                         ]}
                       >
                         <UcDepartmentManagement />
                       </ProtectedRoute>
                     }
-                  
+
                   />
                   <Route
                     path="/calendario/atividades"
@@ -610,8 +608,8 @@ const App = () => {
                   />
                   <Route
                     path="financas/credito/atribuir"
-                   
-                       element={
+
+                    element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
@@ -620,11 +618,11 @@ const App = () => {
                         <AtribuirCredito />
                       </ProtectedRoute>
                     }
-                    
+
                   />
                   <Route
                     path="financas/credito/bolsa"
-                      element={
+                    element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.HISTORICO_BOLSAS.sigla!,
@@ -633,7 +631,7 @@ const App = () => {
                         <ListarBolsa />
                       </ProtectedRoute>
                     }
-                   
+
                   />
                   <Route
                     path="financas/credito/bolsa/estudante"
