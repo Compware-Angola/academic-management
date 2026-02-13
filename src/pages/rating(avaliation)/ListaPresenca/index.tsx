@@ -1,3 +1,8 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -177,30 +182,130 @@ export default function PresenceList() {
 
   const mesDescricao = mesTemp[0]?.designacao;
   const students = presenceAttendanceList?.data || [];
+
+  const pdfData = useMemo(() => {
+  if (!students.length || !appliedFilters) return null;
+
+  return {
+    filtros: [
+      `Ano Letivo: ${appliedFilters.anoLetivo}`,
+      `Semestre: ${appliedFilters.semestre}`,
+      `Curso: ${appliedFilters.curso}`,
+      searchApplied.searchTerm &&
+        `Pesquisa: ${searchApplied.searchTerm}`,
+    ]
+      .filter(Boolean)
+      .join(" | "),
+    total: students.length,
+    rows: students.map((s) => ({
+      curso: s.curso,
+      classe: s.classe,
+      periodo: s.periodo,
+      numero_matricula: s.numero_matricula,
+      nome: s.nome,
+    })),
+  };
+}, [students, appliedFilters, searchApplied]);
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Presença"
+    subtitle="Presenças em Avaliações Académicas"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros },
+      { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "curso", label: "Curso", width: "20%" },
+        { key: "classe", label: "Ano Curricular", width: "15%" },
+        { key: "periodo", label: "Período", width: "15%" },
+        { key: "numero_matricula", label: "Matrícula", width: "20%" },
+        { key: "nome", label: "Nome Completo", width: "30%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Lista de Presença",
+      subtitle: "Presenças em Avaliações Académicas",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "classe", label: "Ano Curricular", width: 20 },
+          { key: "periodo", label: "Período", width: 20 },
+          { key: "numero_matricula", label: "Matrícula", width: 25 },
+          { key: "nome", label: "Nome Completo", width: 40 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+  const baseFileName = `Lista_Presenca_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
+
+
+
   const hasNext = presenceAttendanceList?.hasNextPage || false;
   const loadingSearchButton =
     loadingPresenceAttendanceList || isLoadingParameters;
   return (
     <div className="p-6 space-y-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/">
-                <Home className="h-4 w-4" />
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink>Avaliações</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Lista de Presença</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">
+                  <Home className="h-4 w-4" />
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink>Avaliações</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Lista de Presença</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {pdfData && excelProps && (
+          <div className="flex gap-2">
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`${baseFileName}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
+
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          </div>
+        )}
+      </div>
+
 
       <h1 className="text-2xl font-bold">Lista de Presença</h1>
       <p className="text-muted-foreground">

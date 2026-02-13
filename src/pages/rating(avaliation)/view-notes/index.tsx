@@ -1,4 +1,5 @@
 // src/pages/SchedulesByUC.tsx
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useMemo } from "react";
 import PDFActions, {
@@ -167,6 +168,36 @@ const pdfData = useMemo(() => {
   };
 }, [viewNotes, filters]);
 
+const excelProps = pdfData
+  ? {
+      documentTitle: "Notas Lançadas",
+      subtitle: "Relatório de notas por unidade curricular",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros,
+        },
+        {
+          title: "Resumo",
+          content: pdfData.total,
+        },
+      ],
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Matrícula", width: 20 },
+          { key: "nome", label: "Nome Completo", width: 35 },
+          { key: "avaliacao", label: "Avaliação", width: 25 },
+          { key: "nota", label: "Nota", width: 10 },
+          { key: "docente", label: "Docente", width: 25 },
+          { key: "data", label: "Data", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Relatório gerado a partir do sistema académico.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
 
 const pdfContent = pdfData ? (
   <GenericPDFDocument
@@ -237,6 +268,7 @@ const pdfContent = pdfData ? (
         </div>
 
         {viewNotes.length > 0 && pdfContent && (
+          <div className="flex gap-2">
             <PDFActions
               document={pdfContent}
               fileName={`Notas_Lancadas_${new Date()
@@ -245,7 +277,19 @@ const pdfContent = pdfData ? (
               showDownload
               showPrint
             />
-          )}
+
+            {excelProps && (
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`Notas_Lancadas_${new Date()
+                  .toISOString()
+                  .slice(0, 10)}.xlsx`}
+                showDownload
+              />
+            )}
+          </div>
+        )}
+
 
       </div>
 
