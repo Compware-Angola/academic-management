@@ -54,15 +54,20 @@ import PDFActions, {
 import { GradesCreationPrompt } from "@/services/academiccalendar/get-grades-creation-prompt";
 import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
 import { parseFilter } from "@/util/parse-filter";
-import { TIPO_AVALIACAO } from "@/constants/tipo-avalicao";
+import {
+  TIPO_AVALIACAO,
+  TipoLancamentoPrazoMap,
+} from "@/constants/tipo-avalicao";
 import { useQueryPromptGetPermissionLaunch } from "@/hooks/avaliacao/use-query-prompt-get-permission-launch";
-import { GetAssessmentNotasItem, GetAssessmentNotasResponse } from "@/services/avaliacao/prompt-get-permission-launch.service";
+import {
+  GetAssessmentNotasItem,
+  GetAssessmentNotasResponse,
+} from "@/services/avaliacao/prompt-get-permission-launch.service";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
-
 
   const [formData, setFormData] = useState({
     anoLetivo: "",
@@ -77,7 +82,8 @@ export default function LaunchNotes() {
     verHoario: "",
     filtro: "",
   });
-
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
   const {
     data: students = [],
     isLoading: loadingNoteRelease,
@@ -109,12 +115,14 @@ export default function LaunchNotes() {
       anoLectivo: Number(formData.anoLetivo),
       semestre: Number(formData.semestre),
     });
+  const avaliacaoDescricao = tipoAvaliacao.filter(
+    (t) => t.codigo == parseFilter(formData.tipoAvaliacao),
+  );
 
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
+
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
     useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
@@ -154,7 +162,8 @@ export default function LaunchNotes() {
     useQueryGradesCreationPrompt({
       anoLectivo: parseFilter(formData.anoLetivo),
       semestre: parseFilter(formData.semestre),
-      typeAvaliation: TIPO_AVALIACAO[formData.tipoAvaliacao],
+      typeAvaliation:
+        TipoLancamentoPrazoMap[parseFilter(formData.tipoAvaliacao)],
     });
   useEffect(() => {
     setLocalStudents(students);
@@ -178,7 +187,6 @@ export default function LaunchNotes() {
           : "—",
       observacao: student.observacao || "—",
     }));
-
     const totalAlunos = localStudents.length;
     const notasLancadas = localStudents.filter(
       (s) => s.nota !== null && s.nota !== undefined,
@@ -320,17 +328,20 @@ export default function LaunchNotes() {
       },
     });
   };
-  const { data: promptPermissionLaunch, isLoading: isLoadingPromptPermissionLaunch } = useQueryPromptGetPermissionLaunch({
+  const {
+    data: promptPermissionLaunch,
+    isLoading: isLoadingPromptPermissionLaunch,
+  } = useQueryPromptGetPermissionLaunch({
     anoLectivo: parseFilter(formData.anoLetivo),
     grade: parseFilter(formData.unidadeCurricular),
-    tipoAvaliacao: TIPO_AVALIACAO[formData.tipoAvaliacao],
+    tipoAvaliacao: parseFilter(formData.tipoAvaliacao),
     utilizadorId: userData?.user?.pk_utilizador,
   });
 
-
   const gradesPeriodStatus = useMemo(() => {
     if (!formData.anoLetivo) return "NO_YEAR_SELECTED";
-    if (isLoadingGradesPrompt) return "LOADING";
+    if (isLoadingGradesPrompt || isLoadingPromptPermissionLaunch)
+      return "LOADING";
     if (!gradesPrompt) return "NOT_DEFINED";
 
     const now = new Date();
@@ -338,16 +349,28 @@ export default function LaunchNotes() {
     const end = new Date(gradesPrompt.data_fim);
 
     return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
-  }, [formData.anoLetivo, gradesPrompt, isLoadingGradesPrompt]);
+  }, [
+    formData.anoLetivo,
+    gradesPrompt,
+    isLoadingGradesPrompt,
+    isLoadingPromptPermissionLaunch,
+  ]);
 
-  const hasSpecialPermission = teacherHasPermissionToLaunchNotes(promptPermissionLaunch?.data?.[0]);
-
+  const hasSpecialPermission = teacherHasPermissionToLaunchNotes(
+    promptPermissionLaunch?.data?.[0],
+  );
 
   const isGlobalPeriodActive = gradesPeriodStatus === "ALLOWED";
 
+  const shouldBlockGradesActions = !(
+    hasSpecialPermission || isGlobalPeriodActive
+  );
 
-  const shouldBlockGradesActions = !hasSpecialPermission && !isGlobalPeriodActive;
-
+  const showDeadline =
+    parseFilter(formData.anoLetivo) &&
+    parseFilter(formData.semestre) &&
+    parseFilter(formData.tipoAvaliacao) &&
+    parseFilter(formData.unidadeCurricular);
 
   return (
     <div className="space-y-6">
@@ -512,7 +535,7 @@ export default function LaunchNotes() {
             map={(u) => ({
               key: u.codigo,
               label: u.designacao,
-              value: u.designacao,
+              value: u.codigo,
             })}
             loading={isLoadingTipoAvaliacao}
           />
@@ -529,9 +552,10 @@ export default function LaunchNotes() {
                 !formData.classes ||
                 !formData.horarioId ||
                 !formData.tipoProva ||
-                !formData.tipoAvaliacao
+                !formData.tipoAvaliacao ||
+                shouldBlockGradesActions
               }
-              onClick={() => refetch()}
+              onClick={() => refetch({ cancelRefetch: false })}
             >
               <RefreshCw className="h-5 w-5 mr-2" />
               Listar
@@ -539,17 +563,18 @@ export default function LaunchNotes() {
           </div>
         </div>
       </div>
-      {gradesPeriodStatus === "LOADING" && (
+      {/* {gradesPeriodStatus === "LOADING" && (
         <div className="bg-muted border rounded-lg p-4 text-sm">
           A verificar período de lançamento de notas...
         </div>
+      )} */}
+      {showDeadline && (
+        <StatusBanner
+          gradesPeriodStatus={gradesPeriodStatus}
+          gradesPrompt={gradesPrompt}
+          hasSpecialPermission={hasSpecialPermission}
+        />
       )}
-      <StatusBanner
-        gradesPeriodStatus={gradesPeriodStatus}
-        gradesPrompt={gradesPrompt}
-        hasSpecialPermission={hasSpecialPermission}
-      />
-
 
       {/* Tabela */}
       {loadingNoteRelease ? (
@@ -791,8 +816,6 @@ export default function LaunchNotes() {
   );
 }
 
-
-
 function teacherHasPermissionToLaunchNotes(
   promptPermissionLaunch: GetAssessmentNotasItem | null | undefined,
 ) {
@@ -804,7 +827,6 @@ function teacherHasPermissionToLaunchNotes(
 
   return now >= start && now <= end;
 }
-
 
 interface StatusBannerProps {
   gradesPeriodStatus: string;
@@ -821,7 +843,6 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
   gradesPrompt,
   hasSpecialPermission,
 }) => {
-
   if (hasSpecialPermission) {
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm flex items-center gap-2">
@@ -831,8 +852,10 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     );
   }
 
-
-  const configs: Record<string, { className: string; title?: string; content: React.ReactNode }> = {
+  const configs: Record<
+    string,
+    { className: string; title?: string; content: React.ReactNode }
+  > = {
     LOADING: {
       className: "bg-muted border text-muted-foreground text-sm",
       content: "A verificar prazo de lançamento de notas...",
@@ -852,8 +875,14 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
       content: gradesPrompt ? (
         <>
           O lançamento está permitido apenas de{" "}
-          <strong>{new Date(gradesPrompt.data_inicio).toLocaleDateString("pt-AO")}</strong> até{" "}
-          <strong>{new Date(gradesPrompt.data_fim).toLocaleDateString("pt-AO")}</strong>.
+          <strong>
+            {new Date(gradesPrompt.data_inicio).toLocaleDateString("pt-AO")}
+          </strong>{" "}
+          até{" "}
+          <strong>
+            {new Date(gradesPrompt.data_fim).toLocaleDateString("pt-AO")}
+          </strong>
+          .
         </>
       ) : null,
     },
@@ -868,7 +897,9 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
   if (!config) return null;
 
   return (
-    <div className={`${config.className} rounded-lg p-4 transition-all duration-300`}>
+    <div
+      className={`${config.className} rounded-lg p-4 transition-all duration-300`}
+    >
       {config.title && <p className="font-semibold mb-1">{config.title}</p>}
       <div className={config.title ? "text-sm opacity-90" : ""}>
         {config.content}
@@ -876,4 +907,3 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     </div>
   );
 };
-
