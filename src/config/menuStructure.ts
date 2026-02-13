@@ -577,10 +577,16 @@ export const academicStructure: MenuStructure = {
         {
           title: "Fórmula por unidade curricular",
           url: "/avaliacoes/formula-uc",
+          permission: [
+            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+          ],
         },
         {
           title: "Definir unidade curricular com oral",
           url: "/avaliacoes/formula-oral",
+          permission: [
+            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+          ]
         },
         {
           title: "Estatísticas de notas lançadas",
@@ -589,18 +595,37 @@ export const academicStructure: MenuStructure = {
         {
           title: "Estudantes inscritos por avaliação",
           url: "/avaliacoes/estudantes",
+          permission: [
+            PermissionTypeDetails.ESTUDANTES_INSCRITOS_POR_AVALIACAO.sigla!,
+          ]
         },
-        { title: "Histórico de lançamentos", url: "/avaliacoes/historico" },
+        {
+          title: "Histórico de lançamentos", url: "/avaliacoes/historico", permission: [
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!,
+          ]
+        },
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
         { title: "Lançamento de notas", url: "/avaliacoes/notas" },
         { title: "Lista de presença", url: "/avaliacoes/presenca" },
 
         { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
-        { title: "Pauta por UC", url: "/avaliacoes/pauta-uc" },
+        {
+          title: "Pauta por UC", url: "/avaliacoes/pauta-uc", permission: [
+            PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!,
+          ]
+        },
         { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
         { title: "Validação", url: "/avaliacoes/validacao" },
-        { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
-        { title: "Parâmetros gerais", url: "/avaliacoes/parametros" },
+        {
+          title: "Visualizar notas", url: "/avaliacoes/visualizar", permission: [
+            PermissionTypeDetails.LANCAMENTO_NOTAS_AVALIACOES.sigla!,
+          ]
+        },
+        {
+          title: "Parâmetros gerais", url: "/avaliacoes/parametros", permission: [
+            PermissionTypeDetails.PARAMETROS_GERAIS_AVALIACAO.sigla!,
+          ]
+        },
       ],
 
       permission: [],
