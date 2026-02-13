@@ -592,7 +592,15 @@ const App = () => {
                   />
                   <Route
                     path="financas/credito/tipos"
-                    element={<TipoCredito />}
+                    element={
+                      <ProtectedRoute allowedPermissions={[
+                        PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla,
+                      ]}>
+
+                        <TipoCredito />
+
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="financas/credito/instituicoes/todas"
