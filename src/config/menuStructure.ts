@@ -642,7 +642,13 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/criar",
           permission: [PermissionTypeDetails.CRIAR_HORARIO.sigla],
         },
-        { title: "Horários semanais", url: "/horarios/semanais" },
+        {
+          title: "Horários semanais",
+          url: "/horarios/semanais",
+          permission: [
+            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
+          ]
+        },
         //  { title: "Substitutos", url: "/horarios/substitutos" },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
         {
@@ -676,7 +682,11 @@ export const academicStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
         { title: "Horários por UC", url: "/horarios/uc" },
-        { title: "Parâmetros", url: "/horarios/parametros" },
+        {
+          title: "Parâmetros", url: "/horarios/parametros", permission: [
+            PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla!,
+          ]
+        },
       ],
 
       permission: [],
