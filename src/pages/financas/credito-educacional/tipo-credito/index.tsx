@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
-import { ArchiveRestore, FileText, Home, Pencil, Plus, RotateCcw, Trash } from "lucide-react";
+import { FileText, Home, Pencil, Plus, RotateCcw, Trash } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDebounce } from "@/hooks/use-debounce";
 import { TipoCreditoDialog } from "./tipo-credito-dialog";
@@ -29,6 +29,8 @@ import { CreditoEducacionalTipo } from "@/services/financas/credito-educacional/
 import { useDeleteTipoCreditoEducacional } from "@/hooks/financas/credito-educacional/use-delete-tipo-credito";
 import { Switch } from "@/components/ui/switch";
 import { useRestoreTipoCreditoEducacional } from "@/hooks/financas/credito-educacional/use-restore-tipo-credito";
+import { cn } from "@/lib/utils"; // Certifique-se de que o import do cn está presente
+
 const setDefaultValue = (value: string) =>
   value === "all" ? undefined : value;
 
@@ -91,35 +93,35 @@ export default function TipoCredito() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="text-2xl font-bold">Tipos de Crédito</h1>
-      <p className="text-muted-foreground">
-        Tipos de crédito educacional.
-      </p>
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold">Tipos de Crédito</h1>
+        <p className="text-muted-foreground text-sm">
+          Gerencie as configurações e tipos de crédito educacional do sistema.
+        </p>
+      </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Filtros de Pesquisa</CardTitle>
+          <CardTitle className="text-base font-semibold">Filtros de Pesquisa</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div className="flex flex-col gap-2 col-span-2">
               <Label htmlFor="designacao">Designação</Label>
               <Input
                 id="designacao"
-                placeholder="Pesquisar designação"
+                placeholder="Pesquisar designação..."
                 value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                }}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="flex items-center space-x-2 pt-8">
+            <div className="flex items-center space-x-2 pb-3">
               <Switch
                 id="deleted-mode"
                 checked={showDeleted}
                 onCheckedChange={setShowDeleted}
               />
-              <Label htmlFor="deleted-mode" className="cursor-pointer">
+              <Label htmlFor="deleted-mode" className="cursor-pointer text-sm">
                 Mostrar eliminados
               </Label>
             </div>
@@ -134,85 +136,100 @@ export default function TipoCredito() {
         </Button>
       </div>
 
-      <div className="bg-card border rounded-lg p-6">
+      <div className="bg-card border rounded-lg p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
         {isLoadingCreditoEducationalTipo ? (
           <div className="space-y-3">
-            {Array.from({ length: 10 }).map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
         ) : creditoEducacional.length === 0 ? (
-          <div className="text-center py-12">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-2">
-              Nenhum registo encontrado
+          <div className="text-center py-12 border-2 border-dashed rounded-lg">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <p className="text-muted-foreground font-medium">
+              Nenhum registro encontrado
             </p>
-            <p className="text-sm text-muted-foreground">
-              Utilize os filtros acima para pesquisar
+            <p className="text-sm text-muted-foreground/70">
+              Tente ajustar seus filtros ou pesquisar por outro termo
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            {" "}
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Designação</TableHead>
                   <TableHead>Sigla</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {creditoEducacional.map(item => {
                   const isDeleted = !!item.deleteat;
                   return (
-                    <TableRow key={item.codigo}>
-                      <TableCell>{item.designacao}</TableCell>
-                      <TableCell>{item.sigla}</TableCell>
+                    <TableRow
+                      key={item.codigo}
+                      className={cn(
+                        "transition-all duration-200",
+                        isDeleted && "bg-destructive/5 opacity-75 hover:bg-destructive/10"
+                      )}
+                    >
+                      <TableCell className={cn("font-medium", isDeleted && "line-through text-muted-foreground italic")}>
+                        {item.designacao}
+                      </TableCell>
+                      <TableCell className={cn(isDeleted && "line-through text-muted-foreground italic")}>
+                        {item.sigla}
+                      </TableCell>
                       <TableCell>
                         {isDeleted ? (
-                          <Badge variant="destructive">Eliminado</Badge>
+                          <Badge variant="destructive" className="uppercase text-[10px]">Eliminado</Badge>
                         ) : (
                           <Badge variant={item.status === 1 ? "secondary" : "outline"}>
                             {item.status === 1 ? "Ativo" : "Inativo"}
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="space-x-2">
-                        {isDeleted ? <> <Button
-                          className="cursor-pointer"
-                          variant="outline"
-                          size="icon"
-                          disabled={isRestoring}
-                          onClick={() => handleRestoreTipoCreditoEducacional(item.codigo)}
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                        </Button>
-
-                        </> : <>     <Button
-                          className="cursor-pointer"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleSelectTipoCredito(item)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                      <TableCell className="text-right space-x-2">
+                        {isDeleted ? (
                           <Button
-                            className="cursor-pointer"
+                            className="h-8 w-8 text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
                             variant="outline"
                             size="icon"
-                            disabled={isDeleting}
-                            onClick={() => handleDeleteTipoCreditoEducacional(item.codigo)}
+                            disabled={isRestoring}
+                            title="Restaurar item"
+                            onClick={() => handleRestoreTipoCreditoEducacional(item.codigo)}
                           >
-                            <Trash className="h-4 w-4" />
-                          </Button></>}
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <>
+                            <Button
+                              className="h-8 w-8"
+                              variant="outline"
+                              size="icon"
+                              title="Editar"
+                              onClick={() => handleSelectTipoCredito(item)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              variant="outline"
+                              size="icon"
+                              disabled={isDeleting}
+                              title="Eliminar"
+                              onClick={() => handleDeleteTipoCreditoEducacional(item.codigo)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                       </TableCell>
                     </TableRow>
                   )
                 })}
-
               </TableBody>
             </Table>
           </div>
