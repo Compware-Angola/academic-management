@@ -24,6 +24,8 @@ import { ESTADOS, getEstadoBadge } from "./components/estado-badge";
 import { useRejectSolicitacao } from "@/hooks/acess/use-mutation-reject-solicitacao";
 import { useAprovarSolicitacao } from "@/hooks/acess/use-mutation-accept-solicitacao";
 import { useAuth } from "@/hooks/use-auth";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQueryServicos } from "@/hooks/acess/use-query-listar-servicos-solicitacao";
 
 
 
@@ -31,6 +33,8 @@ import { useAuth } from "@/hooks/use-auth";
 
 
 export default function SolicitacoesEncaminhadas() {
+  const [codigoAnoLectivo, setCodigoAnoLectivo] = useState<string>("");
+
   const [serviceId, setServiceId] = useState<string>("");
   const [estado, setEstado] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,14 +44,22 @@ export default function SolicitacoesEncaminhadas() {
   const [showDetails, setShowDetails] = useState(false);
 
   /* ---------- QUERY ---------- */
+const { data: anosAcademicos } = useQueryAnoAcademico();
+const { data: servicos } = useQueryServicos({codigo_ano_lectivo: 23});
+
+console.log("SERVICOS NO COMPONENTE:", servicos);
 const { data, isLoading, isFetching } = useQueryListarSolicitacoes({
-  serviceId: serviceId === "all" ? undefined : serviceId,
+  serviceId:
+    serviceId && serviceId !== "all"
+      ? Number(serviceId)
+      : undefined,
   estado: estado === "all" ? undefined : estado,
   page: currentPage,
   limit: 10,
 });
 
-console.log("SOLICITACAO: ", data)
+
+//console.log("SOLICITACAO: ", data)
 
 const { mutate: rejectMutate } = useRejectSolicitacao()
 const { mutate: approveMutate } = useAprovarSolicitacao()
@@ -169,16 +181,26 @@ function handleRejeitar(row: Solicitacao) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Serviço</label>
-            <Select value={serviceId} onValueChange={setServiceId}>
+
+              <Select value={serviceId} onValueChange={setServiceId}>
   <SelectTrigger>
     <SelectValue placeholder="Todos os serviços" />
   </SelectTrigger>
+
   <SelectContent>
     <SelectItem value="all">Todos</SelectItem>
-    <SelectItem value="1">Declaração</SelectItem>
-    <SelectItem value="2">Certificado</SelectItem>
+
+    {servicos?.map((servico) => (
+      <SelectItem
+        key={servico.CODIGO}
+        value={String(servico.CODIGO)}
+      >
+        {servico.DESCRICAO}
+      </SelectItem>
+    ))}
   </SelectContent>
 </Select>
+
 
             </div>
 
