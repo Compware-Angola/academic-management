@@ -412,7 +412,7 @@ export default function AddMarkingAssessment() {
                         <TableCell>
                           {formatarData(item.tcp_data_prova)}
                         </TableCell>
-                        <TableCell>{item.duracaoprova} min</TableCell>
+                        <TableCell>{item.duracaoprova}</TableCell>
                         <TableCell>{item.tcp_hora_prova}</TableCell>
                         <TableCell>{item.horatermino}</TableCell>
                         <TableCell className="text-center">
