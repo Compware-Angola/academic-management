@@ -7,6 +7,8 @@ import {
   Building,
   HomeIcon,
   BadgeDollarSign,
+  Headphones,
+  ListChecks,
 
 } from "lucide-react";
 
@@ -522,6 +524,7 @@ export const healpStructure: MenuStructure = {
           url: "/controle-acesso/solicitacoes",
           permission: []
         }
+        
       ],
 
       permission: [],
@@ -539,6 +542,22 @@ export const healpStructure: MenuStructure = {
     */
   ],
 };
+export const  suporteStructure :MenuStructure={
+  items:[
+     {
+  
+
+
+    title: "Suporte",
+    url:"suporte",
+    icon: Headphones,
+    items: [
+      { title: "Solicitações de Suporte", url: "/suporte/solicitacoes" },
+      { title: "Tipos de Suporte",  url: "/suporte/tipos" },
+    ],
+  },
+  ]
+}
 
 export const academicStructure: MenuStructure = {
   items: [

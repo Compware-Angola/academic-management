@@ -17,7 +17,7 @@ import {
 import { useNavigate, useLocation, matchPath, Link } from "react-router-dom";
 import clsx from "clsx";
 
-export function NavHealp({
+export function NavSuporte({
   items,
 }: {
   items: {
@@ -42,7 +42,7 @@ export function NavHealp({
   return (
     <SidebarGroup>
                 {hasAnyItem && (
-     <SidebarGroupLabel>Comunicação  </SidebarGroupLabel>
+     <SidebarGroupLabel>Suporte </SidebarGroupLabel>
   )}
      
       <SidebarMenu>
