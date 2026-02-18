@@ -596,10 +596,16 @@ export const academicStructure: MenuStructure = {
         {
           title: "Fórmula por unidade curricular",
           url: "/avaliacoes/formula-uc",
+          permission: [
+            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+          ],
         },
         {
           title: "Definir unidade curricular com oral",
           url: "/avaliacoes/formula-oral",
+          permission: [
+            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+          ]
         },
         {
           title: "Estatísticas de notas lançadas",
@@ -608,18 +614,37 @@ export const academicStructure: MenuStructure = {
         {
           title: "Estudantes inscritos por avaliação",
           url: "/avaliacoes/estudantes",
+          permission: [
+            PermissionTypeDetails.ESTUDANTES_INSCRITOS_POR_AVALIACAO.sigla!,
+          ]
         },
-        { title: "Histórico de lançamentos", url: "/avaliacoes/historico" },
+        {
+          title: "Histórico de lançamentos", url: "/avaliacoes/historico", permission: [
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!,
+          ]
+        },
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
         { title: "Lançamento de notas", url: "/avaliacoes/notas" },
         { title: "Lista de presença", url: "/avaliacoes/presenca" },
 
         { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
-        { title: "Pauta por UC", url: "/avaliacoes/pauta-uc" },
+        {
+          title: "Pauta por UC", url: "/avaliacoes/pauta-uc", permission: [
+            PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!,
+          ]
+        },
         { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
         { title: "Validação", url: "/avaliacoes/validacao" },
-        { title: "Visualizar notas", url: "/avaliacoes/visualizar" },
-        { title: "Parâmetros gerais", url: "/avaliacoes/parametros" },
+        {
+          title: "Visualizar notas", url: "/avaliacoes/visualizar", permission: [
+            PermissionTypeDetails.LANCAMENTO_NOTAS_AVALIACOES.sigla!,
+          ]
+        },
+        {
+          title: "Parâmetros gerais", url: "/avaliacoes/parametros", permission: [
+            PermissionTypeDetails.PARAMETROS_GERAIS_AVALIACAO.sigla!,
+          ]
+        },
       ],
 
       permission: [],
@@ -636,7 +661,13 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/criar",
           permission: [PermissionTypeDetails.CRIAR_HORARIO.sigla],
         },
-        { title: "Horários semanais", url: "/horarios/semanais" },
+        {
+          title: "Horários semanais",
+          url: "/horarios/semanais",
+          permission: [
+            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
+          ]
+        },
         //  { title: "Substitutos", url: "/horarios/substitutos" },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
         {
@@ -646,12 +677,12 @@ export const academicStructure: MenuStructure = {
         {
           title: "Permissão editar",
           url: "/horarios/permissao",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
+          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla],
         },
         {
           title: "Horários por docente",
           url: "/horarios/docente",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
+          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla],
         },
         {
           title: "Inscrições por horário",
@@ -670,7 +701,11 @@ export const academicStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
         { title: "Horários por UC", url: "/horarios/uc" },
-        { title: "Parâmetros", url: "/horarios/parametros" },
+        {
+          title: "Parâmetros", url: "/horarios/parametros", permission: [
+            PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla!,
+          ]
+        },
       ],
 
       permission: [],

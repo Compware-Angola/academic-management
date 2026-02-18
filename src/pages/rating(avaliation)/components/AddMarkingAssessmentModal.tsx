@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,8 @@ import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-pr
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { DocenteSelect } from "@/components/common/global-selects/DocenteSelect";
 import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
-
+import { useQueryExamCreationPrompt } from "@/hooks/academiccalendar/use-query-exam-creation-prompt";
+import { calcularDuracao } from "@/util/calcular-duracao";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -52,7 +53,6 @@ type Filters = {
   prazoId?: string;
   docente?: string;
   dataInicio?: string;
-  dataFim?: string;
   modalidade?: string;
   tipoProva?: string;
   horarioId?: string;
@@ -117,12 +117,14 @@ export default function AddMarkingAssessmentModal({
       page: 1,
       limit: 100,
     });
+  const tipoAvaliacaoPrazo = prazos.find(
+    (p) => p.prazoid === Number(filters.prazoId),
+  )?.tipoavaliacao;
   const { data: gradesCreationPrompt, isLoading: isLoadingGradesPrompt } =
-    useQueryGradesCreationPrompt({
-      anoLectivo: Number(filters.anoLetivo),
-      semestre: Number(filters.semestre),
-      typeAvaliation: prazos.find((p) => p.prazoid === Number(filters.prazoId))
-        ?.tipoavaliacao,
+    useQueryExamCreationPrompt({
+      anoLectivo: parseFilter(filters.anoLetivo),
+      semestre: parseFilter(filters.semestre),
+      typeAvaliation: tipoAvaliacaoPrazo,
     });
   const gradesPeriodStatus = useMemo(() => {
     if (!filters.anoLetivo) return "NO_YEAR_SELECTED";
@@ -200,21 +202,21 @@ export default function AddMarkingAssessmentModal({
     }
     const payload: CreateCalendarPayload = {
       codigoCalendario: 1,
-      codigoTipoProva: Number(filters.tipoProva),
-      codigoModalidade: Number(filters.modalidade),
-      codigoSala: Number(filters.sala),
-      codigoPeriodo: Number(filters.periodo),
-      codigoDisciplina: Number(filters.unidadeCurricular),
+      codigoTipoProva: parseFilter(filters.tipoProva),
+      codigoModalidade: parseFilter(filters.modalidade),
+      codigoSala: parseFilter(filters.sala),
+      codigoPeriodo: parseFilter(filters.periodo),
+      codigoDisciplina: parseFilter(filters.unidadeCurricular),
       dataProva: filters.dataInicio,
-      duracaoProva: Number(filters.duracaoProva),
+      duracaoProva: parseFilter(filters.duracaoProva),
       horaProva: filters.horaProva,
       horaTermino: filters.horaTermino,
       url: "",
-      Horario: Number(filters.horarioId),
-      prazoId: Number(filters.prazoId),
-      anoLectivo: Number(filters.anoLetivo),
-      tipoCandidatura: Number(filters.tipoCandidatura),
-      semestre: Number(filters.semestre),
+      Horario: parseFilter(filters.horarioId),
+      prazoId: parseFilter(filters.prazoId),
+      anoLectivo: parseFilter(filters.anoLetivo),
+      tipoCandidatura: parseFilter(filters.tipoCandidatura),
+      semestre: parseFilter(filters.semestre),
       vigilantes: teacher.map((t) => {
         const docente = docentes.find((d) => d.codigo.toString() === t);
         return {
@@ -232,7 +234,14 @@ export default function AddMarkingAssessmentModal({
       },
     });
   };
+  useEffect(() => {
+    const duracao = calcularDuracao(filters.horaProva, filters.horaTermino);
 
+    setFilters((prev) => ({
+      ...prev,
+      duracaoProva: duracao ?? "",
+    }));
+  }, [filters.horaProva, filters.horaTermino]);
   if (!isOpen) return null;
 
   return (
@@ -242,7 +251,7 @@ export default function AddMarkingAssessmentModal({
           <DialogTitle className="text-2xl">Marcação de Prova</DialogTitle>
         </DialogHeader>
         <DialogDescription></DialogDescription>
-        {filters.anoLetivo && filters.semestre && (
+        {filters.anoLetivo && filters.semestre && tipoAvaliacaoPrazo && (
           <div className="space-y-2">
             {gradesPeriodStatus === "LOADING" && (
               <div className="bg-muted border rounded-lg p-4 text-sm">
@@ -507,42 +516,16 @@ export default function AddMarkingAssessmentModal({
             />
 
             <div className="space-y-2">
-              <Label>Data Inicial</Label>
+              <Label>Data da Prova</Label>
               <Input
                 type="date"
-                placeholder="Data Início"
+                placeholder="Data da Prova"
                 value={filters.dataInicio}
                 onChange={(e) =>
                   setFilters({
                     ...filters,
                     dataInicio: e.target.value,
                   })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Data Final</Label>
-              <Input
-                type="date"
-                placeholder="Data Fim"
-                value={filters.dataFim}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    dataFim: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Duração da Prova (minutos)</Label>
-              <Input
-                type="number"
-                min={1}
-                placeholder="Ex: 120"
-                value={filters.duracaoProva ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, duracaoProva: e.target.value })
                 }
               />
             </div>
@@ -572,6 +555,19 @@ export default function AddMarkingAssessmentModal({
                 }
               />
             </div>
+            <div className="space-y-2">
+              <Label>Duração da Prova (minutos)</Label>
+              <Input
+                disabled
+                type="number"
+                min={1}
+                placeholder="Ex: 120"
+                value={filters.duracaoProva ?? ""}
+                onChange={(e) =>
+                  setFilters({ ...filters, duracaoProva: e.target.value })
+                }
+              />
+            </div>
           </div>
         </div>
 
@@ -580,7 +576,12 @@ export default function AddMarkingAssessmentModal({
             Fechar
           </Button>
           <Button
-            disabled={isCreateLoadingCalendar || isFormInvalid || shouldDisable}
+            disabled={
+              isCreateLoadingCalendar ||
+              isFormInvalid ||
+              shouldDisable ||
+              gradesPeriodStatus != "ALLOWED"
+            }
             onClick={handleCreateCalendarioProva}
             size="lg"
           >
