@@ -58,7 +58,9 @@ export type StudentDetail = {
   telefonicos: string;
   sexo: string;
   data_nascimento: string; // ISO: "1982-05-24T23:00:00.000Z"
-
+  foto:string;
+  saldo_atual:number;
+  saldo_anterior:number;
   pai: string;
   mae: string;
   naturalidade: string;

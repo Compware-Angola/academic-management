@@ -40,7 +40,8 @@ export function useMutationLogin() {
       title: data.mensagem || "Login realizado com sucesso",
       description: `Bem-vindo, ${data.user?.username ?? "Utilizador"}!`,
     });
-    navigate("/dashboard", { replace: true });
+     navigate("/boas-vindas",{ replace: true });
+   
   }
 },
     onError: (err: Error) => {

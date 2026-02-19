@@ -1,6 +1,8 @@
 export enum PermissionType {
   FULL_ACCESS = "FULL_ACCESS",
   ATRIBUIR_PROVA = "ATRIBUIR_PROVA",
+LSOLICITACAO_SUPORTE = "LSOLICITACAO_SUPORTE",
+TIPO_SUPORTE = "TIPO_SUPORTE",
   LANCAMENTO_NOTAS_AVALIACOES = "LANCAMENTO_NOTAS_AVALIACOES",
   ESTATISTICA_CANDIDATOS_INSCRITOS = "ESTATISTICA_CANDIDATOS_INSCRITOS",
   ESTATISTICA_CANDIDATOS_POR_DIA = "ESTATISTICA_CANDIDATOS_POR_DIA",
@@ -247,6 +249,15 @@ export enum PermissionType {
 
 export const PermissionTypeDetails = {
   FULL_ACCESS: { designacao: "Todos os acesso", sigla: "full.access" },
+  LSOLICITACAO_SUPORTE: {
+  designacao: "Listagem de Solicitação de Suporte",
+  sigla: "mga_su_lso",
+},
+
+TIPO_SUPORTE: {
+  designacao: "Tipo de Suporte",
+  sigla: "mga_su_tip",
+},
   ATRIBUIR_PROVA: { designacao: "Atribuir Prova", sigla: "mgea_atp" },
   LANCAMENTO_NOTAS_AVALIACOES: {
     designacao: "Lançamento de Notas de Avaliações",

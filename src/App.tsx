@@ -16,8 +16,6 @@ import GeneralListing from "./pages/facultymanagement/GeneralListing";
 import LaunchNotes from "./pages/rating(avaliation)/LaunchNotes";
 import UserAccess from "./pages/access/UserAccess";
 import LoggedInUsers from "./pages/access/LoggedInUsers";
-//import AccessLogs from "./pages/access/AccessLogs";
-import UserFunctionality from "./pages/access/UserFunctionality";
 import RectoratePositions from "./pages/access/RectoratePositions";
 import BlockAccess from "./pages/access/BlockAccess";
 
@@ -84,6 +82,9 @@ import { PermissionTypeDetails } from "./constants/permission.type";
 import ServicosEmolumentos from "./pages/financas/area-financeira/ServicosEmolumentos";
 import PrimeiroAcessoEmail from "./pages/auth/PrimeiroAcessoEmail";
 import RedefinirSenhaPrimeiroAcesso from "./pages/auth/RedefinirSenhaPrimeiroAcesso";
+import ListaSolicitacoes from "./pages/suporte/ListaSolicitacoes";
+import TiposSuporte from "./pages/suporte/tiposSuporte";
+import BoasVindas from "./pages/auth/BoasVindas";
 
 
 const App = () => {
@@ -102,6 +103,10 @@ const App = () => {
                 <Route element={<PublicRoute />}>
                   <Route path="/primeiro-acesso" element={<PrimeiroAcessoEmail />} />
                 </Route>
+                 <Route element={<PublicRoute />}>
+                  <Route path="/boas-vindas" element={<BoasVindas />} />
+                </Route>
+               
                 <Route element={<PublicRoute />}>
                   <Route path="/auth/primeiro-acesso/redefinir/:token" element={<RedefinirSenhaPrimeiroAcesso />} />
                 </Route>
@@ -543,6 +548,38 @@ const App = () => {
                     }
 
                   />
+
+                  {/*SUPORTE*/}
+
+                   <Route
+                    path="/suporte/solicitacoes"
+                       element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LSOLICITACAO_SUPORTE.sigla!,
+
+                        ]}
+                      >
+                        <ListaSolicitacoes />
+                      </ProtectedRoute>
+                    }
+                   
+                  />
+                   <Route
+                    path="/suporte/tipos"
+                        element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.TIPO_SUPORTE.sigla!,
+
+                        ]}
+                      >
+                        <TiposSuporte />
+                      </ProtectedRoute>
+                    }
+                 
+                  />
+
                   <Route
                     path="/calendario/atividades"
                     element={<ActivitiesLecturesLic />}

@@ -12,11 +12,12 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { finaceStructure, menuStructure, academicStructure, healpStructure } from "@/config/menuStructure";
+import { finaceStructure, menuStructure, academicStructure, healpStructure, suporteStructure } from "@/config/menuStructure";
 import { NavFinance } from "./nav-finance";
 import { NavAcademic } from "./nav-academic";
 import { filterMenuByPermission } from "@/util/menuFilter";
 import { NavHealp } from "./nav-healp";
+import { NavSuporte } from "./nav-suporte";
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -24,6 +25,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const academicItems = filterMenuByPermission(academicStructure?.items ?? []);
   const financeItems = filterMenuByPermission(finaceStructure?.items ?? []);
  const helpItems = filterMenuByPermission(healpStructure?.items ?? []);
+ const suporteItems = filterMenuByPermission(suporteStructure?.items ?? []);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -36,6 +38,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavAcademic items={academicItems} />
        <NavFinance items={financeItems} />
        <NavHealp items={helpItems} />
+       <NavSuporte items={suporteItems} />
       </SidebarContent>
 
       <SidebarRail />
