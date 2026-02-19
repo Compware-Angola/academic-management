@@ -84,6 +84,8 @@ import { PermissionTypeDetails } from "./constants/permission.type";
 import ServicosEmolumentos from "./pages/financas/area-financeira/ServicosEmolumentos";
 import PrimeiroAcessoEmail from "./pages/auth/PrimeiroAcessoEmail";
 import RedefinirSenhaPrimeiroAcesso from "./pages/auth/RedefinirSenhaPrimeiroAcesso";
+import {CriarMesTemporario} from "./pages/calendar-pos/CriarMesTemporario";
+import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 
 const App = () => {
   return (
@@ -138,6 +140,16 @@ const App = () => {
 
                     }
                   />
+                  
+                  <Route
+                    path="/controle-acesso/all-solicitacoes"
+                    element={
+
+                      <Solicitacoes />
+
+                    }
+                  />
+
                   <Route
                     path="/financas/notas-pagamento"
                     element={
@@ -554,6 +566,7 @@ const App = () => {
                     element={<Parameters />}
                   />
                   <Route path="/calendario/prazos" element={<Deadlines />} />
+                  
                   <Route
                     path="/calendario-pos/atividades"
                     element={<ActivitiesLecturesPos />}

@@ -47,7 +47,7 @@ export default function SolicitacoesEncaminhadas() {
 const { data: anosAcademicos } = useQueryAnoAcademico();
 const { data: servicos } = useQueryServicos({codigo_ano_lectivo: 23});
 
-console.log("SERVICOS NO COMPONENTE:", servicos);
+
 const { data, isLoading, isFetching } = useQueryListarSolicitacoes({
   serviceId:
     serviceId && serviceId !== "all"

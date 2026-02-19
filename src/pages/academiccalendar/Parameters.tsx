@@ -59,9 +59,12 @@ import { number } from "framer-motion";
 import { Vacancy } from "@/services/academiccalendar/fetch-vacancies-per-course";
 import { EditVagaModal } from "./components/modals/EditVagaModal";
 import { useMutationUpdateVagas } from "@/hooks/academiccalendar/useMutation-update-vagas";
+import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
 
 export default function Parameters() {
   const { toast } = useToast();
+
+  
 
   // Filtros e paginação
   const [anoLetivoSelecionado, setAnoLetivoSelecionado] = useState<string>("");
@@ -84,6 +87,9 @@ export default function Parameters() {
     refetch: refetchYears,
   } = useQueryAnoAcademico();
 
+ 
+
+
   const { data: tiposCandidatura = [], isLoading: isLoadingTipos } =
     useQueryTipoCandidatura();
   const updateEstadoMutation = useMutationUpdateAcademicYearState();
@@ -96,6 +102,30 @@ export default function Parameters() {
     );
     return ano?.codigo ?? undefined;
   }, [anoLetivoSelecionado, academicYears]);
+
+
+   const {
+  data: mesesTemp,
+  isLoading: isLoadingMeses,
+  isFetching: isFetchingMeses,
+} = useQueryGenerateMesTemp(
+   { anoLectivoId: selectedCodigo },
+  { enabled: !!selectedCodigo }
+);
+
+
+const mensalidades = useMemo(() => {
+  if (!mesesTemp) return [];
+
+  return mesesTemp.map((item) => ({
+    designacao: item.designacao,
+    prestacao: item.prestacao,
+    semestre: item.semestre,
+    dataLimite: item.data_limite,
+  }));
+}, [mesesTemp]);
+
+
 
   // Parâmetros do ano selecionado
   const {
@@ -167,11 +197,13 @@ export default function Parameters() {
     currentPage * itemsPerPage
   );
   // Paginação das mensalidades
-  const totalPagesMonthly = Math.ceil(monthlyFees.length / itemsPerPageMonthly);
-  const paginatedMonthlyFees = monthlyFees.slice(
-    (currentPageMonthly - 1) * itemsPerPageMonthly,
-    currentPageMonthly * itemsPerPageMonthly
-  );
+
+  const totalPagesMonthly = Math.ceil(mensalidades.length / itemsPerPageMonthly);
+  const paginatedMensalidades = mensalidades.slice(
+  (currentPageMonthly - 1) * itemsPerPageMonthly,
+  currentPageMonthly * itemsPerPageMonthly
+);
+
 
   // Resetar página ao mudar de ano
   useEffect(() => {
@@ -643,22 +675,22 @@ export default function Parameters() {
                 Calendário de Mensalidades — {currentYearParams?.designacao}
               </CardTitle>
               <CardDescription>
-                Total de prestações: {monthlyFees.length} • Vencidas:{" "}
+                Total de prestações: {mensalidades.length} • Vencidas:{" "}
                 {
-                  monthlyFees.filter((f) => new Date(f.dataLimite) < new Date())
+                  mensalidades.filter((f) => new Date(f.dataLimite) < new Date())
                     .length
                 }
               </CardDescription>
             </CardHeader>
 
             <CardContent>
-              {isLoadingMonthlyFees || isFetchingMonthlyFees ? (
+              { isLoadingMeses || isFetchingMeses ? (
                 <div className="space-y-3">
                   {[...Array(10)].map((_, i) => (
                     <Skeleton key={i} className="h-12 w-full" />
                   ))}
                 </div>
-              ) : monthlyFees.length === 0 ? (
+              ) : mensalidades.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <CreditCard className="h-12 w-12 mx-auto mb-4 opacity-30" />
                   <p className="text-lg">
@@ -683,8 +715,8 @@ export default function Parameters() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {paginatedMonthlyFees.length > 0 ? (
-                          paginatedMonthlyFees.map((fee, i) => {
+                        {paginatedMensalidades.length > 0 ? (
+                          paginatedMensalidades.map((fee, i) => {
                             const isOverdue =
                               new Date(fee.dataLimite) < new Date();
                             return (
@@ -760,9 +792,9 @@ export default function Parameters() {
                       {(currentPageMonthly - 1) * itemsPerPageMonthly + 1}–
                       {Math.min(
                         currentPageMonthly * itemsPerPageMonthly,
-                        monthlyFees.length
+                        mensalidades.length
                       )}{" "}
-                      de {monthlyFees.length} prestações
+                      de {mensalidades.length} prestações
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -826,6 +858,7 @@ export default function Parameters() {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         anoLetivo={currentYearParams?.designacao || ""}
+         codigoAnoLectivo={selectedCodigo}
       />
       {vagaSelecionada && (
         <EditVagaModal

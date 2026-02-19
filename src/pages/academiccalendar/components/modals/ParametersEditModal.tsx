@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,10 @@ import {
 import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { useAuth } from "@/hooks/use-auth";
 import { AxiosError } from "axios";
+import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatarData } from "@/util/date-formate";
+import { useMutationCreateMesTemp } from "@/hooks/academiccalendar/use-mutation-create-mes-temp";
 
 type Step = "periodos" | "vagas" | "mensalidades";
 
@@ -28,6 +33,7 @@ interface ParametersEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   anoLetivo?: string;
+  codigoAnoLectivo?: number;
   onSuccess?: () => void;
 }
 
@@ -53,8 +59,12 @@ export function ParametersEditModal({
   open,
   onOpenChange,
   anoLetivo,
+  codigoAnoLectivo,
   onSuccess,
 }: ParametersEditModalProps) {
+  const [mensalidadesEditadas, setMensalidadesEditadas] = useState<any[]>([]);
+
+
   const [currentStep, setCurrentStep] = useState<Step>("periodos");
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -67,6 +77,8 @@ export function ParametersEditModal({
     dataInicioSegundoSemestre: "",
     dataFimSegundoSemestre: "",
   });
+
+  //console.log("MUTA:", codigoAnoLectivo)
 
   const { data: vagasOriginais = [], isLoading: loadingVagas } =
     useQueryVacancies();
@@ -130,14 +142,22 @@ export function ParametersEditModal({
         codigo_utilizador: user.user?.pk_utilizador,
       };
 
-      const periodoRes = await axiosApexGa.post(
-        "/ga/teaching-parameters/academic-year",
-        periodoPayload
-      );
-      const codigoAnoLectivo = periodoRes.data.codigo;
+      // 🔹 Se já veio um código por props, significa que é EDIÇÃO
+      let codigo = codigoAnoLectivo;
 
-      if (!codigoAnoLectivo)
-        throw new Error("Código do ano letivo não retornado");
+      if (!codigo) {
+        // 🔹 Só cria ano se NÃO existir código
+        const periodoRes = await axiosApexGa.post(
+          "/ga/teaching-parameters/academic-year",
+          periodoPayload
+        );
+
+        codigo = periodoRes.data.codigo;
+
+        if (!codigo)
+          throw new Error("Código do ano letivo não retornado");
+      }
+
 
       const vagasPayload = {
         codigo_ano_lectivo: codigoAnoLectivo,
@@ -154,6 +174,35 @@ export function ParametersEditModal({
       };
 
       await axiosApexGa.post("/ga/teaching-parameters/vacancies", vagasPayload);
+
+      if (mensalidadesEditadas.length > 0) {
+          await new Promise((resolve, reject) => {
+            mutateMeses(
+              {
+                meses: mensalidadesEditadas.map((mes) => ({
+                  designacao: mes.designacao,
+                  isencao: mes.isencao,
+                  ordem_mes: mes.ordem_mes,
+                  ano_lectivo: codigoAnoLectivo,
+                  prestacao: mes.prestacao,
+                  activo: mes.activo ? 1 : 0,
+                  activo_posgraduacao: mes.activo_posgraduacao ? 1 : 0,
+                  data_limite: mes.dataLimite || mes.data_limite,
+                  data_inicial: mes.data_inicial,
+                  data_final: mes.data_final,
+                  data_final_desconto: mes.data_final_desconto,
+                  semestre: mes.semestre,
+                  semestre_posgraduacao: mes.semestre_posgraduacao,
+                })),
+              },
+              {
+                onSuccess: resolve,
+                onError: reject,
+              }
+            );
+          });
+        }
+
 
       return { codigoAnoLectivo };
     },
@@ -263,6 +312,50 @@ export function ParametersEditModal({
       mutationTudo.mutate();
     }
   };
+
+
+  const { mutate: mutateMeses } = useMutationCreateMesTemp();
+
+  const { data: mesesTemp } = useQueryGenerateMesTemp(
+  { anoLectivoId: codigoAnoLectivo },
+  { enabled: !!codigoAnoLectivo && currentStep === "mensalidades" }
+);
+
+const mensalidades = useMemo(() => {
+  if (!mesesTemp) return [];
+
+  return mesesTemp.map((item) => ({
+    
+    designacao: item.designacao,
+    isencao: item.isencao,
+    ordem_mes: item.ordem_mes,
+    ano_lectivo: item.ano_lectivo,
+    prestacao: item.prestacao,
+    activo: item.activo,
+    activo_posgraduacao: item.activo_posgraduacao,
+    data_limite: item.data_limite,
+    data_inicial: item.data_inicial,
+    data_final: item.data_final,
+    data_final_desconto: item.data_final_desconto,
+    semestre: item.semestre,
+    semestre_posgraduacao: item.semestre_posgraduacao,
+  }));
+}, [mesesTemp]);
+
+
+useEffect(() => {
+  if (
+    currentStep === "mensalidades" &&
+    mesesTemp &&
+    mensalidadesEditadas.length === 0
+  ) {
+    setMensalidadesEditadas(mensalidades);
+  }
+}, [currentStep, mesesTemp]);
+
+console.log("MESES RAW:", mensalidades);
+console.log("IS ARRAY?", mensalidades);
+
 
   const handlePrev = () => {
     const prevIndex = currentIndex - 1;
@@ -452,14 +545,97 @@ export function ParametersEditModal({
             </div>
           )}
 
-          {currentStep === "mensalidades" && (
-            <div className="flex flex-col items-center justify-center h-96 text-muted-foreground space-y-4">
-              <CreditCard className="h-16 w-16" />
-              <p className="text-lg">
-                Pronto! Agora é só clicar em "Concluir" para salvar tudo.
-              </p>
-            </div>
-          )}
+
+{currentStep === "mensalidades" && (
+  <div className="space-y-6">
+    <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
+      <CreditCard className="h-5 w-5" /> Mensalidades Geradas
+    </h3>
+
+    <div className="bg-card rounded-lg border">
+      <Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Designação</TableHead>
+      <TableHead>Mês</TableHead>
+      <TableHead>Prestação</TableHead>
+      <TableHead>Semestre</TableHead>
+      <TableHead>Data Inicial</TableHead>
+      <TableHead>Data Final</TableHead>
+      <TableHead>Data Limite</TableHead>
+      <TableHead>Isenção</TableHead>
+      <TableHead>Activo</TableHead>
+      <TableHead>Pós-Grad.</TableHead>
+    </TableRow>
+  </TableHeader>
+
+  <TableBody>
+    {mensalidadesEditadas.length === 0 ? (
+      <TableRow>
+        <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+          Nenhuma mensalidade encontrada
+        </TableCell>
+      </TableRow>
+    ) : (
+      mensalidadesEditadas.map((item, index) => (
+        <TableRow key={index}>
+          
+          <TableCell className="font-medium">
+            {item.designacao}
+          </TableCell>
+
+          <TableCell>
+            {item.ordem_mes}
+          </TableCell>
+
+          <TableCell>
+            {item.prestacao}ª
+          </TableCell>
+
+          <TableCell>
+            {item.semestre}º
+          </TableCell>
+
+          <TableCell>
+            {item.data_inicial?.split("T")[0]}
+          </TableCell>
+
+          <TableCell>
+            {item.data_final?.split("T")[0]}
+          </TableCell>
+
+          <TableCell> 
+            <Input type="date" 
+            value={item.data_limite?.split("T")[0] || ""} 
+            onChange={(e) => { const newValue = e.target.value; 
+            setMensalidadesEditadas((prev) => prev.map((mes, i) => i === index ? { ...mes, data_limite: newValue } : mes ) ); }}
+             className="w-[150px]" /> 
+          </TableCell>
+
+          <TableCell>
+            {item.isencao === 1 ? "Sim" : "Não"}
+          </TableCell>
+
+          <TableCell>
+            {item.activo === 1 ? "Activo" : "Inactivo"}
+          </TableCell>
+
+          <TableCell>
+            {item.activo_posgraduacao === 1 ? "Sim" : "Não"}
+          </TableCell>
+
+        </TableRow>
+      ))
+    )}
+  </TableBody>
+</Table>
+
+    </div>
+  </div>
+)}
+
+
+
         </div>
 
         {/* Botões */}
