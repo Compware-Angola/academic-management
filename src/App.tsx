@@ -84,6 +84,7 @@ import PrimeiroAcessoEmail from "./pages/auth/PrimeiroAcessoEmail";
 import RedefinirSenhaPrimeiroAcesso from "./pages/auth/RedefinirSenhaPrimeiroAcesso";
 import ListaSolicitacoes from "./pages/suporte/ListaSolicitacoes";
 import TiposSuporte from "./pages/suporte/tiposSuporte";
+import BoasVindas from "./pages/auth/BoasVindas";
 
 const App = () => {
   return (
@@ -101,6 +102,10 @@ const App = () => {
                 <Route element={<PublicRoute />}>
                   <Route path="/primeiro-acesso" element={<PrimeiroAcessoEmail />} />
                 </Route>
+                 <Route element={<PublicRoute />}>
+                  <Route path="/boas-vindas" element={<BoasVindas />} />
+                </Route>
+               
                 <Route element={<PublicRoute />}>
                   <Route path="/auth/primeiro-acesso/redefinir/:token" element={<RedefinirSenhaPrimeiroAcesso />} />
                 </Route>
