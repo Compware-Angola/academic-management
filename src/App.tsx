@@ -140,15 +140,6 @@ const App = () => {
 
                     }
                   />
-                  
-                  <Route
-                    path="/controle-acesso/all-solicitacoes"
-                    element={
-
-                      <Solicitacoes />
-
-                    }
-                  />
 
                   <Route
                     path="/financas/notas-pagamento"
