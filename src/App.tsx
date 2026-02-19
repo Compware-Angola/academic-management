@@ -546,11 +546,31 @@ const App = () => {
 
                    <Route
                     path="/suporte/solicitacoes"
-                    element={<ListaSolicitacoes />}
+                       element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LSOLICITACAO_SUPORTE.sigla!,
+
+                        ]}
+                      >
+                        <ListaSolicitacoes />
+                      </ProtectedRoute>
+                    }
+                   
                   />
                    <Route
                     path="/suporte/tipos"
-                    element={<TiposSuporte />}
+                        element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.TIPO_SUPORTE.sigla!,
+
+                        ]}
+                      >
+                        <TiposSuporte />
+                      </ProtectedRoute>
+                    }
+                 
                   />
 
                   <Route

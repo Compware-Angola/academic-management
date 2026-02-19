@@ -545,16 +545,14 @@ export const healpStructure: MenuStructure = {
 export const  suporteStructure :MenuStructure={
   items:[
      {
-  
-
-
     title: "Suporte",
-    url:"suporte",
+    url:"/suporte",
     icon: Headphones,
     items: [
-      { title: "Solicitações de Suporte", url: "/suporte/solicitacoes" },
-      { title: "Tipos de Suporte",  url: "/suporte/tipos" },
+      { title: "Solicitações de Suporte", url: "/suporte/solicitacoes",permission:[PermissionTypeDetails.LSOLICITACAO_SUPORTE.sigla] },
+      { title: "Tipos de Suporte",  url: "/suporte/tipos", permission:[PermissionTypeDetails.TIPO_SUPORTE.sigla] },
     ],
+     permission: [],
   },
   ]
 }
