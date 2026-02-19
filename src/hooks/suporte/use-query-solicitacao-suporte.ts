@@ -5,7 +5,7 @@ import {
   responderSolicitacao,
   PaginatedSolicitacoes,
   FilterSolicitacoesParams,
-  SolicitacaoSuporte,
+  SuporteDetalhado,
   ResponderSolicitacaoPayload,
   RespostaCriada,
 } from '@/services/suporte/solicitacao-suporte.service';
@@ -47,7 +47,7 @@ export const useSolicitacoesSuporte = (params: FilterSolicitacoesParams = {}) =>
    Inclui respostas associadas
    ============================================= */
 export const useSolicitacaoDetail = (id?: number) => {
-  return useQuery<SolicitacaoSuporte, Error>({
+  return useQuery<SuporteDetalhado, Error>({
     queryKey: ['solicitacao-detail', id],
     queryFn: () => getSolicitacaoById(id!),
     enabled: !!id && id > 0,

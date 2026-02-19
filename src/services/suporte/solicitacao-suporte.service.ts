@@ -3,7 +3,36 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 // ──────────────────────────────────────────────
 // Tipos / Interfaces
 // ──────────────────────────────────────────────
+// Interface principal (o objeto raiz)
+export interface SuporteDetalhado {
+  estudante: string;
+  mensagem: string;
+  assunto: string;
+  descricao_tipo_suporte: string;
+  utilizador: string;
+  data_mensagem: string;          // formato "DD/MM/YYYY HH:mm:ss"
+  status_mensagem: string;         // ex: "respondido", "pendente", etc.
+  contactos_id: number;
+  mensagem_resposta: string | null;
+  data_resposta: string | null;    // pode ser null ou "DD/MM/YYYY HH:mm:ss"
+  file_name1: string | null;
+  file_name2: string | null;
+  file_name3: string | null;
+  nome_usuario_resposta: string;
+  respostas: RespostaSuporte[];
+}
 
+// Interface para cada item do array "respostas"
+export interface RespostaSuporte {
+  resposta_id: number;
+  mensagem_resposta: string;
+  data_resposta: string | null;    // null quando ainda não processado ou em alguns casos
+  file_name1: string | null;
+  file_name2: string | null;
+  file_name3: string | null;
+  nome_usuario_resposta: string;
+  resposta_user_id: number;
+}
 export type SolicitacaoSuporte = {
   contactos_id: number;
   estudante: string;
@@ -108,7 +137,7 @@ export async function responderSolicitacao(
  * (Opcional) Obter uma solicitação específica por ID
  * Útil para detalhes ou refresh após resposta
  */
-export async function getSolicitacaoById(id: number): Promise<SolicitacaoSuporte> {
+export async function getSolicitacaoById(id: number): Promise<SuporteDetalhado> {
   const response = await axiosNestGa.get(`/suporte/${id}`);
   return response.data;
 }
