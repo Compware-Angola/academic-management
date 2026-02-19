@@ -65,7 +65,7 @@ const BoasVindas = () => {
       {/* Rodapé */}
       <div className="absolute bottom-6 text-center text-xs text-muted-foreground/60">
         © {new Date().getFullYear()} Universidade Metodista de Angola <br />
-        Portal de Gestão Académica • Versão 1.0.0
+        Portal de Gestão Académica • Versão 2.0.0
       </div>
 
       <style>{`
