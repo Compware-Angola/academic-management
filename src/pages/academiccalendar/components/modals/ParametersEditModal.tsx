@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +20,54 @@ import { AxiosError } from "axios";
 import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useMutationCreateMesTemp } from "@/hooks/academiccalendar/use-mutation-create-mes-temp";
+
+// Memoiza o item da vaga para evitar re-renders desnecessários
+const VagaItem = React.memo(
+  ({
+    vaga,
+    index,
+    onChange,
+  }: {
+    vaga: any;
+    index: number;
+    onChange: (index: number, newValue: number) => void;
+  }) => {
+    return (
+      <div className="flex items-center justify-between p-4 border rounded-lg bg-card hover:bg-accent/30 transition-colors">
+        <div className="flex-1 min-w-0">
+          <p className="font-medium truncate">{vaga.cursoDescricao}</p>
+          <p className="text-sm text-muted-foreground truncate">{vaga.periodoDescricao}</p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => onChange(index, Math.max(0, vaga.numeroVagas - 1))}
+          >
+            -
+          </Button>
+          <Input
+            type="number"
+            value={vaga.numeroVagas}
+            onChange={(e) => {
+              const val = Number(e.target.value) || 0;
+              onChange(index, val);
+            }}
+            className="w-24 text-center"
+            min="0"
+          />
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => onChange(index, vaga.numeroVagas + 1)}
+          >
+            +
+          </Button>
+        </div>
+      </div>
+    );
+  }
+);
 
 type Step = "periodos" | "vagas" | "mensalidades";
 
@@ -48,7 +95,6 @@ export function ParametersEditModal({
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  // Formulário de períodos
   const [periodosForm, setPeriodosForm] = useState({
     designacao: "",
     dataInicioPrimeiroSemestre: "",
@@ -57,7 +103,6 @@ export function ParametersEditModal({
     dataFimSegundoSemestre: "",
   });
 
-  // Estados para anos (só serão definidos uma vez)
   const [anoInicioDefinido, setAnoInicioDefinido] = useState<number | undefined>(undefined);
   const [anoFimDefinido, setAnoFimDefinido] = useState<number | undefined>(undefined);
 
@@ -68,7 +113,7 @@ export function ParametersEditModal({
 
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
-  // Gera designação e define anos APENAS uma vez quando as datas estiverem preenchidas
+  // Gera designação e define anos APENAS uma vez
   useEffect(() => {
     const inicio1 = periodosForm.dataInicioPrimeiroSemestre;
     const fim2 = periodosForm.dataFimSegundoSemestre;
@@ -86,21 +131,18 @@ export function ParametersEditModal({
       setAnoInicioDefinido(startYear);
       setAnoFimDefinido(finalYear);
     }
-  }, [
-    periodosForm.dataInicioPrimeiroSemestre,
-    periodosForm.dataFimSegundoSemestre,
-    anoInicioDefinido,
-    anoFimDefinido,
-  ]);
+  }, [periodosForm.dataInicioPrimeiroSemestre, periodosForm.dataFimSegundoSemestre]);
 
-  // Carrega vagas quando entra no passo "vagas"
+  // Carrega vagas apenas quando necessário (evita loop)
   useEffect(() => {
-    if (currentStep === "vagas" && vagasOriginais.length > 0 && vagasEditadas.length === 0) {
-      setVagasEditadas(vagasOriginais.map((v) => ({ ...v, numeroVagas: v.numeroVagas || 0 })));
-    }
+    if (currentStep !== "vagas") return;
+    if (vagasOriginais.length === 0 || vagasEditadas.length > 0) return;
+
+    console.log("Carregando vagas editadas:", vagasOriginais.length, "itens");
+    setVagasEditadas(vagasOriginais.map((v) => ({ ...v, numeroVagas: v.numeroVagas || 0 })));
   }, [currentStep, vagasOriginais]);
 
-  // Chama a geração de meses apenas quando os anos estiverem definidos
+  // Geração de meses (só quando anos definidos)
   const { data: mesesTemp, isLoading: loadingMeses, error: errorMeses } = useQueryGenerateMesTemp(
     { anoInicial: anoInicioDefinido, anoFinal: anoFimDefinido },
     {
@@ -108,18 +150,18 @@ export function ParametersEditModal({
     }
   );
 
-  // Atualiza mensalidades apenas quando chegarmos ao passo e tivermos dados
+  // Atualiza mensalidades quando chegamos ao passo
   useEffect(() => {
-    if (currentStep === "mensalidades" && mesesTemp && mesesTemp.length > 0) {
-      const mapped = mesesTemp.map((item) => ({
-        ...item,
-        data_limite: item.data_limite || item.data_final || "",
-      }));
-      setMensalidadesEditadas(mapped);
-    }
+    if (currentStep !== "mensalidades") return;
+    if (!mesesTemp || mesesTemp.length === 0) return;
+
+    const mapped = mesesTemp.map((item) => ({
+      ...item,
+      data_limite: item.data_limite || item.data_final || "",
+    }));
+    setMensalidadesEditadas(mapped);
   }, [currentStep, mesesTemp]);
 
-  // Validação do passo períodos (mantido igual)
   const isPeriodoValid = () => {
     return [
       periodosForm.dataInicioPrimeiroSemestre,
@@ -129,7 +171,6 @@ export function ParametersEditModal({
     ].every((field) => field.trim() !== "");
   };
 
-  // Mutation (mantida quase igual, só ajustei o retorno e invalidate)
   const { mutate: mutateMeses } = useMutationCreateMesTemp();
 
   const mutationTudo = useMutation({
@@ -240,7 +281,6 @@ export function ParametersEditModal({
         });
       }
 
-      // Validações de mês/ano (mantidas iguais)
       const hoje = new Date();
       const anoAtual = hoje.getFullYear();
       const anoSeguinte = anoAtual + 1;
@@ -311,6 +351,15 @@ export function ParametersEditModal({
     onOpenChange(isOpen);
   };
 
+  // Handler memoizado para mudança de vagas
+  const handleVagaChange = useCallback((index: number, newValue: number) => {
+    setVagasEditadas((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], numeroVagas: newValue };
+      return updated;
+    });
+  }, []);
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl! w-full max-h-[90vh]! overflow-y-auto">
@@ -353,7 +402,7 @@ export function ParametersEditModal({
           </div>
         </div>
 
-        {/* Conteúdo dos passos */}
+        {/* Conteúdo */}
         <div className="min-h-96">
           {currentStep === "periodos" && (
             <div className="space-y-6">
@@ -402,66 +451,30 @@ export function ParametersEditModal({
               <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
                 <Users className="h-5 w-5" /> Vagas por Curso e Período
               </h3>
+
               {loadingVagas ? (
-                <p className="text-center py-10 animate-pulse">Carregando vagas...</p>
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p>Carregando vagas...</p>
+                </div>
+              ) : vagasOriginais.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground border rounded-lg">
+                  <p>Nenhuma vaga encontrada</p>
+                  <p className="text-sm mt-2">Verifique se há cursos/períodos cadastrados</p>
+                </div>
               ) : vagasEditadas.length === 0 ? (
                 <p className="text-center py-10 text-muted-foreground">
-                  Nenhuma vaga disponível para edição
+                  Preparando dados para edição...
                 </p>
               ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                  {vagasEditadas.map((vaga, i) => (
-                    <div
-                      key={`${vaga.codigoCurso}-${vaga.codigo_periodo}`}
-                      className="flex items-center justify-between p-4 border rounded-lg bg-card hover:bg-accent/30 transition-colors"
-                    >
-                      <div>
-                        <p className="font-medium">{vaga.cursoDescricao}</p>
-                        <p className="text-sm text-muted-foreground">{vaga.periodoDescricao}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => {
-                            setVagasEditadas((prev) => {
-                              const novo = [...prev];
-                              novo[i].numeroVagas = Math.max(0, novo[i].numeroVagas - 1);
-                              return novo;
-                            });
-                          }}
-                        >
-                          -
-                        </Button>
-                        <Input
-                          type="number"
-                          value={vaga.numeroVagas}
-                          onChange={(e) => {
-                            const val = Number(e.target.value) || 0;
-                            setVagasEditadas((prev) => {
-                              const novo = [...prev];
-                              novo[i].numeroVagas = val;
-                              return novo;
-                            });
-                          }}
-                          className="w-24 text-center"
-                          min="0"
-                        />
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => {
-                            setVagasEditadas((prev) => {
-                              const novo = [...prev];
-                              novo[i].numeroVagas += 1;
-                              return novo;
-                            });
-                          }}
-                        >
-                          +
-                        </Button>
-                      </div>
-                    </div>
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                  {vagasEditadas.map((vaga, index) => (
+                    <VagaItem
+                      key={`${vaga.codigoCurso}-${vaga.codigo_periodo}-${index}`}
+                      vaga={vaga}
+                      index={index}
+                      onChange={handleVagaChange}
+                    />
                   ))}
                 </div>
               )}
@@ -545,7 +558,7 @@ export function ParametersEditModal({
           )}
         </div>
 
-        {/* Botões de navegação */}
+        {/* Botões */}
         <div className="flex justify-between mt-8 pt-6 border-t">
           <Button variant="outline" onClick={handlePrev} disabled={currentIndex === 0}>
             Anterior
