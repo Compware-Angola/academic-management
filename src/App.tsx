@@ -85,6 +85,7 @@ import RedefinirSenhaPrimeiroAcesso from "./pages/auth/RedefinirSenhaPrimeiroAce
 import ListaSolicitacoes from "./pages/suporte/ListaSolicitacoes";
 import TiposSuporte from "./pages/suporte/tiposSuporte";
 import BoasVindas from "./pages/auth/BoasVindas";
+import Avisos from "./pages/controle-acesso/solicitacao/Avisos";
 
 
 const App = () => {
@@ -136,11 +137,12 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  
                   <Route
-                    path="/controle-acesso/solicitacoes"
+                    path="/controle-acesso/avisos"
                     element={
 
-                      <SolicitacoesEncaminhadas />
+                      <Avisos />
 
                     }
                   />
