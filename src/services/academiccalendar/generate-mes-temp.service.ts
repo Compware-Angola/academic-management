@@ -22,10 +22,11 @@ export type MesTemp = {
 /* ---------- PAYLOAD ---------- */
 
 export type GenerateMesTempPayload = {
-  anoLectivoId: number | string;
+  anoInicial: number;
+  anoFinal: number;
 };
 
-/* ---------- RESPONSE COMPLETO ---------- */
+/* ---------- RESPONSE ---------- */
 
 export type GenerateMesTempResponse = MesTemp[];
 
@@ -33,17 +34,39 @@ export type GenerateMesTempResponse = MesTemp[];
 export async function generateMesTempService(
   payload: GenerateMesTempPayload
 ): Promise<GenerateMesTempResponse> {
+  const { anoInicial, anoFinal } = payload;
 
-  const { anoLectivoId } = payload;
+  // Validação simples (opcional mas recomendada)
+  if (!Number.isInteger(anoInicial) || !Number.isInteger(anoFinal)) {
+    throw new Error("anoInicial e anoFinal devem ser números inteiros");
+  }
+  if (anoFinal <= anoInicial) {
+    throw new Error("anoFinal deve ser maior que anoInicial");
+  }
 
   const params = {
-    anoLectivoId: normalizeParam(anoLectivoId),
+    anoInicial: normalizeParam(anoInicial),
+    anoFinal: normalizeParam(anoFinal),
   };
 
-  const { data } = await axiosNestGa.get<GenerateMesTempResponse>(
-    "/academic-calendar/generate-mes-temp",
-    { params }
-  );
+  try {
+    const { data } = await axiosNestGa.get<GenerateMesTempResponse>(
+      "/academic-calendar/generate-mes-temp",
+      { params }
+    );
 
-  return data;
+    return data;
+  } catch (error: any) {
+    console.error("[generateMesTempService] Erro ao gerar meses temporários:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    
+    // Pode lançar um erro mais amigável ou retornar um fallback conforme tua estratégia
+    throw new Error(
+      error.response?.data?.message || 
+      "Falha ao gerar o calendário de meses temporários. Tente novamente."
+    );
+  }
 }

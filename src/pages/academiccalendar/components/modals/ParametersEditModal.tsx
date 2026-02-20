@@ -24,7 +24,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { AxiosError } from "axios";
 import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatarData } from "@/util/date-formate";
+
 import { useMutationCreateMesTemp } from "@/hooks/academiccalendar/use-mutation-create-mes-temp";
 
 type Step = "periodos" | "vagas" | "mensalidades";
@@ -62,9 +62,10 @@ export function ParametersEditModal({
   onSuccess,
 }: ParametersEditModalProps) {
   const [mensalidadesEditadas, setMensalidadesEditadas] = useState<any[]>([]);
+const [anoInicio, setAnoInicio] = useState<number | undefined>(undefined);
+const [anoFim, setAnoFim]     = useState<number | undefined>(undefined);
   
 
-  console.log("MESES: ", mensalidadesEditadas)
 
   const [currentStep, setCurrentStep] = useState<Step>("periodos");
   const { toast } = useToast();
@@ -99,6 +100,8 @@ export function ParametersEditModal({
         ...prev,
         designacao: `${anoInicio}-${anoFinal}`,
       }));
+      setAnoFim(anoFinal)
+      setAnoInicio(anoInicio)
     } else {
       setPeriodosForm((prev) => ({ ...prev, designacao: "" }));
     }
@@ -315,10 +318,10 @@ export function ParametersEditModal({
 
   const { mutate: mutateMeses } = useMutationCreateMesTemp();
 
- const { data: mesesTemp } = useQueryGenerateMesTemp(
-  { anoLectivoId: codigoAnoGerado as number },
-  { enabled: !!codigoAnoGerado && currentStep === "mensalidades" }
-);
+const { data:mesesTemp, isLoading, error } = useQueryGenerateMesTemp({
+  anoInicial: anoInicio,
+  anoFinal: anoFim,
+});
 
 
 const mensalidades = useMemo(() => {
@@ -349,8 +352,6 @@ useEffect(() => {
   }
 }, [mesesTemp, currentStep]);
 
-console.log("MESES RAW:", mensalidades);
-console.log("IS ARRAY?", mensalidades);
 
 
   const handlePrev = () => {
