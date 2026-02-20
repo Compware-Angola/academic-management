@@ -33,7 +33,6 @@ interface ParametersEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   anoLetivo?: string;
-  codigoAnoLectivo?: number;
   onSuccess?: () => void;
 }
 
@@ -59,11 +58,13 @@ export function ParametersEditModal({
   open,
   onOpenChange,
   anoLetivo,
-  codigoAnoLectivo,
+  
   onSuccess,
 }: ParametersEditModalProps) {
   const [mensalidadesEditadas, setMensalidadesEditadas] = useState<any[]>([]);
+  const [codigoAnoGerado, setCodigoAnoGerado] = useState<number | null>(null);
 
+  console.log("MESES: ", mensalidadesEditadas)
 
   const [currentStep, setCurrentStep] = useState<Step>("periodos");
   const { toast } = useToast();
@@ -142,11 +143,11 @@ export function ParametersEditModal({
         codigo_utilizador: user.user?.pk_utilizador,
       };
 
-      // 🔹 Se já veio um código por props, significa que é EDIÇÃO
-      let codigo = codigoAnoLectivo;
+      
+      let codigo = codigoAnoGerado;
 
       if (!codigo) {
-        // 🔹 Só cria ano se NÃO existir código
+        
         const periodoRes = await axiosApexGa.post(
           "/ga/teaching-parameters/academic-year",
           periodoPayload
@@ -158,9 +159,10 @@ export function ParametersEditModal({
           throw new Error("Código do ano letivo não retornado");
       }
 
+      setCodigoAnoGerado(codigo);
 
       const vagasPayload = {
-        codigo_ano_lectivo: codigoAnoLectivo,
+        codigo_ano_lectivo: codigoAnoGerado,
         codigo_utilizador: 16,
         vagas: vagasEditadas
           .filter((v) => v.numeroVagas > 0)
@@ -183,7 +185,7 @@ export function ParametersEditModal({
                   designacao: mes.designacao,
                   isencao: mes.isencao,
                   ordem_mes: mes.ordem_mes,
-                  ano_lectivo: codigoAnoLectivo,
+                  ano_lectivo: codigoAnoGerado,
                   prestacao: mes.prestacao,
                   activo: mes.activo ? 1 : 0,
                   activo_posgraduacao: mes.activo_posgraduacao ? 1 : 0,
@@ -204,12 +206,17 @@ export function ParametersEditModal({
         }
 
 
-      return { codigoAnoLectivo };
+      return { codigoAnoLectivo: codigo };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({ title: "Parâmetros acadêmicos configurados com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["academic-year-params"] });
       queryClient.invalidateQueries({ queryKey: ["anosLetivos"] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["generate-mes-temp", data.codigoAnoLectivo]
+      });
+
       onSuccess?.();
       resetForm();
       onOpenChange(false);
@@ -236,6 +243,7 @@ export function ParametersEditModal({
       dataFimSegundoSemestre: "",
     });
     setVagasEditadas([]);
+    setCodigoAnoGerado(null);
     setCurrentStep("periodos");
   };
 
@@ -316,10 +324,11 @@ export function ParametersEditModal({
 
   const { mutate: mutateMeses } = useMutationCreateMesTemp();
 
-  const { data: mesesTemp } = useQueryGenerateMesTemp(
-  { anoLectivoId: codigoAnoLectivo },
-  { enabled: !!codigoAnoLectivo && currentStep === "mensalidades" }
+ const { data: mesesTemp } = useQueryGenerateMesTemp(
+  { anoLectivoId: codigoAnoGerado as number },
+  { enabled: !!codigoAnoGerado && currentStep === "mensalidades" }
 );
+
 
 const mensalidades = useMemo(() => {
   if (!mesesTemp) return [];
@@ -344,14 +353,10 @@ const mensalidades = useMemo(() => {
 
 
 useEffect(() => {
-  if (
-    currentStep === "mensalidades" &&
-    mesesTemp &&
-    mensalidadesEditadas.length === 0
-  ) {
+  if (currentStep === "mensalidades" && mesesTemp) {
     setMensalidadesEditadas(mensalidades);
   }
-}, [currentStep, mesesTemp]);
+}, [mesesTemp, currentStep]);
 
 console.log("MESES RAW:", mensalidades);
 console.log("IS ARRAY?", mensalidades);

@@ -86,6 +86,7 @@ import ListaSolicitacoes from "./pages/suporte/ListaSolicitacoes";
 import TiposSuporte from "./pages/suporte/tiposSuporte";
 import BoasVindas from "./pages/auth/BoasVindas";
 import Avisos from "./pages/controle-acesso/solicitacao/Avisos";
+import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 
 
 const App = () => {
@@ -139,7 +140,25 @@ const App = () => {
                   />
                   
                   <Route
-                    path="/controle-acesso/avisos"
+                    path="/controle-acesso/solicitacoes"
+                    element={
+
+                      <SolicitacoesEncaminhadas />
+
+                    }
+                  />
+
+                  <Route
+                    path="/controle-acesso/all-solicitacoes"
+                    element={
+
+                      <Solicitacoes />
+
+                    }
+                  />
+
+                  <Route
+                    path="/comunicacao/avisos"
                     element={
 
                       <Avisos />

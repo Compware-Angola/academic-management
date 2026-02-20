@@ -114,6 +114,7 @@ export default function Parameters() {
 );
 
 
+
 const mensalidades = useMemo(() => {
   if (!mesesTemp) return [];
 
@@ -858,7 +859,6 @@ const mensalidades = useMemo(() => {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         anoLetivo={currentYearParams?.designacao || ""}
-         codigoAnoLectivo={selectedCodigo}
       />
       {vagaSelecionada && (
         <EditVagaModal
