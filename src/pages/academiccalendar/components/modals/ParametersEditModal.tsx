@@ -62,7 +62,7 @@ export function ParametersEditModal({
   onSuccess,
 }: ParametersEditModalProps) {
   const [mensalidadesEditadas, setMensalidadesEditadas] = useState<any[]>([]);
-  const [codigoAnoGerado, setCodigoAnoGerado] = useState<number | null>(null);
+  
 
   console.log("MESES: ", mensalidadesEditadas)
 
@@ -143,26 +143,17 @@ export function ParametersEditModal({
         codigo_utilizador: user.user?.pk_utilizador,
       };
 
-      
-      let codigo = codigoAnoGerado;
+      const periodoRes = await axiosApexGa.post(
+        "/ga/teaching-parameters/academic-year",
+        periodoPayload
+      );
+      const codigoAnoLectivo = periodoRes.data.codigo;
 
-      if (!codigo) {
-        
-        const periodoRes = await axiosApexGa.post(
-          "/ga/teaching-parameters/academic-year",
-          periodoPayload
-        );
-
-        codigo = periodoRes.data.codigo;
-
-        if (!codigo)
-          throw new Error("Código do ano letivo não retornado");
-      }
-
-      setCodigoAnoGerado(codigo);
+      if (!codigoAnoLectivo)
+        throw new Error("Código do ano letivo não retornado");
 
       const vagasPayload = {
-        codigo_ano_lectivo: codigoAnoGerado,
+        codigo_ano_lectivo: codigoAnoLectivo,
         codigo_utilizador: 16,
         vagas: vagasEditadas
           .filter((v) => v.numeroVagas > 0)
@@ -185,7 +176,7 @@ export function ParametersEditModal({
                   designacao: mes.designacao,
                   isencao: mes.isencao,
                   ordem_mes: mes.ordem_mes,
-                  ano_lectivo: codigoAnoGerado,
+                  ano_lectivo: codigoAnoLectivo,
                   prestacao: mes.prestacao,
                   activo: mes.activo ? 1 : 0,
                   activo_posgraduacao: mes.activo_posgraduacao ? 1 : 0,
@@ -206,7 +197,7 @@ export function ParametersEditModal({
         }
 
 
-      return { codigoAnoLectivo: codigo };
+      return { codigoAnoLectivo: codigoAnoLectivo };
     },
     onSuccess: (data) => {
       toast({ title: "Parâmetros acadêmicos configurados com sucesso!" });
@@ -243,7 +234,7 @@ export function ParametersEditModal({
       dataFimSegundoSemestre: "",
     });
     setVagasEditadas([]);
-    setCodigoAnoGerado(null);
+  
     setCurrentStep("periodos");
   };
 
