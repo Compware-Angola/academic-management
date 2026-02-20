@@ -81,7 +81,7 @@ export default function ListarNotasPagamento() {
   }
 
   const [searchBy, setSearchBy] = useState<
-    "codigoMatricula" | "reference" |"codigoFatura"
+    "codigoMatricula" | "reference" | "codigoFatura"
   >("codigoMatricula");
   const [filters, setFilters] = useState({
     anoLetivo: "23",
@@ -109,7 +109,7 @@ export default function ListarNotasPagamento() {
       searchBy === "reference" && searchTerm
         ? searchTerm
         : undefined,
-        codigoFatura:
+    codigoFatura:
       searchBy === "codigoFatura" && searchTerm
         ? searchTerm
         : undefined,
@@ -164,14 +164,14 @@ export default function ListarNotasPagamento() {
   };
 
   const selectedFactura = data?.data.find((f) => f.codigo === selectedFacturaCodigo);
-const placeholders: Record<string, string> = {
-  codigoMatricula: "Pesquisar por código da matrícula...",
-  reference: "Pesquisar por referência da factura...",
-  codigoFatura: "Pesquisar por Codigo da factura...",
-};
+  const placeholders: Record<string, string> = {
+    codigoMatricula: "Pesquisar por código da matrícula...",
+    reference: "Pesquisar por referência da factura...",
+    codigoFatura: "Pesquisar por Codigo da factura...",
+  };
 
-const placeholderText =
-  placeholders[searchBy] || "Pesquisar...";
+  const placeholderText =
+    placeholders[searchBy] || "Pesquisar...";
 
   return (
     <div className="p-6 space-y-6">
@@ -308,7 +308,7 @@ const placeholderText =
                 <TableHead>Curso</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Emissão</TableHead>
-                
+
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -354,9 +354,9 @@ const placeholderText =
                     <TableCell>{nota.nome_aluno}</TableCell>
                     <TableCell className="font-mono">{nota.codigo_matricula}</TableCell>
                     <TableCell>{nota.curso}</TableCell>
-                    <TableCell className="font-medium">{formatCurrency(nota.total_preco)}</TableCell>
+                    <TableCell className="font-medium">{formatCurrency(nota.valor_pagar)}</TableCell>
                     <TableCell>{formatDate(nota.data_factura)}</TableCell>
-                   
+
                     <TableCell>{getStatusBadge(nota.estado)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -408,62 +408,79 @@ const placeholderText =
       {/*               MODAL DE DETALHES                */}
       {/* ================================================ */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-5xl! max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              Detalhes da Nota de Pagamento
-              {selectedFactura && (
-                <span className="font-mono text-muted-foreground">
-                  {selectedFactura.referencia || selectedFactura.codigo}
-                </span>
-              )}
+        <DialogContent className="max-w-4xl! max-h-[90vh]! overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-md">
+          <DialogHeader className="pb-6 border-b border-gray-200 dark:border-gray-800">
+            <DialogTitle className="flex items-center justify-between gap-4 text-2xl font-bold">
+              <div className="flex items-center gap-3">
+                Detalhes da Nota de Pagamento
+                {selectedFactura && (
+                  <span className="inline-flex px-3 py-1 text-sm font-mono bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md font-medium">
+                    {selectedFactura.referencia || selectedFactura.codigo || "—"}
+                  </span>
+                )}
+              </div>
+              {selectedFactura && getStatusBadge(selectedFactura.estado)}
             </DialogTitle>
           </DialogHeader>
 
           {selectedFactura && (
-            <div className="space-y-6">
-              {/* Status e Referência + Valor Total */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  {getStatusBadge(selectedFactura.estado)}
-                  <span className="text-sm text-muted-foreground">
-                    Referência: <span className="font-mono">{selectedFactura.referencia || "—"}</span>
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Valor Total</p>
-                  <p className="text-2xl font-bold text-primary">
-                    {formatCurrency(selectedFactura.total_preco)}
-                  </p>
-                </div>
-              </div>
+            <div className="space-y-8 pt-6">
+              {/* Valor total destacado, mas sem gradiente */}
+           <div className="bg-gray-50 dark:bg-gray-900 px-4 py-4 rounded-xl border border-gray-200 dark:border-gray-800">
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+
+    <div>
+      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+        Valor Total
+      </p>
+      <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+        {formatCurrency(selectedFactura.total_preco)}
+      </p>
+    </div>
+
+    <div>
+      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+        Valor a Pagar
+      </p>
+      <p className="text-2xl font-bold text-primary">
+        {formatCurrency(selectedFactura.valor_pagar)}
+      </p>
+    </div>
+
+    <div className="sm:text-right">
+      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+        Emitida em
+      </p>
+      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {formatDate(selectedFactura.data_factura)}
+      </p>
+    </div>
+
+  </div>
+</div>
 
               <Separator />
 
               {/* Dados do Estudante */}
               <div>
-                <h3 className="font-semibold mb-4 text-lg">Dados do Estudante</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <h3 className="text-lg font-semibold mb-4">Dados do Estudante</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Código da Matrícula</p>
                     <p className="font-medium font-mono">{selectedFactura.codigo_matricula || "—"}</p>
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-2 lg:col-span-1">
                     <p className="text-sm text-muted-foreground">Nome do Estudante</p>
-                    <p className="font-medium">{selectedFactura.nome_aluno || "—"}</p>
+                    <p className="font-semibold text-lg">{selectedFactura.nome_aluno || "—"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Curso</p>
                     <p className="font-medium">{selectedFactura.curso || "—"}</p>
                   </div>
-
                   <div>
                     <p className="text-sm text-muted-foreground">Ano Lectivo</p>
                     <p className="font-medium">{selectedFactura.ano_lectivo || "—"}</p>
                   </div>
-
-
-
                 </div>
               </div>
 
@@ -471,19 +488,24 @@ const placeholderText =
 
               {/* Informações da Nota */}
               <div>
-                <h3 className="font-semibold mb-4 text-lg">Informações da Nota</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <h3 className="text-lg font-semibold mb-4">Informações da Nota</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Nº da Nota</p>
-                    <p className="font-medium font-mono">{selectedFactura.referencia || selectedFactura.codigo}</p>
+                    <p className="font-medium font-mono">{selectedFactura.referencia || selectedFactura.codigo || "—"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Data de Emissão</p>
                     <p className="font-medium">{formatDate(selectedFactura.data_factura)}</p>
                   </div>
-
                   <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
+                    <p className="text-sm text-muted-foreground">Total Multa</p>
+                    <p className="font-medium text-orange-600 dark:text-orange-400">
+                      {formatCurrency(selectedFactura.total_multa || 0)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Estado</p>
                     {getStatusBadge(selectedFactura.estado)}
                   </div>
                 </div>
@@ -493,60 +515,85 @@ const placeholderText =
 
               {/* Itens da Factura */}
               <div>
-                <h3 className="font-semibold mb-4 text-lg">Itens da Factura</h3>
+                <h3 className="text-lg font-semibold mb-4">Itens da Nota de Pagamento</h3>
 
                 {isLoadingItens || isFetchingItens ? (
-                  <div className="text-center py-10 text-muted-foreground">
+                  <div className="py-10 text-center text-muted-foreground bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                     A carregar itens da factura...
                   </div>
                 ) : !itens.data?.length ? (
-                  <div className="text-center py-8 border rounded-md bg-muted/30 text-muted-foreground">
+                  <div className="py-10 text-center border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/30 text-muted-foreground">
                     Nenhum item encontrado para esta nota de pagamento
                   </div>
                 ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Descrição</TableHead>
-                        <TableHead className="text-center">Qtd</TableHead>
-                        <TableHead className="text-right">Valor Unit.</TableHead>
-                        <TableHead className="text-right">Valor Total</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {itens.data.map((item: FacturaItem, index: number) => (
-                        <TableRow key={index}>
-                          <TableCell>
-                            {(item.descricaoservico || "—") +
-                              (Number(item.mesid) != 3 && item.mesid && item.mesdescricao ? ` (${item.mesdescricao})` : "")}
+                  <div className="rounded-lg border overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-gray-100 dark:bg-gray-800">
+                        <TableRow>
+                          <TableHead>Descrição</TableHead>
+                          <TableHead className="text-center">Qtd</TableHead>
+                          <TableHead className="text-center">Multa</TableHead>
+                          <TableHead className="text-right">Valor Unit.</TableHead>
+                          <TableHead className="text-right pr-6">Valor Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {itens.data.map((item: FacturaItem, index: number) => (
+                          <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                            <TableCell>
+                              {(item.descricaoservico || "—") +
+                                (Number(item.mesid) !== 3 && item.mesid && item.mesdescricao
+                                  ? ` (${item.mesdescricao})`
+                                  : "")}
+                            </TableCell>
+                            <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
+                            <TableCell className="text-center text-orange-600 dark:text-orange-400">
+                              {item.multa ? formatCurrency(item.multa) : "—"}
+                            </TableCell>
+                            <TableCell className="text-right font-mono">
+                              {formatCurrency(item.preco)}
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-semibold pr-6">
+                              {formatCurrency(item.preco + item.multa)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="bg-gray-100 dark:bg-gray-800 font-semibold">
+                          <TableCell colSpan={4} className="text-right">
+                            Total Unitário
                           </TableCell>
-                          <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
-                          <TableCell className="text-right font-mono">
-                            {formatCurrency(item.preco)}
-                          </TableCell>
-                          <TableCell className="text-right font-mono font-medium">
-                            {formatCurrency(item.total)}
+                          <TableCell className="text-right text-primary pr-6">
+                            {formatCurrency(
+                              itens.data.reduce((total, item) => {
+                                const quantidade = item.quantidade ?? 1;
+                                return total + (item.preco * quantidade);
+                              }, 0)
+                            )}
                           </TableCell>
                         </TableRow>
-                      ))}
-                      <TableRow className="bg-muted/50">
-                        <TableCell colSpan={3} className="text-right font-semibold">
-                          Total
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-primary">
-                          {formatCurrency(selectedFactura.total_preco)}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                        <TableRow className="bg-gray-100 dark:bg-gray-800 font-semibold">
+                          <TableCell colSpan={4} className="text-right">
+                            Total Preço
+                          </TableCell>
+                          <TableCell className="text-right text-primary pr-6">
+                            {formatCurrency(
+                              itens.data.reduce((total, item) => {
+                                const quantidade = item.quantidade ?? 1;
+                                return total + (item.preco * quantidade) + (item.multa ?? 0);
+                              }, 0)
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </div>
-
 
               <Separator />
 
               {/* Ações */}
-              <div className="flex gap-3 justify-end">
+              <div className="flex justify-end pt-2">
                 <PaymentNoteActions
                   nota={selectedFactura}
                   itens={itens?.data || []}
