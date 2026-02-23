@@ -561,6 +561,11 @@ export const healpStructure: MenuStructure = {
           url: "/controle-acesso/all-solicitacoes",
           permission: [],
         },
+        {
+          title: "Imagem De Abertura",
+          url: "/comunicacao/avisos/imagem",
+          permission: [],
+        },
       ],
 
       permission: [],

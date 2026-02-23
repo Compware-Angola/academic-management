@@ -87,6 +87,7 @@ import TiposSuporte from "./pages/suporte/tiposSuporte";
 import BoasVindas from "./pages/auth/BoasVindas";
 import Avisos from "./pages/controle-acesso/solicitacao/Avisos";
 import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
+import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 
 
 const App = () => {
@@ -162,6 +163,15 @@ const App = () => {
                     element={
 
                       <Avisos />
+
+                    }
+                  />
+
+                  <Route
+                    path="/comunicacao/avisos/imagem"
+                    element={
+
+                      <UploadImagem />
 
                     }
                   />
