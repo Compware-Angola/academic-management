@@ -254,6 +254,7 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
           <View style={[styles.tableRow, styles.tableHeader]}>
             <Text style={[styles.tableCellHeader, { width: '55%' }]}>Descrição</Text>
             <Text style={[styles.tableCellHeader, { width: '15%' }]}>Qtd</Text>
+            <Text style={[styles.tableCellHeader, { width: '15%' }]}>Multa</Text>
             <Text style={[styles.tableCellHeader, { width: '15%' }]}>Unitário</Text>
             <Text style={[styles.tableCellHeader, { width: '15%' }]}>Total</Text>
           </View>
@@ -267,9 +268,12 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
               <Text style={[styles.tableCell, { width: '15%', textAlign: 'center' }]}>
                 {item.quantidade ?? 1}
               </Text>
+                <Text style={[styles.tableCell, { width: '15%', textAlign: 'center' }]}>
+                {item.multa ?? 0}
+              </Text>
 
               <Text style={[styles.tableCell, { width: '15%', textAlign: 'right' }]}>
-                {item.preco?.toFixed(2) || '—'}
+                {item.total?.toFixed(2) || '—'}
               </Text>
               <Text style={[styles.tableCell, { width: '15%', textAlign: 'right' }]}>
                 {item.total?.toFixed(2) || '—'}
@@ -281,7 +285,16 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
         {/* Totais */}
         <View style={styles.totalSection}>
           <Text style={styles.totalText}>
-            Total: {nota.total_preco.toFixed(2)} Kz
+            Total Unitário: { itens.reduce((total, item) => {
+                                const quantidade = item.quantidade ?? 1;
+                                return total + (item.preco * quantidade);
+                              }, 0)} Kz
+          </Text>
+           <Text style={styles.totalText}>
+            Total Preço: {nota.total_preco.toFixed(2)} Kz
+          </Text>
+          <Text style={styles.totalText}>
+            Valor a pagar: {nota.valor_pagar.toFixed(2)} Kz
           </Text>
         </View>
 

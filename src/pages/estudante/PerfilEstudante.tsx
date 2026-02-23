@@ -391,7 +391,7 @@ export default function PerfilEstudante() {
 
       {/* Tabs with detailed information */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 h-auto">
           <TabsTrigger value="geral" className="gap-2">
             <User className="h-4 w-4" />
             <span className="hidden md:inline">Dados Gerais</span>
@@ -406,6 +406,11 @@ export default function PerfilEstudante() {
             <FileText className="h-4 w-4" />
             <span className="hidden md:inline">Disciplinas</span>
             <span className="md:hidden">Disc.</span>
+          </TabsTrigger>
+            <TabsTrigger value="avaliacao" className="gap-2">
+            <FileText className="h-4 w-4" />
+            <span className="hidden md:inline">Notas & avaliações</span>
+            <span className="md:hidden">N-Ava.</span>
           </TabsTrigger>
           <TabsTrigger value="financas" className="gap-2">
             <CreditCard className="h-4 w-4" />
@@ -674,6 +679,30 @@ export default function PerfilEstudante() {
             }}
           />
         </TabsContent>
+           {/* Tab: Avaliacao */}
+ <TabsContent value="avaliacao" className="space-y-4">
+  <Card>
+    <CardHeader>
+      <CardTitle className="text-lg">Histórico de Avaliações</CardTitle>
+      <CardDescription>
+        Esta funcionalidade será desenvolvida em breve.
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent className="py-16">
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <div className="text-muted-foreground text-sm">
+          🚧 Estamos a trabalhar nesta funcionalidade.
+        </div>
+
+        <div className="text-xs text-muted-foreground">
+          Em breve poderá visualizar aqui o histórico completo das suas  avaliações.
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+</TabsContent>
+
 
         {/* Tab: Finanças - Aqui está a parte substituída */}
         <TabsContent value="financas" className="space-y-4">

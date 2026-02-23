@@ -7,8 +7,9 @@ import {
   Search,
   Paperclip,
   X,
-  FileText,
   Image as ImageIcon,
+  Download,
+  Upload,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -48,16 +48,18 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
-// Hooks corrigidos (ajusta o caminho conforme tua pasta real)
+// Hooks
 import {
   useSolicitacoesSuporte,
   useSolicitacaoDetail,
   useResponderSolicitacao,
-
 } from "@/hooks/suporte/use-query-solicitacao-suporte";
-
 import { useAllTiposSuporte } from "@/hooks/suporte/use-query-tipo-suporte";
+import { useUploadSingle } from "@/hooks/upload/use-upload-single";
+
 import { FilterSolicitacoesParams, ResponderSolicitacaoPayload, SolicitacaoSuporte } from "@/services/suporte/solicitacao-suporte.service";
+import { ApiError } from "@/error";
+import { viewFile } from "@/services/upload/upload-single.service";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -73,22 +75,43 @@ export default function ListaSolicitacoes() {
   const [showDetails, setShowDetails] = useState(false);
   const [respostaTexto, setRespostaTexto] = useState("");
   const [showAnexos, setShowAnexos] = useState(false);
+  const [solicitacaoAnexos, setSolicitacaoAnexos] = useState<SolicitacaoSuporte | null>(null);
 
-  // Filtros condicionais
-  const filterParams: FilterSolicitacoesParams = {
-    page: currentPage,
-    limit: ITEMS_PER_PAGE,
-  };
+  // Estados para upload separado
+  const [files, setFiles] = useState<{
+    file1: File | null;
+    file2: File | null;
+    file3: File | null;
+  }>({
+    file1: null,
+    file2: null,
+    file3: null,
+  });
 
-  if (searchTerm.trim()) filterParams.search = searchTerm.trim();
-  if (tipoSuporte !== undefined) filterParams.tipo_suporte = tipoSuporte;
-  if (status !== undefined) filterParams.status = status;
+  const [fileNames, setFileNames] = useState<{
+    fileName1: string | null;
+    fileName2: string | null;
+    fileName3: string | null;
+  }>({
+    fileName1: null,
+    fileName2: null,
+    fileName3: null,
+  });
 
+  const [uploading, setUploading] = useState<number[]>([]); // slots em upload: 1,2,3
+
+  // Hooks
   const {
     data: paginatedResponse,
     isLoading: isLoadingList,
     isError: listError,
-  } = useSolicitacoesSuporte(filterParams);
+  } = useSolicitacoesSuporte({
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+    search: searchTerm.trim() || undefined,
+    tipo_suporte: tipoSuporte,
+    status,
+  });
 
   const { data: tiposSuporte = [] } = useAllTiposSuporte();
 
@@ -98,6 +121,7 @@ export default function ListaSolicitacoes() {
   } = useSolicitacaoDetail(selectedId ?? undefined);
 
   const responderMutation = useResponderSolicitacao();
+  const uploadMutation = useUploadSingle();
 
   const handleFiltrar = () => setCurrentPage(1);
 
@@ -111,12 +135,38 @@ export default function ListaSolicitacoes() {
   const handleVerDetalhes = (id: number) => {
     setSelectedId(id);
     setRespostaTexto("");
+    setFiles({ file1: null, file2: null, file3: null });
+    setFileNames({ fileName1: null, fileName2: null, fileName3: null });
+    setUploading([]);
     setShowDetails(true);
   };
 
-  const handleVerAnexos = (id: number) => {
-    setSelectedId(id);
+  const handleVerAnexos = (solicitacao: SolicitacaoSuporte) => {
+    setSolicitacaoAnexos(solicitacao);
     setShowAnexos(true);
+  };
+
+  const handleUploadFile = async (slot: 1 | 2 | 3, selectedFile: File) => {
+    setUploading((prev) => [...prev, slot]);
+
+    try {
+      const result = await uploadMutation.mutateAsync(selectedFile);
+      const uploadedName = result.file?.filename 
+
+      const nameKey = `fileName${slot}` as keyof typeof fileNames;
+      setFileNames((prev) => ({ ...prev, [nameKey]: uploadedName }));
+
+      const fileKey = `file${slot}` as keyof typeof files;
+      setFiles((prev) => ({ ...prev, [fileKey]: selectedFile }));
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Falha ao enviar o arquivo.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading((prev) => prev.filter((s) => s !== slot));
+    }
   };
 
   const handleEnviarResposta = () => {
@@ -132,6 +182,9 @@ export default function ListaSolicitacoes() {
     const payload: ResponderSolicitacaoPayload = {
       descricao: respostaTexto.trim(),
       contactos_id: selectedId,
+      file_name1: fileNames.fileName1,
+      file_name2: fileNames.fileName2,
+      file_name3: fileNames.fileName3,
     };
 
     responderMutation.mutate(payload, {
@@ -141,6 +194,9 @@ export default function ListaSolicitacoes() {
           description: "Resposta enviada com sucesso.",
         });
         setRespostaTexto("");
+        setFiles({ file1: null, file2: null, file3: null });
+        setFileNames({ fileName1: null, fileName2: null, fileName3: null });
+        setUploading([]);
         setShowDetails(false);
       },
       onError: (err: any) => {
@@ -153,11 +209,30 @@ export default function ListaSolicitacoes() {
     });
   };
 
-  const getEstadoBadge = (status: number) => {
+  const handleDownload = async (ficheiroName: string) => {
+    if (!ficheiroName) return;
+
+    try {
+      const blob = await viewFile(ficheiroName);
+      const fileUrl = URL.createObjectURL(blob);
+      window.open(fileUrl, "_blank");
+      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description:
+          error instanceof ApiError
+            ? error.message
+            : "Erro ao abrir o ficheiro.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getEstadoBadge = (status: any) => {
     const config: Record<number, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
       0: { label: "Pendente", variant: "outline" },
       1: { label: "Respondido", variant: "default" },
-      // acrescente outros estados que existam
     };
     const cfg = config[status] || { label: `Status ${status}`, variant: "secondary" };
     return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
@@ -177,7 +252,7 @@ export default function ListaSolicitacoes() {
     return (
       <div className="p-10 text-center text-destructive">
         <p className="text-lg font-medium">Erro ao carregar as solicitações</p>
-        <p className="text-sm mt-2">{(listError as  any)?.message || "Tente recarregar a página"}</p>
+        <p className="text-sm mt-2">{(listError as any)?.message || "Tente recarregar a página"}</p>
       </div>
     );
   }
@@ -264,23 +339,23 @@ export default function ListaSolicitacoes() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Estado</label>
-             <Select
-  value={status ?? "all"}
-  onValueChange={(v) => {
-    setStatus(v === "all" ? undefined : v);
-    setCurrentPage(1);
-  }}
->
-  <SelectTrigger>
-    <SelectValue placeholder="Todos os estados" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="all">Todos</SelectItem>
-    <SelectItem value="a responder">A Responder</SelectItem>
-    <SelectItem value="aguarda resposta">Aguarda Resposta</SelectItem>
-    <SelectItem value="respondido">Respondido</SelectItem>
-  </SelectContent>
-</Select>
+              <Select
+                value={status ?? "all"}
+                onValueChange={(v) => {
+                  setStatus(v === "all" ? undefined : v);
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="a responder">A Responder</SelectItem>
+                  <SelectItem value="aguarda resposta">Aguarda Resposta</SelectItem>
+                  <SelectItem value="respondido">Respondido</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-end gap-2 md:col-span-2">
@@ -333,7 +408,7 @@ export default function ListaSolicitacoes() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleVerAnexos(sol.contactos_id)}
+                        onClick={() => handleVerAnexos(sol)}
                       >
                         <Paperclip className="mr-1 h-4 w-4" />
                         {[sol.file_name1, sol.file_name2, sol.file_name3].filter(Boolean).length}
@@ -386,7 +461,7 @@ export default function ListaSolicitacoes() {
         </div>
       )}
 
-      {/* Modal de Detalhes */}
+      {/* Modal de Detalhes - restaurado completamente como estava */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
         <DialogContent className="max-w-3xl! max-h-[90vh]! overflow-y-auto">
           <DialogHeader>
@@ -438,41 +513,231 @@ export default function ListaSolicitacoes() {
                 </div>
               </div>
 
-              {solicitacaoDetail.mensagem_resposta && (
+              {solicitacaoDetail.respostas && solicitacaoDetail.respostas.length > 0 ? (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Resposta</p>
-                  <div className="mt-1 p-3 bg-muted rounded-md">
-                    <p className="whitespace-pre-wrap text-sm">{solicitacaoDetail.mensagem_resposta}</p>
-                    {solicitacaoDetail.nome_usuario_resposta && (
-                      <p className="mt-2 text-xs text-muted-foreground italic">
-                        Respondido por: {solicitacaoDetail.nome_usuario_resposta}
-                      </p>
-                    )}
+                  <p className="text-sm font-medium text-muted-foreground mb-2">
+                    Respostas ({solicitacaoDetail.respostas.length})
+                  </p>
+
+                  <div 
+                    className={`
+                      space-y-3 
+                      ${solicitacaoDetail.respostas.length > 4 
+                        ? 'max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/50' 
+                        : ''}
+                    `}
+                  >
+                    {solicitacaoDetail.respostas.map((resposta) => (
+                      <div 
+                        key={resposta.resposta_id}
+                        className="p-3 bg-muted rounded-md border border-border/50"
+                      >
+                        <p className="whitespace-pre-wrap text-sm">
+                          {resposta.mensagem_resposta}
+                        </p>
+
+                        <div className="mt-2 flex flex-col gap-1 text-xs text-muted-foreground italic">
+                          <span>
+                            Respondido por: {resposta.nome_usuario_resposta}
+                          </span>
+                          {resposta.data_resposta && (
+                            <span>
+                              Em: {resposta.data_resposta}
+                            </span>
+                          )}
+                        </div>
+
+                        {(resposta.file_name1 || resposta.file_name2 || resposta.file_name3) && (
+                          <div className="mt-3 text-xs">
+                            <p className="font-medium text-muted-foreground mb-1">Anexos:</p>
+                            <div className="flex flex-col gap-2">
+                              {resposta.file_name1 && (
+                                <div className="flex items-center justify-between bg-muted/50 p-2 rounded border">
+                                  <span className="text-blue-600 truncate max-w-[220px]">
+                                    {resposta.file_name1}
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDownload(resposta.file_name1!)}
+                                  >
+                                    <Download className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+
+                              {resposta.file_name2 && (
+                                <div className="flex items-center justify-between bg-muted/50 p-2 rounded border">
+                                  <span className="text-blue-600 truncate max-w-[220px]">
+                                    {resposta.file_name2}
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDownload(resposta.file_name2!)}
+                                  >
+                                    <Download className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+
+                              {resposta.file_name3 && (
+                                <div className="flex items-center justify-between bg-muted/50 p-2 rounded border">
+                                  <span className="text-blue-600 truncate max-w-[220px]">
+                                    {resposta.file_name3}
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDownload(resposta.file_name3!)}
+                                  >
+                                    <Download className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
+              ) : (
+                solicitacaoDetail.mensagem_resposta && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Resposta</p>
+                    <div className="mt-1 p-3 bg-muted rounded-md">
+                      <p className="whitespace-pre-wrap text-sm">{solicitacaoDetail.mensagem_resposta}</p>
+                      {solicitacaoDetail.nome_usuario_resposta && (
+                        <p className="mt-2 text-xs text-muted-foreground italic">
+                          Respondido por: {solicitacaoDetail.nome_usuario_resposta}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )
               )}
 
-              {/* Área para nova resposta */}
+              {/* Área para nova resposta - com upload separado */}
               <div className="pt-6 border-t">
                 <label className="block text-sm font-medium mb-2">Sua Resposta</label>
-                <Textarea
-                  value={respostaTexto}
-                  onChange={(e) => setRespostaTexto(e.target.value)}
-                  placeholder="Digite a resposta para o estudante..."
-                  rows={5}
-                  className="resize-none"
-                />
-                <div className="mt-4 flex justify-end gap-3">
-                  <Button variant="outline" onClick={() => setShowDetails(false)}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleEnviarResposta}
-                    disabled={responderMutation.isPending || !respostaTexto.trim()}
-                  >
-                    {responderMutation.isPending ? "Enviando..." : "Enviar Resposta"}
-                  </Button>
-                </div>
+
+                {solicitacaoDetail?.status_mensagem === "respondido" ? (
+                  <div className="space-y-3">
+                    <Textarea
+                      value={respostaTexto}
+                      onChange={(e) => setRespostaTexto(e.target.value)}
+                      placeholder="Esta solicitação já foi respondida."
+                      rows={5}
+                      className="resize-none bg-muted/50 cursor-not-allowed"
+                      disabled
+                    />
+                    <p className="text-sm text-muted-foreground italic">
+                      Esta solicitação já está marcada como respondida. Não é possível adicionar novas respostas.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Textarea
+                      value={respostaTexto}
+                      onChange={(e) => setRespostaTexto(e.target.value)}
+                      placeholder="Digite a resposta para o estudante..."
+                      rows={5}
+                      className="resize-none mb-4"
+                    />
+
+                    {/* Upload separado */}
+                    <div className="space-y-3 mb-6">
+                      <label className="block text-sm font-medium text-muted-foreground">
+                        Anexos (máx. 3 arquivos)
+                      </label>
+
+                      {[1, 2, 3].map((n) => {
+                        const slot = n as 1 | 2 | 3;
+                        const fileKey = `file${slot}` as keyof typeof files;
+                        const nameKey = `fileName${slot}` as keyof typeof fileNames;
+                        const isUploading = uploading.includes(slot);
+
+                        return (
+                          <div key={n} className="flex items-center gap-3">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 justify-start truncate max-w-[280px]"
+                              disabled={isUploading || !!fileNames[nameKey]}
+                              asChild
+                            >
+                              <label className="cursor-pointer flex items-center gap-2">
+                                <Upload className="h-4 w-4" />
+                                <span className="truncate">
+                                  {fileNames[nameKey]
+                                    ? fileNames[nameKey]
+                                    : files[fileKey]
+                                    ? files[fileKey]!.name
+                                    : `Escolher arquivo ${n}`}
+                                </span>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.zip"
+                                  onChange={(e) => {
+                                    const selectedFile = e.target.files?.[0];
+                                    if (selectedFile) {
+                                      handleUploadFile(slot, selectedFile);
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </Button>
+
+                            {isUploading && (
+                              <span className="text-xs text-muted-foreground animate-pulse">
+                                Enviando...
+                              </span>
+                            )}
+
+                            {fileNames[nameKey] && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive"
+                                onClick={() => {
+                                  setFiles((prev) => ({ ...prev, [fileKey]: null }));
+                                  setFileNames((prev) => ({ ...prev, [nameKey]: null }));
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-4 flex justify-end gap-3">
+                      <Button variant="outline" onClick={() => {
+                        setShowDetails(false);
+                        setRespostaTexto('');
+                        setFiles({ file1: null, file2: null, file3: null });
+                        setFileNames({ fileName1: null, fileName2: null, fileName3: null });
+                        setUploading([]);
+                      }}>
+                        Cancelar
+                      </Button>
+                      <Button
+                        onClick={handleEnviarResposta}
+                        disabled={
+                          responderMutation.isPending ||
+                          (!respostaTexto.trim() && 
+                           !fileNames.fileName1 && !fileNames.fileName2 && !fileNames.fileName3)
+                        }
+                      >
+                        {responderMutation.isPending ? "Enviando..." : "Enviar Resposta"}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ) : (
@@ -483,31 +748,49 @@ export default function ListaSolicitacoes() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Anexos */}
+      {/* Modal de Anexos */}
       <Dialog open={showAnexos} onOpenChange={setShowAnexos}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Anexos da Solicitação #{selectedId}</DialogTitle>
+            <DialogTitle>Anexos da Solicitação #{solicitacaoAnexos?.contactos_id || '—'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-4">
-            {solicitacaoDetail &&
+            {solicitacaoAnexos &&
               [1, 2, 3].map((n) => {
-                const key = `file_name${n}` as keyof SolicitacaoSuporte;
-                const nome = solicitacaoDetail[key];
-                if (!nome) return null;
+                const key = `file_name${n}` as keyof typeof solicitacaoAnexos;
+                const nomeArquivo = solicitacaoAnexos[key];
+
+                if (!nomeArquivo) return null;
+
                 return (
-                  <div key={n} className="flex items-center gap-3 p-3 border rounded-md">
-                    <ImageIcon className="h-5 w-5 text-primary" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{nome as string}</p>
+                  <div
+                    key={n}
+                    className="flex items-center justify-between gap-3 p-3 border rounded-md bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <ImageIcon className="h-5 w-5 text-primary shrink-0" />
+                      <p className="text-sm font-medium truncate">
+                        {nomeArquivo as string}
+                      </p>
                     </div>
-                    <Button variant="outline" size="sm">Descarregar</Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(nomeArquivo as string)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                 );
               })}
-            {![solicitacaoDetail?.file_name1, solicitacaoDetail?.file_name2, solicitacaoDetail?.file_name3].some(Boolean) && (
-              <p className="text-center text-muted-foreground py-6">Nenhum anexo encontrado</p>
-            )}
+
+            {solicitacaoAnexos &&
+              ![solicitacaoAnexos.file_name1, solicitacaoAnexos.file_name2, solicitacaoAnexos.file_name3].some(Boolean) && (
+                <p className="text-center text-muted-foreground py-6">
+                  Nenhum anexo encontrado
+                </p>
+              )}
           </div>
         </DialogContent>
       </Dialog>

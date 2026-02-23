@@ -84,6 +84,10 @@ import PrimeiroAcessoEmail from "./pages/auth/PrimeiroAcessoEmail";
 import RedefinirSenhaPrimeiroAcesso from "./pages/auth/RedefinirSenhaPrimeiroAcesso";
 import ListaSolicitacoes from "./pages/suporte/ListaSolicitacoes";
 import TiposSuporte from "./pages/suporte/tiposSuporte";
+import BoasVindas from "./pages/auth/BoasVindas";
+import Avisos from "./pages/controle-acesso/solicitacao/Avisos";
+import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
+
 
 const App = () => {
   return (
@@ -101,6 +105,10 @@ const App = () => {
                 <Route element={<PublicRoute />}>
                   <Route path="/primeiro-acesso" element={<PrimeiroAcessoEmail />} />
                 </Route>
+                 <Route element={<PublicRoute />}>
+                  <Route path="/boas-vindas" element={<BoasVindas />} />
+                </Route>
+               
                 <Route element={<PublicRoute />}>
                   <Route path="/auth/primeiro-acesso/redefinir/:token" element={<RedefinirSenhaPrimeiroAcesso />} />
                 </Route>
@@ -130,6 +138,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  
                   <Route
                     path="/controle-acesso/solicitacoes"
                     element={
@@ -138,6 +147,25 @@ const App = () => {
 
                     }
                   />
+
+                  <Route
+                    path="/controle-acesso/all-solicitacoes"
+                    element={
+
+                      <Solicitacoes />
+
+                    }
+                  />
+
+                  <Route
+                    path="/comunicacao/avisos"
+                    element={
+
+                      <Avisos />
+
+                    }
+                  />
+
                   <Route
                     path="/financas/notas-pagamento"
                     element={
@@ -586,6 +614,7 @@ const App = () => {
                     element={<Parameters />}
                   />
                   <Route path="/calendario/prazos" element={<Deadlines />} />
+                  
                   <Route
                     path="/calendario-pos/atividades"
                     element={<ActivitiesLecturesPos />}

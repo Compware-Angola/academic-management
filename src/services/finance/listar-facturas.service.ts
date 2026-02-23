@@ -17,7 +17,11 @@ export type ListarFacturasPayload = {
 /* ---------- RESPONSE ITEM ---------- */
 export type Factura = {
   codigo: number;
+  valor_pagar:number;
   data_factura: string;
+  total_multa:number;
+  total_iva:number;
+  total_incidencia:number;
   total_preco: number;
   codigo_matricula: number;
   referencia: string;
@@ -112,6 +116,7 @@ export type FacturaItem = {
   obs: string | null;
   preco: number;
   total: number;
+  multa:number;
   descricaoservico: string;
   codigoservico: number;
   mesid: number | null;

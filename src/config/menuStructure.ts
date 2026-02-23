@@ -542,18 +542,23 @@ export const healpStructure: MenuStructure = {
       url: "/comunicacao",
       icon: MessageSquare,
       items: [
-        /*
         {
           title: "Avisos",
           url: "/comunicacao/avisos",
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
-        */
+
         // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
         // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
+          permission: [],
+        },
+
+        {
+          title: "Solicitações",
+          url: "/controle-acesso/all-solicitacoes",
           permission: [],
         },
       ],
