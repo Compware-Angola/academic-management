@@ -610,7 +610,7 @@ export const defenseTFC: MenuStructure = {
         {
           title: "Pagamentos TFC",
           url: "/defesa-tfc/pagamentos",
-          permission: [],
+          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
         },
       ],
     },

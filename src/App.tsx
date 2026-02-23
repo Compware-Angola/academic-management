@@ -678,7 +678,15 @@ const App = () => {
                   <Route path="/sem-permissao" element={<AccessDenied />} />
                   <Route
                     path="/defesa-tfc/pagamentos"
-                    element={<PagamentoTFC />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PAGAMENTO_TFC.sigla!,
+                        ]}
+                      >
+                        <PagamentoTFC />
+                      </ProtectedRoute>
+                    }
                   />
                 </Route>
               </Routes>
