@@ -9,7 +9,7 @@ import {
   BadgeDollarSign,
   Headphones,
   ListChecks,
-
+  LibraryBig,
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
@@ -44,7 +44,13 @@ export const menuStructure: MenuStructure = {
           url: "/acessos/criar-utilizador",
           permission: [PermissionTypeDetails.CRIAR_UTILIZADOR.sigla],
         },
-        { title: "Acesso funcionalidade por grupo", url: "/acessos/grupo", permission: [PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla] },
+        {
+          title: "Acesso funcionalidade por grupo",
+          url: "/acessos/grupo",
+          permission: [
+            PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla,
+          ],
+        },
         //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
         {
           title: "Acessos (todos) + novos",
@@ -73,8 +79,11 @@ export const menuStructure: MenuStructure = {
           url: "/acessos/logados",
           permission: [PermissionTypeDetails.LISTAR_UTILIZADORES_LOGADOS.sigla],
         },
-        { title: "Grupos", url: "/controle-acesso/grupos", permission: [PermissionTypeDetails.GRUPOS.sigla] },
-
+        {
+          title: "Grupos",
+          url: "/controle-acesso/grupos",
+          permission: [PermissionTypeDetails.GRUPOS.sigla],
+        },
       ],
 
       permission: [],
@@ -226,15 +235,27 @@ export const menuStructure: MenuStructure = {
       icon: BookOpen,
       items: [
         // { title: "Gestão de Curso", url: "/plano/cursos" },
-        { title: "Gestão de disciplinas", url: "/plano/disciplinas", permission: [PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla] },
+        {
+          title: "Gestão de disciplinas",
+          url: "/plano/disciplinas",
+          permission: [PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla],
+        },
         // { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
 
         {
           title: "Gestão de UC por departamento",
           url: "/plano/uc-departamento",
-          permission: [PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_DEPARTAMENTO.sigla]
+          permission: [
+            PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_DEPARTAMENTO.sigla,
+          ],
         },
-        { title: "Gestão de UC no plano", url: "/plano/uc-plano", permission: [PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla] },
+        {
+          title: "Gestão de UC no plano",
+          url: "/plano/uc-plano",
+          permission: [
+            PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla,
+          ],
+        },
       ],
 
       permission: [],
@@ -318,7 +339,11 @@ export const menuStructure: MenuStructure = {
       url: "/salas",
       icon: Building,
       items: [
-        { title: "Listar salas", url: "/salas/listar", permission: [PermissionTypeDetails.LISTAR_SALAS.sigla] }
+        {
+          title: "Listar salas",
+          url: "/salas/listar",
+          permission: [PermissionTypeDetails.LISTAR_SALAS.sigla],
+        },
       ],
 
       permission: [],
@@ -386,8 +411,11 @@ export const finaceStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla],
         },
         {
-          title: "Tipos Credito", url: "/financas/credito/tipos",
-          permission: [PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla]
+          title: "Tipos Credito",
+          url: "/financas/credito/tipos",
+          permission: [
+            PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla,
+          ],
         },
         // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
         // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
@@ -408,7 +436,11 @@ export const finaceStructure: MenuStructure = {
         //   title: "Instituições com Receita",
         //   url: "/financas/credito/instituicoes/receita",
         // },
-        { title: "Bolsas", url: "financas/credito/bolsa", permission: [PermissionTypeDetails.HISTORICO_BOLSAS.sigla] },
+        {
+          title: "Bolsas",
+          url: "financas/credito/bolsa",
+          permission: [PermissionTypeDetails.HISTORICO_BOLSAS.sigla],
+        },
         {
           title: "Bolsa Estudante",
           url: "/financas/credito/bolsa/estudante",
@@ -421,7 +453,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Atribuir Crédito Educacional",
           url: "/financas/credito/atribuir",
-          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla]
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
 
         // {
@@ -510,27 +542,25 @@ export const healpStructure: MenuStructure = {
       url: "/comunicacao",
       icon: MessageSquare,
       items: [
-        
         {
           title: "Avisos",
           url: "/comunicacao/avisos",
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
-        
+
         // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
         // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
-          permission: []
+          permission: [],
         },
 
         {
           title: "Solicitações",
           url: "/controle-acesso/all-solicitacoes",
-          permission: []
-        }
-        
+          permission: [],
+        },
       ],
 
       permission: [],
@@ -548,21 +578,44 @@ export const healpStructure: MenuStructure = {
     */
   ],
 };
-export const  suporteStructure :MenuStructure={
-  items:[
-     {
-    title: "Suporte",
-    url:"/suporte",
-    icon: Headphones,
-    items: [
-      { title: "Solicitações de Suporte", url: "/suporte/solicitacoes",permission:[PermissionTypeDetails.LSOLICITACAO_SUPORTE.sigla] },
-      { title: "Tipos de Suporte",  url: "/suporte/tipos", permission:[PermissionTypeDetails.TIPO_SUPORTE.sigla] },
-    ],
-     permission: [],
-  },
-  ]
-}
-
+export const suporteStructure: MenuStructure = {
+  items: [
+    {
+      title: "Suporte",
+      url: "/suporte",
+      icon: Headphones,
+      items: [
+        {
+          title: "Solicitações de Suporte",
+          url: "/suporte/solicitacoes",
+          permission: [PermissionTypeDetails.LSOLICITACAO_SUPORTE.sigla],
+        },
+        {
+          title: "Tipos de Suporte",
+          url: "/suporte/tipos",
+          permission: [PermissionTypeDetails.TIPO_SUPORTE.sigla],
+        },
+      ],
+      permission: [],
+    },
+  ],
+};
+export const defenseTFC: MenuStructure = {
+  items: [
+    {
+      title: "Gestão de Defesa e TFC",
+      url: "/defesa-tfc",
+      icon: LibraryBig,
+      items: [
+        {
+          title: "Pagamentos TFC",
+          url: "/defesa-tfc/pagamentos",
+          permission: [],
+        },
+      ],
+    },
+  ],
+};
 export const academicStructure: MenuStructure = {
   items: [
     {
@@ -609,7 +662,7 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/formula-oral",
           permission: [
             PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
-          ]
+          ],
         },
         {
           title: "Estatísticas de notas lançadas",
@@ -620,12 +673,12 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/estudantes",
           permission: [
             PermissionTypeDetails.ESTUDANTES_INSCRITOS_POR_AVALIACAO.sigla!,
-          ]
+          ],
         },
         {
-          title: "Histórico de lançamentos", url: "/avaliacoes/historico", permission: [
-            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!,
-          ]
+          title: "Histórico de lançamentos",
+          url: "/avaliacoes/historico",
+          permission: [PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!],
         },
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
         { title: "Lançamento de notas", url: "/avaliacoes/notas" },
@@ -633,21 +686,25 @@ export const academicStructure: MenuStructure = {
 
         { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
         {
-          title: "Pauta por UC", url: "/avaliacoes/pauta-uc", permission: [
-            PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!,
-          ]
+          title: "Pauta por UC",
+          url: "/avaliacoes/pauta-uc",
+          permission: [PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!],
         },
         { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
         { title: "Validação", url: "/avaliacoes/validacao" },
         {
-          title: "Visualizar notas", url: "/avaliacoes/visualizar", permission: [
+          title: "Visualizar notas",
+          url: "/avaliacoes/visualizar",
+          permission: [
             PermissionTypeDetails.LANCAMENTO_NOTAS_AVALIACOES.sigla!,
-          ]
+          ],
         },
         {
-          title: "Parâmetros gerais", url: "/avaliacoes/parametros", permission: [
+          title: "Parâmetros gerais",
+          url: "/avaliacoes/parametros",
+          permission: [
             PermissionTypeDetails.PARAMETROS_GERAIS_AVALIACAO.sigla!,
-          ]
+          ],
         },
       ],
 
@@ -670,7 +727,7 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/semanais",
           permission: [
             PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
-          ]
+          ],
         },
         //  { title: "Substitutos", url: "/horarios/substitutos" },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
@@ -681,12 +738,18 @@ export const academicStructure: MenuStructure = {
         {
           title: "Permissão editar",
           url: "/horarios/permissao",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla],
+          permission: [
+            PermissionTypeDetails.LISTAR_HORARIOS.sigla,
+            PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla,
+          ],
         },
         {
           title: "Horários por docente",
           url: "/horarios/docente",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla, PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla],
+          permission: [
+            PermissionTypeDetails.LISTAR_HORARIOS.sigla,
+            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
+          ],
         },
         {
           title: "Inscrições por horário",
@@ -706,9 +769,11 @@ export const academicStructure: MenuStructure = {
         },
         { title: "Horários por UC", url: "/horarios/uc" },
         {
-          title: "Parâmetros", url: "/horarios/parametros", permission: [
+          title: "Parâmetros",
+          url: "/horarios/parametros",
+          permission: [
             PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla!,
-          ]
+          ],
         },
       ],
 
