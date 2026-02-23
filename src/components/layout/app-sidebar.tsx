@@ -17,6 +17,7 @@ import {
   healpStructure,
   suporteStructure,
   defenseTFC,
+  assiduidade,
 } from "@/config/menuStructure";
 import { NavFinance } from "./nav-finance";
 import { NavAcademic } from "./nav-academic";
@@ -24,6 +25,7 @@ import { filterMenuByPermission } from "@/util/menuFilter";
 import { NavHealp } from "./nav-healp";
 import { NavSuporte } from "./nav-suporte";
 import { NavDefenseTFC } from "./nav-defense-tfc";
+import { NavAssiduidade } from "./nav-assiduidade";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const mainItems = filterMenuByPermission(menuStructure?.items ?? []);
@@ -32,7 +34,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const helpItems = filterMenuByPermission(healpStructure?.items ?? []);
   const suporteItems = filterMenuByPermission(suporteStructure?.items ?? []);
   const defenseTFCItems = filterMenuByPermission(defenseTFC?.items ?? []);
-
+const assiduidadeItems = filterMenuByPermission(assiduidade?.items ??[])
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -41,6 +43,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         <NavMain items={mainItems} />
+        <NavAssiduidade items={assiduidadeItems} />
         <NavDefenseTFC items={defenseTFCItems} />
         <NavAcademic items={academicItems} />
         <NavFinance items={financeItems} />

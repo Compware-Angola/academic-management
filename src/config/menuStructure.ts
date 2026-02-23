@@ -616,6 +616,22 @@ export const defenseTFC: MenuStructure = {
     },
   ],
 };
+export const assiduidade: MenuStructure = {
+  items: [
+    {
+      title: "Assiduidade",
+      url: "/assiduidade",
+      icon: ListChecks,
+      items: [
+        {
+          title: "Marcação de Assuidade",
+          url: "/assiduidade/marcacao",
+          permission: [PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla],
+        },
+      ],
+    },
+  ],
+};
 export const academicStructure: MenuStructure = {
   items: [
     {
