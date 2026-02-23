@@ -612,6 +612,11 @@ export const defenseTFC: MenuStructure = {
           url: "/defesa-tfc/pagamentos",
           permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
         },
+        {
+          title: "Estudantes Finalistas",
+          url: "/defesa-tfc/estudantes",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
       ],
     },
   ],
