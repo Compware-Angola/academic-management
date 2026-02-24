@@ -90,6 +90,7 @@ import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 import PagamentoTFC from "./pages/defesa-tfc/PagamentoTFC";
 import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
+import IsencaoServico from "@/pages/financas/isencao-servico";
 
 const App = () => {
   return (
@@ -153,9 +154,6 @@ const App = () => {
                     path="/controle-acesso/all-solicitacoes"
                     element={<Solicitacoes />}
                   />
-
-                  <Route path="/comunicacao/avisos" element={<Avisos />} />
-
                   <Route
                     path="/financas/notas-pagamento"
                     element={
@@ -684,6 +682,15 @@ const App = () => {
                   <Route
                     path="financas/credito/bolsa/estudante"
                     element={<ListaBolseiro />}
+                  />
+
+                  <Route
+                      path="/financas/isencao-servico"
+                      element={
+                        <ProtectedRoute allowedPermissions={[PermissionTypeDetails.ISENCAO_SERVICO.sigla!,]}>
+                            <IsencaoServico />
+                        </ProtectedRoute>
+                      }
                   />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />

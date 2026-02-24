@@ -522,6 +522,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/pagamento-referencia",
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
+        {
+            title: "Isenção de serviço",
+            url: "/financas/isencao-servico",
+            permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla]
+        },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
         // /* Serviços Tributários */
