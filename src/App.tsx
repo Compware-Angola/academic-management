@@ -88,6 +88,8 @@ import BoasVindas from "./pages/auth/BoasVindas";
 import Avisos from "./pages/controle-acesso/solicitacao/Avisos";
 import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 import PagamentoTFC from "./pages/defesa-tfc/PagamentoTFC";
+import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
+import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
 
 const App = () => {
   return (
@@ -237,6 +239,16 @@ const App = () => {
                         ]}
                       >
                         <DisciplineManagementList />
+                      </ProtectedRoute>
+                    }
+                  />
+                     <Route
+                    path="/assiduidade/marcacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla]}
+                      >
+                        <MarcarAssiduidade />
                       </ProtectedRoute>
                     }
                   />
@@ -685,6 +697,18 @@ const App = () => {
                         ]}
                       >
                         <PagamentoTFC />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/defesa-tfc/estudantes"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFESA.sigla!,
+                        ]}
+                      >
+                        <ListarEstudanteFinalista />
                       </ProtectedRoute>
                     }
                   />
