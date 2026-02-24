@@ -9,7 +9,12 @@ interface CourseSelectProps {
   onChangeValue: (v: string) => void;
   params?: CursoParams;
 }
-const CourseSelect = ({ onChangeValue, value, params,labelMode = "outside", }: CourseSelectProps) => {
+const CourseSelect = ({
+  onChangeValue,
+  value,
+  params,
+  labelMode = "outside",
+}: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
 
   return (
@@ -18,7 +23,7 @@ const CourseSelect = ({ onChangeValue, value, params,labelMode = "outside", }: C
         disabled={loadingCursos}
         value={value}
         label="Curso"
-        labelMode={labelMode}  // 👈 repassa decisão
+        labelMode={labelMode} // 👈 repassa decisão
         isLoading={loadingCursos}
         width="full"
         options={cursos}

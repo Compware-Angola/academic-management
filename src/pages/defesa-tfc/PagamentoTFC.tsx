@@ -43,6 +43,7 @@ import { Input } from "@/components/ui/input";
 import { useQueryPagamentosTFC } from "@/hooks/defesa-tfc/use-query-pagamentos-tfc";
 import { PeriodoSelect } from "@/components/common/global-selects/PeriodoSelect";
 import { statusFacturaDefesaTFC } from "./data";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 export default function PagamentoTFC() {
   //Options
@@ -65,6 +66,7 @@ export default function PagamentoTFC() {
     curso: "",
     estado: "",
     faculdade: "",
+    tipoCandidatura: "",
     periodo: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
@@ -167,9 +169,17 @@ export default function PagamentoTFC() {
               value={filters.faculdade}
               onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
             />
+            <TipoCandidaturaSelect
+              onChangeValue={(v) =>
+                setFilters({ ...filters, tipoCandidatura: v })
+              }
+              value={filters.tipoCandidatura}
+              enableDefaultSelectItem
+            />
             <CourseSelect
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
               }}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
