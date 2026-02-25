@@ -2,27 +2,17 @@ import { axiosNestGa } from "@/lib/axios-nest-ga"
 
 type ResponseUpload = {
   message: string;
-  file: {
-    filename: string;
-    originalname: string;
-    path: string;
-    size: number;
-  };
+  file: string;
 };
 
-export async function uploadSingleImage(file: File): Promise<ResponseUpload> {
-  const formData = new FormData();
-  formData.append("file", file);
-
+export async function uploadSingleImage(file: string): Promise<ResponseUpload> {
+  
   const response = await axiosNestGa.post<ResponseUpload>(
     "/solicitacoa/aviso/upload",
-    formData,
     {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+        filename: file
     }
-  );
+);
 
   return response.data;
 }

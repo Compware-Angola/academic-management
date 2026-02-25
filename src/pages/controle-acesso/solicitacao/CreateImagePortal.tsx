@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, Trash2, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUploadSingleImage } from "@/hooks/acess/use-mutation-upload-single-image";
+import { useUploadSingle } from "@/hooks/upload/use-upload-single";
 
 export default function UploadImagem() {
   const { toast } = useToast();
@@ -14,8 +15,9 @@ export default function UploadImagem() {
   const [preview, setPreview] = useState<string | null>(null);
 
   const uploadMutation = useUploadSingleImage();
+    const UploadMutation = useUploadSingle();
 
-  // Limpar input
+  
   const clearFileInput = () => {
     setSelectedFile(null);
     setPreview(null);
@@ -24,12 +26,12 @@ export default function UploadImagem() {
     }
   };
 
-  // Selecionar imagem
+  
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Aceitar apenas imagens
+    
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Formato inválido",
@@ -48,16 +50,19 @@ export default function UploadImagem() {
     });
   };
 
-  // Upload
+  
   const handleUpload = async () => {
     if (!selectedFile) return;
 
     try {
-      const response = await uploadMutation.mutateAsync(selectedFile);
+        const resposta = await UploadMutation.mutateAsync(selectedFile);
+        
+        const response = await uploadMutation.mutateAsync(resposta.file.filename);
+
 
       toast({
         title: "Upload feito com sucesso!",
-        description: response?.message || "Imagem enviada.",
+        description: resposta?.message || "Imagem enviada.",
       });
 
       clearFileInput();
@@ -73,7 +78,7 @@ export default function UploadImagem() {
   return (
   <div className="w-full min-h-screen flex flex-col items-center justify-center px-6">
 
-    {/* Título grande */}
+    
     <h1 className="text-5xl md:text-6xl font-extrabold text-center mb-12 tracking-tight">
       IMAGEM DE ABERTURA
       <span className="block text-2xl md:text-3xl font-medium mt-4 text-muted-foreground">
@@ -81,7 +86,7 @@ export default function UploadImagem() {
       </span>
     </h1>
 
-    {/* Área de upload centralizada */}
+    
     <div className="w-full max-w-2xl space-y-6">
 
       <div className="flex flex-col items-center space-y-4">
