@@ -58,3 +58,16 @@ export async function createIsencaoServico(body: CreateIsencaoServicoBody) {
     return data;
 }
 
+export type UpdateIsencaoServicoBody = {
+    codigoMatricula?: number;
+    codigoServico?: number;
+    codigoAnoLectivo?: number;
+    dataIsencao?: string;
+    obs?: string;
+    estadoIsencao?: string;
+};
+
+export async function updateIsencaoServico(codigo: number, body: UpdateIsencaoServicoBody) {
+    const { data } = await axiosNestFinance.patch(`/isencao/${codigo}`, body);
+    return data;
+}

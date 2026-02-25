@@ -22,6 +22,11 @@ import {
 } from "@/pages/financas/isencao-servico/CreateIsencaoServicoDialog.tsx";
 import {useMutationCreateIsencaoServico} from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-servico.ts";
 
+import {EditIsencaoServicoDialog, EditIsencaoServicoFormData} from "@/pages/financas/isencao-servico/EditIsencaoServicoDialog.tsx";
+import {useMutationUpdateIsencaoServico} from "@/hooks/financas/isencao-servico/use-mutation-update-isencao-servico.ts";
+import {Pencil} from "lucide-react";
+import type {IsencaoServico, UpdateIsencaoServicoBody} from "@/services/financas/isencao-servicos/isencao-servico.service.ts";
+
 export default function IsencaoServico() {
     const [matriculaInput, setMatriculaInput] = useState("");
     const [filters, setFilters] = useState({
@@ -51,6 +56,113 @@ export default function IsencaoServico() {
     });
 
     const { mutateAsync, isPending } = useMutationCreateIsencaoServico();
+
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [editForm, setEditForm] = useState<EditIsencaoServicoFormData>({
+        codigoMatricula: "",
+        codigoServico: "",
+        codigoAnoLectivo: "",
+        dataIsencao: "",
+        obs: "",
+        estadoIsencao: "",
+    });
+    const [originalEditForm, setOriginalEditForm] = useState<EditIsencaoServicoFormData | null>(null);
+
+    const { mutateAsync: mutateUpdate, isPending: isUpdating } = useMutationUpdateIsencaoServico();
+
+    const handleEditOpen = (item: IsencaoServico) => {
+        const initial = {
+             codigoMatricula: item.codigo_matricula ?? "",
+             codigoServico: item.codigo_servico ?? "",
+             codigoAnoLectivo: item.codigo_anolectivo ?? "",
+             dataIsencao: item.data_isencao ?? "",
+             obs: "",
+             estadoIsencao: item.estado_isensao ?? "",
+             codigo: item.codigo,
+         };
+        setEditForm(initial);
+        setOriginalEditForm(initial);
+        setIsEditOpen(true);
+    };
+
+    const formatDateToYYYYMMDD = (dateInput?: string | number) => {
+        if (!dateInput) return undefined;
+        const s = String(dateInput);
+        const isoMatch = s.match(/^\d{4}-\d{2}-\d{2}T/);
+        if (isoMatch) {
+            const d = new Date(s);
+            if (isNaN(d.getTime())) return undefined;
+            const y = d.getUTCFullYear();
+            const m = `${d.getUTCMonth() + 1}`.padStart(2, "0");
+            const day = `${d.getUTCDate()}`.padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        }
+        const simpleMatch = s.match(/^\d{4}-\d{2}-\d{2}$/);
+        if (simpleMatch) return s;
+        const d = new Date(s);
+        if (isNaN(d.getTime())) return undefined;
+        const y = d.getUTCFullYear();
+        const m = `${d.getUTCMonth() + 1}`.padStart(2, "0");
+        const day = `${d.getUTCDate()}`.padStart(2, "0");
+        return `${y}-${m}-${day}`;
+    };
+
+    const handleEditSubmit = async () => {
+        const codigo = editForm.codigo;
+        if (!codigo) return;
+
+        const body: UpdateIsencaoServicoBody = {};
+
+        if (originalEditForm) {
+            if (String(editForm.codigoMatricula ?? "") !== String(originalEditForm.codigoMatricula ?? "")) {
+                if (editForm.codigoMatricula !== "" && editForm.codigoMatricula != null) body.codigoMatricula = Number(editForm.codigoMatricula);
+                else body.codigoMatricula = null;
+            }
+
+            if (String(editForm.codigoServico ?? "") !== String(originalEditForm.codigoServico ?? "")) {
+                if (editForm.codigoServico !== "" && editForm.codigoServico != null) body.codigoServico = Number(editForm.codigoServico);
+                else body.codigoServico = null;
+            }
+
+            if (String(editForm.codigoAnoLectivo ?? "") !== String(originalEditForm.codigoAnoLectivo ?? "")) {
+                if (editForm.codigoAnoLectivo !== "" && editForm.codigoAnoLectivo != null) body.codigoAnoLectivo = Number(editForm.codigoAnoLectivo);
+                else body.codigoAnoLectivo = null;
+            }
+
+            const newDate = formatDateToYYYYMMDD(editForm.dataIsencao);
+            const oldDate = formatDateToYYYYMMDD(originalEditForm.dataIsencao);
+            if (newDate !== oldDate) {
+                if (newDate) body.dataIsencao = newDate;
+                else body.dataIsencao = null;
+            }
+
+            if (String(editForm.obs ?? "") !== String(originalEditForm.obs ?? "")) {
+                body.obs = editForm.obs ?? null;
+            }
+
+            if (String(editForm.estadoIsencao ?? "") !== String(originalEditForm.estadoIsencao ?? "")) {
+                body.estadoIsencao = editForm.estadoIsencao ?? null;
+            }
+        } else {
+            if (editForm.codigoMatricula) body.codigoMatricula = Number(editForm.codigoMatricula);
+            if (editForm.codigoServico) body.codigoServico = Number(editForm.codigoServico);
+            if (editForm.codigoAnoLectivo) body.codigoAnoLectivo = Number(editForm.codigoAnoLectivo);
+            const fmt = formatDateToYYYYMMDD(editForm.dataIsencao);
+            if (fmt) body.dataIsencao = fmt;
+            if (editForm.obs) body.obs = editForm.obs;
+            if (editForm.estadoIsencao) body.estadoIsencao = editForm.estadoIsencao;
+        }
+
+        if (Object.keys(body).length === 0) {
+            setIsEditOpen(false);
+            return;
+        }
+
+        await mutateUpdate({ codigo, body });
+        setIsEditOpen(false);
+        setOriginalEditForm(null);
+        await refetch();
+    };
 
     const handleSubmit = async () => {
         await mutateAsync({
@@ -161,6 +273,7 @@ export default function IsencaoServico() {
                                 <TableHead>Ano Lectivo</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead>Data de Isenção</TableHead>
+                                <TableHead>Editar</TableHead>
                             </TableRow>
                         </TableHeader>
                                 <TableBody>
@@ -179,7 +292,7 @@ export default function IsencaoServico() {
                                         </TableRow>
                                     ) : (
                                         items.map((item) => (
-                                            <TableRow key={item.codigo}>
+                                             <TableRow key={item.codigo}>
                                                 <TableCell>{item.codigo_matricula ?? "-"}</TableCell>
                                                 <TableCell>{item.nome_completo ?? "-"}</TableCell>
                                                 <TableCell>{item.bilhete_identidade ?? "-"}</TableCell>
@@ -189,6 +302,11 @@ export default function IsencaoServico() {
                                                 <TableCell>{item.ano_lectivo ?? "-"}</TableCell>
                                                 <TableCell>{item.estado_isensao ?? "-"}</TableCell>
                                                 <TableCell>{item.data_isencao ? formatarData(item.data_isencao) : "-"}</TableCell>
+                                                <TableCell>
+                                                    <Button size="sm" variant="ghost" onClick={() => handleEditOpen(item)}>
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     )}
@@ -248,6 +366,15 @@ export default function IsencaoServico() {
                 onChange={setFormData}
                 onSubmit={handleSubmit}
                 isSubmitting={isPending}
+            />
+
+            <EditIsencaoServicoDialog
+                open={isEditOpen}
+                onOpenChange={setIsEditOpen}
+                formData={editForm}
+                onChange={setEditForm}
+                onSubmit={handleEditSubmit}
+                isSubmitting={isUpdating}
             />
         </div>
     );
