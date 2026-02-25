@@ -90,6 +90,7 @@ import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 import PagamentoTFC from "./pages/defesa-tfc/PagamentoTFC";
 import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
+import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 
 const App = () => {
   return (
@@ -155,6 +156,7 @@ const App = () => {
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
+                  <Route path="/comunicacao/avisos/imagem" element={<UploadImagem />} />
 
                   <Route
                     path="/financas/notas-pagamento"
