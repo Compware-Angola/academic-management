@@ -8,6 +8,7 @@ export interface Curso {
 
 export interface CursoParams {
   faculdadeId?: number;
+  tipoCandidaturaId?: number;
 }
 
 export interface CursoResponse {
@@ -20,6 +21,7 @@ export async function getCursosDropdown(
   const response = await axiosApexGa.get<CursoResponse>("/uma/course/all", {
     params: {
       faculdadeId: params?.faculdadeId,
+      tipoCandidaturaId: params?.tipoCandidaturaId,
     },
   });
   return response.data.cursos ?? [];

@@ -22,50 +22,59 @@ import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryDashboard } from "@/hooks/dashboard/use-query-dashboard";
 import { formatNumber } from "@/util/format-number";
-import { AuthStorage } from "@/util/auth-storage";
+import { filterMenuByPermission } from "@/util/menuFilter";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 const Index = () => {
   const { user:userData } = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
+      const { data: academicYear, isLoading: isLoadingAcademicYear } =
+        useQueryAnoAcademico();
+    
+      // encontra o ano activo
+      const activeAcademicYear = academicYear?.find(
+        (year) => year.estado.toLowerCase() === "activo",
+      );
   const quickLinks = [
   {
     name: "Avaliações",
     icon: FileCheck,
     path: "/avaliacoes/controle",
-    roles: ["adm", "rootAdmin"],
+    permission: [],
   },
   {
     name: "Assiduidade",
     icon: BookOpen,
     path: "/assiduidade/controle",
-    roles: ["adm", "rootAdmin"],
+    permission: [],
   },
   {
     name: "Horários",
     icon: Calendar,
     path: "/horarios/listar",
-    roles: ["adm", "rootAdmin", "dct"],
+    permission: [],
   },
   {
     name: "Estudantes",
     icon: Users,
     path: "/inscricoes/lista-geral",
-    roles: ["adm", "rootAdmin", "dct"],
+    permission: [],
   },
 ];
-  const { groups,user } = userData || {};
-const userGroups = groups?.map(g => g.sigla) || [];
+  const { user } = userData || {};
 
-const allowedQuickLinks = quickLinks.filter(link =>
-  link.roles.some((role) => userGroups.includes(role))
-);
+
+const allowedQuickLinks =  filterMenuByPermission(quickLinks);
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={`Olá, ${user?.username}`}
-        subtitle="Sistema de Gestão Académica da Universidade • Ano letivo 2025/2026"
-      />
+  <PageHeader
+  title={"Olá, " + (user?.nome ?? "N/A")}
+  subtitle={
+    "Sistema de Gestão Académica da Universidade • Ano letivo " +
+    (activeAcademicYear?.designacao ?? "N/A")
+  }
+/>
 
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -615,7 +615,28 @@ export const defenseTFC: MenuStructure = {
         {
           title: "Pagamentos TFC",
           url: "/defesa-tfc/pagamentos",
-          permission: [],
+          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
+        },
+        {
+          title: "Estudantes Finalistas",
+          url: "/defesa-tfc/estudantes",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
+      ],
+    },
+  ],
+};
+export const assiduidade: MenuStructure = {
+  items: [
+    {
+      title: "Assiduidade",
+      url: "/assiduidade",
+      icon: ListChecks,
+      items: [
+        {
+          title: "Marcação de Assuidade",
+          url: "/assiduidade/marcacao",
+          permission: [PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla],
         },
       ],
     },

@@ -35,9 +35,7 @@ export const useSolicitacoesSuporte = (params: FilterSolicitacoesParams = {}) =>
   return useQuery<PaginatedSolicitacoes, Error>({
     queryKey,
     queryFn: () => listSolicitacoes(params),
-    staleTime: 3 * 60 * 1000,          // 3 minutos (solicitações mudam com respostas)
-    gcTime: 10 * 60 * 1000,
-    retry: 1,
+    
     // keepPreviousData: true,         // útil para paginação suave
   });
 };
@@ -66,10 +64,7 @@ export const useResponderSolicitacao = () => {
   return useMutation<RespostaCriada, Error, ResponderSolicitacaoPayload>({
     mutationFn: (payload) => responderSolicitacao(payload),
     onSuccess: (data) => {
- 
 
-     
-      // Invalida a listagem paginada para refletir a mudança de status
       queryClient.invalidateQueries({ queryKey: ['solicitacoes-suporte'] });
     },
     onError: (error) => {
