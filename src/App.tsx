@@ -90,6 +90,7 @@ import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 import PagamentoTFC from "./pages/defesa-tfc/PagamentoTFC";
 import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
+import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
 
 const App = () => {
   return (
@@ -155,6 +156,7 @@ const App = () => {
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
+                  <Route path="/financas/notas-pagamento/liquidar/:codigo" element={<LiquidarNota />} />
 
                   <Route
                     path="/financas/notas-pagamento"
