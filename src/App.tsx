@@ -90,9 +90,8 @@ import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 import PagamentoTFC from "./pages/defesa-tfc/PagamentoTFC";
 import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
-import ProgramaUC from "./pages/docente/ProgramaUC";
+import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
 import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
-
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -157,6 +156,10 @@ const App = () => {
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
+                  <Route
+                    path="/financas/notas-pagamento/liquidar/:codigo"
+                    element={<LiquidarNota />}
+                  />
 
                   <Route
                     path="/financas/notas-pagamento"
