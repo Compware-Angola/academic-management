@@ -90,8 +90,8 @@ import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 import PagamentoTFC from "./pages/defesa-tfc/PagamentoTFC";
 import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
-import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
-
+import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
+import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -156,7 +156,10 @@ const App = () => {
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
-                  <Route path="/comunicacao/avisos/imagem" element={<UploadImagem />} />
+                  <Route
+                    path="/financas/notas-pagamento/liquidar/:codigo"
+                    element={<LiquidarNota />}
+                  />
 
                   <Route
                     path="/financas/notas-pagamento"
@@ -244,11 +247,14 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                     <Route
+                  <Route
                     path="/assiduidade/marcacao"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
+                          PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+                        ]}
                       >
                         <MarcarAssiduidade />
                       </ProtectedRoute>
@@ -261,6 +267,10 @@ const App = () => {
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}
+                  />
+                  <Route
+                    path="/docente/programa"
+                    element={<DocenteLancamentoProgramaUC />}
                   />
                   {/* <Route
                   path="/exame/lista-candidatos"
