@@ -94,6 +94,7 @@ import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
 import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
 import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
+import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 
 const App = () => {
   return (
@@ -159,6 +160,7 @@ const App = () => {
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
+                  <Route path="/comunicacao/avisos/imagem" element={<UploadImagem />} />
                   <Route
                     path="/financas/notas-pagamento/liquidar/:codigo"
                     element={<LiquidarNota />}

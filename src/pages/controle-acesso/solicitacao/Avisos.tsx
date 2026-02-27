@@ -4,19 +4,34 @@ import PDFActions, {
 
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { DataTable } from "@/components/common/DataTable";
 
 import { useQueryAvisos } from "@/hooks/acess/use-avisos";
+import { Button } from "@/components/ui/button";
+import { AvisoFormDialog } from "./components/aviso-form-dialog";
 
 export default function Avisos() {
+const [modalOpen, setModalOpen] = useState(false);
+const [mode, setMode] = useState<"create">("create");
+const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
+
+
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, isFetching } = useQueryAvisos({
     page: currentPage,
-    limit: 10,
+    limit: 5,
   });
+
+  
+
+  useEffect(() => {
+  if (data?.totalPages && currentPage > data.totalPages) {
+    setCurrentPage(data.totalPages);
+  }
+}, [data?.totalPages, currentPage]);
 
   function formatDate(dateString: string) {
     if (!dateString) return "-";
@@ -150,6 +165,16 @@ export default function Avisos() {
                 showDownload
               />
             )}
+
+            <Button
+              onClick={() => {
+                setMode("create");
+                setAvisoSelecionado(null);
+                setModalOpen(true);
+              }}
+            >
+              Criar Aviso
+            </Button>
           </>
         }
       />
@@ -158,9 +183,20 @@ export default function Avisos() {
         columns={columns}
         data={avisos}
         loading={isLoading || isFetching}
-        currentPage={data?.page ?? 1}
+        currentPage={currentPage}
         totalPages={data?.totalPages ?? 1}
-        onPageChange={setCurrentPage}
+        onPageChange={(page) => {
+            if (page < 1) return;
+            if (data?.totalPages && page > data.totalPages) return;
+            setCurrentPage(page);
+          }}
+      />
+
+          <AvisoFormDialog
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            mode={mode}
+            initialData={avisoSelecionado}
       />
     </div>
   );

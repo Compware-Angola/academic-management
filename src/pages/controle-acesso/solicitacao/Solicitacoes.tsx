@@ -33,7 +33,7 @@ export default function Solicitacoes() {
     const solicitacoes = data?.data ?? [];
 
 
-    const exportRows = solicitacoes.map((item: any) => ({
+  const exportRows = solicitacoes.map((item: any) => ({
   nome: item.NAME,
   matricula: item.MATRICULA,
   servico: item.DESCRICAO_SERVICO,
