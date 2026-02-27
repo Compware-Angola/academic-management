@@ -93,6 +93,7 @@ import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalis
 import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
 import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
 import IsencaoServico from "@/pages/financas/isencao-servico";
+import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 
 const App = () => {
   return (
@@ -707,6 +708,19 @@ const App = () => {
                             <IsencaoServico />
                         </ProtectedRoute>
                       }
+                  />
+
+                  <Route
+                    path="/financas/descontos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <ListarDescontos />
+                      </ProtectedRoute>
+                    }
                   />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />

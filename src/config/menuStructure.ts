@@ -471,6 +471,11 @@ export const finaceStructure: MenuStructure = {
         // },
 
         /* Gestão de Descontos */
+        {
+          title: "Descontos",
+          url: "/financas/descontos",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
         // {
         //   title: "Atribuição de Desconto",
         //   url: "/financas/descontos/atribuicao",
