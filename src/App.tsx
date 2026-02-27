@@ -156,7 +156,18 @@ const App = () => {
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
-                  <Route path="/financas/notas-pagamento/liquidar/:codigo" element={<LiquidarNota />} />
+                  <Route
+                    path="/financas/notas-pagamento/liquidar/:codigo"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla!,
+                        ]}
+                      >
+                        <LiquidarNota />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   <Route
                     path="/financas/notas-pagamento"
@@ -244,11 +255,14 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                     <Route
+                  <Route
                     path="/assiduidade/marcacao"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
+                          PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+                        ]}
                       >
                         <MarcarAssiduidade />
                       </ProtectedRoute>
