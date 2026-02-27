@@ -10,10 +10,11 @@ import {
   pdf,
 } from '@react-pdf/renderer'
 import { Button } from '@/components/ui/button'
-import { Download, Printer } from 'lucide-react'
+import { DollarSign, Download, Printer } from 'lucide-react'
 import { format } from 'date-fns'
 import { pt } from 'date-fns/locale'
 import { Factura, FacturaItem } from '@/services/finance/listar-facturas.service'
+import { useNavigate } from 'react-router-dom'
 
 
 const styles = StyleSheet.create({
@@ -268,7 +269,7 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
               <Text style={[styles.tableCell, { width: '15%', textAlign: 'center' }]}>
                 {item.quantidade ?? 1}
               </Text>
-                <Text style={[styles.tableCell, { width: '15%', textAlign: 'center' }]}>
+              <Text style={[styles.tableCell, { width: '15%', textAlign: 'center' }]}>
                 {item.multa ?? 0}
               </Text>
 
@@ -285,12 +286,12 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps
         {/* Totais */}
         <View style={styles.totalSection}>
           <Text style={styles.totalText}>
-            Total Unitário: { itens.reduce((total, item) => {
-                                const quantidade = item.quantidade ?? 1;
-                                return total + (item.preco * quantidade);
-                              }, 0)} Kz
+            Total Unitário: {itens.reduce((total, item) => {
+              const quantidade = item.quantidade ?? 1;
+              return total + (item.preco * quantidade);
+            }, 0)} Kz
           </Text>
-           <Text style={styles.totalText}>
+          <Text style={styles.totalText}>
             Total Preço: {nota.total_preco.toFixed(2)} Kz
           </Text>
           <Text style={styles.totalText}>
@@ -321,14 +322,16 @@ export function PaymentNoteActions({
   itens,
   showDownload = true,
   showPrint = true,
+  showliquidarNota = false,
 }: {
   nota: Factura
   itens: FacturaItem[]
+  showliquidarNota?: boolean
   showDownload?: boolean
   showPrint?: boolean
 }) {
   const document = <PaymentNoteDocument nota={nota} itens={itens} />
-
+  const navigate = useNavigate();
   const handlePrint = async () => {
     try {
       const blob = await pdf(document).toBlob()
@@ -340,7 +343,7 @@ export function PaymentNoteActions({
       }
     } catch (err) {
       console.error('Erro ao gerar PDF para impressão:', err)
-      // Aqui podes mostrar um toast de erro se tiveres um sistema de notificações
+     
     }
   }
 
@@ -359,6 +362,19 @@ export function PaymentNoteActions({
           )}
         </PDFDownloadLink>
       )}
+      {showliquidarNota && nota.estado == 0 && (
+        <Button
+          className="gap-2"
+          onClick={() => {
+
+            navigate(`/financas/notas-pagamento/liquidar/${nota.codigo}`);
+          }}
+        >
+          <DollarSign className="h-4 w-4" />
+          Liquidar Nota
+        </Button>
+      )}
+
 
       {showPrint && (
         <Button variant="outline" onClick={handlePrint} className="gap-2">

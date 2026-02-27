@@ -10,6 +10,7 @@ import {
   Headphones,
   ListChecks,
   LibraryBig,
+  GraduationCap,
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
@@ -137,22 +138,22 @@ export const menuStructure: MenuStructure = {
 
     // ----------------------------------------------------
     // DOCENTE
-    /* ----------------------------------------------------
+   
     {
       title: "Docente",
       url: "/docente",
       icon: GraduationCap,
       items: [
-        { title: "Calendário de aulas", url: "/docente/calendario" },
-        { title: "Horas de vigilância", url: "/docente/vigilancia" },
-        { title: "Programa da UC", url: "/docente/programa" },
-        { title: "Validação do programa", url: "/docente/validacao" },
-        { title: "Assiduidade", url: "/docente/assiduidade" },
+        // { title: "Calendário de aulas", url: "/docente/calendario" },
+        // { title: "Horas de vigilância", url: "/docente/vigilancia" },
+        { title: "Lançamento do programa da UC", url: "/docente/programa",  permission: [], },
+        // { title: "Validação do programa", url: "/docente/validacao" },
+        // { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
 
       permission: ["adm", "rootAdmin", "dct"],
     },
-
+ /* ----------------------------------------------------
     // ----------------------------------------------------
     // TFC
     // ----------------------------------------------------
