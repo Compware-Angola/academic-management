@@ -842,6 +842,10 @@ export const PermissionTypeDetails = {
     designacao: "Isenção de Pagamento",
     sigla: "mga_a_ip",
   },
+  ISENCAO_SERVICO: {
+    designacao: "Isenção de serviço",
+    sigla: "mga_a_is", // TODO entender
+  },
   PAGAMENTOS: { designacao: "Pagamentos", sigla: "mga_a_p" },
   SERVICO_PAGO_HISTORICO: {
     designacao: "Serviço Pago(Histórico)",
