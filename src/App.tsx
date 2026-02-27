@@ -90,6 +90,10 @@ import Solicitacoes from "./pages/controle-acesso/solicitacao/Solicitacoes";
 import PagamentoTFC from "./pages/defesa-tfc/PagamentoTFC";
 import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
+import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
+import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
+import IsencaoServico from "@/pages/financas/isencao-servico";
+import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 
 const App = () => {
@@ -157,6 +161,10 @@ const App = () => {
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
                   <Route path="/comunicacao/avisos/imagem" element={<UploadImagem />} />
+                  <Route
+                    path="/financas/notas-pagamento/liquidar/:codigo"
+                    element={<LiquidarNota />}
+                  />
 
                   <Route
                     path="/financas/notas-pagamento"
@@ -244,11 +252,14 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                     <Route
+                  <Route
                     path="/assiduidade/marcacao"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
+                          PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+                        ]}
                       >
                         <MarcarAssiduidade />
                       </ProtectedRoute>
@@ -261,6 +272,10 @@ const App = () => {
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}
+                  />
+                  <Route
+                    path="/docente/programa"
+                    element={<DocenteLancamentoProgramaUC />}
                   />
                   {/* <Route
                   path="/exame/lista-candidatos"
@@ -686,6 +701,28 @@ const App = () => {
                   <Route
                     path="financas/credito/bolsa/estudante"
                     element={<ListaBolseiro />}
+                  />
+
+                  <Route
+                      path="/financas/isencao-servico"
+                      element={
+                        <ProtectedRoute allowedPermissions={[PermissionTypeDetails.ISENCAO_SERVICO.sigla!,]}>
+                            <IsencaoServico />
+                        </ProtectedRoute>
+                      }
+                  />
+
+                  <Route
+                    path="/financas/descontos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <ListarDescontos />
+                      </ProtectedRoute>
+                    }
                   />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />

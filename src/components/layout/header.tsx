@@ -168,12 +168,12 @@ export function Header() {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg" alt="Utilizador" />
                   <AvatarFallback>
-                    {user?.user?.username?.slice(0, 2).toUpperCase() || "AD"}
+                    {user?.user?.nome?.slice(0, 2).toUpperCase() || "AD"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start text-sm">
                   <span className="font-medium">
-                    {user?.user?.username || "N/A"}
+                    {user?.user?.nome || "N/A"}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {user?.user?.email || "N/A"}

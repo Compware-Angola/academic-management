@@ -10,6 +10,7 @@ import {
   Headphones,
   ListChecks,
   LibraryBig,
+  GraduationCap,
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
@@ -137,22 +138,22 @@ export const menuStructure: MenuStructure = {
 
     // ----------------------------------------------------
     // DOCENTE
-    /* ----------------------------------------------------
+   
     {
       title: "Docente",
       url: "/docente",
       icon: GraduationCap,
       items: [
-        { title: "Calendário de aulas", url: "/docente/calendario" },
-        { title: "Horas de vigilância", url: "/docente/vigilancia" },
-        { title: "Programa da UC", url: "/docente/programa" },
-        { title: "Validação do programa", url: "/docente/validacao" },
-        { title: "Assiduidade", url: "/docente/assiduidade" },
+        // { title: "Calendário de aulas", url: "/docente/calendario" },
+        // { title: "Horas de vigilância", url: "/docente/vigilancia" },
+        { title: "Lançamento do programa da UC", url: "/docente/programa",  permission: [], },
+        // { title: "Validação do programa", url: "/docente/validacao" },
+        // { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
 
       permission: ["adm", "rootAdmin", "dct"],
     },
-
+ /* ----------------------------------------------------
     // ----------------------------------------------------
     // TFC
     // ----------------------------------------------------
@@ -470,6 +471,11 @@ export const finaceStructure: MenuStructure = {
         // },
 
         /* Gestão de Descontos */
+        {
+          title: "Descontos",
+          url: "/financas/descontos",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
         // {
         //   title: "Atribuição de Desconto",
         //   url: "/financas/descontos/atribuicao",
@@ -521,6 +527,11 @@ export const finaceStructure: MenuStructure = {
           title: "Pagamentos por referência",
           url: "/financas/pagamento-referencia",
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
+        },
+        {
+            title: "Isenção de serviço",
+            url: "/financas/isencao-servico",
+            permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla]
         },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
