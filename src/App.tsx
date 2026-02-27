@@ -92,6 +92,7 @@ import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
 import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
 import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
+import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -156,6 +157,7 @@ const App = () => {
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
+                  <Route path="/comunicacao/avisos/imagem" element={<UploadImagem />} />
                   <Route
                     path="/financas/notas-pagamento/liquidar/:codigo"
                     element={<LiquidarNota />}
