@@ -471,6 +471,11 @@ export const finaceStructure: MenuStructure = {
         // },
 
         /* Gestão de Descontos */
+        {
+          title: "Descontos",
+          url: "/financas/descontos",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
         // {
         //   title: "Atribuição de Desconto",
         //   url: "/financas/descontos/atribuicao",
@@ -522,6 +527,11 @@ export const finaceStructure: MenuStructure = {
           title: "Pagamentos por referência",
           url: "/financas/pagamento-referencia",
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
+        },
+        {
+            title: "Isenção de serviço",
+            url: "/financas/isencao-servico",
+            permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla]
         },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 

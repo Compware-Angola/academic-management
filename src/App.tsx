@@ -92,6 +92,9 @@ import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
 import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
 import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
+import IsencaoServico from "@/pages/financas/isencao-servico";
+import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
+
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -696,6 +699,28 @@ const App = () => {
                   <Route
                     path="financas/credito/bolsa/estudante"
                     element={<ListaBolseiro />}
+                  />
+
+                  <Route
+                      path="/financas/isencao-servico"
+                      element={
+                        <ProtectedRoute allowedPermissions={[PermissionTypeDetails.ISENCAO_SERVICO.sigla!,]}>
+                            <IsencaoServico />
+                        </ProtectedRoute>
+                      }
+                  />
+
+                  <Route
+                    path="/financas/descontos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <ListarDescontos />
+                      </ProtectedRoute>
+                    }
                   />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />
