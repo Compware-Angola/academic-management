@@ -5,16 +5,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog.tsx";
-import {Button} from "@/components/ui/button.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {TypeServiceSelectList} from "@/components/common/global-selects/TypeServiceSelectList.tsx";
-import {AcademicYearSelect} from "@/components/common/global-selects/AcademicYearSelect.tsx";
-import {useEffect, useState} from "react";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
-import {Search} from "lucide-react";
-import {useQueryAlunoMatricula} from "@/hooks/financas/alunos/use-query-fecth-aluno";
-import {ConfirmarAlunoModal} from "@/pages/financas/credito-educacional/AtribuirCredito/components/ConfirmarAlunoModal";
+import { Button } from "@/components/ui/button.tsx";
+import { Input } from "@/components/ui/input.tsx";
+import { Label } from "@/components/ui/label.tsx";
+import { TypeServiceSelectList } from "@/components/common/global-selects/TypeServiceSelectList.tsx";
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect.tsx";
+import { useEffect, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
+import { Search } from "lucide-react";
+import { useQueryAlunoMatricula } from "@/hooks/financas/alunos/use-query-fecth-aluno";
+import { ConfirmarAlunoModal } from "@/pages/financas/credito-educacional/AtribuirCredito/components/ConfirmarAlunoModal";
 
 export type EditIsencaoServicoFormData = {
     codigoMatricula?: string | number;
@@ -90,7 +90,7 @@ export function EditIsencaoServicoDialog({
                                 onChange={(e) => {
                                     setAlunoConfirmado(false);
                                     setPesquisar(false);
-                                    onChange({...formData, codigoMatricula: e.target.value});
+                                    onChange({ ...formData, codigoMatricula: e.target.value });
                                 }}
                             />
                             <Button
@@ -118,26 +118,32 @@ export function EditIsencaoServicoDialog({
                         <Label>Data de Isenção</Label>
                         <Input
                             type="date"
-                            value={formData.dataIsencao ?? ""}
-                            onChange={(e) => onChange({...formData, dataIsencao: e.target.value})}
+                            value={
+                                formData.dataIsencao
+                                    ? formData.dataIsencao.split("T")[0]
+                                    : ""
+                            }
+                            onChange={(e) =>
+                                onChange({ ...formData, dataIsencao: e.target.value })
+                            }
                         />
                     </div>
 
                     <AcademicYearSelect
                         value={String(formData.codigoAnoLectivo ?? "")}
-                        onChangeValue={(v) => onChange({...formData, codigoAnoLectivo: v})}
+                        onChangeValue={(v) => onChange({ ...formData, codigoAnoLectivo: v })}
                     />
 
                     <TypeServiceSelectList
                         value={String(formData.codigoServico ?? "")}
-                        onChangeValue={(v) => onChange({...formData, codigoServico: v})}
+                        onChangeValue={(v) => onChange({ ...formData, codigoServico: v })}
                     />
 
                     <div className="space-y-2">
                         <Label>Observações</Label>
                         <Input
                             value={formData.obs ?? ""}
-                            onChange={(e) => onChange({...formData, obs: e.target.value})}
+                            onChange={(e) => onChange({ ...formData, obs: e.target.value })}
                         />
                     </div>
 
@@ -145,7 +151,7 @@ export function EditIsencaoServicoDialog({
                         <Label>Estado</Label>
                         <Select
                             value={String(formData.estadoIsencao ?? "")}
-                            onValueChange={(v) => onChange({...formData, estadoIsencao: v})}
+                            onValueChange={(v) => onChange({ ...formData, estadoIsencao: v })}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue />
