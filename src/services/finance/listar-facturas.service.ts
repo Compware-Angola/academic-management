@@ -7,9 +7,9 @@ export type ListarFacturasPayload = {
   search?: string | number;
   codigoMatricula?: string | number;
   reference?: string | number;
-  codigoFatura?:string | number;
+  codigoFatura?: string | number;
   anoLectivo?: number | string;
-  status?: number | null| string;
+  status?: number | null | string;
   page?: number;
   limit?: number;
 };
@@ -17,11 +17,12 @@ export type ListarFacturasPayload = {
 /* ---------- RESPONSE ITEM ---------- */
 export type Factura = {
   codigo: number;
-  valor_pagar:number;
+  valor_pagar: number;
+  desconto?: number;
   data_factura: string;
-  total_multa:number;
-  total_iva:number;
-  total_incidencia:number;
+  total_multa: number;
+  total_iva: number;
+  total_incidencia: number;
   total_preco: number;
   codigo_matricula: number;
   referencia: string;
@@ -29,7 +30,8 @@ export type Factura = {
   estado: number;
   nome_aluno: string;
   ano_lectivo: string;
-  servicos:string;
+  servicos: string;
+  codigo_ano_lectivo?: number;
 
   curso: string;
   polo: string;
@@ -86,15 +88,24 @@ export type ListarFacturasResponse = {
 export async function listarFacturasService(
   payload: ListarFacturasPayload,
 ): Promise<ListarFacturasResponse> {
-  const { search, anoLectivo, page = 1, limit = 25, status,codigoMatricula,reference,codigoFatura } = payload;
+  const {
+    search,
+    anoLectivo,
+    page = 1,
+    limit = 25,
+    status,
+    codigoMatricula,
+    reference,
+    codigoFatura,
+  } = payload;
 
   const params = {
     search: normalizeParam(search),
     anoLectivo: normalizeParam(anoLectivo),
-    codigoMatricula:normalizeParam(codigoMatricula),
-    reference:normalizeParam(reference),
+    codigoMatricula: normalizeParam(codigoMatricula),
+    reference: normalizeParam(reference),
     status: normalizeParam(status),
-    codigoFatura:normalizeParam(codigoFatura),
+    codigoFatura: normalizeParam(codigoFatura),
     page,
     limit,
   };
@@ -116,7 +127,7 @@ export type FacturaItem = {
   obs: string | null;
   preco: number;
   total: number;
-  multa:number;
+  multa: number;
   descricaoservico: string;
   codigoservico: number;
   mesid: number | null;

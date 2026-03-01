@@ -16,5 +16,8 @@ export function useQueryAlunoMatricula(
     retry: false,
     select: (data) => data,
     throwOnError: false,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0,
   });
 }

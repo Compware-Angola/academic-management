@@ -1,8 +1,8 @@
 export enum PermissionType {
   FULL_ACCESS = "FULL_ACCESS",
   ATRIBUIR_PROVA = "ATRIBUIR_PROVA",
-LSOLICITACAO_SUPORTE = "LSOLICITACAO_SUPORTE",
-TIPO_SUPORTE = "TIPO_SUPORTE",
+  LSOLICITACAO_SUPORTE = "LSOLICITACAO_SUPORTE",
+  TIPO_SUPORTE = "TIPO_SUPORTE",
   LANCAMENTO_NOTAS_AVALIACOES = "LANCAMENTO_NOTAS_AVALIACOES",
   ESTATISTICA_CANDIDATOS_INSCRITOS = "ESTATISTICA_CANDIDATOS_INSCRITOS",
   ESTATISTICA_CANDIDATOS_POR_DIA = "ESTATISTICA_CANDIDATOS_POR_DIA",
@@ -244,20 +244,21 @@ TIPO_SUPORTE = "TIPO_SUPORTE",
   ALTERAR_TIPO_DE_CANDIDATURA = "ALTERAR_TIPO_DE_CANDIDATURA",
 
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
-  LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL"
+  LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL",
+  LIQUIDAR_PAGAMENTO = "LIQUIDAR_FACTURA",
 }
 
 export const PermissionTypeDetails = {
   FULL_ACCESS: { designacao: "Todos os acesso", sigla: "full.access" },
   LSOLICITACAO_SUPORTE: {
-  designacao: "Listagem de Solicitação de Suporte",
-  sigla: "mga_su_lso",
-},
+    designacao: "Listagem de Solicitação de Suporte",
+    sigla: "mga_su_lso",
+  },
 
-TIPO_SUPORTE: {
-  designacao: "Tipo de Suporte",
-  sigla: "mga_su_tip",
-},
+  TIPO_SUPORTE: {
+    designacao: "Tipo de Suporte",
+    sigla: "mga_su_tip",
+  },
   ATRIBUIR_PROVA: { designacao: "Atribuir Prova", sigla: "mgea_atp" },
   LANCAMENTO_NOTAS_AVALIACOES: {
     designacao: "Lançamento de Notas de Avaliações",
@@ -841,6 +842,10 @@ TIPO_SUPORTE: {
     designacao: "Isenção de Pagamento",
     sigla: "mga_a_ip",
   },
+  ISENCAO_SERVICO: {
+    designacao: "Isenção de serviço",
+    sigla: "mga_a_is", // TODO entender
+  },
   PAGAMENTOS: { designacao: "Pagamentos", sigla: "mga_a_p" },
   SERVICO_PAGO_HISTORICO: {
     designacao: "Serviço Pago(Histórico)",
@@ -994,9 +999,13 @@ TIPO_SUPORTE: {
     sigla: "m_lis_ndiv",
   },
   LISTAR_TIPO_CREDITO_EDUCACIONAL: {
-    deseginacao: "Listar tipo de credito educacional",
-    sigla: "list_tpe"
-  }
+    designacao: "Listar tipo de credito educacional",
+    sigla: "list_tpe",
+  },
+  LIQUIDAR_NOTA_PAGAMENTO: {
+    designacao: "Liquidar nota de pagamentos",
+    sigla: "liq_pga",
+  },
 } as const;
 
 export type PermissionDetail = {

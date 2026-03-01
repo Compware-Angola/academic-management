@@ -92,6 +92,11 @@ import MarcarAssiduidade from "./pages/assiduidade/MarcarAssiduidade";
 import ListarEstudanteFinalista from "./pages/defesa-tfc/ListarEEstudanteFinalista";
 import LiquidarNota from "./pages/financas/notas-pagamento/LiquidarNota";
 import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
+import IsencaoServico from "@/pages/financas/isencao-servico";
+import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
+import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
+import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
+
 const App = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="uma-ui-theme">
@@ -149,6 +154,11 @@ const App = () => {
                     path="/controle-acesso/solicitacoes"
                     element={<SolicitacoesEncaminhadas />}
                   />
+                     <Route
+                    path="/financas/listar-pagamentos"
+                    element={<ListarPagamentos />}
+                  />
+                 
 
                   <Route
                     path="/controle-acesso/all-solicitacoes"
@@ -157,8 +167,20 @@ const App = () => {
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
                   <Route
+                    path="/comunicacao/avisos/imagem"
+                    element={<UploadImagem />}
+                  />
+                  <Route
                     path="/financas/notas-pagamento/liquidar/:codigo"
-                    element={<LiquidarNota />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla!,
+                        ]}
+                      >
+                        <LiquidarNota />
+                      </ProtectedRoute>
+                    }
                   />
 
                   <Route
@@ -696,6 +718,33 @@ const App = () => {
                   <Route
                     path="financas/credito/bolsa/estudante"
                     element={<ListaBolseiro />}
+                  />
+
+                  <Route
+                    path="/financas/isencao-servico"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ISENCAO_SERVICO.sigla!,
+                        ]}
+                      >
+                        <IsencaoServico />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/descontos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO
+                            .sigla!,
+                        ]}
+                      >
+                        <ListarDescontos />
+                      </ProtectedRoute>
+                    }
                   />
 
                   <Route path="/ajuda" element={<HealpFAQ />} />
