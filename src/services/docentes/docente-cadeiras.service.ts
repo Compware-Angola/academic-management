@@ -14,15 +14,16 @@ export type CadeirasResponse = {
 export type DocenteCadeirasPayload = {
   docenteId: number;
   cursoId: number;
+  classId: number;
 };
 
 export async function getDocenteCadeirasService(
   payload: DocenteCadeirasPayload,
 ): Promise<CadeirasResponse> {
-  const { docenteId, cursoId } = payload;
+  const { docenteId, cursoId, classId } = payload;
 
   const { data } = await axiosNestGa.get<CadeirasResponse>(
-    `docentes/${docenteId}/${cursoId}/cadeiras`,
+    `docentes/${docenteId}/${cursoId}/${classId}/cadeiras`,
   );
 
   return data;

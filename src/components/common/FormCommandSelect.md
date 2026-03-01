@@ -1,27 +1,27 @@
 import { useState } from "react";
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
+Popover,
+PopoverTrigger,
+PopoverContent,
 } from "@/components/ui/popover";
 import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
+Command,
+CommandInput,
+CommandList,
+CommandEmpty,
+CommandGroup,
+CommandItem,
 } from "@/components/ui/command";
 import { Label } from "@/components/ui/label";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/* ------------------ Tipos ------------------ */
+/_ ------------------ Tipos ------------------ _/
 
 type MapResult = {
-  key: string | number;
-  value: string | number;
-  label: string;
+key: string | number;
+value: string | number;
+label: string;
 };
 
 type WidthPreset = "auto" | "sm" | "md" | "lg" | "full";
@@ -29,74 +29,88 @@ type WidthPreset = "auto" | "sm" | "md" | "lg" | "full";
 type LabelMode = "outside" | "inside";
 
 type FormCommandSelectProps<T> = {
-  label?: string;
-  labelMode?: LabelMode;
-  value?: string;
-  options?: T[];
-  map: (item: T) => MapResult;
-  onChange: (value: string) => void;
+label?: string;
+labelMode?: LabelMode;
+value?: string;
+options?: T[];
+map: (item: T) => MapResult;
+onChange: (value: string) => void;
 
-  placeholder?: string;
-  onSearchChange?: (value: string) => void;
-  disabled?: boolean;
-  width?: WidthPreset | string;
-  isLoading?: boolean;
+placeholder?: string;
+onSearchChange?: (value: string) => void;
+disabled?: boolean;
+width?: WidthPreset | string;
+isLoading?: boolean;
 };
 
-/* ------------------ Utilitário de largura ------------------ */
+/_ ------------------ Utilitário de largura ------------------ _/
 
 function resolveWidthClass(width?: WidthPreset | string) {
-  if (!width || width === "md") return "w-64";
-  if (width === "sm") return "w-48";
-  if (width === "lg") return "w-80";
-  if (width === "full") return "w-full";
-  if (width === "auto") return "w-auto";
-  return width;
+if (!width || width === "md") return "w-64";
+if (width === "sm") return "w-48";
+if (width === "lg") return "w-80";
+if (width === "full") return "w-full";
+if (width === "auto") return "w-auto";
+return width;
 }
 
-/* ------------------ Componente ------------------ */
+/_ ------------------ Componente ------------------ _/
 
 export function FormCommandSelect<T>({
-  label,
-  labelMode = "outside",
-  value,
-  options = [],
-  map,
-  onChange,
-  placeholder = "Selecionar",
-  onSearchChange,
-  disabled = false,
-  width = "md",
-  isLoading = false,
+label,
+labelMode = "outside", // 👈 PADRÃO,
+value,
+options = [],
+map,
+onChange,
+placeholder = "Selecionar",
+onSearchChange,
+disabled = false,
+width = "md",
+isLoading = false,
 }: FormCommandSelectProps<T>) {
-  const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+const [open, setOpen] = useState(false);
+const [searchValue, setSearchValue] = useState("");
 
-  const widthClass = resolveWidthClass(width);
+const [lastSelectedItem, setLastSelectedItem] = useState<T | null>(null);
 
-  // Buscamos o item selecionado APENAS com base no valor atual
-  const selectedItem = options.find(
-    (item) => String(map(item).value) === value,
-  );
+const widthClass = resolveWidthClass(width);
 
-  function handleOpenChange(isOpen: boolean) {
-    setOpen(isOpen);
+const selectedItem = options.find(
+(item) => String(map(item).value) === value,
+);
+
+// 🔥 Atualizar lastSelectedItem quando encontrar na lista
+if (selectedItem && selectedItem !== lastSelectedItem) {
+setLastSelectedItem(selectedItem);
+}
+
+// 🔥 Usar o item memorizado se não estiver na lista atual
+const displayItem = selectedItem || lastSelectedItem;
+
+function handleOpenChange(isOpen: boolean) {
+setOpen(isOpen);
+
     if (!isOpen) {
       setSearchValue("");
       onSearchChange?.("");
     }
-  }
 
-  function handleSelect(selectedValue: string) {
-    onChange(selectedValue);
-    setOpen(false);
+}
+
+function handleSelect(value: string) {
+onChange(value);
+setOpen(false);
+
     setSearchValue("");
     onSearchChange?.("");
-  }
 
-  return (
-    <div className="flex flex-col gap-2">
-      {label && labelMode === "outside" && <Label>{label}</Label>}
+}
+
+return (
+<div className="flex flex-col gap-2">
+{/_ LABEL EXTERNO: só se mandarem _/}
+{label && labelMode === "outside" && <Label>{label}</Label>}
 
       <Popover open={open} onOpenChange={handleOpenChange} modal>
         <PopoverTrigger asChild>
@@ -111,13 +125,11 @@ export function FormCommandSelect<T>({
             )}
           >
             <span className="truncate">
-              {/* Se existe item selecionado, mostra o label dele */}
-              {selectedItem
-                ? map(selectedItem).label
-                : // Se não existe, decide entre mostrar o label interno ou placeholder
-                  labelMode === "inside"
-                  ? label
-                  : placeholder}
+              {displayItem && map(displayItem).label}
+
+              {!displayItem && labelMode === "inside" && label}
+
+              {!displayItem && labelMode === "outside" && placeholder}
             </span>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </button>
@@ -130,20 +142,22 @@ export function FormCommandSelect<T>({
         >
           <Command>
             <CommandInput
+              autoFocus
               value={searchValue}
               placeholder={
                 label ? `Procurar ${label.toLowerCase()}...` : "Procurar..."
               }
-              onValueChange={(val) => {
-                setSearchValue(val);
-                onSearchChange?.(val);
+              className={widthClass}
+              onValueChange={(value) => {
+                setSearchValue(value);
+                onSearchChange?.(value);
               }}
             />
+
             <CommandList>
               {isLoading ? (
-                <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> A
-                  pesquisar...
+                <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />A pesquisar...
                 </div>
               ) : options.length === 0 ? (
                 <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
@@ -151,6 +165,7 @@ export function FormCommandSelect<T>({
                 <CommandGroup>
                   {options.map((item) => {
                     const mapped = map(item);
+
                     return (
                       <CommandItem
                         key={mapped.key}
@@ -176,5 +191,6 @@ export function FormCommandSelect<T>({
         </PopoverContent>
       </Popover>
     </div>
-  );
+
+);
 }

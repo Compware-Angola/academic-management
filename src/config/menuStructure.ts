@@ -146,7 +146,7 @@ export const menuStructure: MenuStructure = {
       items: [
         // { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
-        { title: "Lançamento do programa da UC", url: "/docente/programa",  permission: [], },
+        { title: "Lançamento do programa da UC", url: "/docente/programa", },
         // { title: "Validação do programa", url: "/docente/validacao" },
         // { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
