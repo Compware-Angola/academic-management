@@ -95,6 +95,7 @@ import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
 import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
+import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
 
 const App = () => {
   return (
@@ -153,6 +154,11 @@ const App = () => {
                     path="/controle-acesso/solicitacoes"
                     element={<SolicitacoesEncaminhadas />}
                   />
+                     <Route
+                    path="/financas/listar-pagamentos"
+                    element={<ListarPagamentos />}
+                  />
+                 
 
                   <Route
                     path="/controle-acesso/all-solicitacoes"
