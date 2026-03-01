@@ -341,6 +341,60 @@ export default function LiquidarNota() {
         </Card>
 
         <Card className="mt-4">
+          <CardHeader className="flex! space-x-2 flex-row! items-center">
+            <CardTitle className="text-lg">Fórmula</CardTitle>
+            <p>(Composição do valor a pagar)</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-7 gap-4 items-center">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Valor Total
+                </p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                  {formatNumber(factura.total_preco)}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
+                  -
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Desconto
+                </p>
+                <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
+                  {formatNumber(factura?.desconto)}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary"> + </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Multa
+                </p>
+                <p className="text-2xl font-bold  text-primary dark:text-gray-100">
+                  {formatNumber(factura.total_multa)}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary"> = </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Valor a Pagar
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatNumber(factura.valor_pagar)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-4">
           <CardHeader>
             <CardTitle className="text-lg">Dados do Pagamento</CardTitle>
           </CardHeader>

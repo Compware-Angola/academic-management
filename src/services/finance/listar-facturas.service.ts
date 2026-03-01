@@ -18,6 +18,7 @@ export type ListarFacturasPayload = {
 export type Factura = {
   codigo: number;
   valor_pagar: number;
+  desconto?: number;
   data_factura: string;
   total_multa: number;
   total_iva: number;
