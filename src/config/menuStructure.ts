@@ -775,7 +775,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Movimentar estudantes",
           url: "/horarios/movimentar/estudantes",
-          permission: [PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_HORARIOS.sigla],
+          permission: [PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla],
         },
         {
           title: "Permissão editar",
