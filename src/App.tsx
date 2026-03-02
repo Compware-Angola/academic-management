@@ -229,7 +229,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.HORARIOS_ELIMINADOS.sigla!,
+                          PermissionTypeDetails.LISTAR_HORARIOS_ELIMINADOS
+                            .sigla!,
                         ]}
                       >
                         <ScheduleListEliminated />

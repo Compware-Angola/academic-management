@@ -801,7 +801,7 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/listar",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Eliminados", url: "/horarios/eliminados",permission: [PermissionTypeDetails.HORARIOS_ELIMINADOS.sigla] },
+        { title: "Eliminados", url: "/horarios/eliminados",permission: [PermissionTypeDetails. LISTAR_HORARIOS_ELIMINADOS.sigla] },
         {
           title: "Horários por sala",
           url: "/horarios/sala",

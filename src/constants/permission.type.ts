@@ -1061,10 +1061,7 @@ PERMISSAO_LANC_FORA_PRAZO: {
 
 
 
-HORARIOS_ELIMINADOS: {
-  designacao: "Horários eliminados",
-  sigla: "horarios_eliminados",
-},
+
 
 HORARIOS_POR_UC: {
   designacao: "Horários por unidade curricular",
