@@ -1059,10 +1059,7 @@ PERMISSAO_LANC_FORA_PRAZO: {
   sigla: "lanc_fora_prazo",
 },
 
-MOVIMENTAR_ESTUDANTES_HORARIOS: {
-  designacao: "Movimentar estudantes entre horários",
-  sigla: "mov_estud_horarios",
-},
+
 
 HORARIOS_ELIMINADOS: {
   designacao: "Horários eliminados",

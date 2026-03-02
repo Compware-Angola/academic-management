@@ -603,8 +603,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_HORARIOS
-                            .sigla!,
+                          PermissionTypeDetails
+                            .MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
                         ]}
                       >
                         <MovimentarEstudantes />
