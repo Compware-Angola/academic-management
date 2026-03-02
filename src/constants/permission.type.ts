@@ -1056,6 +1056,7 @@ PERMISSAO_LANC_FORA_PRAZO: {
   sigla: "lanc_fora_prazo",
 },
 
+DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
 
 
 
