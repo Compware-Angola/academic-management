@@ -574,7 +574,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.HORARIOS_POR_UC.sigla!,
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC
+                            .sigla!,
                         ]}
                       >
                         <SchedulesByUC />

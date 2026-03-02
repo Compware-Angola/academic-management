@@ -807,7 +807,7 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/sala",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Horários por UC", url: "/horarios/uc",permission: [PermissionTypeDetails.HORARIOS_POR_UC.sigla] },
+        { title: "Horários por UC", url: "/horarios/uc",permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC.sigla] },
         {
           title: "Parâmetros",
           url: "/horarios/parametros",

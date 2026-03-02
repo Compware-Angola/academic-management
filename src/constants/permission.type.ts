@@ -1061,13 +1061,6 @@ DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
 
 
 
-HORARIOS_POR_UC: {
-  designacao: "Horários por unidade curricular",
-  sigla: "horarios_uc",
-},
-
-
-
 } as const;
 
 export type PermissionDetail = {
