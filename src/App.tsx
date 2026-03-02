@@ -310,7 +310,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LANCAMENTO_NOTAS.sigla,
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
                         ]}
                       >
                         <LaunchNotes />

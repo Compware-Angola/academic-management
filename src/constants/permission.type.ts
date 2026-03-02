@@ -1046,10 +1046,7 @@ CONTROLE_LANCAMENTO: {
 },
 
 
-LANCAMENTO_NOTAS: {
-  designacao: "Lançamento de notas",
-  sigla: "lancamento_notas",
-},
+
 
 PERMISSAO_LANC_FORA_PRAZO: {
   designacao: "Permissão para lançar notas fora do prazo",

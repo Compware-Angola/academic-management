@@ -722,7 +722,7 @@ export const academicStructure: MenuStructure = {
           permission: [PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!],
         },
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta",permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla] },
-        { title: "Lançamento de notas", url: "/avaliacoes/notas",permission: [PermissionTypeDetails.LANCAMENTO_NOTAS.sigla] },
+        { title: "Lançamento de notas", url: "/avaliacoes/notas",permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla] },
         { title: "Lista de presença", url: "/avaliacoes/presenca",permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla] },
 
         { title: "Pauta geral", url: "/avaliacoes/pauta-geral",permission: [PermissionTypeDetails.PAUTA_GERAL.sigla] },
