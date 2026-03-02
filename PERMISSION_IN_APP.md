@@ -135,8 +135,4 @@
 - Alguns menus de “docente/assiduidade” (`TeacherAttendance`) também comentados.
 - Eventuais menus adicionais do `menuStructure` que não possuem `pages/...` correspondentes (ex.: certas telas de parâmetros ou estatísticas específicas que você listou antes).
 
----
 
-Se você quiser, posso agora **gerar um mapa completo de `menu → página`**, indicando **exatamente qual rota tem página implementada e qual não**, em formato **JSON pronto para uso**. Isso vai te permitir ver **de um olhar só** o que está faltando.
-
-Quer que eu faça isso?
