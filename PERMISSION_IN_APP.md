@@ -1,6 +1,4 @@
-Perfeito! Pelo que você enviou, podemos mapear quais menus do seu **menu/table de URLs** têm correspondentes no `App.tsx` (ou `Routes`) e quais não estão implementados ainda. Vou organizar por área principal:
 
----
 
 ## ✅ Menus com páginas correspondentes
 
