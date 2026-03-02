@@ -447,7 +447,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PERMISSAO_LANC_FORA_PRAZO
+                          PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO
                             .sigla!,
                         ]}
                       >

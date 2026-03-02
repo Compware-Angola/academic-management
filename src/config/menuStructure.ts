@@ -731,7 +731,7 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/pauta-uc",
           permission: [PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!],
         },
-        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao",permission: [PermissionTypeDetails.PERMISSAO_LANC_FORA_PRAZO.sigla] },
+        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao",permission: [PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO.sigla] },
         { title: "Validação", url: "/avaliacoes/validacao",permission: [PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla] },
         {
           title: "Visualizar notas",

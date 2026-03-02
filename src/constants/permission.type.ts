@@ -1045,14 +1045,6 @@ CONTROLE_LANCAMENTO: {
   sigla: "controle_lancamento",
 },
 
-
-
-
-PERMISSAO_LANC_FORA_PRAZO: {
-  designacao: "Permissão para lançar notas fora do prazo",
-  sigla: "lanc_fora_prazo",
-},
-
 DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
 
 
