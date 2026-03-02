@@ -1049,8 +1049,6 @@ CONTROLE_LANCAMENTO: {
   sigla: "controle_lancamento",
 },
 
-DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
-
 
 
 

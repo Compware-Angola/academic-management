@@ -689,11 +689,11 @@ const { hasPermission } = usePermission();
 
               {facturaSelecionada && (
                 <>
-                  <strong>Nº Factura:</strong> {facturaSelecionada.numero}
+                  <strong>Nº Factura:</strong> {facturaSelecionada.codigo}
                   <br />
-                  <strong>Aluno:</strong> {facturaSelecionada.aluno_nome}
+                  <strong>Aluno:</strong> {facturaSelecionada.nome_aluno}
                   <br />
-                  <strong>Valor:</strong> {facturaSelecionada.valor_total}
+                  <strong>Valor:</strong> {facturaSelecionada.valor_pagar} Kz
                 </>
               )}
 
