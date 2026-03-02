@@ -48,6 +48,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { Separator } from "@/components/ui/separator";
 import { FacturaItem } from "@/services/finance/listar-facturas.service";
 import { PaymentNoteActions } from "../components/views/uma-payment-invoice";
+import { tr } from "date-fns/locale";
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -599,6 +600,7 @@ export default function ListarNotasPagamento() {
                   itens={itens?.data || []}
                   showDownload={true}
                   showPrint={true}
+                  showliquidarNota={true}
                 />
               </div>
             </div>

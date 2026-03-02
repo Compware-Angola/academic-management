@@ -3,7 +3,7 @@ import { fetchAcessosPorGrupo, GrupoAcesso } from "@/services/access/fetch-grupo
 
 export function useQueryAcessosPorGrupo(grupoId?: number) {
 
-  console.log("HOOK ID", grupoId)
+
 
   return useQuery<GrupoAcesso[]>({
     queryKey: ["acessos-por-grupo", grupoId],

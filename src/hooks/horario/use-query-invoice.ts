@@ -1,16 +1,21 @@
-import { listarFacturaItensService, ListarFacturasPayload, listarFacturasService } from "@/services/finance/listar-facturas.service";
-import { useQuery } from "@tanstack/react-query";
+import {
+  listarFacturaItensService,
+  ListarFacturasPayload,
+  listarFacturasService,
+} from "@/services/finance/listar-facturas.service";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
-
-export const useQueryFacturas = (filters: ListarFacturasPayload) => {
- 
-  const enabled = !!filters.search || !!filters.anoLectivo;
+export const useQueryFacturas = (
+  filters: ListarFacturasPayload,
+  enabled?: boolean,
+) => {
+  const defaultEnabled = !!filters.search || !!filters.anoLectivo;
 
   return useQuery({
     queryKey: ["facturas", filters],
     queryFn: () => listarFacturasService(filters),
-    enabled,
-    staleTime: 1000 * 60 * 5, 
+    enabled: enabled ?? defaultEnabled,
+    staleTime: 1000 * 60 * 5,
     retry: 2,
   });
 };
@@ -21,7 +26,7 @@ export const useQueryFacturaItens = (facturaId?: number | string) => {
     queryKey: ["factura-itens", facturaId],
     queryFn: () => listarFacturaItensService(facturaId as number),
     enabled,
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
     retry: 2,
   });
 };
