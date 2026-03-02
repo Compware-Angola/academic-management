@@ -357,6 +357,7 @@ export const menuStructure: MenuStructure = {
       title: "Marcação de Provas",
       url: "/marcacao",
       icon: FileCheck,
+      permission: [PermissionTypeDetails.CONTROLE_NOTA.sigla, PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS.sigla],
       items: [
         { title: "Controle", url: "/marcacao-provas/controle", permission: [PermissionTypeDetails.CONTROLE_NOTA.sigla] },
         { title: "Marcação", url: "/marcacao-provas/marcacao", permission: [PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS.sigla] },
