@@ -355,14 +355,14 @@ export const menuStructure: MenuStructure = {
     // ----------------------------------------------------
     {
       title: "Marcação de Provas",
-      url: "/marcacao-provas",
+      url: "/marcacao",
       icon: FileCheck,
+      permission: [],
       items: [
         { title: "Controle", url: "/marcacao-provas/controle", permission: [PermissionTypeDetails.CONTROLE_NOTA.sigla] },
-        { title: "Marcação", url: "/marcacao-provas/marcacao", permission: [PermissionTypeDetails.MARCACAO_PROVA.sigla] },
+        { title: "Marcação", url: "/marcacao-provas/marcacao", permission: [PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS.sigla] },
       ],
 
-     permission: [PermissionTypeDetails.MARCACAO_PROVA.sigla],
     },
   ],
 };
@@ -722,7 +722,7 @@ export const academicStructure: MenuStructure = {
           permission: [PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!],
         },
         { title: "Lançamento de pauta", url: "/avaliacoes/pauta",permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla] },
-        { title: "Lançamento de notas", url: "/avaliacoes/notas",permission: [PermissionTypeDetails.LANCAMENTO_NOTAS.sigla] },
+        { title: "Lançamento de notas", url: "/avaliacoes/notas",permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla] },
         { title: "Lista de presença", url: "/avaliacoes/presenca",permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla] },
 
         { title: "Pauta geral", url: "/avaliacoes/pauta-geral",permission: [PermissionTypeDetails.PAUTA_GERAL.sigla] },
@@ -731,7 +731,7 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/pauta-uc",
           permission: [PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!],
         },
-        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao",permission: [PermissionTypeDetails.PERMISSAO_LANC_FORA_PRAZO.sigla] },
+        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao",permission: [PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO.sigla] },
         { title: "Validação", url: "/avaliacoes/validacao",permission: [PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla] },
         {
           title: "Visualizar notas",
@@ -801,13 +801,13 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/listar",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Eliminados", url: "/horarios/eliminados",permission: [PermissionTypeDetails.HORARIOS_ELIMINADOS.sigla] },
+        { title: "Eliminados", url: "/horarios/eliminados",permission: [PermissionTypeDetails. LISTAR_HORARIOS_ELIMINADOS.sigla] },
         {
           title: "Horários por sala",
           url: "/horarios/sala",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Horários por UC", url: "/horarios/uc",permission: [PermissionTypeDetails.HORARIOS_POR_UC.sigla] },
+        { title: "Horários por UC", url: "/horarios/uc",permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC.sigla] },
         {
           title: "Parâmetros",
           url: "/horarios/parametros",

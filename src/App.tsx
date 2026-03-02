@@ -229,7 +229,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.HORARIOS_ELIMINADOS.sigla!,
+                          PermissionTypeDetails.LISTAR_HORARIOS_ELIMINADOS
+                            .sigla!,
                         ]}
                       >
                         <ScheduleListEliminated />
@@ -309,7 +310,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LANCAMENTO_NOTAS.sigla,
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
                         ]}
                       >
                         <LaunchNotes />
@@ -446,7 +447,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PERMISSAO_LANC_FORA_PRAZO
+                          PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO
                             .sigla!,
                         ]}
                       >
@@ -482,7 +483,16 @@ const App = () => {
                   />
                   <Route
                     path="marcacao-provas/marcacao"
-                    element={<AddMarkingAssessment />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS
+                            .sigla!,
+                        ]}
+                      >
+                        <AddMarkingAssessment />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/estudante/:matricula"
@@ -564,7 +574,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.HORARIOS_POR_UC.sigla!,
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC
+                            .sigla!,
                         ]}
                       >
                         <SchedulesByUC />
@@ -603,8 +614,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_HORARIOS
-                            .sigla!,
+                          PermissionTypeDetails
+                            .MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
                         ]}
                       >
                         <MovimentarEstudantes />
