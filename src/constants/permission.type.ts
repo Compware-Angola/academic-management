@@ -1017,10 +1017,7 @@ INSCRICAO_POR_HORARIO: {
     designacao: "Docente lançamento do programa da UC",
     sigla: "doc_lanc_prog_uc",
   },
-  MARCACAO_PROVA: {
-  designacao: "Marcação de prova",
-  sigla: "marc_prova",
-},
+
 CONTROLE_NOTA: {
   designacao: "Controle de nota",
   sigla: "controle_nota",

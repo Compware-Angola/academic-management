@@ -483,7 +483,16 @@ const App = () => {
                   />
                   <Route
                     path="marcacao-provas/marcacao"
-                    element={<AddMarkingAssessment />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS
+                            .sigla!,
+                        ]}
+                      >
+                        <AddMarkingAssessment />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/estudante/:matricula"
