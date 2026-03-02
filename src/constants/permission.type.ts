@@ -254,7 +254,14 @@ export const PermissionTypeDetails = {
     designacao: "Listagem de Solicitação de Suporte",
     sigla: "mga_su_lso",
   },
-
+VALIDACAO_LANCAMENTO_PAUTA: {
+  designacao: "Validação de lançamento de pauta",
+  sigla: "valid_lanc_pauta",
+},
+INSCRICAO_POR_HORARIO: {
+  designacao: "Inscrição de estudantes por horário",
+  sigla: "insc_por_horario",
+},
   TIPO_SUPORTE: {
     designacao: "Tipo de Suporte",
     sigla: "mga_su_tip",
@@ -1006,6 +1013,69 @@ export const PermissionTypeDetails = {
     designacao: "Liquidar nota de pagamentos",
     sigla: "liq_pga",
   },
+  DOCENTE_LANCAMENTO_PROGRAMA_UC: {
+    designacao: "Docente lançamento do programa da UC",
+    sigla: "doc_lanc_prog_uc",
+  },
+  MARCACAO_PROVA: {
+  designacao: "Marcação de prova",
+  sigla: "marc_prova",
+},
+CONTROLE_NOTA: {
+  designacao: "Controle de nota",
+  sigla: "controle_nota",
+},
+CRIAR_PRAZO_ACADEMICO: {
+  designacao: "Criação de prazo académico",
+  sigla: "criar_prazo_acad",
+},
+CRIAR_DIAS_ISENTOS: {
+  designacao: "Criação de dias isentos",
+  sigla: "criar_dias_isentos",
+},
+PARAMETROS_CALENDARIO_ACADEMICO: {
+  designacao: "Parâmetros do calendário académico",
+  sigla: "param_calend_acad",
+},
+
+PRAZO_ACADEMICO: {
+  designacao: "Prazo académico",
+  sigla: "prazo_acad",
+},
+
+CONTROLE_LANCAMENTO: {
+  designacao: "Controle de lançamento",
+  sigla: "controle_lancamento",
+},
+
+
+LANCAMENTO_NOTAS: {
+  designacao: "Lançamento de notas",
+  sigla: "lancamento_notas",
+},
+
+PERMISSAO_LANC_FORA_PRAZO: {
+  designacao: "Permissão para lançar notas fora do prazo",
+  sigla: "lanc_fora_prazo",
+},
+
+MOVIMENTAR_ESTUDANTES_HORARIOS: {
+  designacao: "Movimentar estudantes entre horários",
+  sigla: "mov_estud_horarios",
+},
+
+HORARIOS_ELIMINADOS: {
+  designacao: "Horários eliminados",
+  sigla: "horarios_eliminados",
+},
+
+HORARIOS_POR_UC: {
+  designacao: "Horários por unidade curricular",
+  sigla: "horarios_uc",
+},
+
+
+
 } as const;
 
 export type PermissionDetail = {
