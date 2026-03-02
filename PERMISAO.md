@@ -1,4 +1,3 @@
-Perfeito! Podemos organizar **uma tabela completa com as URLs de cada item**, incluindo menus, submenus, permissões e ícones. Vou estruturar assim:
 
 | Menu Principal | Submenu | URL | Permissão | Ícone |
 | -------------- | ------- | --- | --------- | ----- |
