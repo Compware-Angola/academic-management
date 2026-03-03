@@ -254,6 +254,10 @@ export const PermissionTypeDetails = {
     designacao: "Listagem de Solicitação de Suporte",
     sigla: "mga_su_lso",
   },
+   
+  DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
+
+REACTIVAR_FACTURA: { designacao: "Reactivar Factura", sigla: "maf_react_factura" },
 VALIDACAO_LANCAMENTO_PAUTA: {
   designacao: "Validação de lançamento de pauta",
   sigla: "valid_lanc_pauta",
@@ -1044,8 +1048,6 @@ CONTROLE_LANCAMENTO: {
   designacao: "Controle de lançamento",
   sigla: "controle_lancamento",
 },
-
-DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
 
 
 
