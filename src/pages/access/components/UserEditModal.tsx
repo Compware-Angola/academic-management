@@ -135,7 +135,7 @@ export function UserEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl!">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl">
             <UserIcon className="h-6 w-6 text-primary" />
