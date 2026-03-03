@@ -228,13 +228,6 @@ export default function ListarPagamentos() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => {}}>
-              Limpar Filtros
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1">
-              <RefreshCw className="h-3 w-3" />
-              Actualizar
-            </Button>
             <div className="flex items-end">
               <Button
                 onClick={() => {
