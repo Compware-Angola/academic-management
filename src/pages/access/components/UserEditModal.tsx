@@ -105,7 +105,7 @@ export function UserEditModal({
     if (!formValido || !hasChanges) return;
     try {
       await updateUser({
-        id: user.codigo,
+        id: user.pessoaid,
         payload: {
           nomeCompleto: formData.nome,
           numDocIdentificacao: formData.numerodocumento || null,
