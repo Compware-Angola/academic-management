@@ -1,8 +1,8 @@
 export enum PermissionType {
   FULL_ACCESS = "FULL_ACCESS",
   ATRIBUIR_PROVA = "ATRIBUIR_PROVA",
-LSOLICITACAO_SUPORTE = "LSOLICITACAO_SUPORTE",
-TIPO_SUPORTE = "TIPO_SUPORTE",
+  LSOLICITACAO_SUPORTE = "LSOLICITACAO_SUPORTE",
+  TIPO_SUPORTE = "TIPO_SUPORTE",
   LANCAMENTO_NOTAS_AVALIACOES = "LANCAMENTO_NOTAS_AVALIACOES",
   ESTATISTICA_CANDIDATOS_INSCRITOS = "ESTATISTICA_CANDIDATOS_INSCRITOS",
   ESTATISTICA_CANDIDATOS_POR_DIA = "ESTATISTICA_CANDIDATOS_POR_DIA",
@@ -244,20 +244,32 @@ TIPO_SUPORTE = "TIPO_SUPORTE",
   ALTERAR_TIPO_DE_CANDIDATURA = "ALTERAR_TIPO_DE_CANDIDATURA",
 
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
-  LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL"
+  LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL",
+  LIQUIDAR_PAGAMENTO = "LIQUIDAR_FACTURA",
 }
 
 export const PermissionTypeDetails = {
   FULL_ACCESS: { designacao: "Todos os acesso", sigla: "full.access" },
   LSOLICITACAO_SUPORTE: {
-  designacao: "Listagem de Solicitação de Suporte",
-  sigla: "mga_su_lso",
-},
+    designacao: "Listagem de Solicitação de Suporte",
+    sigla: "mga_su_lso",
+  },
+   
+  DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
 
-TIPO_SUPORTE: {
-  designacao: "Tipo de Suporte",
-  sigla: "mga_su_tip",
+REACTIVAR_FACTURA: { designacao: "Reactivar Factura", sigla: "maf_react_factura" },
+VALIDACAO_LANCAMENTO_PAUTA: {
+  designacao: "Validação de lançamento de pauta",
+  sigla: "valid_lanc_pauta",
 },
+INSCRICAO_POR_HORARIO: {
+  designacao: "Inscrição de estudantes por horário",
+  sigla: "insc_por_horario",
+},
+  TIPO_SUPORTE: {
+    designacao: "Tipo de Suporte",
+    sigla: "mga_su_tip",
+  },
   ATRIBUIR_PROVA: { designacao: "Atribuir Prova", sigla: "mgea_atp" },
   LANCAMENTO_NOTAS_AVALIACOES: {
     designacao: "Lançamento de Notas de Avaliações",
@@ -998,9 +1010,48 @@ TIPO_SUPORTE: {
     sigla: "m_lis_ndiv",
   },
   LISTAR_TIPO_CREDITO_EDUCACIONAL: {
-    deseginacao: "Listar tipo de credito educacional",
-    sigla: "list_tpe"
-  }
+    designacao: "Listar tipo de credito educacional",
+    sigla: "list_tpe",
+  },
+  LIQUIDAR_NOTA_PAGAMENTO: {
+    designacao: "Liquidar nota de pagamentos",
+    sigla: "liq_pga",
+  },
+  DOCENTE_LANCAMENTO_PROGRAMA_UC: {
+    designacao: "Docente lançamento do programa da UC",
+    sigla: "doc_lanc_prog_uc",
+  },
+
+CONTROLE_NOTA: {
+  designacao: "Controle de nota",
+  sigla: "controle_nota",
+},
+CRIAR_PRAZO_ACADEMICO: {
+  designacao: "Criação de prazo académico",
+  sigla: "criar_prazo_acad",
+},
+CRIAR_DIAS_ISENTOS: {
+  designacao: "Criação de dias isentos",
+  sigla: "criar_dias_isentos",
+},
+PARAMETROS_CALENDARIO_ACADEMICO: {
+  designacao: "Parâmetros do calendário académico",
+  sigla: "param_calend_acad",
+},
+
+PRAZO_ACADEMICO: {
+  designacao: "Prazo académico",
+  sigla: "prazo_acad",
+},
+
+CONTROLE_LANCAMENTO: {
+  designacao: "Controle de lançamento",
+  sigla: "controle_lancamento",
+},
+
+
+
+
 } as const;
 
 export type PermissionDetail = {

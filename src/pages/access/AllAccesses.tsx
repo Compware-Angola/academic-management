@@ -56,7 +56,9 @@ export function ListarAcessos() {
 
   const [filterType, setFilterType] = useState<"sigla" | "designacao">("sigla");
   const [filterValue, setFilterValue] = useState("");
-  const [apenasAtivos, setApenasAtivos] = useState<"all" | "true" | "false">("all");
+  const [apenasAtivos, setApenasAtivos] = useState<"all" | "true" | "false">(
+    "all",
+  );
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -134,37 +136,40 @@ export function ListarAcessos() {
   ) : null;
 
   // ─── EXCEL PROPS (paralelo ao pdfContent) ───────────────
- const excelProps = {
-  documentTitle: "Lista de Acessos",
-  subtitle: "Registos de acessos do sistema",
-  infoSections: [
-    { title: "Filtros Aplicados", content: "Filtro: sigla | Valor: ADM | Estado: Todos" },
-    { title: "Resumo", content: ["Total de acessos: 42"] },
-  ],
-  mainTable: {
-    headers: [
-      { key: "id", label: "ID", width: 10 },
-      { key: "designacao", label: "Designação", width: 40 },
-      { key: "sigla", label: "Sigla", width: 12 },
-      { key: "modulo", label: "Módulo", width: 25 },
-      { key: "tipo", label: "Tipo", width: 15 },
-      { key: "data", label: "Data Ativação", width: 18 },
-      { key: "estado", label: "Estado", width: 12 },
+  const excelProps = {
+    documentTitle: "Lista de Acessos",
+    subtitle: "Registos de acessos do sistema",
+    infoSections: [
+      {
+        title: "Filtros Aplicados",
+        content: "Filtro: sigla | Valor: ADM | Estado: Todos",
+      },
+      { title: "Resumo", content: ["Total de acessos: 42"] },
     ],
-    rows: data.map(item => ({
-      id: item.pk_acesso,
-      designacao: item.designacao,
-      sigla: item.sigla,
-      modulo: item.modulonome,
-      tipo: item.tipoacesso,
-      data: item.dataativacao,
-      estado: item.ativo ? "Ativo" : "Inativo",
-    })),
-    headerBackground: "#1e40af",
-  },
-  footerNotice: "Documento gerado automaticamente pelo sistema.",
-  primaryColor: "#1e40af",
-};
+    mainTable: {
+      headers: [
+        { key: "id", label: "ID", width: 10 },
+        { key: "designacao", label: "Designação", width: 40 },
+        { key: "sigla", label: "Sigla", width: 12 },
+        { key: "modulo", label: "Módulo", width: 25 },
+        { key: "tipo", label: "Tipo", width: 15 },
+        { key: "data", label: "Data Ativação", width: 18 },
+        { key: "estado", label: "Estado", width: 12 },
+      ],
+      rows: data.map((item) => ({
+        id: item.pk_acesso,
+        designacao: item.designacao,
+        sigla: item.sigla,
+        modulo: item.modulonome,
+        tipo: item.tipoacesso,
+        data: item.dataativacao,
+        estado: item.ativo ? "Ativo" : "Inativo",
+      })),
+      headerBackground: "#1e40af",
+    },
+    footerNotice: "Documento gerado automaticamente pelo sistema.",
+    primaryColor: "#1e40af",
+  };
 
   const baseFileName = `Acessos_${new Date().toISOString().slice(0, 10)}`;
 
@@ -248,9 +253,7 @@ export function ListarAcessos() {
 
         <Button onClick={handleSearch}>Pesquisar</Button>
 
-        <Button onClick={() => setPasswordModalOpen(true)}>
-          Criar Acesso
-        </Button>
+        <Button onClick={() => setPasswordModalOpen(true)}>Criar Acesso</Button>
       </div>
 
       {/* Tabela */}
@@ -373,9 +376,7 @@ export function ListarAcessos() {
             >
               Cancelar
             </Button>
-            <Button onClick={handleConfirmPassword}>
-              Confirmar
-            </Button>
+            <Button onClick={handleConfirmPassword}>Confirmar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

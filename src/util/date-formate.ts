@@ -12,3 +12,7 @@ export const formatarData = (dataString: string): string => {
     timeZone: "UTC",
   }).format(data);
 };
+
+export const formatDisplay = (data: Date): string => {
+  return data.toLocaleDateString("en-CA");
+};
