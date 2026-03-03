@@ -17,7 +17,7 @@ export async function marcarAulaAssiduidadeService(
 
   const { data } = await axiosNestGa.patch<MarcarAulaResponse>(
     "assiduidade/marcar-aula",
-    null,
+    {},
     {
       params: {
         codigoAgendamento,
@@ -35,7 +35,7 @@ export async function marcarAulaAssiduidadeProvaService(
 
   const { data } = await axiosNestGa.patch<MarcarAulaResponse>(
     "assiduidade/marcar-prova",
-    null,
+    {},
     {
       params: {
         codigoAgendamento,

@@ -6,10 +6,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 export const useQueryFiltroAssiduidade = (
-  filters: FiltroAssiduidadePayload,
-  options?: {
-    enabled?: boolean;
-  },
+  filters: FiltroAssiduidadePayload & { page?: number; limit?: number }
 ) => {
   const {
     unidadeCurricular,
@@ -23,28 +20,39 @@ export const useQueryFiltroAssiduidade = (
     limit = 20,
   } = filters;
 
-  const enabled =
-    typeof options?.enabled === "boolean" ? options.enabled : true;
+  // ────────────────────────────────────────────────
+  // Condição de ativação mais estrita e legível
+  //────────────────────────────────────────────────
+  const hasAno = anoLectivo !== undefined  && !isNaN(Number(anoLectivo));
+
+  const hasBothDates =
+    dataInicial !== undefined &&
+    dataInicial !== "" &&
+    dataFinal !== undefined &&
+    dataFinal !== "" &&
+    // Opcional: validar formato de data se quiseres ser mais rigoroso
+    !isNaN(Date.parse(dataInicial)) &&
+    !isNaN(Date.parse(dataFinal));
+
+  const enabled = hasAno && hasBothDates;
+
+  // Monta payload apenas com valores realmente úteis
+  const payload: FiltroAssiduidadePayload = {
+    page,
+    limit,
+    ...(unidadeCurricular !== undefined && Number(unidadeCurricular) > 0 && { unidadeCurricular: Number(unidadeCurricular) }),
+    ...(docente !== undefined && Number(docente) > 0 && { docente: Number(docente) }),
+    ...(estado !== undefined && Number(estado) >= 1 && { estado: Number(estado) }),
+    ...(hasAno && { anoLectivo: Number(anoLectivo) }),
+    ...(semestre !== undefined && Number(semestre) > 0 && { semestre: Number(semestre) }),
+    // Só inclui datas se ambas forem válidas
+    ...(hasBothDates && { dataInicial, dataFinal }),
+  };
 
   return useQuery<FiltroAssiduidadeResponse>({
-    queryKey: [
-      "filtro-assiduidade",
-      {
-        unidadeCurricular,
-        docente,
-        dataInicial,
-        dataFinal,
-        estado,
-        anoLectivo,
-        semestre,
-        page,
-        limit,
-      },
-    ],
-    queryFn: () => filtroAssiduidadeService(filters),
+    queryKey: ["filtro-assiduidade", payload],
+    queryFn: () => filtroAssiduidadeService(payload),
     enabled,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 20,
     retry: 2,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
