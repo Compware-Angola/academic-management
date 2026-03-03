@@ -96,6 +96,7 @@ import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
+import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 
 const App = () => {
   return (
@@ -877,6 +878,10 @@ const App = () => {
                         <ListarEstudanteFinalista />
                       </ProtectedRoute>
                     }
+                  />
+                  <Route
+                    path="/docente/validacao-uc"
+                    element={<ValidacaoPrograma />}
                   />
                 </Route>
               </Routes>
