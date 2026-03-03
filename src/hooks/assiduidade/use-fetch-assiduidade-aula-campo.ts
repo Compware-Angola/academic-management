@@ -20,9 +20,21 @@ export const useQueryFiltroAssiduidadeCampo = (
     page = 1,
     limit = 20,
   } = filters;
+  // ────────────────────────────────────────────────
+  // Condição de ativação mais estrita e legível
+  //────────────────────────────────────────────────
+  const hasAno = anoLectivo !== undefined  && !isNaN(Number(anoLectivo));
 
-  const enabled =
-    typeof options?.enabled === "boolean" ? options.enabled : true;
+  const hasBothDates =
+    dataInicial !== undefined &&
+    dataInicial !== "" &&
+    dataFinal !== undefined &&
+    dataFinal !== "" &&
+    // Opcional: validar formato de data se quiseres ser mais rigoroso
+    !isNaN(Date.parse(dataInicial)) &&
+    !isNaN(Date.parse(dataFinal));
+
+  const enabled = hasAno && hasBothDates;
 
   // Monta o payload somente com os campos definidos
   const payload: FiltroAssiduidadePayload = {

@@ -130,7 +130,7 @@ export interface ProvaAssiduidadeItem {
   semestre: string;
   hora_prova: string | null;
   hora_termino: string | null;
-  duracaoprova: string | null;
+  duracao_prova: string | null;
   docente_nome: string | null;
 }
 

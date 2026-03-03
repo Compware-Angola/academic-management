@@ -20,9 +20,18 @@ export const useQueryProvaAssiduidade = (
     page = 1,
     limit = 20,
   } = filters;
+  const hasAno = anoLectivo !== undefined  && !isNaN(Number(anoLectivo));
 
-  const enabled =
-    typeof options?.enabled === "boolean" ? options.enabled : true;
+  const hasBothDates =
+    dataInicio !== undefined &&
+    dataInicio !== "" &&
+    dataFim !== undefined &&
+    dataFim !== "" &&
+    // Opcional: validar formato de data se quiseres ser mais rigoroso
+    !isNaN(Date.parse(dataInicio)) &&
+    !isNaN(Date.parse(dataFim));
+
+  const enabled = hasAno && hasBothDates;
 
   // Monta o payload somente com os campos definidos
   const payload: ProvaAssiduidadePayload = {
