@@ -497,7 +497,7 @@ export default function ProvaContent() {
       <Dialog open={!!selectedRegisto} onOpenChange={(open) => !open && setSelectedRegisto(null)}>
         <DialogContent className="sm:max-w-lg!">
           <DialogHeader>
-            <DialogTitle>Detalhes da Aula</DialogTitle>
+            <DialogTitle>Detalhes da Prova</DialogTitle>
             <DialogDescription>Informações e alteração de estado</DialogDescription>
           </DialogHeader>
 
