@@ -68,12 +68,7 @@ export async function fetchLancamentosPauta(
   
 }
 
-  //lancamento/uc-sem-pauta
 
-  /**
- * Busca a lista de lançamentos de pauta com filtros e paginação
- * Rota: GET /api/assessment/lancamento/pauta
- */
 export async function fetchLancamentosUcSemPauta(
   params: FilterLancamentoPautaParams = {}
 ): Promise<LancamentoPautaResponse> {

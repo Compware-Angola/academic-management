@@ -362,7 +362,7 @@ export function PaymentNoteActions({
           )}
         </PDFDownloadLink>
       )}
-      {showliquidarNota && nota.estado == 0 && (
+      {showliquidarNota && (nota.estado == 0 || nota.estado == 2) && (
         <Button
           className="gap-2"
           onClick={() => {

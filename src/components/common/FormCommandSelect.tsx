@@ -58,7 +58,7 @@ function resolveWidthClass(width?: WidthPreset | string) {
 
 export function FormCommandSelect<T>({
   label,
-  labelMode = "outside", // 👈 PADRÃO,
+  labelMode = "outside",
   value,
   options = [],
   map,
@@ -71,50 +71,32 @@ export function FormCommandSelect<T>({
 }: FormCommandSelectProps<T>) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  // 🔥 Memorizar o último item selecionado
-  const [lastSelectedItem, setLastSelectedItem] = useState<T | null>(null);
 
   const widthClass = resolveWidthClass(width);
 
+  // Buscamos o item selecionado APENAS com base no valor atual
   const selectedItem = options.find(
     (item) => String(map(item).value) === value,
   );
 
-  // 🔥 Atualizar lastSelectedItem quando encontrar na lista
-  if (selectedItem && selectedItem !== lastSelectedItem) {
-    setLastSelectedItem(selectedItem);
-  }
-
-  // 🔥 Usar o item memorizado se não estiver na lista atual
-  const displayItem = selectedItem || lastSelectedItem;
-
   function handleOpenChange(isOpen: boolean) {
     setOpen(isOpen);
-
     if (!isOpen) {
       setSearchValue("");
       onSearchChange?.("");
     }
   }
 
-  function handleSelect(value: string) {
-    onChange(value);
+  function handleSelect(selectedValue: string) {
+    onChange(selectedValue);
     setOpen(false);
-
     setSearchValue("");
     onSearchChange?.("");
   }
 
   return (
     <div className="flex flex-col gap-2">
-      
-
-        {/* LABEL EXTERNO: só se mandarem */}
-          {label && labelMode === "outside" && (
-            <Label>{label}</Label>
-          )}
-
-
+      {label && labelMode === "outside" && <Label>{label}</Label>}
 
       <Popover open={open} onOpenChange={handleOpenChange} modal>
         <PopoverTrigger asChild>
@@ -129,11 +111,13 @@ export function FormCommandSelect<T>({
             )}
           >
             <span className="truncate">
-              {displayItem && map(displayItem).label}
-
-              {!displayItem && labelMode === "inside" && label}
-
-              {!displayItem && labelMode === "outside" && placeholder}
+              {/* Se existe item selecionado, mostra o label dele */}
+              {selectedItem
+                ? map(selectedItem).label
+                : // Se não existe, decide entre mostrar o label interno ou placeholder
+                  labelMode === "inside"
+                  ? label
+                  : placeholder}
             </span>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </button>
@@ -146,22 +130,20 @@ export function FormCommandSelect<T>({
         >
           <Command>
             <CommandInput
-              autoFocus
               value={searchValue}
               placeholder={
                 label ? `Procurar ${label.toLowerCase()}...` : "Procurar..."
               }
-              className={widthClass}
-              onValueChange={(value) => {
-                setSearchValue(value);
-                onSearchChange?.(value);
+              onValueChange={(val) => {
+                setSearchValue(val);
+                onSearchChange?.(val);
               }}
             />
-
             <CommandList>
               {isLoading ? (
-                <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />A pesquisar...
+                <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" /> A
+                  pesquisar...
                 </div>
               ) : options.length === 0 ? (
                 <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
@@ -169,7 +151,6 @@ export function FormCommandSelect<T>({
                 <CommandGroup>
                   {options.map((item) => {
                     const mapped = map(item);
-
                     return (
                       <CommandItem
                         key={mapped.key}

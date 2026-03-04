@@ -20,8 +20,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Trash2,
-  CircleCheck,
-  CircleX,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +31,6 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useCursos } from "@/hooks/use-cursos";
-import { useLancamentosPauta } from "@/hooks/avaliacao/use-query-lancamento-pauta";
 import { useCreateLancamentoPauta } from "@/hooks/avaliacao/use-mutation-create-lancamento-pauta copy";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
@@ -50,7 +47,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-update-estado-lancamento-pauta";
-import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { DocenteCursoSelect } from "@/components/common/global-selects/DocenteCursoSelect";
+import { DocenteCadeiraSelect } from "@/components/common/global-selects/DocenteCadeiraSelect";
+import { useDocenteFetchPauta } from "@/hooks/docentes/use-docente-fetch-pauta";
 
 export default function DocenteLancamentoProgramaUC() {
   const { toast } = useToast();
@@ -81,10 +80,8 @@ export default function DocenteLancamentoProgramaUC() {
     curso: "",
     anoCurricular: "",
     unidadeCurricular: "",
-    tipoAvaliacao: "",
   });
 
-  // Queries
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
@@ -100,32 +97,25 @@ export default function DocenteLancamentoProgramaUC() {
       curso: filters.curso,
       semestre: filters.semestre,
     });
-
+  const { data: teacherInfoData } = useQueryTeacherProfile(
+    userData?.user?.pk_utilizador,
+  );
   const {
     data: response,
     isLoading: isLoadingPautas,
     error: errorPautas,
     refetch,
-  } = useLancamentosPauta({
+  } = useDocenteFetchPauta({
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
-    tipoAvaliacao: filters.tipoAvaliacao
-      ? Number(filters.tipoAvaliacao)
-      : undefined,
-    codigoGrade: filters.unidadeCurricular
-      ? Number(filters.unidadeCurricular)
-      : undefined,
-    curso: filters.curso ? Number(filters.curso) : undefined,
     anoCurricular: filters.anoCurricular
       ? Number(filters.anoCurricular)
       : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    codigoCurso: filters.curso ? Number(filters.curso) : undefined,
     page: currentPage,
     limit: limit,
+    docenteId: teacherInfoData?.codigo_docente,
   });
-
-  const { data: teacherInfoData } = useQueryTeacherProfile(
-    userData?.user?.pk_utilizador,
-  );
 
   const pautas = response?.data ?? [];
   const pagination = {
@@ -135,7 +125,6 @@ export default function DocenteLancamentoProgramaUC() {
     totalPages: response?.totalPages ?? 1,
   };
 
-  // Função para limpar input de arquivo
   const clearFileInput = () => {
     setSelectedFile(null);
     if (fileInputRef.current) {
@@ -172,12 +161,8 @@ export default function DocenteLancamentoProgramaUC() {
       });
       return;
     }
-
-    if (
-      !filters.anoLectivo ||
-      !filters.unidadeCurricular ||
-      !filters.tipoAvaliacao
-    ) {
+    console.log(filters);
+    if (!filters.anoLectivo || !filters.unidadeCurricular) {
       toast({
         title: "Campos obrigatórios",
         description:
@@ -215,34 +200,34 @@ export default function DocenteLancamentoProgramaUC() {
 
         return;
       }
-      createMutation.mutate(
-        {
-          anoLectivoId: Number(filters.anoLectivo),
-          docenteId: Number(docenteId),
-          gradeCurricularId: Number(filters.unidadeCurricular),
-          fkEstadoLancamentoPauta: 1,
-          fkTipoAvaliacao: Number(filters.tipoAvaliacao),
-          ficheiroName: uploadResponse.file.filename,
-        },
-        {
-          onSuccess: (data) => {
-            toast({
-              title: "Sucesso!",
-              description: data.message || "Pauta submetida com sucesso.",
-            });
-            clearFileInput();
-            setCurrentPage(1);
-            refetch();
-          },
-          onError: (error: any) => {
-            toast({
-              title: "Erro ao submeter",
-              description: error.message || "Tente novamente.",
-              variant: "destructive",
-            });
-          },
-        },
-      );
+      // createMutation.mutate(
+      //   {
+      //     anoLectivoId: Number(filters.anoLectivo),
+      //     docenteId: Number(docenteId),
+      //     gradeCurricularId: Number(filters.unidadeCurricular),
+      //     fkEstadoLancamentoPauta: 1,
+      //     fkTipoAvaliacao: Number(filters.tipoAvaliacao),
+      //     ficheiroName: uploadResponse.file.filename,
+      //   },
+      //   {
+      //     onSuccess: (data) => {
+      //       toast({
+      //         title: "Sucesso!",
+      //         description: data.message || "Pauta submetida com sucesso.",
+      //       });
+      //       clearFileInput();
+      //       setCurrentPage(1);
+      //       refetch();
+      //     },
+      //     onError: (error: any) => {
+      //       toast({
+      //         title: "Erro ao submeter",
+      //         description: error.message || "Tente novamente.",
+      //         variant: "destructive",
+      //       });
+      //     },
+      //   },
+      // );
     } catch (error) {
       toast({
         title: "Erro inesperado",
@@ -335,10 +320,25 @@ export default function DocenteLancamentoProgramaUC() {
     unidadesCurriculares?.find(
       (u) => u.pk === Number(filters.unidadeCurricular),
     )?.descricao || "";
-  const getTipoAvaliacaoLabel = () =>
-    tipoAvaliacao?.find((t) => t.codigo === Number(filters.tipoAvaliacao))
-      ?.designacao || "";
+  // const getTipoAvaliacaoLabel = () =>
+  //   tipoAvaliacao?.find((t) => t.codigo === Number(filters.tipoAvaliacao))
+  //     ?.designacao || "";
+  const isFiltersComplete =
+    !!filters.anoLectivo &&
+    !!filters.semestre &&
+    !!filters.curso &&
+    !!filters.anoCurricular &&
+    !!filters.unidadeCurricular;
 
+  const isDocente = !!teacherInfoData?.codigo_docente;
+
+  const canSelectFile = isFiltersComplete && isDocente;
+
+  const canSubmit =
+    selectedFile &&
+    isFiltersComplete &&
+    !createMutation.isPending &&
+    !uploadMutation.isPending;
   return (
     <div className="space-y-6">
       {/* Breadcrumb e Cabeçalho */}
@@ -379,7 +379,7 @@ export default function DocenteLancamentoProgramaUC() {
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <FormSelect
-            disabled={isLoadingAcademicYear}
+            disabled={isLoadingAcademicYear || !teacherInfoData?.codigo_docente}
             loading={isLoadingAcademicYear}
             label="Ano Letivo"
             value={filters.anoLectivo}
@@ -395,7 +395,7 @@ export default function DocenteLancamentoProgramaUC() {
             })}
           />
           <FormSelect
-            disabled={isLoadingSemestres}
+            disabled={isLoadingSemestres || !teacherInfoData?.codigo_docente}
             loading={isLoadingSemestres}
             label="Semestre"
             value={filters.semestre}
@@ -410,24 +410,26 @@ export default function DocenteLancamentoProgramaUC() {
               value: s.codigo,
             })}
           />
-
-          <CourseSelect
+          <DocenteCursoSelect
+            docenteId={teacherInfoData?.codigo_docente}
             value={filters.curso}
             onChangeValue={(v) => {
               setFilters({
                 ...filters,
                 curso: v,
-                anoCurricular: "",
                 unidadeCurricular: "",
               });
               setCurrentPage(1);
             }}
           />
-
           <FormSelect
             label="Ano Curricular"
             value={filters.anoCurricular}
-            disabled={isLoadingClasses || !filters.curso}
+            disabled={
+              isLoadingClasses ||
+              !filters.curso ||
+              !teacherInfoData.codigo_categoria
+            }
             loading={isLoadingClasses}
             onChange={(v) => {
               setFilters({
@@ -444,22 +446,18 @@ export default function DocenteLancamentoProgramaUC() {
               value: c.codigo,
             })}
           />
-          <FormSelect
-            label="Unidade Curricular"
+
+          <DocenteCadeiraSelect
+            disabled={isLoadingClasses || !teacherInfoData?.codigo_docente}
+            loading={isLoadingClasses}
+            docenteId={teacherInfoData?.codigo_docente}
+            cursoId={Number(filters.curso)}
+            classId={Number(filters.anoCurricular)}
             value={filters.unidadeCurricular}
-            disabled={
-              isLoadingUC ||
-              !filters.semestre ||
-              !filters.curso ||
-              !filters.anoCurricular
-            }
-            loading={isLoadingUC}
-            onChange={(v) => {
+            onChangeValue={(v) => {
               setFilters({ ...filters, unidadeCurricular: v });
               setCurrentPage(1);
             }}
-            options={unidadesCurriculares}
-            map={(u) => ({ key: u.pk, label: u.descricao, value: u.pk })}
           />
         </div>
       </div>
@@ -473,11 +471,11 @@ export default function DocenteLancamentoProgramaUC() {
           <div className="flex-1 space-y-2">
             <Label htmlFor="file-upload">Arquivo PDF da Pauta</Label>
             <Input
+              disabled={!canSelectFile}
               ref={fileInputRef}
               id="file-upload"
               type="file"
               accept=".pdf"
-              disabled={!teacherInfoData?.codigo_docente}
               onChange={handleFileSelect}
             />
             {selectedFile && (
@@ -493,9 +491,7 @@ export default function DocenteLancamentoProgramaUC() {
           <Button
             onClick={handleOpenSubmitModal}
             disabled={
-              !selectedFile ||
-              createMutation.isPending ||
-              uploadMutation.isPending
+              !canSubmit || createMutation.isPending || uploadMutation.isPending
             }
           >
             <Upload className="h-4 w-4 mr-2" />
@@ -506,9 +502,8 @@ export default function DocenteLancamentoProgramaUC() {
         </div>
       </div>
 
-      {/* Modal Submissão */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-md!">
           <DialogHeader>
             <DialogTitle>Confirmar Submissão de Pauta</DialogTitle>
             <DialogDescription>
@@ -536,12 +531,13 @@ export default function DocenteLancamentoProgramaUC() {
               </Label>
               <span className="col-span-3">{getUnidadeCurricularLabel()}</span>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right font-medium">
                 Tipo de Avaliação:
               </Label>
               <span className="col-span-3">{getTipoAvaliacaoLabel()}</span>
             </div>
+          */}
           </div>
           <DialogFooter>
             <Button
@@ -563,9 +559,8 @@ export default function DocenteLancamentoProgramaUC() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Confirmação Aprovar/Rejeitar */}
       <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md!">
           <DialogHeader>
             <DialogTitle>
               {acaoTipo === "aprovar" ? "Aprovar" : "Rejeitar"} Pauta
@@ -604,7 +599,6 @@ export default function DocenteLancamentoProgramaUC() {
         </DialogContent>
       </Dialog>
 
-      {/* Tabela */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Pautas Submetidas</h3>
 
@@ -629,13 +623,10 @@ export default function DocenteLancamentoProgramaUC() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Arquivo</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Curso</TableHead>
-                    <TableHead>Unidade Curricular</TableHead>
-                    <TableHead>Ano Curricular</TableHead>
-                    <TableHead>Docente</TableHead>
-                    <TableHead>Tipo Avaliação</TableHead>
+                    <TableHead>Codigo</TableHead>
+                    <TableHead>Ano-Lectivo</TableHead>
+                    <TableHead>UC</TableHead>
+                    <TableHead>Data Criação</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
@@ -643,74 +634,15 @@ export default function DocenteLancamentoProgramaUC() {
                 <TableBody>
                   {pautas.map((pauta) => (
                     <TableRow key={pauta.codigo}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-red-500" />
-                          {pauta.ficheiro_name ? (
-                            <span className="truncate max-w-[200px]">
-                              {pauta.ficheiro_name.split("/").pop()}
-                            </span>
-                          ) : (
-                            "-"
-                          )}
-                        </div>
-                      </TableCell>
+                      <TableCell>{pauta.codigo}</TableCell>
+                      <TableCell>{pauta.anolectivo}</TableCell>
+                      <TableCell>{pauta.gradecurricular}</TableCell>
                       <TableCell>
-                        {new Date(pauta.created_at).toLocaleDateString("pt-AO")}
+                        {new Date(pauta.datacriacao).toLocaleDateString(
+                          "pt-AO",
+                        )}
                       </TableCell>
-                      <TableCell>{pauta.curso}</TableCell>
-                      <TableCell>{pauta.unidade_curricular}</TableCell>
-                      <TableCell>{pauta.classe}</TableCell>
-                      <TableCell>{pauta.docente_nome}</TableCell>
-                      <TableCell>{pauta.designacao_av}</TableCell>
-                      <TableCell>
-                        {getEstadoBadge(pauta.estado_pauta)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          {pauta.ficheiro_name && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleDownload(pauta.ficheiro_name!)
-                              }
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          )}
-
-                          {/* Botões apenas se pendente 
-                          {pauta.estado_pauta === 1 && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8 text-green-600 hover:bg-green-50"
-                                title="Aprovar"
-                                onClick={() =>
-                                  abrirConfirmacao(pauta, "aprovar")
-                                }
-                              >
-                                <CircleCheck className="h-4 w-4" />
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8 text-red-600 hover:bg-red-50"
-                                title="Rejeitar"
-                                onClick={() =>
-                                  abrirConfirmacao(pauta, "rejeitar")
-                                }
-                              >
-                                <CircleX className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
-                          */}
-                        </div>
-                      </TableCell>
+                      <TableCell>{getEstadoBadge(pauta.estado)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
