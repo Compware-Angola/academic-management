@@ -1,7 +1,7 @@
 import { AgendamentosDocentePayload, AgendamentosDocenteResponse, controleAssiduidadeService } from "@/services/assiduidade/controle-assiduidade.service";
 import { useQuery } from "@tanstack/react-query";
 
-export const useQueryAgendamentosDocente = (
+export const useQueryControleAssiduidade = (
   filters: AgendamentosDocentePayload,
   options?: {
     enabled?: boolean;

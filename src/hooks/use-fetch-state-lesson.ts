@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export function useQueryStateLesson() {
   return useQuery<LessonState[], Error>({
-    queryKey: ["teachers"],
+    queryKey: ["lesson-state"],
     queryFn: fetchStateLesson,
    staleTime: 5 * 60 * 1000,
 

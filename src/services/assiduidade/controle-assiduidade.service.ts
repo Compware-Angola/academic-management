@@ -1,4 +1,4 @@
-import { axiosNestFinance } from "@/lib/axios-nest-finance";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type AgendamentosDocentePayload = {
   docente: number;
@@ -45,8 +45,8 @@ export async function controleAssiduidadeService(
   } = payload;
 
   const { data } =
-    await axiosNestFinance.get<AgendamentosDocenteResponse>(
-      "assiduidade/controle",
+    await axiosNestGa.get<AgendamentosDocenteResponse>(
+      "/assiduidade/controle",
       {
         params: {
           docente,

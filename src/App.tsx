@@ -95,6 +95,7 @@ import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
 import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
+import ControleAssiduidade from "./pages/assiduidade/ControleAssiduidade";
 
 const App = () => {
   return (
@@ -265,6 +266,20 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="/assiduidade/controle" 
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                        ]}
+                      >
+                        <ControleAssiduidade />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   {/* <Route
                   path="/inscricoes/matriculados"
                   element={<EnrolledList />}
