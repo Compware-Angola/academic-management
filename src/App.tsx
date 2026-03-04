@@ -98,6 +98,8 @@ import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal"
 import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
 import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
+import AulasAgendadas from "./pages/sumario/AulasAgendadas";
+
 
 const App = () => {
   return (
@@ -225,6 +227,11 @@ const App = () => {
                     path="horarios/inscricoes"
                     element={<SchedulesInscription />}
                   />
+                   <Route
+                    path="sumario/aulas-agendadas"
+                    element={<AulasAgendadas />}
+                  />
+                  
                   <Route path="/horarios/listar" element={<ScheduleList />} />
                   <Route
                     path="/horarios/eliminados"

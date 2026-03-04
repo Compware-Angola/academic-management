@@ -11,6 +11,7 @@ import {
   ListChecks,
   LibraryBig,
   GraduationCap,
+  FileText,
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
@@ -491,11 +492,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/descontos",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-          {
-              title: "Atribuir Desconto",
-              url: "/financas/descontos/atribuicao",
-              permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
-          },
+        {
+          title: "Atribuir Desconto",
+          url: "/financas/descontos/atribuicao",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
         // {
         //   title: "Atribuição de Desconto",
         //   url: "/financas/descontos/atribuicao",
@@ -681,6 +682,17 @@ export const assiduidade: MenuStructure = {
         },
       ],
     },
+        {
+      title: "Sumário",
+      url: "/gestao-docentes",
+      icon: FileText,
+      items: [
+      
+        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas" },
+        { title: "Parâmetros", url: "/sumario/parametros" },
+      ],
+      permission: []
+    }
   ],
 };
 export const academicStructure: MenuStructure = {
@@ -897,6 +909,8 @@ export const academicStructure: MenuStructure = {
 
       permission: [],
     },
+
+
     // ----------------------------------------------------
     // EXAME DE ACESSO
     // ----------------------------------------------------
