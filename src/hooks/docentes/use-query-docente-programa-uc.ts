@@ -5,7 +5,13 @@ import {
 } from "@/services/docentes/docente-programa-uc.service";
 import { useQuery } from "@tanstack/react-query";
 
-export function useQueryDocenteListProgramaUC(payload: ListProgramaUCPayload) {
+interface QUeryDocenteProgramaUC {
+  enabled: boolean;
+}
+export function useQueryDocenteListProgramaUC(
+  payload: ListProgramaUCPayload,
+  options?: QUeryDocenteProgramaUC,
+) {
   const {
     anoCurricular,
     anoLectivo,
@@ -16,9 +22,9 @@ export function useQueryDocenteListProgramaUC(payload: ListProgramaUCPayload) {
     limit,
     page,
   } = payload;
-  const enabled =
-    !!anoCurricular && !!anoLectivo && !!codigoCurso && !!semestre;
 
+  const defaultEnabled =
+    !!anoCurricular && !!anoLectivo && !!codigoCurso && !!semestre;
   return useQuery<ListProgramaUCResponse>({
     queryKey: [
       "programa-uc",
@@ -32,6 +38,6 @@ export function useQueryDocenteListProgramaUC(payload: ListProgramaUCPayload) {
       page,
     ],
     queryFn: () => getListProgramaUCService(payload),
-    enabled,
+    enabled: options?.enabled ?? defaultEnabled,
   });
 }

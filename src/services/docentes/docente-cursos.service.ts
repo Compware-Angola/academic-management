@@ -8,11 +8,22 @@ export type CursosResponse = {
   data: CursoItem[];
 };
 
+export interface DocenteCursoProps {
+  docenteId?: number;
+  anoLectivo?: number;
+}
+
 export async function getDocenteCursosService(
-  docenteId: number,
+  props: DocenteCursoProps,
 ): Promise<CursosResponse> {
+  const { anoLectivo, docenteId } = props;
   const { data } = await axiosNestGa.get<CursosResponse>(
     `docentes/${docenteId}/cursos`,
+    {
+      params: {
+        anoLectivo,
+      },
+    },
   );
 
   return data;
