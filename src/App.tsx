@@ -96,6 +96,7 @@ import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
+import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 
 const App = () => {
@@ -849,6 +850,32 @@ const App = () => {
                         ]}
                       >
                         <ListarDescontos />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/descontos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <ListarDescontos />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/descontos/atribuicao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <AtribuirDescontos />
                       </ProtectedRoute>
                     }
                   />
