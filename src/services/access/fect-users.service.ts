@@ -13,6 +13,7 @@ export type User = {
   pessoaid: number | null;
   createdat: string | null;
   updatedat: string | null;
+  tipodocumentoid: number | null;
 
   numerodocumento: string | null;
   datadenascimento: string | null;
