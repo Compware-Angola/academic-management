@@ -1,24 +1,26 @@
 import { useQueryDocenteCursos } from "@/hooks/docentes/use-docentes-curso";
 import { FormCommandSelect } from "../FormCommandSelect";
+import { DocenteCursoProps } from "@/services/docentes/docente-cursos.service";
 
 interface DocenteCursoSelectProps {
-  docenteId?: number;
+  props: DocenteCursoProps;
   value: string;
   onChangeValue: (v: string) => void;
   labelMode?: "inside" | "outside";
 }
 
 export function DocenteCursoSelect({
-  docenteId,
+  props,
   value,
   onChangeValue,
   labelMode = "outside",
 }: DocenteCursoSelectProps) {
-  const { data: cursos = [], isLoading } = useQueryDocenteCursos(docenteId);
-
+  const { data: cursos = [], isLoading } = useQueryDocenteCursos(props);
+  const { anoLectivo, docenteId } = props;
+  const disabled = !docenteId || isLoading || !anoLectivo;
   return (
     <FormCommandSelect
-      disabled={!docenteId || isLoading}
+      disabled={disabled}
       value={value}
       label="Curso"
       labelMode={labelMode}

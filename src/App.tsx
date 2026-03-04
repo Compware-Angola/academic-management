@@ -300,7 +300,15 @@ const App = () => {
                   />
                   <Route
                     path="/docente/programa"
-                    element={<DocenteLancamentoProgramaUC />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
+                        ]}
+                      >
+                        <DocenteLancamentoProgramaUC />
+                      </ProtectedRoute>
+                    }
                   />
                   {/* <Route
                   path="/exame/lista-candidatos"

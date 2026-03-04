@@ -1,19 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  FileCheck,
-  Download,
-  Eye,
-  CheckCircle,
-  X,
-  MapPin,
-  Calendar,
-  CheckCircle2,
-  CircleX,
-} from "lucide-react";
+import { CheckCircle2, CircleX } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,

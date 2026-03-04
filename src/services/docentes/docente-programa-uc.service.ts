@@ -4,7 +4,7 @@ export type ListProgramaUCPayload = {
   anoLectivo: number;
   semestre: number;
   codigoCurso: number;
-  anoCurricular: number;
+  anoCurricular?: number;
   unidadeCurricular?: number;
   estado?: number;
   page?: number;

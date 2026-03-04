@@ -1,11 +1,10 @@
 import { useQueryDocenteCadeiras } from "@/hooks/docentes/use-docentes-cadeiras";
 import { FormCommandSelect } from "../FormCommandSelect";
+import { DocenteCadeirasPayload } from "@/services/docentes/docente-cadeiras.service";
 
 interface DocenteCadeiraSelectProps {
   disabled?: boolean;
-  docenteId?: number;
-  cursoId?: number;
-  classId?: number;
+  params: DocenteCadeirasPayload;
   value: string;
   onChangeValue: (v: string) => void;
   labelMode?: "inside" | "outside";
@@ -13,20 +12,14 @@ interface DocenteCadeiraSelectProps {
 }
 
 export function DocenteCadeiraSelect({
-  classId,
-  docenteId,
-  cursoId,
+  params,
   value,
   onChangeValue,
   disabled,
   loading,
   labelMode = "outside",
 }: DocenteCadeiraSelectProps) {
-  const { data: cadeiras = [], isLoading } = useQueryDocenteCadeiras(
-    docenteId,
-    cursoId,
-    classId,
-  );
+  const { data: cadeiras = [], isLoading } = useQueryDocenteCadeiras(params);
 
   return (
     <FormCommandSelect
