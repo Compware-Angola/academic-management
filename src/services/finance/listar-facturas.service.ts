@@ -161,3 +161,16 @@ export async function buscarFacturaService(
 
   return data;
 }
+
+export async function annulInvoiceService(
+  facturaId: number | string,
+): Promise<FacturaDetalhe> {
+ return  await axiosNestFinance.delete(`/invoices/${facturaId}`);
+}
+
+export async function reactivateInvoiceService(
+  facturaId: number | string,
+): Promise<FacturaDetalhe> {
+  const { data } = await axiosNestFinance.patch(`/invoices/reactivate/${facturaId}`);
+  return data;
+}

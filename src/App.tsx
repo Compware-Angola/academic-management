@@ -96,6 +96,8 @@ import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
+import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
+import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 
 const App = () => {
   return (
@@ -229,7 +231,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.HORARIOS_ELIMINADOS.sigla!,
+                          PermissionTypeDetails.LISTAR_HORARIOS_ELIMINADOS
+                            .sigla!,
                         ]}
                       >
                         <ScheduleListEliminated />
@@ -309,7 +312,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LANCAMENTO_NOTAS.sigla,
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
                         ]}
                       >
                         <LaunchNotes />
@@ -446,7 +449,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PERMISSAO_LANC_FORA_PRAZO
+                          PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO
                             .sigla!,
                         ]}
                       >
@@ -482,7 +485,16 @@ const App = () => {
                   />
                   <Route
                     path="marcacao-provas/marcacao"
-                    element={<AddMarkingAssessment />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS
+                            .sigla!,
+                        ]}
+                      >
+                        <AddMarkingAssessment />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/estudante/:matricula"
@@ -564,7 +576,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.HORARIOS_POR_UC.sigla!,
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC
+                            .sigla!,
                         ]}
                       >
                         <SchedulesByUC />
@@ -603,8 +616,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_HORARIOS
-                            .sigla!,
+                          PermissionTypeDetails
+                            .MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
                         ]}
                       >
                         <MovimentarEstudantes />
@@ -841,6 +854,32 @@ const App = () => {
                     }
                   />
 
+                  <Route
+                    path="/financas/descontos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <ListarDescontos />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/descontos/atribuicao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                        ]}
+                      >
+                        <AtribuirDescontos />
+                      </ProtectedRoute>
+                    }
+                  />
+
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />
                   <Route
@@ -866,6 +905,10 @@ const App = () => {
                         <ListarEstudanteFinalista />
                       </ProtectedRoute>
                     }
+                  />
+                  <Route
+                    path="/docente/validacao-uc"
+                    element={<ValidacaoPrograma />}
                   />
                 </Route>
               </Routes>

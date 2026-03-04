@@ -1,13 +1,7 @@
-import { can } from "@/auth/can";
-import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
+import { usePermission } from "@/auth/permission.helper";
 
-export const filterMenuByPermission = (items: any[]) => {
-  const { data: user, isError } = useCurrentUser("GA");
-  if (isError || !user) {
-    return [];
-  }
-
-  const userPermissions = user?.permissions || [];
+export const useFilterMenuByPermission = (items: any[]) => {
+  const { hasPermission } = usePermission();
 
   const filterItems = (menuItems: any[]): any[] => {
     return menuItems
@@ -16,10 +10,10 @@ export const filterMenuByPermission = (items: any[]) => {
         const filteredSubItems = item.items ? filterItems(item.items) : undefined;
 
         // Verifica se o item atual tem permissão
-        const hasPermission = !item.permission || can(userPermissions, item.permission);
+        const isAllowed = !item.permission || hasPermission(item.permission);
 
         // Retorna o item apenas se tiver permissão ou algum submenu visível
-        if (!hasPermission && (!filteredSubItems || filteredSubItems.length === 0)) {
+        if (!isAllowed && (!filteredSubItems || filteredSubItems.length === 0)) {
           return null;
         }
 
@@ -28,7 +22,7 @@ export const filterMenuByPermission = (items: any[]) => {
           items: filteredSubItems,
         };
       })
-      .filter(Boolean) as any[]; 
+      .filter(Boolean) as any[];
   };
 
   return filterItems(items);

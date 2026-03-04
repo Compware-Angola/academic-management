@@ -254,6 +254,10 @@ export const PermissionTypeDetails = {
     designacao: "Listagem de Solicitação de Suporte",
     sigla: "mga_su_lso",
   },
+   
+  DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
+
+REACTIVAR_FACTURA: { designacao: "Reactivar Factura", sigla: "maf_react_factura" },
 VALIDACAO_LANCAMENTO_PAUTA: {
   designacao: "Validação de lançamento de pauta",
   sigla: "valid_lanc_pauta",
@@ -1017,10 +1021,7 @@ INSCRICAO_POR_HORARIO: {
     designacao: "Docente lançamento do programa da UC",
     sigla: "doc_lanc_prog_uc",
   },
-  MARCACAO_PROVA: {
-  designacao: "Marcação de prova",
-  sigla: "marc_prova",
-},
+
 CONTROLE_NOTA: {
   designacao: "Controle de nota",
   sigla: "controle_nota",
@@ -1048,31 +1049,6 @@ CONTROLE_LANCAMENTO: {
   sigla: "controle_lancamento",
 },
 
-
-LANCAMENTO_NOTAS: {
-  designacao: "Lançamento de notas",
-  sigla: "lancamento_notas",
-},
-
-PERMISSAO_LANC_FORA_PRAZO: {
-  designacao: "Permissão para lançar notas fora do prazo",
-  sigla: "lanc_fora_prazo",
-},
-
-MOVIMENTAR_ESTUDANTES_HORARIOS: {
-  designacao: "Movimentar estudantes entre horários",
-  sigla: "mov_estud_horarios",
-},
-
-HORARIOS_ELIMINADOS: {
-  designacao: "Horários eliminados",
-  sigla: "horarios_eliminados",
-},
-
-HORARIOS_POR_UC: {
-  designacao: "Horários por unidade curricular",
-  sigla: "horarios_uc",
-},
 
 
 

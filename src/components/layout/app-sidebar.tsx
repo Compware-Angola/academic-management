@@ -21,20 +21,21 @@ import {
 } from "@/config/menuStructure";
 import { NavFinance } from "./nav-finance";
 import { NavAcademic } from "./nav-academic";
-import { filterMenuByPermission } from "@/util/menuFilter";
+
 import { NavHealp } from "./nav-healp";
 import { NavSuporte } from "./nav-suporte";
 import { NavDefenseTFC } from "./nav-defense-tfc";
 import { NavAssiduidade } from "./nav-assiduidade";
+import { useFilterMenuByPermission } from "@/util/menuFilter";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const mainItems = filterMenuByPermission(menuStructure?.items ?? []);
-  const academicItems = filterMenuByPermission(academicStructure?.items ?? []);
-  const financeItems = filterMenuByPermission(finaceStructure?.items ?? []);
-  const helpItems = filterMenuByPermission(healpStructure?.items ?? []);
-  const suporteItems = filterMenuByPermission(suporteStructure?.items ?? []);
-  const defenseTFCItems = filterMenuByPermission(defenseTFC?.items ?? []);
-const assiduidadeItems = filterMenuByPermission(assiduidade?.items ??[])
+  const mainItems = useFilterMenuByPermission(menuStructure?.items ?? []);
+  const academicItems = useFilterMenuByPermission(academicStructure?.items ?? []);
+  const financeItems = useFilterMenuByPermission(finaceStructure?.items ?? []);
+  const helpItems = useFilterMenuByPermission(healpStructure?.items ?? []);
+  const suporteItems = useFilterMenuByPermission(suporteStructure?.items ?? []);
+  const defenseTFCItems = useFilterMenuByPermission(defenseTFC?.items ?? []);
+const assiduidadeItems = useFilterMenuByPermission(assiduidade?.items ??[])
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
