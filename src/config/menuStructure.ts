@@ -689,6 +689,7 @@ export const assiduidade: MenuStructure = {
       items: [
       
         { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas" },
+        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral" },
         { title: "Parâmetros", url: "/sumario/parametros" },
       ],
       permission: []

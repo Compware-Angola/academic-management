@@ -145,7 +145,7 @@ export default function AulasAgendadas() {
             toast.error("O sumário não pode estar vazio.");
             return;
         }
-        console.log(sumarioId);
+   
         
         if (sumarioId) {
             mutationUpdateSumario.mutate({
