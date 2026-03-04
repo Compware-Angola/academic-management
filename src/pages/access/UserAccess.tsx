@@ -34,7 +34,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
-  Lock, // Novo ícone
+  Lock,
+  User as UserIcon, // Novo ícone
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -42,8 +43,9 @@ import { useUsers, useUsersNoPagination } from "@/hooks/acess/use-query-users";
 import { User } from "@/services/access/fect-users.service";
 import { UserPermissionsModal } from "./components/UserPermissionsModal";
 // Nova modal para edição
+import { PasswordEditModal } from "./components/UserEditPassword";
 import { UserEditModal } from "./components/UserEditModal";
-
+type UserActionType = "password" | "permissions" | "profile" | null;
 export default function UserAccess() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,9 +53,12 @@ export default function UserAccess() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
   const navigate = useNavigate();
-  // Novo estado para o utilizador a editar
-  const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
+  const [typeToEdit, setTypeToEdit] = useState<UserActionType>(null);
+  const handleEditUser = (user: User, type: UserActionType) => {
+    setSelectedUser(user);
+    setTypeToEdit(type);
+  };
   // Passa os parâmetros diretamente para o hook
   const {
     data: usersResponse,
@@ -64,7 +69,7 @@ export default function UserAccess() {
     search: searchTerm || undefined,
     page: currentPage,
     limit: itemsPerPage,
-    ativo
+    ativo,
   });
 
   const { data: usersNoPagination } = useUsersNoPagination();
@@ -74,89 +79,89 @@ export default function UserAccess() {
   const total = usersResponse?.total ?? 0;
   const totalPages = usersResponse?.totalPages ?? 1;
 
-  
   const pdfData = useMemo(() => {
-  if (!users.length) return null;
+    if (!users.length) return null;
 
-  return {
-    filtros: [
-      ativo === undefined
-        ? "Estado: Todos"
-        : ativo
-        ? "Estado: Ativos"
-        : "Estado: Inativos",
-      searchTerm && `Pesquisa: ${searchTerm}`,
-    ]
-      .filter(Boolean)
-      .join(" | "),
+    return {
+      filtros: [
+        ativo === undefined
+          ? "Estado: Todos"
+          : ativo
+            ? "Estado: Ativos"
+            : "Estado: Inativos",
+        searchTerm && `Pesquisa: ${searchTerm}`,
+      ]
+        .filter(Boolean)
+        .join(" | "),
 
-    total,
+      total,
 
-    rows: users.map((u: User) => ({
-      codigo: u.codigo,
-      nome: u.nome,
-      username: u.username,
-      email: u.email || "N/A",
-      telefone1: u.telefone1 || "N/A",
-      telefone2: u.telefone2 || "N/A",
-    })),
-  };
-}, [users, total, ativo, searchTerm]);
+      rows: users.map((u: User) => ({
+        codigo: u.codigo,
+        nome: u.nome,
+        username: u.username,
+        email: u.email || "N/A",
+        telefone1: u.telefone1 || "N/A",
+        telefone2: u.telefone2 || "N/A",
+      })),
+    };
+  }, [users, total, ativo, searchTerm]);
 
-
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Acessos por Utilizador"
-    subtitle="Listagem de utilizadores do sistema"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros },
-      { title: "Resumo", content: [`Total de utilizadores: ${pdfData.total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "codigo", label: "Código", width: "8%" },
-        { key: "nome", label: "Nome", width: "22%" },
-        { key: "username", label: "Username", width: "15%" },
-        { key: "email", label: "Email", width: "20%" },
-        { key: "telefone1", label: "Telefone", width: "15%" },
-        { key: "telefone2", label: "Telefone (2)", width: "15%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#1e40af",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
-
-const excelProps = pdfData
-  ? {
-      documentTitle: "Acessos por Utilizador",
-      subtitle: "Listagem de utilizadores do sistema",
-      infoSections: [
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Acessos por Utilizador"
+      subtitle="Listagem de utilizadores do sistema"
+      infoSections={[
         { title: "Filtros Aplicados", content: pdfData.filtros },
-        { title: "Resumo", content: [`Total de utilizadores: ${pdfData.total}`] },
-      ],
-      mainTable: {
+        {
+          title: "Resumo",
+          content: [`Total de utilizadores: ${pdfData.total}`],
+        },
+      ]}
+      mainTable={{
         headers: [
-          { key: "codigo", label: "Código", width: 10 },
-          { key: "nome", label: "Nome", width: 30 },
-          { key: "username", label: "Username", width: 20 },
-          { key: "email", label: "Email", width: 30 },
-          { key: "telefone1", label: "Telefone", width: 20 },
-          { key: "telefone2", label: "Telefone (2)", width: 20 },
+          { key: "codigo", label: "Código", width: "8%" },
+          { key: "nome", label: "Nome", width: "22%" },
+          { key: "username", label: "Username", width: "15%" },
+          { key: "email", label: "Email", width: "20%" },
+          { key: "telefone1", label: "Telefone", width: "15%" },
+          { key: "telefone2", label: "Telefone (2)", width: "15%" },
         ],
         rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#1e40af",
-    }
-  : null;
+        headerBackground: "#1e40af",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Acessos por Utilizador",
+        subtitle: "Listagem de utilizadores do sistema",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          {
+            title: "Resumo",
+            content: [`Total de utilizadores: ${pdfData.total}`],
+          },
+        ],
+        mainTable: {
+          headers: [
+            { key: "codigo", label: "Código", width: 10 },
+            { key: "nome", label: "Nome", width: 30 },
+            { key: "username", label: "Username", width: 20 },
+            { key: "email", label: "Email", width: 30 },
+            { key: "telefone1", label: "Telefone", width: 20 },
+            { key: "telefone2", label: "Telefone (2)", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#1e40af",
+      }
+    : null;
 
-  const baseFileName = `Utilizadores_${new Date()
-  .toISOString()
-  .slice(0, 10)}`;
-
+  const baseFileName = `Utilizadores_${new Date().toISOString().slice(0, 10)}`;
 
   // Atualiza página ao mudar itens por página
   const handleItemsPerPageChange = (value: string) => {
@@ -173,70 +178,67 @@ const excelProps = pdfData
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      
 
-  <div className="flex items-center justify-between flex-wrap gap-3">
-  {/* Breadcrumb */}
-  <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-    <Link to="/" className="hover:text-foreground">
-      Início
-    </Link>
-    <span>/</span>
-    <span className="text-foreground">Acessos por utilizador</span>
-  </nav>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Link to="/" className="hover:text-foreground">
+            Início
+          </Link>
+          <span>/</span>
+          <span className="text-foreground">Acessos por utilizador</span>
+        </nav>
 
-  {/* Exportações */}
-  {pdfData && excelProps && (
-    <div className="flex gap-2">
-      {pdfContent && (
-        <PDFActions
-          document={pdfContent}
-          fileName={`${baseFileName}.pdf`}
-          showDownload
-          showPrint
-        />
-      )}
+        {/* Exportações */}
+        {pdfData && excelProps && (
+          <div className="flex gap-2">
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`${baseFileName}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
 
-      <ExcelActions
-        excelProps={excelProps}
-        fileName={`${baseFileName}.xlsx`}
-        showDownload
-      />
-    </div>
-  )}
-</div>
-
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-  <div>
-    <h1 className="text-3xl font-bold tracking-tight">
-      Acessos por utilizador
-    </h1>
-    <p className="text-muted-foreground mt-1">
-      Gestão de permissões por utilizador
-    </p>
-  </div>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Acessos por utilizador
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Gestão de permissões por utilizador
+          </p>
+        </div>
 
-  <div className="flex flex-wrap gap-2">
-    <Button onClick={() => navigate("/acessos/criar-utilizador")}>
-      <Plus className="mr-2 h-4 w-4" />
-      Criar Utilizador
-    </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={() => navigate("/acessos/criar-utilizador")}>
+            <Plus className="mr-2 h-4 w-4" />
+            Criar Utilizador
+          </Button>
 
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={() => refetch()}
-      disabled={isLoading}
-    >
-      <RefreshCw
-        className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-      />
-      Atualizar
-    </Button>
-    </div>
-</div>
-
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Atualizar
+          </Button>
+        </div>
+      </div>
 
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
@@ -363,24 +365,37 @@ const excelProps = pdfData
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          {/* Botão Editar */}
                           <Button
                             variant="outline"
-                            size="sm"
-                            onClick={() => setUserToEdit(user)}
+                            size="icon"
+                            aria-label="Editar Perfil"
+                            title="Editar Perfil"
+                            className="cursor-pointer"
+                            onClick={() => handleEditUser(user, "profile")}
                           >
-                            <Lock className="h-4 w-4 mr-1.5" />
-                            Editar Senha
+                            <UserIcon className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            aria-label="Editar Senha"
+                            title="Editar Senha"
+                            className="cursor-pointer"
+                            onClick={() => handleEditUser(user, "password")}
+                          >
+                            <Lock className="h-4 w-4" />
                           </Button>
 
                           {/* Botão Permissões */}
                           <Button
+                            aria-label="Gerenciar Permissões"
+                            title="Gerenciar Permissões"
                             variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedUser(user)}
+                            size="icon"
+                            className="cursor-pointer"
+                            onClick={() => handleEditUser(user, "permissions")}
                           >
-                            <Shield className="h-4 w-4 mr-1" />
-                            Permissões
+                            <Shield className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -394,7 +409,9 @@ const excelProps = pdfData
           {/* Paginação */}
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Mostrando {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, total)} de {total} utilizadores
+              Mostrando {(currentPage - 1) * itemsPerPage + 1}–
+              {Math.min(currentPage * itemsPerPage, total)} de {total}{" "}
+              utilizadores
             </div>
 
             <div className="flex items-center gap-2">
@@ -425,7 +442,7 @@ const excelProps = pdfData
       )}
 
       {/* Modal de permissões */}
-      {selectedUser && (
+      {typeToEdit === "permissions" && selectedUser && (
         <UserPermissionsModal
           user={selectedUser}
           open={!!selectedUser}
@@ -434,15 +451,28 @@ const excelProps = pdfData
       )}
 
       {/* Nova Modal de edição */}
-      {userToEdit && (
-        <UserEditModal
-          user={userToEdit}
-          open={!!userToEdit}
-          onOpenChange={(open) => !open && setUserToEdit(null)}
-          // Opcional: callback após sucesso para refetch
+      {typeToEdit === "password" && selectedUser && (
+        <PasswordEditModal
+          user={selectedUser}
+          open={!!selectedUser}
+          onOpenChange={(open) => !open && setSelectedUser(null)}
           onSuccess={() => {
             refetch();
-            setUserToEdit(null);
+            setSelectedUser(null);
+            setTypeToEdit(null);
+          }}
+        />
+      )}
+
+      {typeToEdit === "profile" && selectedUser && (
+        <UserEditModal
+          user={selectedUser}
+          open={!!selectedUser}
+          onOpenChange={(open) => !open && setSelectedUser(null)}
+          onSuccess={() => {
+            refetch();
+            setSelectedUser(null);
+            setTypeToEdit(null);
           }}
         />
       )}

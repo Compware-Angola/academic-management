@@ -138,7 +138,7 @@ export const menuStructure: MenuStructure = {
 
     // ----------------------------------------------------
     // DOCENTE
-   
+
     {
       title: "Docente",
       url: "/docente",
@@ -146,14 +146,20 @@ export const menuStructure: MenuStructure = {
       items: [
         // { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
-        { title: "Lançamento do programa da UC", url: "/docente/programa", permission: [PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla] },
+        {
+          title: "Lançamento do programa da UC",
+          url: "/docente/programa",
+          permission: [
+            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+          ],
+        },
         // { title: "Validação do programa", url: "/docente/validacao" },
         // { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
 
       permission: ["adm", "rootAdmin", "dct"],
     },
- /* ----------------------------------------------------
+    /* ----------------------------------------------------
     // ----------------------------------------------------
     // TFC
     // ----------------------------------------------------
@@ -359,10 +365,19 @@ export const menuStructure: MenuStructure = {
       icon: FileCheck,
       permission: [],
       items: [
-        { title: "Controle", url: "/marcacao-provas/controle", permission: [PermissionTypeDetails.CONTROLE_NOTA.sigla] },
-        { title: "Marcação", url: "/marcacao-provas/marcacao", permission: [PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS.sigla] },
+        {
+          title: "Controle",
+          url: "/marcacao-provas/controle",
+          permission: [PermissionTypeDetails.CONTROLE_NOTA.sigla],
+        },
+        {
+          title: "Marcação",
+          url: "/marcacao-provas/marcacao",
+          permission: [
+            PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS.sigla,
+          ],
+        },
       ],
-
     },
   ],
 };
@@ -534,9 +549,14 @@ export const finaceStructure: MenuStructure = {
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
         {
-            title: "Isenção de serviço",
-            url: "/financas/isencao-servico",
-            permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla]
+          title: "Pagamentos",
+          url: "/financas/listar-pagamentos",
+          permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
+        },
+        {
+          title: "Isenção de serviço",
+          url: "/financas/isencao-servico",
+          permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla],
         },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
@@ -642,7 +662,7 @@ export const defenseTFC: MenuStructure = {
       ],
     },
   ],
-};  
+};
 export const assiduidade: MenuStructure = {
   items: [
     {
@@ -654,7 +674,10 @@ export const assiduidade: MenuStructure = {
         {
           title: "Marcação de Assuidade",
           url: "/assiduidade/marcacao",
-          permission: [PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla],
+          permission: [
+            PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
+            PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+          ],
         },
       ],
     },
@@ -672,10 +695,24 @@ export const academicStructure: MenuStructure = {
           url: "/calendario/atividades",
           permission: [PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla],
         },
-        { title: "Prazos", url: "/calendario/prazos", permission: [PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla] },
+        {
+          title: "Prazos",
+          url: "/calendario/prazos",
+          permission: [PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla],
+        },
         //{ title: "Calendário de provas", url: "/calendario/provas" },
-        { title: "Dias isentos", url: "/calendario/dias-isentos", permission: [PermissionTypeDetails.CRIAR_DIAS_ISENTOS.sigla] },
-        { title: "Parâmetros", url: "/calendario/parametros", permission: [PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla] },
+        {
+          title: "Dias isentos",
+          url: "/calendario/dias-isentos",
+          permission: [PermissionTypeDetails.CRIAR_DIAS_ISENTOS.sigla],
+        },
+        {
+          title: "Parâmetros",
+          url: "/calendario/parametros",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+          ],
+        },
         // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
@@ -726,18 +763,44 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/historico",
           permission: [PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!],
         },
-        { title: "Lançamento de pauta", url: "/avaliacoes/pauta",permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla] },
-        { title: "Lançamento de notas", url: "/avaliacoes/notas",permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla] },
-        { title: "Lista de presença", url: "/avaliacoes/presenca",permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla] },
+        {
+          title: "Lançamento de pauta",
+          url: "/avaliacoes/pauta",
+          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+        },
+        {
+          title: "Lançamento de notas",
+          url: "/avaliacoes/notas",
+          permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
+        },
+        {
+          title: "Lista de presença",
+          url: "/avaliacoes/presenca",
+          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+        },
 
-        { title: "Pauta geral", url: "/avaliacoes/pauta-geral",permission: [PermissionTypeDetails.PAUTA_GERAL.sigla] },
+        {
+          title: "Pauta geral",
+          url: "/avaliacoes/pauta-geral",
+          permission: [PermissionTypeDetails.PAUTA_GERAL.sigla],
+        },
         {
           title: "Pauta por UC",
           url: "/avaliacoes/pauta-uc",
           permission: [PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!],
         },
-        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao",permission: [PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO.sigla] },
-        { title: "Validação", url: "/avaliacoes/validacao",permission: [PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla] },
+        {
+          title: "Permissão fora do prazo",
+          url: "/avaliacoes/permissao",
+          permission: [
+            PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO.sigla,
+          ],
+        },
+        {
+          title: "Validação",
+          url: "/avaliacoes/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla],
+        },
         {
           title: "Visualizar notas",
           url: "/avaliacoes/visualizar",
@@ -780,7 +843,9 @@ export const academicStructure: MenuStructure = {
         {
           title: "Movimentar estudantes",
           url: "/horarios/movimentar/estudantes",
-          permission: [PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla],
+          permission: [
+            PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
+          ],
         },
         {
           title: "Permissão editar",
@@ -806,13 +871,21 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/listar",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Eliminados", url: "/horarios/eliminados",permission: [PermissionTypeDetails. LISTAR_HORARIOS_ELIMINADOS.sigla] },
+        {
+          title: "Eliminados",
+          url: "/horarios/eliminados",
+          permission: [PermissionTypeDetails.LISTAR_HORARIOS_ELIMINADOS.sigla],
+        },
         {
           title: "Horários por sala",
           url: "/horarios/sala",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Horários por UC", url: "/horarios/uc",permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC.sigla] },
+        {
+          title: "Horários por UC",
+          url: "/horarios/uc",
+          permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC.sigla],
+        },
         {
           title: "Parâmetros",
           url: "/horarios/parametros",
