@@ -62,6 +62,8 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 
 import { useQueryProvaAssiduidade } from "@/hooks/assiduidade/use-fetch-assiduidade-prova";
 import { useMutationMarcarProva } from "@/hooks/assiduidade/use-mutation-marcar-assiduidade-prova";
+import { PermissionTypeDetails } from "@/constants/permission.type";
+import { usePermission } from "@/auth/permission.helper";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -92,6 +94,7 @@ function EstadoBadge({ estado }: { estado: EstadoAssiduidade }) {
 
 export default function ProvaContent() {
   const { toast } = useToast();
+  const { hasPermission } = usePermission();
   const [selectedRegisto, setSelectedRegisto] = useState<ProvaAssiduidadeItem | null>(null);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
@@ -120,7 +123,7 @@ export default function ProvaContent() {
     page: 1,
     limit: 15,
   });
-  
+
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
     curso: filters.curso,
     semestre: filters.semestre,
@@ -148,8 +151,8 @@ export default function ProvaContent() {
 
 
 
-  
-   const totalPages = assiduidadeAula?.totalPages ?? 1;
+
+  const totalPages = assiduidadeAula?.totalPages ?? 1;
   const currentPage = assiduidadeAula?.page ?? 1;
 
   const handlePageChange = (newPage: number) => {
@@ -186,318 +189,318 @@ export default function ProvaContent() {
 
   return (
     <div className="space-y-6 pb-10">
-        {/* Filtros – mais campos */}
-          <div className="bg-card border rounded-lg p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Filtros</h3>
+      {/* Filtros – mais campos */}
+      <div className="bg-card border rounded-lg p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Filtros</h3>
 
-              <div className="flex items-center gap-3">
-                {/* Botão Mais/Menos filtros */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowMoreFilters(!showMoreFilters)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  {showMoreFilters ? (
-                    <>
-                      Menos filtros <ChevronUp className="ml-1 h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
-                      Mais filtros <ChevronDown className="ml-1 h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-
-                {/* Botão Limpar filtros - agora ao lado */}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setFilters({
-                    docente: "",
-                    anoLectivo: "",
-                    semestre: "",
-                    estado: "",
-                    dataInicio: "",
-                    dataFim: "",
-                    curso: "",
-                    anoCurricular: "all",
-                    unidadeCurricular: "",
-                    page: 1,
-                    limit: 10,
-                  })}
-                >
-                  Limpar filtros
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {/* Sempre visíveis */}
-              <div className="space-y-1.5">
-                <Label>Ano Letivo</Label>
-                <FormSelect
-                  disabled={isLoadingAcademicYear}
-                  value={filters.anoLectivo}
-                  onChange={(v) => setFilters({ ...filters, anoLectivo: v, page: 1 })}
-                  options={anosAcademicos ?? []}
-                  map={(a) => ({
-                    key: a.codigo,
-                    label: a.designacao,
-                    value: String(a.codigo),
-                  })}
-                  placeholder="Selecione o ano..."
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Estado</Label>
-                <FormSelect
-                  disabled={isLoadingStatusAgendamento}
-                  value={filters.estado ?? ""}
-                  onChange={(v) => {
-                    // Se for "", guarda como undefined ou "" (conforme o teu hook espera)
-                    const novoValor = v === "" ? "" : v;
-                    setFilters({ ...filters, estado: novoValor, page: 1 });
-                  }}
-                  options={[
-                    // Opção "Todos" sempre no topo
-                    { key: "todos", label: "Todos os estados", value: null },
-                    // ... as opções reais vindas da API
-                    ...(statusAgendamentos ?? []).map((s) => ({
-                      key: s.codigo,
-                      label: s.designacao,
-                      value: String(s.codigo),
-                    })),
-                  ]}
-                  map={(opt) => opt}  
-                  placeholder="Selecione o estado..."
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Semestre</Label>
-                <FormSelect
-                  value={filters.semestre}
-                  onChange={(v) => setFilters({ ...filters, semestre: v, page: 1 })}
-                  options={SEMESTRE}
-                  map={(s) => ({
-                    key: s.key,
-                    label: s.label,
-                    value: s.value,
-                  })}
-                  placeholder="Selecione o semestre..."
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Docente</Label>
-                <FormCommandSelect
-                  value={filters.docente}
-                  options={teachersData}
-                  map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-                  onChange={(codigo) => setFilters({ ...filters, docente: codigo, page: 1 })}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Data início</Label>
-                <Input
-                  type="date"
-                  value={filters.dataInicio ?? ""}
-                  onChange={(e) => setFilters({ ...filters, dataInicio: e.target.value, page: 1 })}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Data fim</Label>
-                <Input
-                  type="date"
-                  value={filters.dataFim ?? ""}
-                  onChange={(e) => setFilters({ ...filters, dataFim: e.target.value, page: 1 })}
-                />
-              </div>
-
-              {/* Filtros extras – aparecem na mesma grid, quebram linha automaticamente */}
-              {showMoreFilters && (
+          <div className="flex items-center gap-3">
+            {/* Botão Mais/Menos filtros */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMoreFilters(!showMoreFilters)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {showMoreFilters ? (
                 <>
-                  <div className="space-y-1.5">
-                    <Label>Curso</Label>
-                    <FormCommandSelect
-                      value={filters.curso}
-                      options={cursos}
-                      map={(c) => ({
-                        key: c.codigo.toString(),
-                        value: c.codigo.toString(),
-                        label: c.designacao,
-                      })}
-                      onChange={(v) =>
-                        setFilters({
-                          ...filters,
-                          curso: v,
-                          unidadeCurricular: "",
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label>Ano Curricular</Label>
-                    <Select
-                      value={filters.anoCurricular}
-                      onValueChange={(v) =>
-                        setFilters({
-                          ...filters,
-                          anoCurricular: v,
-                          unidadeCurricular: "",
-                        })
-                      }
-                      disabled={!filters.curso}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={filters.curso ? "Todos os anos" : "Selecione curso"}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todos os anos</SelectItem>
-                        {anosCurriculares.map((ac) => (
-                          <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
-                            {ac.designacao}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label>Unidade Curricular</Label>
-                    <FormCommandSelect
-                      value={filters.unidadeCurricular}
-                      options={unidadesCurriculares}
-                      map={(u) => ({
-                        key: u.pk.toString(),
-                        value: u.pk.toString(),
-                        label: u.descricao,
-                      })}
-                      placeholder={
-                        !filters.curso
-                          ? "Selecione curso"
-                          : !filters.semestre
-                            ? "Selecione semestre"
-                            : isLoadingUC
-                              ? "Carregando UCs..."
-                              : "Selecionar UC"
-                      }
-                      onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
-                    />
-                  </div>
+                  Menos filtros <ChevronUp className="ml-1 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Mais filtros <ChevronDown className="ml-1 h-4 w-4" />
                 </>
               )}
+            </Button>
+
+            {/* Botão Limpar filtros - agora ao lado */}
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setFilters({
+                docente: "",
+                anoLectivo: "",
+                semestre: "",
+                estado: "",
+                dataInicio: "",
+                dataFim: "",
+                curso: "",
+                anoCurricular: "all",
+                unidadeCurricular: "",
+                page: 1,
+                limit: 10,
+              })}
+            >
+              Limpar filtros
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {/* Sempre visíveis */}
+          <div className="space-y-1.5">
+            <Label>Ano Letivo</Label>
+            <FormSelect
+              disabled={isLoadingAcademicYear}
+              value={filters.anoLectivo}
+              onChange={(v) => setFilters({ ...filters, anoLectivo: v, page: 1 })}
+              options={anosAcademicos ?? []}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: String(a.codigo),
+              })}
+              placeholder="Selecione o ano..."
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Estado</Label>
+            <FormSelect
+              disabled={isLoadingStatusAgendamento}
+              value={filters.estado ?? ""}
+              onChange={(v) => {
+                // Se for "", guarda como undefined ou "" (conforme o teu hook espera)
+                const novoValor = v === "" ? "" : v;
+                setFilters({ ...filters, estado: novoValor, page: 1 });
+              }}
+              options={[
+                // Opção "Todos" sempre no topo
+                { key: "todos", label: "Todos os estados", value: null },
+                // ... as opções reais vindas da API
+                ...(statusAgendamentos ?? []).map((s) => ({
+                  key: s.codigo,
+                  label: s.designacao,
+                  value: String(s.codigo),
+                })),
+              ]}
+              map={(opt) => opt}
+              placeholder="Selecione o estado..."
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Semestre</Label>
+            <FormSelect
+              value={filters.semestre}
+              onChange={(v) => setFilters({ ...filters, semestre: v, page: 1 })}
+              options={SEMESTRE}
+              map={(s) => ({
+                key: s.key,
+                label: s.label,
+                value: s.value,
+              })}
+              placeholder="Selecione o semestre..."
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Docente</Label>
+            <FormCommandSelect
+              value={filters.docente}
+              options={teachersData}
+              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
+              onChange={(codigo) => setFilters({ ...filters, docente: codigo, page: 1 })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Data início</Label>
+            <Input
+              type="date"
+              value={filters.dataInicio ?? ""}
+              onChange={(e) => setFilters({ ...filters, dataInicio: e.target.value, page: 1 })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Data fim</Label>
+            <Input
+              type="date"
+              value={filters.dataFim ?? ""}
+              onChange={(e) => setFilters({ ...filters, dataFim: e.target.value, page: 1 })}
+            />
+          </div>
+
+          {/* Filtros extras – aparecem na mesma grid, quebram linha automaticamente */}
+          {showMoreFilters && (
+            <>
+              <div className="space-y-1.5">
+                <Label>Curso</Label>
+                <FormCommandSelect
+                  value={filters.curso}
+                  options={cursos}
+                  map={(c) => ({
+                    key: c.codigo.toString(),
+                    value: c.codigo.toString(),
+                    label: c.designacao,
+                  })}
+                  onChange={(v) =>
+                    setFilters({
+                      ...filters,
+                      curso: v,
+                      unidadeCurricular: "",
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Ano Curricular</Label>
+                <Select
+                  value={filters.anoCurricular}
+                  onValueChange={(v) =>
+                    setFilters({
+                      ...filters,
+                      anoCurricular: v,
+                      unidadeCurricular: "",
+                    })
+                  }
+                  disabled={!filters.curso}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={filters.curso ? "Todos os anos" : "Selecione curso"}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os anos</SelectItem>
+                    {anosCurriculares.map((ac) => (
+                      <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
+                        {ac.designacao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Unidade Curricular</Label>
+                <FormCommandSelect
+                  value={filters.unidadeCurricular}
+                  options={unidadesCurriculares}
+                  map={(u) => ({
+                    key: u.pk.toString(),
+                    value: u.pk.toString(),
+                    label: u.descricao,
+                  })}
+                  placeholder={
+                    !filters.curso
+                      ? "Selecione curso"
+                      : !filters.semestre
+                        ? "Selecione semestre"
+                        : isLoadingUC
+                          ? "Carregando UCs..."
+                          : "Selecionar UC"
+                  }
+                  onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Tabela + Paginação */}
+      {isLoadingAssiduidade ? (
+        <div className="space-y-3">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ) : !assiduidadeAula?.data?.length ? (
+        <div className="text-center py-16 bg-muted/40 border rounded-lg">
+          <p className="text-muted-foreground text-lg">Nenhum registo encontrado</p>
+          <p className="text-sm mt-2">Tente ajustar os filtros</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="bg-card border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-28">Código</TableHead>
+                    <TableHead>Docente</TableHead>
+                    <TableHead>Unidade Curricular</TableHead>
+                    <TableHead className="w-32">Data</TableHead>
+                    <TableHead>Hora Inicio</TableHead>
+                    <TableHead>Hora Fim</TableHead>
+                    <TableHead className="w-28">Estado</TableHead>
+                    <TableHead className="text-right w-44">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {assiduidadeAula?.data.map((r) => (
+                    <TableRow key={r.codigo} className="hover:bg-muted/50">
+                      <TableCell className="font-mono text-sm">{r.codigo}</TableCell>
+                      <TableCell className="font-medium">{r.docente_nome}</TableCell>
+                      <TableCell>{r.disciplina}</TableCell>
+                      <TableCell>{r.data_prova}</TableCell>
+
+                      <TableCell className="text-sm">{r.hora_prova}</TableCell>
+                      <TableCell className="text-sm">{r.hora_termino}</TableCell>
+                      <TableCell>
+                        <EstadoBadge estado={r.estado_agendamentoid as EstadoAssiduidade} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-3 text-xs"
+                            onClick={() => setSelectedRegisto(r)}
+                          >
+                            <Eye className="h-3.5 w-3.5 mr-1.5" />
+                            Ver
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </div>
 
-          {/* Tabela + Paginação */}
-          {isLoadingAssiduidade ? (
-            <div className="space-y-3">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : !assiduidadeAula?.data?.length ? (
-            <div className="text-center py-16 bg-muted/40 border rounded-lg">
-              <p className="text-muted-foreground text-lg">Nenhum registo encontrado</p>
-              <p className="text-sm mt-2">Tente ajustar os filtros</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="bg-card border rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-28">Código</TableHead>
-                        <TableHead>Docente</TableHead>
-                        <TableHead>Unidade Curricular</TableHead>
-                        <TableHead className="w-32">Data</TableHead>
-                        <TableHead>Hora Inicio</TableHead>
-                        <TableHead>Hora Fim</TableHead>
-                        <TableHead className="w-28">Estado</TableHead>
-                        <TableHead className="text-right w-44">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {assiduidadeAula?.data.map((r) => (
-                        <TableRow key={r.codigo} className="hover:bg-muted/50">
-                          <TableCell className="font-mono text-sm">{r.codigo}</TableCell>
-                          <TableCell className="font-medium">{r.docente_nome}</TableCell>
-                          <TableCell>{r.disciplina}</TableCell>
-                          <TableCell>{r.data_prova}</TableCell>
-                       
-                          <TableCell className="text-sm">{r.hora_prova}</TableCell>
-                          <TableCell className="text-sm">{r.hora_termino}</TableCell>
-                          <TableCell>
-                            <EstadoBadge estado={r.estado_agendamentoid as EstadoAssiduidade} />
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-3 text-xs"
-                                onClick={() => setSelectedRegisto(r)}
-                              >
-                                <Eye className="h-3.5 w-3.5 mr-1.5" />
-                                Ver
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+          {/* Paginação simples */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
               </div>
 
-              {/* Paginação simples */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                  <div className="text-sm text-muted-foreground">
-                    Página {currentPage} de {totalPages}
-                  </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={currentPage === 1}
-                      onClick={() => handlePageChange(currentPage - 1)}
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Anterior
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={currentPage === totalPages}
-                      onClick={() => handlePageChange(currentPage + 1)}
-                    >
-                      Próximo
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  Próximo
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
+        </div>
+      )}
 
       {/* Modal de detalhes + marcação */}
       <Dialog open={!!selectedRegisto} onOpenChange={(open) => !open && setSelectedRegisto(null)}>
         <DialogContent className="sm:max-w-lg!">
           <DialogHeader>
-            <DialogTitle>Detalhes da Aula</DialogTitle>
+            <DialogTitle>Detalhes da Prova</DialogTitle>
             <DialogDescription>Informações e alteração de estado</DialogDescription>
           </DialogHeader>
 
@@ -521,7 +524,7 @@ export default function ProvaContent() {
               <Separator />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-               
+
                 <div>
                   <p className="text-muted-foreground">Início</p>
                   <p className="font-medium">{selectedRegisto.hora_prova}</p>
@@ -530,11 +533,11 @@ export default function ProvaContent() {
                   <p className="text-muted-foreground">Fim</p>
                   <p className="font-medium">{selectedRegisto.hora_termino}</p>
                 </div>
-                   <div>
+                <div>
                   <p className="text-muted-foreground">Duração</p>
                   <p className="font-medium">{selectedRegisto.duracao_prova}</p>
                 </div>
-              
+
               </div>
 
               <Separator />
@@ -545,38 +548,45 @@ export default function ProvaContent() {
               </div>
 
               <Separator />
+              {
+                hasPermission(PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla) && (
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 border-emerald-600/40 hover:bg-emerald-50"
-                  disabled={selectedRegisto.estado_agendamentoid === 3}
-                  onClick={() => marcar(selectedRegisto.codigo, "presente")}
-                >
-                  <CheckCircle className="h-4 w-4 mr-2 text-emerald-600" />
-                  Presente
-                </Button>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-emerald-600/40 hover:bg-emerald-50"
+                      disabled={selectedRegisto.estado_agendamentoid === 3}
+                      onClick={() => marcar(selectedRegisto.codigo, "presente")}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2 text-emerald-600" />
+                      Presente
+                    </Button>
 
-                <Button
-                  variant="outline"
-                  className="flex-1 border-red-600/40 hover:bg-red-50"
-                  disabled={selectedRegisto.estado_agendamentoid === 2}
-                  onClick={() => marcar(selectedRegisto.codigo, "ausente")}
-                >
-                  <XCircle className="h-4 w-4 mr-2 text-red-600" />
-                  Ausente
-                </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-red-600/40 hover:bg-red-50"
+                      disabled={selectedRegisto.estado_agendamentoid === 2}
+                      onClick={() => marcar(selectedRegisto.codigo, "ausente")}
+                    >
+                      <XCircle className="h-4 w-4 mr-2 text-red-600" />
+                      Ausente
+                    </Button>
 
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  disabled={selectedRegisto.estado_agendamentoid === 1}
-                  onClick={() => marcar(selectedRegisto.codigo, "pendente")}
-                >
-                  <Clock className="h-4 w-4 mr-2 text-amber-600" />
-                  Pendente
-                </Button>
-              </div>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      disabled={selectedRegisto.estado_agendamentoid === 1}
+                      onClick={() => marcar(selectedRegisto.codigo, "pendente")}
+                    >
+                      <Clock className="h-4 w-4 mr-2 text-amber-600" />
+                      Pendente
+                    </Button>
+                  </div>
+
+
+                )}
+
+
             </div>
           )}
         </DialogContent>
