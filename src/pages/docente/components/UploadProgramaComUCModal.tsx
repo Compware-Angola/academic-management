@@ -48,9 +48,9 @@ export const UploadProgramaComUCModal = ({
   };
   const handleSubmit = async () => {
     const uploadResponse = await uploadMutation.mutateAsync(file!);
-    const pathFile = uploadResponse?.file?.path;
+    const fileName = uploadResponse?.file?.filename;
 
-    if (!pathFile) {
+    if (!fileName) {
       toast({
         title: "Erro ao fazer upload",
         description: "Não foi possível fazer upload do ficheiro.",
@@ -63,7 +63,7 @@ export const UploadProgramaComUCModal = ({
       semestre: parseFilter(payload.semestre),
       codigoCurso: parseFilter(payload.curso),
       docenteCode: docenteId,
-      ficheiroName: pathFile,
+      ficheiroName: fileName,
       gradeCurricularCode: parseFilter(payload.unidadeCurricular),
     };
     await createProgramaUC.mutateAsync(programaPayload, {

@@ -21,21 +21,16 @@ export async function uploadSingleFile(file: File): Promise<ResponseUpload> {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    }
+    },
   );
 
   return response.data;
 }
 
-export async function viewFile(
-  fileName: string
-): Promise<Blob> {
-  const response = await uploadApi.get<Blob>(
-    `/upload/${fileName}`,
-    {
-      responseType: "blob",
-    }
-  );
+export async function viewFile(fileName: string): Promise<Blob> {
+  const response = await uploadApi.get<Blob>(`/upload/${fileName}`, {
+    responseType: "blob",
+  });
 
   return response.data;
 }

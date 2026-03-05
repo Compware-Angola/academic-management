@@ -16,6 +16,7 @@ import {
 
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { P } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 
 export const menuStructure: MenuStructure = {
   items: [
@@ -154,7 +155,11 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
-        // { title: "Validação do programa", url: "/docente/validacao" },
+        {
+          title: "Validação do programa",
+          url: "/docente/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+        },
         // { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
 
@@ -585,23 +590,21 @@ export const healpStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
 
-        // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-        // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla],
         },
 
         {
           title: "Solicitações",
           url: "/controle-acesso/all-solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.LISTAR_SOLICITACOES.sigla],
         },
         {
           title: "Imagem De Abertura",
           url: "/comunicacao/avisos/imagem",
-          permission: [],
+          permission: [PermissionTypeDetails.IMAGEM_ABERTURA_PORTAL_ESTUDANTE.sigla],
         },
       ],
 
@@ -688,9 +691,9 @@ export const assiduidade: MenuStructure = {
       icon: FileText,
       items: [
       
-        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas" },
-        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral" },
-        { title: "Parâmetros", url: "/sumario/parametros" },
+        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas",permission: [ PermissionTypeDetails.AULAS_AGENDADAS.sigla] },
+        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral",permission: [ PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla] },
+        { title: "Parâmetros", url: "/sumario/parametros",permission: [ PermissionTypeDetails.SUMARIO_PARAMETROS.sigla] },
       ],
       permission: []
     }
