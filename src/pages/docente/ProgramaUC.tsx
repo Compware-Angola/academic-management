@@ -1,7 +1,5 @@
-import { FormSelect } from "@/components/common/FormSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
-import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,13 +19,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useMutationUpdateProgramaUCEstado } from "@/hooks/docentes/use-mutation-docente-programa-status";
 import { useQueryDocenteListProgramaUC } from "@/hooks/docentes/use-query-docente-programa-uc";
-import { useQueryProgramaUCEstado } from "@/hooks/docentes/use-query-docente-programa-uc-status";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
-import { Check, File, Loader2, Paperclip, X } from "lucide-react";
+import { File, Loader2, Paperclip, Trash2 } from "lucide-react";
 import { useId, useState } from "react";
 import {
   Breadcrumb,
@@ -42,17 +37,20 @@ import { DocenteCursoSelect } from "@/components/common/global-selects/DocenteCu
 import { DocenteCadeiraSelect } from "@/components/common/global-selects/DocenteCadeiraSelect";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
+import { useMutationUpdateProgramaUCVisibilidade } from "@/hooks/docentes/use-mutation-docente-programa-visilidade";
+import { DownloadFileButton } from "@/components/common/DownloadFile";
 
 export default function DocenteLancamentoProgramaUC() {
   const id = useId();
-  const { mutateAsync, isPending } = useMutationUpdateProgramaUCEstado();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
-  const { user } = useAuth();
   const { user: userData } = useAuth();
-  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } =
-    useQueryTeacherProfile(userData?.user?.pk_utilizador);
+  const { data: teacherInfoData } = useQueryTeacherProfile(
+    userData?.user?.pk_utilizador,
+  );
+  const { mutateAsync, isPending } = useMutationUpdateProgramaUCVisibilidade();
+
   const docenteId = teacherInfoData?.codigo_docente;
 
   const [filters, setFilters] = useState({
@@ -63,13 +61,7 @@ export default function DocenteLancamentoProgramaUC() {
     unidadeCurricular: "",
     estado: "",
   });
-  const defaultSelectItem = [
-    {
-      label: "Todos",
-      value: "all",
-      key: id,
-    },
-  ];
+
   const closeModal = () => {
     setIsOpenModal(false);
   };
@@ -106,6 +98,14 @@ export default function DocenteLancamentoProgramaUC() {
       }
 
       return newFilters;
+    });
+  };
+  const updateProgramaUCVisilidade = (programaId: number, status: number) => {
+    mutateAsync({
+      programaUcId: programaId,
+      payload: {
+        estado: status,
+      },
     });
   };
 
@@ -254,13 +254,23 @@ export default function DocenteLancamentoProgramaUC() {
 
                           <TableCell className="text-center flex space-x-2">
                             <div className="flex space-x-2">
-                              <Button
-                                variant="outline"
-                                className="bg-blue-500 text-white"
-                                size="icon"
-                              >
-                                <Paperclip />
-                              </Button>
+                              <DownloadFileButton path={item.arquivo} />
+                              {item.codigo_estado == 1 && (
+                                <Button
+                                  variant="outline"
+                                  className="bg-destructive text-white"
+                                  size="icon"
+                                  onClick={() =>
+                                    updateProgramaUCVisilidade(item.codigo, 0)
+                                  }
+                                >
+                                  {isPending ? (
+                                    <Loader2 className="animate-spin" />
+                                  ) : (
+                                    <Trash2 />
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
