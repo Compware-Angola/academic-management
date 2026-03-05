@@ -11,6 +11,7 @@ import {
   ListChecks,
   LibraryBig,
   GraduationCap,
+  FileText,
 } from "lucide-react";
 
 import { MenuStructure } from "./menu.types";
@@ -685,6 +686,18 @@ export const assiduidade: MenuStructure = {
         },
       ],
     },
+        {
+      title: "Sumário",
+      url: "/gestao-docentes",
+      icon: FileText,
+      items: [
+      
+        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas" },
+        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral" },
+        { title: "Parâmetros", url: "/sumario/parametros" },
+      ],
+      permission: []
+    }
   ],
 };
 export const academicStructure: MenuStructure = {
@@ -901,6 +914,8 @@ export const academicStructure: MenuStructure = {
 
       permission: [],
     },
+
+
     // ----------------------------------------------------
     // EXAME DE ACESSO
     // ----------------------------------------------------
