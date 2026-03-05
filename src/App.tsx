@@ -99,7 +99,7 @@ import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos"
 import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 import AulasAgendadas from "./pages/sumario/AulasAgendadas";
-
+import ParametrosSumario from "./pages/sumario/ParametrosSumario";
 
 const App = () => {
   return (
@@ -227,11 +227,14 @@ const App = () => {
                     path="horarios/inscricoes"
                     element={<SchedulesInscription />}
                   />
-                   <Route
+                  <Route
                     path="sumario/aulas-agendadas"
                     element={<AulasAgendadas />}
                   />
-                  
+                  <Route
+                    path="sumario/parametros"
+                    element={<ParametrosSumario />}
+                  />
                   <Route path="/horarios/listar" element={<ScheduleList />} />
                   <Route
                     path="/horarios/eliminados"
@@ -874,7 +877,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO
+                            .sigla!,
                         ]}
                       >
                         <ListarDescontos />
@@ -887,7 +891,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO
+                            .sigla!,
                         ]}
                       >
                         <AtribuirDescontos />
