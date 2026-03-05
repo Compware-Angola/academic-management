@@ -16,6 +16,7 @@ import {
 
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { P } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 
 export const menuStructure: MenuStructure = {
   items: [
@@ -589,23 +590,21 @@ export const healpStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
 
-        // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-        // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla],
         },
 
         {
           title: "Solicitações",
           url: "/controle-acesso/all-solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.LISTAR_SOLICITACOES.sigla],
         },
         {
           title: "Imagem De Abertura",
           url: "/comunicacao/avisos/imagem",
-          permission: [],
+          permission: [PermissionTypeDetails.IMAGEM_ABERTURA_PORTAL_ESTUDANTE.sigla],
         },
       ],
 
