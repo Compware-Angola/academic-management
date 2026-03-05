@@ -154,7 +154,11 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
-        // { title: "Validação do programa", url: "/docente/validacao" },
+        {
+          title: "Validação do programa",
+          url: "/docente/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+        },
         // { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
 
