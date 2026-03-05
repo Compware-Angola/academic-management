@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,65 +29,46 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-
-interface Parametro {
-  pk_parametro: number;
-  designacao: string;
-  descricao: string;
-  sigla: string;
-  args: { valor: number | boolean };
-}
-
-const dadosMock: Parametro[] = [
-  {
-    pk_parametro: 2,
-    designacao: "Permitir Validar Sumários Sem Marcação do Sumarista",
-    descricao: "",
-    sigla: "pvssms",
-    args: { valor: true },
-  },
-  {
-    pk_parametro: 1,
-    designacao: "Tamanho Mínimo do Sumário",
-    descricao: "",
-    sigla: "tms",
-    args: { valor: 7 },
-  },
-];
-
+import { useQuerySumarioParametros } from "@/hooks/sumario/use-query-sumario-parametros";
+import { ParametroItem } from "@/services/sumario/fetch-sumario-parametros.service";
+import { useMutationUpdateParametro } from "@/hooks/sumario/useMutationUpdateParametro";
 const ParametrosSumario = () => {
-  const [parametros, setParametros] = useState<Parametro[]>(dadosMock);
+  const { data, isLoading, isError } = useQuerySumarioParametros();
   const [pesquisa, setPesquisa] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [parametroEditando, setParametroEditando] = useState<Parametro | null>(
-    null,
-  );
+  const [parametroEditando, setParametroEditando] =
+    useState<ParametroItem | null>(null);
   const [editValorNumero, setEditValorNumero] = useState(0);
+  const mutation = useMutationUpdateParametro();
+  const parametros = data?.data || [];
 
-  // Lógica para atualizar booleanos diretamente na linha
-  const handleToggleBoolean = (pk: number, novoValor: boolean) => {
-    setParametros((prev) =>
-      prev.map((item) =>
-        item.pk_parametro === pk
-          ? { ...item, args: { valor: novoValor } }
-          : item,
-      ),
-    );
-    toast.success(
-      `Parâmetro ${novoValor ? "ativado" : "desativado"} com sucesso.`,
-    );
+  const dadosFiltrados = parametros.filter(
+    (p) =>
+      p.designacao?.toLowerCase().includes(pesquisa.toLowerCase()) ||
+      p.sigla?.toLowerCase().includes(pesquisa.toLowerCase()),
+  );
+  const handleUpdate = (id: number, novoValor: number | boolean) => {
+    mutation.mutate({
+      id,
+      payload: { args: { valor: novoValor } },
+    });
   };
 
-  const RenderEstadoVisual = (p: Parametro) => {
+  const guardarEdicao = () => {
+    if (parametroEditando) {
+      handleUpdate(parametroEditando.pk_parametro, editValorNumero);
+      setEditModalOpen(false);
+    }
+  };
+  const RenderEstadoVisual = (p: ParametroItem) => {
     const valor = p.args.valor;
     if (typeof valor === "boolean") {
       return (
         <div className="flex items-center justify-start py-2">
           <Switch
             checked={valor}
-            onCheckedChange={(checked) =>
-              handleToggleBoolean(p.pk_parametro, checked)
-            }
+            disabled={mutation.isPending}
+            onCheckedChange={(checked) => handleUpdate(p.pk_parametro, checked)}
           />
         </div>
       );
@@ -111,24 +93,32 @@ const ParametrosSumario = () => {
     );
   };
 
-  const abrirEdicao = (p: Parametro) => {
-    setParametroEditando(p);
-    setEditValorNumero(p.args.valor as number);
-    setEditModalOpen(true);
-  };
-
-  const guardarEdicao = () => {
-    if (!parametroEditando) return;
-    setParametros((prev) =>
-      prev.map((p) =>
-        p.pk_parametro === parametroEditando.pk_parametro
-          ? { ...p, args: { valor: editValorNumero } }
-          : p,
-      ),
-    );
-    setEditModalOpen(false);
-    toast.success("Valor atualizado com sucesso.");
-  };
+  const RenderSkeleton = () => (
+    <>
+      {[1, 2, 3].map((i) => (
+        <tr key={i} className="border-b last:border-b-0">
+          <td className="py-4 px-6">
+            <Skeleton className="h-4 w-8" />
+          </td>
+          <td className="py-4 px-6">
+            <Skeleton className="h-4 w-64" />
+          </td>
+          <td className="py-4 px-6">
+            <Skeleton className="h-4 w-16" />
+          </td>
+          <td className="py-4 px-6">
+            <Skeleton className="h-4 w-32" />
+          </td>
+          <td className="py-4 px-6">
+            <Skeleton className="h-10 w-10 rounded-full" />
+          </td>
+          <td className="py-4 px-6">
+            <Skeleton className="h-8 w-8 rounded-md" />
+          </td>
+        </tr>
+      ))}
+    </>
+  );
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -184,37 +174,50 @@ const ParametrosSumario = () => {
               </tr>
             </thead>
             <tbody>
-              {parametros.map((p) => (
-                <tr
-                  key={p.pk_parametro}
-                  className="border-b last:border-b-0 hover:bg-muted/40 transition-colors"
-                >
-                  <td className="py-4 px-6 text-muted-foreground">
-                    {p.pk_parametro}
-                  </td>
-                  <td className="py-4 px-6 text-foreground font-medium">
-                    {p.designacao}
-                  </td>
-                  <td className="py-4 px-6 text-foreground">{p.sigla}</td>
-                  <td className="py-4 px-6 text-muted-foreground italic">
-                    {p.descricao || "-"}
-                  </td>
-                  <td className="py-4 px-6">{RenderEstadoVisual(p)}</td>
-                  <td className="py-4 px-6 text-right">
-                    {/* Botão de edição aparece apenas para valores numéricos */}
-                    {typeof p.args.valor === "number" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                        onClick={() => abrirEdicao(p)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    )}
+              {isLoading ? (
+                <RenderSkeleton />
+              ) : isError ? (
+                <tr>
+                  <td colSpan={6} className="p-6 text-center text-red-500">
+                    Erro ao carregar dados.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                dadosFiltrados.map((p) => (
+                  <tr
+                    key={p.pk_parametro}
+                    className="border-b last:border-b-0 hover:bg-muted/40 transition-colors"
+                  >
+                    <td className="py-4 px-6 text-muted-foreground">
+                      {p.pk_parametro}
+                    </td>
+                    <td className="py-4 px-6 text-foreground font-medium">
+                      {p.designacao}
+                    </td>
+                    <td className="py-4 px-6 text-foreground">{p.sigla}</td>
+                    <td className="py-4 px-6 text-muted-foreground italic">
+                      {p.descricao || "-"}
+                    </td>
+                    <td className="py-4 px-6">{RenderEstadoVisual(p)}</td>
+                    <td className="py-4 px-6 text-right">
+                      {typeof p.args.valor === "number" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                          onClick={() => {
+                            setParametroEditando(p);
+                            setEditValorNumero(p.args.valor as number);
+                            setEditModalOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -234,7 +237,6 @@ const ParametrosSumario = () => {
                 {parametroEditando?.designacao}
               </p>
             </div>
-
             <div className="p-6 rounded-xl border bg-muted/20 space-y-6">
               <div className="flex justify-between items-center">
                 <Label className="text-sm font-medium">Valor Definido</Label>
@@ -255,8 +257,12 @@ const ParametrosSumario = () => {
             <Button variant="outline" onClick={() => setEditModalOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={guardarEdicao} className="px-8">
-              Confirmar
+            <Button
+              onClick={guardarEdicao}
+              disabled={mutation.isPending}
+              className="px-8 text-white"
+            >
+              {mutation.isPending ? "Salvando..." : "Confirmar"}
             </Button>
           </DialogFooter>
         </DialogContent>
