@@ -304,10 +304,23 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
+                          PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC
+                            .sigla,
                         ]}
                       >
                         <DocenteLancamentoProgramaUC />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/docente/validacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla,
+                        ]}
+                      >
+                        <ValidacaoPrograma />
                       </ProtectedRoute>
                     }
                   />
@@ -867,7 +880,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO
+                            .sigla!,
                         ]}
                       >
                         <ListarDescontos />
@@ -880,7 +894,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO
+                            .sigla!,
                         ]}
                       >
                         <AtribuirDescontos />

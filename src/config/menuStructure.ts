@@ -153,7 +153,11 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
-        // { title: "Validação do programa", url: "/docente/validacao" },
+        {
+          title: "Validação do programa",
+          url: "/docente/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+        },
         // { title: "Assiduidade", url: "/docente/assiduidade" },
       ],
 
@@ -491,11 +495,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/descontos",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-          {
-              title: "Atribuir Desconto",
-              url: "/financas/descontos/atribuicao",
-              permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
-          },
+        {
+          title: "Atribuir Desconto",
+          url: "/financas/descontos/atribuicao",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
         // {
         //   title: "Atribuição de Desconto",
         //   url: "/financas/descontos/atribuicao",
