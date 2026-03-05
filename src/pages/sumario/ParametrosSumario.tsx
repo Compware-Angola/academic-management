@@ -2,15 +2,7 @@ import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Pencil,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
-import { toast } from "sonner";
+import { Pencil, Search } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
