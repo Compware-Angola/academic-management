@@ -413,12 +413,12 @@ const baseFileName = `Negociacao_Divida_${new Date()
                     <TableHead>Estudante</TableHead>
                     <TableHead>Faculdade</TableHead>
                     <TableHead>Curso</TableHead>
-                    <TableHead>Nº Prestações</TableHead>
+                    <TableHead>Nº Prestações Meses</TableHead>
                     <TableHead>Mês inicial</TableHead>
                     <TableHead>Mês final</TableHead>
                     <TableHead>Valor Divida</TableHead>
                     <TableHead>1ª Prestações a pagar</TableHead>
-                    <TableHead>Valor da Prestações</TableHead>
+                   
                     <TableHead>Valor Restante</TableHead>
                     <TableHead>Acções</TableHead>
                   </TableRow>
@@ -443,9 +443,7 @@ const baseFileName = `Negociacao_Divida_${new Date()
                           {formatNumber(item.primeiro_valor_pagar)} kz
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <Badge>{formatNumber(item.valor_prestacao)} kz</Badge>
-                      </TableCell>
+                      
                       <TableCell>
                         <Badge> {formatNumber(item.valor_restante)} kz</Badge>
                       </TableCell>
