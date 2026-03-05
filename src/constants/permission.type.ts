@@ -256,6 +256,7 @@ export const PermissionTypeDetails = {
   },
    
   DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
+  AULAS_AGENDADAS: { designacao: "Aulas Agendadas", sigla: "mgh_aa" },
 
 REACTIVAR_FACTURA: { designacao: "Reactivar Factura", sigla: "maf_react_factura" },
 VALIDACAO_LANCAMENTO_PAUTA: {

@@ -692,8 +692,8 @@ export const assiduidade: MenuStructure = {
       icon: FileText,
       items: [
       
-        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas" },
-        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral" },
+        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas",permission: [ PermissionTypeDetails.AULAS_AGENDADAS.sigla] },
+        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral",permission: [ PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla] },
         { title: "Parâmetros", url: "/sumario/parametros" },
       ],
       permission: []
