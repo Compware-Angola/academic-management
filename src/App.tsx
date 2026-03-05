@@ -229,11 +229,27 @@ const App = () => {
                   />
                   <Route
                     path="sumario/aulas-agendadas"
-                    element={<AulasAgendadas />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.AULAS_AGENDADAS.sigla!,
+                        ]}
+                      >
+                        <AulasAgendadas />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="sumario/parametros"
-                    element={<ParametrosSumario />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.SUMARIO_PARAMETROS.sigla!,
+                        ]}
+                      >
+                        <ParametrosSumario />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route path="/horarios/listar" element={<ScheduleList />} />
                   <Route

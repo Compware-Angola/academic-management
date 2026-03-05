@@ -1051,6 +1051,12 @@ CONTROLE_LANCAMENTO: {
 },
 
 
+"SUMARIO_PARAMETROS":{
+  designacao: "Parâmetros do sumário",
+  sigla: "sumario_parametros",
+}
+
+
 
 
 } as const;
