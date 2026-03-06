@@ -28,7 +28,7 @@ import { useQueryDocenteListProgramaUC } from "@/hooks/docentes/use-query-docent
 import { useQueryProgramaUCEstado } from "@/hooks/docentes/use-query-docente-programa-uc-status";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
-import { Check, Loader2, Paperclip, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 
 import { useId, useState } from "react";
 

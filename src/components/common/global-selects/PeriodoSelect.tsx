@@ -1,23 +1,38 @@
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { FormSelect } from "../FormSelect";
+import { useId } from "react";
 
 interface PeriodoSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
   disabled?: boolean;
+  enabledDefaultSelectItem?: boolean;
 }
 const PeriodoSelect = ({
   onChangeValue,
+  enabledDefaultSelectItem,
   value,
   disabled,
 }: PeriodoSelectProps) => {
+  const id = useId();
   const { data: periodos, isLoading: isLoadingPeriodo } = useQueryPeriod();
+  const defaultSelectItem = enabledDefaultSelectItem
+    ? [
+        {
+          label: "Todos",
+          value: "all",
+          key: id,
+        },
+      ]
+    : undefined;
+
   return (
     <>
       <FormSelect
         disabled={isLoadingPeriodo || disabled}
         loading={isLoadingPeriodo}
-        label="Perido"
+        defaultSelectItem={defaultSelectItem}
+        label="Periodo"
         value={value}
         onChange={(v) => onChangeValue(v)}
         options={periodos ?? []}
