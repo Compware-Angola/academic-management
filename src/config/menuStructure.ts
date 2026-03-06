@@ -16,7 +16,6 @@ import {
 
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
-import { P } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 
 export const menuStructure: MenuStructure = {
   items: [
@@ -54,7 +53,7 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla,
           ],
         },
-        //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
+       
         {
           title: "Acessos (todos) + novos",
           url: "/acessos/todos",
@@ -559,6 +558,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/listar-pagamentos",
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
+          {
+          title: "Pagamentos TFC",
+          url: "/defesa-tfc/pagamentos",
+          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
+        },
         {
           title: "Isenção de serviço",
           url: "/financas/isencao-servico",
@@ -653,11 +657,7 @@ export const defenseTFC: MenuStructure = {
       url: "/defesa-tfc",
       icon: LibraryBig,
       items: [
-        {
-          title: "Pagamentos TFC",
-          url: "/defesa-tfc/pagamentos",
-          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
-        },
+      
         {
           title: "Estudantes Finalistas",
           url: "/defesa-tfc/estudantes",
