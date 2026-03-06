@@ -13,7 +13,6 @@ import {
   GraduationCap,
   FileText,
 } from "lucide-react";
-
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 
@@ -386,7 +385,6 @@ export const menuStructure: MenuStructure = {
     },
   ],
 };
-
 export const finaceStructure: MenuStructure = {
   items: [
     /* -------------------------------------------------------- */
@@ -580,7 +578,6 @@ export const finaceStructure: MenuStructure = {
     },
   ],
 };
-
 export const healpStructure: MenuStructure = {
   items: [
     {
@@ -694,6 +691,7 @@ export const assiduidade: MenuStructure = {
         { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas",permission: [ PermissionTypeDetails.AULAS_AGENDADAS.sigla] },
         { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral",permission: [ PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla] },
         { title: "Parâmetros", url: "/sumario/parametros",permission: [ PermissionTypeDetails.SUMARIO_PARAMETROS.sigla] },
+        {title:"Listar Sumários" , url: "/sumario/listar" },
       ],
       permission: []
     }

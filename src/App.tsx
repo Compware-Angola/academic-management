@@ -100,7 +100,8 @@ import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 import AulasAgendadas from "./pages/sumario/AulasAgendadas";
 import ParametrosSumario from "./pages/sumario/ParametrosSumario";
-import ControleGeral from "./pages/assiduidade/ControleGeral";
+import ControleGeral from "./pages/sumario/ControleGeral";
+import ListagemSumarios from "./pages/sumario/ListagemSumarios";
 
 const App = () => {
   return (
@@ -326,6 +327,11 @@ const App = () => {
                   path="/sumario/controle-geral"
                   element={<ControleGeral />}
                 /> 
+                  <Route
+                  path="/sumario/listar"
+                  element={<ListagemSumarios />}
+                /> 
+                
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}

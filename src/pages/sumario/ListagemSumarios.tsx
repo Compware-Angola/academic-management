@@ -304,7 +304,17 @@ export default function ListagemSumarios() {
                 <TableRow key={s.id}>
                   <TableCell className="font-medium">{s.id}</TableCell>
                   <TableCell>{s.unidadeCurricular}</TableCell>
-                  <TableCell className="max-w-[200px] truncate">{s.tema}</TableCell>
+                  <TableCell className="max-w-[200px]">
+                    <div className="truncate">{s.tema}</div>
+                    {s.tema.length > 30 && (
+                      <button
+                        className="text-xs text-primary hover:underline mt-0.5"
+                        onClick={(e) => { e.stopPropagation(); toast(s.tema, { description: s.unidadeCurricular }); }}
+                      >
+                        ver mais
+                      </button>
+                    )}
+                  </TableCell>
                   <TableCell>{s.docente}</TableCell>
                   <TableCell>{s.dataAula}</TableCell>
                   <TableCell>{s.horaInicio} - {s.horaFim}</TableCell>
