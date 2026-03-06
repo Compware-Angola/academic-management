@@ -13,7 +13,6 @@ import { ValidacaoProgramaComUC } from "./components/ValidacaoProgramaComUC";
 import { ValidacaoProgramaSemUC } from "./components/ValidacaoProgramaSemUC";
 
 const ValidacaoPrograma = () => {
-  const [estado, setEstado] = useState("all");
   const [activeTab, setActiveTab] = useState<"com-uc" | "sem-uc">("com-uc");
 
   return (

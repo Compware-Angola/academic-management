@@ -101,6 +101,7 @@ import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 import AulasAgendadas from "./pages/sumario/AulasAgendadas";
 import ParametrosSumario from "./pages/sumario/ParametrosSumario";
 import ControleGeral from "./pages/assiduidade/ControleGeral";
+import HorasVigilancia from "./pages/docente/HorasVigilancia";
 
 const App = () => {
   return (
@@ -131,8 +132,6 @@ const App = () => {
                     element={<RedefinirSenhaPrimeiroAcesso />}
                   />
                 </Route>
-
-
 
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
@@ -323,9 +322,9 @@ const App = () => {
                   />
 
                   <Route
-                  path="/sumario/controle-geral"
-                  element={<ControleGeral />}
-                /> 
+                    path="/sumario/controle-geral"
+                    element={<ControleGeral />}
+                  />
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}
@@ -960,9 +959,21 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route
+                  {/* <Route
                     path="/docente/validacao-uc"
                     element={<ValidacaoPrograma />}
+                  /> */}
+                  <Route
+                    path="/docente/vigilancia"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!,
+                        ]}
+                      >
+                        <HorasVigilancia />
+                      </ProtectedRoute>
+                    }
                   />
                 </Route>
               </Routes>
