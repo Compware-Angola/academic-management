@@ -571,12 +571,12 @@ const { toast } = useToast();
               </div>
                <Separator />
                             {
-                              hasPermission(PermissionTypeDetails.MARCAR_ASSIDUIDADE.sigla)  && (
+                              hasPermission(PermissionTypeDetails.SUMARIO_POR_VALIDAR.sigla)   && (
                                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                                   <Button
                                     variant="outline"
                                     className="flex-1 border-emerald-600/40 hover:bg-emerald-50"
-                                     disabled={selectedSumario.sumario_codigo === 4}
+                                     disabled={selectedSumario.sumario_estado === 4}
                                     onClick={() => marcar(selectedSumario.sumario_codigo, "aprovar")}
                                   >
                                     <CheckCircle className="h-4 w-4 mr-2 text-emerald-600" />
@@ -586,9 +586,9 @@ const { toast } = useToast();
                                   <Button
                                     variant="outline"
                                     className="flex-1 border-red-600/40 hover:bg-red-50"
-                                     disabled={selectedSumario.sumario_codigo === 5}
+                                     disabled={selectedSumario.sumario_estado === 5}
                                     onClick={() => marcar(selectedSumario.sumario_codigo, "rejeitar")}
-                                  >
+                                   >
                                     <XCircle className="h-4 w-4 mr-2 text-red-600" />
                                     Rejeitar
                                   </Button>
