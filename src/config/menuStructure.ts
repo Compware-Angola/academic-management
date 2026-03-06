@@ -692,14 +692,9 @@ export const assiduidade: MenuStructure = {
       url: "/gestao-docentes",
       icon: FileText,
       items: [
-<<<<<<< HEAD
+
       
-        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas",permission: [ PermissionTypeDetails.AULAS_AGENDADAS.sigla] },
-        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral",permission: [ PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla] },
-     
-        {title:"Listar Sumários" , url: "/sumario/listar" },
-           { title: "Parâmetros", url: "/sumario/parametros",permission: [ PermissionTypeDetails.SUMARIO_PARAMETROS.sigla] },
-=======
+      
         {
           title: "Aulas Agendadas",
           url: "/sumario/aulas-agendadas",
@@ -712,13 +707,13 @@ export const assiduidade: MenuStructure = {
             PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
           ],
         },
+         { title: "Listar Sumários", url: "/sumario/listar" },
         {
           title: "Parâmetros",
           url: "/sumario/parametros",
           permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
         },
-        { title: "Listar Sumários", url: "/sumario/listar" },
->>>>>>> e8ebddbee09b9e2cc21b3cc772286a65a63f5de5
+       
       ],
       permission: [],
     },
