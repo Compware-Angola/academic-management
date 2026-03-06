@@ -55,6 +55,7 @@ import { useQueryScheduleCreationPrompt } from "@/hooks/academiccalendar/use-que
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -62,12 +63,10 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
-  { key: "docente", label: "Docente" },
   { key: "tipoAula", label: "Tipo de Aula" },
   { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
@@ -108,7 +107,12 @@ export default function CreateSchedule() {
 
   // extrai só o código
   const activeAcademicYearId = activeAcademicYear?.codigo;
-
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      anoLetivo: activeAcademicYearId?.toString() || "",
+    }));
+  }, [activeAcademicYearId]);
   // busca o prazo usando o código encontrado
   const {
     data: scheduleCreationPrompt,
@@ -263,7 +267,6 @@ export default function CreateSchedule() {
       });
       return;
     }
-
     const payload: SaveHorarioPayload = {
       anoLectivo: Number(formData.anoLetivo),
       semestre: Number(formData.semestre),
@@ -272,11 +275,11 @@ export default function CreateSchedule() {
       unidadeCurricular: Number(formData.unidadeCurricular),
       modalidade: Number(formData.modalidade),
       aulas: aulasSemConflito,
-      apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
+      apenasPrimeiroAno: parseFilter(formData.apenasPrimeiroAno),
       capacidade: Number(formData.capacidade),
       designacao: formData.designacao,
       estadoHorario: 2,
-      docente: Number(formData.docente),
+      docente: parseFilter(formData.docente),
       tipoAula: Number(formData.tipoAula),
       sala: Number(formData.sala),
       turma: 0,
@@ -416,21 +419,18 @@ export default function CreateSchedule() {
 
           {/* CURSO */}
 
-            <CourseSelect
-                                
-                              
-                                value={formData.curso}
-                                onChangeValue={(v) => {
-                                  setFormData({
-                                    ...formData,
-                                    curso: v,
-                                    unidadeCurricular: "",
-                                    designacao: "",
-                                    classes: "",
-                                  })
-
-                                  }}
-                                    />
+          <CourseSelect
+            value={formData.curso}
+            onChangeValue={(v) => {
+              setFormData({
+                ...formData,
+                curso: v,
+                unidadeCurricular: "",
+                designacao: "",
+                classes: "",
+              });
+            }}
+          />
 
           <FormSelect
             label="Ano Curricular"
