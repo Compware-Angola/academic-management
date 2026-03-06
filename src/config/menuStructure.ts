@@ -53,7 +53,7 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla,
           ],
         },
-        //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
+       
         {
           title: "Acessos (todos) + novos",
           url: "/acessos/todos",
@@ -558,6 +558,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/listar-pagamentos",
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
+          {
+          title: "Pagamentos TFC",
+          url: "/defesa-tfc/pagamentos",
+          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
+        },
         {
           title: "Isenção de serviço",
           url: "/financas/isencao-servico",
@@ -589,23 +594,21 @@ export const healpStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
 
-        // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-        // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla],
         },
 
         {
           title: "Solicitações",
           url: "/controle-acesso/all-solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.LISTAR_SOLICITACOES.sigla],
         },
         {
           title: "Imagem De Abertura",
           url: "/comunicacao/avisos/imagem",
-          permission: [],
+          permission: [PermissionTypeDetails.IMAGEM_ABERTURA_PORTAL_ESTUDANTE.sigla],
         },
       ],
 
@@ -654,11 +657,7 @@ export const defenseTFC: MenuStructure = {
       url: "/defesa-tfc",
       icon: LibraryBig,
       items: [
-        {
-          title: "Pagamentos TFC",
-          url: "/defesa-tfc/pagamentos",
-          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
-        },
+      
         {
           title: "Estudantes Finalistas",
           url: "/defesa-tfc/estudantes",
@@ -692,9 +691,9 @@ export const assiduidade: MenuStructure = {
       icon: FileText,
       items: [
       
-        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas" },
-        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral" },
-        { title: "Parâmetros", url: "/sumario/parametros" },
+        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas",permission: [ PermissionTypeDetails.AULAS_AGENDADAS.sigla] },
+        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral",permission: [ PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla] },
+        { title: "Parâmetros", url: "/sumario/parametros",permission: [ PermissionTypeDetails.SUMARIO_PARAMETROS.sigla] },
       ],
       permission: []
     }

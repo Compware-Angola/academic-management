@@ -99,7 +99,8 @@ import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos"
 import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 import AulasAgendadas from "./pages/sumario/AulasAgendadas";
-
+import ParametrosSumario from "./pages/sumario/ParametrosSumario";
+import ControleGeral from "./pages/assiduidade/ControleGeral";
 
 const App = () => {
   return (
@@ -130,6 +131,8 @@ const App = () => {
                     element={<RedefinirSenhaPrimeiroAcesso />}
                   />
                 </Route>
+
+
 
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
@@ -227,11 +230,31 @@ const App = () => {
                     path="horarios/inscricoes"
                     element={<SchedulesInscription />}
                   />
-                   <Route
+                  <Route
                     path="sumario/aulas-agendadas"
-                    element={<AulasAgendadas />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.AULAS_AGENDADAS.sigla!,
+                        ]}
+                      >
+                        <AulasAgendadas />
+                      </ProtectedRoute>
+                    }
                   />
-                  
+
+                  <Route
+                    path="sumario/parametros"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.SUMARIO_PARAMETROS.sigla!,
+                        ]}
+                      >
+                        <ParametrosSumario />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/horarios/listar" element={<ScheduleList />} />
                   <Route
                     path="/horarios/eliminados"
@@ -298,10 +321,11 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route
-                  path="/inscricoes/matriculados"
-                  element={<EnrolledList />}
-                /> */}
+
+                  <Route
+                  path="/sumario/controle-geral"
+                  element={<ControleGeral />}
+                /> 
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}
