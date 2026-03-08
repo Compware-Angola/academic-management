@@ -101,6 +101,7 @@ import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 import AulasAgendadas from "./pages/sumario/AulasAgendadas";
 import ParametrosSumario from "./pages/sumario/ParametrosSumario";
 import ControleGeral from "./pages/assiduidade/ControleGeral";
+import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
 
 const App = () => {
   return (
@@ -131,8 +132,6 @@ const App = () => {
                     element={<RedefinirSenhaPrimeiroAcesso />}
                   />
                 </Route>
-
-
 
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
@@ -323,9 +322,9 @@ const App = () => {
                   />
 
                   <Route
-                  path="/sumario/controle-geral"
-                  element={<ControleGeral />}
-                /> 
+                    path="/sumario/controle-geral"
+                    element={<ControleGeral />}
+                  />
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}
@@ -354,6 +353,11 @@ const App = () => {
                         <ValidacaoPrograma />
                       </ProtectedRoute>
                     }
+                  />
+
+                  <Route
+                    path="/docente/assiduidade"
+                    element={<AssiduidadeDocente />}
                   />
                   {/* <Route
                   path="/exame/lista-candidatos"
