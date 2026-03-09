@@ -364,7 +364,15 @@ const App = () => {
 
                   <Route
                     path="/docente/assiduidade"
-                    element={<AssiduidadeDocente />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla,
+                        ]}
+                      >
+                        <AssiduidadeDocente />
+                      </ProtectedRoute>
+                    }
                   />
                   {/* <Route
                   path="/exame/lista-candidatos"
