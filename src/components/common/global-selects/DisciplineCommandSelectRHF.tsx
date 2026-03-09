@@ -31,7 +31,7 @@ export function DisciplineCommandSelectRHF<TForm>({
     <FormCommandSelect
       label={label}
       labelMode={labelMode}
-      value={field.value ? String(field.value) : undefined} // ✅ NORMALIZA
+      value={field.value ? String(field.value) : undefined} 
       disabled={isLoadingDisciplines}
       isLoading={isLoadingDisciplines}
        width="full"
@@ -41,7 +41,7 @@ export function DisciplineCommandSelectRHF<TForm>({
         value: c.codigo.toString(),
         label: c.desginacao,
       })}
-      onChange={(value) => field.onChange(value)} // value já é string
+      onChange={(value) => field.onChange(value)} 
     />
   );
 }

@@ -40,6 +40,7 @@ import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 import { useQuerySchedulesByClassRoom } from "@/hooks/horario/use-query-schedule-by-room";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 export default function SchedulesByRoom() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -168,22 +169,19 @@ export default function SchedulesByRoom() {
             </div>
             {/* Sala */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Sala</label>
-              <Select
+              <FormCommandSelect
+                label="Sala"
                 value={filters.sala}
-                onValueChange={(v) => setFilters({ ...filters, sala: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={"Selecionar sala"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {salas.map((sala) => (
-                    <SelectItem key={sala.pk} value={String(sala.pk)}>
-                      {sala.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                width="full"
+                placeholder="Selecionar sala"
+                options={salas}
+                map={(sala) => ({
+                  key: sala.pk,
+                  value: sala.pk,
+                  label: sala.descricao,
+                })}
+                onChange={(v) => setFilters({ ...filters, sala: v })}
+              />
             </div>
 
             {/* Semestre */}
