@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
@@ -25,7 +24,6 @@ import { useQueryModalidade } from "@/hooks/modalidade/use-query-modalidade";
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
-import { FormMultiSelect } from "@/components/common/FormMultiSelect";
 import { useMutationCreateCalendar } from "@/hooks/avaliacao/use-mutation-create-calendar";
 import { CreateCalendarPayload } from "@/services/avaliacao/create-calendario-prova";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
@@ -34,10 +32,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { DocenteSelect } from "@/components/common/global-selects/DocenteSelect";
-import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
 import { useQueryExamCreationPrompt } from "@/hooks/academiccalendar/use-query-exam-creation-prompt";
 import { calcularDuracao } from "@/util/calcular-duracao";
+import { DocenteVigilanteSelect } from "@/components/common/global-selects/DocenteVigitantesSelect";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -106,14 +103,14 @@ export default function AddMarkingAssessmentModal({
     });
   const { data: markingResponse, isLoading: loadingMarking } =
     useQueryMarkingAssessment({
-      anoLectivo: Number(filters.anoLetivo),
-      semestre: Number(filters.semestre),
+      anoLectivo: parseFilter(filters.anoLetivo),
+      semestre: parseFilter(filters.semestre),
       periodo: parseFilter(filters.periodo),
-      curso: Number(filters.curso),
-      prazoId: Number(filters.prazoId),
+      curso: parseFilter(filters.curso),
+      prazoId: parseFilter(filters.prazoId),
       tipoHorario: 2,
       anoCurricular: parseFilter(filters.anoCurricular),
-      unidadeCurricular: Number(filters.unidadeCurricular),
+      unidadeCurricular: parseFilter(filters.unidadeCurricular),
       page: 1,
       limit: 100,
     });
@@ -218,7 +215,9 @@ export default function AddMarkingAssessmentModal({
       tipoCandidatura: parseFilter(filters.tipoCandidatura),
       semestre: parseFilter(filters.semestre),
       vigilantes: teacher.map((t) => {
-        const docente = docentes.find((d) => d.codigo.toString() === t);
+        const docente = docentes.find(
+          (d) => d.codigo_utilizador.toString() === t,
+        );
         return {
           codigoUtilizador: Number(t),
           desc: docente?.nome ?? "",
@@ -481,7 +480,7 @@ export default function AddMarkingAssessmentModal({
               })}
             />
 
-            <DocenteSelect
+            <DocenteVigilanteSelect
               values={teacher}
               label="Vigilante"
               onChange={handleVigilantesChange}

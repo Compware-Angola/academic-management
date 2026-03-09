@@ -60,6 +60,11 @@ const getStatusPagamentoBadge = (status: string) => {
       return <Badge>{status}</Badge>;
   }
 };
+type SearchByType =
+  | "codigoMatricula"
+  | "nome"
+  | "n_operacao_bancaria"
+  | "n_operacao_bancaria2";
 
 export default function ListarPagamentos() {
   const [limit, setLimit] = useState(25);
@@ -72,22 +77,42 @@ export default function ListarPagamentos() {
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
 
-  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
-    "codigoMatricula",
-  );
+  const [searchBy, setSearchBy] = useState<SearchByType>("codigoMatricula");
+  const [searchByApplied, setSearchByApplied] =
+    useState<SearchByType>("codigoMatricula");
   const [searchApplied, setSearchApplied] = useState("codigoMatricula");
 
   const [searchTerm, setSearchTerm] = useState("");
+
+  const searchFieldMap: Record<SearchByType, string> = {
+    codigoMatricula: "codigoMatricula",
+    nome: "nome",
+    n_operacao_bancaria: "n_operacao_bancaria",
+    n_operacao_bancaria2: "n_operacao_bancaria2",
+  };
+  const searchOptions = [
+    { id: "codigoMatricula", label: "Código da Matrícula" },
+    { id: "n_operacao_bancaria", label: "Número de Operacão bancária" },
+    { id: "n_operacao_bancaria2", label: "Número de Operacão bancária 2" },
+    { id: "nome", label: "Nome do Aluno" },
+  ];
+  const searchParams = searchApplied
+    ? {
+        [searchFieldMap[searchByApplied]]:
+          searchByApplied === "codigoMatricula"
+            ? parseFilter(searchApplied)
+            : searchApplied,
+      }
+    : {};
   const placeholders: Record<string, string> = {
     codigoMatricula: "Pesquisar por código da matrícula...",
     nome: "Nome do Aluno.",
+    n_operacao_bancaria: "Pesquisar por número de operação bancária ",
+    n_operacao_bancaria2: "Pesquisar por segundo número de operação bancária ",
   };
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const searchOptions = [
-    { id: "codigoMatricula", label: "Código da Matrícula" },
-    { id: "nome", label: "Nome do Aluno" },
-  ];
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -100,9 +125,7 @@ export default function ListarPagamentos() {
     anoLectivo: parseFilter(filtersApplied.anoLectivo),
     codigoFactura: parseFilter(filtersApplied.factura),
     estado: parseFilter(filtersApplied.estado),
-    codigoMatricula:
-      searchBy === "codigoMatricula" ? parseFilter(searchApplied) : undefined,
-    nome: searchBy === "nome" ? searchApplied : undefined,
+    ...searchParams,
     page,
     limit,
   });
@@ -168,7 +191,6 @@ export default function ListarPagamentos() {
                 value={searchBy}
                 onChange={(v) => {
                   setSearchBy(v as "codigoMatricula" | "nome");
-                  setSearchTerm("");
                   setPage(1);
                 }}
                 options={searchOptions}
@@ -233,6 +255,7 @@ export default function ListarPagamentos() {
                 onClick={() => {
                   setFiltersApplied(filters);
                   setSearchApplied(searchTerm);
+                  setSearchByApplied(searchBy);
                   refetch();
                 }}
               >

@@ -99,8 +99,13 @@ import ControleAssiduidade from "./pages/assiduidade/ControleAssiduidade";
 import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
 import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
-import ControleGeralPorDocente from "./pages/assiduidade";
-import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteContent";
+import AulasAgendadas from "./pages/sumario/AulasAgendadas";
+import ParametrosSumario from "./pages/sumario/ParametrosSumario";
+import ControleGeral from "./pages/sumario/ControleGeral";
+import ListagemSumarios from "./pages/sumario/ListagemSumarios";
+import HorasVigilancia from "./pages/docente/HorasVigilancia";
+import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
+import ListarOrientadores from "./pages/defesa-tfc/ListarOrientadores";
 
 const App = () => {
   return (
@@ -228,6 +233,31 @@ const App = () => {
                     path="horarios/inscricoes"
                     element={<SchedulesInscription />}
                   />
+                  <Route
+                    path="sumario/aulas-agendadas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.AULAS_AGENDADAS.sigla!,
+                        ]}
+                      >
+                        <AulasAgendadas />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="sumario/parametros"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.SUMARIO_PARAMETROS.sigla!,
+                        ]}
+                      >
+                        <ParametrosSumario />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="/horarios/listar" element={<ScheduleList />} />
                   <Route
                     path="/horarios/eliminados"
@@ -296,42 +326,55 @@ const App = () => {
                   />
 
                   <Route
-                    path="/assiduidade/controle" 
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
-                        ]}
-                      >
-                        <ControleAssiduidade />
-                      </ProtectedRoute>
-                    }
+                    path="/sumario/controle-geral"
+                    element={<ControleGeral />}
                   />
-
                   <Route
-                    path="/assiduidade/controle-geral-por-docente" 
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla
-                        ]}
-                      >
-                        <ControleGeralPorDocente />
-                      </ProtectedRoute>
-                    }
+                    path="/sumario/listar"
+                    element={<ListagemSumarios />}
                   />
 
-                  {/* <Route
-                  path="/inscricoes/matriculados"
-                  element={<EnrolledList />}
-                /> */}
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}
                   />
                   <Route
                     path="/docente/programa"
-                    element={<DocenteLancamentoProgramaUC />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC
+                            .sigla,
+                        ]}
+                      >
+                        <DocenteLancamentoProgramaUC />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/docente/validacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla,
+                        ]}
+                      >
+                        <ValidacaoPrograma />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/docente/assiduidade"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla,
+                        ]}
+                      >
+                        <AssiduidadeDocente />
+                      </ProtectedRoute>
+                    }
                   />
                   {/* <Route
                   path="/exame/lista-candidatos"
@@ -906,7 +949,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO
+                            .sigla!,
                         ]}
                       >
                         <ListarDescontos />
@@ -919,7 +963,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla!,
+                          PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO
+                            .sigla!,
                         ]}
                       >
                         <AtribuirDescontos />
@@ -954,8 +999,32 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/defesa-tfc/orientadores"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFESA.sigla!,
+                        ]}
+                      >
+                        <ListarOrientadores />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* <Route
                     path="/docente/validacao-uc"
                     element={<ValidacaoPrograma />}
+                  /> */}
+                  <Route
+                    path="/docente/vigilancia"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!,
+                        ]}
+                      >
+                        <HorasVigilancia />
+                      </ProtectedRoute>
+                    }
                   />
                 </Route>
               </Routes>

@@ -48,6 +48,7 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-query-departamento-uc";
 import { CreateUcModal } from "./components/CreateUcModal";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 interface UnidadeCurricular {
   id: number;
@@ -163,26 +164,30 @@ export default function UcDepartmentManagement() {
       />
 
       <FilterBar>
-        <FormSelect
-          disabled={isLoadingDepartamento}
-          loading={isLoadingDepartamento}
-          label="Departamento"
+
+        <FormCommandSelect
           value={formData.departamento}
-          onChange={(v) => setFormData({ ...formData, departamento: v })}
-          options={departamento}
-          map={(a) => ({
-            key: a.codigo,
-            label: a.designacao,
-            value: a.codigo,
+          label="Departamento"
+          options={cursos}
+          map={(c) => ({
+            key: c.codigo.toString(),
+            value: c.codigo.toString(),
+            label: c.designacao,
           })}
+          onChange={(v) =>
+            setFormData({
+              ...formData,
+              departamento: v
+            })
+          }
         />
 
-        
-          <CourseSelect
-            value={formData.curso}
-            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
-          />
-        
+
+        <CourseSelect
+          value={formData.curso}
+          onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+        />
+
         <FormSelect
           label="Ano Curricular"
           value={formData.classes}

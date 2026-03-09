@@ -11,7 +11,7 @@ export const useQuerySchedulesByClassRoom = (
   filters: GetSchedulesByClassRoomPayload,
   options?: {
     enabled?: boolean; // permite sobrescrever o enabled automático
-  }
+  },
 ) => {
   const {
     anoLectivo,
@@ -29,7 +29,7 @@ export const useQuerySchedulesByClassRoom = (
   const enabled =
     typeof options?.enabled === "boolean"
       ? options.enabled
-      : !!anoLectivo && !!semestre && !!periodo && !!curso && !!sala;
+      : !!anoLectivo && !!sala;
 
   return useQuery<GetSchedulesByClassRoomResponse>({
     queryKey: [

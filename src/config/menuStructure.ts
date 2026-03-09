@@ -11,8 +11,8 @@ import {
   ListChecks,
   LibraryBig,
   GraduationCap,
+  FileText,
 } from "lucide-react";
-
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 
@@ -52,7 +52,7 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla,
           ],
         },
-        //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
+
         {
           title: "Acessos (todos) + novos",
           url: "/acessos/todos",
@@ -146,8 +146,17 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
+<<<<<<< HEAD
          { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
+=======
+        // { title: "Calendário de aulas", url: "/docente/calendario" },
+        {
+          title: "Horas de vigilância",
+          url: "/docente/vigilancia",
+          permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
+        },
+>>>>>>> c12fae88cd8a4937dc2d2df0c63201537c4f6918
         {
           title: "Lançamento do programa da UC",
           url: "/docente/programa",
@@ -155,8 +164,12 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
-        // { title: "Validação do programa", url: "/docente/validacao" },
-        // { title: "Assiduidade", url: "/docente/assiduidade" },
+        {
+          title: "Validação do programa",
+          url: "/docente/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+        },
+        { title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
       ],
 
       permission: ["adm", "rootAdmin", "dct"],
@@ -383,7 +396,6 @@ export const menuStructure: MenuStructure = {
     },
   ],
 };
-
 export const finaceStructure: MenuStructure = {
   items: [
     /* -------------------------------------------------------- */
@@ -493,11 +505,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/descontos",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-          {
-              title: "Atribuir Desconto",
-              url: "/financas/descontos/atribuicao",
-              permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
-          },
+        {
+          title: "Atribuir Desconto",
+          url: "/financas/descontos/atribuicao",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
         // {
         //   title: "Atribuição de Desconto",
         //   url: "/financas/descontos/atribuicao",
@@ -556,6 +568,11 @@ export const finaceStructure: MenuStructure = {
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
         {
+          title: "Pagamentos TFC",
+          url: "/defesa-tfc/pagamentos",
+          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
+        },
+        {
           title: "Isenção de serviço",
           url: "/financas/isencao-servico",
           permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla],
@@ -572,7 +589,6 @@ export const finaceStructure: MenuStructure = {
     },
   ],
 };
-
 export const healpStructure: MenuStructure = {
   items: [
     {
@@ -586,23 +602,23 @@ export const healpStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
 
-        // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-        // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla],
         },
 
         {
           title: "Solicitações",
           url: "/controle-acesso/all-solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.LISTAR_SOLICITACOES.sigla],
         },
         {
           title: "Imagem De Abertura",
           url: "/comunicacao/avisos/imagem",
-          permission: [],
+          permission: [
+            PermissionTypeDetails.IMAGEM_ABERTURA_PORTAL_ESTUDANTE.sigla,
+          ],
         },
       ],
 
@@ -652,15 +668,15 @@ export const defenseTFC: MenuStructure = {
       icon: LibraryBig,
       items: [
         {
-          title: "Pagamentos TFC",
-          url: "/defesa-tfc/pagamentos",
-          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
-        },
-        {
           title: "Estudantes Finalistas",
           url: "/defesa-tfc/estudantes",
           permission: [PermissionTypeDetails.DEFESA.sigla],
         },
+        {
+          title: "Orientadores",
+          url: "/defesa-tfc/orientadores",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        }
       ],
     },
   ],
@@ -697,6 +713,36 @@ export const assiduidade: MenuStructure = {
           ],
         },
       ],
+    },
+    {
+      title: "Sumário",
+      url: "/gestao-docentes",
+      icon: FileText,
+      items: [
+
+      
+      
+        {
+          title: "Aulas Agendadas",
+          url: "/sumario/aulas-agendadas",
+          permission: [PermissionTypeDetails.AULAS_AGENDADAS.sigla],
+        },
+        {
+          title: "Controle Geral de Sumário & Assiduidade",
+          url: "/sumario/controle-geral",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
+          ],
+        },
+         { title: "Listar Sumários", url: "/sumario/listar" },
+        {
+          title: "Parâmetros",
+          url: "/sumario/parametros",
+          permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
+        },
+       
+      ],
+      permission: [],
     },
   ],
 };
@@ -914,6 +960,7 @@ export const academicStructure: MenuStructure = {
 
       permission: [],
     },
+
     // ----------------------------------------------------
     // EXAME DE ACESSO
     // ----------------------------------------------------

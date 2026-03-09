@@ -79,7 +79,7 @@ export function UserEditModal({
         genero: user.genero?.toString() ?? "",
         estadocivil: user.estadocivil?.toString() ?? "",
         nacionalidade: user.nacionalidade?.toString() ?? "",
-        tipoDocumentoId: user.numerodocumento?.toString() ?? "",
+        tipoDocumentoId: user.tipodocumentoid?.toString() ?? "",
       };
 
       setFormData(data);

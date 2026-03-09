@@ -1,3 +1,4 @@
+import { DownloadFileButton } from "@/components/common/DownloadFile";
 import { FormSelect } from "@/components/common/FormSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
@@ -27,7 +28,8 @@ import { useQueryDocenteListProgramaUC } from "@/hooks/docentes/use-query-docent
 import { useQueryProgramaUCEstado } from "@/hooks/docentes/use-query-docente-programa-uc-status";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
-import { Check, Loader2, Paperclip, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
+
 import { useId, useState } from "react";
 
 const ValidacaoProgramaComUC = () => {
@@ -231,13 +233,7 @@ const ValidacaoProgramaComUC = () => {
 
                         <TableCell className="text-center flex space-x-2">
                           <div className="flex space-x-2">
-                            <Button
-                              variant="outline"
-                              className="bg-blue-500 text-white"
-                              size="icon"
-                            >
-                              <Paperclip />
-                            </Button>
+                            <DownloadFileButton path={item.arquivo} />
                           </div>
                           {item.codigo_estado == 1 && (
                             <>

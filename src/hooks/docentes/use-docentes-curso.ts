@@ -1,13 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { getDocenteCursosService, CursoItem } from "@/services/docentes/docente-cursos.service";
+import {
+  getDocenteCursosService,
+  CursoItem,
+  DocenteCursoProps,
+} from "@/services/docentes/docente-cursos.service";
 
-export function useQueryDocenteCursos(docenteId?: number) {
+export function useQueryDocenteCursos(props: DocenteCursoProps) {
+  const { anoLectivo, docenteId } = props;
   return useQuery<CursoItem[]>({
-    queryKey: ["docente-cursos", docenteId],
+    queryKey: ["docente-cursos", docenteId, anoLectivo],
     queryFn: async () => {
-      const response = await getDocenteCursosService(docenteId as number);
+      const response = await getDocenteCursosService(props);
       return response.data;
     },
-    enabled: !!docenteId,
+    enabled: !!docenteId && !!anoLectivo,
   });
 }
