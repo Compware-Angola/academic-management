@@ -166,10 +166,10 @@ export const menuStructure: MenuStructure = {
           url: "/docente/validacao",
           permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
         },
-        { title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
+        //{ title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
       ],
 
-      permission: ["adm", "rootAdmin", "dct"],
+      permission: [],
     },
     /* ----------------------------------------------------
     // ----------------------------------------------------
