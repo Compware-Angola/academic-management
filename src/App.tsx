@@ -106,6 +106,8 @@ import ListagemSumarios from "./pages/sumario/ListagemSumarios";
 import HorasVigilancia from "./pages/docente/HorasVigilancia";
 import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
 import ListarOrientadores from "./pages/defesa-tfc/ListarOrientadores";
+import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteContent";
+import ControleGeralPorDocente from "./pages/assiduidade";
 
 const App = () => {
   return (
@@ -321,6 +323,32 @@ const App = () => {
                         ]}
                       >
                         <MarcarAssiduidade />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/assiduidade/controle"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                        ]}
+                      >
+                        <ControleAssiduidade />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/assiduidade/docente"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                        ]}
+                      >
+                        <ControleGeralPorDocente />
                       </ProtectedRoute>
                     }
                   />

@@ -146,17 +146,14 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
-<<<<<<< HEAD
          { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
-=======
         // { title: "Calendário de aulas", url: "/docente/calendario" },
         {
           title: "Horas de vigilância",
           url: "/docente/vigilancia",
           permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
         },
->>>>>>> c12fae88cd8a4937dc2d2df0c63201537c4f6918
         {
           title: "Lançamento do programa da UC",
           url: "/docente/programa",
@@ -707,7 +704,7 @@ export const assiduidade: MenuStructure = {
         },
         {
           title: "Controle Geral de Assuidade por Docente",
-          url: "/assiduidade/controle-geral-por-docente",
+          url: "/assiduidade/docente",
           permission: [
             PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla
           ],
