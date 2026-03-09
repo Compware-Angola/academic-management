@@ -103,6 +103,7 @@ import ParametrosSumario from "./pages/sumario/ParametrosSumario";
 import ControleGeral from "./pages/sumario/ControleGeral";
 import ListagemSumarios from "./pages/sumario/ListagemSumarios";
 import HorasVigilancia from "./pages/docente/HorasVigilancia";
+import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
 
 const App = () => {
   return (
@@ -357,6 +358,19 @@ const App = () => {
                         ]}
                       >
                         <ValidacaoPrograma />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/docente/assiduidade"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla,
+                        ]}
+                      >
+                        <AssiduidadeDocente />
                       </ProtectedRoute>
                     }
                   />

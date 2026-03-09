@@ -162,7 +162,7 @@ export const menuStructure: MenuStructure = {
           url: "/docente/validacao",
           permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
         },
-        // { title: "Assiduidade", url: "/docente/assiduidade" },
+        { title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
       ],
 
       permission: ["adm", "rootAdmin", "dct"],
@@ -692,6 +692,9 @@ export const assiduidade: MenuStructure = {
       url: "/gestao-docentes",
       icon: FileText,
       items: [
+
+      
+      
         {
           title: "Aulas Agendadas",
           url: "/sumario/aulas-agendadas",
@@ -704,12 +707,13 @@ export const assiduidade: MenuStructure = {
             PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
           ],
         },
+         { title: "Listar Sumários", url: "/sumario/listar" },
         {
           title: "Parâmetros",
           url: "/sumario/parametros",
           permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
         },
-        { title: "Listar Sumários", url: "/sumario/listar" },
+       
       ],
       permission: [],
     },
