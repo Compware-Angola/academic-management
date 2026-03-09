@@ -90,21 +90,7 @@ export const menuStructure: MenuStructure = {
       permission: [],
     },
 
-    {
-      title: "Assiduidade",
-      url: "/assiduidade",
-      items: [
-        { title: "Controle de assiduidade", url: "/assiduidade/controle" },
-        //{ title: "Assiduidade por docente", url: "/assiduidade/docente" },
-        //{ title: "Assiduidade + sumário", url: "/assiduidade/sumario" },
-        //{ title: "Assiduidade aulas de campo", url: "/assiduidade/campo" },
-        //{ title: "Marcar assiduidade", url: "/assiduidade/marcar" },
-        //{ title: "Marcar assiduidade prova", url: "/assiduidade/prova" },
-      ],
-
-      permission: [PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla],
-    },
-
+    
     // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
@@ -160,7 +146,7 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
-        // { title: "Calendário de aulas", url: "/docente/calendario" },
+         { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
         {
           title: "Lançamento do programa da UC",
@@ -693,6 +679,21 @@ export const assiduidade: MenuStructure = {
           permission: [
             PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
             PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+          ],
+        },
+        {
+          title: "Controle de Assuidade",
+          url: "/assiduidade/controle",
+          permission: [
+            PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
+            PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
+          ],
+        },
+        {
+          title: "Controle Geral de Assuidade por Docente",
+          url: "/assiduidade/controle-geral-por-docente",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla
           ],
         },
       ],

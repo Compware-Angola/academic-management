@@ -1,7 +1,6 @@
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
-
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useState } from "react";
@@ -29,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search } from "lucide-react";
+import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { FormSelect } from "@/components/common/FormSelect";
@@ -38,7 +37,31 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryStateLesson } from "@/hooks/use-fetch-state-lesson";
 import { useQueryControleAssiduidade } from "@/hooks/assiduidade/use-fetch-controle-assiduidade";
+import { Label } from "recharts";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
+function SummaryCard({
+  title,
+  value,
+  className = "",
+  valueClassName = "",
+}: {
+  title: string;
+  value: number;
+  className?: string;
+  valueClassName?: string;
+}) {
+  return (
+    <Card className={className}>
+      <CardContent className="p-4">
+        <div className="text-sm text-muted-foreground">{title}</div>
+        <div className={`text-2xl font-bold mt-1 ${valueClassName}`}>
+          {value}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ControleAssiduidade() {
   const { data: anosAcademicos, isLoading: loadingAno } =
@@ -62,6 +85,7 @@ export default function ControleAssiduidade() {
     setFilters((prev) => ({
       ...prev,
       [key]: value,
+      ...(key !== "page" ? { page: 1 } : {}),
     }));
   };
 
@@ -85,76 +109,97 @@ export default function ControleAssiduidade() {
     });
 
   const aulas = response?.data ?? [];
-  
-const total = response?.total ?? 0;
-const totalPages = Math.ceil(total / filters.limit);
-const exportRows = aulas.map((item: any) => ({
-  data: new Date(item.data_aula).toLocaleDateString(),
-  horario: `${item.hora_inicio} - ${item.hora_fim}`,
-  curso: item.curso,
-  unidade_curricular: item.unidade_curricular,
-  docente: item.docente,
-}));
+  const resumo = response?.resumo ?? {
+    marcacoesPendentes: 0,
+    presencasMarcadas: 0,
+    faltasMarcadas: 0,
+  };
 
-const pdfContent =
-  exportRows.length > 0 ? (
-    <GenericPDFDocument
-      documentTitle="Controle de Assiduidade"
-      subtitle="Relatório de aulas por docente"
-      infoSections={[
-        {
-          title: "Filtros Aplicados",
-          content: `
+  const total = response?.total ?? 0;
+  const totalPages = Math.ceil(total / filters.limit);
+
+  const exportRows = aulas.map((item: any) => ({
+    data: new Date(item.data_aula).toLocaleDateString(),
+    horario: `${item.hora_inicio} - ${item.hora_fim}`,
+    curso: item.curso,
+    unidade_curricular: item.unidade_curricular,
+    tempo: item.ordem_tempo,
+    docente: item.docente,
+    estado: item.estado_agendamento_designacao || "—",
+  }));
+
+  const pdfContent =
+    exportRows.length > 0 ? (
+      <GenericPDFDocument
+        documentTitle="Controle de Assiduidade"
+        subtitle="Relatório de aulas por docente"
+        infoSections={[
+          {
+            title: "Filtros Aplicados",
+            content: `
 Docente: ${filters.docente || "—"}
 Data Inicial: ${filters.dataInicial || "—"}
 Data Final: ${filters.dataFinal || "—"}
-          `,
-        },
-        {
-          title: "Resumo",
-          content: `Total de registos: ${total}`,
-        },
-      ]}
-      mainTable={{
-        headers: [
-          { key: "data", label: "Data", width: "15%" },
-          { key: "horario", label: "Horário", width: "20%" },
-          { key: "curso", label: "Curso", width: "20%" },
-          { key: "unidade_curricular", label: "Unidade Curricular", width: "25%" },
-          { key: "docente", label: "Docente", width: "20%" },
-        ],
-        rows: exportRows,
-        headerBackground: "#1e40af",
-      }}
-      footerNotice="Documento gerado automaticamente pelo sistema."
-    />
-  ) : null;
-
-  const excelProps =
-  exportRows.length > 0
-    ? {
-        documentTitle: "Controle de Assiduidade",
-        subtitle: "Relatório de aulas por docente",
-        infoSections: [
+            `,
+          },
           {
             title: "Resumo",
-            content: `Total de registos: ${total}`,
+            content: `
+Total de registos: ${total}
+Marcações Pendentes: ${resumo.marcacoesPendentes}
+Presenças Marcadas: ${resumo.presencasMarcadas}
+Faltas Marcadas: ${resumo.faltasMarcadas}
+            `,
           },
-        ],
-        mainTable: {
+        ]}
+        mainTable={{
           headers: [
-            { key: "data", label: "Data", width: 20 },
-            { key: "horario", label: "Horário", width: 25 },
-            { key: "curso", label: "Curso", width: 25 },
-            { key: "unidade_curricular", label: "Unidade Curricular", width: 35 },
-            { key: "docente", label: "Docente", width: 25 },
+            { key: "data", label: "Data", width: "12%" },
+            { key: "horario", label: "Horário", width: "16%" },
+            { key: "curso", label: "Curso", width: "18%" },
+            { key: "unidade_curricular", label: "Unidade Curricular", width: "24%" },
+            { key: "tempo", label: "Tempo", width: "10%" },
+            { key: "docente", label: "Docente", width: "20%" },
           ],
           rows: exportRows,
-        },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#1e40af",
-      }
-    : null;
+          headerBackground: "#1e40af",
+        }}
+        footerNotice="Documento gerado automaticamente pelo sistema."
+      />
+    ) : null;
+
+  const excelProps =
+    exportRows.length > 0
+      ? {
+          documentTitle: "Controle de Assiduidade",
+          subtitle: "Relatório de aulas por docente",
+          infoSections: [
+            {
+              title: "Resumo",
+              content: `
+Total de registos: ${total}
+Marcações Pendentes: ${resumo.marcacoesPendentes}
+Presenças Marcadas: ${resumo.presencasMarcadas}
+Faltas Marcadas: ${resumo.faltasMarcadas}
+              `,
+            },
+          ],
+          mainTable: {
+            headers: [
+              { key: "data", label: "Data", width: 18 },
+              { key: "horario", label: "Horário", width: 20 },
+              { key: "curso", label: "Curso", width: 22 },
+              { key: "unidade_curricular", label: "Unidade Curricular", width: 35 },
+              { key: "tempo", label: "Tempo", width: 12 },
+              { key: "docente", label: "Docente", width: 25 },
+              { key: "estado", label: "Estado", width: 20 },
+            ],
+            rows: exportRows,
+          },
+          footerNotice: "Documento gerado automaticamente pelo sistema.",
+          primaryColor: "#1e40af",
+        }
+      : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -178,26 +223,26 @@ Data Final: ${filters.dataFinal || "—"}
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* FILTROS (Swagger) */}
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 items-end">
-
-            <FormSelect
-              label="Docente"
-              value={filters.docente}
-              onChange={(v) => handleFilterChange("docente", v)}
-              options={teachersData ?? []}
-              map={(t) => ({
-                key: String(t.codigo),
-                label: t.nome,
-                value: String(t.codigo),
-              })}
-              placeholder="Selecione o docente"
-            />
+            <div className="space-y-1.5">
+              <Label>Docente</Label>
+              <FormCommandSelect
+                value={filters.docente}
+                options={teachersData ?? []}
+                map={(t) => ({
+                  key: String(t.codigo),
+                  label: t.nome,
+                  value: String(t.codigo),
+                })}
+                placeholder="Selecionar docente..."
+                onChange={(v) => handleFilterChange("docente", v)}
+              />
+            </div>
 
             <div>
               <label className="text-sm font-medium">Data Inicial *</label>
@@ -236,9 +281,7 @@ Data Final: ${filters.dataFinal || "—"}
             <FormSelect
               label="Ano Letivo"
               value={filters.anoLectivo}
-              onChange={(v) =>
-                handleFilterChange("anoLectivo", v)
-              }
+              onChange={(v) => handleFilterChange("anoLectivo", v)}
               options={anosAcademicos ?? []}
               map={(a) => ({
                 key: String(a.codigo),
@@ -251,9 +294,7 @@ Data Final: ${filters.dataFinal || "—"}
             <FormSelect
               label="Semestre"
               value={filters.semestre}
-              onChange={(v) =>
-                handleFilterChange("semestre", v)
-              }
+              onChange={(v) => handleFilterChange("semestre", v)}
               options={semestres ?? []}
               map={(s) => ({
                 key: String(s.codigo),
@@ -265,7 +306,31 @@ Data Final: ${filters.dataFinal || "—"}
         </CardContent>
       </Card>
 
-      {/* TABELA */}
+      {!!response && (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <SummaryCard
+      title="Marcações Pendentes"
+      value={response.resumo?.marcacoesPendentes ?? 0}
+      className="border-amber-500/30 bg-amber-500/5"
+      valueClassName="text-amber-700"
+    />
+
+    <SummaryCard
+      title="Presenças Marcadas"
+      value={response.resumo?.presencasMarcadas ?? 0}
+      className="border-emerald-500/30 bg-emerald-500/5"
+      valueClassName="text-emerald-700"
+    />
+
+    <SummaryCard
+      title="Faltas Marcadas"
+      value={response.resumo?.faltasMarcadas ?? 0}
+      className="border-red-500/30 bg-red-500/5"
+      valueClassName="text-red-700"
+    />
+  </div>
+)}
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Resultados</CardTitle>
@@ -295,32 +360,37 @@ Data Final: ${filters.dataFinal || "—"}
             </div>
           )}
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Data</TableHead>
+                <TableHead>Data da Aula</TableHead>
                 <TableHead>Horário</TableHead>
                 <TableHead>Curso</TableHead>
                 <TableHead>Unidade Curricular</TableHead>
+                <TableHead>Tempo</TableHead>
                 <TableHead>Docente</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
+                  <TableCell colSpan={6} className="text-center py-8">
                     A carregar aulas...
                   </TableCell>
                 </TableRow>
               ) : aulas.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Nenhuma aula encontrada
                   </TableCell>
                 </TableRow>
               ) : (
-                aulas.map((item) => (
+                aulas.map((item: any) => (
                   <TableRow key={item.codigo}>
                     <TableCell>
                       {new Date(item.data_aula).toLocaleDateString()}
@@ -330,45 +400,45 @@ Data Final: ${filters.dataFinal || "—"}
                     </TableCell>
                     <TableCell>{item.curso}</TableCell>
                     <TableCell>{item.unidade_curricular}</TableCell>
+                    <TableCell>{item.ordem_tempo}</TableCell>
                     <TableCell>{item.docente}</TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
-              
-              {!isLoading && totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-sm text-muted-foreground">
-                  Página {filters.page} de {totalPages} • {total} registos
-                </span>
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={filters.page === 1}
-                    onClick={() =>
-                      handleFilterChange("page", filters.page - 1)
-                    }
-                  >
-                    Anterior
-                  </Button>
+          {!isLoading && totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-sm text-muted-foreground">
+                Página {filters.page} de {totalPages} • {total} registos
+              </span>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={filters.page >= totalPages}
-                    onClick={() =>
-                      handleFilterChange("page", filters.page + 1)
-                    }
-                  >
-                    Próxima
-                  </Button>
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={filters.page === 1}
+                  onClick={() =>
+                    handleFilterChange("page", filters.page - 1)
+                  }
+                >
+                  Anterior
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={filters.page >= totalPages}
+                  onClick={() =>
+                    handleFilterChange("page", filters.page + 1)
+                  }
+                >
+                  Próxima
+                </Button>
               </div>
-            )}
-
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

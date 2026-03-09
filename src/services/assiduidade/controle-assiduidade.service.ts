@@ -22,8 +22,15 @@ export type AgendamentoDocenteItem = {
   docente: string;
 };
 
+export type AgendamentosDocenteResumo = {
+  marcacoesPendentes: number;
+  presencasMarcadas: number;
+  faltasMarcadas: number;
+};
+
 export type AgendamentosDocenteResponse = {
   data: AgendamentoDocenteItem[];
+  resumo?: AgendamentosDocenteResumo;
   total?: number;
   page?: number;
   limit?: number;

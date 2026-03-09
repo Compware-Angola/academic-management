@@ -99,6 +99,8 @@ import ControleAssiduidade from "./pages/assiduidade/ControleAssiduidade";
 import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
 import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
+import ControleGeralPorDocente from "./pages/assiduidade";
+import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteContent";
 
 const App = () => {
   return (
@@ -302,6 +304,19 @@ const App = () => {
                         ]}
                       >
                         <ControleAssiduidade />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/assiduidade/controle-geral-por-docente" 
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla
+                        ]}
+                      >
+                        <ControleGeralPorDocente />
                       </ProtectedRoute>
                     }
                   />
@@ -626,6 +641,23 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="/docente/calendario"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE
+                            .sigla!,
+                        ]}
+                      >
+                        <CalendarioAulasDocente />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  
+
                   <Route
                     path="/horarios/movimentar/estudantes"
                     element={
