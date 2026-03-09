@@ -39,6 +39,8 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 import { useQuerySchedulesByClassRoom } from "@/hooks/horario/use-query-schedule-by-room";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { parseFilter } from "@/util/parse-filter";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 export default function SchedulesByRoom() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,29 +81,22 @@ export default function SchedulesByRoom() {
       classe: filters.anoCurricular,
     });
 
-  const canLoadTurmas =
-    !!filters.anoLetivo &&
-    !!filters.semestre &&
-    !!filters.periodo &&
-    !!filters.curso &&
-    !!filters.unidadeCurricular &&
-    !!filters.anoCurricular &&
-    !!filters.sala;
+  const canLoadTurmas = !!filters.anoLetivo && !!filters.sala;
 
   const { data: turmasResponse, isLoading: loadingTurmas } =
     useQuerySchedulesByClassRoom(
       {
-        anoLectivo: Number(filters.anoLetivo),
-        semestre: Number(filters.semestre),
-        periodo: Number(filters.periodo),
-        curso: Number(filters.curso),
-        sala: Number(filters.sala),
-        unidadeCurricular: Number(filters.unidadeCurricular),
-        anoCurricular: Number(filters.anoCurricular),
+        anoLectivo: parseFilter(filters.anoLetivo),
+        semestre: parseFilter(filters.semestre),
+        periodo: parseFilter(filters.periodo),
+        curso: parseFilter(filters.curso),
+        sala: parseFilter(filters.sala),
+        unidadeCurricular: parseFilter(filters.unidadeCurricular),
+        anoCurricular: parseFilter(filters.anoCurricular),
         page,
         limit,
       },
-      { enabled: canLoadTurmas }
+      { enabled: canLoadTurmas },
     );
 
   const openDetails = (turmaId: number) => {
@@ -174,22 +169,19 @@ export default function SchedulesByRoom() {
             </div>
             {/* Sala */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Sala</label>
-              <Select
+              <FormCommandSelect
+                label="Sala"
                 value={filters.sala}
-                onValueChange={(v) => setFilters({ ...filters, sala: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={"Selecionar sala"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {salas.map((sala) => (
-                    <SelectItem key={sala.pk} value={String(sala.pk)}>
-                      {sala.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                width="full"
+                placeholder="Selecionar sala"
+                options={salas}
+                map={(sala) => ({
+                  key: sala.pk,
+                  value: sala.pk,
+                  label: sala.descricao,
+                })}
+                onChange={(v) => setFilters({ ...filters, sala: v })}
+              />
             </div>
 
             {/* Semestre */}
@@ -242,19 +234,16 @@ export default function SchedulesByRoom() {
             {/* Curso */}
             <div className="space-y-2">
               <CourseSelect
-                                                            
-                                                          
-                                                            value={filters.curso}
-                                                            onChangeValue={(v) => {
-                                                            setFilters({
-                                                            ...filters,
-                                                              curso: v,
-                                                              anoCurricular: "",
-                                                              unidadeCurricular: "",
-                                                              });
-                                                                                      
-                                                              }}
-                                                                />
+                value={filters.curso}
+                onChangeValue={(v) => {
+                  setFilters({
+                    ...filters,
+                    curso: v,
+                    anoCurricular: "",
+                    unidadeCurricular: "",
+                  });
+                }}
+              />
             </div>
 
             {/* Ano Curricular */}
@@ -305,10 +294,10 @@ export default function SchedulesByRoom() {
                       !filters.curso
                         ? "Selecione curso"
                         : !filters.semestre
-                        ? "Selecione semestre"
-                        : isLoadingUC
-                        ? "Carregando UCs..."
-                        : "Selecionar UC"
+                          ? "Selecione semestre"
+                          : isLoadingUC
+                            ? "Carregando UCs..."
+                            : "Selecionar UC"
                     }
                   />
                 </SelectTrigger>
