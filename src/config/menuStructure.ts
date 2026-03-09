@@ -169,7 +169,7 @@ export const menuStructure: MenuStructure = {
         //{ title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
       ],
 
-      permission: ["adm", "rootAdmin", "dct"],
+      permission: [],
     },
     /* ----------------------------------------------------
     // ----------------------------------------------------
