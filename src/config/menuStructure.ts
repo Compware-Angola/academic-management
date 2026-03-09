@@ -665,6 +665,11 @@ export const defenseTFC: MenuStructure = {
           url: "/defesa-tfc/estudantes",
           permission: [PermissionTypeDetails.DEFESA.sigla],
         },
+        {
+          title: "Orientadores",
+          url: "/defesa-tfc/orientadores",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        }
       ],
     },
   ],

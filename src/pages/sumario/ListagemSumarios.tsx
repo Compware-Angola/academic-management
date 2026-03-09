@@ -207,7 +207,7 @@ const { toast } = useToast();
       });
 
       setSelectedSumario((prev) =>
-        prev && prev.codigo === id ? { ...prev, sumario_estado: novoEstado } : prev
+        prev && prev.sumario_codigo === id ? { ...prev, sumario_estado: novoEstado } : prev
       );
     } catch (err) {
       toast({

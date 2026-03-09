@@ -104,6 +104,7 @@ import ControleGeral from "./pages/sumario/ControleGeral";
 import ListagemSumarios from "./pages/sumario/ListagemSumarios";
 import HorasVigilancia from "./pages/docente/HorasVigilancia";
 import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
+import ListarOrientadores from "./pages/defesa-tfc/ListarOrientadores";
 
 const App = () => {
   return (
@@ -976,6 +977,18 @@ const App = () => {
                         ]}
                       >
                         <ListarEstudanteFinalista />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/defesa-tfc/orientadores"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFESA.sigla!,
+                        ]}
+                      >
+                        <ListarOrientadores />
                       </ProtectedRoute>
                     }
                   />
