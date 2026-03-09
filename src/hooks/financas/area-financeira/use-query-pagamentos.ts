@@ -17,6 +17,8 @@ export const useQueryListPayments = (
     anoLectivo,
     codigoMatricula,
     codigoFactura,
+    n_operacao_bancaria,
+    n_operacao_bancaria2,
     estado,
     nome,
     page = 1,
@@ -30,6 +32,8 @@ export const useQueryListPayments = (
     queryKey: [
       "list-payments",
       {
+        n_operacao_bancaria,
+        n_operacao_bancaria2,
         anoLectivo,
         codigoMatricula,
         codigoFactura,

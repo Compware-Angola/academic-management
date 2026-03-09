@@ -4,6 +4,8 @@ export type ListPaymentsPayload = {
   anoLectivo: number;
   codigoMatricula?: number;
   codigoFactura?: number;
+  n_operacao_bancaria?: number;
+  n_operacao_bancaria2?: number;
   estado?: number;
   nome?: string;
   page?: number;
@@ -49,6 +51,8 @@ export async function getListPaymentsService(
     anoLectivo,
     codigoMatricula,
     codigoFactura,
+    n_operacao_bancaria,
+    n_operacao_bancaria2,
     estado,
     nome,
     page = 1,
@@ -62,6 +66,8 @@ export async function getListPaymentsService(
         anoLectivo,
         codigoMatricula,
         codigoFactura,
+        n_operacao_bancaria,
+        n_operacao_bancaria2,
         estado,
         nome,
         page,

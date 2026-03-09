@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2 } from "lucide-react";
+import { Home, Search, Loader2, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -44,23 +44,49 @@ import { useQueryPagamentosTFC } from "@/hooks/defesa-tfc/use-query-pagamentos-t
 import { PeriodoSelect } from "@/components/common/global-selects/PeriodoSelect";
 import { statusFacturaDefesaTFC } from "./data";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { ListaPagamentoModal } from "../financas/notas-pagamento/components/ListaPagamentoModal";
+
+type SearchByType = "codigoMatricula" | "nome" | "facturaId" | "pagamentoId";
 
 export default function PagamentoTFC() {
   //Options
   const searchOptions = [
     { id: "codigoMatricula", label: "Código da Matrícula" },
     { id: "nome", label: "Nome do Aluno" },
+    { id: "facturaId", label: "Código Factura" },
+    { id: "pagamentoId", label: "Código Pagamento" },
   ];
-  // paginação
-  const [page, setPage] = useState(1);
-
-  const [limit, setLimit] = useState(25);
-  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
-    "codigoMatricula",
-  );
+  const searchFieldMap: Record<SearchByType, string> = {
+    codigoMatricula: "matriculaId",
+    nome: "nome",
+    facturaId: "facturaId",
+    pagamentoId: "pagamentoId",
+  };
+  const [searchBy, setSearchBy] = useState<SearchByType>("codigoMatricula");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchApplied, setSearchApplied] = useState("");
 
+  const searchParams = searchApplied
+    ? {
+        [searchFieldMap[searchBy]]:
+          searchBy === "nome" ? searchApplied : parseFilter(searchApplied),
+      }
+    : {};
+
+  const [page, setPage] = useState(1);
+
+  const [limit, setLimit] = useState(25);
+
+  const [facturaSelecionado, setFacturaSelecionado] = useState<number>(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+  const openModal = (facturaId: number) => {
+    setIsModalOpen(true);
+    setFacturaSelecionado(facturaId);
+  };
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     curso: "",
@@ -69,6 +95,7 @@ export default function PagamentoTFC() {
     tipoCandidatura: "",
     periodo: "",
   });
+
   const [filtersApplied, setFiltersApplied] = useState(filters);
   const placeholders: Record<string, string> = {
     codigoMatricula: "Pesquisar por código da matrícula...",
@@ -116,9 +143,7 @@ export default function PagamentoTFC() {
     curso: parseFilter(filtersApplied.curso),
     periodoId: parseFilter(filtersApplied.periodo),
     status: parseFilter(filtersApplied.estado),
-    matriculaId:
-      searchBy === "codigoMatricula" ? parseFilter(searchApplied) : undefined,
-    nome: searchBy === "nome" ? searchApplied : undefined,
+    ...searchParams,
     page,
     limit,
   });
@@ -274,6 +299,7 @@ export default function PagamentoTFC() {
                     <TableHead>Nº Matrícula</TableHead>
                     <TableHead>Nome</TableHead>
                     <TableHead>Pagamentos</TableHead>
+                    <TableHead>Factura</TableHead>
                     <TableHead>Curso</TableHead>
                     <TableHead>Estado</TableHead>
                   </TableRow>
@@ -286,8 +312,19 @@ export default function PagamentoTFC() {
                       </TableCell>
                       <TableCell>{item.nome}</TableCell>
                       <TableCell>{item.pagamento}</TableCell>
+                      <TableCell>{item.codigo_factura}</TableCell>
                       <TableCell>{item.curso}</TableCell>
                       <TableCell>{getStatusBadge(item.estado)}</TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          title="Ver Detalhes"
+                          onClick={() => openModal(item.codigo_factura)}
+                        >
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -340,6 +377,11 @@ export default function PagamentoTFC() {
           </div>
         </CardContent>
       </Card>
+      <ListaPagamentoModal
+        factureId={facturaSelecionado}
+        isModalOpen={isModalOpen}
+        setIsModalOpen={closeModal}
+      />
     </div>
   );
 }

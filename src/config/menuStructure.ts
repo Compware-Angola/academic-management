@@ -13,7 +13,6 @@ import {
   GraduationCap,
   FileText,
 } from "lucide-react";
-
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 
@@ -53,7 +52,7 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla,
           ],
         },
-       
+
         {
           title: "Acessos (todos) + novos",
           url: "/acessos/todos",
@@ -146,7 +145,11 @@ export const menuStructure: MenuStructure = {
       icon: GraduationCap,
       items: [
         // { title: "Calendário de aulas", url: "/docente/calendario" },
-        // { title: "Horas de vigilância", url: "/docente/vigilancia" },
+        {
+          title: "Horas de vigilância",
+          url: "/docente/vigilancia",
+          permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
+        },
         {
           title: "Lançamento do programa da UC",
           url: "/docente/programa",
@@ -159,7 +162,7 @@ export const menuStructure: MenuStructure = {
           url: "/docente/validacao",
           permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
         },
-        // { title: "Assiduidade", url: "/docente/assiduidade" },
+        { title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
       ],
 
       permission: ["adm", "rootAdmin", "dct"],
@@ -386,7 +389,6 @@ export const menuStructure: MenuStructure = {
     },
   ],
 };
-
 export const finaceStructure: MenuStructure = {
   items: [
     /* -------------------------------------------------------- */
@@ -558,7 +560,7 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/listar-pagamentos",
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
-          {
+        {
           title: "Pagamentos TFC",
           url: "/defesa-tfc/pagamentos",
           permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
@@ -580,7 +582,6 @@ export const finaceStructure: MenuStructure = {
     },
   ],
 };
-
 export const healpStructure: MenuStructure = {
   items: [
     {
@@ -608,7 +609,9 @@ export const healpStructure: MenuStructure = {
         {
           title: "Imagem De Abertura",
           url: "/comunicacao/avisos/imagem",
-          permission: [PermissionTypeDetails.IMAGEM_ABERTURA_PORTAL_ESTUDANTE.sigla],
+          permission: [
+            PermissionTypeDetails.IMAGEM_ABERTURA_PORTAL_ESTUDANTE.sigla,
+          ],
         },
       ],
 
@@ -657,7 +660,6 @@ export const defenseTFC: MenuStructure = {
       url: "/defesa-tfc",
       icon: LibraryBig,
       items: [
-      
         {
           title: "Estudantes Finalistas",
           url: "/defesa-tfc/estudantes",
@@ -685,18 +687,36 @@ export const assiduidade: MenuStructure = {
         },
       ],
     },
-        {
+    {
       title: "Sumário",
       url: "/gestao-docentes",
       icon: FileText,
       items: [
+
       
-        { title: "Aulas Agendadas", url: "/sumario/aulas-agendadas",permission: [ PermissionTypeDetails.AULAS_AGENDADAS.sigla] },
-        { title:"Controle Geral de Sumário & Assiduidade" , url: "/sumario/controle-geral",permission: [ PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla] },
-        { title: "Parâmetros", url: "/sumario/parametros",permission: [ PermissionTypeDetails.SUMARIO_PARAMETROS.sigla] },
+      
+        {
+          title: "Aulas Agendadas",
+          url: "/sumario/aulas-agendadas",
+          permission: [PermissionTypeDetails.AULAS_AGENDADAS.sigla],
+        },
+        {
+          title: "Controle Geral de Sumário & Assiduidade",
+          url: "/sumario/controle-geral",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
+          ],
+        },
+         { title: "Listar Sumários", url: "/sumario/listar" },
+        {
+          title: "Parâmetros",
+          url: "/sumario/parametros",
+          permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
+        },
+       
       ],
-      permission: []
-    }
+      permission: [],
+    },
   ],
 };
 export const academicStructure: MenuStructure = {
@@ -913,7 +933,6 @@ export const academicStructure: MenuStructure = {
 
       permission: [],
     },
-
 
     // ----------------------------------------------------
     // EXAME DE ACESSO

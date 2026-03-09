@@ -103,14 +103,14 @@ export default function AddMarkingAssessmentModal({
     });
   const { data: markingResponse, isLoading: loadingMarking } =
     useQueryMarkingAssessment({
-      anoLectivo: Number(filters.anoLetivo),
-      semestre: Number(filters.semestre),
+      anoLectivo: parseFilter(filters.anoLetivo),
+      semestre: parseFilter(filters.semestre),
       periodo: parseFilter(filters.periodo),
-      curso: Number(filters.curso),
-      prazoId: Number(filters.prazoId),
+      curso: parseFilter(filters.curso),
+      prazoId: parseFilter(filters.prazoId),
       tipoHorario: 2,
       anoCurricular: parseFilter(filters.anoCurricular),
-      unidadeCurricular: Number(filters.unidadeCurricular),
+      unidadeCurricular: parseFilter(filters.unidadeCurricular),
       page: 1,
       limit: 100,
     });
