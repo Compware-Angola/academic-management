@@ -95,6 +95,7 @@ import DocenteLancamentoProgramaUC from "./pages/docente/ProgramaUC";
 import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
+import ControleAssiduidade from "./pages/assiduidade/ControleAssiduidade";
 import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
 import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
@@ -104,6 +105,9 @@ import ControleGeral from "./pages/sumario/ControleGeral";
 import ListagemSumarios from "./pages/sumario/ListagemSumarios";
 import HorasVigilancia from "./pages/docente/HorasVigilancia";
 import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
+import ListarOrientadores from "./pages/defesa-tfc/ListarOrientadores";
+import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteContent";
+import ControleGeralPorDocente from "./pages/assiduidade";
 
 const App = () => {
   return (
@@ -319,6 +323,32 @@ const App = () => {
                         ]}
                       >
                         <MarcarAssiduidade />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/assiduidade/controle"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                        ]}
+                      >
+                        <ControleAssiduidade />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/assiduidade/docente"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                        ]}
+                      >
+                        <ControleGeralPorDocente />
                       </ProtectedRoute>
                     }
                   />
@@ -682,6 +712,23 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="/docente/calendario"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE
+                            .sigla!,
+                        ]}
+                      >
+                        <CalendarioAulasDocente />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  
+
                   <Route
                     path="/horarios/movimentar/estudantes"
                     element={
@@ -976,6 +1023,18 @@ const App = () => {
                         ]}
                       >
                         <ListarEstudanteFinalista />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/defesa-tfc/orientadores"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFESA.sigla!,
+                        ]}
+                      >
+                        <ListarOrientadores />
                       </ProtectedRoute>
                     }
                   />

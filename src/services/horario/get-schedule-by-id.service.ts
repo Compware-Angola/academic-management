@@ -26,24 +26,27 @@ export type Aula = {
 };
 
 export type ScheduleDetailsResponse = {
-  codigo: number;
-  designacao: string;               // "AGT.1.TAS.D-H1"
-  unidadeCurricularId: number;
-  unidadeCurricular: string;
-  curso: string;
-  ano: string;
-  capacidade: number;
-  reservado: string;
-  semestre: number;
-  estado: string;
-  estadoCor: string | null;
-  estadoId: number;
-  disponibilidade: string;
-  disponivel: boolean;
-  criadoPor: string;
-  atualizadoPor: string | null;
-  dataUltimaAtualizacao: string;
-  dataCriacao: string;
+codigo: number
+  fk_ano_lectivo: number
+  designacao: string
+  unidadeCurricularId: number
+  unidadeCurricular: string
+  curso: string
+  cursoId: number
+  ano: string
+  capacidade: number
+  reservado: string
+  semestre: number
+  periodo: number
+  estado: string
+  estadoCor: any
+  estadoId: number
+  disponibilidade: string
+  disponivel: boolean
+  criadoPor: string
+  atualizadoPor: string
+  dataUltimaAtualizacao: string
+  dataCriacao: string
   aulas: Aula[];
 };
 

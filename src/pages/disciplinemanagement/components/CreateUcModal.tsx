@@ -29,6 +29,8 @@ import { Semestre } from "@/services/study_plan/semestre/fecth-semestres";
 import { Departamento } from "@/services/departamento/fetch-departamento";
 import { useAuth } from "@/hooks/use-auth";
 import { CourseCommandSelectRHF } from "@/components/common/global-selects/CourseCommandSelectRHF";
+import { DisciplineCommandSelectRHF } from "@/components/common/global-selects/DisciplineCommandSelectRHF";
+import { DepartamentoCommandSelectRHF } from "@/components/common/global-selects/DepartamentoCommandSelectRHF";
 
 interface Props {
   open: boolean;
@@ -59,14 +61,12 @@ export function CreateUcModal({ open, onClose }: Props) {
   // =======================
   // QUERIES
   // =======================
-  const { data: cursos = [], isLoading: loadingCursos } = useCursos();
-  const { data: departamentos = [], isLoading: isLoadingDepartamento } =
-    useQueryDepartamento();
+
+
   const { data: semestres = [], isLoading: isLoadingSemestres } =
     useQuerySemestres();
   const { data: anos = [], isLoading: isLoadingAnos } = useQueryAnoAcademico();
-  const { data: disciplines = [], isLoading: isLoadingDisciplines } =
-    useDisciplines();
+
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: form.watch("codigo_curso") });
 
@@ -106,9 +106,9 @@ export function CreateUcModal({ open, onClose }: Props) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
 
             <CourseCommandSelectRHF<FormValues>
-                control={form.control}
-                name="codigo_curso"
-                />
+              control={form.control}
+              name="codigo_curso"
+            />
 
             <FormSelectRHF<FormValues, Classes>
               control={form.control}
@@ -124,18 +124,11 @@ export function CreateUcModal({ open, onClose }: Props) {
               })}
             />
 
-            <FormSelectRHF<FormValues, Discipline>
+            <DisciplineCommandSelectRHF<FormValues>
               control={form.control}
               name="codigo_disciplina"
-              label="Disciplina"
-              options={disciplines}
-              loading={isLoadingDisciplines}
-              map={(d) => ({
-                key: String(d.codigo),
-                label: d.desginacao,
-                value: String(d.codigo),
-              })}
             />
+
 
             <FormSelectRHF<FormValues, AnoAcademico>
               control={form.control}
@@ -163,18 +156,12 @@ export function CreateUcModal({ open, onClose }: Props) {
               })}
             />
 
-            <FormSelectRHF<FormValues, Departamento>
+           
+            <DepartamentoCommandSelectRHF<FormValues>
               control={form.control}
               name="codigo_departamento"
-              label="Departamento"
-              options={departamentos}
-              loading={isLoadingDepartamento}
-              map={(d) => ({
-                key: String(d.codigo),
-                label: d.designacao,
-                value: String(d.codigo),
-              })}
             />
+            
 
             <DialogFooter>
               <Button

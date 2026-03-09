@@ -53,12 +53,13 @@ import {
 import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
   const [classeId, setClasseId] = useState<string>("");
-  const { user:userData } = useAuth();
+  const { user: userData } = useAuth();
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -205,22 +206,24 @@ export default function UCManagementPlan() {
 
           {/* Curso */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Curso</label>
+
             {loadingCursos ? (
               <Skeleton className="h-10 w-full rounded-md" />
             ) : (
-              <Select value={cursoId} onValueChange={setCursoId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione o curso..." />
-                </SelectTrigger>
-                <SelectContent className="max-h-96">
-                  {cursos.map((curso) => (
-                    <SelectItem key={curso.codigo} value={String(curso.codigo)}>
-                      {curso.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormCommandSelect
+                value={cursoId}
+                label="Curso"
+                options={cursos}
+                width="lg"
+                
+                map={(c) => ({
+                  key: c.codigo.toString(),
+                  value: c.codigo.toString(),
+                  label: c.designacao,
+                })}
+                onChange={(v) => setCursoId(v)}
+              />
+
             )}
           </div>
 
@@ -433,43 +436,22 @@ export default function UCManagementPlan() {
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Unidade Curricular</Label>
-              <Select
+              <FormCommandSelect
                 value={formData.codigo_disciplina}
-                onValueChange={(value) =>
+                label="Unidade Curricular"
+                placeholder="Selecione a disciplina..."
+                options={disciplines}
+                  width="full"
+
+                map={(disc) => ({
+                  key: disc.codigo.toString(),
+                  value: disc.codigo.toString(),
+                  label: `${disc.codigo} – ${disc.desginacao}`,
+                })}
+                onChange={(value) =>
                   setFormData({ ...formData, codigo_disciplina: value })
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a disciplina..." />
-                </SelectTrigger>
-                <SelectContent className="max-h-96">
-                  {loadingDisciplines ? (
-                    <SelectItem value="loading" disabled>
-                      <span className="flex items-center gap-2">
-                        <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                        Carregando disciplinas...
-                      </span>
-                    </SelectItem>
-                  ) : disciplines.length === 0 ? (
-                    <SelectItem value="empty" disabled>
-                      Nenhuma disciplina disponível
-                    </SelectItem>
-                  ) : (
-                    disciplines.map((disc) => (
-                      <SelectItem key={disc.codigo} value={String(disc.codigo)}>
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono font-semibold text-sm">
-                            {disc.codigo}
-                          </span>
-                          <span className="text-muted-foreground">–</span>
-                          <span>{disc.desginacao}</span>
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              />
             </div>
 
             <div className="grid gap-2">

@@ -55,6 +55,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -143,20 +144,23 @@ export default function CreateSchedule() {
       semestre: formData.semestre,
     });
   const { data: designacao } = useNextScheduleDesignation(
-    formData.curso
-      ? gerarSiglaCurso(
-          cursos.find((c) => c.codigo.toString() === formData.curso)
-            ?.designacao || "",
-        )
-      : undefined,
-    formData.classes,
-    formData.unidadeCurricular
-      ? unidadesCurriculares.find(
-          (c) => c.pk.toString() === formData.unidadeCurricular,
-        )?.codigo || ""
-      : "",
-    Number(formData.periodo),
-    Number(formData.anoLetivo),
+    {
+      cursoSigla: formData.curso
+        ? gerarSiglaCurso(
+            cursos.find((c) => c.codigo.toString() === formData.curso)
+              ?.designacao || "",
+          )
+        : undefined,
+      ano: formData.classes,
+      codigoUC: formData.unidadeCurricular
+        ? unidadesCurriculares.find(
+            (c) => c.pk.toString() === formData.unidadeCurricular,
+          )?.codigo || ""
+        : "",
+      periodo: Number(formData.periodo),
+      anoLectivo: Number(formData.anoLetivo),
+    },
+    true,
   );
 
   const { data: classes = [], isLoading: isLoadingClasses } =
@@ -562,39 +566,21 @@ export default function CreateSchedule() {
 
           {/* SALA */}
           <div>
-            <Label>Sala</Label>
-            <Select
-              disabled={!isWithinPeriod}
+            <FormCommandSelect
+              label="Sala"
+              width="full"
               value={formData.sala}
-              onValueChange={(v) => setFormData({ ...formData, sala: v })}
-            >
-              <SelectTrigger
-                disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
-                className="w-full "
-              >
-                <SelectValue
-                  placeholder={
-                    <>
-                      {" "}
-                      {isLoadingSala ? (
-                        <span className="flex gap-2 items-center">
-                          Carregando <Loader2 className="animate-spin" />
-                        </span>
-                      ) : (
-                        "Selecione Salas"
-                      )}
-                    </>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {salas?.map((sala) => (
-                  <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
-                    {sala.sala}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              disabled={!isWithinPeriod || Boolean(formData.tipoAula) === false}
+              isLoading={isLoadingSala}
+              placeholder={isLoadingSala ? "Carregando..." : "Selecione Salas"}
+              options={salas ?? []}
+              map={(sala) => ({
+                key: sala.salaid,
+                value: sala.salaid.toString(),
+                label: sala.sala,
+              })}
+              onChange={(v) => setFormData({ ...formData, sala: v })}
+            />
           </div>
         </div>
 

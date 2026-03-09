@@ -48,6 +48,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
   { key: "capacidade", label: "Capacidade" },
@@ -100,7 +101,11 @@ export function EditSchedule() {
 
   /* ------------------------- QUERIES ------------------------- */
 
-  const { data, isLoading, isError } = useQueryScheduleDetails(scheduleId);
+  const {
+    data: initialDataSchedule,
+    isLoading,
+    isError,
+  } = useQueryScheduleDetails(scheduleId);
 
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
@@ -138,23 +143,34 @@ export function EditSchedule() {
     anoLectivo: Number(formData.anoLetivo),
     periodo: Number(formData.periodo),
   });
-  const { data: designacao, isLoading: isLoadindeNextScheduleDesignation } =
+  const { data: designacao, isLoading: isLoadingNextScheduleDesignation } =
     useNextScheduleDesignation(
-      formData.curso
-        ? gerarSiglaCurso(
-            cursos.find((c) => c.codigo.toString() === formData.curso)
-              ?.designacao || "",
-          )
-        : undefined,
-      formData.classes,
-      formData.unidadeCurricular
-        ? unidadesCurriculares.find(
-            (c) => c.pk.toString() === formData.unidadeCurricular,
-          )?.codigo || ""
-        : "",
-      Number(formData.periodo),
-      Number(formData.anoLetivo),
+      {
+        cursoSigla: formData.curso
+          ? gerarSiglaCurso(
+              cursos.find((c) => c.codigo.toString() === formData.curso)
+                ?.designacao || "",
+            )
+          : undefined,
+        ano: formData.classes,
+        anoLectivo: Number(formData.anoLetivo),
+        codigoUC: formData.unidadeCurricular
+          ? unidadesCurriculares.find(
+              (c) => c.pk.toString() === formData.unidadeCurricular,
+            )?.codigo || ""
+          : "",
+        periodo: Number(formData.periodo),
+      },
+
+      initialDataSchedule
+        ? initialDataSchedule.cursoId.toString() !== formData.curso ||
+            initialDataSchedule.unidadeCurricularId.toFixed() !=
+              formData.unidadeCurricular ||
+            initialDataSchedule.semestre.toString() !== formData.semestre ||
+            initialDataSchedule.periodo.toString() !== formData.periodo
+        : false,
     );
+
   const { data: teachers = [], isLoading: isLoadingTeacher } =
     useQueryTeacherByUC(formData.unidadeCurricular);
   useEffect(() => {
@@ -182,9 +198,9 @@ export function EditSchedule() {
   /* ------------------------- LOAD INICIAL ------------------------- */
 
   useEffect(() => {
-    if (!data) return;
+    if (!initialDataSchedule) return;
 
-    const mapped = mapScheduleToFormData(data);
+    const mapped = mapScheduleToFormData(initialDataSchedule);
 
     // 🔹 Campos independentes
     setFormData((prev) => ({
@@ -209,10 +225,11 @@ export function EditSchedule() {
     });
 
     // 🔹 Aulas
-    const slots: AulaPayload[] = mapBackendAulasToGrid(data.aulas) ?? [];
+    const slots: AulaPayload[] =
+      mapBackendAulasToGrid(initialDataSchedule.aulas) ?? [];
 
     setAulas(slots);
-  }, [data]);
+  }, [initialDataSchedule]);
 
   /* ------------------------- APPLY CLASSES ------------------------- */
 
@@ -439,20 +456,17 @@ export function EditSchedule() {
             onChange={(v) => setFormData((p) => ({ ...p, periodo: v }))}
           />
 
-              <CourseSelect
-                                                            
-                                                          
-                  value={formData.curso}
-                  onChangeValue={(v) => {
-                  setFormData((p) => ({
+          <CourseSelect
+            value={formData.curso}
+            onChangeValue={(v) => {
+              setFormData((p) => ({
                 ...p,
                 curso: v,
                 classes: "",
                 unidadeCurricular: "",
-              }))
-                                                                                      
-                                                              }}
-                                                                />
+              }));
+            }}
+          />
           <FormSelect
             disabled={!isWithinPeriod}
             label="Ano Curricular"
@@ -518,17 +532,17 @@ export function EditSchedule() {
               <Input
                 id="designacao"
                 readOnly
-                disabled={isLoadindeNextScheduleDesignation}
+                disabled={isLoadingNextScheduleDesignation}
                 value={formData.designacao}
                 placeholder={
-                  isLoadindeNextScheduleDesignation
+                  isLoadingNextScheduleDesignation
                     ? "A gerar designação automaticamente…"
                     : "Designação do horário"
                 }
                 className="pr-10"
               />
 
-              {isLoadindeNextScheduleDesignation && (
+              {isLoadingNextScheduleDesignation && (
                 <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
               )}
             </div>
@@ -587,52 +601,34 @@ export function EditSchedule() {
           </div>
 
           {/* SALA */}
+
           <div>
-            <Label>Sala</Label>
-            <Select
-              disabled={!isWithinPeriod}
+            <FormCommandSelect
+              label="Sala"
+              width="full"
               value={formData.sala}
-              onValueChange={(v) => setFormData({ ...formData, sala: v })}
-            >
-              <SelectTrigger
-                disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
-                className="w-full "
-              >
-                <SelectValue
-                  placeholder={
-                    <>
-                      {" "}
-                      {isLoadingSala ? (
-                        <span className="flex gap-2 items-center">
-                          Carregando <Loader2 className="animate-spin" />
-                        </span>
-                      ) : (
-                        "Selecione Salas"
-                      )}
-                    </>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {salas?.map((sala) => (
-                  <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
-                    {sala.sala}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              disabled={!isWithinPeriod || Boolean(formData.tipoAula) === false}
+              isLoading={isLoadingSala}
+              placeholder="Selecione Salas"
+              options={salas ?? []}
+              map={(sala) => ({
+                key: sala.salaid,
+                value: sala.salaid.toString(),
+                label: sala.sala,
+              })}
+              onChange={(v) => setFormData({ ...formData, sala: v })}
+            />
           </div>
         </div>
 
-        {temposDisponiveis.length > 0 ||
-          (!isWithinPeriod && (
-            <ScheduleGridEdit
-              ocupadas={ocupadasSet}
-              scheduleData={temposDisponiveis}
-              aulasExistentes={aulas}
-              onChange={setAulas}
-            />
-          ))}
+        {temposDisponiveis.length > 0 && isWithinPeriod && (
+          <ScheduleGridEdit
+            ocupadas={ocupadasSet}
+            scheduleData={temposDisponiveis}
+            aulasExistentes={aulas}
+            onChange={setAulas}
+          />
+        )}
 
         {isWithinPeriod && (
           <div className="flex justify-end gap-3 pt-4">

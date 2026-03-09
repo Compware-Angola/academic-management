@@ -8,8 +8,10 @@ interface CourseSelectProps {
   labelMode?: "inside" | "outside"; // 👈 decisão sobe
   onChangeValue: (v: string) => void;
   params?: CursoParams;
+  disabled?: boolean;
 }
 const CourseSelect = ({
+  disabled,
   onChangeValue,
   value,
   params,
@@ -20,7 +22,7 @@ const CourseSelect = ({
   return (
     <>
       <FormCommandSelect
-        disabled={loadingCursos}
+        disabled={disabled || loadingCursos}
         value={value}
         label="Curso"
         labelMode={labelMode} // 👈 repassa decisão

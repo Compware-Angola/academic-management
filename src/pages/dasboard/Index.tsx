@@ -107,7 +107,8 @@ const allowedQuickLinks =  useFilterMenuByPermission(quickLinks);
         <UpcomingEventsCard />
 
         <SemesterStatsCard
-          title="Desempenho Académico 2024/2025"
+         title={"Desempenho Académico  " + (activeAcademicYear?.designacao ?? "N/A")}
+         
           description="Licenciatura em Engenharia Informática"
        
         />
