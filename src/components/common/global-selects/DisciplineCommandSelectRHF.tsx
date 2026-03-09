@@ -34,7 +34,7 @@ export function DisciplineCommandSelectRHF<TForm>({
       value={field.value ? String(field.value) : undefined} // ✅ NORMALIZA
       disabled={isLoadingDisciplines}
       isLoading={isLoadingDisciplines}
-      width="lg"
+       width="full"
       options={disciplines}
       map={(c) => ({
         key: c.codigo.toString(),
