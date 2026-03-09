@@ -3,14 +3,16 @@ import {
   getNextScheduleDesignationService,
 } from "@/services/horario/schedule-designation.service";
 import { useQuery } from "@tanstack/react-query";
-
-export const useNextScheduleDesignation = (
-  cursoSigla?: string,
+type Params = {
+   cursoSigla?: string,
   ano?: string,
   codigoUC?: string,
   periodo?: number,
   anoLectivo?: number,
-) => {
+ 
+}
+export const useNextScheduleDesignation = ( params:Params, autoLoad=true ) => {
+  const {ano,anoLectivo,codigoUC,cursoSigla,periodo} = params
   const base =
     cursoSigla && ano && codigoUC
       ? `${cursoSigla}.${ano}.${codigoUC}`
@@ -31,7 +33,7 @@ export const useNextScheduleDesignation = (
 
       return gerarDesignacao(base, response);
     },
-    enabled: !!base && !!periodo && !!anoLectivo,
+    enabled: !!base && !!periodo && !!anoLectivo && autoLoad, 
     retry: 1,
   });
 };
