@@ -8,6 +8,8 @@ export type PagamentosTFCPayload = {
   matriculaId?: number;
   nome?: string;
   page?: number;
+  pagamentoId?: number;
+  facturaId?: number;
   limit?: number;
 };
 
@@ -17,6 +19,7 @@ export type PagamentoTFCItem = {
   pagamento: number;
   curso: string;
   estado: number;
+  codigo_factura: number;
 };
 
 export type PagamentosTFCResponse = {
@@ -35,6 +38,8 @@ export async function getPagamentosTFCService(
     curso,
     periodoId,
     matriculaId,
+    facturaId,
+    pagamentoId,
     nome,
     status,
     page = 1,
@@ -49,6 +54,8 @@ export async function getPagamentosTFCService(
         curso,
         periodoId,
         status,
+        facturaId,
+        pagamentoId,
         page,
         limit,
         matriculaId,
