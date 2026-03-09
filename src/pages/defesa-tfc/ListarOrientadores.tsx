@@ -1,17 +1,9 @@
-import { useMemo } from "react";
-
-import PDFActions, {
-  GenericPDFDocument,
-} from "@/components/views/pdf/GenericPDFDocument";
-import ExcelActions from "@/components/views/excel/GenericExcelExport";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -30,19 +22,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2 } from "lucide-react";
+import { Home, Search, Loader2, RefreshCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
-import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
-import { useQueryPagamentosTFC } from "@/hooks/defesa-tfc/use-query-pagamentos-tfc";
-import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
-import { useQueryEstudanteFinalista } from "@/hooks/defesa-tfc/use-query-estudante-finalista-tfc";
-
+import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+const statusConfig = {
+  activo: {
+    label: "Activo",
+    variant: "default" as const,
+    className: "bg-primary hover:bg-primary/80",
+  },
+  inactivo: {
+    label: "Inactivo",
+    variant: "destructive" as const,
+    className: "bg-slate-500 hover:bg-slate-600",
+  },
+  pendente: {
+    label: "Pendente",
+    variant: "outline" as const,
+    className: "bg-yellow-100 text-yellow-700 border-yellow-300",
+  },
+};
 export default function ListarOrientadores() {
   //Options
   const searchOptions = [
@@ -60,16 +65,11 @@ export default function ListarOrientadores() {
   const [searchApplied, setSearchApplied] = useState("");
 
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "all",
     curso: "",
     estado: "",
-    faculdade: "",
-    periodo: "",
-    tipoCandidatura: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
-  const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
-    useQueryTipoCandidatura();
   const placeholders: Record<string, string> = {
     codigoMatricula: "Pesquisar por código da matrícula...",
     nome: "Nome do Aluno.",
@@ -77,19 +77,23 @@ export default function ListarOrientadores() {
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
   const {
-    data: estudanteFinalistaResponse,
+    data: orientadoresResponse,
     refetch,
     isFetching,
-  } = useQueryEstudanteFinalista({
-    anoLectivo: parseFilter(filtersApplied.anoLectivo),
-    curso: parseFilter(filtersApplied.curso),
-    tipoCandidatura: parseFilter(filtersApplied.tipoCandidatura),
-
+  } = useQueryOrientadoresTFC({
+    anoLectivoId:
+      filters.anoLectivo === "all"
+        ? undefined
+        : parseFilter(filters.anoLectivo),
+    cursoId: parseFilter(filters.curso),
+    estado: filters.estado === "all" ? undefined : filters.estado,
     page,
     limit,
   });
-  const tableData = estudanteFinalistaResponse?.data || [];
-  const total = estudanteFinalistaResponse?.total || 0;
+
+  console.log({ filtersApplied });
+  const tableData = orientadoresResponse?.data || [];
+  const total = orientadoresResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -109,14 +113,14 @@ export default function ListarOrientadores() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>Estudantes Finalistas</BreadcrumbLink>
+            <BreadcrumbLink>Orientadores</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
-      <p className="text-muted-foreground">Consultar estudantes finalistas.</p>
+      <h1 className="text-2xl font-bold">Orientadores</h1>
+      <p className="text-muted-foreground">Consultar orientadores.</p>
 
       <Card>
         <CardHeader>
@@ -126,46 +130,48 @@ export default function ListarOrientadores() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <AcademicYearSelect
               value={filters.anoLectivo}
+              enableDefaultSelectItem
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
-            <FacultySelect
-              allOption
-              value={filters.faculdade}
-              onChangeValue={(v) =>
-                setFilters({ ...filters, faculdade: v, curso: "" })
-              }
-            />
+
             <CourseSelect
-              params={{
-                faculdadeId: parseFilter(filters.faculdade),
-              }}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
             />
-            <FormSelect
-              label="Tipo Candidatura"
-              value={filters.tipoCandidatura}
-              onChange={(v) => setFilters({ ...filters, tipoCandidatura: v })}
-              options={tipoCandidatura}
-              loading={isLoadingTipoCandidatura}
-              disabled={isLoadingTipoCandidatura}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo.toString(),
-              })}
-            />
+            <div className="flex flex-col gap-2">
+              <Label>Estado</Label>
+              <Select
+                value={filters.estado}
+                onValueChange={(v) => setFilters({ ...filters, estado: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="activo">Activo</SelectItem>
+                  <SelectItem value="inactivo">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="flex items-end">
               <Button
+                aria-label="Limpar filtros"
+                title="Limpar filtros"
+                className="cursor-pointer"
                 onClick={() => {
-                  setFiltersApplied(filters);
-                  setSearchApplied(searchTerm);
+                  setFilters({
+                    anoLectivo: "all",
+                    curso: "",
+                    estado: "",
+                  });
+                  setPage(1);
+                  setLimit(25);
                   refetch();
                 }}
               >
-                <Search className="h-4 w-4" />
-                Pesquisar
+                <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -175,43 +181,75 @@ export default function ListarOrientadores() {
         <CardHeader className="space-y-2">
           {/* Exportações */}
 
-          <CardTitle>Estudantes Finalistas</CardTitle>
+          <CardTitle>Orientadores</CardTitle>
         </CardHeader>
 
         <CardContent>
           {isFetching ? (
             <div className="flex flex-col items-center justify-center py-16">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Carregando Pagamento...</p>
+              <p className="text-muted-foreground">
+                Carregando Orientadores...
+              </p>
             </div>
           ) : tableData.length == 0 ? (
             <div className="text-center py-16 text-muted-foreground">
-              Nenhuma Pagamento encontrada.
+              Nenhuma Orientador encontrado.
             </div>
           ) : (
             <>
-              <Table>
+              <Table className="w-full">
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Nº Matrícula</TableHead>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Bilhete</TableHead>
-                    <TableHead>Curso</TableHead>
-                    <TableHead>Genero</TableHead>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-[100px]">Código</TableHead>
+                    <TableHead className="min-w-[200px]">Nome</TableHead>
+                    <TableHead className="min-w-[150px]">Ano Lectivo</TableHead>
+                    <TableHead className="min-w-[180px]">Curso</TableHead>
+                    <TableHead className="w-[120px]">Estado</TableHead>
+                    <TableHead className="w-[150px] text-center">
+                      Nº Orientados
+                    </TableHead>
+                    <TableHead className="w-[150px]">Data Cadastro</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tableData.map((item, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-mono">
-                        {item.matricula}
-                      </TableCell>
-                      <TableCell>{item.nome}</TableCell>
-                      <TableCell>{item.bilhete}</TableCell>
-                      <TableCell>{item.curso}</TableCell>
-                      <TableCell>{item.genero}</TableCell>
-                    </TableRow>
-                  ))}
+                  {tableData.map((item, i) => {
+                    // Normaliza o estado para minúsculo para bater com o objeto de config
+                    const status = (item.estado?.toLowerCase() ||
+                      "pendente") as keyof typeof statusConfig;
+                    const config =
+                      statusConfig[status] || statusConfig.pendente;
+
+                    return (
+                      <TableRow
+                        key={item.codigo || i}
+                        className="hover:bg-muted/50"
+                      >
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          {item.codigo}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {item.utilizador}
+                        </TableCell>
+                        <TableCell>{item.ano_lectivo}</TableCell>
+                        <TableCell>{item.curso}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={config.variant}
+                            className={config.className}
+                          >
+                            {config.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center font-semibold">
+                          {item.numero_orientados}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {item.data_cadastro}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </>
