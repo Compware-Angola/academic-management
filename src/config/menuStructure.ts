@@ -89,6 +89,8 @@ export const menuStructure: MenuStructure = {
 
       permission: [],
     },
+
+    
     // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
@@ -144,6 +146,8 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
+         { title: "Calendário de aulas", url: "/docente/calendario" },
+        // { title: "Horas de vigilância", url: "/docente/vigilancia" },
         // { title: "Calendário de aulas", url: "/docente/calendario" },
         {
           title: "Horas de vigilância",
@@ -688,6 +692,21 @@ export const assiduidade: MenuStructure = {
           permission: [
             PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
             PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+          ],
+        },
+        {
+          title: "Controle de Assuidade",
+          url: "/assiduidade/controle",
+          permission: [
+            PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
+            PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
+          ],
+        },
+        {
+          title: "Controle Geral de Assuidade por Docente",
+          url: "/assiduidade/docente",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla
           ],
         },
       ],

@@ -1,3 +1,8 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { useState } from "react";
 import {
   Card,
@@ -13,8 +18,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -23,64 +28,178 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Home, Search, Plus, CheckCircle2, Calendar, MapPin } from "lucide-react";
+import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { usePoloDropdown } from "@/hooks/shared/use-query-fetch-polo";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryStateLesson } from "@/hooks/use-fetch-state-lesson";
-// import outros hooks que você precise (turmas, disciplinas, alunos, etc.)
+import { useQueryControleAssiduidade } from "@/hooks/assiduidade/use-fetch-controle-assiduidade";
+import { Label } from "recharts";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+
+function SummaryCard({
+  title,
+  value,
+  className = "",
+  valueClassName = "",
+}: {
+  title: string;
+  value: number;
+  className?: string;
+  valueClassName?: string;
+}) {
+  return (
+    <Card className={className}>
+      <CardContent className="p-4">
+        <div className="text-sm text-muted-foreground">{title}</div>
+        <div className={`text-2xl font-bold mt-1 ${valueClassName}`}>
+          {value}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ControleAssiduidade() {
-  const { toast } = useToast();
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: anosAcademicos, isLoading: loadingAno } =
+    useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
-  const {
-      data: teachersData = [],
-  
-      refetch,
-      error,
-    } = useQueryTeacther();
-    const {
-        data: lessonState = [],
-    
-      } = useQueryStateLesson();
+  const { data: teachersData = [] } = useQueryTeacther();
+  const { data: lessonState = [] } = useQueryStateLesson();
 
-  const { data: polos, isLoading: loadingPolo } = usePoloDropdown();
-
-  // Filtros comuns / base (podem ser compartilhados ou separados por aba)
   const [filters, setFilters] = useState({
-    anoLetivo: "",
-    polo: "",
-    turma: "",           // pode vir de outro hook
-    disciplina: "",      // pode vir de outro hook
-    data: "",            // formato YYYY-MM-DD
+    docente: "",
+    dataInicial: "",
+    dataFinal: "",
+    estado: "",
+    anoLectivo: "",
+    semestre: "",
+    page: 1,
+    limit: 20,
   });
 
-  // Controla qual aba está ativa (útil para resetar filtros ou carregar dados diferentes)
-  const [activeTab, setActiveTab] = useState<"normal" | "prova" | "campo">("normal");
-
-  // Aqui você deve trazer as queries reais de acordo com o tipo
-  // Por enquanto usando placeholders
-  const isLoading = false; // substituir por isLoading real da query
-  const assiduidades = []; // substituir por dados reais (array paginado)
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    // resetar página se houver paginação
+  const handleFilterChange = (key: string, value: string | number) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      ...(key !== "page" ? { page: 1 } : {}),
+    }));
   };
 
-  const handleSearch = () => {
-    toast({
-      title: "Pesquisando...",
-      description: `Filtros: ${JSON.stringify(filters)}`,
+  const queryFilters = {
+    docente: filters.docente ? Number(filters.docente) : undefined,
+    dataInicial: filters.dataInicial || undefined,
+    dataFinal: filters.dataFinal || undefined,
+    estado: filters.estado ? Number(filters.estado) : undefined,
+    anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
+    semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    page: filters.page,
+    limit: filters.limit,
+  };
+
+  const { data: response, isLoading } =
+    useQueryControleAssiduidade(queryFilters, {
+      enabled:
+        !!queryFilters.docente &&
+        !!queryFilters.dataInicial &&
+        !!queryFilters.dataFinal,
     });
-    // chamar refetch / invalidate queries aqui
+
+  const aulas = response?.data ?? [];
+  const resumo = response?.resumo ?? {
+    marcacoesPendentes: 0,
+    presencasMarcadas: 0,
+    faltasMarcadas: 0,
   };
+
+  const total = response?.total ?? 0;
+  const totalPages = Math.ceil(total / filters.limit);
+
+  const exportRows = aulas.map((item: any) => ({
+    data: new Date(item.data_aula).toLocaleDateString(),
+    horario: `${item.hora_inicio} - ${item.hora_fim}`,
+    curso: item.curso,
+    unidade_curricular: item.unidade_curricular,
+    tempo: item.ordem_tempo,
+    docente: item.docente,
+    estado: item.estado_agendamento_designacao || "—",
+  }));
+
+  const pdfContent =
+    exportRows.length > 0 ? (
+      <GenericPDFDocument
+        documentTitle="Controle de Assiduidade"
+        subtitle="Relatório de aulas por docente"
+        infoSections={[
+          {
+            title: "Filtros Aplicados",
+            content: `
+Docente: ${filters.docente || "—"}
+Data Inicial: ${filters.dataInicial || "—"}
+Data Final: ${filters.dataFinal || "—"}
+            `,
+          },
+          {
+            title: "Resumo",
+            content: `
+Total de registos: ${total}
+Marcações Pendentes: ${resumo.marcacoesPendentes}
+Presenças Marcadas: ${resumo.presencasMarcadas}
+Faltas Marcadas: ${resumo.faltasMarcadas}
+            `,
+          },
+        ]}
+        mainTable={{
+          headers: [
+            { key: "data", label: "Data", width: "12%" },
+            { key: "horario", label: "Horário", width: "16%" },
+            { key: "curso", label: "Curso", width: "18%" },
+            { key: "unidade_curricular", label: "Unidade Curricular", width: "24%" },
+            { key: "tempo", label: "Tempo", width: "10%" },
+            { key: "docente", label: "Docente", width: "20%" },
+          ],
+          rows: exportRows,
+          headerBackground: "#1e40af",
+        }}
+        footerNotice="Documento gerado automaticamente pelo sistema."
+      />
+    ) : null;
+
+  const excelProps =
+    exportRows.length > 0
+      ? {
+          documentTitle: "Controle de Assiduidade",
+          subtitle: "Relatório de aulas por docente",
+          infoSections: [
+            {
+              title: "Resumo",
+              content: `
+Total de registos: ${total}
+Marcações Pendentes: ${resumo.marcacoesPendentes}
+Presenças Marcadas: ${resumo.presencasMarcadas}
+Faltas Marcadas: ${resumo.faltasMarcadas}
+              `,
+            },
+          ],
+          mainTable: {
+            headers: [
+              { key: "data", label: "Data", width: 18 },
+              { key: "horario", label: "Horário", width: 20 },
+              { key: "curso", label: "Curso", width: 22 },
+              { key: "unidade_curricular", label: "Unidade Curricular", width: 35 },
+              { key: "tempo", label: "Tempo", width: 12 },
+              { key: "docente", label: "Docente", width: 25 },
+              { key: "estado", label: "Estado", width: 20 },
+            ],
+            rows: exportRows,
+          },
+          footerNotice: "Documento gerado automaticamente pelo sistema.",
+          primaryColor: "#1e40af",
+        }
+      : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -99,202 +218,229 @@ export default function ControleAssiduidade() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Marcar Assiduidade</BreadcrumbPage>
+            <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Marcação de Assiduidade</h1>
-          <p className="text-muted-foreground">
-            Registo de presença  em aulas, provas e atividades de campo
-          </p>
-        </div>
-    
-      </div>
-
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => setActiveTab(v as typeof activeTab)}
-        className="w-full"
-      >
-        <TabsList className="grid w-full max-w-3xl grid-cols-3 mb-6">
-          <TabsTrigger value="normal" className="gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            Assiduidade Normal
-          </TabsTrigger>
-          <TabsTrigger value="prova" className="gap-2">
-            <Calendar className="h-4 w-4" />
-            Provas / Exames
-          </TabsTrigger>
-          <TabsTrigger value="campo" className="gap-2">
-            <MapPin className="h-4 w-4" />
-            Aulas de Campo
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Filtros comuns às 3 abas */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Filtros de Pesquisa</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4 md:flex-row md:items-end flex-wrap">
-              <div className="min-w-[220px]">
-                <FormSelect
-                  label="Ano Letivo"
-                  value={filters.anoLetivo}
-                  onChange={(v) => handleFilterChange("anoLetivo", v)}
-                  options={anosAcademicos ?? []}
-                  map={(a) => ({
-                    key: String(a.codigo),
-                    label: a.designacao,
-                    value: String(a.codigo),
-                  })}
-                  disabled={isLoadingAcademicYear}
-                  placeholder="Selecione o ano..."
-                />
-              </div>
-
-              <div className="min-w-[220px]">
-                <FormSelect
-                  label="Polo / Campus"
-                  value={filters.polo}
-                  onChange={(v) => handleFilterChange("polo", v)}
-                  options={polos ?? []}
-                  map={(p) => ({
-                    key: String(p.id),
-                    label: p.designacao,
-                    value: String(p.id),
-                  })}
-                  disabled={loadingPolo}
-                  placeholder="Selecione o campus..."
-                />
-              </div>
-
-              {/* Campos que você deve adaptar conforme suas entidades reais */}
-          
-
-           
-              <div className="min-w-[180px]">
-                <label className="text-sm font-medium">Data</label>
-                <Input
-                  type="date"
-                  value={filters.data}
-                  onChange={(e) => handleFilterChange("data", e.target.value)}
-                />
-              </div>
-
-              <Button onClick={handleSearch} className="mt-6 md:mt-0">
-                <Search className="mr-2 h-4 w-4" />
-                Filtrar
-              </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="space-y-1.5">
+              <Label>Docente</Label>
+              <FormCommandSelect
+                value={filters.docente}
+                options={teachersData ?? []}
+                map={(t) => ({
+                  key: String(t.codigo),
+                  label: t.nome,
+                  value: String(t.codigo),
+                })}
+                placeholder="Selecionar docente..."
+                onChange={(v) => handleFilterChange("docente", v)}
+              />
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Conteúdo das abas */}
-        <TabsContent value="normal">
-          <AssiduidadeTable
-            title="Aulas Normais / Diárias"
-            data={assiduidades}
-            isLoading={isLoading}
-            type="normal"
-          />
-        </TabsContent>
+            <div>
+              <label className="text-sm font-medium">Data Inicial *</label>
+              <Input
+                type="date"
+                value={filters.dataInicial}
+                onChange={(e) =>
+                  handleFilterChange("dataInicial", e.target.value)
+                }
+              />
+            </div>
 
-        <TabsContent value="prova">
-          <AssiduidadeTable
-            title="Provas, Testes e Exames"
-            data={assiduidades}
-            isLoading={isLoading}
-            type="prova"
-          />
-        </TabsContent>
+            <div>
+              <label className="text-sm font-medium">Data Final *</label>
+              <Input
+                type="date"
+                value={filters.dataFinal}
+                onChange={(e) =>
+                  handleFilterChange("dataFinal", e.target.value)
+                }
+              />
+            </div>
 
-        <TabsContent value="campo">
-          <AssiduidadeTable
-            title="Aulas de Campo"
-            data={assiduidades}
-            isLoading={isLoading}
-            type="campo"
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+            <FormSelect
+              label="Estado da Aula"
+              value={filters.estado}
+              onChange={(v) => handleFilterChange("estado", v)}
+              options={lessonState ?? []}
+              map={(e) => ({
+                key: String(e.PK_ESTADO_AGENDAMENTO),
+                label: e.DESIGNACAO,
+                value: String(e.PK_ESTADO_AGENDAMENTO),
+              })}
+            />
 
-// Componente auxiliar para evitar repetição (pode personalizar colunas por tipo)
-function AssiduidadeTable({
-  title,
-  data,
-  isLoading,
-  type,
-}: {
-  title: string;
-  data: any[];
-  isLoading: boolean;
-  type: "normal" | "prova" | "campo";
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Data</TableHead>
-              <TableHead>Turma</TableHead>
-              <TableHead>Disciplina</TableHead>
-              <TableHead>Docente</TableHead>
-              {type === "prova" && <TableHead>Tipo de Prova</TableHead>}
-              {type === "campo" && <TableHead>Local</TableHead>}
-              <TableHead>Presentes</TableHead>
-              <TableHead>Faltas</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+            <FormSelect
+              label="Ano Letivo"
+              value={filters.anoLectivo}
+              onChange={(v) => handleFilterChange("anoLectivo", v)}
+              options={anosAcademicos ?? []}
+              map={(a) => ({
+                key: String(a.codigo),
+                label: a.designacao,
+                value: String(a.codigo),
+              })}
+              disabled={loadingAno}
+            />
+
+            <FormSelect
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) => handleFilterChange("semestre", v)}
+              options={semestres ?? []}
+              map={(s) => ({
+                key: String(s.codigo),
+                label: s.designacao,
+                value: String(s.codigo),
+              })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {!!response && (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <SummaryCard
+      title="Marcações Pendentes"
+      value={response.resumo?.marcacoesPendentes ?? 0}
+      className="border-amber-500/30 bg-amber-500/5"
+      valueClassName="text-amber-700"
+    />
+
+    <SummaryCard
+      title="Presenças Marcadas"
+      value={response.resumo?.presencasMarcadas ?? 0}
+      className="border-emerald-500/30 bg-emerald-500/5"
+      valueClassName="text-emerald-700"
+    />
+
+    <SummaryCard
+      title="Faltas Marcadas"
+      value={response.resumo?.faltasMarcadas ?? 0}
+      className="border-red-500/30 bg-red-500/5"
+      valueClassName="text-red-700"
+    />
+  </div>
+)}
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Resultados</CardTitle>
+
+          {exportRows.length > 0 && (
+            <div className="flex gap-2">
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`Controle_Assiduidade_${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
+
+              {excelProps && (
+                <ExcelActions
+                  excelProps={excelProps}
+                  fileName={`Controle_Assiduidade_${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.xlsx`}
+                  showDownload
+                />
+              )}
+            </div>
+          )}
+        </CardHeader>
+
+        <CardContent>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
-                  A carregar registos...
-                </TableCell>
+                <TableHead>Data da Aula</TableHead>
+                <TableHead>Horário</TableHead>
+                <TableHead>Curso</TableHead>
+                <TableHead>Unidade Curricular</TableHead>
+                <TableHead>Tempo</TableHead>
+                <TableHead>Docente</TableHead>
               </TableRow>
-            ) : data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  Nenhum registo encontrado
-                </TableCell>
-              </TableRow>
-            ) : (
-              data.map((item, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{item.data}</TableCell>
-                  <TableCell>{item.turma}</TableCell>
-                  <TableCell>{item.disciplina}</TableCell>
-                  <TableCell>{item.docente}</TableCell>
-                  {type === "prova" && <TableCell>{item.tipoProva || "—"}</TableCell>}
-                  {type === "campo" && <TableCell>{item.local || "—"}</TableCell>}
-                  <TableCell className="text-green-600 font-medium">{item.presentes}</TableCell>
-                  <TableCell className="text-red-600 font-medium">{item.faltas}</TableCell>
-                  <TableCell className="text-right">
-                    <Button size="sm" variant="outline">
-                      Ver / Editar
-                    </Button>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    A carregar aulas...
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : aulas.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    Nenhuma aula encontrada
+                  </TableCell>
+                </TableRow>
+              ) : (
+                aulas.map((item: any) => (
+                  <TableRow key={item.codigo}>
+                    <TableCell>
+                      {new Date(item.data_aula).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {item.hora_inicio} - {item.hora_fim}
+                    </TableCell>
+                    <TableCell>{item.curso}</TableCell>
+                    <TableCell>{item.unidade_curricular}</TableCell>
+                    <TableCell>{item.ordem_tempo}</TableCell>
+                    <TableCell>{item.docente}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
 
-        {/* Aqui você coloca paginação quando implementar */}
-      </CardContent>
-    </Card>
+          {!isLoading && totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-sm text-muted-foreground">
+                Página {filters.page} de {totalPages} • {total} registos
+              </span>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={filters.page === 1}
+                  onClick={() =>
+                    handleFilterChange("page", filters.page - 1)
+                  }
+                >
+                  Anterior
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={filters.page >= totalPages}
+                  onClick={() =>
+                    handleFilterChange("page", filters.page + 1)
+                  }
+                >
+                  Próxima
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
