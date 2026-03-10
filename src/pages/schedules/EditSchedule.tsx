@@ -51,12 +51,10 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
-  { key: "docente", label: "Docente" },
   { key: "tipoAula", label: "Tipo de Aula" },
   { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
@@ -307,11 +305,11 @@ export function EditSchedule() {
     });
 
     if (aulasComConflito.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Conflito de horários detectado",
-        description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
-      });
+      // toast({
+      //   variant: "destructive",
+      //   title: "Conflito de horários detectado",
+      //   description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
+      // });
     }
 
     if (aulasSemConflito.length === 0) {
@@ -691,7 +689,7 @@ function gerarSiglaCurso(nome: string) {
   return nome
     .split(" ")
     .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
-    .map((p) => p[0].toUpperCase())
+    .map((p) => p[0]?.toUpperCase())
     .join("");
 }
 function mapBackendAulasToGrid(aulasBackend: any[]): AulaPayload[] {
@@ -712,10 +710,8 @@ export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   const ocupadas = new Set<string>();
 
   aulas.forEach((dia) => {
-    dia.tempos.forEach((tempo, index) => {
-      // backend não manda ordem, então usamos índice + 1
-      const ordem = index + 1;
-      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+    dia.tempos.forEach((tempo) => {
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${tempo.ordem_tempo}`;
       ocupadas.add(key);
     });
   });

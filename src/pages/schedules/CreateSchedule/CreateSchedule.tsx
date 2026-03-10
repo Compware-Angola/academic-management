@@ -663,12 +663,10 @@ function gerarSiglaCurso(nome: string) {
  */
 export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   const ocupadas = new Set<string>();
-
+  console.log({ aulas });
   aulas.forEach((dia) => {
-    dia.tempos.forEach((tempo, index) => {
-      // backend não manda ordem, então usamos índice + 1
-      const ordem = index + 1;
-      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+    dia.tempos.forEach((tempo) => {
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${tempo.ordem_tempo}`;
       ocupadas.add(key);
     });
   });
