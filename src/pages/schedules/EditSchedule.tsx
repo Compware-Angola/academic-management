@@ -51,12 +51,10 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
-  { key: "docente", label: "Docente" },
   { key: "tipoAula", label: "Tipo de Aula" },
   { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
@@ -201,7 +199,7 @@ export function EditSchedule() {
     if (!initialDataSchedule) return;
 
     const mapped = mapScheduleToFormData(initialDataSchedule);
-
+    console.log({ mapped, initialDataSchedule });
     // 🔹 Campos independentes
     setFormData((prev) => ({
       ...prev,
@@ -659,6 +657,7 @@ export function EditSchedule() {
 
 /* ------------------------------------------------------------------ */
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapScheduleToFormData(schedule: any) {
   const primeiraAula = schedule.aulas?.[0];
   return {
@@ -691,9 +690,10 @@ function gerarSiglaCurso(nome: string) {
   return nome
     .split(" ")
     .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
-    .map((p) => p[0].toUpperCase())
+    .map((p) => p[0]?.toUpperCase())
     .join("");
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapBackendAulasToGrid(aulasBackend: any[]): AulaPayload[] {
   if (!aulasBackend) return [];
 
@@ -713,9 +713,8 @@ export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
 
   aulas.forEach((dia) => {
     dia.tempos.forEach((tempo, index) => {
-      // backend não manda ordem, então usamos índice + 1
       const ordem = index + 1;
-      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${dia.diaSemana.ordem}-${tempo.horaInicio}-${tempo.horaFim}`;
       ocupadas.add(key);
     });
   });

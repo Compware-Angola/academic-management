@@ -27,14 +27,18 @@ export default function ScheduleGridEdit({
 }: ScheduleGridEditProps) {
   const { toast } = useToast();
   const [slotData, setSlotData] = useState<Record<SlotKey, AulaPayload>>({});
-  const isOcupada = (diaId: number, ordem: number) =>
-    ocupadas.has(`${diaId}-${ordem}`);
+  const isOcupada = (
+    diaId: number,
+    ordem: number,
+    horaInicio: string,
+    horaFim: string,
+  ) => ocupadas.has(`${diaId}-${ordem}-${horaInicio}-${horaFim}`);
 
   useEffect(() => {
     const initial: Record<SlotKey, AulaPayload> = {};
 
     aulasExistentes.forEach((aula) => {
-      const key = `${aula.diaSemana}-${aula.ordemTempo}`;
+      const key = `${aula.diaSemana}-${aula.ordemTempo}-${aula.hora_inicio}-${aula.hora_fim}`;
       initial[key] = aula;
     });
 
@@ -42,9 +46,11 @@ export default function ScheduleGridEdit({
   }, [aulasExistentes]);
 
   const toggleSlot = (dia: DiaSemana, tempo: Tempo) => {
-    const key = `${dia.pkDiaDaSemana}-${tempo.ordem}`;
+    const key = `${dia.pkDiaDaSemana}-${tempo.ordem}-${tempo.horaInicio}-${tempo.horaFim}`;
 
-    if (isOcupada(dia.pkDiaDaSemana, tempo.ordem)) {
+    if (
+      isOcupada(dia.pkDiaDaSemana, tempo.ordem, tempo.horaInicio, tempo.horaFim)
+    ) {
       toast({
         variant: "destructive",
         title: "Sala ocupada",
@@ -83,7 +89,13 @@ export default function ScheduleGridEdit({
     const updated = { ...slotData };
 
     const temposDisponiveis = tempos.filter(
-      (tempo) => !isOcupada(dia.pkDiaDaSemana, tempo.ordem),
+      (tempo) =>
+        !isOcupada(
+          dia.pkDiaDaSemana,
+          tempo.ordem,
+          tempo.horaInicio,
+          tempo.horaFim,
+        ),
     );
 
     if (temposDisponiveis.length === 0) {
@@ -122,8 +134,12 @@ export default function ScheduleGridEdit({
     onChange(Object.values(updated));
   };
 
-  const hasData = (diaId: number, ordem: number) =>
-    Boolean(slotData[`${diaId}-${ordem}`]);
+  const hasData = (
+    diaId: number,
+    ordem: number,
+    horaInicio: string,
+    horaFim: string,
+  ) => Boolean(slotData[`${diaId}-${ordem}-${horaInicio}-${horaFim}`]);
 
   const days = scheduleData.filter((item) => item.diaSemana);
 
@@ -131,7 +147,12 @@ export default function ScheduleGridEdit({
     <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {days.map((item) => {
         const allSelected = item.tempos.every((tempo) =>
-          hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem),
+          hasData(
+            item.diaSemana.pkDiaDaSemana,
+            tempo.ordem,
+            tempo.horaInicio,
+            tempo.horaFim,
+          ),
         );
 
         return (
@@ -174,10 +195,14 @@ export default function ScheduleGridEdit({
                 const filled = hasData(
                   item.diaSemana.pkDiaDaSemana,
                   tempo.ordem,
+                  tempo.horaInicio,
+                  tempo.horaFim,
                 );
                 const ocupada = isOcupada(
                   item.diaSemana.pkDiaDaSemana,
                   tempo.ordem,
+                  tempo.horaInicio,
+                  tempo.horaFim,
                 );
 
                 return (
