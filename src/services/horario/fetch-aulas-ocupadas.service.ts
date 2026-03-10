@@ -13,6 +13,7 @@ export type TempoOcupado = {
   codigoAula: number;
   tipoAula: string | null;
   periodo: string;
+  ordem_tempo: number;
 };
 
 export type AulasOcupadasPorDia = {

@@ -199,7 +199,7 @@ export function EditSchedule() {
     if (!initialDataSchedule) return;
 
     const mapped = mapScheduleToFormData(initialDataSchedule);
-    console.log({ mapped, initialDataSchedule });
+
     // 🔹 Campos independentes
     setFormData((prev) => ({
       ...prev,
@@ -305,11 +305,11 @@ export function EditSchedule() {
     });
 
     if (aulasComConflito.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Conflito de horários detectado",
-        description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
-      });
+      // toast({
+      //   variant: "destructive",
+      //   title: "Conflito de horários detectado",
+      //   description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
+      // });
     }
 
     if (aulasSemConflito.length === 0) {
@@ -657,7 +657,6 @@ export function EditSchedule() {
 
 /* ------------------------------------------------------------------ */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapScheduleToFormData(schedule: any) {
   const primeiraAula = schedule.aulas?.[0];
   return {
@@ -693,7 +692,6 @@ function gerarSiglaCurso(nome: string) {
     .map((p) => p[0]?.toUpperCase())
     .join("");
 }
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapBackendAulasToGrid(aulasBackend: any[]): AulaPayload[] {
   if (!aulasBackend) return [];
 
@@ -712,9 +710,8 @@ export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   const ocupadas = new Set<string>();
 
   aulas.forEach((dia) => {
-    dia.tempos.forEach((tempo, index) => {
-      const ordem = index + 1;
-      const key = `${dia.diaSemana.pkDiaDaSemana}-${dia.diaSemana.ordem}-${tempo.horaInicio}-${tempo.horaFim}`;
+    dia.tempos.forEach((tempo) => {
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${tempo.ordem_tempo}`;
       ocupadas.add(key);
     });
   });
