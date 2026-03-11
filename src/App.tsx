@@ -108,6 +108,7 @@ import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
 import ListarOrientadores from "./pages/defesa-tfc/ListarOrientadores";
 import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteContent";
 import ControleGeralPorDocente from "./pages/assiduidade";
+import GestaoAfectacao from "./pages/gestao-docente/GestaoAfectacao";
 
 const App = () => {
   return (
@@ -332,7 +333,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
                         ]}
                       >
                         <ControleAssiduidade />
@@ -345,7 +346,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
                         ]}
                       >
                         <ControleGeralPorDocente />
@@ -727,8 +728,6 @@ const App = () => {
                     }
                   />
 
-                  
-
                   <Route
                     path="/horarios/movimentar/estudantes"
                     element={
@@ -1051,6 +1050,18 @@ const App = () => {
                         ]}
                       >
                         <HorasVigilancia />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/gestao-docente/afectacoes"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_AFETACOES.sigla!,
+                        ]}
+                      >
+                        <GestaoAfectacao />
                       </ProtectedRoute>
                     }
                   />

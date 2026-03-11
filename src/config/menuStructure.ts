@@ -12,6 +12,7 @@ import {
   LibraryBig,
   GraduationCap,
   FileText,
+  BookUser,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -90,7 +91,6 @@ export const menuStructure: MenuStructure = {
       permission: [],
     },
 
-    
     // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
@@ -146,7 +146,7 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
-         { title: "Calendário de aulas", url: "/docente/calendario" },
+        { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
         // { title: "Calendário de aulas", url: "/docente/calendario" },
         {
@@ -656,6 +656,23 @@ export const suporteStructure: MenuStructure = {
     },
   ],
 };
+export const gestaoDocente: MenuStructure = {
+  items: [
+    {
+      title: "Gestão de Docente",
+      url: "/gestao-docente",
+      icon: BookUser,
+      items: [
+        {
+          title: "Gestão de Afectação",
+          url: "/gestao-docente/afectacoes",
+          permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
+        },
+      ],
+      permission: [],
+    },
+  ],
+};
 export const defenseTFC: MenuStructure = {
   items: [
     {
@@ -673,7 +690,7 @@ export const defenseTFC: MenuStructure = {
           title: "Orientadores",
           url: "/defesa-tfc/orientadores",
           permission: [PermissionTypeDetails.DEFESA.sigla],
-        }
+        },
       ],
     },
   ],
@@ -706,7 +723,7 @@ export const assiduidade: MenuStructure = {
           title: "Controle Geral de Assuidade por Docente",
           url: "/assiduidade/docente",
           permission: [
-            PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla
+            PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla,
           ],
         },
       ],
@@ -716,9 +733,6 @@ export const assiduidade: MenuStructure = {
       url: "/gestao-docentes",
       icon: FileText,
       items: [
-
-      
-      
         {
           title: "Aulas Agendadas",
           url: "/sumario/aulas-agendadas",
@@ -731,13 +745,12 @@ export const assiduidade: MenuStructure = {
             PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
           ],
         },
-         { title: "Listar Sumários", url: "/sumario/listar" },
+        { title: "Listar Sumários", url: "/sumario/listar" },
         {
           title: "Parâmetros",
           url: "/sumario/parametros",
           permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
         },
-       
       ],
       permission: [],
     },
