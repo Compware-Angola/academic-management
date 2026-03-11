@@ -1,16 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, Loader2, LucideLoader2, Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-
 import { FormSelect } from "@/components/common/FormSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-
 import { useQueryScheduleDetails } from "@/hooks/horario/use-query-schedule-details";
 import { useUpdateSchedule } from "@/hooks/horario/use-update-schedule";
-
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
@@ -49,6 +46,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { parseFilter } from "@/util/parse-filter";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
   { key: "anoLetivo", label: "Ano Letivo" },
@@ -188,6 +186,8 @@ export function EditSchedule() {
     salaId: formData.sala,
     anoLectivo: formData.anoLetivo,
     periodo: formData.periodo,
+    semestre: formData.semestre,
+    horarioId:scheduleId
   });
   const ocupadasSet = useMemo(
     () => mapOcupacaoPorChave(aulasOcupadas),
@@ -279,14 +279,13 @@ export function EditSchedule() {
         return false;
       }
     }
-
     if (!aulas.length) {
-      toast({
-        variant: "destructive",
-        title: "Horário vazio",
-        description: "Selecione pelo menos uma aula.",
-      });
-      return false;
+      // toast({
+      //   variant: "destructive",
+      //   title: "Horário vazio",
+      //   description: "Selecione pelo menos uma aula.",
+      // });
+      // return false;
     }
 
     return true;
@@ -294,7 +293,7 @@ export function EditSchedule() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     validateForm();
-    const aulasSemConflito = aulas.filter((aula) => {
+    let aulasSemConflito = aulas.filter((aula) => {
       const key = `${aula.diaSemana}-${aula.ordemTempo}`;
       return !ocupadasSet.has(key);
     });
@@ -313,12 +312,12 @@ export function EditSchedule() {
     }
 
     if (aulasSemConflito.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Nenhuma aula válida",
-        description: "Remova os conflitos antes de guardar o horário.",
-      });
-      return;
+      // toast({
+      //   variant: "destructive",
+      //   title: "Nenhuma aula válida",
+      //   description: "Remova os conflitos antes de guardar o horário.",
+      // });
+      aulasSemConflito = [];
     }
 
     await updateSchedule.mutateAsync({
@@ -337,7 +336,7 @@ export function EditSchedule() {
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
         tipoAula: Number(formData.tipoAula),
         sala: Number(formData.sala),
-        docente: Number(formData.docente),
+        docente: parseFilter(formData.docente),
         aulas: aulasSemConflito,
       },
     });
@@ -347,10 +346,9 @@ export function EditSchedule() {
   };
 
   /* ------------------------- UI ------------------------- */
-  const isFormComplete =
-    requiredFields.every(
-      (f) => !isEmpty(formData[f.key as keyof typeof formData]),
-    ) && aulas.length > 0;
+  const isFormComplete = requiredFields.every(
+    (f) => !isEmpty(formData[f.key as keyof typeof formData]),
+  );
   if (isLoadingAcademicYear || isLoadingScheduleCreationPrompt || isLoading) {
     return (
       <div className="flex justify-center items-center">

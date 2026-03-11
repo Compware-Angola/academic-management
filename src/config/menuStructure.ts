@@ -171,23 +171,9 @@ export const menuStructure: MenuStructure = {
 
       permission: [],
     },
-    /* ----------------------------------------------------
+   
     // ----------------------------------------------------
-    // TFC
-    // ----------------------------------------------------
-    {
-      title: "Gestão de Defesas e TFC",
-      url: "/tfc",
-      icon: BookMarked,
-      items: [
-        { title: "Finalistas", url: "/tfc/finalistas" },
-        { title: "Orientadores", url: "/tfc/orientadores" },
-        { title: "Pagamentos TFC", url: "/tfc/pagamentos" },
-      ],
-
-      permission: ["adm", "rootAdmin"],
-    },
-
+  
     // ----------------------------------------------------
     // GESTÃO DE DOCENTES
     // ----------------------------------------------------
@@ -196,24 +182,23 @@ export const menuStructure: MenuStructure = {
       url: "/gestao-docentes",
       icon: GraduationCap,
       items: [
-        { title: "Atualização de dados", url: "/gestao-docentes/atualizacao" },
-        { title: "Alterar senha", url: "/gestao-docentes/senha" },
-        { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
-        { title: "Afetações", url: "/gestao-docentes/afetacoes" },
-        { title: "Contratos", url: "/gestao-docentes/contratos" },
-        { title: "Listagem geral", url: "/gestao-docentes/listagem" },
-        { title: "Regentes", url: "/gestao-docentes/regentes" },
-        { title: "Afetados", url: "/gestao-docentes/afetados" },
-        { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
-        { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
+
+       // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
+       // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
+       // { title: "Contratos", url: "/gestao-docentes/contratos" },
+      //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
+       // { title: "Regentes", url: "/gestao-docentes/regentes" },
+       // { title: "Afetados", url: "/gestao-docentes/afetados" },
+       // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
+       // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
         { title: "Parâmetros", url: "/gestao-docentes/parametros" },
         { title: "Salário", url: "/gestao-docentes/salario" },
-        { title: "Validação docente", url: "/gestao-docentes/validacao" },
+        //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
       ],
 
-      permission: ["adm", "rootAdmin"],
+      permission: [],
     },
-
+ /* ----------------------------------------------------
 
     // ----------------------------------------------------
     // INSCRIÇÕES E MATRÍCULA
