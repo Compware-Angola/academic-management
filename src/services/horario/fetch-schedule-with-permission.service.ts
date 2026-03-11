@@ -1,22 +1,22 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { normalizeParam } from "@/util/normalize-param";
+
+import { parseFilter } from "@/util/parse-filter";
 
 /* =======================
  * PARAMS
  * ======================= */
 export type ScheduleWIthPermissionParams = {
-  anoLectivo: number;
-  semestre?: number;
-  periodo?: number;
-  curso?: number;
-  anoCurricular?: number;
-  unidadeCurricular?: number;
-  estado?: number;
-  afetacaoDocente?: number;
+  anoLectivo: string;
+  semestre?: string;
+  periodo?: string;
+  curso?: string;
+  anoCurricular?: string;
+  unidadeCurricular?: string;
+  estado?: string;
+  afetacaoDocente?: string;
   page?: number;
   limit?: number;
 };
-
 /* =======================
  * PERMISSAO
  * ======================= */
@@ -90,14 +90,14 @@ export const fetchScheduleWithSchedule = async (
     unidadeCurricular,
   } = payload;
   const params = {
-    anoLectivo: normalizeParam(anoLectivo),
-    semestre: normalizeParam(semestre),
-    periodo: normalizeParam(periodo),
-    curso: normalizeParam(curso),
-    anoCurricular: normalizeParam(anoCurricular),
-    unidadeCurricular: normalizeParam(unidadeCurricular),
-    estado: normalizeParam(estado),
-    afetacaoDocente: normalizeParam(afetacaoDocente),
+    anoLectivo: parseFilter(anoLectivo),
+    semestre: parseFilter(semestre),
+    periodo: parseFilter(periodo),
+    curso: parseFilter(curso),
+    anoCurricular: parseFilter(anoCurricular),
+    unidadeCurricular: parseFilter(unidadeCurricular),
+    estado: parseFilter(estado),
+    afetacaoDocente: parseFilter(afetacaoDocente),
     page,
     limit,
   };
