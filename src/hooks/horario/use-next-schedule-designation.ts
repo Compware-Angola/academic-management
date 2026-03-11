@@ -33,6 +33,8 @@ export const useNextScheduleDesignation = ( params:Params, autoLoad=true ) => {
 
       return gerarDesignacao(base, response);
     },
+    staleTime: 0,
+    gcTime: 0,
     enabled: !!base && !!periodo && !!anoLectivo && autoLoad, 
     retry: 1,
   });
