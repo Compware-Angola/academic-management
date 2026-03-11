@@ -188,6 +188,7 @@ export function EditSchedule() {
     salaId: formData.sala,
     anoLectivo: formData.anoLetivo,
     periodo: formData.periodo,
+    semetre:formData.semestre,
   });
   const ocupadasSet = useMemo(
     () => mapOcupacaoPorChave(aulasOcupadas),
