@@ -108,6 +108,8 @@ import AssiduidadeDocente from "./pages/docente/AssiduidadeDocente";
 import ListarOrientadores from "./pages/defesa-tfc/ListarOrientadores";
 import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteContent";
 import ControleGeralPorDocente from "./pages/assiduidade";
+import Parametros from "./pages/gestao_docente/Parametros";
+import SalarioDocente from "./pages/gestao_docente/Salario_docente";
 import GestaoAfectacao from "./pages/gestao-docente/GestaoAfectacao";
 
 const App = () => {
@@ -181,6 +183,14 @@ const App = () => {
                   <Route
                     path="/comunicacao/avisos/imagem"
                     element={<UploadImagem />}
+                  />
+                  <Route
+                    path="/gestao-docentes/parametros"
+                    element={<Parametros />}
+                  />
+                  <Route
+                    path="/gestao-docentes/salario"
+                    element={<SalarioDocente />}
                   />
                   <Route
                     path="/financas/notas-pagamento/liquidar/:codigo"

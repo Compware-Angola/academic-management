@@ -8,6 +8,7 @@ type UseAulasOcupadasParams = {
   salaId?: string;
   anoLectivo?: string;
   periodo?: string;
+  semetre?:string;
 };
 
 export function useQueryAulasOcupadas(params: UseAulasOcupadasParams = {}) {
@@ -17,6 +18,7 @@ export function useQueryAulasOcupadas(params: UseAulasOcupadasParams = {}) {
       params.salaId,
       params.anoLectivo,
       params.periodo,
+      params.semetre,
     ],
     queryFn: async () => {
       if (!params.salaId || !params.anoLectivo || !params.periodo) {
@@ -27,6 +29,7 @@ export function useQueryAulasOcupadas(params: UseAulasOcupadasParams = {}) {
         salaId: Number(params.salaId),
         anoLectivo: Number(params.anoLectivo),
         periodo: Number(params.periodo),
+        semetre: Number(params.semetre),
       });
     },
     enabled: !!params.salaId && !!params.anoLectivo && !!params.periodo,

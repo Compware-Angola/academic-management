@@ -1,16 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, Loader2, LucideLoader2, Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-
 import { FormSelect } from "@/components/common/FormSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-
 import { useQueryScheduleDetails } from "@/hooks/horario/use-query-schedule-details";
 import { useUpdateSchedule } from "@/hooks/horario/use-update-schedule";
-
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
@@ -49,14 +46,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { parseFilter } from "@/util/parse-filter";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
-  { key: "docente", label: "Docente" },
   { key: "tipoAula", label: "Tipo de Aula" },
   { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
@@ -190,6 +186,7 @@ export function EditSchedule() {
     salaId: formData.sala,
     anoLectivo: formData.anoLetivo,
     periodo: formData.periodo,
+    semetre: formData.semestre,
   });
   const ocupadasSet = useMemo(
     () => mapOcupacaoPorChave(aulasOcupadas),
@@ -281,14 +278,13 @@ export function EditSchedule() {
         return false;
       }
     }
-
     if (!aulas.length) {
-      toast({
-        variant: "destructive",
-        title: "Horário vazio",
-        description: "Selecione pelo menos uma aula.",
-      });
-      return false;
+      // toast({
+      //   variant: "destructive",
+      //   title: "Horário vazio",
+      //   description: "Selecione pelo menos uma aula.",
+      // });
+      // return false;
     }
 
     return true;
@@ -296,7 +292,7 @@ export function EditSchedule() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     validateForm();
-    const aulasSemConflito = aulas.filter((aula) => {
+    let aulasSemConflito = aulas.filter((aula) => {
       const key = `${aula.diaSemana}-${aula.ordemTempo}`;
       return !ocupadasSet.has(key);
     });
@@ -307,20 +303,20 @@ export function EditSchedule() {
     });
 
     if (aulasComConflito.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Conflito de horários detectado",
-        description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
-      });
+      // toast({
+      //   variant: "destructive",
+      //   title: "Conflito de horários detectado",
+      //   description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
+      // });
     }
 
     if (aulasSemConflito.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Nenhuma aula válida",
-        description: "Remova os conflitos antes de guardar o horário.",
-      });
-      return;
+      // toast({
+      //   variant: "destructive",
+      //   title: "Nenhuma aula válida",
+      //   description: "Remova os conflitos antes de guardar o horário.",
+      // });
+      aulasSemConflito = [];
     }
 
     await updateSchedule.mutateAsync({
@@ -339,7 +335,7 @@ export function EditSchedule() {
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
         tipoAula: Number(formData.tipoAula),
         sala: Number(formData.sala),
-        docente: Number(formData.docente),
+        docente: parseFilter(formData.docente),
         aulas: aulasSemConflito,
       },
     });
@@ -349,10 +345,9 @@ export function EditSchedule() {
   };
 
   /* ------------------------- UI ------------------------- */
-  const isFormComplete =
-    requiredFields.every(
-      (f) => !isEmpty(formData[f.key as keyof typeof formData]),
-    ) && aulas.length > 0;
+  const isFormComplete = requiredFields.every(
+    (f) => !isEmpty(formData[f.key as keyof typeof formData]),
+  );
   if (isLoadingAcademicYear || isLoadingScheduleCreationPrompt || isLoading) {
     return (
       <div className="flex justify-center items-center">
@@ -691,7 +686,7 @@ function gerarSiglaCurso(nome: string) {
   return nome
     .split(" ")
     .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
-    .map((p) => p[0].toUpperCase())
+    .map((p) => p[0]?.toUpperCase())
     .join("");
 }
 function mapBackendAulasToGrid(aulasBackend: any[]): AulaPayload[] {
@@ -712,10 +707,8 @@ export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   const ocupadas = new Set<string>();
 
   aulas.forEach((dia) => {
-    dia.tempos.forEach((tempo, index) => {
-      // backend não manda ordem, então usamos índice + 1
-      const ordem = index + 1;
-      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+    dia.tempos.forEach((tempo) => {
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${tempo.ordem_tempo}`;
       ocupadas.add(key);
     });
   });
