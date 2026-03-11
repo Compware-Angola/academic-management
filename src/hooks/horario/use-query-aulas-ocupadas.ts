@@ -11,7 +11,6 @@ type UseAulasOcupadasParams = {
   semestre?:string;
   horarioId?:number
 };
-
 export function useQueryAulasOcupadas(params: UseAulasOcupadasParams = {}) {
   return useQuery<AulasOcupadasPorDia[], Error>({
     queryKey: [
@@ -32,7 +31,9 @@ export function useQueryAulasOcupadas(params: UseAulasOcupadasParams = {}) {
         anoLectivo: Number(params.anoLectivo),
         periodo: Number(params.periodo),
         semestre: Number(params.semestre),
-        horarioId:Number(params.horarioId)
+        ...(params.horarioId !== undefined && {
+          horarioId: Number(params.horarioId),
+        }),
       });
     },
     enabled: !!params.salaId && !!params.anoLectivo && !!params.periodo,
