@@ -29,19 +29,21 @@ type FetchAulasOcupadasParams = {
   salaId: number;
   anoLectivo: number;
   periodo: number;
-  semetre:number;
+  semestre:number;
+  horarioId?:number
 };
 
 export async function fetchAulasOcupadas({
   salaId,
   anoLectivo,
   periodo,
-  semetre,
+  semestre,
+  horarioId
 }: FetchAulasOcupadasParams): Promise<AulasOcupadasPorDia[]> {
   const { data } = await axiosNestGa.get<FetchAulasOcupadasResponse>(
     `/schedule/aulas-ocupadas/${salaId}`,
     {
-      params: { anoLectivo, periodo,semetre },
+      params: { anoLectivo, periodo,semestre,horarioId },
     },
   );
 

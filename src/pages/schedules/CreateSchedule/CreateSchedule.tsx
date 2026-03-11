@@ -172,7 +172,7 @@ export default function CreateSchedule() {
     salaId: formData.sala,
     anoLectivo: formData.anoLetivo,
     periodo: formData.periodo,
-    semetre:formData.semestre,
+    semestre:formData.semestre,
   });
 
   const ocupadasSet = useMemo(
