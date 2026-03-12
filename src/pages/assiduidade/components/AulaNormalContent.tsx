@@ -126,19 +126,19 @@ export default function AulaNormalContent() {
     semestre: filters.semestre,
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
-const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltroAssiduidade(
-  {
-    ...(filters.docente && { docente: Number(filters.docente) }),
-    ...(filters.unidadeCurricular && { unidadeCurricular: Number(filters.unidadeCurricular) }),
-    ...(filters.dataInicio && { dataInicial: filters.dataInicio }),
-    ...(filters.dataFim && { dataFinal: filters.dataFim }),
-    ...(filters.estado && { estado: Number(filters.estado) }),
-    ...(filters.anoLectivo && { anoLectivo: Number(filters.anoLectivo) }),
-    ...(filters.semestre && { semestre: Number(filters.semestre) }),
-    ...(filters.page && { page: filters.page }),
-    ...(filters.limit && { limit: filters.limit }),
-  }
-);
+  const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltroAssiduidade(
+    {
+      ...(filters.docente && { docente: Number(filters.docente) }),
+      ...(filters.unidadeCurricular && { unidadeCurricular: Number(filters.unidadeCurricular) }),
+      ...(filters.dataInicio && { dataInicial: filters.dataInicio }),
+      ...(filters.dataFim && { dataFinal: filters.dataFim }),
+      ...(filters.estado && filters.estado !== "" && { estado: Number(filters.estado) }),
+      ...(filters.anoLectivo && filters.anoLectivo !== "" && { anoLectivo: Number(filters.anoLectivo) }),
+      ...(filters.semestre && filters.semestre !== "" && { semestre: Number(filters.semestre) }),
+      ...(filters.page && { page: filters.page }),
+      ...(filters.limit && { limit: filters.limit }),
+    }
+  );
 
   const { data: cursos } = useCursos();
 
