@@ -111,6 +111,7 @@ import ControleGeralPorDocente from "./pages/assiduidade";
 import Parametros from "./pages/gestao_docente/Parametros";
 import SalarioDocente from "./pages/gestao_docente/Salario_docente";
 import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
+import { DocenteAfectacao } from "./pages/gestao_docente/DocenteAfectacao";
 
 const App = () => {
   return (
@@ -1072,6 +1073,18 @@ const App = () => {
                         ]}
                       >
                         <GestaoAfectacao />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/gestao-docente/docente-afectados"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_AFETACOES.sigla!,
+                        ]}
+                      >
+                        <DocenteAfectacao />
                       </ProtectedRoute>
                     }
                   />

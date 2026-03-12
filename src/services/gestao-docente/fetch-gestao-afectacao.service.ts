@@ -1,6 +1,6 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-export type ListAfectacaoDocentesPayload = {
+export type ListGestaoAfectacaoDocentesPayload = {
   anoLectivo: number;
   semestre?: number;
   unidadeCurricular?: number;
@@ -11,7 +11,7 @@ export type ListAfectacaoDocentesPayload = {
   limit?: number;
 };
 
-export type AfectacaoDocenteItem = {
+export type GestaoAfectacaoDocenteItem = {
   codigo: number;
   anolectivo: string;
   uc: string;
@@ -26,17 +26,17 @@ export type AfectacaoDocenteItem = {
   estado: number;
 };
 
-export type ListAfectacaoDocentesResponse = {
-  data: AfectacaoDocenteItem[];
+export type ListGestaoAfectacaoDocentesResponse = {
+  data: GestaoAfectacaoDocenteItem[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
 };
 
-export async function getListAfectacaoDocentesService(
-  payload: ListAfectacaoDocentesPayload,
-): Promise<ListAfectacaoDocentesResponse> {
+export async function getListGestaoAfectacaoDocentesService(
+  payload: ListGestaoAfectacaoDocentesPayload,
+): Promise<ListGestaoAfectacaoDocentesResponse> {
   const {
     anoLectivo,
     semestre,
@@ -48,7 +48,7 @@ export async function getListAfectacaoDocentesService(
     limit = 25,
   } = payload;
 
-  const { data } = await axiosNestGa.get<ListAfectacaoDocentesResponse>(
+  const { data } = await axiosNestGa.get<ListGestaoAfectacaoDocentesResponse>(
     "/docente-gestao/afectacao",
     {
       params: {

@@ -28,8 +28,11 @@ import { Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useId, useState } from "react";
 import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mutation-update-afectacao-status";
+import { Input } from "@/components/ui/input";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryDocentesAfectacao } from "@/hooks/gestao_docente/use-query-docentes-afectacao";
 
-const GestaoAfectacaoPorDocente = () => {
+const DocenteAfectacao = () => {
   const id = useId();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -38,57 +41,29 @@ const GestaoAfectacaoPorDocente = () => {
     anoLectivo: "23",
     semestre: "",
     docente: "",
+    tipoAfectacao: "",
   });
-  const defaultSelectItem = [
+  const tipoAfectados = [
     {
-      label: "Todos",
-      value: "all",
-      key: id,
+      key: "1",
+      label: "Com Afectação",
+    },
+    {
+      key: "2",
+      label: "Sem Afectação",
     },
   ];
+
   const { data: teachersData = [] } = useQueryTeacther();
-  const { data: afectacoesResponse, isLoading } =
-    useQueryGestaoAfectacaoDocentes({
-      anoLectivo: parseFilter(filters.anoLectivo),
-      docente: parseFilter(filters.docente),
-      semestre: parseFilter(filters.semestre),
-      limit,
-      page,
-    });
+  const { data: afectacoesResponse, isLoading } = useQueryDocentesAfectacao({
+    anoLectivo: parseFilter(filters.anoLectivo),
+    docente: parseFilter(filters.docente),
+    tipoAfectacao: parseFilter(filters.tipoAfectacao),
+    semestre: parseFilter(filters.semestre),
+    limit,
+    page,
+  });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Pendente":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            Pendente
-          </Badge>
-        );
-      case "Aprovado":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Aprovado
-          </Badge>
-        );
-
-      case "Regeitado":
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            Regeitado
-          </Badge>
-        );
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-  const updateAfectacaoStatus = (codigo: number, status: boolean) => {
-    mutateAsync({
-      codigo,
-      payload: {
-        status: +status,
-      },
-    });
-  };
   const afectacoes = afectacoesResponse?.data ?? [];
   const total = afectacoesResponse?.total;
   const totalPages = afectacoesResponse?.totalPages;
@@ -112,6 +87,7 @@ const GestaoAfectacaoPorDocente = () => {
             <div className="space-y-1.5">
               <Label>Docente</Label>
               <FormCommandSelect
+                width="full"
                 value={filters.docente}
                 options={teachersData}
                 map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
@@ -120,6 +96,25 @@ const GestaoAfectacaoPorDocente = () => {
                 }
               />
             </div>
+            <div>
+              <Label>Data Inicio</Label>
+              <Input placeholder="Data inicial" type="date" />
+            </div>
+            <div>
+              <Label>Data Fim</Label>
+              <Input placeholder="Data inicial" type="date" />
+            </div>
+            <FormSelect
+              label="Afectação"
+              value={filters.tipoAfectacao}
+              onChange={(v) => setFilters({ ...filters, tipoAfectacao: v })}
+              options={tipoAfectados}
+              map={(a) => ({
+                key: a.key,
+                label: a.label,
+                value: a.key,
+              })}
+            />
           </div>
         </CardContent>
       </Card>
@@ -146,37 +141,14 @@ const GestaoAfectacaoPorDocente = () => {
                       <TableHead>Código</TableHead>
                       <TableHead>Docente</TableHead>
                       <TableHead>Semestre</TableHead>
-                      <TableHead>Ano Curricular</TableHead>
-                      <TableHead>UC</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Afectado Por</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Estado</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {afectacoes.map((item) => (
-                      <TableRow key={item.codigo}>
-                        <TableCell>{item.codigo}</TableCell>
+                      <TableRow key={item.codigo_docente}>
+                        <TableCell>{item.codigo_docente}</TableCell>
                         <TableCell>{item.docente}</TableCell>
-                        <TableCell>{item.semestre}</TableCell>
-                        <TableCell>{item.classe}</TableCell>
-                        <TableCell> {item.uc}</TableCell>
-                        <TableCell>{item.categoria}</TableCell>
-                        <TableCell>{item.afectadopor}</TableCell>
-
-                        <TableCell className="text-center flex space-x-2">
-                          {formatarData(item.data)}
-                        </TableCell>
-                        <TableCell>
-                          <Switch
-                            onCheckedChange={(v) =>
-                              updateAfectacaoStatus(item.codigo, v)
-                            }
-                            id="deleted-mode"
-                            checked={item.estado == 1}
-                          />
-                        </TableCell>
+                        <TableCell>{item.mecanografico}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -233,4 +205,4 @@ const GestaoAfectacaoPorDocente = () => {
     </>
   );
 };
-export { GestaoAfectacaoPorDocente };
+export { DocenteAfectacao };

@@ -1,10 +1,8 @@
-import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -20,14 +18,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQueryAfectacaoDocentes } from "@/hooks/gestao-docente/use-query-afectacao.service";
+import { useQueryGestaoAfectacaoDocentes } from "@/hooks/gestao_docente/use-query-gestao-afectacao.service";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
 import { Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useId, useState } from "react";
-import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao-docente/use-mutation-update-afectacao-status";
+import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mutation-update-afectacao-status";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
@@ -47,16 +45,17 @@ const GestaoAfectacaoPorUC = () => {
   });
 
   const { data: teachersData = [] } = useQueryTeacther();
-  const { data: afectacoesResponse, isLoading } = useQueryAfectacaoDocentes({
-    anoLectivo: parseFilter(filters.anoLectivo),
-    docente: parseFilter(filters.docente),
-    semestre: parseFilter(filters.semestre),
-    curso: parseFilter(filters.curso),
-    anoCurricular: parseFilter(filters.anoCurricular),
-    unidadeCurricular: parseFilter(filters.unidadeCurricular),
-    limit,
-    page,
-  });
+  const { data: afectacoesResponse, isLoading } =
+    useQueryGestaoAfectacaoDocentes({
+      anoLectivo: parseFilter(filters.anoLectivo),
+      docente: parseFilter(filters.docente),
+      semestre: parseFilter(filters.semestre),
+      curso: parseFilter(filters.curso),
+      anoCurricular: parseFilter(filters.anoCurricular),
+      unidadeCurricular: parseFilter(filters.unidadeCurricular),
+      limit,
+      page,
+    });
 
   const getStatusBadge = (status: string) => {
     switch (status) {

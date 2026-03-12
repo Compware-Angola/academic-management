@@ -171,9 +171,9 @@ export const menuStructure: MenuStructure = {
 
       permission: [],
     },
-   
+
     // ----------------------------------------------------
-  
+
     // ----------------------------------------------------
     // GESTÃO DE DOCENTES
     // ----------------------------------------------------
@@ -182,15 +182,14 @@ export const menuStructure: MenuStructure = {
       url: "/gestao-docentes",
       icon: GraduationCap,
       items: [
-
-       // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
-       // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
-       // { title: "Contratos", url: "/gestao-docentes/contratos" },
-      //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
-       // { title: "Regentes", url: "/gestao-docentes/regentes" },
-       // { title: "Afetados", url: "/gestao-docentes/afetados" },
-       // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
-       // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
+        // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
+        // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
+        // { title: "Contratos", url: "/gestao-docentes/contratos" },
+        //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
+        // { title: "Regentes", url: "/gestao-docentes/regentes" },
+        // { title: "Afetados", url: "/gestao-docentes/afetados" },
+        // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
+        // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
         { title: "Parâmetros", url: "/gestao-docentes/parametros" },
         { title: "Salário", url: "/gestao-docentes/salario" },
         //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
@@ -198,7 +197,7 @@ export const menuStructure: MenuStructure = {
 
       permission: [],
     },
- /* ----------------------------------------------------
+    /* ----------------------------------------------------
 
     // ----------------------------------------------------
     // INSCRIÇÕES E MATRÍCULA
@@ -651,6 +650,11 @@ export const gestaoDocente: MenuStructure = {
         {
           title: "Gestão de Afectação",
           url: "/gestao-docente/afectacoes",
+          permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
+        },
+        {
+          title: "Docente Afectados",
+          url: "/gestao-docente/docente-afectados",
           permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
         },
       ],
