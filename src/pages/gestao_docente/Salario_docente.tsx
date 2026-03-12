@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
@@ -13,131 +12,17 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-interface ControleItem {
-  codigo: string;
-  aula: string;
-  uc: string;
-  docente: string;
-  data: string;
-  horario: string;
-  turma: string;
-  sala: string;
-  estado: "agendada" | "em_curso" | "concluida" | "cancelada";
-  sumarios: {
-    pendentes: number;
-    lancados: number;
-    total: number;
-  };
-  assiduidades: {
-    pendentes: number;
-    presenca: number;
-    falta: number;
-    total: number;
-  };
-  sumariosComAssiduidade: number;
-}
 
-const mockData: ControleItem[] = [
-  {
-    codigo: "AG-001", aula: "Aula 01", uc: "Programação I", docente: "Prof. Manuel Santos",
-    data: "2025-03-10", horario: "08:00 - 10:00", turma: "T1-EI", sala: "Sala A101", estado: "concluida",
-    sumarios: { pendentes: 0, lancados: 3, total: 3 },
-    assiduidades: { pendentes: 0, presenca: 28, falta: 2, total: 30 },
-    sumariosComAssiduidade: 3,
-  },
-  {
-    codigo: "AG-002", aula: "Aula 02", uc: "Bases de Dados", docente: "Prof.ª Ana Ferreira",
-    data: "2025-03-10", horario: "10:30 - 12:30", turma: "T2-EI", sala: "Lab. Info 1", estado: "concluida",
-    sumarios: { pendentes: 1, lancados: 2, total: 3 },
-    assiduidades: { pendentes: 2, presenca: 25, falta: 3, total: 30 },
-    sumariosComAssiduidade: 2,
-  },
-  {
-    codigo: "AG-003", aula: "Aula 03", uc: "Matemática Discreta", docente: "Prof. João Baptista",
-    data: "2025-03-11", horario: "08:00 - 10:00", turma: "T1-EI", sala: "Sala B203", estado: "agendada",
-    sumarios: { pendentes: 3, lancados: 0, total: 3 },
-    assiduidades: { pendentes: 30, presenca: 0, falta: 0, total: 30 },
-    sumariosComAssiduidade: 0,
-  },
-  {
-    codigo: "AG-004", aula: "Aula 04", uc: "Redes de Computadores", docente: "Prof. Carlos Mendes",
-    data: "2025-03-11", horario: "10:30 - 12:30", turma: "T1-RC", sala: "Lab. Redes", estado: "em_curso",
-    sumarios: { pendentes: 2, lancados: 1, total: 3 },
-    assiduidades: { pendentes: 10, presenca: 18, falta: 2, total: 30 },
-    sumariosComAssiduidade: 1,
-  },
-  {
-    codigo: "AG-005", aula: "Aula 05", uc: "Engenharia de Software", docente: "Prof.ª Maria Lopes",
-    data: "2025-03-12", horario: "14:00 - 16:00", turma: "T2-EI", sala: "Sala C102", estado: "concluida",
-    sumarios: { pendentes: 0, lancados: 4, total: 4 },
-    assiduidades: { pendentes: 0, presenca: 30, falta: 5, total: 35 },
-    sumariosComAssiduidade: 4,
-  },
-  {
-    codigo: "AG-006", aula: "Aula 06", uc: "Sistemas Operativos", docente: "Prof. Manuel Santos",
-    data: "2025-03-12", horario: "16:30 - 18:30", turma: "T1-EI", sala: "Sala A101", estado: "cancelada",
-    sumarios: { pendentes: 0, lancados: 0, total: 2 },
-    assiduidades: { pendentes: 0, presenca: 0, falta: 0, total: 0 },
-    sumariosComAssiduidade: 0,
-  },
-  {
-    codigo: "AG-007", aula: "Aula 07", uc: "Inteligência Artificial", docente: "Prof.ª Ana Ferreira",
-    data: "2025-03-13", horario: "08:00 - 10:00", turma: "T3-EI", sala: "Lab. Info 2", estado: "concluida",
-    sumarios: { pendentes: 0, lancados: 2, total: 2 },
-    assiduidades: { pendentes: 0, presenca: 22, falta: 3, total: 25 },
-    sumariosComAssiduidade: 2,
-  },
-  {
-    codigo: "AG-008", aula: "Aula 08", uc: "Programação II", docente: "Prof. João Baptista",
-    data: "2025-03-13", horario: "10:30 - 12:30", turma: "T1-EI", sala: "Sala A101", estado: "agendada",
-    sumarios: { pendentes: 2, lancados: 0, total: 2 },
-    assiduidades: { pendentes: 28, presenca: 0, falta: 0, total: 28 },
-    sumariosComAssiduidade: 0,
-  },
-  {
-    codigo: "AG-009", aula: "Aula 09", uc: "Estatística", docente: "Prof. Carlos Mendes",
-    data: "2025-03-14", horario: "08:00 - 10:00", turma: "T2-RC", sala: "Sala B105", estado: "concluida",
-    sumarios: { pendentes: 0, lancados: 3, total: 3 },
-    assiduidades: { pendentes: 0, presenca: 26, falta: 4, total: 30 },
-    sumariosComAssiduidade: 3,
-  },
-  {
-    codigo: "AG-010", aula: "Aula 10", uc: "Álgebra Linear", docente: "Prof.ª Maria Lopes",
-    data: "2025-03-14", horario: "14:00 - 16:00", turma: "T1-EI", sala: "Sala C102", estado: "em_curso",
-    sumarios: { pendentes: 1, lancados: 1, total: 2 },
-    assiduidades: { pendentes: 5, presenca: 20, falta: 3, total: 28 },
-    sumariosComAssiduidade: 1,
-  },
-  {
-    codigo: "AG-011", aula: "Aula 11", uc: "Programação I", docente: "Prof. Manuel Santos",
-    data: "2025-03-15", horario: "08:00 - 10:00", turma: "T1-EI", sala: "Sala A101", estado: "concluida",
-    sumarios: { pendentes: 0, lancados: 2, total: 2 },
-    assiduidades: { pendentes: 0, presenca: 27, falta: 3, total: 30 },
-    sumariosComAssiduidade: 2,
-  },
-  {
-    codigo: "AG-012", aula: "Aula 12", uc: "Bases de Dados", docente: "Prof.ª Ana Ferreira",
-    data: "2025-03-15", horario: "10:30 - 12:30", turma: "T2-EI", sala: "Lab. Info 1", estado: "agendada",
-    sumarios: { pendentes: 3, lancados: 0, total: 3 },
-    assiduidades: { pendentes: 30, presenca: 0, falta: 0, total: 30 },
-    sumariosComAssiduidade: 0,
-  },
-];
-
-
-
-type SortField = "codigo" | "docente" | "data" | "uc" | "estado";
+type SortField = "nrMec" | "nome" | "grauAcademico" | "escalao";
 
 export default function SalarioDocente() {
-
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroDocente, setFiltroDocente] = useState("todos");
-  const [filtroCurso, setFiltroCurso] = useState("todos");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [sortField, setSortField] = useState<SortField>("codigo");
+  const [sortField, setSortField] = useState<SortField>("nrMec");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-   const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [anoLectivo, setAnoLectivo] = useState("2024-2025");
   const [semestre, setSemestre] = useState("1");
@@ -150,14 +35,14 @@ export default function SalarioDocente() {
   const [exigirSumariosInseridos, setExigirSumariosInseridos] = useState(false);
   const [exigirSumariosValidos, setExigirSumariosValidos] = useState(false);
 
-  const mockData: any = [
-    { id: 1, nrMec: "1001", nome: "Prof. Dr. João Silva", grauAcademico: "Doutorado", escalao: "A1", aulasSemanais: 12, aulasMensais: 48, totalHorasEfectivas: 46, totalFaltas: 2, ts: 8, tat: 16, ha: 4, pav: 12, totalServico: 40, ap: 8, av: 4, pfPratico: 1, totalPratico: 13, pfGeral: 1, totalGeral: 46 },
-    { id: 2, nrMec: "1002", nome: "Prof.ª Dra. Maria Santos", grauAcademico: "Doutorado", escalao: "A2", aulasSemanais: 14, aulasMensais: 56, totalHorasEfectivas: 54, totalFaltas: 2, ts: 10, tat: 20, ha: 6, pav: 14, totalServico: 50, ap: 10, av: 6, pfPratico: 0, totalPratico: 16, pfGeral: 2, totalGeral: 54 },
-    { id: 3, nrMec: "1003", nome: "Prof. MSc. Carlos Manuel", grauAcademico: "Mestrado", escalao: "B1", aulasSemanais: 16, aulasMensais: 64, totalHorasEfectivas: 60, totalFaltas: 4, ts: 12, tat: 24, ha: 8, pav: 16, totalServico: 60, ap: 12, av: 8, pfPratico: 2, totalPratico: 22, pfGeral: 2, totalGeral: 60 },
-    { id: 4, nrMec: "1004", nome: "Prof.ª MSc. Ana Paula", grauAcademico: "Mestrado", escalao: "B1", aulasSemanais: 10, aulasMensais: 40, totalHorasEfectivas: 38, totalFaltas: 2, ts: 6, tat: 12, ha: 4, pav: 10, totalServico: 32, ap: 6, av: 4, pfPratico: 1, totalPratico: 11, pfGeral: 1, totalGeral: 38 },
-    { id: 5, nrMec: "1005", nome: "Prof. Dr. Pedro Costa", grauAcademico: "Doutorado", escalao: "A1", aulasSemanais: 12, aulasMensais: 48, totalHorasEfectivas: 48, totalFaltas: 0, ts: 8, tat: 16, ha: 4, pav: 12, totalServico: 40, ap: 8, av: 4, pfPratico: 0, totalPratico: 12, pfGeral: 0, totalGeral: 48 },
-    { id: 6, nrMec: "1006", nome: "Prof. Dr. Fernando Dias", grauAcademico: "Doutorado", escalao: "A2", aulasSemanais: 8, aulasMensais: 32, totalHorasEfectivas: 30, totalFaltas: 2, ts: 6, tat: 10, ha: 2, pav: 8, totalServico: 26, ap: 6, av: 2, pfPratico: 1, totalPratico: 9, pfGeral: 1, totalGeral: 30 },
-    { id: 7, nrMec: "1007", nome: "Eng. Luísa Ferreira", grauAcademico: "Mestrado", escalao: "B2", aulasSemanais: 18, aulasMensais: 72, totalHorasEfectivas: 68, totalFaltas: 4, ts: 14, tat: 28, ha: 10, pav: 18, totalServico: 70, ap: 14, av: 10, pfPratico: 2, totalPratico: 26, pfGeral: 2, totalGeral: 68 },
+  const mockData = [
+    { id: 1, nrMec: "1001", nome: "Prof. Dr. João Silva",      grauAcademico: "Doutorado", escalao: "A1", aulasSemanais: 12, aulasMensais: 48, tm: 4, totalHorasEfectivas: 46, totalFaltas: 2, ts: 8,  tat: 16, ha: 4,  pav: 12, totalServico: 40, ap: 7,  apF: 1, apTotal: 8,  av: 3,  avF: 1, avTotal: 4,  totalPratico: 12, pfGeral: 1, totalGeral: 46 },
+    { id: 2, nrMec: "1002", nome: "Prof.ª Dra. Maria Santos",  grauAcademico: "Doutorado", escalao: "A2", aulasSemanais: 14, aulasMensais: 56, tm: 4, totalHorasEfectivas: 54, totalFaltas: 2, ts: 10, tat: 20, ha: 6,  pav: 14, totalServico: 50, ap: 9,  apF: 1, apTotal: 10, av: 5,  avF: 1, avTotal: 6,  totalPratico: 16, pfGeral: 2, totalGeral: 54 },
+    { id: 3, nrMec: "1003", nome: "Prof. MSc. Carlos Manuel",  grauAcademico: "Mestrado",  escalao: "B1", aulasSemanais: 16, aulasMensais: 64, tm: 6, totalHorasEfectivas: 60, totalFaltas: 4, ts: 12, tat: 24, ha: 8,  pav: 16, totalServico: 60, ap: 10, apF: 2, apTotal: 12, av: 6,  avF: 2, avTotal: 8,  totalPratico: 20, pfGeral: 2, totalGeral: 60 },
+    { id: 4, nrMec: "1004", nome: "Prof.ª MSc. Ana Paula",     grauAcademico: "Mestrado",  escalao: "B1", aulasSemanais: 10, aulasMensais: 40, tm: 3, totalHorasEfectivas: 38, totalFaltas: 2, ts: 6,  tat: 12, ha: 4,  pav: 10, totalServico: 32, ap: 5,  apF: 1, apTotal: 6,  av: 3,  avF: 1, avTotal: 4,  totalPratico: 10, pfGeral: 1, totalGeral: 38 },
+    { id: 5, nrMec: "1005", nome: "Prof. Dr. Pedro Costa",     grauAcademico: "Doutorado", escalao: "A1", aulasSemanais: 12, aulasMensais: 48, tm: 4, totalHorasEfectivas: 48, totalFaltas: 0, ts: 8,  tat: 16, ha: 4,  pav: 12, totalServico: 40, ap: 8,  apF: 0, apTotal: 8,  av: 4,  avF: 0, avTotal: 4,  totalPratico: 12, pfGeral: 0, totalGeral: 48 },
+    { id: 6, nrMec: "1006", nome: "Prof. Dr. Fernando Dias",   grauAcademico: "Doutorado", escalao: "A2", aulasSemanais: 8,  aulasMensais: 32, tm: 2, totalHorasEfectivas: 30, totalFaltas: 2, ts: 6,  tat: 10, ha: 2,  pav: 8,  totalServico: 26, ap: 5,  apF: 1, apTotal: 6,  av: 1,  avF: 1, avTotal: 2,  totalPratico: 8,  pfGeral: 1, totalGeral: 30 },
+    { id: 7, nrMec: "1007", nome: "Eng. Luísa Ferreira",       grauAcademico: "Mestrado",  escalao: "B2", aulasSemanais: 18, aulasMensais: 72, tm: 8, totalHorasEfectivas: 68, totalFaltas: 4, ts: 14, tat: 28, ha: 10, pav: 18, totalServico: 70, ap: 12, apF: 2, apTotal: 14, av: 8,  avF: 2, avTotal: 10, totalPratico: 24, pfGeral: 2, totalGeral: 68 },
   ];
 
   const filteredData = useMemo(() => {
@@ -166,25 +51,20 @@ export default function SalarioDocente() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       data = data.filter(d =>
-        d.codigo.toLowerCase().includes(term) ||
-        d.aula.toLowerCase().includes(term) ||
-        d.uc.toLowerCase().includes(term) ||
-        d.docente.toLowerCase().includes(term) ||
-        d.turma.toLowerCase().includes(term)
+        d.nrMec.toLowerCase().includes(term) ||
+        d.nome.toLowerCase().includes(term)
       );
     }
 
-    if (filtroEstado !== "todos") data = data.filter(d => d.estado === filtroEstado);
-    if (filtroDocente !== "todos") data = data.filter(d => d.docente === filtroDocente);
+    if (filtroDocente !== "todos") data = data.filter(d => d.nrMec === filtroDocente);
 
     data.sort((a, b) => {
       const dir = sortDirection === "asc" ? 1 : -1;
-      if (sortField === "data") return dir * a.data.localeCompare(b.data);
       return dir * String(a[sortField]).localeCompare(String(b[sortField]));
     });
 
     return data;
-  }, [searchTerm, filtroEstado, filtroDocente, sortField, sortDirection]);
+  }, [searchTerm, filtroDocente, sortField, sortDirection]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -194,20 +74,12 @@ export default function SalarioDocente() {
     else { setSortField(field); setSortDirection("asc"); }
   };
 
-  // Resumo
-  const resumo = useMemo(() => {
-    const r = {
-      totalAulas: filteredData.length,
-      agendadas: 0, emCurso: 0, concluidas: 0, canceladas: 0,
-      sumPendentes: 0, sumLancados: 0, sumTotal: 0,
-      assPendentes: 0, assPresenca: 0, assFalta: 0, assTotal: 0,
-      comAssiduidade: 0,
-    };
-   
-    return r;
-  }, [filteredData]);
-
-  const handleExport = (type: string) => toast.success(`Exportação ${type} iniciada`);
+  const resumo = useMemo(() => ({
+    totalDocentes: filteredData.length,
+    totalHorasEfectivas: filteredData.reduce((s, d) => s + d.totalHorasEfectivas, 0),
+    totalFaltas: filteredData.reduce((s, d) => s + d.totalFaltas, 0),
+    totalGeral: filteredData.reduce((s, d) => s + d.totalGeral, 0),
+  }), [filteredData]);
 
   const SortHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <button onClick={() => toggleSort(field)} className="flex items-center gap-1 hover:text-foreground transition-colors">
@@ -218,7 +90,7 @@ export default function SalarioDocente() {
 
   return (
     <div className="space-y-6">
-    <Breadcrumb>
+      <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -235,13 +107,13 @@ export default function SalarioDocente() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm"><RefreshCw className="h-4 w-4 mr-2" />Atualizar</Button>
-
           <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" />Imprimir</Button>
           <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />Excel</Button>
           <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />PDF</Button>
         </div>
       </div>
-     {/* Filtros */}
+
+      {/* Filtros */}
       <div className="bg-card border rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <Filter className="h-5 w-5 text-primary" />
@@ -289,7 +161,7 @@ export default function SalarioDocente() {
 
           <div className="space-y-2">
             <Label>Docente</Label>
-            <Select value={docente} onValueChange={setDocente}>
+            <Select value={docente} onValueChange={(v) => { setDocente(v); setFiltroDocente(v); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos os Docentes</SelectItem>
@@ -310,7 +182,7 @@ export default function SalarioDocente() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single"   className="p-3 pointer-events-auto" />
+                <Calendar mode="single" className="p-3 pointer-events-auto" />
               </PopoverContent>
             </Popover>
           </div>
@@ -325,7 +197,7 @@ export default function SalarioDocente() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single"  className="p-3 pointer-events-auto" />
+                <Calendar mode="single" className="p-3 pointer-events-auto" />
               </PopoverContent>
             </Popover>
           </div>
@@ -379,77 +251,23 @@ export default function SalarioDocente() {
         </div>
       </div>
 
-      {/* Resumo Geral */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      {/* Resumo */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="p-3 text-center">
-          <p className="text-xs text-muted-foreground">Total Aulas</p>
-          <p className="text-2xl font-bold text-foreground">{resumo.totalAulas}</p>
-        </Card>
-        <Card className="p-3 text-center">
-          <p className="text-xs text-muted-foreground">Concluídas</p>
-          <p className="text-2xl font-bold text-emerald-600">{resumo.concluidas}</p>
+          <p className="text-xs text-muted-foreground">Total Docentes</p>
+          <p className="text-2xl font-bold text-foreground">{resumo.totalDocentes}</p>
         </Card>
         <Card className="p-3 text-center">
-          <p className="text-xs text-muted-foreground">Agendadas</p>
-          <p className="text-2xl font-bold text-blue-600">{resumo.agendadas}</p>
+          <p className="text-xs text-muted-foreground">Total Horas Efectivas</p>
+          <p className="text-2xl font-bold text-emerald-600">{resumo.totalHorasEfectivas}</p>
         </Card>
         <Card className="p-3 text-center">
-          <p className="text-xs text-muted-foreground">Em Curso</p>
-          <p className="text-2xl font-bold text-amber-600">{resumo.emCurso}</p>
+          <p className="text-xs text-muted-foreground">Total Faltas</p>
+          <p className="text-2xl font-bold text-red-600">{resumo.totalFaltas}</p>
         </Card>
         <Card className="p-3 text-center">
-          <p className="text-xs text-muted-foreground">Canceladas</p>
-          <p className="text-2xl font-bold text-red-600">{resumo.canceladas}</p>
-        </Card>
-        <Card className="p-3 text-center">
-          <p className="text-xs text-muted-foreground">Com Assiduidade</p>
-          <p className="text-2xl font-bold text-primary">{resumo.comAssiduidade}</p>
-        </Card>
-      </div>
-
-      {/* Resumo Sumários vs Assiduidades */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <FileText className="h-4 w-4 text-primary" /> Resumo de Sumários
-          </h3>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center p-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Pendentes</p>
-              <p className="text-xl font-bold text-amber-600">{resumo.sumPendentes}</p>
-            </div>
-            <div className="text-center p-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Lançados</p>
-              <p className="text-xl font-bold text-emerald-600">{resumo.sumLancados}</p>
-            </div>
-            <div className="text-center p-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Total</p>
-              <p className="text-xl font-bold text-foreground">{resumo.sumTotal}</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-primary" /> Resumo de Assiduidades
-          </h3>
-          <div className="grid grid-cols-4 gap-3">
-            <div className="text-center p-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Pendentes</p>
-              <p className="text-xl font-bold text-amber-600">{resumo.assPendentes}</p>
-            </div>
-            <div className="text-center p-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Presença</p>
-              <p className="text-xl font-bold text-emerald-600">{resumo.assPresenca}</p>
-            </div>
-            <div className="text-center p-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Falta</p>
-              <p className="text-xl font-bold text-red-600">{resumo.assFalta}</p>
-            </div>
-            <div className="text-center p-2 rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Total</p>
-              <p className="text-xl font-bold text-foreground">{resumo.assTotal}</p>
-            </div>
-          </div>
+          <p className="text-xs text-muted-foreground">Total Geral</p>
+          <p className="text-2xl font-bold text-primary">{resumo.totalGeral}</p>
         </Card>
       </div>
 
@@ -458,72 +276,124 @@ export default function SalarioDocente() {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
+              {/* ── LINHA 1: grupos de topo ── */}
               <TableRow>
-                <TableHead rowSpan={2} className="border-r align-middle"><SortHeader field="codigo">Código</SortHeader></TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle">Aula</TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle"><SortHeader field="uc">UC</SortHeader></TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle"><SortHeader field="docente">Docente</SortHeader></TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle"><SortHeader field="data">Data</SortHeader></TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle">Horário</TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle">Turma</TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle">Sala</TableHead>
-                <TableHead rowSpan={2} className="border-r align-middle"><SortHeader field="estado">Estado</SortHeader></TableHead>
-                <TableHead colSpan={3} className="text-center border-r bg-blue-50 dark:bg-blue-950/30 font-semibold">Controle de Sumários</TableHead>
-                <TableHead colSpan={4} className="text-center border-r bg-emerald-50 dark:bg-emerald-950/30 font-semibold">Controle de Assiduidades</TableHead>
-                <TableHead rowSpan={2} className="text-center align-middle bg-purple-50 dark:bg-purple-950/30 font-semibold">Sum. c/ Assid.</TableHead>
+                {/* 9 colunas fixas com rowSpan=3 */}
+                <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs">
+                  <SortHeader field="nrMec">Nº Mec</SortHeader>
+                </TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs">
+                  <SortHeader field="nome">Nome</SortHeader>
+                </TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs">
+                  <SortHeader field="grauAcademico">Grau Académico</SortHeader>
+                </TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs">
+                  <SortHeader field="escalao">Escalão</SortHeader>
+                </TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs">Aulas Semanais</TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs">Aulas Mensais</TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs">TM</TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs">Total Horas Efectivas</TableHead>
+                <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs">Total Faltas</TableHead>
+
+                {/* Serviço: 5 colunas, rowSpan=2 para o título */}
+                <TableHead colSpan={5} className="border border-border text-center bg-blue-50 dark:bg-blue-950/30 font-semibold text-xs">
+                  Serviço
+                </TableHead>
+
+                {/* Aulas Mensais: AP(3) + AV(3) + Total(1) = 7 */}
+                <TableHead colSpan={7} className="border border-border text-center bg-emerald-50 dark:bg-emerald-950/30 font-semibold text-xs">
+                  Aulas Mensais
+                </TableHead>
+
+                {/* Geral: 2 colunas, rowSpan=2 */}
+                <TableHead colSpan={2} className="border border-border text-center bg-purple-50 dark:bg-purple-950/30 font-semibold text-xs">
+                  Geral
+                </TableHead>
               </TableRow>
+
+              {/* ── LINHA 2: sub-grupos ── */}
               <TableRow>
-                <TableHead className="text-center border-r bg-blue-50 dark:bg-blue-950/30 text-xs">Pend.</TableHead>
-                <TableHead className="text-center border-r bg-blue-50 dark:bg-blue-950/30 text-xs">Lanç.</TableHead>
-                <TableHead className="text-center border-r bg-blue-50 dark:bg-blue-950/30 text-xs">Total</TableHead>
-                <TableHead className="text-center border-r bg-emerald-50 dark:bg-emerald-950/30 text-xs">Pend.</TableHead>
-                <TableHead className="text-center border-r bg-emerald-50 dark:bg-emerald-950/30 text-xs">Pres.</TableHead>
-                <TableHead className="text-center border-r bg-emerald-50 dark:bg-emerald-950/30 text-xs">Falta</TableHead>
-                <TableHead className="text-center border-r bg-emerald-50 dark:bg-emerald-950/30 text-xs">Total</TableHead>
+                {/* Serviço sub-colunas (rowSpan=2 cada) */}
+                <TableHead rowSpan={2} className="border border-border text-center bg-blue-50 dark:bg-blue-950/30 text-xs whitespace-nowrap">TS</TableHead>
+                <TableHead rowSpan={2} className="border border-border text-center bg-blue-50 dark:bg-blue-950/30 text-xs whitespace-nowrap">TAT</TableHead>
+                <TableHead rowSpan={2} className="border border-border text-center bg-blue-50 dark:bg-blue-950/30 text-xs whitespace-nowrap">HA</TableHead>
+                <TableHead rowSpan={2} className="border border-border text-center bg-blue-50 dark:bg-blue-950/30 text-xs whitespace-nowrap">P.AV.</TableHead>
+                <TableHead rowSpan={2} className="border border-border text-center bg-blue-50 dark:bg-blue-950/30 text-xs whitespace-nowrap font-bold">Total</TableHead>
+
+                {/* AP sub-grupo */}
+                <TableHead colSpan={3} className="border border-border text-center bg-emerald-100 dark:bg-emerald-900/40 text-xs font-semibold">AP</TableHead>
+                {/* AV sub-grupo */}
+                <TableHead colSpan={3} className="border border-border text-center bg-teal-100 dark:bg-teal-900/40 text-xs font-semibold">AV</TableHead>
+                {/* Total Aulas Mensais */}
+                <TableHead rowSpan={2} className="border border-border text-center bg-emerald-50 dark:bg-emerald-950/30 text-xs font-bold whitespace-nowrap">Total</TableHead>
+
+                {/* Geral sub-colunas (rowSpan=2) */}
+                <TableHead rowSpan={2} className="border border-border text-center bg-purple-50 dark:bg-purple-950/30 text-xs whitespace-nowrap">PF</TableHead>
+                <TableHead rowSpan={2} className="border border-border text-center bg-purple-50 dark:bg-purple-950/30 text-xs whitespace-nowrap font-bold">Total</TableHead>
+              </TableRow>
+
+              {/* ── LINHA 3: P, F, Total dentro de AP e AV ── */}
+              <TableRow>
+                {/* AP: P, F, Total */}
+                <TableHead className="border border-border text-center bg-emerald-100/70 dark:bg-emerald-900/30 text-xs">P</TableHead>
+                <TableHead className="border border-border text-center bg-emerald-100/70 dark:bg-emerald-900/30 text-xs">F</TableHead>
+                <TableHead className="border border-border text-center bg-emerald-100/70 dark:bg-emerald-900/30 text-xs font-semibold">Total</TableHead>
+
+                {/* AV: P, F, Total */}
+                <TableHead className="border border-border text-center bg-teal-100/70 dark:bg-teal-900/30 text-xs">P</TableHead>
+                <TableHead className="border border-border text-center bg-teal-100/70 dark:bg-teal-900/30 text-xs">F</TableHead>
+                <TableHead className="border border-border text-center bg-teal-100/70 dark:bg-teal-900/30 text-xs font-semibold">Total</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={18} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={23} className="text-center py-10 text-muted-foreground">
                     Nenhum registo encontrado
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedData.map((item) => (
-                  <TableRow key={item.codigo}>
-                    <TableCell className="border-r font-mono text-xs">{item.codigo}</TableCell>
-                    <TableCell className="border-r text-sm">{item.aula}</TableCell>
-                    <TableCell className="border-r text-sm font-medium">{item.uc}</TableCell>
-                    <TableCell className="border-r text-sm">{item.docente}</TableCell>
-                    <TableCell className="border-r text-sm whitespace-nowrap">{new Date(item.data).toLocaleDateString("pt-AO")}</TableCell>
-                    <TableCell className="border-r text-sm whitespace-nowrap">{item.horario}</TableCell>
-                    <TableCell className="border-r text-sm">{item.turma}</TableCell>
-                    <TableCell className="border-r text-sm">{item.sala}</TableCell>
-                    <TableCell className="border-r">{item.estado}</TableCell>
-                    {/* Sumários */}
-                    <TableCell className="text-center border-r bg-blue-50/50 dark:bg-blue-950/10">
-                      <span className={90 > 0 ? "text-amber-600 font-semibold" : "text-muted-foreground"}>{2}</span>
+                  <TableRow key={item.id} className="hover:bg-muted/50">
+                    {/* Colunas fixas */}
+                    <TableCell className="border border-border font-mono text-xs whitespace-nowrap">{item.nrMec}</TableCell>
+                    <TableCell className="border border-border text-xs font-medium whitespace-nowrap">{item.nome}</TableCell>
+                    <TableCell className="border border-border text-xs whitespace-nowrap">{item.grauAcademico}</TableCell>
+                    <TableCell className="border border-border text-xs text-center">{item.escalao}</TableCell>
+                    <TableCell className="border border-border text-center text-xs">{item.aulasSemanais}</TableCell>
+                    <TableCell className="border border-border text-center text-xs">{item.aulasMensais}</TableCell>
+                    <TableCell className="border border-border text-center text-xs">{item.tm}</TableCell>
+                    <TableCell className="border border-border text-center text-xs font-semibold text-emerald-600">{item.totalHorasEfectivas}</TableCell>
+                    <TableCell className="border border-border text-center text-xs">
+                      <span className={item.totalFaltas > 0 ? "text-red-600 font-semibold" : "text-muted-foreground"}>{item.totalFaltas}</span>
                     </TableCell>
-                    <TableCell className="text-center border-r bg-blue-50/50 dark:bg-blue-950/10">
-                      <span className="text-emerald-600 font-semibold">{2}</span>
-                    </TableCell>
-                    <TableCell className="text-center border-r bg-blue-50/50 dark:bg-blue-950/10 font-semibold">{2}</TableCell>
-                    {/* Assiduidades */}
-                    <TableCell className="text-center border-r bg-emerald-50/50 dark:bg-emerald-950/10">
-                      <span className={34 > 0 ? "text-amber-600 font-semibold" : "text-muted-foreground"}>{4}</span>
-                    </TableCell>
-                    <TableCell className="text-center border-r bg-emerald-50/50 dark:bg-emerald-950/10">
-                      <span className="text-emerald-600 font-semibold">{4}</span>
-                    </TableCell>
-                    <TableCell className="text-center border-r bg-emerald-50/50 dark:bg-emerald-950/10">
-                      <span className="text-red-600 font-semibold">{3}</span>
-                    </TableCell>
-                    <TableCell className="text-center border-r bg-emerald-50/50 dark:bg-emerald-950/10 font-semibold">{4}</TableCell>
-                    {/* Sum c/ Assiduidade */}
-                    <TableCell className="text-center bg-purple-50/50 dark:bg-purple-950/10">
-                      <span className="font-semibold text-primary">{4}</span>
-                    </TableCell>
+
+                    {/* Serviço: TS, TAT, HA, P.AV., Total */}
+                    <TableCell className="border border-border text-center text-xs bg-blue-50/50 dark:bg-blue-950/10">{item.ts}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-blue-50/50 dark:bg-blue-950/10">{item.tat}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-blue-50/50 dark:bg-blue-950/10">{item.ha}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-blue-50/50 dark:bg-blue-950/10">{item.pav}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-blue-50/50 dark:bg-blue-950/10 font-bold">{item.totalServico}</TableCell>
+
+                    {/* AP: P, F, Total */}
+                    <TableCell className="border border-border text-center text-xs bg-emerald-50/50 dark:bg-emerald-950/10 text-emerald-700">{item.ap}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-emerald-50/50 dark:bg-emerald-950/10 text-red-600">{item.apF ?? 0}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-emerald-50/50 dark:bg-emerald-950/10 font-semibold">{item.apTotal ?? item.ap}</TableCell>
+
+                    {/* AV: P, F, Total */}
+                    <TableCell className="border border-border text-center text-xs bg-teal-50/50 dark:bg-teal-950/10 text-teal-700">{item.av}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-teal-50/50 dark:bg-teal-950/10 text-red-600">{item.avF ?? 0}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-teal-50/50 dark:bg-teal-950/10 font-semibold">{item.avTotal ?? item.av}</TableCell>
+
+                    {/* Total Aulas Mensais */}
+                    <TableCell className="border border-border text-center text-xs bg-emerald-50/80 dark:bg-emerald-950/20 font-bold">{item.totalPratico}</TableCell>
+
+                    {/* Geral: PF, Total */}
+                    <TableCell className="border border-border text-center text-xs bg-purple-50/50 dark:bg-purple-950/10">{item.pfGeral}</TableCell>
+                    <TableCell className="border border-border text-center text-xs bg-purple-50/50 dark:bg-purple-950/10 font-bold text-primary">{item.totalGeral}</TableCell>
                   </TableRow>
                 ))
               )}
