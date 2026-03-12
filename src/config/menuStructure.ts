@@ -166,7 +166,7 @@ export const menuStructure: MenuStructure = {
           url: "/docente/validacao",
           permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
         },
-        //{ title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
+        { title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
       ],
 
       permission: [],
@@ -177,27 +177,7 @@ export const menuStructure: MenuStructure = {
     // ----------------------------------------------------
     // GESTÃO DE DOCENTES
     // ----------------------------------------------------
-    {
-      title: "Gestão de Docentes",
-      url: "/gestao-docentes",
-      icon: GraduationCap,
-      items: [
-
-       // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
-       // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
-       // { title: "Contratos", url: "/gestao-docentes/contratos" },
-      //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
-       // { title: "Regentes", url: "/gestao-docentes/regentes" },
-       // { title: "Afetados", url: "/gestao-docentes/afetados" },
-       // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
-       // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
-        { title: "Parâmetros", url: "/gestao-docentes/parametros" },
-        { title: "Salário", url: "/gestao-docentes/salario" },
-        //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
-      ],
-
-      permission: [],
-    },
+   
  /* ----------------------------------------------------
 
     // ----------------------------------------------------
@@ -644,7 +624,7 @@ export const suporteStructure: MenuStructure = {
 export const gestaoDocente: MenuStructure = {
   items: [
     {
-      title: "Gestão de Docente",
+      title: "Gestão de Docentes",
       url: "/gestao-docente",
       icon: BookUser,
       items: [
@@ -653,6 +633,31 @@ export const gestaoDocente: MenuStructure = {
           url: "/gestao-docente/afectacoes",
           permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
         },
+        {
+          title: "Lista de UC sem docentes afectados",
+          url: "/gestao-docente/sem-afetacao/uc",
+          permission: [
+            PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS.sigla,
+          ],
+        },
+        // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
+       // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
+       // { title: "Contratos", url: "/gestao-docentes/contratos" },
+      //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
+       // { title: "Regentes", url: "/gestao-docentes/regentes" },
+       // { title: "Afetados", url: "/gestao-docentes/afetados" },
+       // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
+       // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
+        { title: "Parâmetros", url: "/gestao-docentes/parametros" },
+        {title:"Lista de UC sem docentes afectados", url:"/gestao-docentes/sem-afetacao/uc"},
+        { title: "Salário", url: "/gestao-docentes/salario" },
+        //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
+
+
+
+
+
+
       ],
       permission: [],
     },

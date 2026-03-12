@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useCursos } from "@/hooks/use-cursos";
 import { Curso, CursoParams } from "@/services/fetch-course";
 import { FormCommandSelect } from "../FormCommandSelect";
@@ -9,24 +9,36 @@ interface CourseSelectProps {
   onChangeValue: (v: string) => void;
   params?: CursoParams;
   disabled?: boolean;
+  enableDefaultSelectItem?: boolean;
 }
 const CourseSelect = ({
   disabled,
   onChangeValue,
   value,
   params,
+  enableDefaultSelectItem,
   labelMode = "outside",
 }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
-
+  const id = useId();
+  const defaultSelectItem = enableDefaultSelectItem
+    ? [
+        {
+          label: "Todos",
+          value: "all",
+          key: id,
+        },
+      ]
+    : undefined;
   return (
     <>
       <FormCommandSelect
         disabled={disabled || loadingCursos}
         value={value}
         label="Curso"
-        labelMode={labelMode} // 👈 repassa decisão
+        labelMode={labelMode}
         isLoading={loadingCursos}
+        defaultSelectItem={defaultSelectItem}
         width="full"
         options={cursos}
         map={(f) => ({
