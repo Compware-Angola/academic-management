@@ -129,11 +129,11 @@ export default function ProvaContent() {
     semestre: filters.semestre,
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
-const toNumber = (value: string | undefined): number | undefined => {
-  if (!value || value === "") return undefined;
-  const parsed = Number(value);
-  return isNaN(parsed) ? undefined : parsed;
-};
+  const toNumber = (value: string | undefined): number | undefined => {
+    if (!value || value === "") return undefined;
+    const parsed = Number(value);
+    return isNaN(parsed) ? undefined : parsed;
+  };
   const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryProvaAssiduidade(
     {
       ...(toNumber(filters.docente) && { docente: toNumber(filters.docente) }),
