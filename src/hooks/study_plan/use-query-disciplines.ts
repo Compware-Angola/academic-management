@@ -1,11 +1,11 @@
 // src/hooks/ga/use-disciplines.ts
-import { Discipline, fetchDisciplines } from "@/services/study_plan/fect-discipline.serice";
+import { fetchDisciplines, DisciplinesResponse,DisciplineParams } from "@/services/study_plan/fect-discipline.serice";
 import { useQuery } from "@tanstack/react-query";
 
-export function useDisciplines() {
-  return useQuery<Discipline[], Error>({
-    queryKey: ["disciplines"],
-    queryFn: fetchDisciplines,
+export function useDisciplines(params?: DisciplineParams) {
+  return useQuery<DisciplinesResponse, Error>({
+    queryKey: ["disciplines", params],
+    queryFn: () => fetchDisciplines(params),
     staleTime: 1000 * 60 * 30, 
    
   });
