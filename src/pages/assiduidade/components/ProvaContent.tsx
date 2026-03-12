@@ -129,15 +129,20 @@ export default function ProvaContent() {
     semestre: filters.semestre,
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
+const toNumber = (value: string | undefined): number | undefined => {
+  if (!value || value === "") return undefined;
+  const parsed = Number(value);
+  return isNaN(parsed) ? undefined : parsed;
+};
   const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryProvaAssiduidade(
     {
-      ...(filters.docente && { docente: Number(filters.docente) }),
-      ...(filters.unidadeCurricular && { disciplina: Number(filters.unidadeCurricular) }),
+      ...(toNumber(filters.docente) && { docente: toNumber(filters.docente) }),
+      ...(toNumber(filters.unidadeCurricular) && { disciplina: toNumber(filters.unidadeCurricular) }),
       ...(filters.dataInicio && { dataInicio: filters.dataInicio }),
       ...(filters.dataFim && { dataFim: filters.dataFim }),
-      ...(filters.estado && filters.estado !== "" && { estado: Number(filters.estado) }),
-      ...(filters.anoLectivo && filters.anoLectivo !== "" && { anoLectivo: Number(filters.anoLectivo) }),
-      ...(filters.semestre && filters.semestre !== "" && { semestre: Number(filters.semestre) }),
+      ...(toNumber(filters.estado) && { estado: toNumber(filters.estado) }),
+      ...(toNumber(filters.anoLectivo) && { anoLectivo: toNumber(filters.anoLectivo) }),
+      ...(toNumber(filters.semestre) && { semestre: toNumber(filters.semestre) }),
       ...(filters.page && { page: filters.page }),
       ...(filters.limit && { limit: filters.limit }),
     }
