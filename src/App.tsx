@@ -111,6 +111,7 @@ import ControleGeralPorDocente from "./pages/assiduidade";
 import Parametros from "./pages/gestao_docente/Parametros";
 import SalarioDocente from "./pages/gestao_docente/Salario_docente";
 import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
+import ListarUCDocenteSemAfetacao from "./pages/gestao_docente/listar-uc-docente-sem-afetacao";
 
 const App = () => {
   return (
@@ -1072,6 +1073,19 @@ const App = () => {
                         ]}
                       >
                         <GestaoAfectacao />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/gestao-docente/sem-afetacao/uc"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS
+                            .sigla,
+                        ]}
+                      >
+                        <ListarUCDocenteSemAfetacao />
                       </ProtectedRoute>
                     }
                   />
