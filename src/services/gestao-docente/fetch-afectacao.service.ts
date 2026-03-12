@@ -49,7 +49,7 @@ export async function getListAfectacaoDocentesService(
   } = payload;
 
   const { data } = await axiosNestGa.get<ListAfectacaoDocentesResponse>(
-    "/docentes/afectacao",
+    "/docente-gestao/afectacao",
     {
       params: {
         anoLectivo,

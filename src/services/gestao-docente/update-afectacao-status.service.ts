@@ -11,5 +11,5 @@ export const updateAfectacaoStatus = async ({
   codigo: number;
   payload: UpdateAfectacaoStatusPayload;
 }): Promise<void> => {
-  await axiosNestGa.put(`/docentes/afectacao/${codigo}/status`, payload);
+  await axiosNestGa.put(`/docente-gestao/afectacao/${codigo}/status`, payload);
 };

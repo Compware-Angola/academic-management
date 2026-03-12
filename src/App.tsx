@@ -110,7 +110,7 @@ import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteConten
 import ControleGeralPorDocente from "./pages/assiduidade";
 import Parametros from "./pages/gestao_docente/Parametros";
 import SalarioDocente from "./pages/gestao_docente/Salario_docente";
-import GestaoAfectacao from "./pages/gestao-docente/GestaoAfectacao";
+import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
 
 const App = () => {
   return (
