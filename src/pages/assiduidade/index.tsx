@@ -17,7 +17,7 @@ import { CalendarMode } from "@/util/types";
 import MesContent from "./components/MesContent";
 import SemanaContent from "./components/SemanaContent";
 import DiaContent from "./components/DiaContent";
-import { FormSelect } from "@/components/common/FormSelect";
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 function toISODate(d: Date) {
@@ -29,7 +29,6 @@ export default function ControleGeralPorDocente() {
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const { data: teachersData = [] } = useQueryTeacther();
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
 
   const todayIso = useMemo(() => toISODate(new Date()), []);
 

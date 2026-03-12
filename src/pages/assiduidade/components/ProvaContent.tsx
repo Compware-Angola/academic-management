@@ -129,19 +129,19 @@ export default function ProvaContent() {
     semestre: filters.semestre,
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
-  const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryProvaAssiduidade(
-    {
-      docente: filters.docente ? Number(filters.docente) : undefined,
-      disciplina: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
-      dataInicio: filters.dataInicio || undefined,
-      dataFim: filters.dataFim || undefined,
-      estado: filters.estado ? Number(filters.estado) : undefined,
-      anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
-      semestre: filters.semestre ? Number(filters.semestre) : undefined,
-      page: filters.page,
-      limit: filters.limit,
-    }
-  );
+ const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryProvaAssiduidade(
+  {
+    ...(filters.docente && { docente: Number(filters.docente) }),
+    ...(filters.unidadeCurricular && { disciplina: Number(filters.unidadeCurricular) }),
+    ...(filters.dataInicio && { dataInicio: filters.dataInicio }),
+    ...(filters.dataFim && { dataFim: filters.dataFim }),
+    ...(filters.estado && { estado: Number(filters.estado) }),
+    ...(filters.anoLectivo && { anoLectivo: Number(filters.anoLectivo) }),
+    ...(filters.semestre && { semestre: Number(filters.semestre) }),
+    ...(filters.page && { page: filters.page }),
+    ...(filters.limit && { limit: filters.limit }),
+  }
+);
 
   const { data: cursos } = useCursos();
 
