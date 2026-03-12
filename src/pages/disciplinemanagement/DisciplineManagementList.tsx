@@ -1,4 +1,3 @@
-// src/pages/DisciplineManagementList.tsx (ou onde estiver)
 import { useMemo } from "react";
 
 import PDFActions, {
@@ -27,34 +26,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Plus, Edit, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
 import { CreateDisciplineModal } from "./components/CreateDisciplineModal";
-import { useTiposUnidade } from "@/hooks/study_plan/use-type-unidade";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useMutationDeleteDiscipline } from "@/hooks/study_plan/use-mutation-delete-discipline";
 import { Discipline } from "@/services/study_plan/fect-discipline.serice";
-type NormalizeDiscipline = Discipline & {
-  tipo_descricao: string;
-  natureza: string;
-};
+import { Switch } from "@/components/ui/switch";
+import { useMutationUpdateDiscipline } from "@/hooks/study_plan/use-mutation-update-discipline";
+import { useDebounce } from "@/hooks/use-debounce";
+import { parseFilter } from "@/util/parse-filter";
+
 type EditDisciplinePayload = {
   codigo: number;
   designacao: string;
@@ -66,22 +47,21 @@ type EditDisciplinePayload = {
   status: number;
 };
 export default function DisciplineManagementList() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [naturezaFilter, setNaturezaFilter] = useState<string>("all");
-  const [tipoFilter, setTipoFilter] = useState<string>("all"); // ← NOVO FILTRO
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const { mutate: update, isPending: updating } = useMutationUpdateDiscipline();
+
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
   const [selectedDiscipline, setSelectedDiscipline] =
     useState<EditDisciplinePayload | null>(null);
 
-  const deleteMutation = useMutationDeleteDiscipline();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filters, setFilters] = useState({
     natureza: "all",
     tipo: "all",
+    status: "all",
   });
   const {
     data: disciplinesResponse,
@@ -94,9 +74,9 @@ export default function DisciplineManagementList() {
     naturezaUnidadeCurricular:
       filters.natureza === "all" ? undefined : filters.natureza,
     tipoUnidadeCurricular: filters.tipo === "all" ? undefined : filters.tipo,
+    status: filters.status === "all" ? undefined : parseFilter(filters.status),
+    search: debouncedSearch,
   });
-  const { data: tiposUnidade = [], isLoading: loadingTipos } =
-    useTiposUnidade();
 
   const disciplines = disciplinesResponse?.data || [];
   const tableData = disciplines;
@@ -112,159 +92,90 @@ export default function DisciplineManagementList() {
 
   const totalAtivas =
     disciplinesResponse?.data.filter((d) => d.status_ === 1).length || 0;
-  // Funções auxiliares
-  const getDescricaoTipo = (sigla: string) => {
-    const tipo = tiposUnidade.find((t) => t.sigla === sigla);
-    return tipo ? tipo.descricao : sigla || "Não definido";
-  };
 
-  const getNaturezaLabel = (sigla: string) => {
-    switch (sigla) {
-      case "TP":
-        return "Teórico-Prática";
-      case "T":
-        return "Teórica";
-      case "P":
-        return "Prática";
-      default:
-        return "Não definida";
-    }
-  };
-  const getNaturezaLabelVariant = (sigla: string) => {
-    switch (sigla) {
-      case "TP":
-        return "default";
-      case "T":
-        return "secondary";
-      case "P":
-        return "outline";
-      default:
-        return "outline";
-    }
-  };
+  const pdfData = useMemo(() => {
+    if (!disciplines.length) return null;
 
-  const getTipoUCLabelVariant = (sigla: string) => {
-    switch (sigla) {
-      case "S":
-        return "outline";
-      case "MIC":
-        return "default";
-      default:
-        return "secondary";
-    }
-  };
+    return {
+      filtros:
+        [
+          search && `Pesquisa: ${search}`,
+          filters.natureza !== "all" &&
+            `Natureza: ${
+              filters.natureza === "TP"
+                ? "Teórico-Prática"
+                : filters.natureza === "T"
+                  ? "Teórica"
+                  : "Prática"
+            }`,
+          filters.tipo !== "all" && `Tipo UC: ${filters.tipo}`,
+        ]
+          .filter(Boolean)
+          .join(" | ") || "Sem filtros",
 
-  const getTipoUCLabel = (sigla: string) => {
-    switch (sigla) {
-      case "S":
-        return "Disciplina do curso";
-      case "MIC":
-        return "Tronco em comum";
-      default:
-        return "Não definido";
-    }
-  };
+      total: disciplines.length,
 
-  // const handleOpenDelete = (discipline: Discipline) => {
-  //   setSelectedDiscipline(discipline);
-  //   setOpenDeleteDialog(true);
-  // };
+      rows: disciplines.map((d) => ({
+        codigo: d.codigo,
+        nome: d.designacao,
+        tipo: getTipoUCLabel(d.tipo_unidade_curricular),
+        natureza: getNaturezaLabel(d.natureza_unidade_curricular),
+      })),
+    };
+  }, [disciplines, debouncedSearch, filters.natureza, filters.tipo]);
 
-  // const startItem = (currentPage - 1) * itemsPerPage + 1;
-  // const endItem = Math.min(currentPage * itemsPerPage, filteredData.length);
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Gestão de Disciplinas"
+      subtitle="Lista de disciplinas e unidades curriculares"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        {
+          title: "Resumo",
+          content: [`Total de disciplinas: ${pdfData.total}`],
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "codigo", label: "Código", width: "10%" },
+          { key: "nome", label: "Nome da Disciplina", width: "45%" },
+          { key: "tipo", label: "Tipo", width: "25%" },
+          { key: "natureza", label: "Natureza", width: "20%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#1e40af",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-  // const pdfData = useMemo(() => {
-  //   if (!filteredData.length) return null;
-
-  //   return {
-  //     filtros:
-  //       [
-  //         searchTerm && `Pesquisa: ${searchTerm}`,
-  //         naturezaFilter !== "all" &&
-  //           `Natureza: ${
-  //             naturezaFilter === "TP"
-  //               ? "Teórico-Prática"
-  //               : naturezaFilter === "T"
-  //                 ? "Teórica"
-  //                 : "Prática"
-  //           }`,
-  //         tipoFilter !== "all" && `Tipo UC: ${tipoFilter}`,
-  //       ]
-  //         .filter(Boolean)
-  //         .join(" | ") || "Sem filtros",
-
-  //     total: filteredData.length,
-
-  //     rows: filteredData.map((d) => ({
-  //       codigo: d.codigo,
-  //       nome: d.desginacao,
-  //       tipo: d.tipo_descricao,
-  //       natureza: d.natureza,
-  //     })),
-  //   };
-  // }, [filteredData, searchTerm, naturezaFilter, tipoFilter]);
-
-  // const pdfContent = pdfData ? (
-  //   <GenericPDFDocument
-  //     documentTitle="Gestão de Disciplinas"
-  //     subtitle="Lista de disciplinas e unidades curriculares"
-  //     infoSections={[
-  //       { title: "Filtros Aplicados", content: pdfData.filtros },
-  //       {
-  //         title: "Resumo",
-  //         content: [`Total de disciplinas: ${pdfData.total}`],
-  //       },
-  //     ]}
-  //     mainTable={{
-  //       headers: [
-  //         { key: "codigo", label: "Código", width: "10%" },
-  //         { key: "nome", label: "Nome da Disciplina", width: "45%" },
-  //         { key: "tipo", label: "Tipo", width: "25%" },
-  //         { key: "natureza", label: "Natureza", width: "20%" },
-  //       ],
-  //       rows: pdfData.rows,
-  //       headerBackground: "#1e40af",
-  //     }}
-  //     footerNotice="Documento gerado automaticamente pelo sistema."
-  //   />
-  // ) : null;
-
-  // const excelProps = pdfData
-  //   ? {
-  //       documentTitle: "Gestão de Disciplinas",
-  //       subtitle: "Lista de disciplinas e unidades curriculares",
-  //       infoSections: [
-  //         { title: "Filtros Aplicados", content: pdfData.filtros },
-  //         {
-  //           title: "Resumo",
-  //           content: [`Total de disciplinas: ${pdfData.total}`],
-  //         },
-  //       ],
-  //       mainTable: {
-  //         headers: [
-  //           { key: "codigo", label: "Código", width: 10 },
-  //           { key: "nome", label: "Nome da Disciplina", width: 40 },
-  //           { key: "tipo", label: "Tipo", width: 25 },
-  //           { key: "natureza", label: "Natureza", width: 20 },
-  //         ],
-  //         rows: pdfData.rows,
-  //       },
-  //       footerNotice: "Documento gerado automaticamente pelo sistema.",
-  //       primaryColor: "#1e40af",
-  //     }
-  //   : null;
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Gestão de Disciplinas",
+        subtitle: "Lista de disciplinas e unidades curriculares",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          {
+            title: "Resumo",
+            content: [`Total de disciplinas: ${pdfData.total}`],
+          },
+        ],
+        mainTable: {
+          headers: [
+            { key: "codigo", label: "Código", width: 10 },
+            { key: "nome", label: "Nome da Disciplina", width: 40 },
+            { key: "tipo", label: "Tipo", width: 25 },
+            { key: "natureza", label: "Natureza", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#1e40af",
+      }
+    : null;
 
   const baseFileName = `Disciplinas_${new Date().toISOString().slice(0, 10)}`;
 
-  const handleFilterChange = () => setCurrentPage(1);
-  // const handleConfirmDelete = () => {
-  //   if (!selectedDiscipline) return;
-
-  //   deleteMutation.mutate(selectedDiscipline.codigo);
-
-  //   setOpenDeleteDialog(false);
-  //   setSelectedDiscipline(null);
-  // };
   const handleOpenEdit = (item: Discipline) => {
     setSelectedDiscipline({
       codigo: item.codigo,
@@ -278,7 +189,12 @@ export default function DisciplineManagementList() {
     });
     setCreateModalOpen(true);
   };
-
+  const handleStatusChange = (codigo: number, status: boolean) => {
+    update({
+      codigo,
+      status: status ? 1 : 0,
+    });
+  };
   return (
     <div className="space-y-6 p-8">
       {/* Breadcrumb */}
@@ -307,8 +223,7 @@ export default function DisciplineManagementList() {
 
         {/* Ações (em coluna) */}
         <div className="flex flex-col items-end gap-2">
-          {/* Exportações */}
-          {/* {pdfData && excelProps && (
+          {pdfData && excelProps && (
             <div className="flex flex-wrap gap-2">
               {pdfContent && (
                 <PDFActions
@@ -327,7 +242,6 @@ export default function DisciplineManagementList() {
             </div>
           )}
 
-          {/* Botão principal mantém posição */}
           <Button size="sm" onClick={() => setCreateModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova disciplina
@@ -363,36 +277,36 @@ export default function DisciplineManagementList() {
 
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Filtros</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Pesquisa */}
-          <div className="space-y-2">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Filtros</h3>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="space-y-2 lg:col-span-2">
             <Label htmlFor="search">Pesquisar</Label>
             <Input
               id="search"
-              placeholder="Código ou nome..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                handleFilterChange();
-              }}
+              placeholder="Nome da disciplina ou código"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          {/* Filtro por Natureza */}
+          {/* Natureza */}
           <div className="space-y-2">
             <Label htmlFor="natureza">Natureza da UC</Label>
             <Select
               value={filters.natureza}
-              onValueChange={(v) => {
-                setFilters((prev) => ({ ...prev, natureza: v }));
-              }}
+              onValueChange={(v) =>
+                setFilters((prev) => ({ ...prev, natureza: v }))
+              }
             >
               <SelectTrigger id="natureza">
-                <SelectValue placeholder="Todas as naturezas" />
+                <SelectValue placeholder="Todas" />
               </SelectTrigger>
               <SelectContent>
-                {NATUREZA_UNIDADE_CURRICULAR.map((option) => (
+                {NATUREZA_UNIDADE_CURRICULAR_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -401,31 +315,65 @@ export default function DisciplineManagementList() {
             </Select>
           </div>
 
-          {/* NOVO FILTRO POR TIPO (dinâmico da API) */}
+          {/* Tipo */}
           <div className="space-y-2">
-            <Label htmlFor="tipo">Tipo de Unidade Curricular</Label>
-            {loadingTipos ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (
-              <Select
-                value={filters.tipo}
-                onValueChange={(v) => {
-                  setFilters((prev) => ({ ...prev, tipo: v }));
-                }}
-              >
-                <SelectTrigger id="tipo">
-                  <SelectValue placeholder="Todos os tipos" />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIPO_UNIDADE_CURRICULAR.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Label htmlFor="tipo">Tipo</Label>
+            <Select
+              value={filters.tipo}
+              onValueChange={(v) =>
+                setFilters((prev) => ({ ...prev, tipo: v }))
+              }
+            >
+              <SelectTrigger id="tipo">
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                {TIPO_UNIDADE_CURRICULAR_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* Status */}
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={filters.status}
+              onValueChange={(v) =>
+                setFilters((prev) => ({ ...prev, status: v }))
+              }
+            >
+              <SelectTrigger id="status">
+                <SelectValue placeholder="Todos" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Ações */}
+        <div className="flex justify-end gap-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={() =>
+              setFilters({
+                natureza: "",
+                tipo: "",
+                status: "",
+              })
+            }
+          >
+            Limpar
+          </Button>
         </div>
       </div>
 
@@ -502,7 +450,7 @@ export default function DisciplineManagementList() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2 items-center">
                           <Button
                             type="button"
                             variant="ghost"
@@ -513,15 +461,14 @@ export default function DisciplineManagementList() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            // onClick={() => handleOpenDelete(item)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+
+                          <Switch
+                            disabled={updating}
+                            checked={item.status_ === 1}
+                            onCheckedChange={(checked) => {
+                              handleStatusChange(item.codigo, checked);
+                            }}
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -587,46 +534,80 @@ export default function DisciplineManagementList() {
         }}
         discipline={selectedDiscipline}
       />
-      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Tem certeza que deseja eliminar?
-            </AlertDialogTitle>
-            {/* <AlertDialogDescription>
-              A disciplina <strong>{selectedDiscipline?.desginacao}</strong>{" "}
-              será removida permanentemente.
-              <br />
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription> */}
-          </AlertDialogHeader>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-
-            <AlertDialogAction
-              className="bg-destructive hover:bg-destructive/90"
-              // onClick={handleConfirmDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? "A eliminar..." : "Eliminar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
 
-const TIPO_UNIDADE_CURRICULAR = [
+const TIPO_UNIDADE_CURRICULAR_OPTIONS = [
   { value: "all", label: "Todos" },
   { value: "MIC", label: "Tronco em Comum (MIC)" },
   { value: "S", label: "Disciplina do Curso (S)" },
 ];
 
-const NATUREZA_UNIDADE_CURRICULAR = [
+const NATUREZA_UNIDADE_CURRICULAR_OPTIONS = [
   { value: "all", label: "Todos" },
   { value: "TP", label: "Teórico-Prática (TP)" },
   { value: "T", label: "Teórica (T)" },
   { value: "P", label: "Prática (P)" },
+];
+const getNaturezaLabel = (sigla: string) => {
+  switch (sigla) {
+    case "TP":
+      return "Teórico-Prática";
+    case "T":
+      return "Teórica";
+    case "P":
+      return "Prática";
+    default:
+      return "Não definida";
+  }
+};
+const getNaturezaLabelVariant = (sigla: string) => {
+  switch (sigla) {
+    case "TP":
+      return "default";
+    case "T":
+      return "secondary";
+    case "P":
+      return "outline";
+    default:
+      return "outline";
+  }
+};
+
+const getTipoUCLabelVariant = (sigla: string) => {
+  switch (sigla) {
+    case "S":
+      return "outline";
+    case "MIC":
+      return "default";
+    default:
+      return "secondary";
+  }
+};
+
+const getTipoUCLabel = (sigla: string) => {
+  switch (sigla) {
+    case "S":
+      return "Disciplina do curso";
+    case "MIC":
+      return "Tronco em comum";
+    default:
+      return "Não definido";
+  }
+};
+
+const STATUS_OPTIONS = [
+  {
+    value: "all",
+    label: "Todos",
+  },
+  {
+    value: "1",
+    label: "Ativo",
+  },
+  {
+    value: "0",
+    label: "Inativo",
+  },
 ];
