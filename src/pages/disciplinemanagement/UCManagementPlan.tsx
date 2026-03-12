@@ -54,6 +54,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdown-disciplines";
 
 export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -76,7 +77,7 @@ export default function UCManagementPlan() {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
   const { data: classes = [], isLoading: loadingClasses } = useClasses();
   const { data: disciplines = [], isLoading: loadingDisciplines } =
-    useDisciplines();
+    useQueryDropdownDisciplines();
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const {
     data: gradeResponses,
