@@ -249,7 +249,7 @@ export default function DisciplineManagementList() {
         </div>
       </div>
 
-      {/* Estatísticas */}
+      {/* Estatísticas 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border rounded-lg p-4">
           <p className="text-sm text-muted-foreground mb-1">
@@ -274,7 +274,7 @@ export default function DisciplineManagementList() {
           <p className="text-3xl font-bold text-purple-600">{totalMIC}</p>
         </div>
       </div>
-
+    */}
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
@@ -287,7 +287,7 @@ export default function DisciplineManagementList() {
             <Label htmlFor="search">Pesquisar</Label>
             <Input
               id="search"
-              placeholder="Nome da disciplina ou código"
+              placeholder="Nome da disciplina"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
