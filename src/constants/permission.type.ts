@@ -436,6 +436,7 @@ INSCRICAO_POR_HORARIO: {
     designacao: "Marcar Assiduidade Prova",
     sigla: "mav_a_map",
   },
+    VALIDACAO_HORARIO: { designacao: "Validação de Horário", sigla: "mga_h_val" },
   LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA: {
     designacao: "Listar Estudantes Por Estado Da Matricula",
     sigla: "mgim_a_lepem",
