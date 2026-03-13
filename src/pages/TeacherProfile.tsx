@@ -9,31 +9,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, AlertTriangle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  Briefcase,
-  Building,
-  GraduationCap,
-  Edit,
+  User, Mail, Phone, MapPin, Calendar, Briefcase,
+  Building, GraduationCap, ClipboardList, FileText,
+  BarChart2, ScrollText,
 } from "lucide-react";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
+import { useAssiduidadeDocente } from "@/hooks/docentes/useAssiduidadeDocente";
+import { useQueryDocenteCadeiras } from "@/hooks/docentes/use-docentes-cadeiras";
+import { useQueryDocenteCursos } from "@/hooks/docentes/use-docentes-curso";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assiduidade-status-agendamentos";
+import { FormSelect } from "@/components/common/FormSelect";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 export interface TeacherInfo {
   name: string;
@@ -49,12 +57,342 @@ export interface TeacherInfo {
   address: string;
 }
 
+// ===================== ESTADO BADGE =====================
+const estadoBadgeConfig: Record<string, { label: string; className: string }> = {
+  Falta: { label: "Falta", className: "bg-red-100 text-red-700 border border-red-300" },
+  Realizada: { label: "Realizada", className: "bg-green-100 text-green-700 border border-green-300" },
+  Pendente: { label: "Pendente", className: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
+};
+
+function EstadoBadge({ estado }: { estado: string }) {
+  const config = estadoBadgeConfig[estado] ?? {
+    label: estado,
+    className: "bg-gray-100 text-gray-700 border border-gray-300",
+  };
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
+      {config.label}
+    </span>
+  );
+}
+
+// ===================== ASSIDUIDADE TAB =====================
+function AssiduidadeTab({
+  docenteId,
+  isDocente,
+}: {
+  docenteId: string | undefined;
+  isDocente: boolean;
+}) {
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } =
+    useQueryStatusAgendamento({ enabled: true });
+
+  const [filters, setFilters] = useState({
+    anoCurricular: "all",
+    unidadeCurricular: "",
+    dataInicio: "",
+    dataFim: "",
+    estado: "",
+    anoLectivo: "",
+    semestre: "",
+    curso: "",
+    page: 1,
+    limit: 5,
+  });
+
+  const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } =
+    useAssiduidadeDocente({
+      docenteId: parseFilter(docenteId),
+      gradeId: parseFilter(filters.unidadeCurricular),
+      dataFim: filters.dataInicio || undefined,
+      dataInicio: filters.dataFim || undefined,
+      estadoAgendamento: parseFilter(filters.estado),
+      anoLectivo: parseFilter(filters.anoLectivo),
+      semestre: parseFilter(filters.semestre),
+      page: filters.page,
+      limit: filters.limit,
+    });
+
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDocenteCadeiras({
+      anoLectivo: parseFilter(filters.anoLectivo),
+      classeId: parseFilter(filters.anoCurricular),
+      cursoId: parseFilter(filters.curso),
+      semestreId: parseFilter(filters.semestre),
+      docenteId: parseFilter(docenteId),
+    });
+
+  const { data: cursos } = useQueryDocenteCursos({
+    anoLectivo: parseFilter(filters.anoLectivo),
+    docenteId: parseFilter(docenteId),
+  });
+
+  const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({ curso: filters.curso });
+
+  const totalPages = assiduidadeAula?.total ?? 1;
+  const currentPage = assiduidadeAula?.page ?? 1;
+  const contagem = assiduidadeAula?.data?.reduce(
+    (acc, item) => { acc[item.estado] = (acc[item.estado] || 0) + 1; return acc; },
+    {} as Record<string, number>,
+  );
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setFilters((prev) => ({ ...prev, page: newPage }));
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Alerta se não for docente */}
+      {!isDocente && (
+        <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle className="font-semibold">Acesso Restrito</AlertTitle>
+          <AlertDescription className="mt-1 space-y-1">
+            <p>
+              Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
+              a sua própria assiduidade nas aulas que leciona.
+            </p>
+            <p>
+              A sua conta não está associada a um perfil de docente, pelo que não tem permissão
+              para visualizar estes dados.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Filtros */}
+      <div className="bg-muted/30 border rounded-lg p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-semibold">Filtros</h4>
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={!isDocente}
+            onClick={() =>
+              setFilters({
+                anoLectivo: "", semestre: "", estado: "", dataInicio: "",
+                dataFim: "", curso: "", anoCurricular: "all",
+                unidadeCurricular: "", page: 1, limit: 5,
+              })
+            }
+          >
+            Limpar filtros
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <Label>Ano Letivo</Label>
+            <FormSelect
+              disabled={isLoadingAcademicYear || !isDocente}
+              value={filters.anoLectivo}
+              onChange={(v) => setFilters({ ...filters, anoLectivo: v, page: 1 })}
+              options={anosAcademicos ?? []}
+              map={(a) => ({ key: a.codigo, label: a.designacao, value: String(a.codigo) })}
+              placeholder="Selecione o ano..."
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Estado</Label>
+            <FormSelect
+              disabled={isLoadingStatusAgendamento || !isDocente}
+              value={filters.estado ?? ""}
+              onChange={(v) => setFilters({ ...filters, estado: v === "" ? "" : v, page: 1 })}
+              options={[
+                { key: "todos", label: "Todos os estados", value: null },
+                ...(statusAgendamentos ?? []).map((s) => ({
+                  key: s.codigo, label: s.designacao, value: String(s.codigo),
+                })),
+              ]}
+              map={(opt) => opt}
+              placeholder="Selecione o estado..."
+            />
+          </div>
+
+          <SemestreSelect
+            onChangeValue={(v) => setFilters({ ...filters, semestre: v, page: 1 })}
+            value={filters.semestre}
+            key={filters.semestre}
+            disabled={!isDocente}
+          />
+
+          <div className="space-y-1.5">
+            <Label>Curso</Label>
+            <FormCommandSelect
+              value={filters.curso}
+              options={cursos}
+              disabled={!isDocente}
+              map={(c) => ({ key: c.codigo.toString(), value: c.codigo.toString(), label: c.designacao })}
+              onChange={(v) => setFilters({ ...filters, curso: v, unidadeCurricular: "" })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Ano Curricular</Label>
+            <Select
+              value={filters.anoCurricular}
+              onValueChange={(v) => setFilters({ ...filters, anoCurricular: v, unidadeCurricular: "" })}
+              disabled={!filters.curso || !isDocente}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={filters.curso ? "Todos os anos" : "Selecione curso"} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os anos</SelectItem>
+                {anosCurriculares.map((ac) => (
+                  <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
+                    {ac.designacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Unidade Curricular</Label>
+            <FormCommandSelect
+              value={filters.unidadeCurricular}
+              options={unidadesCurriculares}
+              disabled={!isDocente}
+              map={(u) => ({ key: u.codigo, value: u.codigo, label: u.nome_cadeira })}
+              placeholder={
+                !filters.curso ? "Selecione curso"
+                : !filters.semestre ? "Selecione semestre"
+                : isLoadingUC ? "Carregando UCs..."
+                : "Selecionar UC"
+              }
+              onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Data início</Label>
+            <Input
+              type="date"
+              disabled={!isDocente}
+              value={filters.dataInicio ?? ""}
+              onChange={(e) => setFilters({ ...filters, dataInicio: e.target.value, page: 1 })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Data fim</Label>
+            <Input
+              type="date"
+              disabled={!isDocente}
+              value={filters.dataFim ?? ""}
+              onChange={(e) => setFilters({ ...filters, dataFim: e.target.value, page: 1 })}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Conteúdo — só se for docente */}
+      {isDocente && (
+        <>
+          {/* Legenda */}
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-yellow-300" />
+              <span className="text-sm">Marcações Pendentes ({contagem?.["Pendente"] ?? 0})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-green-200" />
+              <span className="text-sm">Presenças Marcadas ({contagem?.["Realizada"] ?? 0})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded bg-red-300" />
+              <span className="text-sm">Faltas Marcadas ({contagem?.["Falta"] ?? 0})</span>
+            </div>
+          </div>
+
+          {/* Tabela */}
+          {isLoadingAssiduidade ? (
+            <div className="space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !assiduidadeAula?.data?.length ? (
+            <div className="text-center py-16 bg-muted/40 border rounded-lg">
+              <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground text-lg">Nenhum registo encontrado</p>
+              <p className="text-sm mt-2">Tente ajustar os filtros</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="border rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-20">Código</TableHead>
+                        <TableHead className="min-w-[150px]">Docente</TableHead>
+                        <TableHead className="min-w-[120px]">Horário</TableHead>
+                        <TableHead className="min-w-[200px]">Unidade Curricular</TableHead>
+                        <TableHead className="min-w-20">Tempo</TableHead>
+                        <TableHead className="min-w-[120px]">Data da Aula</TableHead>
+                        <TableHead className="min-w-[100px]">Hora Início</TableHead>
+                        <TableHead className="min-w-[100px]">Hora Término</TableHead>
+                        <TableHead className="min-w-[120px]">Assiduidade</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {assiduidadeAula?.data.map((r) => (
+                        <TableRow key={r.codigo} className="hover:bg-muted/50">
+                          <TableCell className="font-mono text-sm">{r.codigo}</TableCell>
+                          <TableCell className="font-medium">{r.docente ?? "N/A"}</TableCell>
+                          <TableCell>{r.curso}</TableCell>
+                          <TableCell>{r.unidade_curricular}</TableCell>
+                          <TableCell>{r.ordem_tempo}</TableCell>
+                          <TableCell>{r["data_aula"]}</TableCell>
+                          <TableCell>{r.hora_inicio}</TableCell>
+                          <TableCell>{r.hora_termino}</TableCell>
+                          <TableCell><EstadoBadge estado={r.estado} /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    Página {currentPage} de {totalPages}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" disabled={currentPage === 1}
+                      onClick={() => handlePageChange(currentPage - 1)}>
+                      <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+                    </Button>
+                    <Button variant="outline" size="sm" disabled={currentPage === totalPages}
+                      onClick={() => handlePageChange(currentPage + 1)}>
+                      Próximo <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ===================== MAIN COMPONENT =====================
 const TeacherProfile = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
 
-  // Queries
+  const { data: userDate } = useCurrentUser("GA");
+  const isDocente = userDate?.roles?.docente ?? false;
+
   const {
     data: academicYear,
     isLoading: isLoadingAcademicYear,
@@ -67,38 +405,23 @@ const TeacherProfile = () => {
     isError: teacherInfoError,
   } = useQueryTeacherProfile(user?.user?.pk_utilizador);
 
-  // Ano letivo ativo
-  const activeYear = academicYear?.find(
-    (ay) => ay.estado.toLowerCase() === "activo"
-  );
+  const activeYear = academicYear?.find((ay) => ay.estado.toLowerCase() === "activo");
 
   const {
     data: turmData,
     isLoading: isLoadingTurmaData,
     isError: isErrorTurma,
-    refetch: refetchTurma,
   } = useQueryListSchedules({
     teacherId: teacherInfoData?.codigo_docente,
     anoLectivo: activeYear?.codigo,
-    
   });
 
-  // Estado local do perfil
   const [teacherInfo, setTeacherInfo] = useState<TeacherInfo>({
-    name: "",
-    employeeId: "",
-    email: "",
-    phone: "",
-    phone2: "",
-    department: "",
-    category: "",
-    office: "",
-    hireDate: "",
-    birthDate: "",
-    address: "",
+    name: "", employeeId: "", email: "", phone: "", phone2: "",
+    department: "", category: "", office: "", hireDate: "",
+    birthDate: "", address: "",
   });
 
-  // Preenche os dados quando chegam
   useEffect(() => {
     if (teacherInfoData) {
       setTeacherInfo({
@@ -122,18 +445,13 @@ const TeacherProfile = () => {
     : "";
 
   const handleSave = () => {
-    toast({
-      title: "Alterações guardadas!",
-      description: "Os dados do docente foram atualizados com sucesso.",
-    });
+    toast({ title: "Alterações guardadas!", description: "Os dados do docente foram atualizados com sucesso." });
     setIsEditing(false);
   };
 
-  // Estados globais
   const isLoading = isLoadingAcademicYear || teacherInfoDataLoading || isLoadingTurmaData;
   const hasError = isErrorAcademicYear || teacherInfoError || isErrorTurma;
 
-  // ================== LOADING SKELETON ==================
   if (isLoading) {
     return (
       <div className="space-y-8 p-6">
@@ -144,7 +462,6 @@ const TeacherProfile = () => {
           </div>
           <Skeleton className="h-10 w-40" />
         </div>
-
         <div className="grid gap-8 lg:grid-cols-3">
           <Card>
             <CardContent className="pt-6 space-y-6">
@@ -156,7 +473,6 @@ const TeacherProfile = () => {
               </div>
             </CardContent>
           </Card>
-
           <Card className="lg:col-span-2">
             <CardContent className="pt-6 space-y-6">
               <Skeleton className="h-8 w-64" />
@@ -175,7 +491,6 @@ const TeacherProfile = () => {
     );
   }
 
-  // ================== ERRO GLOBAL ==================
   if (hasError) {
     return (
       <div className="flex flex-col items-center justify-center min-h-96 space-y-6 p-8">
@@ -194,32 +509,21 @@ const TeacherProfile = () => {
     );
   }
 
-  // ================== RENDER PRINCIPAL ==================
   return (
     <div className="space-y-8 p-6">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Perfil do Docente</h1>
-          <p className="text-muted-foreground">
-            Visualize e edite as suas informações profissionais
-          </p>
+          <p className="text-muted-foreground">Visualize e edite as suas informações profissionais</p>
         </div>
-        {/* <Button
-          variant={isEditing ? "default" : "outline"}
-          onClick={() => setIsEditing(!isEditing)}
-        >
-          <Edit className="mr-2 h-4 w-4" />
-          {isEditing ? "Cancelar" : "Editar Dados"}
-        </Button> */}
       </div>
 
+      {/* Secção Superior */}
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Foto + Info Rápida */}
         <Card>
-          <CardHeader>
-            <CardTitle>Foto do Perfil</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Foto do Perfil</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             <div className="flex justify-center">
               <Avatar className="h-40 w-40 border-4 border-background">
@@ -229,12 +533,9 @@ const TeacherProfile = () => {
                 </AvatarFallback>
               </Avatar>
             </div>
-
             <div className="text-center space-y-3">
               <h3 className="text-2xl font-semibold">{teacherInfo.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                Nº Mec: {teacherInfo.employeeId || "N/A"}
-              </p>
+              <p className="text-sm text-muted-foreground">Nº Mec: {teacherInfo.employeeId || "N/A"}</p>
               <div className="flex items-center justify-center gap-2 text-sm">
                 <Briefcase className="h-4 w-4" />
                 <span>{teacherInfo.category || "N/A"}</span>
@@ -244,10 +545,7 @@ const TeacherProfile = () => {
                 <span>{teacherInfo.department || "N/A"}</span>
               </div>
             </div>
-
-            <Button className="w-full" variant="outline" disabled={!isEditing}>
-              Alterar Foto
-            </Button>
+            <Button className="w-full" variant="outline" disabled={!isEditing}>Alterar Foto</Button>
           </CardContent>
         </Card>
 
@@ -269,81 +567,53 @@ const TeacherProfile = () => {
               <TabsContent value="personal" className="space-y-4 pt-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome Completo</Label>
+                    <Label>Nome Completo</Label>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="name"
-                        value={teacherInfo.name}
-                        disabled={!isEditing}
-                        onChange={(e) => setTeacherInfo({ ...teacherInfo, name: e.target.value })}
-                      />
+                      <Input value={teacherInfo.name} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, name: e.target.value })} />
                     </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Institucional</Label>
+                    <Label>Email Institucional</Label>
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        value={teacherInfo.email}
-                        disabled={!isEditing}
-                        onChange={(e) => setTeacherInfo({ ...teacherInfo, email: e.target.value })}
-                      />
+                      <Input type="email" value={teacherInfo.email} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, email: e.target.value })} />
                     </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone Principal</Label>
+                    <Label>Telefone Principal</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="phone"
-                        value={teacherInfo.phone}
-                        disabled={!isEditing}
-                        onChange={(e) => setTeacherInfo({ ...teacherInfo, phone: e.target.value })}
-                      />
+                      <Input value={teacherInfo.phone} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, phone: e.target.value })} />
                     </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="phone2">Telefone Alternativo</Label>
+                    <Label>Telefone Alternativo</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="phone2"
-                        value={teacherInfo.phone2}
-                        disabled={!isEditing}
-                        onChange={(e) => setTeacherInfo({ ...teacherInfo, phone2: e.target.value })}
-                      />
+                      <Input value={teacherInfo.phone2} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, phone2: e.target.value })} />
                     </div>
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="birth">Data de Nascimento</Label>
+                    <Label>Data de Nascimento</Label>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="birth"
                         value={teacherInfo.birthDate ? new Date(teacherInfo.birthDate).toLocaleDateString("pt-AO") : ""}
                         disabled={!isEditing}
-                        onChange={(e) => setTeacherInfo({ ...teacherInfo, birthDate: e.target.value })}
-                      />
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, birthDate: e.target.value })} />
                     </div>
                   </div>
-
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="address">Endereço</Label>
+                    <Label>Endereço</Label>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="address"
-                        value={teacherInfo.address}
-                        disabled={!isEditing}
-                        onChange={(e) => setTeacherInfo({ ...teacherInfo, address: e.target.value })}
-                      />
+                      <Input value={teacherInfo.address} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, address: e.target.value })} />
                     </div>
                   </div>
                 </div>
@@ -356,36 +626,25 @@ const TeacherProfile = () => {
                     <Label>Nº de Funcionário</Label>
                     <Input value={teacherInfo.employeeId} disabled />
                   </div>
-
                   <div className="space-y-2">
                     <Label>Categoria</Label>
-                    <Input
-                      value={teacherInfo.category}
-                      disabled={!isEditing}
-                      onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })}
-                    />
+                    <Input value={teacherInfo.category} disabled={!isEditing}
+                      onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
                   </div>
-
                   <div className="space-y-2">
                     <Label>Faculdade / Departamento</Label>
                     <Input value={teacherInfo.department} disabled />
                   </div>
-
                   <div className="space-y-2">
                     <Label>Escalão</Label>
-                    <Input
-                      value={teacherInfo.office}
-                      disabled={!isEditing}
-                      onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })}
-                    />
+                    <Input value={teacherInfo.office} disabled={!isEditing}
+                      onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
                   </div>
-
                   <div className="space-y-2 md:col-span-2">
                     <Label>Data de Admissão</Label>
                     <Input
                       value={teacherInfo.hireDate ? new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO") : ""}
-                      disabled
-                    />
+                      disabled />
                   </div>
                 </div>
               </TabsContent>
@@ -394,22 +653,16 @@ const TeacherProfile = () => {
               <TabsContent value="classes" className="pt-4">
                 {isLoadingTurmaData ? (
                   <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-28 w-full rounded-lg" />
-                    ))}
+                    {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-lg" />)}
                   </div>
                 ) : turmData?.horarios && turmData.horarios.length > 0 ? (
                   <div className="space-y-4">
                     {turmData.horarios.map((cls) => (
-                      <div
-                        key={cls.codigo_horario}
-                        className="flex items-center gap-4 rounded-lg border bg-card p-5 transition-all hover:shadow-md"
-                      >
+                      <div key={cls.codigo_horario}
+                        className="flex items-center gap-4 rounded-lg border bg-card p-5 transition-all hover:shadow-md">
                         <GraduationCap className="h-12 w-12 text-primary" />
                         <div className="flex-1">
-                          <p className="font-semibold text-lg">
-                            {cls.codigo_grade} – {cls.grade}
-                          </p>
+                          <p className="font-semibold text-lg">{cls.codigo_grade} – {cls.grade}</p>
                           <div className="mt-1 space-y-1 text-sm text-muted-foreground">
                             <p>• Horário: {cls.horario}</p>
                             <p>• Sala: {cls.sala}</p>
@@ -433,20 +686,88 @@ const TeacherProfile = () => {
               </TabsContent>
             </Tabs>
 
-            {/* Botões de edição */}
             {isEditing && (
               <div className="mt-8 flex gap-3">
-                <Button onClick={handleSave} className="flex-1">
-                  Guardar Alterações
-                </Button>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancelar
-                </Button>
+                <Button onClick={handleSave} className="flex-1">Guardar Alterações</Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>Cancelar</Button>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* ===================== SECÇÃO INFERIOR — TABS ADICIONAIS ===================== */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Atividade do Docente</CardTitle>
+          <CardDescription>Consulte a sua assiduidade, avaliações, pautas e contratos</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="assiduidade" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="assiduidade" className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4" /> Assiduidade
+              </TabsTrigger>
+              <TabsTrigger value="avaliacoes" className="flex items-center gap-2">
+                <BarChart2 className="h-4 w-4" /> Avaliações
+              </TabsTrigger>
+              <TabsTrigger value="pautas" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" /> Pautas
+              </TabsTrigger>
+              <TabsTrigger value="contratos" className="flex items-center gap-2">
+                <ScrollText className="h-4 w-4" /> Contratos
+              </TabsTrigger>
+            </TabsList>
+
+            {/* ASSIDUIDADE */}
+            <TabsContent value="assiduidade" className="pt-6">
+              <AssiduidadeTab
+                docenteId={teacherInfoData?.codigo_docente?.toString()}
+                isDocente={isDocente}
+              />
+            </TabsContent>
+
+            {/* AVALIAÇÕES */}
+            <TabsContent value="avaliacoes" className="pt-6">
+              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50 py-16 text-center">
+                <div className="rounded-full bg-muted p-5 mb-4">
+                  <BarChart2 className="h-14 w-14 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium">Avaliações</h3>
+                <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+                  Aqui será apresentado o histórico de avaliações lançadas pelo docente.
+                </p>
+              </div>
+            </TabsContent>
+
+            {/* PAUTAS */}
+            <TabsContent value="pautas" className="pt-6">
+              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50 py-16 text-center">
+                <div className="rounded-full bg-muted p-5 mb-4">
+                  <FileText className="h-14 w-14 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium">Pautas</h3>
+                <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+                  Aqui serão listadas as pautas submetidas pelo docente.
+                </p>
+              </div>
+            </TabsContent>
+
+            {/* CONTRATOS */}
+            <TabsContent value="contratos" className="pt-6">
+              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50 py-16 text-center">
+                <div className="rounded-full bg-muted p-5 mb-4">
+                  <ScrollText className="h-14 w-14 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium">Contratos</h3>
+                <p className="mt-2 text-sm text-muted-foreground max-w-sm">
+                  Aqui será apresentada a informação contratual do docente.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

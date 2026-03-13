@@ -110,6 +110,9 @@ import CalendarioAulasDocente from "./pages/docente/CalendarioAulasDocenteConten
 import ControleGeralPorDocente from "./pages/assiduidade";
 import Parametros from "./pages/gestao_docente/Parametros";
 import SalarioDocente from "./pages/gestao_docente/Salario_docente";
+import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
+import ListarUCDocenteSemAfetacao from "./pages/gestao_docente/listar-uc-docente-sem-afetacao";
+import { DocenteAfectacao } from "./pages/gestao_docente/DocenteAfectacao";
 
 const App = () => {
   return (
@@ -183,11 +186,11 @@ const App = () => {
                     path="/comunicacao/avisos/imagem"
                     element={<UploadImagem />}
                   />
-                    <Route
+                  <Route
                     path="/gestao-docentes/parametros"
                     element={<Parametros />}
                   />
-                     <Route
+                  <Route
                     path="/gestao-docentes/salario"
                     element={<SalarioDocente />}
                   />
@@ -342,7 +345,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
                         ]}
                       >
                         <ControleAssiduidade />
@@ -355,7 +358,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla
+                          PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
                         ]}
                       >
                         <ControleGeralPorDocente />
@@ -737,8 +740,6 @@ const App = () => {
                     }
                   />
 
-                  
-
                   <Route
                     path="/horarios/movimentar/estudantes"
                     element={
@@ -1061,6 +1062,43 @@ const App = () => {
                         ]}
                       >
                         <HorasVigilancia />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/gestao-docente/afectacoes"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_AFETACOES.sigla!,
+                        ]}
+                      >
+                        <GestaoAfectacao />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/gestao-docente/sem-afetacao/uc"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS
+                            .sigla,
+                        ]}
+                      >
+                        <ListarUCDocenteSemAfetacao />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/gestao-docente/docente-afectados"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_AFETACOES.sigla!,
+                        ]}
+                      >
+                        <DocenteAfectacao />
                       </ProtectedRoute>
                     }
                   />

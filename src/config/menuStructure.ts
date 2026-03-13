@@ -12,6 +12,7 @@ import {
   LibraryBig,
   GraduationCap,
   FileText,
+  BookUser,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -90,7 +91,6 @@ export const menuStructure: MenuStructure = {
       permission: [],
     },
 
-    
     // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
@@ -146,7 +146,7 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
-         { title: "Calendário de aulas", url: "/docente/calendario" },
+        { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
         // { title: "Calendário de aulas", url: "/docente/calendario" },
         {
@@ -166,39 +166,25 @@ export const menuStructure: MenuStructure = {
           url: "/docente/validacao",
           permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
         },
-        //{ title: "Assiduidade", url: "/docente/assiduidade", permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla] },
+        /*
+        {
+          title: "Assiduidade",
+          url: "/docente/assiduidade",
+          permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla],
+        },
+        */
       ],
 
       permission: [],
     },
-   
+
     // ----------------------------------------------------
-  
+
     // ----------------------------------------------------
     // GESTÃO DE DOCENTES
     // ----------------------------------------------------
-    {
-      title: "Gestão de Docentes",
-      url: "/gestao-docentes",
-      icon: GraduationCap,
-      items: [
 
-       // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
-       // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
-       // { title: "Contratos", url: "/gestao-docentes/contratos" },
-      //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
-       // { title: "Regentes", url: "/gestao-docentes/regentes" },
-       // { title: "Afetados", url: "/gestao-docentes/afetados" },
-       // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
-       // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
-       // { title: "Parâmetros", url: "/gestao-docentes/parametros" },
-       // { title: "Salário", url: "/gestao-docentes/salario" },
-        //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
-      ],
-
-      permission: [],
-    },
- /* ----------------------------------------------------
+    /* ----------------------------------------------------
 
     // ----------------------------------------------------
     // INSCRIÇÕES E MATRÍCULA
@@ -641,6 +627,47 @@ export const suporteStructure: MenuStructure = {
     },
   ],
 };
+export const gestaoDocente: MenuStructure = {
+  items: [
+    {
+      title: "Gestão de Docentes",
+      url: "/gestao-docente",
+      icon: BookUser,
+      items: [
+        {
+          title: "Gestão de Afectação",
+          url: "/gestao-docente/afectacoes",
+          permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
+        },
+        {
+          title: "Lista de UC sem docentes afectados",
+          url: "/gestao-docente/sem-afetacao/uc",
+          permission: [
+            PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS.sigla,
+          ],
+        },
+        // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
+        // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
+        // { title: "Contratos", url: "/gestao-docentes/contratos" },
+        //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
+        // { title: "Regentes", url: "/gestao-docentes/regentes" },
+        // { title: "Afetados", url: "/gestao-docentes/afetados" },
+        // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
+        // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
+        { title: "Parâmetros", url: "/gestao-docentes/parametros", permission:[PermissionTypeDetails.PARAMETROS_MGD.sigla] },
+        { title: "Salário", url: "/gestao-docentes/salario" ,permission:[PermissionTypeDetails.DESEMPENHO_DOCENTE.sigla] },
+        //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
+
+        {
+          title: "Docente Afectados",
+          url: "/gestao-docente/docente-afectados",
+          permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
+        },
+      ],
+      permission: [],
+    },
+  ],
+};
 export const defenseTFC: MenuStructure = {
   items: [
     {
@@ -658,7 +685,7 @@ export const defenseTFC: MenuStructure = {
           title: "Orientadores",
           url: "/defesa-tfc/orientadores",
           permission: [PermissionTypeDetails.DEFESA.sigla],
-        }
+        },
       ],
     },
   ],
@@ -691,7 +718,7 @@ export const assiduidade: MenuStructure = {
           title: "Controle Geral de Assuidade por Docente",
           url: "/assiduidade/docente",
           permission: [
-            PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla
+            PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla,
           ],
         },
       ],
@@ -701,9 +728,6 @@ export const assiduidade: MenuStructure = {
       url: "/gestao-docentes",
       icon: FileText,
       items: [
-
-      
-      
         {
           title: "Aulas Agendadas",
           url: "/sumario/aulas-agendadas",
@@ -716,13 +740,12 @@ export const assiduidade: MenuStructure = {
             PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
           ],
         },
-         { title: "Listar Sumários", url: "/sumario/listar" },
+        { title: "Listar Sumários", url: "/sumario/listar",  permission:[PermissionTypeDetails.LISTAR_SUMARIO.sigla]},
         {
           title: "Parâmetros",
           url: "/sumario/parametros",
           permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
         },
-       
       ],
       permission: [],
     },

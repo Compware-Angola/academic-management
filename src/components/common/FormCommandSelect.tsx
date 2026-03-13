@@ -35,7 +35,7 @@ type FormCommandSelectProps<T> = {
   options?: T[];
   map: (item: T) => MapResult;
   onChange: (value: string) => void;
-
+  defaultSelectItem?: MapResult[];
   placeholder?: string;
   onSearchChange?: (value: string) => void;
   disabled?: boolean;
@@ -64,6 +64,7 @@ export function FormCommandSelect<T>({
   map,
   onChange,
   placeholder = "Selecionar",
+  defaultSelectItem = [],
   onSearchChange,
   disabled = false,
   width = "md",
@@ -73,11 +74,6 @@ export function FormCommandSelect<T>({
   const [searchValue, setSearchValue] = useState("");
 
   const widthClass = resolveWidthClass(width);
-
-  // Buscamos o item selecionado APENAS com base no valor atual
-  const selectedItem = options.find(
-    (item) => String(map(item).value) === value,
-  );
 
   function handleOpenChange(isOpen: boolean) {
     setOpen(isOpen);
@@ -93,7 +89,8 @@ export function FormCommandSelect<T>({
     setSearchValue("");
     onSearchChange?.("");
   }
-
+  const allItems = [...defaultSelectItem, ...options.map(map)];
+  const selectedItem = allItems.find((item) => String(item.value) === value);
   return (
     <div className="flex flex-col gap-2">
       {label && labelMode === "outside" && <Label>{label}</Label>}
@@ -113,7 +110,7 @@ export function FormCommandSelect<T>({
             <span className="truncate">
               {/* Se existe item selecionado, mostra o label dele */}
               {selectedItem
-                ? map(selectedItem).label
+                ? selectedItem.label
                 : // Se não existe, decide entre mostrar o label interno ou placeholder
                   labelMode === "inside"
                   ? label
@@ -149,6 +146,25 @@ export function FormCommandSelect<T>({
                 <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
               ) : (
                 <CommandGroup>
+                  {defaultSelectItem.map((item) => {
+                    return (
+                      <CommandItem
+                        key={item.key}
+                        value={`${item.label} ${item.value}`}
+                        onSelect={() => handleSelect(String(item.value))}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === String(item.value)
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        {item.label}
+                      </CommandItem>
+                    );
+                  })}
                   {options.map((item) => {
                     const mapped = map(item);
                     return (
