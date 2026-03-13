@@ -654,12 +654,12 @@ export const gestaoDocente: MenuStructure = {
         // { title: "Afetados", url: "/gestao-docentes/afetados" },
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
         // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
-        { title: "Parâmetros", url: "/gestao-docentes/parametros" },
+        { title: "Parâmetros", url: "/gestao-docentes/parametros", permission:[PermissionTypeDetails.PARAMETROS_MGD.sigla] },
         {
           title: "Lista de UC sem docentes afectados",
           url: "/gestao-docentes/sem-afetacao/uc",
         },
-        { title: "Salário", url: "/gestao-docentes/salario" },
+        { title: "Salário", url: "/gestao-docentes/salario" ,permission:[PermissionTypeDetails.DESEMPENHO_DOCENTE.sigla] },
         //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
 
         {
@@ -744,7 +744,7 @@ export const assiduidade: MenuStructure = {
             PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
           ],
         },
-        { title: "Listar Sumários", url: "/sumario/listar" },
+        { title: "Listar Sumários", url: "/sumario/listar",  permission:[PermissionTypeDetails.LISTAR_SUMARIO.sigla]},
         {
           title: "Parâmetros",
           url: "/sumario/parametros",

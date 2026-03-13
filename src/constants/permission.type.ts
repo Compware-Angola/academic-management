@@ -795,6 +795,10 @@ INSCRICAO_POR_HORARIO: {
   },
   SUMARIO_POR_VALIDAR: { designacao: "Sumário Por Validar", sigla: "msa_spv" },
   PARAMETROS_MGD: { designacao: "parametros", sigla: "mgd_p" },
+  DESEMPENHO_DOCENTE: { 
+  designacao: "desempenho docente", 
+  sigla: "desempenho_docente" 
+},
   LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO: {
     designacao: "Listar Estudantes Sem Inscrições No Curso",
     sigla: "mgim_esi",
@@ -1052,12 +1056,15 @@ CONTROLE_LANCAMENTO: {
 },
 
 
-"SUMARIO_PARAMETROS":{
+SUMARIO_PARAMETROS:{
   designacao: "Parâmetros do sumário",
   sigla: "sumario_parametros",
+},
+
+LISTAR_SUMARIO: {
+  designacao: "Listar sumários",
+  sigla: "listar_sumario",
 }
-
-
 
 
 } as const;
