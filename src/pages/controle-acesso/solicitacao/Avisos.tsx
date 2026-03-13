@@ -11,10 +11,11 @@ import { DataTable } from "@/components/common/DataTable";
 import { useQueryAvisos } from "@/hooks/acess/use-avisos";
 import { Button } from "@/components/ui/button";
 import { AvisoFormDialog } from "./components/aviso-form-dialog";
+import { Plus } from "lucide-react";
 
 export default function Avisos() {
 const [modalOpen, setModalOpen] = useState(false);
-const [mode, setMode] = useState<"create">("create");
+const [mode, setMode] = useState<"create" | "edit">("create");
 const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
 
 
@@ -136,6 +137,28 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       accessor: "date_expiracao",
       cell: (row) => formatDate(row.date_expiracao),
     },
+
+    {
+    header: "Editar",                // nova coluna
+    accessor: "editar",
+    cell: ( row ) => (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          // coloca o diálogo em modo de edição com os dados do aviso
+          setMode("edit");
+          setAvisoSelecionado(row);
+          setModalOpen(true);
+        }}
+      >
+        {/* pode ser um ícone de lápis ou texto "Editar" */}
+        <Plus className="h-4 w-4 mr-2" />
+            Editar
+      </Button>
+    ),
+  },
+
   ];
 
   return (
