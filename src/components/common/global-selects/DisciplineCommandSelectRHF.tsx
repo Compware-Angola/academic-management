@@ -3,6 +3,7 @@ import { Control, Path, useController } from "react-hook-form";
 import { CursoParams } from "@/services/fetch-course";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
+import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdown-disciplines";
 
 interface Props<TForm> {
   control: Control<TForm>;
@@ -24,24 +25,24 @@ export function DisciplineCommandSelectRHF<TForm>({
     control,
   });
 
-    const { data: disciplines = [], isLoading: isLoadingDisciplines } =
-    useDisciplines();
+  const { data: disciplines = [], isLoading: isLoadingDisciplines } =
+    useQueryDropdownDisciplines();
 
   return (
     <FormCommandSelect
       label={label}
       labelMode={labelMode}
-      value={field.value ? String(field.value) : undefined} 
+      value={field.value ? String(field.value) : undefined}
       disabled={isLoadingDisciplines}
       isLoading={isLoadingDisciplines}
-       width="full"
+      width="full"
       options={disciplines}
       map={(c) => ({
         key: c.codigo.toString(),
         value: c.codigo.toString(),
         label: c.desginacao,
       })}
-      onChange={(value) => field.onChange(value)} 
+      onChange={(value) => field.onChange(value)}
     />
   );
 }
