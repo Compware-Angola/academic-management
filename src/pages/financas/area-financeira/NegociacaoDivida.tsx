@@ -419,6 +419,7 @@ const baseFileName = `Negociacao_Divida_${new Date()
                     <TableHead>Valor Divida</TableHead>
                     <TableHead>1ª Prestações a pagar</TableHead>
                    
+                    <TableHead>Valor Prestação</TableHead>
                     <TableHead>Valor Restante</TableHead>
                     <TableHead>Acções</TableHead>
                   </TableRow>
@@ -444,6 +445,9 @@ const baseFileName = `Negociacao_Divida_${new Date()
                         </Badge>
                       </TableCell>
                       
+                      <TableCell>
+                        <Badge> {formatNumber(item.valor_prestacao)} kz</Badge>
+                      </TableCell>
                       <TableCell>
                         <Badge> {formatNumber(item.valor_restante)} kz</Badge>
                       </TableCell>
