@@ -62,7 +62,6 @@ export function CreateUcModal({ open, onClose }: Props) {
   // QUERIES
   // =======================
 
-
   const { data: semestres = [], isLoading: isLoadingSemestres } =
     useQuerySemestres();
   const { data: anos = [], isLoading: isLoadingAnos } = useQueryAnoAcademico();
@@ -78,20 +77,19 @@ export function CreateUcModal({ open, onClose }: Props) {
       {
         cursos: [{ codigoCurso: Number(data.codigo_curso) }],
 
-        codigo_disciplina: Number(data.codigo_disciplina),
-        codigo_ano_lectivo: Number(data.codigo_ano_lectivo),
-        codigo_semestre: Number(data.codigo_semestre),
-        codigo_classe: Number(data.codigo_classe),
-        codigo_curso: Number(data.codigo_curso),
-        codigo_departamento: Number(data.codigo_departamento),
-        codigo_utilizador: pk_utilizador,
+        codigoDisciplina: Number(data.codigo_disciplina),
+        codigoAnoLectivo: Number(data.codigo_ano_lectivo),
+        codigoSemestre: Number(data.codigo_semestre),
+        codigoClasse: Number(data.codigo_classe),
+        codigoDepartamento: Number(data.codigo_departamento),
+        codigoUtilizador: pk_utilizador,
       },
       {
         onSuccess: () => {
           form.reset();
           onClose();
         },
-      }
+      },
     );
   };
 
@@ -104,7 +102,6 @@ export function CreateUcModal({ open, onClose }: Props) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-
             <CourseCommandSelectRHF<FormValues>
               control={form.control}
               name="codigo_curso"
@@ -128,7 +125,6 @@ export function CreateUcModal({ open, onClose }: Props) {
               control={form.control}
               name="codigo_disciplina"
             />
-
 
             <FormSelectRHF<FormValues, AnoAcademico>
               control={form.control}
@@ -156,12 +152,10 @@ export function CreateUcModal({ open, onClose }: Props) {
               })}
             />
 
-           
             <DepartamentoCommandSelectRHF<FormValues>
               control={form.control}
               name="codigo_departamento"
             />
-            
 
             <DialogFooter>
               <Button
