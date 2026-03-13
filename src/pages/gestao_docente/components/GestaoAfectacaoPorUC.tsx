@@ -40,8 +40,8 @@ const GestaoAfectacaoPorUC = () => {
     semestre: "",
     docente: "",
     curso: "",
-    anoCurricular: "",
-    unidadeCurricular: "",
+    anoCurricular: "all",
+    unidadeCurricular: "all",
   });
 
   const { data: teachersData = [] } = useQueryTeacther();
@@ -57,36 +57,11 @@ const GestaoAfectacaoPorUC = () => {
       page,
     });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "Pendente":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            Pendente
-          </Badge>
-        );
-      case "Aprovado":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Aprovado
-          </Badge>
-        );
-
-      case "Regeitado":
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            Regeitado
-          </Badge>
-        );
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       curso: filters.curso,
       semestre: filters.semestre,
-      classe: filters.anoCurricular,
+      classe: filters.anoCurricular == "all" ? null : filters.anoCurricular,
     });
   const updateAfectacaoStatus = (codigo: number, status: boolean) => {
     mutateAsync({

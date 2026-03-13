@@ -1,15 +1,16 @@
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { toast, useToast } from "@/components/ui/use-toast";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import {
@@ -21,7 +22,12 @@ import {
 } from "@/components/ui/select";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-
+import { useQueryCategoriaDocente } from "@/hooks/categoria-docente/use-query-categoria-docente";
+import { Button } from "@/components/ui/button";
+import { useMutationCreateDocenteAfectacao } from "@/hooks/gestao_docente/use-mutation-create-afectacao";
+import { Loader2 } from "lucide-react";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { FormSelect } from "@/components/common/FormSelect";
 interface GestaoAfectacaoModalProps {
   isModalOpen: boolean;
   setIsModalOpen: () => void;
@@ -30,17 +36,20 @@ export const GestaoAfectacaoModal = ({
   isModalOpen,
   setIsModalOpen,
 }: GestaoAfectacaoModalProps) => {
-  const { toast } = useToast();
-  const handleSubmit = async () => {};
+  const { mutateAsync, isPending } = useMutationCreateDocenteAfectacao();
   const { data: teachersData = [] } = useQueryTeacther();
+  const { data: categoriaDocente = [] } = useQueryCategoriaDocente();
   const [params, setParams] = useState({
-    docente: "",
-    curso: "",
-    anoCurricular: "",
-    unidadeCurricular: "",
-    semestre: "",
+    docente: undefined,
+    curso: undefined,
+    anoCurricular: undefined,
+    unidadeCurricular: undefined,
+    semestre: undefined,
+    categoria: undefined,
+    anoLectivo: undefined,
   });
-
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   const handleChangeInput = (key: string, v: any) => {
     setParams({
       ...params,
@@ -55,6 +64,44 @@ export const GestaoAfectacaoModal = ({
     });
   const canLoadUcs = !!params.curso && !!params.semestre;
 
+  const handleSubmit = async () => {
+    const payload = {
+      anoLectivo: 23,
+      docente: params.docente,
+      unidadeCurricular: params.unidadeCurricular,
+      semestre: params.semestre,
+      categoria: params.categoria,
+    };
+    await mutateAsync(payload, {
+      onSuccess: (response) => {
+        toast({
+          title: "Programa UC",
+          description: "Programa UC criado com sucesso.",
+          variant: "default",
+        });
+        setIsModalOpen();
+      },
+      onError(error) {
+        toast({
+          title: "Programa UC",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
+    });
+  };
+  const activeAcademicYear = academicYear?.find(
+    (year) => year.estado.toLowerCase() === "activo",
+  );
+
+  const activeAcademicYearId = activeAcademicYear?.codigo;
+  useEffect(() => {
+    setParams((prev) => ({
+      ...prev,
+      anoLectivo: activeAcademicYearId?.toString() || "",
+    }));
+  }, [activeAcademicYearId]);
+
   return (
     <>
       {/* Modal de Detalhes */}
@@ -67,8 +114,22 @@ export const GestaoAfectacaoModal = ({
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
+            <FormSelect
+              disabled={isLoadingAcademicYear}
+              loading={isLoadingAcademicYear}
+              label="Ano Letivo"
+              value={params.anoLectivo}
+              onChange={(v) => setParams({ ...params, anoLectivo: v })}
+              options={[activeAcademicYear]}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
+            />
             <Label>Docente</Label>
             <FormCommandSelect
+              width="full"
               value={params.docente}
               options={teachersData}
               map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
@@ -118,6 +179,25 @@ export const GestaoAfectacaoModal = ({
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label>Categoria</Label>
+            <FormCommandSelect
+              width="full"
+              value={params.categoria}
+              options={categoriaDocente}
+              map={(t) => ({ key: t.value, value: t.value, label: t.label })}
+              onChange={(codigo) => handleChangeInput("categoria", codigo)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {}}>
+              Cancelar
+            </Button>
+            <Button onClick={() => handleSubmit()}>
+              {" "}
+              {isPending ? <Loader2 /> : "Adicionar"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
