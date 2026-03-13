@@ -20,7 +20,8 @@ export function useAvailableRooms(params?: AvailableRoomsParams) {
         periodo: params.periodo,
         tipoAula: params.tipoAula,
       }),
-
+    staleTime: 0,
+    gcTime: 0,
     enabled,
   });
 }

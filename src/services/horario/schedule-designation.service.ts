@@ -39,14 +39,10 @@ export function gerarDesignacao(
     return `${base}-H1`;
   }
 
-  const numeros = response.data
-    .map((item) => {
-      const match = item.designacao.match(/-H(\d+)$/);
-      return match ? Number(match[1]) : 0;
-    })
-    .filter(Boolean);
-
-  const proximo = numeros.length + 1;
+  const numeros = response.data.length
+    
+    
+  const proximo = numeros + 1;
 
   return `${base}-H${proximo}`;
 }
