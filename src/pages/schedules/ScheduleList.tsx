@@ -66,10 +66,13 @@ import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-val
 import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
 import { useAuth } from "@/hooks/use-auth";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { es, is } from "date-fns/locale";
+
+import { PermissionTypeDetails } from "@/constants/permission.type";
+import { usePermission } from "@/auth/permission.helper";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
+  const { hasPermission } = usePermission();
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -543,7 +546,8 @@ export default function ScheduleList() {
                                 <Trash2 className="h-4 w-4" />
                               )}
                             </Button>
-                            {Number(item.estadoid) === 2 && (
+                            {Number(item.estadoid) === 2 &&  hasPermission(PermissionTypeDetails.VALIDACAO_HORARIO.sigla) && (
+                              
                               <Button
                                 variant="default"
                                 size="icon"
