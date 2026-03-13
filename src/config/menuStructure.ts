@@ -653,10 +653,6 @@ export const gestaoDocente: MenuStructure = {
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
         // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
         { title: "Parâmetros", url: "/gestao-docentes/parametros" },
-        {
-          title: "Lista de UC sem docentes afectados",
-          url: "/gestao-docentes/sem-afetacao/uc",
-        },
         { title: "Salário", url: "/gestao-docentes/salario" },
         //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
 
