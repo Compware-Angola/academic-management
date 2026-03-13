@@ -13,13 +13,10 @@ export class LogoutPayload {
 }
 
 
-
-export interface Group {
-  codigo: number;
-  designation: string;
-  sigla: string;
-  type_group: number;
-  type_group_designation: string;
+export interface roles {
+  docente: boolean;
+  direitor_curso: boolean;
+  
 }
 
 export interface User {
@@ -46,7 +43,7 @@ export interface AuthResponse {
   access_token: string;
   expires_in: number;
   user: User;
-  groups: Group[];
+  roles: roles;
   mensagem: string;
   first_login:number
 }
@@ -58,7 +55,7 @@ export interface logoutResponse {
 export interface CurrentUserResponse {
   isAuthenticated: boolean;
   user: User;
-  groups?: Group[]; 
+  roles?: roles; 
   permissions?: string[] 
   message: string;
   platform?: 'GA' | 'PORTAL'; 

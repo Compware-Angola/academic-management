@@ -436,6 +436,7 @@ INSCRICAO_POR_HORARIO: {
     designacao: "Marcar Assiduidade Prova",
     sigla: "mav_a_map",
   },
+    VALIDACAO_HORARIO: { designacao: "Validação de Horário", sigla: "mga_h_val" },
   LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA: {
     designacao: "Listar Estudantes Por Estado Da Matricula",
     sigla: "mgim_a_lepem",
@@ -794,6 +795,10 @@ INSCRICAO_POR_HORARIO: {
   },
   SUMARIO_POR_VALIDAR: { designacao: "Sumário Por Validar", sigla: "msa_spv" },
   PARAMETROS_MGD: { designacao: "parametros", sigla: "mgd_p" },
+  DESEMPENHO_DOCENTE: { 
+  designacao: "desempenho docente", 
+  sigla: "desempenho_docente" 
+},
   LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO: {
     designacao: "Listar Estudantes Sem Inscrições No Curso",
     sigla: "mgim_esi",
@@ -1051,12 +1056,15 @@ CONTROLE_LANCAMENTO: {
 },
 
 
-"SUMARIO_PARAMETROS":{
+SUMARIO_PARAMETROS:{
   designacao: "Parâmetros do sumário",
   sigla: "sumario_parametros",
+},
+
+LISTAR_SUMARIO: {
+  designacao: "Listar sumários",
+  sigla: "listar_sumario",
 }
-
-
 
 
 } as const;
