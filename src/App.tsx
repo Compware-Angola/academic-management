@@ -113,6 +113,7 @@ import SalarioDocente from "./pages/gestao_docente/Salario_docente";
 import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
 import ListarUCDocenteSemAfetacao from "./pages/gestao_docente/listar-uc-docente-sem-afetacao";
 import { DocenteAfectacao } from "./pages/gestao_docente/DocenteAfectacao";
+import ListagemDocentes from "./pages/gestao_docente/ListDocentes";
 
 const App = () => {
   return (
@@ -1102,6 +1103,14 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="/gestao-docentes/docentes"
+                    element={
+                        <ListagemDocentes />
+                    }
+                  />
+
                 </Route>
               </Routes>
             </TooltipProvider>
