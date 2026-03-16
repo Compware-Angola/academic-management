@@ -646,10 +646,12 @@ export const gestaoDocente: MenuStructure = {
             PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS.sigla,
           ],
         },
+        { title: "Lista de Docentes", 
+          url: "/gestao-docentes/docentes" 
+        },
         // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
         // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
         // { title: "Contratos", url: "/gestao-docentes/contratos" },
-        //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
         // { title: "Regentes", url: "/gestao-docentes/regentes" },
         // { title: "Afetados", url: "/gestao-docentes/afetados" },
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
