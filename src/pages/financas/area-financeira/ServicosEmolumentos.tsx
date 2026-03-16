@@ -531,9 +531,9 @@ export default function ServicosEmolumentos() {
                 </div>
 
                 <div className="flex-1 min-w-[300px]">
-                  <Label>Descrição / Curso</Label>
+                  <Label> Curso</Label>
                   <Input
-                    placeholder="Filtrar por descrição ou nome do curso..."
+                    placeholder="Filtrar pelo nome do curso..."
                     value={mensalidadesFilters.descricao}
                     onChange={(e) => {
                       setMensalidadesFilters((prev) => ({ ...prev, descricao: e.target.value }));
@@ -553,7 +553,7 @@ export default function ServicosEmolumentos() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Curso / Descrição</TableHead>
+                    <TableHead>Descrição</TableHead>
                     <TableHead>Grau</TableHead>
                     <TableHead>Valor Mensal</TableHead>
                     <TableHead>Valor Anual (estimado)</TableHead>
@@ -577,7 +577,7 @@ export default function ServicosEmolumentos() {
                   ) : (
                     mensalidades.data.map((item) => (
                       <TableRow key={item.codigo}>
-                        <TableCell>{item.descricao}</TableCell>
+                         {item.descricao.replace(/propina/gi, "Mensalidade")}
                         <TableCell>{item.mestrado ? "Mestrado" : "Licenciatura"}</TableCell>
                         <TableCell>{Number(item.preco).toLocaleString()} kz</TableCell>
                         <TableCell>{Number(item.preco * 10).toLocaleString()} kz</TableCell>
