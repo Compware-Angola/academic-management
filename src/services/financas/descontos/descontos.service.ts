@@ -25,7 +25,9 @@ export type FetchDescontoParams = {
   limit?: number;
 };
 
-export async function fetchDescontos(params: FetchDescontoParams): Promise<PaginationResponse<Desconto>> {
+export async function fetchDescontos(
+  params: FetchDescontoParams,
+): Promise<PaginationResponse<Desconto>> {
   const { data } = await axiosNestFinance.get("/discount", {
     params: {
       codigo: params.codigo,
@@ -53,8 +55,8 @@ export async function createDesconto(body: CreateDescontoBody) {
 }
 
 export async function updateDesconto(id: number, body: CreateDescontoBody) {
-    const { data } = await axiosNestFinance.patch(`/discount/${id}`, body);
-    return data;
+  const { data } = await axiosNestFinance.patch(`/discount/${id}`, body);
+  return data;
 }
 
 export type AtribuirItem = {
@@ -89,7 +91,9 @@ export type FetchDescontosAddParams = {
   codigoMatricula?: string | number;
 };
 
-export async function fetchDescontosAdd(params: FetchDescontosAddParams): Promise<PaginationResponse<AtribuirItem>> {
+export async function fetchDescontosAdd(
+  params: FetchDescontosAddParams,
+): Promise<PaginationResponse<AtribuirItem>> {
   const { data } = await axiosNestFinance.get("/discount/add", {
     params: {
       page: params.page ?? 1,
@@ -114,11 +118,14 @@ export type CreateDescontoAddBody = {
 };
 
 export async function createDescontoAdd(body: CreateDescontoAddBody) {
-    const {data} = await axiosNestFinance.post("/discount/add", body);
-    return data;
+  const { data } = await axiosNestFinance.post("/discount/add", body);
+  return data;
 }
 
-export async function updateDescontoAdd(id: number, body: CreateDescontoAddBody) {
-    const {data} = await axiosNestFinance.patch(`/discount/add/${id}`, body);
-    return data;
+export async function updateDescontoAdd(
+  id: number,
+  body: CreateDescontoAddBody,
+) {
+  const { data } = await axiosNestFinance.patch(`/discount/add/${id}`, body);
+  return data;
 }
