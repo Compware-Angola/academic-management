@@ -85,6 +85,8 @@ type ServicoFormData = {
   codigoGradeCurricular: number | null;
   cursoDescricao?: string;
   grau?: string;
+  categoria: "MENSALIDADE" | "OUTRO" | "";
+
 };
 
 const initialForm: ServicoFormData = {
@@ -102,6 +104,8 @@ const initialForm: ServicoFormData = {
   canal: 1,
   mestrado: false,
   cacuaco: false,
+  categoria: "",
+
   valorAnterior: 0,
   estadoSolicitacao: 1,
   tipoCandidatura: 1,
@@ -119,6 +123,7 @@ export default function ServicosEmolumentos() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState<ServicoFormData>(initialForm);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editingCodigo, setEditingCodigo] = useState<number | null>(null);
   const [currentContext, setCurrentContext] = useState<"servico" | "mensalidade">("servico");
@@ -182,7 +187,7 @@ export default function ServicosEmolumentos() {
       descricao: item.descricao || "",
       preco: Number(item.preco) || 0,
       sigla: item.sigla || (item.descricao ? item.descricao.slice(0, 4).toUpperCase() : ""),
-      tipoServico: item.tiposervico ,
+      tipoServico: item.tiposervico,
       estado:
         item.estado === "Ativo" ||
         item.estado === true ||
@@ -202,6 +207,8 @@ export default function ServicosEmolumentos() {
       codigoGradeCurricular: item.codigoGradeCurricular || null,
       cursoDescricao: context === "mensalidade" ? item.descricao : undefined,
       grau: context === "mensalidade" ? (item.mestrado ? "Mestrado" : "Licenciatura") : undefined,
+      categoria: ""
+
     });
 
     setIsEditing(true);
@@ -245,7 +252,7 @@ export default function ServicosEmolumentos() {
         codigoAnoLectivo: formData.codigoAnoLectivo,
         taxaIvaId: formData.taxaIvaId,
         motivoIsencaoIvaCodigo: formData.motivoIsencaoIvaCodigo,
-        tipoServico:formData.tipoServico
+        tipoServico: formData.tipoServico
       };
 
       updateMutation.mutate(payload, {
@@ -266,12 +273,15 @@ export default function ServicosEmolumentos() {
         },
       });
     } else {
+      const { categoria, ...rest } = formData;
+
       const payload: TipoServicoPayload = {
-        ...formData,
+        ...rest,
+
         data: new Date().toISOString().split("T")[0],
         sigla:
-          formData.sigla.trim() ||
-          formData.descricao.slice(0, 4).toUpperCase() ||
+          rest.sigla.trim() ||
+          rest.descricao.slice(0, 4).toUpperCase() ||
           "SERV",
       };
 
@@ -577,7 +587,7 @@ export default function ServicosEmolumentos() {
                   ) : (
                     mensalidades.data.map((item) => (
                       <TableRow key={item.codigo}>
-                         {item.descricao.replace(/propina/gi, "Mensalidade")}
+                     <TableCell>   {item.descricao.replace(/propina/gi, "Mensalidade")}</TableCell>
                         <TableCell>{item.mestrado ? "Mestrado" : "Licenciatura"}</TableCell>
                         <TableCell>{Number(item.preco).toLocaleString()} kz</TableCell>
                         <TableCell>{Number(item.preco * 10).toLocaleString()} kz</TableCell>
@@ -673,6 +683,33 @@ export default function ServicosEmolumentos() {
                   />
                 </div>
 
+                {/* Categoria - só aparece ao criar */}
+                {!isEditing && (
+                  <div>
+                    <Label>Categoria *</Label>
+                    <FormSelect
+                      value={String(formData.categoria || "")}
+                      onChange={(v) => {
+                        setFormData((prev) => ({
+                          ...prev,
+                          categoria: v as "MENSALIDADE" | "OUTRO" | "",
+                          sigla: v === "MENSALIDADE" ? "PROP" : "",
+                        }));
+                      }}
+                      options={[
+                        { codigo: 1, label: "Mensalidade", value: "MENSALIDADE" },
+                        { codigo: 2, label: "Outro Serviço", value: "OUTRO" },
+                      ]}
+                      map={(a) => ({
+                        key: String(a.codigo),
+                        label: a.label,
+                        value: String(a.value),
+                      })}
+                      placeholder="Selecione a categoria"
+                    />
+                  </div>
+                )}
+
                 {/* Sigla - só aparece ao criar */}
                 {!isEditing && (
                   <div>
@@ -681,33 +718,34 @@ export default function ServicosEmolumentos() {
                       id="sigla"
                       maxLength={10}
                       value={formData.sigla}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, sigla: e.target.value.toUpperCase() }))}
+                      disabled={formData.categoria === "MENSALIDADE"}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, sigla: e.target.value.toUpperCase() }))
+                      }
                       placeholder="Ex: PROP, MATR, EXAM"
                     />
                   </div>
                 )}
 
-                {/* Tipo de Serviço - só aparece ao criar */}
-               
-                  <div>
-                    <Label>Tipo de Serviço *</Label>
-                    <FormSelect
-                      value={String(formData.tipoServico || "")}
-                      onChange={(v) => setFormData((prev) => ({ ...prev, tipoServico: v || "" }))}
-                      options={[
-                        { codigo: 1, label: "Mensal", value: "MENSAL" },
-                        { codigo: 2, label: "Anual", value: "ANUAL" },
-                        { codigo: 3, label: "Semestral", value: "SEMESTRAL" },
-                      ]}
-                      map={(a) => ({
-                        key: String(a.codigo),
-                        label: a.label,
-                        value: String(a.value),
-                      })}
-                      placeholder="Selecione a Periodicidade"
-                    />
-                  </div>
-               
+                {/* Tipo de Serviço */}
+                <div>
+                  <Label>Tipo de Serviço *</Label>
+                  <FormSelect
+                    value={String(formData.tipoServico || "")}
+                    onChange={(v) => setFormData((prev) => ({ ...prev, tipoServico: v || "" }))}
+                    options={[
+                      { codigo: 1, label: "Mensal", value: "MENSAL" },
+                      { codigo: 2, label: "Anual", value: "ANUAL" },
+                      { codigo: 3, label: "Semestral", value: "SEMESTRAL" },
+                    ]}
+                    map={(a) => ({
+                      key: String(a.codigo),
+                      label: a.label,
+                      value: String(a.value),
+                    })}
+                    placeholder="Selecione a Periodicidade"
+                  />
+                </div>
 
                 {/* Ano Letivo */}
                 <div>
@@ -722,7 +760,6 @@ export default function ServicosEmolumentos() {
                       value: String(a.codigo),
                     })}
                     placeholder="Selecione o ano letivo"
-                  // disabled={isEditing && currentContext === "mensalidade"} // opcional: travar se for mensalidade
                   />
                 </div>
 
@@ -739,7 +776,6 @@ export default function ServicosEmolumentos() {
                       value: String(a.id),
                     })}
                     placeholder="Selecione o campus"
-                  // disabled={isEditing && currentContext === "mensalidade"} // opcional: travar se for mensalidade
                   />
                 </div>
               </div>
@@ -761,7 +797,6 @@ export default function ServicosEmolumentos() {
                   <>
                     <div>
                       <Label htmlFor="taxaIva">Taxa IVA ID</Label>
-
                       <FormSelect
                         value={String(formData.taxaIvaId || "")}
                         onChange={(v) => setFormData((prev) => ({ ...prev, taxaIvaId: Number(v) || 0 }))}
@@ -772,13 +807,11 @@ export default function ServicosEmolumentos() {
                           value: String(a.id),
                         })}
                         placeholder="Selecione a Taxa"
-                     
                       />
                     </div>
 
                     <div>
                       <Label htmlFor="motivoIsencao">Motivo Isenção IVA</Label>
-
                       <FormSelect
                         value={String(formData.motivoIsencaoIvaCodigo || "")}
                         onChange={(v) => setFormData((prev) => ({ ...prev, motivoIsencaoIvaCodigo: Number(v) || 0 }))}
@@ -789,7 +822,6 @@ export default function ServicosEmolumentos() {
                           value: String(a.codigo),
                         })}
                         placeholder="Selecione a Taxa"
-                      
                       />
                     </div>
                   </>
