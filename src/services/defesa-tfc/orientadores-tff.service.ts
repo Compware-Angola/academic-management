@@ -11,10 +11,11 @@ export type EstudanteFinalistaPayload = {
 export type OrientadoresItem = {
   codigo: number
   curso: string
+  nome_orientador: string
   numero_orientados: number
   ano_lectivo: string
   estado: string
-  utilizador: string
+  criado_por: string
   data_cadastro: string
 };
 
