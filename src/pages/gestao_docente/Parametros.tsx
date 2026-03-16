@@ -76,11 +76,7 @@ const Parametros = () => {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Parâmetros de Gestão de Docentes</h1>
           <p className="text-muted-foreground mt-1">Configure os parâmetros do sistema de gestão docente</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()}><RefreshCw className="h-4 w-4 mr-2" />Atualizar</Button>
-          <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" />Imprimir</Button>
-          <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />Exportar</Button>
-        </div>
+   
       </div>
 
       <Card>
