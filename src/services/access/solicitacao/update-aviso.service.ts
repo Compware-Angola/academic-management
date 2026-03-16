@@ -8,7 +8,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
  */
 export interface UpdateAvisoRequest {
   /** Identificador do aviso a ser atualizado */
-  id: number;
+  codigo: number;
   /** Assunto do aviso */
   assunto?: string;
   /** Data de expiração no formato ISO (YYYY-MM-DD) */
@@ -51,10 +51,13 @@ export interface UpdateAvisoResponse {
 export async function updateAvisoService(
   payload: UpdateAvisoRequest
 ): Promise<UpdateAvisoResponse> {
-  const { id, ...rest } = payload;
+  const { codigo, ...rest } = payload;
+
+   console.log("codigo da URL:", codigo);
+  console.log("body enviado:", rest);
 
   const { data } = await axiosNestGa.put(
-    `/solicitacoa/aviso/${id}`,
+    `/solicitacoa/aviso/${codigo}`,
     rest
   );
 

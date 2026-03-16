@@ -12,12 +12,12 @@ import { useQueryAvisos } from "@/hooks/acess/use-avisos";
 import { Button } from "@/components/ui/button";
 import { AvisoFormDialog } from "./components/aviso-form-dialog";
 import { Plus } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Avisos() {
 const [modalOpen, setModalOpen] = useState(false);
 const [mode, setMode] = useState<"create" | "edit">("create");
 const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
-
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -26,7 +26,7 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
     limit: 5,
   });
 
-  
+  //console.log("AVISO: ", data)  
 
   useEffect(() => {
   if (data?.totalPages && currentPage > data.totalPages) {
@@ -47,11 +47,14 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
 
   const avisos = useMemo(() => {
     return (data?.data ?? []).map((item) => ({
+      codigo: item.CODIGO,
       assunto: item.ASSUNTO,
       descricao: item.DESCRICAO,
-      name: item.NAME,
+      name: item.NOME,
       curso: item.CURSO,
-      date_expiracao: item.DATE_EXPIRACAO, // ajuste conforme vem da API
+      periodo: item.PERIODO,       
+      destino: item.DESTINO, 
+      date_expiracao: item.DATE_EXPIRACAO, 
     }));
   }, [data]);
 
@@ -137,7 +140,11 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       accessor: "date_expiracao",
       cell: (row) => formatDate(row.date_expiracao),
     },
-
+    {
+      header: "Destino",
+      accessor: "destino",
+      cell: (row) => row.destino,
+    },
     {
     header: "Editar",                // nova coluna
     accessor: "editar",
