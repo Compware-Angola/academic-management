@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.tsx";
+import { Loader2 } from "lucide-react";
 
 export type CreateDescontoFormData = {
   descricao: string;
@@ -27,6 +28,7 @@ export type CreateDescontoFormData = {
 };
 
 type CreateDescontoDialogProps = {
+  isEditing: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   formData: CreateDescontoFormData;
@@ -41,13 +43,16 @@ export function CreateDescontoDialog({
   formData,
   onChange,
   onSubmit,
+  isEditing,
   isSubmitting,
 }: CreateDescontoDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Criar Novo Desconto</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Editar Desconto" : "Criar Novo Desconto"}{" "}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
@@ -57,7 +62,9 @@ export function CreateDescontoDialog({
               id="descricao"
               placeholder="Ex: Desconto de Funcionário"
               value={formData.descricao}
-              onChange={(e) => onChange({ ...formData, descricao: e.target.value })}
+              onChange={(e) =>
+                onChange({ ...formData, descricao: e.target.value })
+              }
             />
           </div>
 
@@ -69,14 +76,18 @@ export function CreateDescontoDialog({
                 type="number"
                 placeholder="Ex: 10"
                 value={formData.taxa}
-                onChange={(e) => onChange({ ...formData, taxa: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...formData, taxa: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="estado">Estado</Label>
               <Select
                 value={formData.estado ? "true" : "false"}
-                onValueChange={(v) => onChange({ ...formData, estado: v === "true" })}
+                onValueChange={(v) =>
+                  onChange({ ...formData, estado: v === "true" })
+                }
               >
                 <SelectTrigger id="estado">
                   <SelectValue placeholder="Selecione o estado" />
@@ -96,7 +107,9 @@ export function CreateDescontoDialog({
                 id="data_inicio"
                 type="date"
                 value={formData.data_inicio}
-                onChange={(e) => onChange({ ...formData, data_inicio: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...formData, data_inicio: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
@@ -105,7 +118,9 @@ export function CreateDescontoDialog({
                 id="data_fim"
                 type="date"
                 value={formData.data_fim}
-                onChange={(e) => onChange({ ...formData, data_fim: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...formData, data_fim: e.target.value })
+                }
               />
             </div>
           </div>
@@ -135,7 +150,8 @@ export function CreateDescontoDialog({
               !formData.data_fim
             }
           >
-            {isSubmitting ? "Criando..." : "Criar Desconto"}
+            {isSubmitting && <Loader2 className="animate-spin" />}
+            {isEditing ? "Editar Desconto" : "Criar Desconto"}
           </Button>
         </DialogFooter>
       </DialogContent>
