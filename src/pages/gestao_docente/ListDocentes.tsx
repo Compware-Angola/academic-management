@@ -12,9 +12,8 @@ import {
   Mail,
   ChevronLeft,
   ChevronRight,
-  Check,
-  ChevronsUpDown,
   Search,
+  Edit2,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -42,6 +41,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryListDocentes } from "@/hooks/gestao_docente/use-query-list-teachers";
 import { useQueryAreaFormacaoDocentes } from "@/hooks/gestao_docente/use-query-area-formacao-teachers";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { EditarDocenteModal } from "./components/EditDocenteDialog";
+import { TeachersItem } from "@/services/gestao-docente/fetch-list-teachers.service";
 
 interface AreaFormacao {
   codigo: number;
@@ -60,6 +61,7 @@ interface DocenteApi {
 }
 
 interface DocenteTabela {
+  codigo: number;
   id: string;
   numeroMec: string;
   nome: string;
@@ -80,6 +82,9 @@ interface FiltersState {
 
 export default function ListagemDocentes() {
   const [areaFormacaoOpen, setAreaFormacaoOpen] = useState(false);
+  const [selectedDocente, setSelectedDocente] = useState<TeachersItem | null>(
+    null,
+  );
 
   const [filters, setFilters] = useState<FiltersState>({
     page: 1,
@@ -88,10 +93,8 @@ export default function ListagemDocentes() {
     search: "",
   });
 
-  const {
-    data: formacaoResponse,
-    isLoading: formacaoLoading,
-  } = useQueryAreaFormacaoDocentes();
+  const { data: formacaoResponse, isLoading: formacaoLoading } =
+    useQueryAreaFormacaoDocentes();
 
   const {
     data: docentesResponse,
@@ -100,6 +103,9 @@ export default function ListagemDocentes() {
     refetch: refetchDocentes,
   } = useQueryListDocentes(filters);
 
+  const [isShowModal, setIsShowModal] = useState<boolean>(false);
+  const openModal = () => setIsShowModal(true);
+  const closeModal = () => setIsShowModal(false);
 
   const areasFormacao: AreaFormacao[] = useMemo(() => {
     if (!Array.isArray(formacaoResponse)) return [];
@@ -108,15 +114,15 @@ export default function ListagemDocentes() {
 
   const areaMap = useMemo(() => {
     return new Map<number, string>(
-      areasFormacao.map((area) => [area.codigo, area.designacao])
+      areasFormacao.map((area) => [area.codigo, area.designacao]),
     );
   }, [areasFormacao]);
 
   const normalizeEmail = (email: unknown): string => {
-  if (!email) return "—";
-  if (typeof email === "string") return email.trim() || "—";
-  return "—";
-};
+    if (!email) return "—";
+    if (typeof email === "string") return email.trim() || "—";
+    return "—";
+  };
 
   const docentes: DocenteTabela[] = useMemo(() => {
     const raw = docentesResponse?.data;
@@ -124,6 +130,7 @@ export default function ListagemDocentes() {
     if (!Array.isArray(raw)) return [];
 
     return raw.map((item: DocenteApi, index: number) => ({
+      codigo: item.codigo,
       id: `${item.codigo}-${index}`,
       numeroMec: item.numero_mec ?? "—",
       nome: item.nome ?? "—",
@@ -134,7 +141,7 @@ export default function ListagemDocentes() {
       areaFormacaoId: item.area_formacao_id,
       areaFormacaoNome:
         item.area_formacao_id != null
-          ? areaMap.get(item.area_formacao_id) ?? "—"
+          ? (areaMap.get(item.area_formacao_id) ?? "—")
           : "—",
     }));
   }, [docentesResponse, areaMap]);
@@ -147,8 +154,8 @@ export default function ListagemDocentes() {
   const selectedAreaLabel =
     filters.area === 0
       ? "Todas"
-      : areasFormacao.find((area) => area.codigo === filters.area)?.designacao ??
-        "Selecionar";
+      : (areasFormacao.find((area) => area.codigo === filters.area)
+          ?.designacao ?? "Selecionar");
 
   const exportRows = docentes.map((item) => ({
   numeroMec: item.numeroMec,
@@ -227,7 +234,7 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
 
   const handleFilterChange = <K extends keyof FiltersState>(
     field: K,
-    value: FiltersState[K]
+    value: FiltersState[K],
   ) => {
     setFilters((prev) => ({
       ...prev,
@@ -243,6 +250,13 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
       area: 0,
       search: "",
     });
+  };
+
+  const onHandleSelectDocente = (codigo: number) => {
+    const docentes = docentesResponse?.data ?? [];
+    const docente = docentes.find((docente) => docente.codigo == codigo);
+    setSelectedDocente(docente);
+    openModal();
   };
 
   const handleRefresh = async () => {
@@ -270,12 +284,15 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">LISTA DE DOCENTES</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            LISTA DE DOCENTES
+          </h1>
           <p className="mt-1 text-muted-foreground">
             Gestão completa do corpo docente
           </p>
         </div>
 
+<<<<<<< HEAD
           <div className="flex flex-wrap gap-2">
   <Button
     variant="outline"
@@ -288,6 +305,23 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
     />
     Atualizar lista
   </Button>
+=======
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isFetchingDocentes}
+          >
+            <RefreshCw
+              className={cn(
+                "mr-2 h-4 w-4",
+                isFetchingDocentes && "animate-spin",
+              )}
+            />
+            Atualizar lista
+          </Button>
+>>>>>>> 6cc9bd9b5fdc90c920c23e0449fd66040a00047c
 
   {pdfContent && (
     <PDFActions
@@ -311,22 +345,21 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
 
       <div className="rounded-lg border bg-card p-6">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr_auto_auto] lg:items-end">
-          
-            <div className="space-y-1.5">
-                <Label>Área de Formação</Label>
-                <FormCommandSelect
-                    value={String(filters.area)}
-                    options={[{ codigo: 0, designacao: "Todas" }, ...areasFormacao]}
-                    map={(area) => ({
-                    key: area.codigo,
-                    value: String(area.codigo),
-                    label: area.designacao,
-                    })}
-                    onChange={(value) => {
-                    handleFilterChange("area", Number(value));
-                    }}
-                />
-            </div>
+          <div className="space-y-1.5">
+            <Label>Área de Formação</Label>
+            <FormCommandSelect
+              value={String(filters.area)}
+              options={[{ codigo: 0, designacao: "Todas" }, ...areasFormacao]}
+              map={(area) => ({
+                key: area.codigo,
+                value: String(area.codigo),
+                label: area.designacao,
+              })}
+              onChange={(value) => {
+                handleFilterChange("area", Number(value));
+              }}
+            />
+          </div>
 
           <div className="space-y-2">
             <Label>Pesquisa geral</Label>
@@ -339,7 +372,10 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
 
           <Button onClick={handleRefresh} disabled={isFetchingDocentes}>
             <RefreshCw
-              className={cn("mr-2 h-4 w-4", isFetchingDocentes && "animate-spin")}
+              className={cn(
+                "mr-2 h-4 w-4",
+                isFetchingDocentes && "animate-spin",
+              )}
             />
             Listar
           </Button>
@@ -386,6 +422,7 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
                     <TableHead>Categoria</TableHead>
                     <TableHead>Grau</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Acções</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -411,6 +448,15 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
                           <Mail className="h-4 w-4 text-muted-foreground" />
                           <span>{item.email}</span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => onHandleSelectDocente(item.codigo)}
+                        >
+                          <Edit2 />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -473,7 +519,7 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
                 onClick={() =>
                   handleFilterChange(
                     "page",
-                    Math.min(totalPages, filters.page + 1)
+                    Math.min(totalPages, filters.page + 1),
                   )
                 }
                 disabled={filters.page === totalPages}
@@ -483,6 +529,11 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
               </Button>
             </div>
           </div>
+          <EditarDocenteModal
+            docente={selectedDocente}
+            isModalOpen={isShowModal}
+            setIsModalOpen={closeModal}
+          />
         </>
       )}
     </div>
