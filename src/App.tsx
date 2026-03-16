@@ -114,6 +114,7 @@ import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
 import ListarUCDocenteSemAfetacao from "./pages/gestao_docente/listar-uc-docente-sem-afetacao";
 import { DocenteAfectacao } from "./pages/gestao_docente/DocenteAfectacao";
 import ListagemDocentes from "./pages/gestao_docente/ListDocentes";
+import Regentes from "./pages/gestao_docente/Regentes";
 
 const App = () => {
   return (
@@ -1108,6 +1109,13 @@ const App = () => {
                     path="/gestao-docentes/docentes"
                     element={
                         <ListagemDocentes />
+                    }
+                  />
+
+                  <Route
+                    path="/gestao-docentes/regentes"
+                    element={
+                        <Regentes />
                     }
                   />
 
