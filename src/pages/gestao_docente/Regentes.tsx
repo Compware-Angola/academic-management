@@ -20,6 +20,8 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryListDocentesRegentes } from "@/hooks/gestao_docente/use-query-list-docentes-regentes";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FormSelect } from "@/components/common/FormSelect";
 
 
 type DocenteRegente = {
@@ -42,7 +44,7 @@ export default function Regentes() {
 
   const [anoLectivo, setAnoLectivo] = useState("");
   const [curso, setCurso] = useState("");
-  const [classe, setClasse] = useState("0");
+  const [classe, setClasse] = useState("");
   const [semestre, setSemestre] = useState("");
   const [estado, setEstado] = useState("0");
 
@@ -59,7 +61,7 @@ export default function Regentes() {
   
   const { data: semestres } = useQuerySemestres();
   const { data: classes = [], isLoading: isLoadingClasses } =
-      useQueryClassFilterByCurso({ curso: filtrosAplicados.curso });
+      useQueryClassFilterByCurso({ curso });
 
 
   const { data, isLoading, isFetching } = useQueryListDocentesRegentes({
@@ -227,42 +229,30 @@ export default function Regentes() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Curso</label>
-              <Select value={curso} onValueChange={setCurso}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o curso" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursos?.map((item: any) => (
-                    <SelectItem
-                      key={item.codigo ?? item.CODIGO}
-                      value={String(item.codigo ?? item.CODIGO)}
-                    >
-                      {item.designacao ?? item.DESIGNACAO}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              
+              <CourseSelect
+                value={curso}
+                onChangeValue={(v) => {
+                  setCurso(String(v));
+                  setClasse("0");
+                }}
+              />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Curricular</label>
-              <Select value={classe} onValueChange={setClasse}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">Todos</SelectItem>
-                  {classes?.map((item: any) => (
-                    <SelectItem
-                      key={item.codigo ?? item.CODIGO}
-                      value={String(item.codigo ?? item.CODIGO)}
-                    >
-                      {item.designacao ?? item.DESIGNACAO}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormSelect
+                label="Ano Curricular"
+                value={classe}
+                disabled={isLoadingClasses || !curso}
+                onChange={(v) => setClasse(String(v))}
+                options={classes}
+                map={(c: any) => ({
+                  key: c.codigo,
+                  label: c.designacao,
+                  value: String(c.codigo),
+                })}
+                loading={isLoadingClasses}
+              />
             </div>
 
             <div className="space-y-2">

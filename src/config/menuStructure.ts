@@ -652,7 +652,10 @@ export const gestaoDocente: MenuStructure = {
         // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
         // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
         // { title: "Contratos", url: "/gestao-docentes/contratos" },
-        // { title: "Regentes", url: "/gestao-docentes/regentes" },
+         { 
+          title: "Regentes", 
+          url: "/gestao-docentes/regentes" 
+        },
         // { title: "Afetados", url: "/gestao-docentes/afetados" },
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
         // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
