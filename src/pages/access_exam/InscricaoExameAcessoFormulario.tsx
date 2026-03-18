@@ -108,9 +108,9 @@ const InscricaoExameAcessoFormulario = () => {
     <div className="min-h-screen  py-8 px-4 ">
       <div className="max-w-3xl mx-auto space-y-6">
 
-<div className="flex justify-end">
-  <ThemeSwitcher />
-</div>
+        <div className="flex justify-end">
+          <ThemeSwitcher />
+        </div>
 
         {/* Header */}
         <div className="text-center space-y-2">
@@ -245,7 +245,7 @@ const InscricaoExameAcessoFormulario = () => {
             </CardContent>
           </Card>
 
-          {/* Dados Académicos */}
+          {/* Dados Académicos 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -273,8 +273,8 @@ const InscricaoExameAcessoFormulario = () => {
 
             </CardContent>
           </Card>
-
-          {/* Escolha de Curso */}
+*/}
+          {/* Escolha de Curso 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -344,8 +344,8 @@ const InscricaoExameAcessoFormulario = () => {
 
             </CardContent>
           </Card>
-
-          {/* Período / Turno */}
+*/}
+          {/* Período / Turno 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -391,8 +391,8 @@ const InscricaoExameAcessoFormulario = () => {
 
             </CardContent>
           </Card>
-
-          {/* Upload de Documentos */}
+*/}
+          {/* Upload de Documentos 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -435,7 +435,7 @@ const InscricaoExameAcessoFormulario = () => {
 
             </CardContent>
           </Card>
-
+*/}
           {/* Submit */}
           <div className="flex justify-end">
             <Button type="submit" size="lg" disabled={isSubmitting} className="gap-2">

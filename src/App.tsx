@@ -119,6 +119,9 @@ import AlterarSenhaExame from "./pages/access_exam/AlterarSenhaExame";
 
 import InscricaoEpocaEspecial from "./pages/access_exam/InscricaoEpocaEspecial";
 import InscricaoExameAcessoFormulario from "./pages/access_exam/InscricaoExameAcessoFormulario";
+import HorariosPorCurso from "./pages/access_exam/HorariosPorCurso";
+import PautaGeralExame from "./pages/access_exam/PautaGeralExame";
+import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 
 const App = () => {
   return (
@@ -149,13 +152,13 @@ const App = () => {
                     element={<RedefinirSenhaPrimeiroAcesso />}
                   />
                 </Route>
-                  <Route >
+                <Route >
                   <Route
                     path="/exame-acesso/inscricao-especial"
                     element={<InscricaoExameAcessoFormulario />}
                   />
                 </Route>
-                 
+
 
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
@@ -628,24 +631,74 @@ const App = () => {
                     element={<PerfilEstudante />}
                   />
 
-                  
-                  {/* EXAME ACESSO*/}
-                  
+                  {/* EXAME ACESSO */}
+
                   <Route
-                  path="/exame/lista-candidatos"
-                  element={<ListaCandidatos />}
-                /> 
-                
-                <Route
-                  path="/exame/alterar-senha"
-                  element={<AlterarSenhaExame />}
-                />
-                 <Route
-                  path="/exame/epoca-especial"
-                  element={<InscricaoEpocaEspecial />}
-                />
-                   
-                
+                    path="/exame/lista-candidatos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla!]}
+                      >
+                        <ListaCandidatos />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/exame/pauta-geral"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla!]}
+                      >
+                        <PautaGeralExame />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/exame/candidatos-prova"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla!]}
+                      >
+                        <CandidatosComESemProva />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/exame/alterar-senha"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla!]}
+                      >
+                        <AlterarSenhaExame />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/exame/epoca-especial"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla!]}
+                      >
+                        <InscricaoEpocaEspecial />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/exame/horarios"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO.sigla!]}
+                      >
+                        <HorariosPorCurso />
+                      </ProtectedRoute>
+                    }
+                  />
+
 
                   <Route
                     path="/acessos/utilizador"
@@ -1129,7 +1182,7 @@ const App = () => {
                   <Route
                     path="/gestao-docentes/docentes"
                     element={
-                        <ListagemDocentes />
+                      <ListagemDocentes />
                     }
                   />
 

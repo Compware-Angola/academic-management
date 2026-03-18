@@ -16,35 +16,13 @@ import { useUpdateCandidato } from "@/hooks/access_exam/use-update-candidato";
 import { UpdateCandidatoPayload } from "@/services/access_exam/update-candidato.service";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
-import { useCursos } from "@/hooks/use-cursos";
+
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 import { useToast } from "@/hooks/use-toast";
-
-const CURSOS = [
-  { codigo: 6, designacao: "Cardiopneumologia" },
-  { codigo: 4, designacao: "Fisioterapia" },
-  { codigo: 20, designacao: "Análises Clínicas" },
-];
-
-const TURNOS = [
-  { codigo: 5, designacao: "Diurno" },
-  { codigo: 6, designacao: "Nocturno" },
-];
-
-const TIPOS_CANDIDATURA = [
-  { codigo: 1, designacao: "Licenciatura" },
-  { codigo: 2, designacao: "Mestrado" },
-];
-
-const PROFISSOES = [
-  { codigo: 1, designacao: "Desconhecida/não tem" },
-  { codigo: 101, designacao: "Engenheiro" },
-  { codigo: 202, designacao: "Professor" },
-];
 
 export default function ListaCandidatos() {
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
