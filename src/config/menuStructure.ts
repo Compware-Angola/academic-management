@@ -654,7 +654,8 @@ export const gestaoDocente: MenuStructure = {
         // { title: "Contratos", url: "/gestao-docentes/contratos" },
          { 
           title: "Regentes", 
-          url: "/gestao-docentes/regentes" 
+          url: "/gestao-docentes/regentes",
+          permission:[PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla]
         },
         // { title: "Afetados", url: "/gestao-docentes/afetados" },
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },

@@ -1114,8 +1114,16 @@ const App = () => {
 
                   <Route
                     path="/gestao-docentes/regentes"
+                    
+
                     element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
+                        ]}
+                      >
                         <Regentes />
+                      </ProtectedRoute>
                     }
                   />
 
