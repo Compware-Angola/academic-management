@@ -18,12 +18,39 @@ const InscricaoEpocaEspecial = () => {
 
   const inscricaoLink = `${window.location.origin}/exame-acesso/inscricao-especial`;
 
-  function handleCopyLink() {
-    navigator.clipboard.writeText(inscricaoLink);
+async function handleCopyLink() {
+  try {
+    if (!navigator.clipboard) {
+      throw new Error("Clipboard API não disponível");
+    }
+
+    await navigator.clipboard.writeText(inscricaoLink);
+
     setCopied(true);
-    toast.success("Link copiado para a área de transferência!");
+    toast.success("Link copiado!");
     setTimeout(() => setCopied(false), 2000);
+  } catch (err) {
+    console.error(err);
+    fallbackCopy();
   }
+}
+  function fallbackCopy() {
+  const textarea = document.createElement("textarea");
+  textarea.value = inscricaoLink;
+  textarea.style.position = "fixed"; 
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
+  try {
+    document.execCommand("copy");
+    toast.success("Link copiado (fallback)!");
+  } catch {
+    toast.error("Não foi possível copiar");
+  }
+
+  document.body.removeChild(textarea);
+}
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-6">
