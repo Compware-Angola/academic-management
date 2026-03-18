@@ -647,7 +647,10 @@ export const gestaoDocente: MenuStructure = {
           ],
         },
         { title: "Lista de Docentes", 
-          url: "/gestao-docentes/docentes" 
+          url: "/gestao-docentes/docentes",
+          permission: [
+            PermissionTypeDetails.LISTA_DE_DOCENTES.sigla,
+          ], 
         },
         // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
         // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
