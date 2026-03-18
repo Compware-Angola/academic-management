@@ -21,6 +21,7 @@ export type PaginationResponse<T> = {
 export type FetchDescontoParams = {
   codigo?: string;
   designacao?: string;
+  percentual?: string | number;
   page?: number;
   limit?: number;
 };
@@ -32,6 +33,7 @@ export async function fetchDescontos(
     params: {
       codigo: params.codigo,
       designacao: params.designacao,
+      percentual: params.percentual,
       page: params.page ?? 1,
       limit: params.limit ?? 10,
     },
@@ -89,6 +91,8 @@ export type FetchDescontosAddParams = {
   codigoAnoLectivo?: string | number;
   semestre?: string | number;
   codigoMatricula?: string | number;
+  codigoInstituicao?: string | number;
+  afectacao?: string | number;
 };
 
 export async function fetchDescontosAdd(
@@ -102,6 +106,8 @@ export async function fetchDescontosAdd(
       codigoAnoLectivo: params.codigoAnoLectivo,
       semestre: params.semestre,
       codigoMatricula: params.codigoMatricula,
+      codigoInstituicao: params.codigoInstituicao,
+      afectacao: params?.afectacao,
     },
   });
 
