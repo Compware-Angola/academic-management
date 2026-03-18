@@ -292,23 +292,9 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
           </p>
         </div>
 
-<<<<<<< HEAD
-          <div className="flex flex-wrap gap-2">
-  <Button
-    variant="outline"
-    size="sm"
-    onClick={handleRefresh}
-    disabled={isFetchingDocentes}
-  >
-    <RefreshCw
-      className={cn("mr-2 h-4 w-4", isFetchingDocentes && "animate-spin")}
-    />
-    Atualizar lista
-  </Button>
-=======
         <div className="flex flex-wrap gap-2">
           <Button
-            variant="outline"
+            //variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={isFetchingDocentes}
@@ -321,7 +307,6 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
             />
             Atualizar lista
           </Button>
->>>>>>> 6cc9bd9b5fdc90c920c23e0449fd66040a00047c
 
   {pdfContent && (
     <PDFActions
