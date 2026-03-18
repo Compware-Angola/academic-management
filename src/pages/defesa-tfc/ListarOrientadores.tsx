@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCcw } from "lucide-react";
+import { Home, Search, Loader2, RefreshCcw, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -31,6 +31,7 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { OrientadorModal } from "./components/orientador-modal";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -58,6 +59,7 @@ export default function ListarOrientadores() {
   const [page, setPage] = useState(1);
 
   const [limit, setLimit] = useState(25);
+  const [open, setOpen] = useState(false);
   const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
     "codigoMatricula",
   );
@@ -118,9 +120,16 @@ export default function ListarOrientadores() {
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
-
-      <h1 className="text-2xl font-bold">Orientadores</h1>
-      <p className="text-muted-foreground">Consultar orientadores.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Orientadores</h1>
+          <p className="text-muted-foreground">Consultar orientadores.</p>
+        </div>
+        <Button onClick={() => setOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Adicionar
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
@@ -323,6 +332,7 @@ export default function ListarOrientadores() {
           </div>
         </CardContent>
       </Card>
+      <OrientadorModal open={open} setOpen={setOpen} />
     </div>
   );
 }
