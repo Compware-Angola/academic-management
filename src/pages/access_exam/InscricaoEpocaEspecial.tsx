@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,14 +16,46 @@ import { toast } from "sonner";
 
 const InscricaoEpocaEspecial = () => {
   const [copied, setCopied] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const inscricaoLink = `${window.location.origin}/exame-acesso/inscricao-especial`;
 
-  function handleCopyLink() {
-    navigator.clipboard.writeText(inscricaoLink);
-    setCopied(true);
-    toast.success("Link copiado para a área de transferência!");
-    setTimeout(() => setCopied(false), 2000);
+  async function handleCopyLink() {
+    try {
+      setLoading(true);
+
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(inscricaoLink);
+      } else {
+        fallbackCopy();
+      }
+
+      setCopied(true);
+      toast.success("Link copiado!");
+
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao copiar");
+    } finally {
+      setLoading(false);
+    }
+  }
+  function fallbackCopy() {
+    const textarea = document.createElement("textarea");
+    textarea.value = inscricaoLink;
+    textarea.style.position = "fixed";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+      document.execCommand("copy");
+      toast.success("Link copiado (fallback)!");
+    } catch {
+      toast.error("Não foi possível copiar");
+    }
+
+    document.body.removeChild(textarea);
   }
 
   return (
@@ -81,13 +114,17 @@ const InscricaoEpocaEspecial = () => {
               variant="outline"
               size="icon"
               onClick={handleCopyLink}
+              disabled={loading}
               title="Copiar link"
               className={copied ? "text-green-600 border-green-500" : ""}
             >
-              {copied
-                ? <ClipboardCheck className="h-4 w-4 text-green-600" />
-                : <Copy className="h-4 w-4" />
-              }
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : copied ? (
+                <ClipboardCheck className="h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
             </Button>
             <Button
               variant="outline"
