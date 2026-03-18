@@ -6,11 +6,14 @@ import { normalizeParam } from "@/util/normalize-param";
 
 /* ---------- RESPONSE ITEM ---------- */
 export type Avisos = {
+  CODIGO: number;
   ASSUNTO: string;
   DESCRICAO: string;
   DATE_EXPIRACAO: string;
-  NAME: string;
+  NOME: string;
   CURSO: string;
+  PERIODO: string;
+  DESTINO: string;
 };
 
 /* ---------- RESPONSE COMPLETO ---------- */
@@ -39,7 +42,7 @@ export async function AvisosService({ page,
     }
 );
 
-    console.log("RESPOSTA BACKEND:", data);
+    //console.log("RESPOSTA BACKEND:", data);
 
   return data;
 }

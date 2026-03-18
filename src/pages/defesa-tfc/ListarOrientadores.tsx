@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCcw } from "lucide-react";
+import { Home, Search, Loader2, RefreshCcw, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -31,6 +31,7 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { OrientadorModal } from "./components/orientador-modal";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -58,6 +59,7 @@ export default function ListarOrientadores() {
   const [page, setPage] = useState(1);
 
   const [limit, setLimit] = useState(25);
+  const [open, setOpen] = useState(false);
   const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
     "codigoMatricula",
   );
@@ -118,9 +120,16 @@ export default function ListarOrientadores() {
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
-
-      <h1 className="text-2xl font-bold">Orientadores</h1>
-      <p className="text-muted-foreground">Consultar orientadores.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Orientadores</h1>
+          <p className="text-muted-foreground">Consultar orientadores.</p>
+        </div>
+        <Button onClick={() => setOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Adicionar
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
@@ -198,60 +207,83 @@ export default function ListarOrientadores() {
             </div>
           ) : (
             <>
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="w-[100px]">Código</TableHead>
-                    <TableHead className="min-w-[200px]">Nome</TableHead>
-                    <TableHead className="min-w-[150px]">Ano Lectivo</TableHead>
-                    <TableHead className="min-w-[180px]">Curso</TableHead>
-                    <TableHead className="w-[120px]">Estado</TableHead>
-                    <TableHead className="w-[150px] text-center">
-                      Nº Orientados
-                    </TableHead>
-                    <TableHead className="w-[150px]">Data Cadastro</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableData.map((item, i) => {
-                    // Normaliza o estado para minúsculo para bater com o objeto de config
-                    const status = (item.estado?.toLowerCase() ||
-                      "pendente") as keyof typeof statusConfig;
-                    const config =
-                      statusConfig[status] || statusConfig.pendente;
+              {/* 1. Envolva em uma div com scroll lateral */}
+              <div className="w-full overflow-x-auto">
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      {/* Adicione whitespace-nowrap em todos os cabeçalhos */}
+                      <TableHead className="w-[80px] whitespace-nowrap">
+                        Código
+                      </TableHead>
+                      <TableHead className="min-w-[250px] whitespace-nowrap text-left">
+                        Nome
+                      </TableHead>
+                      <TableHead className="whitespace-nowrap">
+                        Ano Lectivo
+                      </TableHead>
+                      <TableHead className="whitespace-nowrap">Curso</TableHead>
+                      <TableHead className="w-[120px] whitespace-nowrap">
+                        Estado
+                      </TableHead>
+                      <TableHead className="w-[150px] whitespace-nowrap text-center">
+                        Nº Orientados
+                      </TableHead>
+                      <TableHead className="w-[150px] whitespace-nowrap">
+                        Data Cadastro
+                      </TableHead>
+                      <TableHead className="w-[200px] whitespace-nowrap">
+                        Criado por
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tableData.map((item, i) => {
+                      const status = (item.estado?.toLowerCase() ||
+                        "pendente") as keyof typeof statusConfig;
+                      const config =
+                        statusConfig[status] || statusConfig.pendente;
 
-                    return (
-                      <TableRow
-                        key={item.codigo || i}
-                        className="hover:bg-muted/50"
-                      >
-                        <TableCell className="font-mono text-xs text-muted-foreground">
-                          {item.codigo}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {item.utilizador}
-                        </TableCell>
-                        <TableCell>{item.ano_lectivo}</TableCell>
-                        <TableCell>{item.curso}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={config.variant}
-                            className={config.className}
-                          >
-                            {config.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold">
-                          {item.numero_orientados}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {item.data_cadastro}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                      return (
+                        <TableRow
+                          key={item.codigo || i}
+                          className="hover:bg-muted/50"
+                        >
+                          <TableCell className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+                            {item.codigo}
+                          </TableCell>
+                          <TableCell className="font-medium whitespace-nowrap">
+                            {item.nome_orientador}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {item.ano_lectivo}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {item.curso}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            <Badge
+                              variant={config.variant}
+                              className={config.className}
+                            >
+                              {config.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold whitespace-nowrap">
+                            {item.numero_orientados}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground whitespace-nowrap">
+                            {item.data_cadastro}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground whitespace-nowrap">
+                            {item.criado_por}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </>
           )}
 
@@ -300,6 +332,7 @@ export default function ListarOrientadores() {
           </div>
         </CardContent>
       </Card>
+      <OrientadorModal open={open} setOpen={setOpen} />
     </div>
   );
 }

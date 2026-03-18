@@ -7,8 +7,20 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb.tsx";
 import { Link } from "react-router-dom";
-import { Home, Search, RefreshCw, ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
+import {
+  Home,
+  Search,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -23,8 +35,12 @@ import {
   TableRow,
 } from "@/components/ui/table.tsx";
 import { formatarData } from "@/util/date-formate.ts";
-import { CreateDescontoDialog, CreateDescontoFormData } from "./CreateDescontoDialog.tsx";
+import {
+  CreateDescontoDialog,
+  CreateDescontoFormData,
+} from "./CreateDescontoDialog.tsx";
 import { useMutationCreateDesconto } from "@/hooks/financas/descontos/use-mutation-create-desconto.ts";
+import { useMutationUpdateDesconto } from "@/hooks/financas/descontos/use-mutation-update-desconto.ts";
 
 export default function ListarDescontos() {
   const [codigoInput, setCodigoInput] = useState("");
@@ -70,6 +86,8 @@ export default function ListarDescontos() {
   };
 
   const { mutateAsync, isPending } = useMutationCreateDesconto();
+  const { mutateAsync: mutateAsyncEditind, isPending: isPendingEditing } =
+    useMutationUpdateDesconto();
 
   const items = data?.data ?? [];
   const totalPages = data?.totalPages ?? 1;
@@ -165,12 +183,10 @@ export default function ListarDescontos() {
         obs: formData.obs,
         estado: formData.estado,
       };
-      const res = await fetch(`http://localhost:3002/api/discount/${editingId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+      mutateAsyncEditind({
+        id: editingId,
+        body,
       });
-      if (!res.ok) throw new Error("Erro ao atualizar desconto");
       setIsModalOpen(false);
       setEditingId(null);
       resetForm();
@@ -218,6 +234,7 @@ export default function ListarDescontos() {
           setIsModalOpen(open);
         }}
         formData={formData}
+        isEditing={Boolean(editingId)}
         onChange={setFormData}
         onSubmit={editingId ? handleEditSubmit : handleCreateSubmit}
         isSubmitting={isPending || isUpdating}
@@ -225,7 +242,9 @@ export default function ListarDescontos() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Filtros de Busca</CardTitle>
+          <CardTitle className="text-lg font-medium">
+            Filtros de Busca
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -252,8 +271,14 @@ export default function ListarDescontos() {
                 <Search className="h-4 w-4 mr-2" />
                 Buscar
               </Button>
-              <Button variant="outline" onClick={handleClear} disabled={isFetching}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
+              <Button
+                variant="outline"
+                onClick={handleClear}
+                disabled={isFetching}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`}
+                />
                 Limpar
               </Button>
             </div>
@@ -389,7 +414,9 @@ export default function ListarDescontos() {
                 <button
                   key={p}
                   className={`px-3 py-1 rounded-md text-sm ${
-                    p === page ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"
+                    p === page
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground hover:bg-muted"
                   }`}
                   onClick={() => setPage(p)}
                   disabled={isFetching}
@@ -398,7 +425,9 @@ export default function ListarDescontos() {
                 </button>
               ))}
 
-              {pageList[pageList.length - 1] < totalPages - 1 && <span className="px-2">…</span>}
+              {pageList[pageList.length - 1] < totalPages - 1 && (
+                <span className="px-2">…</span>
+              )}
               {pageList[pageList.length - 1] < totalPages && (
                 <button
                   className="px-2 py-1 rounded-md text-sm text-muted-foreground"

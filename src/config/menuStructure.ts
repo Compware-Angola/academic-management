@@ -646,10 +646,12 @@ export const gestaoDocente: MenuStructure = {
             PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS.sigla,
           ],
         },
+        { title: "Lista de Docentes", 
+          url: "/gestao-docentes/docentes" 
+        },
         // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
         // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
         // { title: "Contratos", url: "/gestao-docentes/contratos" },
-        //  { title: "Listagem geral", url: "/gestao-docentes/listagem" },
         // { title: "Regentes", url: "/gestao-docentes/regentes" },
         // { title: "Afetados", url: "/gestao-docentes/afetados" },
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
@@ -970,36 +972,36 @@ export const academicStructure: MenuStructure = {
     // EXAME DE ACESSO
     // ----------------------------------------------------
 
-    /*
     {
       title: "Exame de Acesso",
       url: "/exame",
       icon: FileCheck,
       items: [
-        { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-        { title: "Admitir candidatura", url: "/exame/admitir" },
-        { title: "Alterar senha", url: "/exame/alterar-senha" },
-        { title: "Alterar tipo", url: "/exame/alterar-tipo" },
-        { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-        { title: "Consultar prova", url: "/exame/consultar-prova" },
-        { title: "Estatísticas", url: "/exame/estatisticas" },
-        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
-        { title: "Inscrição época especial", url: "/exame/epoca-especial" },
-        { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
-        { title: "Lista de candidatos", url: "/exame/lista-candidatos" },
-        { title: "Admitidos", url: "/exame/admitidos" },
-        { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
-        { title: "Sem prova marcada", url: "/exame/sem-prova" },
-        { title: "Provas por candidato", url: "/exame/provas-candidato" },
-        { title: "Resultados finais", url: "/exame/resultados" },
-        { title: "Horários por curso", url: "/exame/horarios" },
-        { title: "Pauta geral", url: "/exame/pauta-geral" },
-        { title: "Resetar prova", url: "/exame/resetar" },
-        { title: "Lista de presença", url: "/exame/presenca" },
+       // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
+       // { title: "Admitir candidatura", url: "/exame/admitir" },
+        { title: "Alterar senha", url: "/exame/alterar-senha" ,permission:[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla]},
+     
+       // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
+       // { title: "Consultar prova", url: "/exame/consultar-prova" },
+        //{ title: "Estatísticas", url: "/exame/estatisticas" },
+       // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+       { title: "Inscrição época especial", url: "/exame/epoca-especial" ,permission:[PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla]},
+       // { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
+        { title: "Lista de candidatos", url: "/exame/lista-candidatos" ,permission:[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla]},
+        //{ title: "Admitidos", url: "/exame/admitidos" },
+       // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
+       // { title: "Sem prova marcada", url: "/exame/sem-prova" },
+       // { title: "Provas por candidato", url: "/exame/provas-candidato" },
+       // { title: "Resultados finais", url: "/exame/resultados" },
+        { title: "Horários por curso", url: "/exame/horarios",permission:[PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO.sigla] },
+        { title: "Pauta geral", url: "/exame/pauta-geral" ,permission:[PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla]},
+        //{ title: "Resetar prova", url: "/exame/resetar" },
+       // { title: "Lista de presença", url: "/exame/presenca" },
+        { title: "Candidatos com/sem prova", url: "/exame/candidatos-prova",permission:[PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla] },
       ],
 
-      permission: ["adm", "rootAdmin", "dct"],
+      permission: [],
     },
-     */
+     
   ],
 };
