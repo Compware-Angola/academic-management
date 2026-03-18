@@ -3,7 +3,6 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutationCreateOrientadorTfc } from "@/hooks/defesa-tfc/use-mutation-criar-orientador-tfc";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
