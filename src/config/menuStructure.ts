@@ -972,36 +972,35 @@ export const academicStructure: MenuStructure = {
     // EXAME DE ACESSO
     // ----------------------------------------------------
 
-    /*
     {
       title: "Exame de Acesso",
       url: "/exame",
       icon: FileCheck,
       items: [
-        { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-        { title: "Admitir candidatura", url: "/exame/admitir" },
+       // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
+       // { title: "Admitir candidatura", url: "/exame/admitir" },
         { title: "Alterar senha", url: "/exame/alterar-senha" },
-        { title: "Alterar tipo", url: "/exame/alterar-tipo" },
-        { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-        { title: "Consultar prova", url: "/exame/consultar-prova" },
-        { title: "Estatísticas", url: "/exame/estatisticas" },
-        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
-        { title: "Inscrição época especial", url: "/exame/epoca-especial" },
-        { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
+     
+       // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
+       // { title: "Consultar prova", url: "/exame/consultar-prova" },
+        //{ title: "Estatísticas", url: "/exame/estatisticas" },
+       // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+       { title: "Inscrição época especial", url: "/exame/epoca-especial" },
+       // { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
         { title: "Lista de candidatos", url: "/exame/lista-candidatos" },
-        { title: "Admitidos", url: "/exame/admitidos" },
-        { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
-        { title: "Sem prova marcada", url: "/exame/sem-prova" },
-        { title: "Provas por candidato", url: "/exame/provas-candidato" },
-        { title: "Resultados finais", url: "/exame/resultados" },
-        { title: "Horários por curso", url: "/exame/horarios" },
-        { title: "Pauta geral", url: "/exame/pauta-geral" },
-        { title: "Resetar prova", url: "/exame/resetar" },
-        { title: "Lista de presença", url: "/exame/presenca" },
+        //{ title: "Admitidos", url: "/exame/admitidos" },
+       // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
+       // { title: "Sem prova marcada", url: "/exame/sem-prova" },
+       // { title: "Provas por candidato", url: "/exame/provas-candidato" },
+       // { title: "Resultados finais", url: "/exame/resultados" },
+        //{ title: "Horários por curso", url: "/exame/horarios" },
+        //{ title: "Pauta geral", url: "/exame/pauta-geral" },
+        //{ title: "Resetar prova", url: "/exame/resetar" },
+       // { title: "Lista de presença", url: "/exame/presenca" },
       ],
 
-      permission: ["adm", "rootAdmin", "dct"],
+      permission: [],
     },
-     */
+     
   ],
 };

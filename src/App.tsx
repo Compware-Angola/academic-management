@@ -114,6 +114,11 @@ import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
 import ListarUCDocenteSemAfetacao from "./pages/gestao_docente/listar-uc-docente-sem-afetacao";
 import { DocenteAfectacao } from "./pages/gestao_docente/DocenteAfectacao";
 import ListagemDocentes from "./pages/gestao_docente/ListDocentes";
+import ListaCandidatos from "./pages/access_exam/ListaCandidatos";
+import AlterarSenhaExame from "./pages/access_exam/AlterarSenhaExame";
+
+import InscricaoEpocaEspecial from "./pages/access_exam/InscricaoEpocaEspecial";
+import InscricaoExameAcessoFormulario from "./pages/access_exam/InscricaoExameAcessoFormulario";
 
 const App = () => {
   return (
@@ -144,6 +149,13 @@ const App = () => {
                     element={<RedefinirSenhaPrimeiroAcesso />}
                   />
                 </Route>
+                  <Route >
+                  <Route
+                    path="/exame-acesso/inscricao-especial"
+                    element={<InscricaoExameAcessoFormulario />}
+                  />
+                </Route>
+                 
 
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
@@ -615,15 +627,25 @@ const App = () => {
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
-                  {/* <Route
-                  path="/bolsa/bolseiros"
-                  element={<ScholarshipHoldersList />}
-                /> */}
-                  {/*
+
+                  
+                  {/* EXAME ACESSO*/}
+                  
+                  <Route
+                  path="/exame/lista-candidatos"
+                  element={<ListaCandidatos />}
+                /> 
+                
                 <Route
-                  path="/assiduidade/docente"
-                  element={<TeacherAttendance />}
-                />*/}
+                  path="/exame/alterar-senha"
+                  element={<AlterarSenhaExame />}
+                />
+                 <Route
+                  path="/exame/epoca-especial"
+                  element={<InscricaoEpocaEspecial />}
+                />
+                   
+                
 
                   <Route
                     path="/acessos/utilizador"
