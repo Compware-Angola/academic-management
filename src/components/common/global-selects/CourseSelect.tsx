@@ -9,6 +9,7 @@ interface CourseSelectProps {
   onChangeValue: (v: string) => void;
   params?: CursoParams;
   disabled?: boolean;
+  label?:string
   enableDefaultSelectItem?: boolean;
 }
 const CourseSelect = ({
@@ -17,6 +18,7 @@ const CourseSelect = ({
   value,
   params,
   enableDefaultSelectItem,
+  label="Cursos",
   labelMode = "outside",
 }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
@@ -35,7 +37,7 @@ const CourseSelect = ({
       <FormCommandSelect
         disabled={disabled || loadingCursos}
         value={value}
-        label="Curso"
+        label= {label}
         labelMode={labelMode}
         isLoading={loadingCursos}
         defaultSelectItem={defaultSelectItem}

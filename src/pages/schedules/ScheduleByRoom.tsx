@@ -33,7 +33,7 @@ import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
+
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQuerySalas } from "@/hooks/salas/use-query-sala";
@@ -66,7 +66,7 @@ export default function SchedulesByRoom() {
   const { data: anosAcademicos } = useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-  const { data: cursos } = useCursos();
+
   const { data: salas = [] } = useQuerySalas();
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
