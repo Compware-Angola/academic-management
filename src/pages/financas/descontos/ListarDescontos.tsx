@@ -41,13 +41,16 @@ import {
 } from "./CreateDescontoDialog.tsx";
 import { useMutationCreateDesconto } from "@/hooks/financas/descontos/use-mutation-create-desconto.ts";
 import { useMutationUpdateDesconto } from "@/hooks/financas/descontos/use-mutation-update-desconto.ts";
+import { useToast } from "@/hooks/use-toast.ts";
 
 export default function ListarDescontos() {
   const [codigoInput, setCodigoInput] = useState("");
   const [descricaoInput, setDescricaoInput] = useState("");
+  const [percentualInput, setPercentual] = useState("");
   const [filters, setFilters] = useState({
     codigo: "",
     designacao: "",
+    percentual: "",
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -66,10 +69,12 @@ export default function ListarDescontos() {
   // Estado para edição
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
 
   const { data, refetch, isFetching } = useQueryFetchDescontos({
     codigo: filters.codigo || undefined,
     designacao: filters.designacao || undefined,
+    percentual: filters.percentual || undefined,
     page,
     limit,
   });
@@ -143,6 +148,7 @@ export default function ListarDescontos() {
     setFilters({
       codigo: codigoInput,
       designacao: descricaoInput,
+      percentual: percentualInput,
     });
     setPage(1);
   };
@@ -153,6 +159,7 @@ export default function ListarDescontos() {
     setFilters({
       codigo: "",
       designacao: "",
+      percentual: "",
     });
     setPage(1);
   };
@@ -183,10 +190,20 @@ export default function ListarDescontos() {
         obs: formData.obs,
         estado: formData.estado,
       };
-      mutateAsyncEditind({
-        id: editingId,
-        body,
-      });
+      mutateAsyncEditind(
+        {
+          id: editingId,
+          body,
+        },
+        {
+          onSuccess() {
+            toast({
+              title: "Editar Desconto",
+              description: "Desconto Editado com sucess0",
+            });
+          },
+        },
+      );
       setIsModalOpen(false);
       setEditingId(null);
       resetForm();
@@ -266,6 +283,16 @@ export default function ListarDescontos() {
                 onChange={(e) => setDescricaoInput(e.target.value)}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="percentual">Percentual</Label>
+              <Input
+                id="percentual"
+                type="number"
+                placeholder="Filtrar por percentual %"
+                value={percentualInput}
+                onChange={(e) => setPercentual(e.target.value)}
+              />
+            </div>
             <div className="flex gap-2">
               <Button onClick={handleSearch} disabled={isFetching}>
                 <Search className="h-4 w-4 mr-2" />
@@ -315,13 +342,13 @@ export default function ListarDescontos() {
             <TableBody>
               {isFetching ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     Nenhum desconto encontrado.
                   </TableCell>
                 </TableRow>

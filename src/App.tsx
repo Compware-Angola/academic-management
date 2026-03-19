@@ -122,6 +122,8 @@ import InscricaoExameAcessoFormulario from "./pages/access_exam/InscricaoExameAc
 import HorariosPorCurso from "./pages/access_exam/HorariosPorCurso";
 import PautaGeralExame from "./pages/access_exam/PautaGeralExame";
 import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
+import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
+
 
 const App = () => {
   return (
@@ -632,6 +634,10 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
+                  <Route
+                    path="/exame/presenca"
+                    element={<ListaPresencaExame />}
+                  />
 
                   <Route
                     path="/exame/lista-candidatos"

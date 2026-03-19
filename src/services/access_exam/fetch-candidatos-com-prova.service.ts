@@ -6,6 +6,7 @@ export type CandidatoComProvaParams = {
   codigoCurso?: number;
   dataRealizacao?: string;
   horaInicio?: string;
+  codigoSala?:number;
   page?: number;
   limit?: number;
 };
