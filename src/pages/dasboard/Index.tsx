@@ -68,11 +68,11 @@ const Index = () => {
         //console.log("Grupo principal:", grupoPrincipal);
         //console.log("Avisos do grupo:", avisoAtivo);
 
-useEffect(() => {
-  if (avisoPrincipal) {
-    setOpenAvisoModal(true);
-  }
-}, [avisoPrincipal]);
+        useEffect(() => {
+          if (avisoPrincipal) {
+            setOpenAvisoModal(true);
+          }
+        }, [avisoPrincipal]);
     
       // encontra o ano activo
       const activeAcademicYear = academicYear?.find(
