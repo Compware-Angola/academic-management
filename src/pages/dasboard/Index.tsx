@@ -27,8 +27,11 @@ import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { useQueryAvisosPorGrupo } from "@/hooks/acess/use-query-avisos-por-grupo";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
+  const [openAvisoModal, setOpenAvisoModal] = useState(false);
   const [mostrarAviso, setMostrarAviso] = useState(true);
   const { user:userData} = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
@@ -44,20 +47,32 @@ const Index = () => {
 
         const { data: avisosGrupo, isLoading: isLoadingAvisos, error } = useQueryAvisosPorGrupo({grupoId: grupoPrincipal?.codigo});
 
+        const agora = new Date();
+
+        const avisosValidos = (avisosGrupo || []).filter((aviso) => {
+          const ativo = aviso.STATUS === 1;
+
+          const naoExpirado =
+            !aviso.DATE_EXPIRACAO || new Date(aviso.DATE_EXPIRACAO) >= agora;
+
+          return ativo && naoExpirado;
+        });
+
+
+        const avisoPrincipal = avisosValidos[0];
+
         const avisoAtivo = avisosGrupo?.[0];
 
+        console.log("AVISOS VALIDOS: ", avisosValidos)
+        
         //console.log("Grupo principal:", grupoPrincipal);
         //console.log("Avisos do grupo:", avisoAtivo);
 
-        useEffect(() => {
-          if (avisoAtivo) {
-            setMostrarAviso(true);
-          }
-        }, [avisoAtivo]);
-
-      function fecharAviso() {
-      setMostrarAviso(false);
-    }
+useEffect(() => {
+  if (avisoPrincipal) {
+    setOpenAvisoModal(true);
+  }
+}, [avisoPrincipal]);
     
       // encontra o ano activo
       const activeAcademicYear = academicYear?.find(
@@ -103,43 +118,43 @@ const allowedQuickLinks =  useFilterMenuByPermission(quickLinks);
   }
 />
 
-  {avisoAtivo && mostrarAviso && (
-  <div className="flex justify-center">
-    <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm">
-      <div className="h-1 w-full bg-amber-400" />
-
-      <div className="relative px-6 py-5">
-        <button
-          onClick={fecharAviso}
-          className="absolute right-4 top-4 text-slate-400 transition hover:text-slate-700"
-          aria-label="Fechar aviso"
-        >
-          ✕
-        </button>
-
-        <div className="flex items-start gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-100 text-lg">
+  <Dialog open={openAvisoModal} onOpenChange={setOpenAvisoModal}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-xl">
             🔔
           </div>
 
-          <div className="flex-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-amber-600">
-              Aviso importante
-            </p>
+          <DialogTitle>{avisoPrincipal?.ASSUNTO}</DialogTitle>
 
-            <h2 className="mt-1 text-lg font-semibold text-slate-900">
-              {avisoAtivo.ASSUNTO}
-            </h2>
+          <DialogDescription className="pt-2 text-sm leading-6 text-slate-600">
+            {avisoPrincipal?.DESCRICAO}
+          </DialogDescription>
+        </DialogHeader>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {avisoAtivo.DESCRICAO}
+        {avisoPrincipal?.DATE_EXPIRACAO && (
+          <div className="rounded-lg bg-slate-50 px-4 py-3">
+            <p className="text-sm text-muted-foreground">
+              Expira em{" "}
+              {new Date(avisoPrincipal.DATE_EXPIRACAO).toLocaleDateString(
+                "pt-PT",
+                {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                }
+              )}
             </p>
           </div>
+        )}
+
+        <div className="flex justify-end">
+          <Button onClick={() => setOpenAvisoModal(false)}>
+            Fechar
+          </Button>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      </DialogContent>
+    </Dialog>
 
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

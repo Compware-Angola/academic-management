@@ -6,6 +6,7 @@ export type AvisoPorGrupo = {
   CODIGO: number;
   ASSUNTO: string;
   DESCRICAO: string;
+  STATUS: number;
   FILE_NAME?: string | null;
   DATE_EXPIRACAO: string | null;
   DESTINO: number;
