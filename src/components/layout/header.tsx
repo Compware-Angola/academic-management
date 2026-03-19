@@ -1,7 +1,8 @@
-import {  LogOut, Search, User } from "lucide-react";
+import { LogOut, Search, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,47 @@ import { useState, useEffect } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/tudents/use-query-students";
 
+// ─── Tipagem de notificação ────────────────────────────────────────────────
+interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+}
+
+// ─── Mock de notificações — substituir pelo teu hook/query real ────────────
+const mockNotifications: Notification[] = [
+  {
+    id: 1,
+    title: "Nova mensagem",
+    message: "O aluno João Silva enviou uma mensagem.",
+    time: "há 2 min",
+    read: false,
+  },
+  {
+    id: 2,
+    title: "Matrícula aprovada",
+    message: "A matrícula de Ana Costa foi aprovada.",
+    time: "há 15 min",
+    read: false,
+  },
+  {
+    id: 3,
+    title: "Documento pendente",
+    message: "Existe 1 documento à espera de revisão.",
+    time: "há 1 h",
+    read: false,
+  },
+  {
+    id: 4,
+    title: "Relatório gerado",
+    message: "O relatório mensal está pronto.",
+    time: "ontem",
+    read: true,
+  },
+];
+
 export function Header() {
   const { logout, user } = useAuth();
   const { mutate: logoutUser } = useMutationLogout();
@@ -37,6 +79,19 @@ export function Header() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  // ─── Notificações ────────────────────────────────────────────────────────
+  const [notifications, setNotifications] =
+    useState<Notification[]>(mockNotifications);
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAllAsRead = () =>
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
+  const markAsRead = (id: number) =>
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+
   /** ---------------------------
    * DEBOUNCE (700ms)
    * --------------------------- */
@@ -44,7 +99,6 @@ export function Header() {
     const timer = setTimeout(() => {
       setDebouncedSearch(search.trim());
     }, 700);
-
     return () => clearTimeout(timer);
   }, [search]);
 
@@ -61,11 +115,8 @@ export function Header() {
    * CONTROLAR POPOVER
    * --------------------------- */
   useEffect(() => {
-    if (debouncedSearch.length > 0) {
-      setOpen(true);
-    } else {
-      setOpen(false);
-    }
+    if (debouncedSearch.length > 0) setOpen(true);
+    else setOpen(false);
   }, [debouncedSearch]);
 
   const handleSelect = (aluno: StudentSugestao) => {
@@ -85,7 +136,7 @@ export function Header() {
         <SidebarTrigger className="-ml-1" />
 
         <div className="ml-auto flex items-center gap-2 md:gap-4">
-          {/* Pesquisa com debounce */}
+          {/* ── Pesquisa com debounce ─────────────────────────────────── */}
           <div className="hidden md:flex items-center gap-2 w-full max-w-md">
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
@@ -162,6 +213,72 @@ export function Header() {
 
           <ThemeSwitcher />
 
+          {/* ── Sino de notificações ──────────────────────────────────── */}
+          <DropdownMenu>
+            <DropdownMenuTrigger >
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 h-5 min-w-5 rounded-full px-1 text-[10px] font-bold flex items-center justify-center"
+                  >
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="flex items-center justify-between px-3 py-2">
+                <DropdownMenuLabel className="p-0 text-sm font-semibold">
+                  Notificações
+
+                </DropdownMenuLabel>
+
+              </div>
+              <DropdownMenuSeparator />
+
+              {notifications.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Sem notificações
+                </div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto">
+                  {notifications.map((notif) => (
+                    <DropdownMenuItem
+                      key={notif.id}
+                      className="flex flex-col items-start gap-0.5 px-3 py-2.5 cursor-default focus:bg-accent"
+                    >
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <span className="text-sm font-medium leading-tight text-foreground">
+                          {notif.title}
+                        </span>
+
+                        <span className="text-[10px] text-muted-foreground">
+                          {notif.time}
+                        </span>
+                      </div>
+
+                      <span className="text-xs text-muted-foreground leading-snug">
+                        {notif.message}
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              )}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="justify-center text-xs text-primary cursor-pointer"
+                onSelect={() => navigate("/notificacoes")}
+              >
+                Ver todas as notificações
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* ── Menu do utilizador ────────────────────────────────────── */}
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="ghost" className="gap-2">

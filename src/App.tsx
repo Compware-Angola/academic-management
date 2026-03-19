@@ -123,6 +123,7 @@ import HorariosPorCurso from "./pages/access_exam/HorariosPorCurso";
 import PautaGeralExame from "./pages/access_exam/PautaGeralExame";
 import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
+import NotificacoesPage from "./pages/notification/Notificacoespage";
 
 
 const App = () => {
@@ -192,6 +193,10 @@ const App = () => {
                   <Route
                     path="/controle-acesso/all-solicitacoes"
                     element={<Solicitacoes />}
+                  />
+                     <Route
+                    path="/notificacoes"
+                    element={<NotificacoesPage />}
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
