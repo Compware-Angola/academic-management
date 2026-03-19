@@ -996,7 +996,7 @@ export const academicStructure: MenuStructure = {
         { title: "Horários por curso", url: "/exame/horarios",permission:[PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO.sigla] },
         { title: "Pauta geral", url: "/exame/pauta-geral" ,permission:[PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla]},
         //{ title: "Resetar prova", url: "/exame/resetar" },
-       // { title: "Lista de presença", url: "/exame/presenca" },
+        { title: "Lista de presença", url: "/exame/presenca" },
         { title: "Candidatos com/sem prova", url: "/exame/candidatos-prova",permission:[PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla] },
       ],
 
