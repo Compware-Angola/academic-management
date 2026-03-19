@@ -30,34 +30,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2 } from "lucide-react";
+import { Home, Search, Loader2, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
-import { useQueryPagamentosTFC } from "@/hooks/defesa-tfc/use-query-pagamentos-tfc";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQueryEstudanteFinalista } from "@/hooks/defesa-tfc/use-query-estudante-finalista-tfc";
 
 export default function ListarEstudanteFinalista() {
-  //Options
-  const searchOptions = [
-    { id: "codigoMatricula", label: "Código da Matrícula" },
-    { id: "nome", label: "Nome do Aluno" },
-  ];
-  // paginação
   const [page, setPage] = useState(1);
 
   const [limit, setLimit] = useState(10);
-  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
-    "codigoMatricula",
-  );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchApplied, setSearchApplied] = useState("");
 
   const [filters, setFilters] = useState({
     anoLectivo: "23",
@@ -67,27 +54,32 @@ export default function ListarEstudanteFinalista() {
     periodo: "",
     tipoCandidatura: "",
   });
-  const [filtersApplied, setFiltersApplied] = useState(filters);
   const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
     useQueryTipoCandidatura();
-  const placeholders: Record<string, string> = {
-    codigoMatricula: "Pesquisar por código da matrícula...",
-    nome: "Nome do Aluno.",
-  };
-  const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
   const {
     data: estudanteFinalistaResponse,
     refetch,
     isFetching,
   } = useQueryEstudanteFinalista({
-    anoLectivo: parseFilter(filtersApplied.anoLectivo),
-    curso: parseFilter(filtersApplied.curso),
-    tipoCandidatura: parseFilter(filtersApplied.tipoCandidatura),
-
+    anoLectivo: parseFilter(filters.anoLectivo),
+    curso: parseFilter(filters.curso),
+    tipoCandidatura: parseFilter(filters.tipoCandidatura),
     page,
     limit,
   });
+  const handleRefetch = () => {
+    setFilters({
+      anoLectivo: "23",
+      curso: "",
+      estado: "",
+      faculdade: "",
+      periodo: "",
+      tipoCandidatura: "",
+    });
+    setPage(1);
+    refetch();
+  };
   const tableData = estudanteFinalistaResponse?.data || [];
   const total = estudanteFinalistaResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
@@ -157,15 +149,9 @@ export default function ListarEstudanteFinalista() {
             />
 
             <div className="flex items-end">
-              <Button
-                onClick={() => {
-                  setFiltersApplied(filters);
-                  setSearchApplied(searchTerm);
-                  refetch();
-                }}
-              >
-                <Search className="h-4 w-4" />
-                Pesquisar
+              <Button onClick={handleRefetch}>
+                <RefreshCw className="h-4 w-4" />
+                Atualizar
               </Button>
             </div>
           </div>
@@ -255,7 +241,6 @@ export default function ListarEstudanteFinalista() {
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
                 </SelectContent>
               </Select>
             </div>

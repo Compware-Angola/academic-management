@@ -7,12 +7,14 @@ interface AcademicYearSelectProps {
   onChangeValue: (v: string) => void;
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
+  onlyActive?: boolean;
 }
 const AcademicYearSelect = ({
   onChangeValue,
   value,
   disabled,
   enableDefaultSelectItem = false,
+  onlyActive = false,
 }: AcademicYearSelectProps) => {
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
@@ -35,7 +37,13 @@ const AcademicYearSelect = ({
         value={value}
         defaultSelectItem={defaultSelectItem}
         onChange={(v) => onChangeValue(v)}
-        options={academicYear}
+        options={
+          onlyActive
+            ? academicYear?.filter(
+                (a) => a.estado.toLocaleLowerCase() === "activo",
+              )
+            : academicYear
+        }
         map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
       />
     </>
