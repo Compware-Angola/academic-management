@@ -6,6 +6,7 @@ export type CandidatoSemProvaParams = {
   codigoCurso?: number;
   codigoTurno?: number;
   filtroProva?: "sem_prova" | "com_prova";
+  statusProva?:number
   page?: number;
   limit?: number;
 };
