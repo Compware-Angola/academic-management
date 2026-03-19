@@ -55,6 +55,7 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { CreateIsencaoDialog } from "./CreateIsencaoDialog";
 
 export default function IsencaoServico() {
   const [matriculaInput, setMatriculaInput] = useState("");
@@ -444,14 +445,15 @@ export default function IsencaoServico() {
         </CardContent>
       </Card>
 
-      <CreateIsencaoServicoDialog
+      {/* <CreateIsencaoServicoDialog
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         formData={formData}
         onChange={setFormData}
         onSubmit={handleSubmit}
         isSubmitting={isPending}
-      />
+      /> */}
+      <CreateIsencaoDialog open={isModalOpen} onOpenChange={setIsModalOpen} />
 
       <EditIsencaoServicoDialog
         open={isEditOpen}

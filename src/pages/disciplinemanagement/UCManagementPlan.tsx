@@ -130,9 +130,11 @@ export default function UCManagementPlan() {
           refetch();
         },
         onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.message || "Erro ao adicionar UC ao plano.",
-          );
+          const backendMessage =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Erro ao adicionar UC ao plano xxxx.";
+          toast.error(backendMessage);
         },
       },
     );
