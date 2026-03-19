@@ -17,7 +17,7 @@ import { toast } from "sonner";
 const InscricaoEpocaEspecial = () => {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
-  const inscricaoLink = `${window.location.origin}/exame-acesso/inscricao-especial`;
+ const inscricaoLink = `${import.meta.env.VITE_PORTAL_APP_URL}/auth/registro`;
 
   async function handleCopyLink() {
     try {

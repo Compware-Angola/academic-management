@@ -118,11 +118,12 @@ import ListaCandidatos from "./pages/access_exam/ListaCandidatos";
 import AlterarSenhaExame from "./pages/access_exam/AlterarSenhaExame";
 
 import InscricaoEpocaEspecial from "./pages/access_exam/InscricaoEpocaEspecial";
-import InscricaoExameAcessoFormulario from "./pages/access_exam/InscricaoExameAcessoFormulario";
+
 import HorariosPorCurso from "./pages/access_exam/HorariosPorCurso";
 import PautaGeralExame from "./pages/access_exam/PautaGeralExame";
 import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
+import NotificacoesPage from "./pages/notification/Notificacoespage";
 
 
 const App = () => {
@@ -154,12 +155,7 @@ const App = () => {
                     element={<RedefinirSenhaPrimeiroAcesso />}
                   />
                 </Route>
-                <Route >
-                  <Route
-                    path="/exame-acesso/inscricao-especial"
-                    element={<InscricaoExameAcessoFormulario />}
-                  />
-                </Route>
+              
 
 
                 <Route element={<MainLayout />}>
@@ -197,6 +193,10 @@ const App = () => {
                   <Route
                     path="/controle-acesso/all-solicitacoes"
                     element={<Solicitacoes />}
+                  />
+                     <Route
+                    path="/notificacoes"
+                    element={<NotificacoesPage />}
                   />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
