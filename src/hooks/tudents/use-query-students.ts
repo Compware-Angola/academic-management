@@ -1,28 +1,34 @@
 // hooks/useStudents.ts
-import { 
-  fetchStudentEstatisticas, 
-  fetchStudentsSugestoes, 
+import {
+  fetchStudentEstatisticas,
+  fetchStudentsSugestoes,
   fetchDisciplinasMatriculadas,
-  StudentDetail, 
+  StudentDetail,
   StudentSugestao,
   DisciplinasResponse,
-  FetchDisciplinasMatriculadasParams 
-} from '@/services/students/students.service';
+  FetchDisciplinasMatriculadasParams,
+} from "@/services/students/students.service";
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  getListStudentsService,
+  ListStudentsPayload,
+  ListStudentsResponse,
+} from "@/services/students/students.service";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 /* =============================================
    Sugestões de alunos (busca por nome, BI, etc.)
    ============================================= */
-export const useStudentSugestoes = (search: string = '') => {
-  const queryKey = ['students-sugestoes', search.trim().toLowerCase()];
+export const useStudentSugestoes = (search: string = "") => {
+  const queryKey = ["students-sugestoes", search.trim().toLowerCase()];
 
   return useQuery<StudentSugestao[], Error>({
     queryKey,
     queryFn: () => fetchStudentsSugestoes({ search }),
-    enabled: search.trim().length > 2,         // mínimo 3 caracteres para buscar (ajuste se quiser)
-    staleTime: 2 * 60 * 1000,                  // 2 minutos
-    gcTime: 5 * 60 * 1000,                     // 5 minutos antes de garbage collect
+    enabled: search.trim().length > 2, // mínimo 3 caracteres para buscar (ajuste se quiser)
+    staleTime: 2 * 60 * 1000, // 2 minutos
+    gcTime: 5 * 60 * 1000, // 5 minutos antes de garbage collect
     retry: 1,
   });
 };
@@ -31,13 +37,11 @@ export const useStudentSugestoes = (search: string = '') => {
    Detalhes completos / estatísticas de um aluno
    ============================================= */
 export const useStudentDetail = (codigoMatricula?: number | string) => {
-
-
   return useQuery<StudentDetail, Error>({
-    queryKey: ['student-detail', String(codigoMatricula ?? '').trim()],
+    queryKey: ["student-detail", String(codigoMatricula ?? "").trim()],
     queryFn: () => fetchStudentEstatisticas(codigoMatricula!),
     enabled: !!codigoMatricula && String(codigoMatricula).trim().length > 0,
-    staleTime: 10 * 60 * 1000,                 // 10 minutos
+    staleTime: 10 * 60 * 1000, // 10 minutos
     gcTime: 30 * 60 * 1000,
     retry: 1,
   });
@@ -46,13 +50,15 @@ export const useStudentDetail = (codigoMatricula?: number | string) => {
 /* =============================================
    Disciplinas / cadeiras matriculadas do aluno
    ============================================= */
-export const useStudentDisciplinas = (params: FetchDisciplinasMatriculadasParams) => {
+export const useStudentDisciplinas = (
+  params: FetchDisciplinasMatriculadasParams,
+) => {
   const { matriculaId, anoLectivo, semestre, page = 1, limit = 25 } = params;
 
   // Chave única que considera todos os filtros importantes
   const queryKey = [
-    'student-disciplinas',
-    String(matriculaId ?? '').trim(),
+    "student-disciplinas",
+    String(matriculaId ?? "").trim(),
     anoLectivo ? String(anoLectivo) : null,
     semestre ? String(semestre) : null,
     page,
@@ -63,7 +69,7 @@ export const useStudentDisciplinas = (params: FetchDisciplinasMatriculadasParams
     queryKey,
     queryFn: () => fetchDisciplinasMatriculadas(params),
     enabled: !!matriculaId && String(matriculaId).trim().length > 0,
-    staleTime: 5 * 60 * 1000,                  // 5 minutos (disciplinas mudam pouco)
+    staleTime: 5 * 60 * 1000, // 5 minutos (disciplinas mudam pouco)
     gcTime: 30 * 60 * 1000,
     retry: 1,
     // keepPreviousData: true,                 // descomente se quiser manter dados antigos durante refetch
@@ -74,11 +80,37 @@ export const useStudentDisciplinas = (params: FetchDisciplinasMatriculadasParams
 // Função auxiliar para invalidar/refetchar caches
 // (útil após alguma ação que altera matrícula/disciplinas)
 // =============================================
-export const invalidateStudentQueries = (queryClient: ReturnType<typeof useQueryClient>, codigoMatricula?: string | number) => {
+export const invalidateStudentQueries = (
+  queryClient: ReturnType<typeof useQueryClient>,
+  codigoMatricula?: string | number,
+) => {
   const matriculaStr = codigoMatricula ? String(codigoMatricula).trim() : null;
 
-  queryClient.invalidateQueries({ queryKey: ['student-detail', matriculaStr] });
-  queryClient.invalidateQueries({ queryKey: ['student-disciplinas', matriculaStr] });
+  queryClient.invalidateQueries({ queryKey: ["student-detail", matriculaStr] });
+  queryClient.invalidateQueries({
+    queryKey: ["student-disciplinas", matriculaStr],
+  });
   // se quiser invalidar sugestões também (menos comum):
   // queryClient.invalidateQueries({ queryKey: ['students-sugestoes'] });
 };
+
+export function useQueryStudents(payload: ListStudentsPayload) {
+  const { anoLectivo, codigoCurso, faculdadeId, codigoMatricula, page, limit } =
+    payload;
+
+  const enabled = !!anoLectivo;
+
+  return useQuery<ListStudentsResponse>({
+    queryKey: [
+      "students",
+      anoLectivo,
+      codigoCurso,
+      faculdadeId,
+      codigoMatricula,
+      page,
+      limit,
+    ],
+    enabled,
+    queryFn: () => getListStudentsService(payload),
+  });
+}
