@@ -14,6 +14,7 @@ export type Avisos = {
   CURSO: string;
   PERIODO: string;
   DESTINO: string;
+  STATUS_: number;
 };
 
 /* ---------- RESPONSE COMPLETO ---------- */
