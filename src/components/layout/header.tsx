@@ -1,3 +1,4 @@
+import { useQueryAvisosPorGrupo } from "@/hooks/acess/use-query-avisos-por-grupo";
 import { LogOut, Search, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,50 +29,28 @@ import { useMutationLogout } from "@/hooks/mutations/use-mutation-login";
 import { useState, useEffect } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/tudents/use-query-students";
+import { AuthStorage } from "@/util/auth-storage";
+import { getCurrentUserService } from "@/services/auth/login.service";
+import { useQuery } from "@tanstack/react-query";
 
-// ─── Tipagem de notificação ────────────────────────────────────────────────
-interface Notification {
-  id: number;
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-}
-
-// ─── Mock de notificações — substituir pelo teu hook/query real ────────────
-const mockNotifications: Notification[] = [
-  {
-    id: 1,
-    title: "Nova mensagem",
-    message: "O aluno João Silva enviou uma mensagem.",
-    time: "há 2 min",
-    read: false,
-  },
-  {
-    id: 2,
-    title: "Matrícula aprovada",
-    message: "A matrícula de Ana Costa foi aprovada.",
-    time: "há 15 min",
-    read: false,
-  },
-  {
-    id: 3,
-    title: "Documento pendente",
-    message: "Existe 1 documento à espera de revisão.",
-    time: "há 1 h",
-    read: false,
-  },
-  {
-    id: 4,
-    title: "Relatório gerado",
-    message: "O relatório mensal está pronto.",
-    time: "ontem",
-    read: true,
-  },
-];
 
 export function Header() {
   const { logout, user } = useAuth();
+
+  const [token, setToken] = useState<string | null>(AuthStorage.getToken());
+            localStorage.removeItem("auth.user");
+            const {
+              data: userCurrent,
+              isLoading: gaLoading,
+              isError,
+            } = useQuery({
+              queryKey: ["current-user", "GA"],
+              queryFn: () => getCurrentUserService("GA"),
+              enabled: !!token,
+              staleTime: 5 * 60 * 1000,
+              retry: false,
+            });
+
   const { mutate: logoutUser } = useMutationLogout();
   const navigate = useNavigate();
 
@@ -79,19 +58,31 @@ export function Header() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
+  const grupoPrincipal = user?.groups?.find(
+  (group) => group.type_group === 1
+);
+
+const { data: avisosGrupo = [] } = useQueryAvisosPorGrupo({
+  grupoId: grupoPrincipal?.codigo,
+});
+
+console.log("AVISO GRUPO: ", grupoPrincipal)
+
+const agora = new Date();
+
+const avisosValidos = avisosGrupo.filter((aviso) => {
+  const ativo = aviso.STATUS === 1;
+
+  const naoExpirado =
+    !aviso.DATE_EXPIRACAO || new Date(aviso.DATE_EXPIRACAO) >= agora;
+
+  return ativo && naoExpirado;
+});
+
   // ─── Notificações ────────────────────────────────────────────────────────
-  const [notifications, setNotifications] =
-    useState<Notification[]>(mockNotifications);
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  
 
-  const markAllAsRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-
-  const markAsRead = (id: number) =>
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-
+  
   /** ---------------------------
    * DEBOUNCE (700ms)
    * --------------------------- */
@@ -218,14 +209,14 @@ export function Header() {
             <DropdownMenuTrigger >
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-1 h-5 min-w-5 rounded-full px-1 text-[10px] font-bold flex items-center justify-center"
-                  >
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </Badge>
-                )}
+                {avisosValidos.length > 0 && (
+  <Badge
+    variant="destructive"
+    className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold"
+  >
+    {avisosValidos.length > 99 ? "99+" : avisosValidos.length}
+  </Badge>
+)}
               </Button>
             </DropdownMenuTrigger>
 
@@ -239,34 +230,40 @@ export function Header() {
               </div>
               <DropdownMenuSeparator />
 
-              {notifications.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  Sem notificações
-                </div>
-              ) : (
-                <div className="max-h-72 overflow-y-auto">
-                  {notifications.map((notif) => (
-                    <DropdownMenuItem
-                      key={notif.id}
-                      className="flex flex-col items-start gap-0.5 px-3 py-2.5 cursor-default focus:bg-accent"
-                    >
-                      <div className="flex w-full items-center justify-between gap-2">
-                        <span className="text-sm font-medium leading-tight text-foreground">
-                          {notif.title}
-                        </span>
+              {avisosValidos.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-muted-foreground">
+                    Sem notificações
+                  </div>
+                ) : (
+                  <div className="max-h-72 overflow-y-auto">
+                    {avisosValidos.map((aviso) => (
+                      <DropdownMenuItem
+                        key={aviso.CODIGO}
+                        className="flex cursor-default flex-col items-start gap-1 px-3 py-2.5 focus:bg-accent"
+                      >
+                        <div className="flex w-full items-start justify-between gap-2">
+                          <span className="text-sm font-medium leading-tight text-foreground">
+                            {aviso.ASSUNTO}
+                          </span>
 
-                        <span className="text-[10px] text-muted-foreground">
-                          {notif.time}
-                        </span>
-                      </div>
+                          {aviso.DATE_EXPIRACAO && (
+                            <span className="text-[10px] text-muted-foreground">
+                              {new Date(aviso.DATE_EXPIRACAO).toLocaleDateString("pt-PT", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              })}
+                            </span>
+                          )}
+                        </div>
 
-                      <span className="text-xs text-muted-foreground leading-snug">
-                        {notif.message}
-                      </span>
-                    </DropdownMenuItem>
-                  ))}
-                </div>
-              )}
+                        <span className="text-xs leading-snug text-muted-foreground">
+                          {aviso.DESCRICAO}
+                        </span>
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                )}
 
               <DropdownMenuSeparator />
               <DropdownMenuItem
