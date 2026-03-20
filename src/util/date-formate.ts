@@ -9,6 +9,10 @@ export const formatarData = (dataString: string): string => {
     day: "2-digit",
     month: "long",
     year: "numeric",
-    timeZone: "UTC",
+    //timeZone: "Africa/Luanda",
   }).format(data);
+};
+
+export const formatDisplay = (data: Date): string => {
+  return data.toLocaleDateString("en-CA");
 };

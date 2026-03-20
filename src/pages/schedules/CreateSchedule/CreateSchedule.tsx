@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Save,
   X,
-  AlertCircle,
   Loader2,
   List,
   AlertTriangle,
@@ -55,6 +54,8 @@ import { useQueryScheduleCreationPrompt } from "@/hooks/academiccalendar/use-que
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { parseFilter } from "@/util/parse-filter";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 /* -----------------------------------
    CONSTANTES E UTILS
@@ -62,12 +63,10 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
-  { key: "docente", label: "Docente" },
   { key: "tipoAula", label: "Tipo de Aula" },
   { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
@@ -108,7 +107,12 @@ export default function CreateSchedule() {
 
   // extrai só o código
   const activeAcademicYearId = activeAcademicYear?.codigo;
-
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      anoLetivo: activeAcademicYearId?.toString() || "",
+    }));
+  }, [activeAcademicYearId]);
   // busca o prazo usando o código encontrado
   const {
     data: scheduleCreationPrompt,
@@ -140,20 +144,23 @@ export default function CreateSchedule() {
       semestre: formData.semestre,
     });
   const { data: designacao } = useNextScheduleDesignation(
-    formData.curso
-      ? gerarSiglaCurso(
-          cursos.find((c) => c.codigo.toString() === formData.curso)
-            ?.designacao || "",
-        )
-      : undefined,
-    formData.classes,
-    formData.unidadeCurricular
-      ? unidadesCurriculares.find(
-          (c) => c.pk.toString() === formData.unidadeCurricular,
-        )?.codigo || ""
-      : "",
-    Number(formData.periodo),
-    Number(formData.anoLetivo),
+    {
+      cursoSigla: formData.curso
+        ? gerarSiglaCurso(
+            cursos.find((c) => c.codigo.toString() === formData.curso)
+              ?.designacao || "",
+          )
+        : undefined,
+      ano: formData.classes,
+      codigoUC: formData.unidadeCurricular
+        ? unidadesCurriculares.find(
+            (c) => c.pk.toString() === formData.unidadeCurricular,
+          )?.codigo || ""
+        : "",
+      periodo: Number(formData.periodo),
+      anoLectivo: Number(formData.anoLetivo),
+    },
+    true,
   );
 
   const { data: classes = [], isLoading: isLoadingClasses } =
@@ -165,6 +172,7 @@ export default function CreateSchedule() {
     salaId: formData.sala,
     anoLectivo: formData.anoLetivo,
     periodo: formData.periodo,
+    semestre:formData.semestre,
   });
 
   const ocupadasSet = useMemo(
@@ -263,7 +271,6 @@ export default function CreateSchedule() {
       });
       return;
     }
-
     const payload: SaveHorarioPayload = {
       anoLectivo: Number(formData.anoLetivo),
       semestre: Number(formData.semestre),
@@ -272,11 +279,11 @@ export default function CreateSchedule() {
       unidadeCurricular: Number(formData.unidadeCurricular),
       modalidade: Number(formData.modalidade),
       aulas: aulasSemConflito,
-      apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
+      apenasPrimeiroAno: parseFilter(formData.apenasPrimeiroAno),
       capacidade: Number(formData.capacidade),
       designacao: formData.designacao,
       estadoHorario: 2,
-      docente: Number(formData.docente),
+      docente: parseFilter(formData.docente),
       tipoAula: Number(formData.tipoAula),
       sala: Number(formData.sala),
       turma: 0,
@@ -416,21 +423,18 @@ export default function CreateSchedule() {
 
           {/* CURSO */}
 
-            <CourseSelect
-                                
-                              
-                                value={formData.curso}
-                                onChangeValue={(v) => {
-                                  setFormData({
-                                    ...formData,
-                                    curso: v,
-                                    unidadeCurricular: "",
-                                    designacao: "",
-                                    classes: "",
-                                  })
-
-                                  }}
-                                    />
+          <CourseSelect
+            value={formData.curso}
+            onChangeValue={(v) => {
+              setFormData({
+                ...formData,
+                curso: v,
+                unidadeCurricular: "",
+                designacao: "",
+                classes: "",
+              });
+            }}
+          />
 
           <FormSelect
             label="Ano Curricular"
@@ -563,39 +567,21 @@ export default function CreateSchedule() {
 
           {/* SALA */}
           <div>
-            <Label>Sala</Label>
-            <Select
-              disabled={!isWithinPeriod}
+            <FormCommandSelect
+              label="Sala"
+              width="full"
               value={formData.sala}
-              onValueChange={(v) => setFormData({ ...formData, sala: v })}
-            >
-              <SelectTrigger
-                disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
-                className="w-full "
-              >
-                <SelectValue
-                  placeholder={
-                    <>
-                      {" "}
-                      {isLoadingSala ? (
-                        <span className="flex gap-2 items-center">
-                          Carregando <Loader2 className="animate-spin" />
-                        </span>
-                      ) : (
-                        "Selecione Salas"
-                      )}
-                    </>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {salas?.map((sala) => (
-                  <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
-                    {sala.sala}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              disabled={!isWithinPeriod || Boolean(formData.tipoAula) === false}
+              isLoading={isLoadingSala}
+              placeholder={isLoadingSala ? "Carregando..." : "Selecione Salas"}
+              options={salas ?? []}
+              map={(sala) => ({
+                key: sala.salaid,
+                value: sala.salaid.toString(),
+                label: sala.sala,
+              })}
+              onChange={(v) => setFormData({ ...formData, sala: v })}
+            />
           </div>
         </div>
 
@@ -678,12 +664,10 @@ function gerarSiglaCurso(nome: string) {
  */
 export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   const ocupadas = new Set<string>();
-
+  console.log({ aulas });
   aulas.forEach((dia) => {
-    dia.tempos.forEach((tempo, index) => {
-      // backend não manda ordem, então usamos índice + 1
-      const ordem = index + 1;
-      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+    dia.tempos.forEach((tempo) => {
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${tempo.ordem_tempo}`;
       ocupadas.add(key);
     });
   });

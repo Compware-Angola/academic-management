@@ -1,16 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, Loader2, LucideLoader2, Save, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-
 import { FormSelect } from "@/components/common/FormSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-
 import { useQueryScheduleDetails } from "@/hooks/horario/use-query-schedule-details";
 import { useUpdateSchedule } from "@/hooks/horario/use-update-schedule";
-
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
@@ -48,14 +45,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { parseFilter } from "@/util/parse-filter";
 const requiredFields = [
   { key: "designacao", label: "Designação do Horário" },
-  { key: "capacidade", label: "Capacidade" },
   { key: "anoLetivo", label: "Ano Letivo" },
   { key: "semestre", label: "Semestre" },
   { key: "periodo", label: "Período" },
   { key: "curso", label: "Curso" },
-  { key: "docente", label: "Docente" },
   { key: "tipoAula", label: "Tipo de Aula" },
   { key: "sala", label: "Sala" },
   { key: "unidadeCurricular", label: "Unidade Curricular" },
@@ -100,7 +97,11 @@ export function EditSchedule() {
 
   /* ------------------------- QUERIES ------------------------- */
 
-  const { data, isLoading, isError } = useQueryScheduleDetails(scheduleId);
+  const {
+    data: initialDataSchedule,
+    isLoading,
+    isError,
+  } = useQueryScheduleDetails(scheduleId);
 
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
@@ -138,23 +139,34 @@ export function EditSchedule() {
     anoLectivo: Number(formData.anoLetivo),
     periodo: Number(formData.periodo),
   });
-  const { data: designacao, isLoading: isLoadindeNextScheduleDesignation } =
+  const { data: designacao, isLoading: isLoadingNextScheduleDesignation } =
     useNextScheduleDesignation(
-      formData.curso
-        ? gerarSiglaCurso(
-            cursos.find((c) => c.codigo.toString() === formData.curso)
-              ?.designacao || "",
-          )
-        : undefined,
-      formData.classes,
-      formData.unidadeCurricular
-        ? unidadesCurriculares.find(
-            (c) => c.pk.toString() === formData.unidadeCurricular,
-          )?.codigo || ""
-        : "",
-      Number(formData.periodo),
-      Number(formData.anoLetivo),
+      {
+        cursoSigla: formData.curso
+          ? gerarSiglaCurso(
+              cursos.find((c) => c.codigo.toString() === formData.curso)
+                ?.designacao || "",
+            )
+          : undefined,
+        ano: formData.classes,
+        anoLectivo: Number(formData.anoLetivo),
+        codigoUC: formData.unidadeCurricular
+          ? unidadesCurriculares.find(
+              (c) => c.pk.toString() === formData.unidadeCurricular,
+            )?.codigo || ""
+          : "",
+        periodo: Number(formData.periodo),
+      },
+
+      initialDataSchedule
+        ? initialDataSchedule.cursoId.toString() !== formData.curso ||
+            initialDataSchedule.unidadeCurricularId.toFixed() !=
+              formData.unidadeCurricular ||
+            initialDataSchedule.semestre.toString() !== formData.semestre ||
+            initialDataSchedule.periodo.toString() !== formData.periodo
+        : false,
     );
+
   const { data: teachers = [], isLoading: isLoadingTeacher } =
     useQueryTeacherByUC(formData.unidadeCurricular);
   useEffect(() => {
@@ -174,6 +186,8 @@ export function EditSchedule() {
     salaId: formData.sala,
     anoLectivo: formData.anoLetivo,
     periodo: formData.periodo,
+    semestre: formData.semestre,
+    horarioId:scheduleId
   });
   const ocupadasSet = useMemo(
     () => mapOcupacaoPorChave(aulasOcupadas),
@@ -182,9 +196,9 @@ export function EditSchedule() {
   /* ------------------------- LOAD INICIAL ------------------------- */
 
   useEffect(() => {
-    if (!data) return;
+    if (!initialDataSchedule) return;
 
-    const mapped = mapScheduleToFormData(data);
+    const mapped = mapScheduleToFormData(initialDataSchedule);
 
     // 🔹 Campos independentes
     setFormData((prev) => ({
@@ -209,10 +223,11 @@ export function EditSchedule() {
     });
 
     // 🔹 Aulas
-    const slots: AulaPayload[] = mapBackendAulasToGrid(data.aulas) ?? [];
+    const slots: AulaPayload[] =
+      mapBackendAulasToGrid(initialDataSchedule.aulas) ?? [];
 
     setAulas(slots);
-  }, [data]);
+  }, [initialDataSchedule]);
 
   /* ------------------------- APPLY CLASSES ------------------------- */
 
@@ -264,14 +279,13 @@ export function EditSchedule() {
         return false;
       }
     }
-
     if (!aulas.length) {
-      toast({
-        variant: "destructive",
-        title: "Horário vazio",
-        description: "Selecione pelo menos uma aula.",
-      });
-      return false;
+      // toast({
+      //   variant: "destructive",
+      //   title: "Horário vazio",
+      //   description: "Selecione pelo menos uma aula.",
+      // });
+      // return false;
     }
 
     return true;
@@ -279,7 +293,7 @@ export function EditSchedule() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     validateForm();
-    const aulasSemConflito = aulas.filter((aula) => {
+    let aulasSemConflito = aulas.filter((aula) => {
       const key = `${aula.diaSemana}-${aula.ordemTempo}`;
       return !ocupadasSet.has(key);
     });
@@ -290,20 +304,20 @@ export function EditSchedule() {
     });
 
     if (aulasComConflito.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Conflito de horários detectado",
-        description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
-      });
+      // toast({
+      //   variant: "destructive",
+      //   title: "Conflito de horários detectado",
+      //   description: `${aulasComConflito.length} aula(s) foram removidas porque a sala já está ocupada nesse horário.`,
+      // });
     }
 
     if (aulasSemConflito.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Nenhuma aula válida",
-        description: "Remova os conflitos antes de guardar o horário.",
-      });
-      return;
+      // toast({
+      //   variant: "destructive",
+      //   title: "Nenhuma aula válida",
+      //   description: "Remova os conflitos antes de guardar o horário.",
+      // });
+      aulasSemConflito = [];
     }
 
     await updateSchedule.mutateAsync({
@@ -322,7 +336,7 @@ export function EditSchedule() {
         apenasPrimeiroAno: Number(formData.apenasPrimeiroAno),
         tipoAula: Number(formData.tipoAula),
         sala: Number(formData.sala),
-        docente: Number(formData.docente),
+        docente: parseFilter(formData.docente),
         aulas: aulasSemConflito,
       },
     });
@@ -332,10 +346,9 @@ export function EditSchedule() {
   };
 
   /* ------------------------- UI ------------------------- */
-  const isFormComplete =
-    requiredFields.every(
-      (f) => !isEmpty(formData[f.key as keyof typeof formData]),
-    ) && aulas.length > 0;
+  const isFormComplete = requiredFields.every(
+    (f) => !isEmpty(formData[f.key as keyof typeof formData]),
+  );
   if (isLoadingAcademicYear || isLoadingScheduleCreationPrompt || isLoading) {
     return (
       <div className="flex justify-center items-center">
@@ -439,20 +452,17 @@ export function EditSchedule() {
             onChange={(v) => setFormData((p) => ({ ...p, periodo: v }))}
           />
 
-              <CourseSelect
-                                                            
-                                                          
-                  value={formData.curso}
-                  onChangeValue={(v) => {
-                  setFormData((p) => ({
+          <CourseSelect
+            value={formData.curso}
+            onChangeValue={(v) => {
+              setFormData((p) => ({
                 ...p,
                 curso: v,
                 classes: "",
                 unidadeCurricular: "",
-              }))
-                                                                                      
-                                                              }}
-                                                                />
+              }));
+            }}
+          />
           <FormSelect
             disabled={!isWithinPeriod}
             label="Ano Curricular"
@@ -518,17 +528,17 @@ export function EditSchedule() {
               <Input
                 id="designacao"
                 readOnly
-                disabled={isLoadindeNextScheduleDesignation}
+                disabled={isLoadingNextScheduleDesignation}
                 value={formData.designacao}
                 placeholder={
-                  isLoadindeNextScheduleDesignation
+                  isLoadingNextScheduleDesignation
                     ? "A gerar designação automaticamente…"
                     : "Designação do horário"
                 }
                 className="pr-10"
               />
 
-              {isLoadindeNextScheduleDesignation && (
+              {isLoadingNextScheduleDesignation && (
                 <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
               )}
             </div>
@@ -587,52 +597,34 @@ export function EditSchedule() {
           </div>
 
           {/* SALA */}
+
           <div>
-            <Label>Sala</Label>
-            <Select
-              disabled={!isWithinPeriod}
+            <FormCommandSelect
+              label="Sala"
+              width="full"
               value={formData.sala}
-              onValueChange={(v) => setFormData({ ...formData, sala: v })}
-            >
-              <SelectTrigger
-                disabled={Boolean(formData.tipoAula) === false || isLoadingSala}
-                className="w-full "
-              >
-                <SelectValue
-                  placeholder={
-                    <>
-                      {" "}
-                      {isLoadingSala ? (
-                        <span className="flex gap-2 items-center">
-                          Carregando <Loader2 className="animate-spin" />
-                        </span>
-                      ) : (
-                        "Selecione Salas"
-                      )}
-                    </>
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {salas?.map((sala) => (
-                  <SelectItem key={sala.salaid} value={sala.salaid.toString()}>
-                    {sala.sala}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              disabled={!isWithinPeriod || Boolean(formData.tipoAula) === false}
+              isLoading={isLoadingSala}
+              placeholder="Selecione Salas"
+              options={salas ?? []}
+              map={(sala) => ({
+                key: sala.salaid,
+                value: sala.salaid.toString(),
+                label: sala.sala,
+              })}
+              onChange={(v) => setFormData({ ...formData, sala: v })}
+            />
           </div>
         </div>
 
-        {temposDisponiveis.length > 0 ||
-          (!isWithinPeriod && (
-            <ScheduleGridEdit
-              ocupadas={ocupadasSet}
-              scheduleData={temposDisponiveis}
-              aulasExistentes={aulas}
-              onChange={setAulas}
-            />
-          ))}
+        {temposDisponiveis.length > 0 && isWithinPeriod && (
+          <ScheduleGridEdit
+            ocupadas={ocupadasSet}
+            scheduleData={temposDisponiveis}
+            aulasExistentes={aulas}
+            onChange={setAulas}
+          />
+        )}
 
         {isWithinPeriod && (
           <div className="flex justify-end gap-3 pt-4">
@@ -695,7 +687,7 @@ function gerarSiglaCurso(nome: string) {
   return nome
     .split(" ")
     .filter((p) => !STOP_WORDS.includes(p.toLowerCase()))
-    .map((p) => p[0].toUpperCase())
+    .map((p) => p[0]?.toUpperCase())
     .join("");
 }
 function mapBackendAulasToGrid(aulasBackend: any[]): AulaPayload[] {
@@ -716,10 +708,8 @@ export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   const ocupadas = new Set<string>();
 
   aulas.forEach((dia) => {
-    dia.tempos.forEach((tempo, index) => {
-      // backend não manda ordem, então usamos índice + 1
-      const ordem = index + 1;
-      const key = `${dia.diaSemana.pkDiaDaSemana}-${ordem}`;
+    dia.tempos.forEach((tempo) => {
+      const key = `${dia.diaSemana.pkDiaDaSemana}-${tempo.ordem_tempo}`;
       ocupadas.add(key);
     });
   });

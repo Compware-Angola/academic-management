@@ -1,33 +1,33 @@
 import { useQueryDocenteCadeiras } from "@/hooks/docentes/use-docentes-cadeiras";
 import { FormCommandSelect } from "../FormCommandSelect";
+import { DocenteCadeirasPayload } from "@/services/docentes/docente-cadeiras.service";
 
 interface DocenteCadeiraSelectProps {
-  docenteId?: number;
-  cursoId?: number;
+  disabled?: boolean;
+  params: DocenteCadeirasPayload;
   value: string;
   onChangeValue: (v: string) => void;
   labelMode?: "inside" | "outside";
+  loading?: boolean;
 }
 
 export function DocenteCadeiraSelect({
-  docenteId,
-  cursoId,
+  params,
   value,
   onChangeValue,
+  disabled,
+  loading,
   labelMode = "outside",
 }: DocenteCadeiraSelectProps) {
-  const { data: cadeiras = [], isLoading } = useQueryDocenteCadeiras(
-    docenteId,
-    cursoId,
-  );
+  const { data: cadeiras = [], isLoading } = useQueryDocenteCadeiras(params);
 
   return (
     <FormCommandSelect
-      disabled={!docenteId || !cursoId || isLoading}
+      disabled={disabled || isLoading || loading}
       value={value}
-      label="Cadeira"
+      label="Unidade Curricular"
       labelMode={labelMode}
-      isLoading={isLoading}
+      isLoading={loading || isLoading}
       width="full"
       options={cadeiras}
       map={(c) => ({

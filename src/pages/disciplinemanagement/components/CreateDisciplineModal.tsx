@@ -33,8 +33,6 @@ import { useTiposUnidade } from "@/hooks/study_plan/use-type-unidade";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
-import { Discipline } from "@/services/study_plan/fect-discipline.serice";
-
 interface TipoUnidade {
   codigo: number;
   sigla: string;
@@ -44,7 +42,16 @@ interface TipoUnidade {
 interface CreateDisciplineModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  discipline?: Discipline;
+  discipline?: {
+    codigo: number;
+    designacao: string;
+    tipoUnidadeCurricular: string;
+    naturezaUnidadeCurricular: string;
+    codigoDisciplina: string;
+    nomeAbreviatura: string;
+    duracao: number;
+    status: number;
+  };
 }
 
 export function CreateDisciplineModal({
@@ -60,7 +67,7 @@ export function CreateDisciplineModal({
 
   const isPending = creating || updating;
 
-  const { user:userData } = useAuth();
+  const { user: userData } = useAuth();
   const { toast } = useToast();
 
   // Estados do formulário
@@ -91,11 +98,11 @@ export function CreateDisciplineModal({
    */
   useEffect(() => {
     if (discipline && open) {
-      setDesignacao(discipline.desginacao);
-      setCodigoDisciplina(discipline.codigo_disciplina);
-      setCAbbr(discipline.sigla);
-      setTipo(discipline.tipo_unidade_curricular);
-      setNatureza(discipline.natureza_unidade_curricular as "TP" | "T" | "P");
+      setDesignacao(discipline.designacao);
+      setCodigoDisciplina(discipline.codigoDisciplina);
+      setCAbbr(discipline.nomeAbreviatura);
+      setTipo(discipline.tipoUnidadeCurricular);
+      setNatureza(discipline.naturezaUnidadeCurricular as "TP" | "T" | "P");
     } else if (open) {
       reset();
     }
@@ -122,38 +129,36 @@ export function CreateDisciplineModal({
       update(
         {
           codigo: discipline!.codigo,
-          codigo_disciplina: codigo_disciplina.toUpperCase(),
+          codigoDisciplina: codigo_disciplina.toUpperCase(),
           designacao: designacao.trim(),
-          natureza_unidade_curricular,
-          nome_abreviatura: cAbbr.toUpperCase(),
-          tipo_unidade_curricular,
+          naturezaUnidadeCurricular: natureza_unidade_curricular,
+          nomeAbreviatura: cAbbr.toUpperCase(),
+          tipoUnidadeCurricular: tipo_unidade_curricular,
         },
         {
           onSuccess: () => {
             reset();
             onOpenChange(false);
           },
-        }
+        },
       );
       return;
     }
 
-    // ➕ Criar
     create(
       {
         designacao: designacao.trim(),
-        pk_utilizador: Number(userData?.user?.pk_utilizador) || 1,
-        tipo_unidade_curricular,
-        natureza_unidade_curricular,
-        codigo_disciplina: codigo_disciplina.toUpperCase(),
-        cAbbr: cAbbr.toUpperCase(),
+        tipoUnidadeCurricular: tipo_unidade_curricular,
+        naturezaUnidadeCurricular: natureza_unidade_curricular,
+        codigoDisciplina: codigo_disciplina.toUpperCase(),
+        nomeAbreviatura: cAbbr.toUpperCase(),
       },
       {
         onSuccess: () => {
           reset();
           onOpenChange(false);
         },
-      }
+      },
     );
   };
 
@@ -161,7 +166,6 @@ export function CreateDisciplineModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          {/* 🔥 TEXTO DINÂMICO */}
           <DialogTitle>
             {isEdit ? "Atualizar Disciplina" : "Nova Disciplina"}
           </DialogTitle>

@@ -1,19 +1,15 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
+import { useState } from "react";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Check, ChevronsUpDown, User } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,14 +18,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -38,81 +28,181 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, GraduationCap, Loader2 } from "lucide-react";
+import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 
+import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useQuerySchedulesByDocente } from "@/hooks/horario/use-query-schedules-by-docente-service";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
-import { formatReadableTimeInterval } from "@/util/format-readable-time-interval";
+import { useQueryStateLesson } from "@/hooks/use-fetch-state-lesson";
+import { useQueryControleAssiduidade } from "@/hooks/assiduidade/use-fetch-controle-assiduidade";
+import { Label } from "recharts";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { useQueryControleAttendance } from "@/hooks/assiduidade/use-query-controlle-assiduidade";
 
-// Converte ticks .NET → HH:mm
-const formatTime = (ticks: string): string => {
-  const totalSeconds = Number(ticks) / 10_000_000;
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
-};
+function SummaryCard({
+  title,
+  value,
+  className = "",
+  valueClassName = "",
+}: {
+  title: string;
+  value: number;
+  className?: string;
+  valueClassName?: string;
+}) {
+  return (
+    <Card className={className}>
+      <CardContent className="p-4">
+        <div className="text-sm text-muted-foreground">{title}</div>
+        <div className={`text-2xl font-bold mt-1 ${valueClassName}`}>
+          {value}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-export default function ControleAssiduidadde() {
+export default function ControleAssiduidade() {
+  const { data: anosAcademicos, isLoading: loadingAno } =
+    useQueryAnoAcademico();
+  const { data: semestres } = useQuerySemestres();
+  const { data: teachersData = [] } = useQueryTeacther();
+  const { data: lessonState = [] } = useQueryStateLesson();
+
   const [filters, setFilters] = useState({
-    anoLetivo: "",
+    docente: "",
+    dataInicial: "",
+    dataFinal: "",
+    estado: "",
+    anoLectivo: "",
     semestre: "",
-    docenteId: "",
-    estadoAula: "",
-    dataInicio: "",
-    dataFim: ""
+    page: 1,
+    limit: 20,
   });
 
-  // Paginação (igual ao SchedulesByUC)
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [openDocente, setOpenDocente] = useState(false);
-  // Dados base
-  const { data: anosAcademicos } = useQueryAnoAcademico();
-  const { data: semestres } = useQuerySemestres();
-  const { data: periodos } = useQueryPeriod();
-  const {
-    data: teachersData = [],
+  const handleFilterChange = (key: string, value: string | number) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      ...(key !== "page" ? { page: 1 } : {}),
+    }));
+  };
 
-    refetch,
-    error,
-  } = useQueryTeacther();
-  // Chama a API real com paginação
-  const { data: response, isLoading } = useQueryControleAttendance(
-    {
-      docenteId: Number(filters.docenteId) || 0,
-      anoLectivo: Number(filters.anoLetivo) || 0,
-      semestre: Number(filters.semestre) || 0,
-      estado_aula: Number(filters.estadoAula) || 0,
-      data_inicio: Date(filters.dataInicio) || 0,
-      page,
-      limit,
-    },
-    {
+  const queryFilters = {
+    docente: filters.docente ? Number(filters.docente) : undefined,
+    dataInicial: filters.dataInicial || undefined,
+    dataFinal: filters.dataFinal || undefined,
+    estado: filters.estado ? Number(filters.estado) : undefined,
+    anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
+    semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    page: filters.page,
+    limit: filters.limit,
+  };
+
+  const { data: response, isLoading } =
+    useQueryControleAssiduidade(queryFilters, {
       enabled:
-        !!filters.docenteId &&
-        !!filters.anoLetivo &&
-        !!filters.semestre
-    }
-  );
+        !!queryFilters.docente &&
+        !!queryFilters.dataInicial &&
+        !!queryFilters.dataFinal,
+    });
 
-  const aulas = response?.data || [];
-  const total = response?.total || 0;
-  const totalPages = Math.ceil(total / limit);
+  const aulas = response?.data ?? [];
+  const resumo = response?.resumo ?? {
+    marcacoesPendentes: 0,
+    presencasMarcadas: 0,
+    faltasMarcadas: 0,
+  };
 
-  const docenteNome = aulas.length > 0 ? aulas[0].docente_nome : "";
+  const total = response?.total ?? 0;
+  const totalPages = Math.ceil(total / filters.limit);
+
+  const exportRows = aulas.map((item: any) => ({
+    data: new Date(item.data_aula).toLocaleDateString(),
+    horario: `${item.hora_inicio} - ${item.hora_fim}`,
+    curso: item.curso,
+    unidade_curricular: item.unidade_curricular,
+    tempo: item.ordem_tempo,
+    docente: item.docente,
+    estado: item.estado_agendamento_designacao || "—",
+  }));
+
+  const pdfContent =
+    exportRows.length > 0 ? (
+      <GenericPDFDocument
+        documentTitle="Controle de Assiduidade"
+        subtitle="Relatório de aulas por docente"
+        infoSections={[
+          {
+            title: "Filtros Aplicados",
+            content: `
+Docente: ${filters.docente || "—"}
+Data Inicial: ${filters.dataInicial || "—"}
+Data Final: ${filters.dataFinal || "—"}
+            `,
+          },
+          {
+            title: "Resumo",
+            content: `
+Total de registos: ${total}
+Marcações Pendentes: ${resumo.marcacoesPendentes}
+Presenças Marcadas: ${resumo.presencasMarcadas}
+Faltas Marcadas: ${resumo.faltasMarcadas}
+            `,
+          },
+        ]}
+        mainTable={{
+          headers: [
+            { key: "data", label: "Data", width: "12%" },
+            { key: "horario", label: "Horário", width: "16%" },
+            { key: "curso", label: "Curso", width: "18%" },
+            { key: "unidade_curricular", label: "Unidade Curricular", width: "24%" },
+            { key: "tempo", label: "Tempo", width: "10%" },
+            { key: "docente", label: "Docente", width: "20%" },
+          ],
+          rows: exportRows,
+          headerBackground: "#1e40af",
+        }}
+        footerNotice="Documento gerado automaticamente pelo sistema."
+      />
+    ) : null;
+
+  const excelProps =
+    exportRows.length > 0
+      ? {
+          documentTitle: "Controle de Assiduidade",
+          subtitle: "Relatório de aulas por docente",
+          infoSections: [
+            {
+              title: "Resumo",
+              content: `
+Total de registos: ${total}
+Marcações Pendentes: ${resumo.marcacoesPendentes}
+Presenças Marcadas: ${resumo.presencasMarcadas}
+Faltas Marcadas: ${resumo.faltasMarcadas}
+              `,
+            },
+          ],
+          mainTable: {
+            headers: [
+              { key: "data", label: "Data", width: 18 },
+              { key: "horario", label: "Horário", width: 20 },
+              { key: "curso", label: "Curso", width: 22 },
+              { key: "unidade_curricular", label: "Unidade Curricular", width: 35 },
+              { key: "tempo", label: "Tempo", width: 12 },
+              { key: "docente", label: "Docente", width: 25 },
+              { key: "estado", label: "Estado", width: 20 },
+            ],
+            rows: exportRows,
+          },
+          footerNotice: "Documento gerado automaticamente pelo sistema.",
+          primaryColor: "#1e40af",
+        }
+      : null;
 
   return (
-    <div className="p-6 space-y-8">
-      {/* Breadcrumb */}
+    <div className="p-6 space-y-6">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -123,246 +213,231 @@ export default function ControleAssiduidadde() {
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem>Horários</BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Académico</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Por Docente</BreadcrumbPage>
+            <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Cabeçalho */}
-      <div className="flex items-center gap-4">
-        <GraduationCap className="h-9 w-9 text-primary" />
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Horários por Docente
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Consulte todas as aulas de um professor com paginação.
-          </p>
-        </div>
-      </div>
-
-      {/* Filtros */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl">Filtros de Pesquisa</CardTitle>
+          <CardTitle>Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Letivo</label>
-              <Select
-                value={filters.anoLetivo}
-                onValueChange={(v) => {
-                  setFilters({ ...filters, anoLetivo: v });
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosAcademicos?.map((a) => (
-                    <SelectItem key={a.codigo} value={a.codigo.toString()}>
-                      {a.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="flex flex-wrap gap-4 items-end">
+            <div className="space-y-1.5">
+              <Label>Docente</Label>
+              <FormCommandSelect
+                value={filters.docente}
+                options={teachersData ?? []}
+                map={(t) => ({
+                  key: String(t.codigo),
+                  label: t.nome,
+                  value: String(t.codigo),
+                })}
+                placeholder="Selecionar docente..."
+                onChange={(v) => handleFilterChange("docente", v)}
+              />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Semestre</label>
-              <Select
-                value={filters.semestre}
-                onValueChange={(v) => {
-                  setFilters({ ...filters, semestre: v });
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {semestres?.map((s) => (
-                    <SelectItem key={s.codigo} value={s.codigo.toString()}>
-                      {s.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div>
+              <label className="text-sm font-medium">Data Inicial *</label>
+              <Input
+                type="date"
+                value={filters.dataInicial}
+                onChange={(e) =>
+                  handleFilterChange("dataInicial", e.target.value)
+                }
+              />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Período</label>
-              <Select
-                value={filters.periodo}
-                onValueChange={(v) => {
-                  setFilters({ ...filters, periodo: v });
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {periodos?.map((p) => (
-                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
-                      {p.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div>
+              <label className="text-sm font-medium">Data Final *</label>
+              <Input
+                type="date"
+                value={filters.dataFinal}
+                onChange={(e) =>
+                  handleFilterChange("dataFinal", e.target.value)
+                }
+              />
             </div>
-            <FormCommandSelect
-              label="Docente"
-              value={filters.docenteId}
-              options={teachersData}
-              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-              onChange={(codigo) => {
-                setFilters({ ...filters, docenteId: codigo });
-                setPage(1);
-              }}
+
+            <FormSelect
+              label="Estado da Aula"
+              value={filters.estado}
+              onChange={(v) => handleFilterChange("estado", v)}
+              options={lessonState ?? []}
+              map={(e) => ({
+                key: String(e.PK_ESTADO_AGENDAMENTO),
+                label: e.DESIGNACAO,
+                value: String(e.PK_ESTADO_AGENDAMENTO),
+              })}
+            />
+
+            <FormSelect
+              label="Ano Letivo"
+              value={filters.anoLectivo}
+              onChange={(v) => handleFilterChange("anoLectivo", v)}
+              options={anosAcademicos ?? []}
+              map={(a) => ({
+                key: String(a.codigo),
+                label: a.designacao,
+                value: String(a.codigo),
+              })}
+              disabled={loadingAno}
+            />
+
+            <FormSelect
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) => handleFilterChange("semestre", v)}
+              options={semestres ?? []}
+              map={(s) => ({
+                key: String(s.codigo),
+                label: s.designacao,
+                value: String(s.codigo),
+              })}
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabela */}
+      {!!response && (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <SummaryCard
+      title="Marcações Pendentes"
+      value={response.resumo?.marcacoesPendentes ?? 0}
+      className="border-amber-500/30 bg-amber-500/5"
+      valueClassName="text-amber-700"
+    />
+
+    <SummaryCard
+      title="Presenças Marcadas"
+      value={response.resumo?.presencasMarcadas ?? 0}
+      className="border-emerald-500/30 bg-emerald-500/5"
+      valueClassName="text-emerald-700"
+    />
+
+    <SummaryCard
+      title="Faltas Marcadas"
+      value={response.resumo?.faltasMarcadas ?? 0}
+      className="border-red-500/30 bg-red-500/5"
+      valueClassName="text-red-700"
+    />
+  </div>
+)}
+
       <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">
-            Aulas do Docente
-            {docenteNome && (
-              <span className="text-lg font-normal text-muted-foreground ml-3">
-                — {docenteNome}
-              </span>
-            )}
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Resultados</CardTitle>
+
+          {exportRows.length > 0 && (
+            <div className="flex gap-2">
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`Controle_Assiduidade_${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
+
+              {excelProps && (
+                <ExcelActions
+                  excelProps={excelProps}
+                  fileName={`Controle_Assiduidade_${new Date()
+                    .toISOString()
+                    .slice(0, 10)}.xlsx`}
+                  showDownload
+                />
+              )}
+            </div>
+          )}
         </CardHeader>
+
         <CardContent>
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Carregando aulas...</p>
-            </div>
-          ) : aulas.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
-              <p className="text-xl">
-                {!filters.docenteId
-                  ? "Selecione um docente para ver as aulas."
-                  : "Nenhuma aula encontrada com os filtros aplicados."}
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Disciplina</TableHead>
-                      <TableHead>Desigação</TableHead>
-                      <TableHead>Curso / Ano</TableHead>
-                      <TableHead>Dia</TableHead>
-                      <TableHead>Horário</TableHead>
-                      <TableHead>Sala</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Modalidade</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {aulas.map((aula) => (
-                      <TableRow key={aula.codigo} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">
-                          {aula.disciplina}
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {aula.horario_nome}
-                        </TableCell>
-                        <TableCell>
-                          {aula.curso} • {aula.ano}
-                        </TableCell>
-                        <TableCell>
-                          {aula.dia_semana.replace("-Feira", "")}
-                        </TableCell>
-                        <TableCell className="font-mono">
-                          {formatReadableTimeInterval(
-                            aula.hora_inicio,
-                            aula.hora_termino
-                          )}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {aula.sala}
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                              aula.tipo_aula.includes("Teórica") ||
-                              aula.tipo_aula.includes("Teorica")
-                                ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                : aula.tipo_aula.includes("Prática")
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                            }`}
-                          >
-                            {aula.tipo_aula.replace("Teorica", "Teórica")}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {aula.modalidade}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data da Aula</TableHead>
+                <TableHead>Horário</TableHead>
+                <TableHead>Curso</TableHead>
+                <TableHead>Unidade Curricular</TableHead>
+                <TableHead>Tempo</TableHead>
+                <TableHead>Docente</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    A carregar aulas...
+                  </TableCell>
+                </TableRow>
+              ) : aulas.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    Nenhuma aula encontrada
+                  </TableCell>
+                </TableRow>
+              ) : (
+                aulas.map((item: any) => (
+                  <TableRow key={item.codigo}>
+                    <TableCell>
+                      {new Date(item.data_aula).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {item.hora_inicio} - {item.hora_fim}
+                    </TableCell>
+                    <TableCell>{item.curso}</TableCell>
+                    <TableCell>{item.unidade_curricular}</TableCell>
+                    <TableCell>{item.ordem_tempo}</TableCell>
+                    <TableCell>{item.docente}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
 
-              {/* Paginação — EXATAMENTE como no SchedulesByUC */}
-              <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-muted-foreground">
-                  A mostrar {aulas.length} de {total} registos
-                </p>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    disabled={page === 1}
-                    onClick={() => setPage((p) => p - 1)}
-                  >
-                    Anterior
-                  </Button>
-                  <span className="text-sm">
-                    Página {page} de {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    disabled={page === totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    Próxima
-                  </Button>
+          {!isLoading && totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-sm text-muted-foreground">
+                Página {filters.page} de {totalPages} • {total} registos
+              </span>
 
-                  <Select
-                    value={String(limit)}
-                    onValueChange={(v) => {
-                      setLimit(Number(v));
-                      setPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="25">25</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                      <SelectItem value="100">100</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={filters.page === 1}
+                  onClick={() =>
+                    handleFilterChange("page", filters.page - 1)
+                  }
+                >
+                  Anterior
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={filters.page >= totalPages}
+                  onClick={() =>
+                    handleFilterChange("page", filters.page + 1)
+                  }
+                >
+                  Próxima
+                </Button>
               </div>
-            </>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Key, Eye, EyeOff, Check, X } from "lucide-react";
+import { Loader2, User as UserIcon } from "lucide-react";
 
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryEstadoCivil } from "@/hooks/acess/use-query-estado-civil";
+import { useQueryNacionalidade } from "@/hooks/acess/use-query-nacionalidade";
+import { useQuerySexo } from "@/hooks/acess/use-query-sexo";
+import { useQueryTipoDocumento } from "@/hooks/acess/use-query-tipo-documento";
 import { User } from "@/services/access/fect-users.service";
-import { useUpdateUserPassword } from "@/hooks/acess/use-mutation-updade-user";
+import { useUpdatePersonUser } from "@/hooks/acess/useUpdatePersonUser";
 
 interface UserEditModalProps {
   user: User;
@@ -22,16 +26,14 @@ interface UserEditModalProps {
   onSuccess?: () => void;
 }
 
+function isValidEmail(email: string) {
+  if (!email) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
-// 🔹 função para validar cada requisito individual
-function validatePasswordSteps(password: string) {
-  return {
-    minLength: password.length >= 8,
-    upperCase: /[A-Z]/.test(password),
-    lowerCase: /[a-z]/.test(password),
-    number: /\d/.test(password),
-    symbol: /[!@#$%^&*()_+\-=[\]{}|;:',.<>/?~]/.test(password),
-  };
+function isValidBI(bi: string) {
+  if (!bi) return true;
+  return /^\d{9}[A-Z]{2}\d{3}$/.test(bi.toUpperCase());
 }
 
 export function UserEditModal({
@@ -40,150 +42,264 @@ export function UserEditModal({
   onOpenChange,
   onSuccess,
 }: UserEditModalProps) {
-  const [novaPassword, setNovaPassword] = useState("");
-  const [confirmarPassword, setConfirmarPassword] = useState("");
-  const [mostrarPassword, setMostrarPassword] = useState(false);
-  const { mutateAsync: updatePassword, isPending } = useUpdateUserPassword();
+  const { mutateAsync: updateUser, isPending } = useUpdatePersonUser();
 
-  // 🔹 validações
-  const passwordsIguais = novaPassword === confirmarPassword && novaPassword !== "";
-  const steps = validatePasswordSteps(novaPassword);
-  const senhaForte = Object.values(steps).every(Boolean);
-  const podeGuardar = passwordsIguais && senhaForte;
+  const { data: estadosCivis = [], isLoading: isLoadingEstadosCivis } =
+    useQueryEstadoCivil();
+  const { data: nacionalidades = [], isLoading: isLoadingNacionalidade } =
+    useQueryNacionalidade();
+  const { data: sexos = [], isLoading: isLoadingSexo } = useQuerySexo();
+  const { data: tiposDocumento = [], isLoading: isLoadingTipoDocumento } =
+    useQueryTipoDocumento();
 
-  // 🔹 handler para alterar a senha
-  async function handleChangePassword() {
-    if (!podeGuardar) return;
+  const [formData, setFormData] = useState<any>({});
+  const [initialData, setInitialData] = useState<any>(null);
 
+  function formatToInputDate(date: string | null) {
+    if (!date) return "";
+    const [day, month, year] = date.split("/");
+    return `${year}-${month}-${day}`;
+  }
+
+  function formatToApiDate(date: string) {
+    if (!date) return null;
+    const [year, month, day] = date.split("-");
+    return `${day}/${month}/${year}`;
+  }
+
+  useEffect(() => {
+    if (user && open) {
+      const data = {
+        nome: user.nome ?? "",
+        numerodocumento: user.numerodocumento ?? "",
+        email: user.email ?? "",
+        datadenascimento: formatToInputDate(user.datadenascimento),
+        telefone1: user.telefone1 ?? "",
+        telefone2: user.telefone2 ?? "",
+        genero: user.genero?.toString() ?? "",
+        estadocivil: user.estadocivil?.toString() ?? "",
+        nacionalidade: user.nacionalidade?.toString() ?? "",
+        tipoDocumentoId: user.tipodocumentoid?.toString() ?? "",
+      };
+
+      setFormData(data);
+      setInitialData(data);
+    }
+  }, [user, open]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const emailValido = isValidEmail(formData?.email || "");
+  const biValido = isValidBI(formData?.numerodocumento || "");
+
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialData);
+
+  const formValido = formData?.nome?.trim() !== "" && emailValido && biValido;
+
+  async function handleSubmit() {
+    if (!formValido || !hasChanges) return;
     try {
-      await updatePassword({
-        utilizadorId: user.codigo,
-        novaSenha: novaPassword,
+      await updateUser({
+        id: user.pessoaid,
+        payload: {
+          nomeCompleto: formData.nome,
+          numDocIdentificacao: formData.numerodocumento || null,
+          email: formData.email || null,
+          dataDeNascimento: formData.datadenascimento,
+          telefone1: formData.telefone1 || null,
+          telefone2: formData.telefone2 || null,
+          sexoId: formData.genero ? Number(formData.genero) : null,
+          estadoCivilId: formData.estadocivil
+            ? Number(formData.estadocivil)
+            : null,
+          nacionalidadeId: formData.nacionalidade
+            ? Number(formData.nacionalidade)
+            : null,
+          tipoDocumentoId: formData.tipoDocumentoId
+            ? Number(formData.tipoDocumentoId)
+            : null,
+        },
       });
 
       onSuccess?.();
-      handleOpenChange(false);
-
-      // Reset campos
-      setNovaPassword("");
-      setConfirmarPassword("");
+      onOpenChange(false);
     } catch (error) {
-      console.error("Erro ao alterar password:", error);
+      console.error("Erro ao atualizar utilizador:", error);
     }
   }
 
-  // 🔹 reset ao abrir/fechar modal
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setNovaPassword("");
-      setConfirmarPassword("");
-      setMostrarPassword(false);
-    }
-    onOpenChange(isOpen);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md w-full">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl!">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl">
-            <Key className="h-6 w-6 text-primary" />
-            Alterar Password – {user.nome}
-            <Badge variant="outline">Código: {user.codigo}</Badge>
+            <UserIcon className="h-6 w-6 text-primary" />
+            Editar Utilizador – {user?.nome}
+            <Badge variant="outline">Código: {user?.codigo}</Badge>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 mt-6">
-          {/* Nova senha */}
-          <div className="space-y-2">
-            <Label htmlFor="nova-password">Nova password</Label>
-            <div className="relative">
-              <Input
-                id="nova-password"
-                type={mostrarPassword ? "text" : "password"}
-                value={novaPassword}
-                onChange={(e) => setNovaPassword(e.target.value)}
-                placeholder="••••••••"
-                minLength={8}
-                autoComplete="new-password"
-                name="nova-senha-unique"
-                className={novaPassword && !senhaForte ? "border-destructive focus-visible:ring-destructive" : ""}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3"
-                onClick={() => setMostrarPassword(!mostrarPassword)}
-              >
-                {mostrarPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
-
-            {/* 🔹 passos da senha */}
-            {novaPassword && (
-              <ul className="mt-2 space-y-1 text-sm">
-                <li className="flex items-center gap-2">
-                  {steps.minLength ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
-                  Mínimo 8 caracteres
-                </li>
-                <li className="flex items-center gap-2">
-                  {steps.upperCase ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
-                  Pelo menos 1 letra maiúscula
-                </li>
-                <li className="flex items-center gap-2">
-                  {steps.lowerCase ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
-                  Pelo menos 1 letra minúscula
-                </li>
-                <li className="flex items-center gap-2">
-                  {steps.number ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
-                  Pelo menos 1 número
-                </li>
-                <li className="flex items-center gap-2">
-                  {steps.symbol ? <Check className="h-4 w-4 text-green-500" /> : <X className="h-4 w-4 text-red-500" />}
-                  Pelo menos 1 símbolo
-                </li>
-              </ul>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          {/* Nome */}
+          <div className="space-y-2 md:col-span-2">
+            <Label>Nome Completo *</Label>
+            <Input
+              value={formData?.nome || ""}
+              onChange={(e) => handleInputChange("nome", e.target.value)}
+            />
           </div>
 
-          {/* Confirmar senha */}
+          {/* BI */}
           <div className="space-y-2">
-            <Label htmlFor="confirmar-password">Confirmar password</Label>
+            <Label>Nº Documento</Label>
             <Input
-              id="confirmar-password"
-              type={mostrarPassword ? "text" : "password"}
-              value={confirmarPassword}
-              onChange={(e) => setConfirmarPassword(e.target.value)}
-              placeholder="••••••••"
-              autoComplete="new-password"
-              name="confirmar-senha-unique"
+              value={formData?.numerodocumento || ""}
+              onChange={(e) =>
+                handleInputChange(
+                  "numerodocumento",
+                  e.target.value.toUpperCase(),
+                )
+              }
               className={
-                confirmarPassword && novaPassword !== confirmarPassword
+                formData?.numerodocumento && !biValido
                   ? "border-destructive focus-visible:ring-destructive"
                   : ""
               }
             />
-            {confirmarPassword && novaPassword !== confirmarPassword && (
-              <p className="text-sm text-destructive">As passwords não coincidem</p>
+            {formData?.numerodocumento && !biValido && (
+              <p className="text-sm text-destructive">
+                Formato inválido. Ex: 001234567LA047
+              </p>
             )}
           </div>
+
+          {/* Email */}
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input
+              type="email"
+              value={formData?.email || ""}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              className={
+                formData?.email && !emailValido
+                  ? "border-destructive focus-visible:ring-destructive"
+                  : ""
+              }
+            />
+            {formData?.email && !emailValido && (
+              <p className="text-sm text-destructive">Email inválido</p>
+            )}
+          </div>
+
+          {/* Data */}
+          <div className="space-y-2">
+            <Label>Data de Nascimento</Label>
+            <Input
+              type="date"
+              value={formData?.datadenascimento || ""}
+              onChange={(e) =>
+                handleInputChange("datadenascimento", e.target.value)
+              }
+            />
+          </div>
+
+          {/* Telefones */}
+          <div className="space-y-2">
+            <Label>Telefone 1</Label>
+            <Input
+              value={formData?.telefone1 || ""}
+              onChange={(e) => handleInputChange("telefone1", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Telefone 2</Label>
+            <Input
+              value={formData?.telefone2 || ""}
+              onChange={(e) => handleInputChange("telefone2", e.target.value)}
+            />
+          </div>
+
+          {/* Selects */}
+          <FormSelect
+            label="Estado Civil"
+            options={estadosCivis}
+            map={(e) => ({
+              key: e.codigo,
+              label: e.designacao,
+              value: e.codigo,
+            })}
+            value={formData?.estadocivil}
+            onChange={(val) => handleInputChange("estadocivil", val)}
+            disabled={isLoadingEstadosCivis}
+            loading={isLoadingEstadosCivis}
+          />
+
+          <FormSelect
+            label="Nacionalidade"
+            options={nacionalidades}
+            map={(n) => ({
+              key: n.codigo,
+              label: n.designacao,
+              value: n.codigo,
+            })}
+            value={formData?.nacionalidade}
+            onChange={(val) => handleInputChange("nacionalidade", val)}
+            disabled={isLoadingNacionalidade}
+            loading={isLoadingNacionalidade}
+          />
+
+          <FormSelect
+            label="Sexo"
+            options={sexos}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
+            value={formData?.genero}
+            onChange={(val) => handleInputChange("genero", val)}
+            disabled={isLoadingSexo}
+            loading={isLoadingSexo}
+          />
+
+          <FormSelect
+            label="Tipo Documento"
+            options={tiposDocumento}
+            map={(d) => ({
+              key: d.codigo,
+              label: d.designacao,
+              value: d.codigo,
+            })}
+            value={formData?.tipoDocumentoId}
+            onChange={(val) => handleInputChange("tipoDocumentoId", val)}
+            disabled={isLoadingTipoDocumento}
+            loading={isLoadingTipoDocumento}
+          />
         </div>
 
-        {/* Ações */}
+        {/* Botões */}
         <div className="flex justify-end gap-3 mt-8">
           <Button
             variant="outline"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
             Cancelar
           </Button>
+
           <Button
-            onClick={handleChangePassword}
-            disabled={!podeGuardar || isPending}
+            onClick={handleSubmit}
+            disabled={isPending || !hasChanges || !formValido}
+            className="flex items-center gap-2"
           >
-            {isPending ? "A alterar..." : "Alterar password"}
+            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isPending ? "A guardar..." : "Guardar alterações"}
           </Button>
         </div>
       </DialogContent>

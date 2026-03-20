@@ -101,12 +101,12 @@ export default function SchedulesWithPermission() {
   // --------- Query de horários ---------
   const { data: scheduleResponse, isLoading: isLoadingSchedule } =
     useScheduleWithPermissionQuery({
-      anoLectivo: Number(filters.anoLetivo),
-      semestre: Number(filters.semestre),
-      periodo: Number(filters.periodo),
-      curso: Number(filters.curso),
-      unidadeCurricular: Number(filters.unidadeCurricular),
-      estado: Number(filters.estado),
+      anoLectivo: filters.anoLetivo,
+      semestre:filters.semestre,
+      periodo: filters.periodo,
+      curso:filters.curso,
+      unidadeCurricular: filters.unidadeCurricular,
+      estado: filters.estado,
       page,
       limit,
     });

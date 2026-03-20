@@ -8,14 +8,24 @@ export type User = {
   nome: string;
   username: string;
   email: string | null;
-  activestate: number; // 1 = ativo, 0 = inativo
+  activestate: number; // 0 ou 1
   obs: string | null;
+  pessoaid: number | null;
   createdat: string | null;
   updatedat: string | null;
+  tipodocumentoid: number | null;
+
   numerodocumento: string | null;
   datadenascimento: string | null;
+
   telefone1: string | null;
   telefone2: string | null;
+
+  genero: number | null;
+  estadocivil: number | null;
+  nacionalidade: number | null;
+
+
 };
 
 // Tipagem completa da resposta paginada

@@ -12,8 +12,6 @@ import {
   Filter,
   BookOpen,
   AlertCircle,
-  User,
-  GraduationCap,
 } from "lucide-react";
 import {
   Card,
@@ -52,7 +50,10 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useCursos } from "@/hooks/use-cursos";
-import { useLancamentosPauta, useLancamentosUcSemPauta } from "@/hooks/avaliacao/use-query-lancamento-pauta";
+import {
+  useLancamentosPauta,
+  useLancamentosUcSemPauta,
+} from "@/hooks/avaliacao/use-query-lancamento-pauta";
 import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-update-estado-lancamento-pauta";
 import { useQueryEstadoPauta } from "@/hooks/avaliacao/use-query-estado-pauta";
 
@@ -62,7 +63,6 @@ import { useAuth } from "@/hooks/use-auth";
 
 export default function ValidationTeacherAgenda() {
   const { toast } = useToast();
-  const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState("submetidas");
 
@@ -111,13 +111,27 @@ export default function ValidationTeacherAgenda() {
     isLoading: isLoadingSubmetidas,
     error: errorSubmetidas,
   } = useLancamentosPauta({
-    anoLectivo: filtersSubmetidas.anoLectivo ? Number(filtersSubmetidas.anoLectivo) : undefined,
-    tipoAvaliacao: filtersSubmetidas.tipoAvaliacao ? Number(filtersSubmetidas.tipoAvaliacao) : undefined,
-    codigoGrade: filtersSubmetidas.unidadeCurricular ? Number(filtersSubmetidas.unidadeCurricular) : undefined,
-    curso: filtersSubmetidas.curso ? Number(filtersSubmetidas.curso) : undefined,
-    anoCurricular: filtersSubmetidas.anoCurricular ? Number(filtersSubmetidas.anoCurricular) : undefined,
-    semestre: filtersSubmetidas.semestre ? Number(filtersSubmetidas.semestre) : undefined,
-    estadoPauta: filtersSubmetidas.estadoPauta ? Number(filtersSubmetidas.estadoPauta) : undefined,
+    anoLectivo: filtersSubmetidas.anoLectivo
+      ? Number(filtersSubmetidas.anoLectivo)
+      : undefined,
+    tipoAvaliacao: filtersSubmetidas.tipoAvaliacao
+      ? Number(filtersSubmetidas.tipoAvaliacao)
+      : undefined,
+    codigoGrade: filtersSubmetidas.unidadeCurricular
+      ? Number(filtersSubmetidas.unidadeCurricular)
+      : undefined,
+    curso: filtersSubmetidas.curso
+      ? Number(filtersSubmetidas.curso)
+      : undefined,
+    anoCurricular: filtersSubmetidas.anoCurricular
+      ? Number(filtersSubmetidas.anoCurricular)
+      : undefined,
+    semestre: filtersSubmetidas.semestre
+      ? Number(filtersSubmetidas.semestre)
+      : undefined,
+    estadoPauta: filtersSubmetidas.estadoPauta
+      ? Number(filtersSubmetidas.estadoPauta)
+      : undefined,
     page: currentPageSubmetidas,
     limit,
   });
@@ -130,18 +144,26 @@ export default function ValidationTeacherAgenda() {
   };
 
   // Unidades sem pauta
-  const {
-    data: responsePendentes,
-    isLoading: isLoadingPendentes,
-  } = useLancamentosUcSemPauta({
-    anoLectivo: filtersPendentes.anoLectivo ? Number(filtersPendentes.anoLectivo) : undefined,
-    semestre: filtersPendentes.semestre ? Number(filtersPendentes.semestre) : undefined,
-    curso: filtersPendentes.curso ? Number(filtersPendentes.curso) : undefined,
-    anoCurricular: filtersPendentes.anoCurricular ? Number(filtersPendentes.anoCurricular) : undefined,
-    tipoAvaliacao: filtersPendentes.tipoAvaliacao ? Number(filtersPendentes.tipoAvaliacao) : undefined,
-    page: currentPagePendentes,
-    limit,
-  });
+  const { data: responsePendentes, isLoading: isLoadingPendentes } =
+    useLancamentosUcSemPauta({
+      anoLectivo: filtersPendentes.anoLectivo
+        ? Number(filtersPendentes.anoLectivo)
+        : undefined,
+      semestre: filtersPendentes.semestre
+        ? Number(filtersPendentes.semestre)
+        : undefined,
+      curso: filtersPendentes.curso
+        ? Number(filtersPendentes.curso)
+        : undefined,
+      anoCurricular: filtersPendentes.anoCurricular
+        ? Number(filtersPendentes.anoCurricular)
+        : undefined,
+      tipoAvaliacao: filtersPendentes.tipoAvaliacao
+        ? Number(filtersPendentes.tipoAvaliacao)
+        : undefined,
+      page: currentPagePendentes,
+      limit,
+    });
 
   const pendentes = responsePendentes?.data ?? [];
   const paginationPendentes = {
@@ -181,11 +203,14 @@ export default function ValidationTeacherAgenda() {
           toast({
             variant: "destructive",
             title: "Erro",
-            description: err instanceof ApiError ? err.message : "Não foi possível atualizar o estado.",
+            description:
+              err instanceof ApiError
+                ? err.message
+                : "Não foi possível atualizar o estado.",
           });
         },
         onSettled: () => setConfirmOpen(false),
-      }
+      },
     );
   };
 
@@ -213,7 +238,10 @@ export default function ValidationTeacherAgenda() {
     const labels = { 1: "Pendente", 2: "Aprovado", 3: "Rejeitado" };
 
     return (
-      <Badge variant="outline" className={styles[estado as keyof typeof styles] || ""}>
+      <Badge
+        variant="outline"
+        className={styles[estado as keyof typeof styles] || ""}
+      >
         {labels[estado as keyof typeof labels] || "Desconhecido"}
       </Badge>
     );
@@ -250,7 +278,9 @@ export default function ValidationTeacherAgenda() {
       <div className="flex flex-col gap-2 pb-6 border-b">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Validação de Pautas</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Validação de Pautas
+            </h1>
             <p className="text-muted-foreground mt-1">
               Acompanhe, valide e aprove as pautas submetidas pelos docentes
             </p>
@@ -262,13 +292,21 @@ export default function ValidationTeacherAgenda() {
         </div>
 
         <nav className="flex text-sm text-muted-foreground mt-2">
-          <Link to="/" className="hover:text-foreground">Início</Link>
+          <Link to="/" className="hover:text-foreground">
+            Início
+          </Link>
           <span className="mx-2">/</span>
-          <span className="text-foreground font-medium">Validação de Pautas</span>
+          <span className="text-foreground font-medium">
+            Validação de Pautas
+          </span>
         </nav>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:w-auto lg:inline-flex bg-muted/50 p-1 rounded-xl">
           <TabsTrigger value="submetidas" className="px-6 py-3">
             <FileText className="mr-2 h-4 w-4" />
@@ -291,7 +329,9 @@ export default function ValidationTeacherAgenda() {
                     <Filter className="h-5 w-5" />
                     Filtros Avançados
                   </CardTitle>
-                  <CardDescription>Refine os resultados da lista</CardDescription>
+                  <CardDescription>
+                    Refine os resultados da lista
+                  </CardDescription>
                 </div>
                 <Button variant="ghost" size="sm" onClick={limparFiltros}>
                   Limpar tudo
@@ -304,17 +344,29 @@ export default function ValidationTeacherAgenda() {
                 <FormSelect
                   label="Ano Lectivo"
                   value={filtersSubmetidas.anoLectivo}
-                  onChange={(v) => setFiltersSubmetidas((prev) => ({ ...prev, anoLectivo: v }))}
+                  onChange={(v) =>
+                    setFiltersSubmetidas((prev) => ({ ...prev, anoLectivo: v }))
+                  }
                   options={academicYear}
-                  map={(a) => ({ value: a.codigo, label: a.designacao,key:a.codigo })}
+                  map={(a) => ({
+                    value: a.codigo,
+                    label: a.designacao,
+                    key: a.codigo,
+                  })}
                 />
 
                 <FormSelect
                   label="Semestre"
                   value={filtersSubmetidas.semestre}
-                  onChange={(v) => setFiltersSubmetidas((prev) => ({ ...prev, semestre: v }))}
+                  onChange={(v) =>
+                    setFiltersSubmetidas((prev) => ({ ...prev, semestre: v }))
+                  }
                   options={semestres}
-                  map={(s) => ({ value: s.codigo, label: s.designacao,key:s.codigo })}
+                  map={(s) => ({
+                    value: s.codigo,
+                    label: s.designacao,
+                    key: s.codigo,
+                  })}
                 />
 
                 <CourseSelect
@@ -334,35 +386,74 @@ export default function ValidationTeacherAgenda() {
                   value={filtersSubmetidas.anoCurricular}
                   disabled={!filtersSubmetidas.curso}
                   options={classes}
-                  map={(c) => ({ value: c.codigo, label: c.designacao,key:c.codigo })}
+                  map={(c) => ({
+                    value: c.codigo,
+                    label: c.designacao,
+                    key: c.codigo,
+                  })}
                   onChange={(v) =>
-                    setFiltersSubmetidas((prev) => ({ ...prev, anoCurricular: v, unidadeCurricular: "" }))
+                    setFiltersSubmetidas((prev) => ({
+                      ...prev,
+                      anoCurricular: v,
+                      unidadeCurricular: "",
+                    }))
                   }
                 />
 
                 <FormSelect
                   label="Unidade Curricular"
                   value={filtersSubmetidas.unidadeCurricular}
-                  disabled={!filtersSubmetidas.curso || !filtersSubmetidas.semestre || !filtersSubmetidas.anoCurricular}
+                  disabled={
+                    !filtersSubmetidas.curso ||
+                    !filtersSubmetidas.semestre ||
+                    !filtersSubmetidas.anoCurricular
+                  }
                   options={unidadesCurriculares}
-                  map={(u) => ({ value: u.pk, label: u.descricao,key:u.codigo })}
-                  onChange={(v) => setFiltersSubmetidas((prev) => ({ ...prev, unidadeCurricular: v }))}
+                  map={(u) => ({
+                    value: u.pk,
+                    label: u.descricao,
+                    key: u.codigo,
+                  })}
+                  onChange={(v) =>
+                    setFiltersSubmetidas((prev) => ({
+                      ...prev,
+                      unidadeCurricular: v,
+                    }))
+                  }
                 />
 
                 <FormSelect
                   label="Tipo de Avaliação"
                   value={filtersSubmetidas.tipoAvaliacao}
                   options={tipoAvaliacao}
-                  map={(t) => ({ value: t.codigo, label: t.designacao,key:t.codigo })}
-                  onChange={(v) => setFiltersSubmetidas((prev) => ({ ...prev, tipoAvaliacao: v }))}
+                  map={(t) => ({
+                    value: t.codigo,
+                    label: t.designacao,
+                    key: t.codigo,
+                  })}
+                  onChange={(v) =>
+                    setFiltersSubmetidas((prev) => ({
+                      ...prev,
+                      tipoAvaliacao: v,
+                    }))
+                  }
                 />
 
                 <FormSelect
                   label="Estado"
                   value={filtersSubmetidas.estadoPauta}
                   options={estadosPauta}
-                  map={(e) => ({ value: e.codigo, label: e.designacao,key:e.codigo })}
-                  onChange={(v) => setFiltersSubmetidas((prev) => ({ ...prev, estadoPauta: v }))}
+                  map={(e) => ({
+                    value: e.codigo,
+                    label: e.designacao,
+                    key: e.codigo,
+                  })}
+                  onChange={(v) =>
+                    setFiltersSubmetidas((prev) => ({
+                      ...prev,
+                      estadoPauta: v,
+                    }))
+                  }
                 />
               </div>
             </CardContent>
@@ -382,20 +473,27 @@ export default function ValidationTeacherAgenda() {
             <CardContent className="p-0">
               {isLoadingSubmetidas ? (
                 <div className="p-6 space-y-4">
-                  {[...Array(7)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-md" />)}
+                  {[...Array(7)].map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-md" />
+                  ))}
                 </div>
               ) : errorSubmetidas ? (
                 <div className="p-12 text-center text-destructive">
                   <AlertCircle className="mx-auto h-12 w-12 mb-4" />
                   <p>Erro ao carregar as pautas</p>
-                  <p className="text-sm mt-2">{(errorSubmetidas as Error).message}</p>
+                  <p className="text-sm mt-2">
+                    {(errorSubmetidas as Error).message}
+                  </p>
                 </div>
               ) : pautas.length === 0 ? (
                 <div className="p-16 text-center space-y-4">
                   <FileText className="mx-auto h-16 w-16 text-muted-foreground/50" />
-                  <h3 className="text-lg font-medium">Nenhuma pauta encontrada</h3>
+                  <h3 className="text-lg font-medium">
+                    Nenhuma pauta encontrada
+                  </h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
-                    Tente ajustar os filtros ou aguarde que os docentes submetam novas pautas.
+                    Tente ajustar os filtros ou aguarde que os docentes submetam
+                    novas pautas.
                   </p>
                 </div>
               ) : (
@@ -412,12 +510,17 @@ export default function ValidationTeacherAgenda() {
                           <TableHead>Docente</TableHead>
                           <TableHead className="w-36">Tipo Avaliação</TableHead>
                           <TableHead className="w-32">Estado</TableHead>
-                          <TableHead className="text-right w-40 pr-6">Ações</TableHead>
+                          <TableHead className="text-right w-40 pr-6">
+                            Ações
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {pautas.map((pauta) => (
-                          <TableRow key={pauta.codigo} className="hover:bg-muted/60 transition-colors">
+                          <TableRow
+                            key={pauta.codigo}
+                            className="hover:bg-muted/60 transition-colors"
+                          >
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-primary" />
@@ -427,22 +530,37 @@ export default function ValidationTeacherAgenda() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {new Date(pauta.created_at).toLocaleDateString("pt-AO", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              })}
+                              {new Date(pauta.created_at).toLocaleDateString(
+                                "pt-AO",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )}
                             </TableCell>
-                            <TableCell className="max-w-[180px] truncate">{pauta.curso}</TableCell>
-                            <TableCell className="max-w-[220px] truncate">{pauta.unidade_curricular}</TableCell>
+                            <TableCell className="max-w-[180px] truncate">
+                              {pauta.curso}
+                            </TableCell>
+                            <TableCell className="max-w-[220px] truncate">
+                              {pauta.unidade_curricular}
+                            </TableCell>
                             <TableCell>{pauta.classe || "—"}</TableCell>
                             <TableCell>{pauta.docente_nome || "—"}</TableCell>
                             <TableCell>{pauta.designacao_av || "—"}</TableCell>
-                            <TableCell>{getEstadoBadge(pauta.estado_pauta)}</TableCell>
+                            <TableCell>
+                              {getEstadoBadge(pauta.estado_pauta)}
+                            </TableCell>
                             <TableCell className="text-right pr-6">
                               <div className="flex items-center justify-end gap-2">
                                 {pauta.ficheiro_name && (
-                                  <Button variant="ghost" size="icon" onClick={() => handleDownload(pauta.ficheiro_name)}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      handleDownload(pauta.ficheiro_name)
+                                    }
+                                  >
                                     <Download className="h-4 w-4" />
                                   </Button>
                                 )}
@@ -452,7 +570,9 @@ export default function ValidationTeacherAgenda() {
                                       variant="outline"
                                       size="icon"
                                       className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                      onClick={() => abrirConfirmacao(pauta, "aprovar")}
+                                      onClick={() =>
+                                        abrirConfirmacao(pauta, "aprovar")
+                                      }
                                     >
                                       <CircleCheck className="h-4 w-4" />
                                     </Button>
@@ -460,7 +580,9 @@ export default function ValidationTeacherAgenda() {
                                       variant="outline"
                                       size="icon"
                                       className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                      onClick={() => abrirConfirmacao(pauta, "rejeitar")}
+                                      onClick={() =>
+                                        abrirConfirmacao(pauta, "rejeitar")
+                                      }
                                     >
                                       <CircleX className="h-4 w-4" />
                                     </Button>
@@ -477,21 +599,30 @@ export default function ValidationTeacherAgenda() {
                   {/* Paginação */}
                   <div className="flex items-center justify-between px-6 py-4 border-t">
                     <div className="text-sm text-muted-foreground">
-                      Página {currentPageSubmetidas} de {paginationSubmetidas.totalPages || 1}
+                      Página {currentPageSubmetidas} de{" "}
+                      {paginationSubmetidas.totalPages || 1}
                     </div>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={currentPageSubmetidas === 1 || isLoadingSubmetidas}
-                        onClick={() => setCurrentPageSubmetidas((p) => Math.max(1, p - 1))}
+                        disabled={
+                          currentPageSubmetidas === 1 || isLoadingSubmetidas
+                        }
+                        onClick={() =>
+                          setCurrentPageSubmetidas((p) => Math.max(1, p - 1))
+                        }
                       >
                         <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={currentPageSubmetidas >= paginationSubmetidas.totalPages || isLoadingSubmetidas}
+                        disabled={
+                          currentPageSubmetidas >=
+                            paginationSubmetidas.totalPages ||
+                          isLoadingSubmetidas
+                        }
                         onClick={() => setCurrentPageSubmetidas((p) => p + 1)}
                       >
                         Seguinte <ChevronRight className="h-4 w-4 ml-1" />
@@ -515,7 +646,9 @@ export default function ValidationTeacherAgenda() {
                     <Filter className="h-5 w-5" />
                     Filtros – Unidades sem Pauta
                   </CardTitle>
-                  <CardDescription>Encontre unidades curriculares pendentes</CardDescription>
+                  <CardDescription>
+                    Encontre unidades curriculares pendentes
+                  </CardDescription>
                 </div>
                 <Button variant="ghost" size="sm" onClick={limparFiltros}>
                   Limpar tudo
@@ -528,17 +661,29 @@ export default function ValidationTeacherAgenda() {
                 <FormSelect
                   label="Ano Lectivo"
                   value={filtersPendentes.anoLectivo}
-                  onChange={(v) => setFiltersPendentes((prev) => ({ ...prev, anoLectivo: v }))}
+                  onChange={(v) =>
+                    setFiltersPendentes((prev) => ({ ...prev, anoLectivo: v }))
+                  }
                   options={academicYear}
-                  map={(a) => ({ value: a.codigo, label: a.designacao ,key:a.codigo})}
+                  map={(a) => ({
+                    value: a.codigo,
+                    label: a.designacao,
+                    key: a.codigo,
+                  })}
                 />
 
                 <FormSelect
                   label="Semestre"
                   value={filtersPendentes.semestre}
-                  onChange={(v) => setFiltersPendentes((prev) => ({ ...prev, semestre: v }))}
+                  onChange={(v) =>
+                    setFiltersPendentes((prev) => ({ ...prev, semestre: v }))
+                  }
                   options={semestres}
-                  map={(s) => ({ value: s.codigo, label: s.designacao,key:s.codigo })}
+                  map={(s) => ({
+                    value: s.codigo,
+                    label: s.designacao,
+                    key: s.codigo,
+                  })}
                 />
 
                 <CourseSelect
@@ -557,8 +702,17 @@ export default function ValidationTeacherAgenda() {
                   value={filtersPendentes.anoCurricular}
                   disabled={!filtersPendentes.curso}
                   options={classes}
-                  map={(c) => ({ value: c.codigo, label: c.designacao,key:c.codigo })}
-                  onChange={(v) => setFiltersPendentes((prev) => ({ ...prev, anoCurricular: v }))}
+                  map={(c) => ({
+                    value: c.codigo,
+                    label: c.designacao,
+                    key: c.codigo,
+                  })}
+                  onChange={(v) =>
+                    setFiltersPendentes((prev) => ({
+                      ...prev,
+                      anoCurricular: v,
+                    }))
+                  }
                 />
                 {/*
                 <FormSelect
@@ -587,14 +741,19 @@ export default function ValidationTeacherAgenda() {
             <CardContent className="p-0">
               {isLoadingPendentes ? (
                 <div className="p-6 space-y-4">
-                  {[...Array(7)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-md" />)}
+                  {[...Array(7)].map((_, i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded-md" />
+                  ))}
                 </div>
               ) : pendentes.length === 0 ? (
                 <div className="p-16 text-center space-y-4">
                   <BookOpen className="mx-auto h-16 w-16 text-muted-foreground/50" />
-                  <h3 className="text-lg font-medium">Nenhuma unidade pendente</h3>
+                  <h3 className="text-lg font-medium">
+                    Nenhuma unidade pendente
+                  </h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
-                    Todas as unidades curriculares deste filtro já têm pautas submetidas ou não existem registos.
+                    Todas as unidades curriculares deste filtro já têm pautas
+                    submetidas ou não existem registos.
                   </p>
                 </div>
               ) : (
@@ -603,29 +762,43 @@ export default function ValidationTeacherAgenda() {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-muted/40">
-                          <TableHead className="w-40">Unidade Curricular</TableHead>
+                          <TableHead className="w-40">
+                            Unidade Curricular
+                          </TableHead>
                           <TableHead className="w-40">Curso</TableHead>
                           <TableHead className="w-24">Ano</TableHead>
                           <TableHead className="w-36">Semestre</TableHead>
-                          <TableHead className="w-40">Docente Responsável</TableHead>
-                          <TableHead className="w-32 text-center">Estado</TableHead>
-                          
+                          <TableHead className="w-40">
+                            Docente Responsável
+                          </TableHead>
+                          <TableHead className="w-32 text-center">
+                            Estado
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {pendentes.map((uc) => (
-                          <TableRow key={uc.codigo_grade || uc.unidade_curricular} className="hover:bg-muted/60">
-                            <TableCell className="font-medium">{uc.unidade_curricular || "—"}</TableCell>
+                          <TableRow
+                            key={uc.codigo_grade || uc.unidade_curricular}
+                            className="hover:bg-muted/60"
+                          >
+                            <TableCell className="font-medium">
+                              {uc.unidade_curricular || "—"}
+                            </TableCell>
                             <TableCell>{uc.curso || "—"}</TableCell>
                             <TableCell>{uc.classe || "—"}</TableCell>
                             <TableCell>{uc.semestre || "—"}</TableCell>
-                            <TableCell>{uc.docente_nome || "Não atribuído"}</TableCell>
+                            <TableCell>
+                              {uc.docente_nome || "Não atribuído"}
+                            </TableCell>
                             <TableCell className="text-center">
-                              <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-300">
+                              <Badge
+                                variant="secondary"
+                                className="bg-amber-100 text-amber-800 border-amber-300"
+                              >
                                 Sem Pauta
                               </Badge>
                             </TableCell>
-                           
                           </TableRow>
                         ))}
                       </TableBody>
@@ -635,21 +808,29 @@ export default function ValidationTeacherAgenda() {
                   {/* Paginação */}
                   <div className="flex items-center justify-between px-6 py-4 border-t">
                     <div className="text-sm text-muted-foreground">
-                      Página {currentPagePendentes} de {paginationPendentes.totalPages || 1}
+                      Página {currentPagePendentes} de{" "}
+                      {paginationPendentes.totalPages || 1}
                     </div>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={currentPagePendentes === 1 || isLoadingPendentes}
-                        onClick={() => setCurrentPagePendentes((p) => Math.max(1, p - 1))}
+                        disabled={
+                          currentPagePendentes === 1 || isLoadingPendentes
+                        }
+                        onClick={() =>
+                          setCurrentPagePendentes((p) => Math.max(1, p - 1))
+                        }
                       >
                         <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={currentPagePendentes >= paginationPendentes.totalPages || isLoadingPendentes}
+                        disabled={
+                          currentPagePendentes >=
+                            paginationPendentes.totalPages || isLoadingPendentes
+                        }
                         onClick={() => setCurrentPagePendentes((p) => p + 1)}
                       >
                         Seguinte <ChevronRight className="h-4 w-4 ml-1" />
@@ -667,16 +848,26 @@ export default function ValidationTeacherAgenda() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{acao === "aprovar" ? "Aprovar Pauta" : "Rejeitar Pauta"}</DialogTitle>
+            <DialogTitle>
+              {acao === "aprovar" ? "Aprovar Pauta" : "Rejeitar Pauta"}
+            </DialogTitle>
             <DialogDescription className="space-y-3 pt-2">
               <p>
-                Tem a certeza que deseja <strong>{acao === "aprovar" ? "aprovar" : "rejeitar"}</strong> esta pauta?
+                Tem a certeza que deseja{" "}
+                <strong>{acao === "aprovar" ? "aprovar" : "rejeitar"}</strong>{" "}
+                esta pauta?
               </p>
               {pautaSelecionada && (
                 <div className="text-sm space-y-1.5 bg-muted/50 p-3 rounded-md">
-                  <div><strong>UC:</strong> {pautaSelecionada.unidade_curricular}</div>
-                  <div><strong>Docente:</strong> {pautaSelecionada.docente_nome}</div>
-                  <div><strong>Curso:</strong> {pautaSelecionada.curso}</div>
+                  <div>
+                    <strong>UC:</strong> {pautaSelecionada.unidade_curricular}
+                  </div>
+                  <div>
+                    <strong>Docente:</strong> {pautaSelecionada.docente_nome}
+                  </div>
+                  <div>
+                    <strong>Curso:</strong> {pautaSelecionada.curso}
+                  </div>
                 </div>
               )}
               <p className="text-destructive text-sm font-medium">
@@ -693,7 +884,11 @@ export default function ValidationTeacherAgenda() {
               onClick={confirmarAcao}
               disabled={mutationEstado.isPending}
             >
-              {mutationEstado.isPending ? "A processar..." : acao === "aprovar" ? "Aprovar" : "Rejeitar"}
+              {mutationEstado.isPending
+                ? "A processar..."
+                : acao === "aprovar"
+                  ? "Aprovar"
+                  : "Rejeitar"}
             </Button>
           </DialogFooter>
         </DialogContent>

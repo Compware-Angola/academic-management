@@ -22,8 +22,9 @@ import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryDashboard } from "@/hooks/dashboard/use-query-dashboard";
 import { formatNumber } from "@/util/format-number";
-import { filterMenuByPermission } from "@/util/menuFilter";
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useFilterMenuByPermission } from "@/util/menuFilter";
 
 const Index = () => {
   const { user:userData } = useAuth();
@@ -65,7 +66,7 @@ const Index = () => {
   const { user } = userData || {};
 
 
-const allowedQuickLinks =  filterMenuByPermission(quickLinks);
+const allowedQuickLinks =  useFilterMenuByPermission(quickLinks);
   return (
     <div className="space-y-6">
   <PageHeader
@@ -106,7 +107,8 @@ const allowedQuickLinks =  filterMenuByPermission(quickLinks);
         <UpcomingEventsCard />
 
         <SemesterStatsCard
-          title="Desempenho Académico 2024/2025"
+         title={"Desempenho Académico  " + (activeAcademicYear?.designacao ?? "N/A")}
+         
           description="Licenciatura em Engenharia Informática"
        
         />

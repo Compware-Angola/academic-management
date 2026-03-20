@@ -6,7 +6,7 @@ export function can(
 ): boolean {
   if (!required) return true;
 
-  // FULL ACCESS bypass
+
   if (userPermissions.includes(PermissionTypeDetails.FULL_ACCESS.sigla)) return true;
 
   if (Array.isArray(required)) {

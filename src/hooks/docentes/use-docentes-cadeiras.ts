@@ -1,20 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { getDocenteCadeirasService, CadeiraItem } from "@/services/docentes/docente-cadeiras.service";
+import {
+  getDocenteCadeirasService,
+  CadeiraItem,
+  DocenteCadeirasPayload,
+} from "@/services/docentes/docente-cadeiras.service";
 
-export function useQueryDocenteCadeiras(
-  docenteId?: number,
-  cursoId?: number,
-) {
+export function useQueryDocenteCadeiras(params: DocenteCadeirasPayload) {
+  const { docenteId, cursoId, classeId, anoLectivo, semestreId } = params;
   return useQuery<CadeiraItem[]>({
-    queryKey: ["docente-cadeiras", docenteId, cursoId],
+    queryKey: [
+      "docente-cadeiras",
+      docenteId,
+      cursoId,
+      classeId,
+      anoLectivo,
+      semestreId,
+    ],
     queryFn: async () => {
-      const response = await getDocenteCadeirasService({
-        docenteId: docenteId as number,
-        cursoId: cursoId as number,
-      });
+      const response = await getDocenteCadeirasService(params);
 
       return response.data;
     },
-    enabled: !!docenteId && !!cursoId,
+    enabled: !!docenteId && !!cursoId && !!classeId && !!anoLectivo,
   });
 }

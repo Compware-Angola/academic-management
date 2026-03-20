@@ -27,6 +27,8 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -40,15 +42,19 @@ import {
   ChevronLeft,
   ChevronRight,
   FileDown,
+  Trash2,
+  CircleX,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useQueryFacturas, useQueryFacturaItens } from "@/hooks/horario/use-query-invoice";
+import { useQueryFacturas, useQueryFacturaItens, useReactivateInvoice, useAnnulInvoice } from "@/hooks/horario/use-query-invoice";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
 import { Separator } from "@/components/ui/separator";
 import { FacturaItem } from "@/services/finance/listar-facturas.service";
 import { PaymentNoteActions } from "../components/views/uma-payment-invoice";
-import { tr } from "date-fns/locale";
+import { PermissionTypeDetails } from "@/constants/permission.type";
+
+import { usePermission } from "@/auth/permission.helper";
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -69,13 +75,16 @@ function truncate(text: string, max = 10) {
 }
 
 export default function ListarNotasPagamento() {
+const { hasPermission } = usePermission();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openServicesModal, setOpenServicesModal] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string | null>(null);
-
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [acaoTipo, setAcaoTipo] = useState<"anular" | "reactivar" | null>(null);
+  const [facturaSelecionada, setFacturaSelecionada] = useState<any>(null);
   function handleOpenServices(services: string) {
     setSelectedServices(services);
     setOpenServicesModal(true);
@@ -93,8 +102,26 @@ export default function ListarNotasPagamento() {
 
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
 
+  const { mutate: annulInvoice } = useAnnulInvoice();
+  const { mutate: reactivateInvoice } = useReactivateInvoice();
+  const abrirConfirmacao = (tipo: "anular" | "reactivar", factura: any) => {
+    setAcaoTipo(tipo);
+    setFacturaSelecionada(factura);
+    setIsConfirmModalOpen(true);
+  };
+  const confirmarAcao = () => {
+    if (!facturaSelecionada) return;
 
+    if (acaoTipo === "anular") {
+      annulInvoice(facturaSelecionada.codigo);
+    }
 
+    if (acaoTipo === "reactivar") {
+      reactivateInvoice(facturaSelecionada.codigo);
+    }
+
+    setIsConfirmModalOpen(false);
+  };
   const { data, isLoading, refetch } = useQueryFacturas({
     anoLectivo: filters.anoLetivo,
     status: filters.estado,
@@ -370,6 +397,19 @@ export default function ListarNotasPagamento() {
                           <Eye className="h-3 w-3" />
                         </Button>
 
+                        {nota.estado === 0 &&
+                          hasPermission(PermissionTypeDetails.DELETAR_FACTURA.sigla) && (
+                            <Button
+                              size="icon"
+                              variant="outline"
+                                className="h-8 w-8 text-red-600 hover:bg-red-50"
+                              onClick={() => abrirConfirmacao("anular", nota)}
+                            >
+                                 <CircleX className="h-4 w-4" />
+                            </Button>
+                          )}
+
+
                       </div>
                     </TableCell>
                   </TableRow>
@@ -427,38 +467,38 @@ export default function ListarNotasPagamento() {
           {selectedFactura && (
             <div className="space-y-8 pt-6">
               {/* Valor total destacado, mas sem gradiente */}
-           <div className="bg-gray-50 dark:bg-gray-900 px-4 py-4 rounded-xl border border-gray-200 dark:border-gray-800">
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+              <div className="bg-gray-50 dark:bg-gray-900 px-4 py-4 rounded-xl border border-gray-200 dark:border-gray-800">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
 
-    <div>
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
-        Valor Total
-      </p>
-      <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-        {formatCurrency(selectedFactura.total_preco)}
-      </p>
-    </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Valor Total
+                    </p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                      {formatCurrency(selectedFactura.total_preco)}
+                    </p>
+                  </div>
 
-    <div>
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
-        Valor a Pagar
-      </p>
-      <p className="text-2xl font-bold text-primary">
-        {formatCurrency(selectedFactura.valor_pagar)}
-      </p>
-    </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Valor a Pagar
+                    </p>
+                    <p className="text-2xl font-bold text-primary">
+                      {formatCurrency(selectedFactura.valor_pagar)}
+                    </p>
+                  </div>
 
-    <div className="sm:text-right">
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
-        Emitida em
-      </p>
-      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-        {formatDate(selectedFactura.data_factura)}
-      </p>
-    </div>
+                  <div className="sm:text-right">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Emitida em
+                    </p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {formatDate(selectedFactura.data_factura)}
+                    </p>
+                  </div>
 
-  </div>
-</div>
+                </div>
+              </div>
 
               <Separator />
 
@@ -631,7 +671,53 @@ export default function ListarNotasPagamento() {
           </div>
         </DialogContent>
       </Dialog>
+      <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {acaoTipo === "anular" ? "Anular Factura" : "Reactivar Factura"}
+            </DialogTitle>
 
+            <DialogDescription>
+              Tem certeza que deseja{" "}
+              <strong>
+                {acaoTipo === "anular" ? "anular" : "reactivar"}
+              </strong>{" "}
+              esta factura?
+              <br />
+
+              {facturaSelecionada && (
+                <>
+                  <strong>Nº Factura:</strong> {facturaSelecionada.codigo}
+                  <br />
+                  <strong>Aluno:</strong> {facturaSelecionada.nome_aluno}
+                  <br />
+                  <strong>Valor:</strong> {facturaSelecionada.valor_pagar} Kz
+                </>
+              )}
+
+              <br />
+              Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsConfirmModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              variant={acaoTipo === "anular" ? "destructive" : "default"}
+              onClick={confirmarAcao}
+            >
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -48,6 +48,8 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-query-departamento-uc";
 import { CreateUcModal } from "./components/CreateUcModal";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 interface UnidadeCurricular {
   id: number;
@@ -65,9 +67,10 @@ interface UnidadeCurricular {
 
 export default function UcDepartmentManagement() {
   const [openModal, setOpenModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
   const [formData, setFormData] = useState({
     departamento: "",
@@ -82,11 +85,13 @@ export default function UcDepartmentManagement() {
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
 
-  const { data: departamentoUC = [], isLoading: isLoadingDepartamentoUC } =
+  const { data: departamentoUCResponse, isLoading: isLoadingDepartamentoUC } =
     useQueryDepartamentoUC({
-      classe: formData.classes,
-      departamento: formData.departamento,
-      semestre: formData.semestre,
+      classe: parseFilter(formData.classes),
+      departamento: parseFilter(formData.departamento),
+      semestre: parseFilter(formData.semestre),
+      limit,
+      page,
     });
   const mockData: UnidadeCurricular[] = [];
 
@@ -118,13 +123,9 @@ export default function UcDepartmentManagement() {
         return "outline";
     }
   };
-
-  const totalPages = Math.ceil(departamentoUC.length / itemsPerPage);
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-
-  const currentData = departamentoUC.slice(startIndex, endIndex);
+  const departamentos = departamentoUCResponse?.data ?? [];
+  const total = departamentoUCResponse?.total;
+  const totalPages = departamentoUCResponse?.totalPages;
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -163,26 +164,28 @@ export default function UcDepartmentManagement() {
       />
 
       <FilterBar>
-        <FormSelect
-          disabled={isLoadingDepartamento}
-          loading={isLoadingDepartamento}
-          label="Departamento"
+        <FormCommandSelect
           value={formData.departamento}
-          onChange={(v) => setFormData({ ...formData, departamento: v })}
+          label="Departamento"
           options={departamento}
-          map={(a) => ({
-            key: a.codigo,
-            label: a.designacao,
-            value: a.codigo,
+          map={(c) => ({
+            key: c.codigo.toString(),
+            value: c.codigo.toString(),
+            label: c.designacao,
           })}
+          onChange={(v) =>
+            setFormData({
+              ...formData,
+              departamento: v,
+            })
+          }
         />
 
-        
-          <CourseSelect
-            value={formData.curso}
-            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
-          />
-        
+        <CourseSelect
+          value={formData.curso}
+          onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+        />
+
         <FormSelect
           label="Ano Curricular"
           value={formData.classes}
@@ -218,7 +221,7 @@ export default function UcDepartmentManagement() {
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
-        ) : currentData.length === 0 ? (
+        ) : departamentos.length === 0 ? (
           <div className="text-center py-12 bg-card border rounded-lg">
             <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-lg font-medium">
@@ -242,15 +245,15 @@ export default function UcDepartmentManagement() {
             </TableHeader>
 
             <TableBody>
-              {currentData.map((uc) => (
+              {departamentos.map((uc) => (
                 <TableRow key={uc.codigo_grade}>
                   <TableCell className="font-medium">
                     {uc.codigo_grade}
                   </TableCell>
 
-                  <TableCell>{uc.disciplina}</TableCell>
+                  <TableCell>{uc.unidade_curricular}</TableCell>
 
-                  <TableCell>{uc.classe}</TableCell>
+                  <TableCell>{uc.ano_curricular}</TableCell>
 
                   <TableCell>{uc.semestre}</TableCell>
 
@@ -288,15 +291,35 @@ export default function UcDepartmentManagement() {
         )}
       </div>
 
-      {!isLoadingDepartamentoUC && currentData.length > 0 && (
-        <div className="flex items-center justify-between">
+      {!isLoadingDepartamentoUC && departamento.length > 0 && (
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            A mostrar {departamentos.length} de {total} registos
+          </p>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Mostrar</span>
+            <Button
+              variant="outline"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Anterior
+            </Button>
+            <span>
+              Página {page} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Próxima
+            </Button>
+
             <Select
-              value={itemsPerPage.toString()}
-              onValueChange={(value) => {
-                setItemsPerPage(Number(value));
-                setCurrentPage(1);
+              value={String(limit)}
+              onValueChange={(v) => {
+                setLimit(Number(v));
+                setPage(1);
               }}
             >
               <SelectTrigger className="w-20">
@@ -309,33 +332,6 @@ export default function UcDepartmentManagement() {
                 <SelectItem value="100">100</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-sm text-muted-foreground">
-              registos por página
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              Anterior
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Página {currentPage} de {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-              disabled={currentPage === totalPages}
-            >
-              Próxima
-            </Button>
           </div>
         </div>
       )}

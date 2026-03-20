@@ -1,4 +1,3 @@
-// src/pages/SchedulesByUC.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,10 +66,13 @@ import { useMutationValidarHorarioDirector } from "@/hooks/horario/use-query-val
 import { useMutationDeletarHorario } from "@/hooks/horario/use-query-delete-schedule";
 import { useAuth } from "@/hooks/use-auth";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { es, is } from "date-fns/locale";
+
+import { PermissionTypeDetails } from "@/constants/permission.type";
+import { usePermission } from "@/auth/permission.helper";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
+  const { hasPermission } = usePermission();
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -89,7 +91,7 @@ export default function ScheduleList() {
     anoCurricular: "",
     unidadeCurricular: "",
     estado: "",
-    afetacaoDocente: ""
+    afetacaoDocente: "",
   });
 
   // Paginação
@@ -97,8 +99,10 @@ export default function ScheduleList() {
   const [limit, setLimit] = useState(10);
 
   // Dados base
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
   const { data: cursos } = useCursos();
 
@@ -107,11 +111,13 @@ export default function ScheduleList() {
   });
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
-    curso: filters.curso,
-    semestre: filters.semestre,
-    classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
-  });
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      curso: filters.curso,
+      semestre: filters.semestre,
+      classe:
+        filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
+    });
 
   // ==============================================
   // Parâmetros da query - sem useMemo problemático
@@ -123,18 +129,20 @@ export default function ScheduleList() {
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
     periodo: filters.periodo ? Number(filters.periodo) : undefined,
     curso: filters.curso ? Number(filters.curso) : undefined,
-    unidadeCurricular: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
- ...(filters.afetacaoDocente != null &&
-    filters.afetacaoDocente !== "" &&
-    !isNaN(Number(filters.afetacaoDocente)) && {
-      afetacaoDocente: Number(filters.afetacaoDocente),
-    }),
+    unidadeCurricular: filters.unidadeCurricular
+      ? Number(filters.unidadeCurricular)
+      : undefined,
+    ...(filters.afetacaoDocente != null &&
+      filters.afetacaoDocente !== "" &&
+      !isNaN(Number(filters.afetacaoDocente)) && {
+        afetacaoDocente: Number(filters.afetacaoDocente),
+      }),
 
-  ...(filters.estado != null &&
-    filters.estado !== "" &&
-    !isNaN(Number(filters.estado)) && {
-      estado: Number(filters.estado),
-    }),
+    ...(filters.estado != null &&
+      filters.estado !== "" &&
+      !isNaN(Number(filters.estado)) && {
+        estado: Number(filters.estado),
+      }),
   };
 
   const {
@@ -209,7 +217,8 @@ export default function ScheduleList() {
             Horários Existentes
           </h1>
           <p className="text-muted-foreground">
-            Visualize todos os horários criados por ano letivo, semestre, período, curso e ano curricular.
+            Visualize todos os horários criados por ano letivo, semestre,
+            período, curso e ano curricular.
           </p>
         </div>
         <Button onClick={() => navigate("/horarios/criar")}>
@@ -340,7 +349,9 @@ export default function ScheduleList() {
               >
                 <SelectTrigger>
                   <SelectValue
-                    placeholder={filters.curso ? "Todos os anos" : "Selecione curso"}
+                    placeholder={
+                      filters.curso ? "Todos os anos" : "Selecione curso"
+                    }
                   />
                 </SelectTrigger>
                 <SelectContent>
@@ -392,9 +403,9 @@ export default function ScheduleList() {
                 value: option.codigo,
               })}
             />
-              <FormSelect
+            <FormSelect
               label="Docente"
-                disabled={isLoadingSchedule || isLoadingAcademicYear}
+              disabled={isLoadingSchedule || isLoadingAcademicYear}
               value={filters.afetacaoDocente || ""}
               onChange={(v) => setFilters({ ...filters, afetacaoDocente: v })}
               options={[
@@ -408,7 +419,6 @@ export default function ScheduleList() {
                 value: option.codigo,
               })}
             />
-
           </div>
         </CardContent>
       </Card>
@@ -471,7 +481,7 @@ export default function ScheduleList() {
                           <Badge
                             variant={
                               item.estado.toLowerCase().includes("pendente") ||
-                                item.estado.toLowerCase().includes("distribuição")
+                              item.estado.toLowerCase().includes("distribuição")
                                 ? "secondary"
                                 : "default"
                             }
@@ -514,7 +524,9 @@ export default function ScheduleList() {
                               variant="outline"
                               size="icon"
                               title="Editar horário"
-                              onClick={() => navigate(`/schedule/${item.codigo}/edit`)}
+                              onClick={() =>
+                                navigate(`/schedule/${item.codigo}/edit`)
+                              }
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -522,23 +534,32 @@ export default function ScheduleList() {
                               variant="destructive"
                               size="icon"
                               onClick={() => openDeleteDialog(item.codigo)}
-                              disabled={deleteMutation.isPending && itemIdToConfirm === item.codigo}
+                              disabled={
+                                deleteMutation.isPending &&
+                                itemIdToConfirm === item.codigo
+                              }
                             >
-                              {deleteMutation.isPending && itemIdToConfirm === item.codigo ? (
+                              {deleteMutation.isPending &&
+                              itemIdToConfirm === item.codigo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
                               )}
                             </Button>
-                            {Number(item.estadoid) === 2 && (
+                            {Number(item.estadoid) === 2 &&  hasPermission(PermissionTypeDetails.VALIDACAO_HORARIO.sigla) && (
+                              
                               <Button
                                 variant="default"
                                 size="icon"
                                 onClick={() => openValidateDialog(item.codigo)}
-                                disabled={validarMutation.isPending && itemIdToConfirm === item.codigo}
+                                disabled={
+                                  validarMutation.isPending &&
+                                  itemIdToConfirm === item.codigo
+                                }
                                 className="bg-green-500 hover:bg-green-600"
                               >
-                                {validarMutation.isPending && itemIdToConfirm === item.codigo ? (
+                                {validarMutation.isPending &&
+                                itemIdToConfirm === item.codigo ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                   <Check className="h-4 w-4" />
@@ -613,7 +634,10 @@ export default function ScheduleList() {
         }}
       />
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Tem certeza que deseja excluir?</AlertDialogTitle>
@@ -622,7 +646,9 @@ export default function ScheduleList() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirmed}
               disabled={deleteMutation.isPending}
@@ -639,16 +665,22 @@ export default function ScheduleList() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={isValidateDialogOpen} onOpenChange={setIsValidateDialogOpen}>
+      <AlertDialog
+        open={isValidateDialogOpen}
+        onOpenChange={setIsValidateDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Deseja validar este Horário?</AlertDialogTitle>
             <AlertDialogDescription>
-              Ao validar, você confirma que o horário está correto e pode ser usado.
+              Ao validar, você confirma que o horário está correto e pode ser
+              usado.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={validarMutation.isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={validarMutation.isPending}>
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleValidateConfirmed}
               disabled={validarMutation.isPending}

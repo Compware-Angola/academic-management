@@ -11,8 +11,9 @@ import {
   ListChecks,
   LibraryBig,
   GraduationCap,
+  FileText,
+  BookUser,
 } from "lucide-react";
-
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 
@@ -52,7 +53,7 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.ACESSOS_FUNCIONALIDADES_POR_GRUPO.sigla,
           ],
         },
-        //  { title: "Funcionalidade por utilizador",url: "/acessos/funcionalidade-utilizador"},
+
         {
           title: "Acessos (todos) + novos",
           url: "/acessos/todos",
@@ -89,6 +90,7 @@ export const menuStructure: MenuStructure = {
 
       permission: [],
     },
+
     // ----------------------------------------------------
     // CONTROLE DE ACESSO
     // ----------------------------------------------------
@@ -138,64 +140,51 @@ export const menuStructure: MenuStructure = {
 
     // ----------------------------------------------------
     // DOCENTE
-   
+
     {
       title: "Docente",
       url: "/docente",
       icon: GraduationCap,
       items: [
-        // { title: "Calendário de aulas", url: "/docente/calendario" },
+        { title: "Calendário de aulas", url: "/docente/calendario" },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
-        { title: "Lançamento do programa da UC", url: "/docente/programa",  permission: [], },
-        // { title: "Validação do programa", url: "/docente/validacao" },
-        // { title: "Assiduidade", url: "/docente/assiduidade" },
+        // { title: "Calendário de aulas", url: "/docente/calendario" },
+        {
+          title: "Horas de vigilância",
+          url: "/docente/vigilancia",
+          permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
+        },
+        {
+          title: "Lançamento do programa da UC",
+          url: "/docente/programa",
+          permission: [
+            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+          ],
+        },
+        {
+          title: "Validação do programa",
+          url: "/docente/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+        },
+        /*
+        {
+          title: "Assiduidade",
+          url: "/docente/assiduidade",
+          permission: [PermissionTypeDetails.MINHAS_ASSIDUIDADES.sigla],
+        },
+        */
       ],
 
-      permission: ["adm", "rootAdmin", "dct"],
+      permission: [],
     },
- /* ----------------------------------------------------
-    // ----------------------------------------------------
-    // TFC
-    // ----------------------------------------------------
-    {
-      title: "Gestão de Defesas e TFC",
-      url: "/tfc",
-      icon: BookMarked,
-      items: [
-        { title: "Finalistas", url: "/tfc/finalistas" },
-        { title: "Orientadores", url: "/tfc/orientadores" },
-        { title: "Pagamentos TFC", url: "/tfc/pagamentos" },
-      ],
 
-      permission: ["adm", "rootAdmin"],
-    },
+    // ----------------------------------------------------
 
     // ----------------------------------------------------
     // GESTÃO DE DOCENTES
     // ----------------------------------------------------
-    {
-      title: "Gestão de Docentes",
-      url: "/gestao-docentes",
-      icon: GraduationCap,
-      items: [
-        { title: "Atualização de dados", url: "/gestao-docentes/atualizacao" },
-        { title: "Alterar senha", url: "/gestao-docentes/senha" },
-        { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
-        { title: "Afetações", url: "/gestao-docentes/afetacoes" },
-        { title: "Contratos", url: "/gestao-docentes/contratos" },
-        { title: "Listagem geral", url: "/gestao-docentes/listagem" },
-        { title: "Regentes", url: "/gestao-docentes/regentes" },
-        { title: "Afetados", url: "/gestao-docentes/afetados" },
-        { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
-        { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
-        { title: "Parâmetros", url: "/gestao-docentes/parametros" },
-        { title: "Salário", url: "/gestao-docentes/salario" },
-        { title: "Validação docente", url: "/gestao-docentes/validacao" },
-      ],
 
-      permission: ["adm", "rootAdmin"],
-    },
-
+    /* ----------------------------------------------------
 
     // ----------------------------------------------------
     // INSCRIÇÕES E MATRÍCULA
@@ -355,18 +344,26 @@ export const menuStructure: MenuStructure = {
     // ----------------------------------------------------
     {
       title: "Marcação de Provas",
-      url: "/marcacao-provas",
+      url: "/marcacao",
       icon: FileCheck,
-      items: [
-        { title: "Controle", url: "/marcacao-provas/controle" },
-        { title: "Marcação", url: "/marcacao-provas/marcacao" },
-      ],
-
       permission: [],
+      items: [
+        {
+          title: "Controle",
+          url: "/marcacao-provas/controle",
+          permission: [PermissionTypeDetails.CONTROLE_NOTA.sigla],
+        },
+        {
+          title: "Marcação",
+          url: "/marcacao-provas/marcacao",
+          permission: [
+            PermissionTypeDetails.PRAZO_MARCACAO_PROVAS_LANC_NOTAS.sigla,
+          ],
+        },
+      ],
     },
   ],
 };
-
 export const finaceStructure: MenuStructure = {
   items: [
     /* -------------------------------------------------------- */
@@ -471,6 +468,16 @@ export const finaceStructure: MenuStructure = {
         // },
 
         /* Gestão de Descontos */
+        {
+          title: "Descontos",
+          url: "/financas/descontos",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
+        {
+          title: "Atribuir Desconto",
+          url: "/financas/descontos/atribuicao",
+          permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
+        },
         // {
         //   title: "Atribuição de Desconto",
         //   url: "/financas/descontos/atribuicao",
@@ -523,6 +530,21 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/pagamento-referencia",
           permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
         },
+        {
+          title: "Pagamentos",
+          url: "/financas/listar-pagamentos",
+          permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
+        },
+        {
+          title: "Pagamentos TFC",
+          url: "/defesa-tfc/pagamentos",
+          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
+        },
+        {
+          title: "Isenção de serviço",
+          url: "/financas/isencao-servico",
+          permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla],
+        },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
         // /* Serviços Tributários */
@@ -535,7 +557,6 @@ export const finaceStructure: MenuStructure = {
     },
   ],
 };
-
 export const healpStructure: MenuStructure = {
   items: [
     {
@@ -549,23 +570,23 @@ export const healpStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LISTAR_COMUNICACAO_INTERNA.sigla],
         },
 
-        // { title: "Imagens de abertura", url: "/comunicacao/imagens" },
-        // { title: "Solicitações", url: "/comunicacao/solicitacoes" },
         {
           title: "Solicitações encaminhadas",
           url: "/controle-acesso/solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla],
         },
 
         {
           title: "Solicitações",
           url: "/controle-acesso/all-solicitacoes",
-          permission: [],
+          permission: [PermissionTypeDetails.LISTAR_SOLICITACOES.sigla],
         },
         {
           title: "Imagem De Abertura",
           url: "/comunicacao/avisos/imagem",
-          permission: [],
+          permission: [
+            PermissionTypeDetails.IMAGEM_ABERTURA_PORTAL_ESTUDANTE.sigla,
+          ],
         },
       ],
 
@@ -606,21 +627,70 @@ export const suporteStructure: MenuStructure = {
     },
   ],
 };
+export const gestaoDocente: MenuStructure = {
+  items: [
+    {
+      title: "Gestão de Docentes",
+      url: "/gestao-docente",
+      icon: BookUser,
+      items: [
+        {
+          title: "Gestão de Afectação",
+          url: "/gestao-docente/afectacoes",
+          permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
+        },
+        {
+          title: "Lista de UC sem docentes afectados",
+          url: "/gestao-docente/sem-afetacao/uc",
+          permission: [
+            PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS.sigla,
+          ],
+        },
+        { title: "Lista de Docentes", 
+          url: "/gestao-docentes/docentes" 
+        },
+        // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
+        // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
+        // { title: "Contratos", url: "/gestao-docentes/contratos" },
+        // { title: "Regentes", url: "/gestao-docentes/regentes" },
+        // { title: "Afetados", url: "/gestao-docentes/afetados" },
+        // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
+        // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
+        { title: "Parâmetros", url: "/gestao-docentes/parametros", permission:[PermissionTypeDetails.PARAMETROS_MGD.sigla] },
+        { title: "Salário", url: "/gestao-docentes/salario" ,permission:[PermissionTypeDetails.DESEMPENHO_DOCENTE.sigla] },
+        //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
+
+        {
+          title: "Docente Afectados",
+          url: "/gestao-docente/docente-afectados",
+          permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
+        },
+      ],
+      permission: [],
+    },
+  ],
+};
 export const defenseTFC: MenuStructure = {
   items: [
     {
+      permission: [PermissionTypeDetails.DEFESA.sigla],
       title: "Gestão de Defesa e TFC",
       url: "/defesa-tfc",
       icon: LibraryBig,
       items: [
         {
-          title: "Pagamentos TFC",
-          url: "/defesa-tfc/pagamentos",
-          permission: [PermissionTypeDetails.PAGAMENTO_TFC.sigla],
-        },
-        {
           title: "Estudantes Finalistas",
           url: "/defesa-tfc/estudantes",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
+        {
+          title: "Orientadores",
+          url: "/defesa-tfc/orientadores",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
+        {
+          title: "Vínculos de TFC",
+          url: "/defesa-tfc/vinculos",
           permission: [PermissionTypeDetails.DEFESA.sigla],
         },
       ],
@@ -630,6 +700,7 @@ export const defenseTFC: MenuStructure = {
 export const assiduidade: MenuStructure = {
   items: [
     {
+      permission: [PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla],
       title: "Assiduidade",
       url: "/assiduidade",
       icon: ListChecks,
@@ -637,9 +708,53 @@ export const assiduidade: MenuStructure = {
         {
           title: "Marcação de Assuidade",
           url: "/assiduidade/marcacao",
-          permission: [PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla],
+          permission: [
+            PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
+            PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+          ],
+        },
+        {
+          title: "Controle de Assuidade",
+          url: "/assiduidade/controle",
+          permission: [
+            PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
+            PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
+          ],
+        },
+        {
+          title: "Controle Geral de Assuidade por Docente",
+          url: "/assiduidade/docente",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_ASSIDUIDADE_POR_DOCENTE.sigla,
+          ],
         },
       ],
+    },
+    {
+      title: "Sumário",
+      url: "/gestao-docentes",
+      icon: FileText,
+      items: [
+        {
+          title: "Aulas Agendadas",
+          url: "/sumario/aulas-agendadas",
+          permission: [PermissionTypeDetails.AULAS_AGENDADAS.sigla],
+        },
+        {
+          title: "Controle Geral de Sumário & Assiduidade",
+          url: "/sumario/controle-geral",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
+          ],
+        },
+        { title: "Listar Sumários", url: "/sumario/listar",  permission:[PermissionTypeDetails.LISTAR_SUMARIO.sigla]},
+        {
+          title: "Parâmetros",
+          url: "/sumario/parametros",
+          permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
+        },
+      ],
+      permission: [],
     },
   ],
 };
@@ -653,12 +768,26 @@ export const academicStructure: MenuStructure = {
         {
           title: "Atividades letivas",
           url: "/calendario/atividades",
-          permission: [],
+          permission: [PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla],
         },
-        { title: "Prazos", url: "/calendario/prazos" },
+        {
+          title: "Prazos",
+          url: "/calendario/prazos",
+          permission: [PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla],
+        },
         //{ title: "Calendário de provas", url: "/calendario/provas" },
-        { title: "Dias isentos", url: "/calendario/dias-isentos" },
-        { title: "Parâmetros", url: "/calendario/parametros" },
+        {
+          title: "Dias isentos",
+          url: "/calendario/dias-isentos",
+          permission: [PermissionTypeDetails.CRIAR_DIAS_ISENTOS.sigla],
+        },
+        {
+          title: "Parâmetros",
+          url: "/calendario/parametros",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+          ],
+        },
         // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
@@ -676,6 +805,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Controle de lançamento de notas",
           url: "/avaliacoes/controle",
+          permission: [PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla],
         },
         {
           title: "Fórmula por unidade curricular",
@@ -694,6 +824,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Estatísticas de notas lançadas",
           url: "/avaliacoes/estatisticas",
+          permission: [PermissionTypeDetails.ESTATISTICA_NOTAS_LANCADAS.sigla],
         },
         {
           title: "Estudantes inscritos por avaliação",
@@ -707,18 +838,44 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/historico",
           permission: [PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!],
         },
-        { title: "Lançamento de pauta", url: "/avaliacoes/pauta" },
-        { title: "Lançamento de notas", url: "/avaliacoes/notas" },
-        { title: "Lista de presença", url: "/avaliacoes/presenca" },
+        {
+          title: "Lançamento de pauta",
+          url: "/avaliacoes/pauta",
+          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+        },
+        {
+          title: "Lançamento de notas",
+          url: "/avaliacoes/notas",
+          permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
+        },
+        {
+          title: "Lista de presença",
+          url: "/avaliacoes/presenca",
+          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+        },
 
-        { title: "Pauta geral", url: "/avaliacoes/pauta-geral" },
+        {
+          title: "Pauta geral",
+          url: "/avaliacoes/pauta-geral",
+          permission: [PermissionTypeDetails.PAUTA_GERAL.sigla],
+        },
         {
           title: "Pauta por UC",
           url: "/avaliacoes/pauta-uc",
           permission: [PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!],
         },
-        { title: "Permissão fora do prazo", url: "/avaliacoes/permissao" },
-        { title: "Validação", url: "/avaliacoes/validacao" },
+        {
+          title: "Permissão fora do prazo",
+          url: "/avaliacoes/permissao",
+          permission: [
+            PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO.sigla,
+          ],
+        },
+        {
+          title: "Validação",
+          url: "/avaliacoes/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla],
+        },
         {
           title: "Visualizar notas",
           url: "/avaliacoes/visualizar",
@@ -761,12 +918,14 @@ export const academicStructure: MenuStructure = {
         {
           title: "Movimentar estudantes",
           url: "/horarios/movimentar/estudantes",
+          permission: [
+            PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
+          ],
         },
         {
           title: "Permissão editar",
           url: "/horarios/permissao",
           permission: [
-            PermissionTypeDetails.LISTAR_HORARIOS.sigla,
             PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla,
           ],
         },
@@ -774,27 +933,34 @@ export const academicStructure: MenuStructure = {
           title: "Horários por docente",
           url: "/horarios/docente",
           permission: [
-            PermissionTypeDetails.LISTAR_HORARIOS.sigla,
             PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
           ],
         },
         {
           title: "Inscrições por horário",
           url: "/horarios/inscricoes",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
+          permission: [PermissionTypeDetails.INSCRICAO_POR_HORARIO.sigla],
         },
         {
           title: "Listar horário",
           url: "/horarios/listar",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Eliminados", url: "/horarios/eliminados" },
+        {
+          title: "Eliminados",
+          url: "/horarios/eliminados",
+          permission: [PermissionTypeDetails.LISTAR_HORARIOS_ELIMINADOS.sigla],
+        },
         {
           title: "Horários por sala",
           url: "/horarios/sala",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
         },
-        { title: "Horários por UC", url: "/horarios/uc" },
+        {
+          title: "Horários por UC",
+          url: "/horarios/uc",
+          permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC.sigla],
+        },
         {
           title: "Parâmetros",
           url: "/horarios/parametros",
@@ -806,40 +972,41 @@ export const academicStructure: MenuStructure = {
 
       permission: [],
     },
+
     // ----------------------------------------------------
     // EXAME DE ACESSO
     // ----------------------------------------------------
 
-    /*
     {
       title: "Exame de Acesso",
       url: "/exame",
       icon: FileCheck,
       items: [
-        { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-        { title: "Admitir candidatura", url: "/exame/admitir" },
-        { title: "Alterar senha", url: "/exame/alterar-senha" },
-        { title: "Alterar tipo", url: "/exame/alterar-tipo" },
-        { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-        { title: "Consultar prova", url: "/exame/consultar-prova" },
-        { title: "Estatísticas", url: "/exame/estatisticas" },
-        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
-        { title: "Inscrição época especial", url: "/exame/epoca-especial" },
-        { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
-        { title: "Lista de candidatos", url: "/exame/lista-candidatos" },
-        { title: "Admitidos", url: "/exame/admitidos" },
-        { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
-        { title: "Sem prova marcada", url: "/exame/sem-prova" },
-        { title: "Provas por candidato", url: "/exame/provas-candidato" },
-        { title: "Resultados finais", url: "/exame/resultados" },
-        { title: "Horários por curso", url: "/exame/horarios" },
-        { title: "Pauta geral", url: "/exame/pauta-geral" },
-        { title: "Resetar prova", url: "/exame/resetar" },
+       // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
+       // { title: "Admitir candidatura", url: "/exame/admitir" },
+        { title: "Alterar senha", url: "/exame/alterar-senha" ,permission:[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla]},
+     
+       // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
+       // { title: "Consultar prova", url: "/exame/consultar-prova" },
+        //{ title: "Estatísticas", url: "/exame/estatisticas" },
+       // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+       { title: "Inscrição época especial", url: "/exame/epoca-especial" ,permission:[PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla]},
+       // { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
+        { title: "Lista de candidatos", url: "/exame/lista-candidatos" ,permission:[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla]},
+        //{ title: "Admitidos", url: "/exame/admitidos" },
+       // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
+       // { title: "Sem prova marcada", url: "/exame/sem-prova" },
+       // { title: "Provas por candidato", url: "/exame/provas-candidato" },
+       // { title: "Resultados finais", url: "/exame/resultados" },
+        { title: "Horários por curso", url: "/exame/horarios",permission:[PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO.sigla] },
+        { title: "Pauta geral", url: "/exame/pauta-geral" ,permission:[PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla]},
+        //{ title: "Resetar prova", url: "/exame/resetar" },
         { title: "Lista de presença", url: "/exame/presenca" },
+        { title: "Candidatos com/sem prova", url: "/exame/candidatos-prova",permission:[PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla] },
       ],
 
-      permission: ["adm", "rootAdmin", "dct"],
+      permission: [],
     },
-     */
+     
   ],
 };
