@@ -24,14 +24,19 @@ import {
 } from "@/components/ui/table";
 import { useQueryStudents } from "@/hooks/tudents/use-query-students";
 import { parseFilter } from "@/util/parse-filter";
-import { Banknote, GraduationCap, RefreshCw } from "lucide-react";
+import { Banknote, Eye, GraduationCap, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { useMutationCreateIsencaoServico } from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-servico.ts";
+import { useToast } from "@/hooks/use-toast";
 
 type CreateIsencaoServicoDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
+type CreateIsencaoResponseError = {
+  codigoMatricula: number;
+  error: string;
+};
 export function CreateIsencaoDialog({
   open,
   onOpenChange,
@@ -53,11 +58,12 @@ export function CreateIsencaoDialog({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
-  const [successFullStudents, setSuccessFullStudents] = useState<number[]>([
-    61644,
-  ]);
-  const [errorStudents, setErroStudents] = useState<number[]>([61647]);
-
+  const [successFullStudents, setSuccessFullStudents] = useState<number[]>([]);
+  const [errorStudents, setErroStudents] = useState<
+    CreateIsencaoResponseError[]
+  >([]);
+  const { mutateAsync, isPending } = useMutationCreateIsencaoServico();
+  const { toast } = useToast();
   const handleSearch = () => {
     setFiltersApplied(filters);
     setPage(1);
@@ -81,7 +87,7 @@ export function CreateIsencaoDialog({
       return "bg-emerald-100 dark:bg-emerald-700";
     }
 
-    if (errorStudents.includes(codigo)) {
+    if (errorStudents.some((e) => e.codigoMatricula === codigo)) {
       return "bg-destructive/70";
     }
 
@@ -90,6 +96,14 @@ export function CreateIsencaoDialog({
     }
 
     return "";
+  };
+  const getError = (codigo: number) => {
+    const error = errorStudents.find((e) => e.codigoMatricula === codigo).error;
+    toast({
+      title: "Erro",
+      description: error,
+      variant: "destructive",
+    });
   };
 
   const { data: studentsResponse, isLoading: isLoadingStudent } =
@@ -102,6 +116,30 @@ export function CreateIsencaoDialog({
       page,
     });
   const students = studentsResponse?.data ?? [];
+  const handleSubmit = async () => {
+    setSuccessFullStudents([]);
+    setErroStudents([]);
+
+    await mutateAsync(
+      {
+        codigoMatriculas: selectedStudents,
+        codigoServico: parseFilter(filters.codigoServico),
+        codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
+      },
+      {
+        onSuccess(response) {
+          console.log(response);
+          const sucessos = response?.sucessos ?? [];
+          const erros = response?.erros ?? [];
+          setErroStudents(erros);
+          setSuccessFullStudents(sucessos);
+        },
+      },
+    );
+  };
+  const disabledIsencaoButton = isPending || selectedStudents.length == 0;
+  const disabledPesquisaButtom = isPending || isLoadingStudent;
+  const temErros = errorStudents.length > 0;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-5xl!">
@@ -142,7 +180,7 @@ export function CreateIsencaoDialog({
             onChangeValue={(v) => setFilters({ ...filters, codigoServico: v })}
           />
           <div className="flex items-end">
-            <Button onClick={handleSearch} disabled={isLoadingStudent}>
+            <Button onClick={handleSearch} disabled={disabledPesquisaButtom}>
               <RefreshCw
                 className={`h-4 w-4 mr-2 ${isLoadingStudent ? "animate-spin" : ""}`}
               />
@@ -166,6 +204,7 @@ export function CreateIsencaoDialog({
                   <TableHead>B.I</TableHead>
                   <TableHead>Curso</TableHead>
                   <TableHead>Grau Academico</TableHead>
+                  {temErros && <TableHead>Erros</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -203,6 +242,17 @@ export function CreateIsencaoDialog({
                       <TableCell>{student?.bi ?? "-"}</TableCell>
                       <TableCell>{student?.curso ?? "-"}</TableCell>
                       <TableCell>{student?.candidatura ?? "-"}</TableCell>
+                      {temErros && (
+                        <TableCell>
+                          <Button
+                            onClick={() => getError(student.codigo_matricula)}
+                            variant="outline"
+                            size="icon"
+                          >
+                            <Eye />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
@@ -215,7 +265,13 @@ export function CreateIsencaoDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button>Isentar</Button>
+          <Button
+            onClick={() => handleSubmit()}
+            disabled={disabledIsencaoButton}
+          >
+            {isPending && <RefreshCw className={`h-4 w-4 mr-2 animate-spin`} />}
+            Isentar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
