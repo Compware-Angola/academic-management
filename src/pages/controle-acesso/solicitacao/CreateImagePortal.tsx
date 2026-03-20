@@ -100,7 +100,16 @@ export default function UploadImagem() {
         />
 
         {preview && (
-          <div className="w-full">
+          <div
+            style={{
+              maxHeight: '300px',
+              overflowY: 'auto',
+              borderRadius: '8px',
+              border: '1px solid #ddd',
+            }}
+
+            className="w-full"
+            >
             <img
               src={preview}
               alt="Preview"
