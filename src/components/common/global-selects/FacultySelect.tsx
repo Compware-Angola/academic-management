@@ -24,7 +24,7 @@ const FacultySelect = ({
         {
           codigo: "all",
           designacao: "Todos",
-        } as any,
+        } as unknown as Faculdade,
         ...faculdades,
       ]);
     } else {

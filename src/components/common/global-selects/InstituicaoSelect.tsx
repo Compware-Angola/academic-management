@@ -25,7 +25,6 @@ export function InstituicaoSelect({
     tipo: tipoInstituicao,
   });
 
-  console.log(value);
   return (
     <FormCommandSelect
       label="Instituição"
