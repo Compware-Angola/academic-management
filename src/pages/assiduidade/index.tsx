@@ -72,15 +72,6 @@ export default function ControleGeralPorDocente() {
               onClick={() => setShowMoreFilters((s) => !s)}
               className="text-muted-foreground hover:text-foreground"
             >
-              {showMoreFilters ? (
-                <>
-                  Menos filtros <ChevronUp className="ml-1 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Mais filtros <ChevronDown className="ml-1 h-4 w-4" />
-                </>
-              )}
             </Button>
 
             <Button

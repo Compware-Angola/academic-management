@@ -203,25 +203,58 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
   return (
     <div className="p-6 space-y-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/">
-                <Home className="h-4 w-4" />
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink>Académico</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+  
+  <div className="flex items-center gap-2 flex-wrap">
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/">
+              <Home className="h-4 w-4" />
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbLink>Académico</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  </div>
+
+  {exportRows.length > 0 && (
+    <div className="flex flex-wrap gap-2">
+      {pdfContent && (
+        <PDFActions
+          document={pdfContent}
+          fileName={`Controle_Assiduidade_${new Date()
+            .toISOString()
+            .slice(0, 10)}.pdf`}
+          showDownload
+          showPrint
+        />
+      )}
+
+      {excelProps && (
+        <ExcelActions
+          excelProps={excelProps}
+          fileName={`Controle_Assiduidade_${new Date()
+            .toISOString()
+            .slice(0, 10)}.xlsx`}
+          showDownload
+        />
+      )}
+    </div>
+  )}
+</div>
+
+      
 
       <Card>
         <CardHeader>
@@ -335,36 +368,13 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Resultados</CardTitle>
 
-          {exportRows.length > 0 && (
-            <div className="flex gap-2">
-              {pdfContent && (
-                <PDFActions
-                  document={pdfContent}
-                  fileName={`Controle_Assiduidade_${new Date()
-                    .toISOString()
-                    .slice(0, 10)}.pdf`}
-                  showDownload
-                  showPrint
-                />
-              )}
-
-              {excelProps && (
-                <ExcelActions
-                  excelProps={excelProps}
-                  fileName={`Controle_Assiduidade_${new Date()
-                    .toISOString()
-                    .slice(0, 10)}.xlsx`}
-                  showDownload
-                />
-              )}
-            </div>
-          )}
         </CardHeader>
 
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Codigo</TableHead>
                 <TableHead>Data da Aula</TableHead>
                 <TableHead>Horário</TableHead>
                 <TableHead>Curso</TableHead>
@@ -392,6 +402,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
               ) : (
                 aulas.map((item: any) => (
                   <TableRow key={item.codigo}>
+                    <TableCell>{item.codigo}</TableCell>
                     <TableCell>
                       {new Date(item.data_aula).toLocaleDateString()}
                     </TableCell>

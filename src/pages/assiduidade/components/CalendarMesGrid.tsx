@@ -104,7 +104,7 @@ export default function CalendarMesGrid({ dataReferencia, rows, onPickDay }: Pro
                   <div>Pe: {c.row.pendentes}</div>
                 </div>
               ) : (
-                <div className="mt-2 text-[11px] opacity-70">Sem dados</div>
+                <div className="mt-2 text-[11px] opacity-70"></div>
               )}
             </button>
           );
