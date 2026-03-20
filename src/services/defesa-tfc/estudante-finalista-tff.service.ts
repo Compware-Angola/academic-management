@@ -1,6 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type EstudanteFinalistaPayload = {
+  search?: string;
   anoLectivo?: number;
   curso?: number;
   tipoCandidatura?: number;
@@ -33,12 +34,14 @@ export async function getEstudanteFinalistaService(
     tipoCandidatura,
     page = 1,
     limit = 25,
+    search
   } = payload;
 
   const { data } = await axiosNestGa.get<EstudanteFinalistaResponse>(
     "defense-management-tfc/students",
     {
       params: {
+        search,
         anoLectivo,
         curso,
         tipoCandidatura,

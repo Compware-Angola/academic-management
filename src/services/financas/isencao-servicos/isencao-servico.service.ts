@@ -65,10 +65,9 @@ export async function fetchIsencaoServicoAll(
 }
 
 export type CreateIsencaoServicoBody = {
-  codigoMatricula: number;
+  codigoMatriculas: number[];
   codigoServico: number;
   codigoAnoLectivo: number;
-  dataIsencao: string;
 };
 
 export async function createIsencaoServico(body: CreateIsencaoServicoBody) {

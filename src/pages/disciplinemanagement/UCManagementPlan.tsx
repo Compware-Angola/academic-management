@@ -63,7 +63,7 @@ export default function UCManagementPlan() {
   const { user: userData } = useAuth();
   // Paginação
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(10);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -130,9 +130,11 @@ export default function UCManagementPlan() {
           refetch();
         },
         onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.message || "Erro ao adicionar UC ao plano.",
-          );
+          const backendMessage =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Erro ao adicionar UC ao plano xxxx.";
+          toast.error(backendMessage);
         },
       },
     );

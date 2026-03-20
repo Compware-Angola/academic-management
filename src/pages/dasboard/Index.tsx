@@ -25,13 +25,18 @@ import { formatNumber } from "@/util/format-number";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
+import { useState } from "react";
+import { Dialog} from "@/components/ui/dialog";
+
 
 const Index = () => {
-  const { user:userData } = useAuth();
+  const [openAvisoModal, setOpenAvisoModal] = useState(false);
+  const { user:userData} = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
       const { data: academicYear, isLoading: isLoadingAcademicYear } =
         useQueryAnoAcademico();
+
     
       // encontra o ano activo
       const activeAcademicYear = academicYear?.find(
@@ -76,6 +81,10 @@ const allowedQuickLinks =  useFilterMenuByPermission(quickLinks);
     (activeAcademicYear?.designacao ?? "N/A")
   }
 />
+
+  <Dialog open={openAvisoModal} onOpenChange={setOpenAvisoModal}>
+      
+    </Dialog>
 
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

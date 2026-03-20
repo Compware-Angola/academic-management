@@ -5,7 +5,6 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -68,7 +67,7 @@ export default function NegociacaoDivida() {
   const closeModal = () => {
     setOpenModal(false);
   };
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(10);
   const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
     "codigoMatricula",
   );
@@ -126,107 +125,104 @@ export default function NegociacaoDivida() {
   );
   const tableData = pagamentoResponse?.data || [];
   const total = pagamentoResponse?.total || 0;
-  
 
   const pdfData = useMemo(() => {
-  if (!tableData.length) return null;
+    if (!tableData.length) return null;
 
-  return {
-    filtros: [
-      filtersApplied.anoLectivo && `Ano Letivo: ${filtersApplied.anoLectivo}`,
-      filtersApplied.faculdade && `Faculdade: ${filtersApplied.faculdade}`,
-      filtersApplied.curso && `Curso: ${filtersApplied.curso}`,
-      filtersApplied.negociacao &&
-        `Negociação: ${
-          filtersApplied.negociacao === "1"
-            ? "50%"
-            : filtersApplied.negociacao === "2"
-            ? "100%"
-            : "Todos"
-        }`,
-      searchTerm &&
-        `${searchBy === "codigoMatricula" ? "Matrícula" : "Aluno"}: ${searchTerm}`,
-    ]
-      .filter(Boolean)
-      .join(" | ") || "Sem filtros",
+    return {
+      filtros:
+        [
+          filtersApplied.anoLectivo &&
+            `Ano Letivo: ${filtersApplied.anoLectivo}`,
+          filtersApplied.faculdade && `Faculdade: ${filtersApplied.faculdade}`,
+          filtersApplied.curso && `Curso: ${filtersApplied.curso}`,
+          filtersApplied.negociacao &&
+            `Negociação: ${
+              filtersApplied.negociacao === "1"
+                ? "50%"
+                : filtersApplied.negociacao === "2"
+                  ? "100%"
+                  : "Todos"
+            }`,
+          searchTerm &&
+            `${searchBy === "codigoMatricula" ? "Matrícula" : "Aluno"}: ${searchTerm}`,
+        ]
+          .filter(Boolean)
+          .join(" | ") || "Sem filtros",
 
-    total,
+      total,
 
-    rows: tableData.map((n) => ({
-      matricula: n.codigo_matricula,
-      aluno: n.nome,
-      faculdade: n.faculdade,
-      curso: n.curso,
-      prestacoes: n.prestacoes,
-      valorDivida: formatNumber(n.valor_divida),
-      primeiraPrestacao: formatNumber(n.primeiro_valor_pagar),
-      valorPrestacao: formatNumber(n.valor_prestacao),
-      valorRestante: formatNumber(n.valor_restante),
-    })),
-  };
-}, [tableData, filtersApplied, searchTerm, searchBy, total]);
+      rows: tableData.map((n) => ({
+        matricula: n.codigo_matricula,
+        aluno: n.nome,
+        faculdade: n.faculdade,
+        curso: n.curso,
+        prestacoes: n.prestacoes,
+        valorDivida: formatNumber(n.valor_divida),
+        primeiraPrestacao: formatNumber(n.primeiro_valor_pagar),
+        valorPrestacao: formatNumber(n.valor_prestacao),
+        valorRestante: formatNumber(n.valor_restante),
+      })),
+    };
+  }, [tableData, filtersApplied, searchTerm, searchBy, total]);
 
-
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Negociação de Dívida"
-    subtitle="Lista de negociações de dívida dos alunos"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros },
-      { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "matricula", label: "Matrícula", width: "12%" },
-        { key: "aluno", label: "Aluno", width: "20%" },
-        { key: "faculdade", label: "Faculdade", width: "15%" },
-        { key: "curso", label: "Curso", width: "15%" },
-        { key: "prestacoes", label: "Prestações", width: "8%" },
-        { key: "valorDivida", label: "Valor Dívida", width: "10%" },
-        { key: "primeiraPrestacao", label: "1ª Prestação", width: "10%" },
-        { key: "valorPrestacao", label: "Valor Prest.", width: "10%" },
-        { key: "valorRestante", label: "Restante", width: "10%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#1e40af",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
-
-
-const excelProps = pdfData
-  ? {
-      documentTitle: "Negociação de Dívida",
-      subtitle: "Lista de negociações de dívida dos alunos",
-      infoSections: [
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Negociação de Dívida"
+      subtitle="Lista de negociações de dívida dos alunos"
+      infoSections={[
         { title: "Filtros Aplicados", content: pdfData.filtros },
         { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-      ],
-      mainTable: {
+      ]}
+      mainTable={{
         headers: [
-          { key: "matricula", label: "Matrícula", width: 18 },
-          { key: "aluno", label: "Aluno", width: 30 },
-          { key: "faculdade", label: "Faculdade", width: 25 },
-          { key: "curso", label: "Curso", width: 25 },
-          { key: "prestacoes", label: "Prestações", width: 15 },
-          { key: "valorDivida", label: "Valor Dívida", width: 20 },
-          { key: "primeiraPrestacao", label: "1ª Prestação", width: 20 },
-          { key: "valorPrestacao", label: "Valor Prestação", width: 20 },
-          { key: "valorRestante", label: "Valor Restante", width: 20 },
+          { key: "matricula", label: "Matrícula", width: "12%" },
+          { key: "aluno", label: "Aluno", width: "20%" },
+          { key: "faculdade", label: "Faculdade", width: "15%" },
+          { key: "curso", label: "Curso", width: "15%" },
+          { key: "prestacoes", label: "Prestações", width: "8%" },
+          { key: "valorDivida", label: "Valor Dívida", width: "10%" },
+          { key: "primeiraPrestacao", label: "1ª Prestação", width: "10%" },
+          { key: "valorPrestacao", label: "Valor Prest.", width: "10%" },
+          { key: "valorRestante", label: "Restante", width: "10%" },
         ],
         rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#1e40af",
-    }
-  : null;
+        headerBackground: "#1e40af",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const baseFileName = `Negociacao_Divida_${new Date()
-  .toISOString()
-  .slice(0, 10)}`;
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Negociação de Dívida",
+        subtitle: "Lista de negociações de dívida dos alunos",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Matrícula", width: 18 },
+            { key: "aluno", label: "Aluno", width: 30 },
+            { key: "faculdade", label: "Faculdade", width: 25 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "prestacoes", label: "Prestações", width: 15 },
+            { key: "valorDivida", label: "Valor Dívida", width: 20 },
+            { key: "primeiraPrestacao", label: "1ª Prestação", width: 20 },
+            { key: "valorPrestacao", label: "Valor Prestação", width: 20 },
+            { key: "valorRestante", label: "Valor Restante", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#1e40af",
+      }
+    : null;
 
-
+  const baseFileName = `Negociacao_Divida_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
 
   const totalPages = Math.ceil(total / limit);
   const stats = pagamentoResponse?.stats;
@@ -418,7 +414,7 @@ const baseFileName = `Negociacao_Divida_${new Date()
                     <TableHead>Mês final</TableHead>
                     <TableHead>Valor Divida</TableHead>
                     <TableHead>1ª Prestações a pagar</TableHead>
-                   
+
                     <TableHead>Valor Prestação</TableHead>
                     <TableHead>Valor Restante</TableHead>
                     <TableHead>Acções</TableHead>
@@ -444,7 +440,7 @@ const baseFileName = `Negociacao_Divida_${new Date()
                           {formatNumber(item.primeiro_valor_pagar)} kz
                         </Badge>
                       </TableCell>
-                      
+
                       <TableCell>
                         <Badge> {formatNumber(item.valor_prestacao)} kz</Badge>
                       </TableCell>

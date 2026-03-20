@@ -1,6 +1,8 @@
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { DocenteTFCCommandSelect } from "@/components/common/global-selects/DocenteTFCCommandSelect";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -22,6 +24,7 @@ export function OrientadorModal({
     anoLectivo: "23",
     curso: "",
     docente: "",
+    faculdade: "",
   });
   const handleClose = () => {
     setOpen(false);
@@ -29,6 +32,7 @@ export function OrientadorModal({
       anoLectivo: "23",
       curso: "",
       docente: "",
+      faculdade: "",
     });
   };
   const handleOpenChange = (open: boolean) => {
@@ -54,24 +58,32 @@ export function OrientadorModal({
         onEscapeKeyDown={handleClose}
       >
         <DialogTitle>Adicionar Orientador</DialogTitle>
-        <div className="grid gap-4 py-4 grid-cols-3">
+        <div className="grid gap-4 py-4 grid-cols-2">
           <AcademicYearSelect
             value={filters.anoLectivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
           />
-          <div className="space-y-1.5">
-            <Label>Docente</Label>
-            <FormCommandSelect
-              value={filters.docente}
-              options={teachersData}
-              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-              onChange={(codigo) => setFilters({ ...filters, docente: codigo })}
-              width="full"
-            />
-          </div>
+          <FacultySelect
+            allOption
+            value={filters.faculdade}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, faculdade: v, curso: "", docente: "" })
+            }
+          />
+          <DocenteTFCCommandSelect
+            label="Docente"
+            value={filters.docente}
+            onChangeValue={(v) => setFilters({ ...filters, docente: v })}
+            params={{
+              faculdadeId: parseFilter(filters.faculdade),
+            }}
+          />
           <CourseSelect
             value={filters.curso}
             onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+            params={{
+              faculdadeId: parseFilter(filters.faculdade),
+            }}
           />
         </div>
         <div className="flex justify-end gap-2">
