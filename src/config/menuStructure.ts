@@ -691,6 +691,11 @@ export const defenseTFC: MenuStructure = {
           url: "/defesa-tfc/orientadores",
           permission: [PermissionTypeDetails.DEFESA.sigla],
         },
+        {
+          title: "Vínculos de TFC",
+          url: "/defesa-tfc/vinculos",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
       ],
     },
   ],

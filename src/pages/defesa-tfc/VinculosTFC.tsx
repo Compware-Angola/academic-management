@@ -32,6 +32,10 @@ import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientador
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { OrientadorModal } from "./components/orientador-modal";
+import { useQueryVinculos } from "@/hooks/defesa-tfc/use-query-vinculos";
+import { FormSelect } from "@/components/common/FormSelect";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { VinculosModal } from "./components/vinculos-modal";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -49,7 +53,7 @@ const statusConfig = {
     className: "bg-yellow-100 text-yellow-700 border-yellow-300",
   },
 };
-export default function ListarOrientadores() {
+export default function VinculosTFC() {
   //Options
   const searchOptions = [
     { id: "codigoMatricula", label: "Código da Matrícula" },
@@ -67,44 +71,42 @@ export default function ListarOrientadores() {
   const [searchApplied, setSearchApplied] = useState("");
 
   const [filters, setFilters] = useState({
-    anoLectivo: "all",
+    anoLectivo: "23",
     curso: "",
+    faculdade: "",
+    orientador: "",
     estado: "",
   });
-
+  const [filtersApplied, setFiltersApplied] = useState(filters);
   const placeholders: Record<string, string> = {
     codigoMatricula: "Pesquisar por código da matrícula...",
     nome: "Nome do Aluno.",
   };
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
+  const { data: orientadoresResponse } = useQueryOrientadoresTFC({
+    anoLectivoId: parseFilter(filters.anoLectivo),
+    cursoId: parseFilter(filters.curso),
+    estado: "activo",
+    page,
+    limit,
+  });
   const {
-    data: orientadoresResponse,
+    data: vinculosResponse,
     refetch,
     isFetching,
-  } = useQueryOrientadoresTFC({
+  } = useQueryVinculos({
     anoLectivoId:
       filters.anoLectivo === "all"
         ? undefined
         : parseFilter(filters.anoLectivo),
     cursoId: parseFilter(filters.curso),
-    estado: filters.estado === "all" ? undefined : filters.estado,
+    search: searchTerm || undefined,
     page,
     limit,
   });
-
-  const handleRefetch = () => {
-    setFilters({
-      anoLectivo: "23",
-      curso: "",
-      estado: "",
-    });
-    setPage(1);
-    setLimit(10);
-    refetch();
-  };
-  const tableData = orientadoresResponse?.data || [];
-  const total = orientadoresResponse?.total || 0;
+  const tableData = vinculosResponse?.data || [];
+  const total = vinculosResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -124,15 +126,14 @@ export default function ListarOrientadores() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>Orientadores</BreadcrumbLink>
+            <BreadcrumbLink>Vínculos de TFC</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Orientadores</h1>
-          <p className="text-muted-foreground">Consultar orientadores.</p>
+          <h1 className="text-2xl font-bold">Vínculos de TFC</h1>
         </div>
         <Button onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4" />
@@ -145,41 +146,58 @@ export default function ListarOrientadores() {
           <CardTitle>Filtros</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <AcademicYearSelect
               value={filters.anoLectivo}
-              enableDefaultSelectItem
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
 
+            <FacultySelect
+              allOption
+              value={filters.faculdade}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, faculdade: v, curso: "" })
+              }
+            />
             <CourseSelect
+              params={{
+                faculdadeId: parseFilter(filters.faculdade),
+              }}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
             />
-            <div className="flex flex-col gap-2">
-              <Label>Estado</Label>
-              <Select
-                value={filters.estado}
-                onValueChange={(v) => setFilters({ ...filters, estado: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <FormSelect
+              label="Orientador"
+              value={filters.orientador}
+              onChange={(v) => setFilters({ ...filters, orientador: v })}
+              options={orientadoresResponse?.data || []}
+              loading={isFetching}
+              disabled={isFetching}
+              map={(u) => ({
+                key: u.codigo,
+                label: u.nome_orientador,
+                value: u.codigo.toString(),
+              })}
+            />
 
             <div className="flex items-end">
               <Button
-                aria-label="Actualizar"
+                aria-label="Limpar filtros"
+                title="Limpar filtros"
                 className="cursor-pointer"
-                onClick={handleRefetch}
+                onClick={() => {
+                  setFilters({
+                    anoLectivo: "23",
+                    curso: "",
+                    orientador: "",
+                    estado: "",
+                    faculdade: "",
+                  });
+                  setPage(1);
+                  setLimit(25);
+                  refetch();
+                }}
               >
-                Atualizar
                 <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
@@ -190,7 +208,7 @@ export default function ListarOrientadores() {
         <CardHeader className="space-y-2">
           {/* Exportações */}
 
-          <CardTitle>Orientadores</CardTitle>
+          <CardTitle>Lista de Finalistas</CardTitle>
         </CardHeader>
 
         <CardContent>
@@ -203,84 +221,58 @@ export default function ListarOrientadores() {
             </div>
           ) : tableData.length == 0 ? (
             <div className="text-center py-16 text-muted-foreground">
-              Nenhuma Orientador encontrado.
+              Nenhuma Lista de Finalistas encontrada.
             </div>
           ) : (
             <>
               {/* 1. Envolva em uma div com scroll lateral */}
               <div className="w-full overflow-x-auto">
-                <Table className="w-full">
+                <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      {/* Adicione whitespace-nowrap em todos os cabeçalhos */}
-                      <TableHead className="w-[80px] whitespace-nowrap">
-                        Código
+                      <TableHead className="whitespace-nowrap">
+                        Matrícula
                       </TableHead>
                       <TableHead className="min-w-[250px] whitespace-nowrap text-left">
-                        Nome
+                        Aluno
+                      </TableHead>
+                      <TableHead className="min-w-[200px] whitespace-nowrap text-left">
+                        Curso
+                      </TableHead>
+                      <TableHead className="min-w-[300px] whitespace-nowrap text-left">
+                        Tema
+                      </TableHead>
+                      <TableHead className="min-w-[200px] whitespace-nowrap text-left">
+                        Orientador
                       </TableHead>
                       <TableHead className="whitespace-nowrap">
-                        Ano Lectivo
-                      </TableHead>
-                      <TableHead className="whitespace-nowrap">Curso</TableHead>
-                      <TableHead className="w-[120px] whitespace-nowrap">
-                        Estado
-                      </TableHead>
-                      <TableHead className="w-[150px] whitespace-nowrap text-center">
-                        Nº Orientados
-                      </TableHead>
-                      <TableHead className="w-[150px] whitespace-nowrap">
-                        Data Cadastro
-                      </TableHead>
-                      <TableHead className="w-[200px] whitespace-nowrap">
-                        Criado por
+                        Data Vínculo
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tableData.map((item, i) => {
-                      const status = (item.estado?.toLowerCase() ||
-                        "pendente") as keyof typeof statusConfig;
-                      const config =
-                        statusConfig[status] || statusConfig.pendente;
-
-                      return (
-                        <TableRow
-                          key={item.codigo || i}
-                          className="hover:bg-muted/50"
-                        >
-                          <TableCell className="font-mono text-xs text-muted-foreground whitespace-nowrap">
-                            {item.codigo}
-                          </TableCell>
-                          <TableCell className="font-medium whitespace-nowrap">
-                            {item.nome_orientador}
-                          </TableCell>
-                          <TableCell className="whitespace-nowrap">
-                            {item.ano_lectivo}
-                          </TableCell>
-                          <TableCell className="whitespace-nowrap">
-                            {item.curso}
-                          </TableCell>
-                          <TableCell className="whitespace-nowrap">
-                            <Badge
-                              variant={config.variant}
-                              className={config.className}
-                            >
-                              {config.label}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center font-semibold whitespace-nowrap">
-                            {item.numero_orientados}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground whitespace-nowrap">
-                            {item.data_cadastro}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground whitespace-nowrap">
-                            {item.criado_por}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                    {tableData.map((item, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-mono text-xs whitespace-nowrap text-left">
+                          {item.matricula}
+                        </TableCell>
+                        <TableCell className="font-medium whitespace-nowrap text-left">
+                          {item.nome_aluno}
+                        </TableCell>
+                        <TableCell className="text-sm whitespace-nowrap text-left">
+                          {item.curso}
+                        </TableCell>
+                        <TableCell className="italic text-sm whitespace-nowrap text-left">
+                          "{item.tema}"
+                        </TableCell>
+                        <TableCell className="font-medium whitespace-nowrap text-left">
+                          {item.nome_orientador}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground whitespace-nowrap text-left">
+                          {item.data_cadastro}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </div>
@@ -325,13 +317,14 @@ export default function ListarOrientadores() {
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </CardContent>
       </Card>
-      <OrientadorModal open={open} setOpen={setOpen} />
+      <VinculosModal open={open} setOpen={setOpen} />
     </div>
   );
 }
