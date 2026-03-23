@@ -131,11 +131,12 @@ export default function NotificacoesPage() {
                 onClick={() => abrirDetalhe(aviso)}
               >
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 whitespace-pre-line text-sm leading-relaxed text-foreground">
-                      {aviso.DESCRICAO}
-                    </p>
-                  </div>
+                  <div className="flex items-start gap-2">
+            <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+            <span className="line-clamp-2 text-xs leading-6 text-foreground">
+              {aviso.DESCRICAO}
+            </span>
+          </div>
 
                   <div className="flex shrink-0 items-center gap-2 md:flex-col md:items-end">
                     <span className="text-xs text-muted-foreground">
