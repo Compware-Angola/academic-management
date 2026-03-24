@@ -15,7 +15,12 @@ import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryEstatisticaAssiduidadeDocente } from "@/hooks/assiduidade/use-fetch-EstatisticaAssiduidadeDocente";
 import { useCursos } from "@/hooks/use-cursos";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 type SortField = "n_mecanografico" | "nome" | "grau_academico" | "escalao";
 
 const SEMESTRE = [
@@ -298,140 +303,156 @@ export default function SalarioDocente() {
             {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
+         <div className="overflow-x-auto">
+  <Table>
+    <TableHeader>
 
-                {/* ── LINHA 1: grupos principais ── */}
-                <TableRow>
-                  {/* Identificação — rowSpan=3 */}
-                  <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs px-2">
-                    <SortHeader field="n_mecanografico">Nº Mec</SortHeader>
-                  </TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs px-2">
-                    <SortHeader field="nome">Nome</SortHeader>
-                  </TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs px-2">
-                    <SortHeader field="grau_academico">Grau Académico</SortHeader>
-                  </TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">
-                    <SortHeader field="escalao">Escalão</SortHeader>
-                  </TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">Categoria</TableHead>
+      {/* ── LINHA 1 ── */}
+      <TableRow>
+        <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs px-2">
+          <SortHeader field="n_mecanografico">Nº Mec</SortHeader>
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs px-2">
+          <SortHeader field="nome">Nome</SortHeader>
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle whitespace-nowrap text-xs px-2">
+          <SortHeader field="grau_academico">Grau Académico</SortHeader>
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">
+          <SortHeader field="escalao">Escalão</SortHeader>
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">
+          Categoria
+        </TableHead>
 
-                  {/* Aulas — rowSpan=3 */}
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">Aulas Semanais</TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">Aulas Mensais</TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">Total Previstas</TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">
+          Aulas Semanais
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">
+          Aulas Mensais
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2">
+          Total Previstas
+        </TableHead>
 
-                  {/* Totais Período — rowSpan=3 */}
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-blue-50 dark:bg-blue-950/30">TM</TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-blue-50 dark:bg-blue-950/30">TS</TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-blue-50 dark:bg-blue-950/30">TA</TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-blue-50 dark:bg-blue-950/30">
+          <ThTooltip label="TM" description="Total Mensal — total de aulas no mês actual" />
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-blue-50 dark:bg-blue-950/30">
+          <ThTooltip label="TS" description="Total Semestral — total de aulas no semestre filtrado" />
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-blue-50 dark:bg-blue-950/30">
+          <ThTooltip label="TA" description="Total Anual — total de aulas no ano lectivo" />
+        </TableHead>
 
-                  {/* Horas — rowSpan=3 */}
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-emerald-50 dark:bg-emerald-950/20">Total Horas Efectivas</TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-emerald-50 dark:bg-emerald-950/20">Total Horas Salarial</TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-emerald-50 dark:bg-emerald-950/20">
+          Total Horas Efectivas
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-emerald-50 dark:bg-emerald-950/20">
+          Total Horas Salarial
+        </TableHead>
 
-                  {/* Faltas — rowSpan=3 */}
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-red-50 dark:bg-red-950/20">Total Faltas</TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-red-50 dark:bg-red-950/20">
+          Total Faltas
+        </TableHead>
 
-                  {/* AP grupo — colSpan=3 */}
-                  <TableHead colSpan={3} className="border border-border text-center text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40">
-                    AP — Aulas Presenciais
-                  </TableHead>
+        <TableHead colSpan={3} className="border border-border text-center text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40">
+          <ThTooltip label="AP" description="Aulas Presenciais — aulas realizadas em modo presencial" />
+        </TableHead>
 
-                  {/* AV grupo — colSpan=3 */}
-                  <TableHead colSpan={3} className="border border-border text-center text-xs font-semibold bg-teal-100 dark:bg-teal-900/40">
-                    AV — Aulas Virtuais
-                  </TableHead>
+        <TableHead colSpan={3} className="border border-border text-center text-xs font-semibold bg-teal-100 dark:bg-teal-900/40">
+          <ThTooltip label="AV" description="Aulas Virtuais — aulas realizadas em modo virtual / online" />
+        </TableHead>
 
-                  {/* Totais Gerais — rowSpan=3 */}
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-purple-50 dark:bg-purple-950/20">Total Presenças</TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-purple-50 dark:bg-purple-950/20">Total Faltas Geral</TableHead>
-                  <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-purple-50 dark:bg-purple-950/20 font-bold">Total Geral</TableHead>
-                </TableRow>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-purple-50 dark:bg-purple-950/20">
+          Total Presenças
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-purple-50 dark:bg-purple-950/20">
+          Total Faltas Geral
+        </TableHead>
+        <TableHead rowSpan={3} className="border border-border align-middle text-center whitespace-nowrap text-xs px-2 bg-purple-50 dark:bg-purple-950/20 font-bold">
+          Total Geral
+        </TableHead>
+      </TableRow>
 
-                {/* ── LINHA 2: sub-colunas AP e AV ── */}
-                <TableRow>
-                  {/* AP: P, F, Total */}
-                  <TableHead className="border border-border text-center text-xs bg-emerald-100/70 dark:bg-emerald-900/30 whitespace-nowrap px-2">P — Presença</TableHead>
-                  <TableHead className="border border-border text-center text-xs bg-emerald-100/70 dark:bg-emerald-900/30 whitespace-nowrap px-2">F — Falta</TableHead>
-                  <TableHead className="border border-border text-center text-xs bg-emerald-100/70 dark:bg-emerald-900/30 font-semibold whitespace-nowrap px-2">Total</TableHead>
-                  {/* AV: P, F, Total */}
-                  <TableHead className="border border-border text-center text-xs bg-teal-100/70 dark:bg-teal-900/30 whitespace-nowrap px-2">P — Presença</TableHead>
-                  <TableHead className="border border-border text-center text-xs bg-teal-100/70 dark:bg-teal-900/30 whitespace-nowrap px-2">F — Falta</TableHead>
-                  <TableHead className="border border-border text-center text-xs bg-teal-100/70 dark:bg-teal-900/30 font-semibold whitespace-nowrap px-2">Total</TableHead>
-                </TableRow>
+      {/* ── LINHA 2 ── */}
+      <TableRow>
+        <TableHead className="border border-border text-center text-xs bg-emerald-100/70 dark:bg-emerald-900/30 whitespace-nowrap px-2">
+          <ThTooltip label="P" description="Presenças — aulas presenciais em que o docente esteve presente" />
+        </TableHead>
+        <TableHead className="border border-border text-center text-xs bg-emerald-100/70 dark:bg-emerald-900/30 whitespace-nowrap px-2">
+          <ThTooltip label="F" description="Faltas — aulas presenciais em que o docente faltou" />
+        </TableHead>
+        <TableHead className="border border-border text-center text-xs bg-emerald-100/70 dark:bg-emerald-900/30 font-semibold whitespace-nowrap px-2">
+          Total
+        </TableHead>
+        <TableHead className="border border-border text-center text-xs bg-teal-100/70 dark:bg-teal-900/30 whitespace-nowrap px-2">
+          <ThTooltip label="P" description="Presenças — aulas virtuais em que o docente esteve presente" />
+        </TableHead>
+        <TableHead className="border border-border text-center text-xs bg-teal-100/70 dark:bg-teal-900/30 whitespace-nowrap px-2">
+          <ThTooltip label="F" description="Faltas — aulas virtuais em que o docente faltou" />
+        </TableHead>
+        <TableHead className="border border-border text-center text-xs bg-teal-100/70 dark:bg-teal-900/30 font-semibold whitespace-nowrap px-2">
+          Total
+        </TableHead>
+      </TableRow>
 
-              </TableHeader>
+    </TableHeader>
 
-              <TableBody>
-                {sortedData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={24} className="text-center py-10 text-muted-foreground">
-                      Nenhum registo encontrado
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  sortedData.map((item, idx) => (
-                    <TableRow key={idx} className="hover:bg-muted/50">
-                      {/* Identificação */}
-                      <TableCell className="border border-border font-mono text-xs whitespace-nowrap px-2">{item.n_mecanografico}</TableCell>
-                      <TableCell className="border border-border text-xs font-medium whitespace-nowrap px-2">{item.nome}</TableCell>
-                      <TableCell className="border border-border text-xs whitespace-nowrap px-2">{item.grau_academico}</TableCell>
-                      <TableCell className="border border-border text-xs text-center px-2">{item.escalao}</TableCell>
-                      <TableCell className="border border-border text-xs text-center px-2">{item.categoria}</TableCell>
+    <TableBody>
+      {sortedData.length === 0 ? (
+        <TableRow>
+          <TableCell colSpan={24} className="text-center py-10 text-muted-foreground">
+            Nenhum registo encontrado
+          </TableCell>
+        </TableRow>
+      ) : (
+        sortedData.map((item, idx) => (
+          <TableRow key={idx} className="hover:bg-muted/50">
+            <TableCell className="border border-border font-mono text-xs whitespace-nowrap px-2">{item.n_mecanografico}</TableCell>
+            <TableCell className="border border-border text-xs font-medium whitespace-nowrap px-2">{item.nome}</TableCell>
+            <TableCell className="border border-border text-xs whitespace-nowrap px-2">{item.grau_academico}</TableCell>
+            <TableCell className="border border-border text-xs text-center px-2">{item.escalao}</TableCell>
+            <TableCell className="border border-border text-xs text-center px-2">{item.categoria}</TableCell>
 
-                      {/* Aulas */}
-                      <TableCell className="border border-border text-center text-xs px-2">{n(item.aulas_semanais)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2">{n(item.aulas_mensais)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2">{n(item.total_aulas_previstas)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2">{n(item.aulas_semanais)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2">{n(item.aulas_mensais)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2">{n(item.total_aulas_previstas)}</TableCell>
 
-                      {/* TM, TS, TA */}
-                      <TableCell className="border border-border text-center text-xs px-2 bg-blue-50/50 dark:bg-blue-950/10">{n(item.tm)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-blue-50/50 dark:bg-blue-950/10">{n(item.ts)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-blue-50/50 dark:bg-blue-950/10">{n(item.ta)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-blue-50/50 dark:bg-blue-950/10">{n(item.tm)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-blue-50/50 dark:bg-blue-950/10">{n(item.ts)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-blue-50/50 dark:bg-blue-950/10">{n(item.ta)}</TableCell>
 
-                      {/* Horas */}
-                      <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/50 dark:bg-emerald-950/10 font-semibold text-emerald-700">
-                        {n(item.total_horas_efetivas)}
-                      </TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/50 dark:bg-emerald-950/10">
-                        {n(item.total_horas_salarial)}
-                      </TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/50 dark:bg-emerald-950/10 font-semibold text-emerald-700">
+              {n(item.total_horas_efetivas)}
+            </TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/50 dark:bg-emerald-950/10">
+              {n(item.total_horas_salarial)}
+            </TableCell>
 
-                      {/* Total Faltas */}
-                      <TableCell className="border border-border text-center text-xs px-2 bg-red-50/50 dark:bg-red-950/10">
-                        <span className={n(item.total_faltas) > 0 ? "text-red-600 font-semibold" : "text-muted-foreground"}>
-                          {n(item.total_faltas)}
-                        </span>
-                      </TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-red-50/50 dark:bg-red-950/10">
+              <span className={n(item.total_faltas) > 0 ? "text-red-600 font-semibold" : "text-muted-foreground"}>
+                {n(item.total_faltas)}
+              </span>
+            </TableCell>
 
-                      {/* AP */}
-                      <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/40 dark:bg-emerald-950/10 text-emerald-700">{n(item.ap_presenca)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/40 dark:bg-emerald-950/10 text-red-600">{n(item.ap_falta)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/40 dark:bg-emerald-950/10 font-semibold">{n(item.ap_total)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/40 dark:bg-emerald-950/10 text-emerald-700">{n(item.ap_presenca)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/40 dark:bg-emerald-950/10 text-red-600">{n(item.ap_falta)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-emerald-50/40 dark:bg-emerald-950/10 font-semibold">{n(item.ap_total)}</TableCell>
 
-                      {/* AV */}
-                      <TableCell className="border border-border text-center text-xs px-2 bg-teal-50/40 dark:bg-teal-950/10 text-teal-700">{n(item.av_presenca)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-teal-50/40 dark:bg-teal-950/10 text-red-600">{n(item.av_falta)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-teal-50/40 dark:bg-teal-950/10 font-semibold">{n(item.av_total)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-teal-50/40 dark:bg-teal-950/10 text-teal-700">{n(item.av_presenca)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-teal-50/40 dark:bg-teal-950/10 text-red-600">{n(item.av_falta)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-teal-50/40 dark:bg-teal-950/10 font-semibold">{n(item.av_total)}</TableCell>
 
-                      {/* Totais Gerais */}
-                      <TableCell className="border border-border text-center text-xs px-2 bg-purple-50/50 dark:bg-purple-950/10 text-emerald-700 font-semibold">{n(item.total_presencas)}</TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-purple-50/50 dark:bg-purple-950/10 text-red-600">
-                        {n(item.total_faltas_geral)}
-                      </TableCell>
-                      <TableCell className="border border-border text-center text-xs px-2 bg-purple-50/50 dark:bg-purple-950/10 font-bold text-primary">
-                        {n(item.total_geral)}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+            <TableCell className="border border-border text-center text-xs px-2 bg-purple-50/50 dark:bg-purple-950/10 text-emerald-700 font-semibold">{n(item.total_presencas)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-purple-50/50 dark:bg-purple-950/10 text-red-600">{n(item.total_faltas_geral)}</TableCell>
+            <TableCell className="border border-border text-center text-xs px-2 bg-purple-50/50 dark:bg-purple-950/10 font-bold text-primary">{n(item.total_geral)}</TableCell>
+          </TableRow>
+        ))
+      )}
+    </TableBody>
+  </Table>
+</div>
         )}
 
         {/* Paginação */}
@@ -465,5 +486,19 @@ export default function SalarioDocente() {
         </div>
       </Card>
     </div>
+  );
+}
+function ThTooltip({ label, description }: { label: string; description: string }) {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="cursor-help underline decoration-dotted">{label}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-xs">{description}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
