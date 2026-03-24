@@ -133,7 +133,7 @@ export default function UCManagementPlan() {
           const backendMessage =
             error?.response?.data?.message ||
             error?.message ||
-            "Erro ao adicionar UC ao plano xxxx.";
+            "Erro ao adicionar UC ao plano.";
           toast.error(backendMessage);
         },
       },
