@@ -11,9 +11,13 @@ export const useMutationCreateAviso = () => {
     mutationFn: (payload: CreateAvisoRequest) =>
       createAvisoService(payload),
 
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({
         queryKey: ["avisos"], // importante bater com a query de listagem
+      });
+
+       await queryClient.invalidateQueries({
+        queryKey: ["avisos-por-grupos"],
       });
 
       toast({
