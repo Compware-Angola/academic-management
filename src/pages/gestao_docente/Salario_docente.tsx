@@ -14,6 +14,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryEstatisticaAssiduidadeDocente } from "@/hooks/assiduidade/use-fetch-EstatisticaAssiduidadeDocente";
+import { useCursos } from "@/hooks/use-cursos";
 
 type SortField = "n_mecanografico" | "nome" | "grau_academico" | "escalao";
 
@@ -39,14 +40,14 @@ export default function SalarioDocente() {
     anoLectivo: "",
     semestre: "",
     curso: "",
-    search:"",
+    search: "",
     page: 1,
     limit: 10,
   });
 
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: teachersData = [] } = useQueryTeacther();
-
+  const { data: cursos = [] } = useCursos();
   const { data: response, isLoading, refetch } = useQueryEstatisticaAssiduidadeDocente({
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
     semestre: filters.semestre ? Number(filters.semestre) : 0,
@@ -58,7 +59,7 @@ export default function SalarioDocente() {
     exigirPresencasConfirmadas: filters.exigirPresencasConfirmadas,
     exigirSumariosInseridos: filters.exigirSumariosInseridos,
     exigirSumariosValidos: filters.exigirSumariosValidos,
-     search: filters.search || undefined,
+    search: filters.search || undefined,
     page: filters.page,
     limit: filters.limit,
   });
@@ -128,7 +129,7 @@ export default function SalarioDocente() {
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
             Atualizar
           </Button>
-           {/*
+          {/*
           <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" />Imprimir</Button>
           <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />Excel</Button>
           <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />PDF</Button>
@@ -147,7 +148,7 @@ export default function SalarioDocente() {
               setFilters({
                 docente: "", anoLectivo: "", semestre: "",
                 exigirPresencasConfirmadas: false, exigirSumariosInseridos: false,
-                exigirSumariosValidos: false, naoCobrarFaltas: false,search:"",
+                exigirSumariosValidos: false, naoCobrarFaltas: false, search: "",
                 dataInicio: "", dataFim: "", curso: "", page: 1, limit: itemsPerPage,
               });
               setCurrentPage(1);
@@ -157,81 +158,81 @@ export default function SalarioDocente() {
           </Button>
         </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-  <div className="space-y-1.5">
-    <Label>Ano Letivo</Label>
-    <FormSelect
-      disabled={isLoadingAcademicYear}
-      value={filters.anoLectivo}
-      onChange={(v) => updateFilters({ anoLectivo: v })}
-      options={anosAcademicos ?? []}
-      map={(a) => ({ key: a.codigo, label: a.designacao, value: String(a.codigo) })}
-      placeholder="Selecione o ano..."
-    />
-  </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <Label>Ano Letivo</Label>
+            <FormSelect
+              disabled={isLoadingAcademicYear}
+              value={filters.anoLectivo}
+              onChange={(v) => updateFilters({ anoLectivo: v })}
+              options={anosAcademicos ?? []}
+              map={(a) => ({ key: a.codigo, label: a.designacao, value: String(a.codigo) })}
+              placeholder="Selecione o ano..."
+            />
+          </div>
 
-  <div className="space-y-1.5">
-    <Label>Semestre</Label>
-    <FormSelect
-      value={filters.semestre}
-      onChange={(v) => updateFilters({ semestre: v })}
-      options={SEMESTRE}
-      map={(s) => ({ key: s.key, label: s.label, value: s.value })}
-      placeholder="Selecione o semestre..."
-    />
-  </div>
+          <div className="space-y-1.5">
+            <Label>Semestre</Label>
+            <FormSelect
+              value={filters.semestre}
+              onChange={(v) => updateFilters({ semestre: v })}
+              options={SEMESTRE}
+              map={(s) => ({ key: s.key, label: s.label, value: s.value })}
+              placeholder="Selecione o semestre..."
+            />
+          </div>
 
-  <div className="space-y-1.5">
-    <Label>Docente</Label>
-    <FormCommandSelect
-      value={filters.docente}
-      options={teachersData}
-      map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-      onChange={(codigo) => updateFilters({ docente: codigo })}
-    />
-  </div>
+          <div className="space-y-1.5">
+            <Label>Docente</Label>
+            <FormCommandSelect
+              value={filters.docente}
+              options={teachersData}
+              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
+              onChange={(codigo) => updateFilters({ docente: codigo })}
+            />
+          </div>
 
-  <div className="space-y-1.5">
-    <Label>Curso</Label>
-    <FormCommandSelect
-      value={filters.curso}
-      options={[]}
-      map={(c) => ({ key: c.codigo, value: c.codigo, label: c.designacao })}
-      onChange={(v) => updateFilters({ curso: v })}
-    />
-  </div>
+          <div className="space-y-1.5">
+            <Label>Curso</Label>
+            <FormCommandSelect
+              value={filters.curso}
+              options={cursos}
+              map={(c) => ({ key: c.codigo, value: c.codigo, label: c.designacao })}
+              onChange={(v) => updateFilters({ curso: v })}
+            />
+          </div>
 
-  <div className="space-y-1.5">
-    <Label>Data início</Label>
-    <Input
-      type="date"
-      value={filters.dataInicio ?? ""}
-      onChange={(e) => updateFilters({ dataInicio: e.target.value })}
-    />
-  </div>
+          <div className="space-y-1.5">
+            <Label>Data início</Label>
+            <Input
+              type="date"
+              value={filters.dataInicio ?? ""}
+              onChange={(e) => updateFilters({ dataInicio: e.target.value })}
+            />
+          </div>
 
-  <div className="space-y-1.5">
-    <Label>Data fim</Label>
-    <Input
-      type="date"
-      value={filters.dataFim ?? ""}
-      onChange={(e) => updateFilters({ dataFim: e.target.value })}
-    />
-  </div>
+          <div className="space-y-1.5">
+            <Label>Data fim</Label>
+            <Input
+              type="date"
+              value={filters.dataFim ?? ""}
+              onChange={(e) => updateFilters({ dataFim: e.target.value })}
+            />
+          </div>
 
-  <div className="space-y-1.5 lg:col-span-2">
-    <Label>Pesquisar</Label>
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      <Input
-        className="pl-9"
-        placeholder="Pesquisar por nome ou Nº Mec..."
-        value={filters.search}
-        onChange={(e) => updateFilters({ search: e.target.value })}
-      />
-    </div>
-  </div>
-</div>
+          <div className="space-y-1.5 lg:col-span-2">
+            <Label>Pesquisar</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Pesquisar por nome ou Nº Mec..."
+                value={filters.search}
+                onChange={(e) => updateFilters({ search: e.target.value })}
+              />
+            </div>
+          </div>
+        </div>
 
         <div className="border-t pt-4 mt-4">
           <h4 className="text-sm font-semibold text-muted-foreground mb-3">Opções de Cálculo</h4>
@@ -272,11 +273,13 @@ export default function SalarioDocente() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="p-3 text-center">
           <p className="text-xs text-muted-foreground">Total Docentes</p>
-          <p className="text-2xl font-bold">{resumo.totalDocentes}</p>
+          <p className="text-2xl font-bold">{resumo.totalDocentes -1}</p>
         </Card>
         <Card className="p-3 text-center">
           <p className="text-xs text-muted-foreground">Total Horas Efectivas</p>
-          <p className="text-2xl font-bold text-emerald-600">{resumo.totalHorasEfetivas}</p>
+          <p className="text-2xl font-bold text-emerald-600">
+            {Math.round(resumo.totalHorasEfetivas)}
+          </p>
         </Card>
         <Card className="p-3 text-center">
           <p className="text-xs text-muted-foreground">Total Faltas</p>
