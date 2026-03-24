@@ -1,30 +1,28 @@
+import { AvisosPorGruposResponse, AvisosPorGruposService } from "@/services/access/solicitacao/fetch-avisos-por-grupo.service";
 import { useQuery } from "@tanstack/react-query";
-import {
-  AvisosPorGrupoResponse,
-  AvisosPorGrupoService,
-} from "@/services/access/solicitacao/fetch-avisos-por-grupo.service";
 
-type UseQueryAvisosPorGrupoProps = {
-  grupoId?: number;
-  curso?: number;
-  periodo?: number;
+type UseQueryAvisosPorGruposProps = {
+  grupoIds?: number[];
 };
 
-export function useQueryAvisosPorGrupo({
-  grupoId,
-  curso,
-  periodo,
-}: UseQueryAvisosPorGrupoProps) {
-  return useQuery<AvisosPorGrupoResponse>({
-    queryKey: ["avisos-por-grupo", grupoId, curso, periodo],
+export function useQueryAvisosPorGrupos({
+  grupoIds,
+}: UseQueryAvisosPorGruposProps) {
+  const grupoIdsValidos =
+    grupoIds?.filter(
+      (id) => id !== undefined && id !== null && id !== 0
+    ) ?? [];
+
+  return useQuery<AvisosPorGruposResponse>({
+    queryKey: ["avisos-por-grupos", grupoIdsValidos],
     queryFn: () =>
-      AvisosPorGrupoService({
-        grupoId: grupoId as number,
-        curso,
-        periodo,
+      AvisosPorGruposService({
+        grupoIds: grupoIdsValidos,
       }),
-    enabled: !!grupoId,
-    staleTime: 1000 * 60 * 5,
+    enabled: grupoIdsValidos.length > 0,
+    staleTime: 1000 * 30,
+    refetchInterval: 1000 * 30,
+    refetchOnWindowFocus: true,
     retry: 2,
   });
 }

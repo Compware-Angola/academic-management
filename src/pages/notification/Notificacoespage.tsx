@@ -11,7 +11,8 @@ import {
 import { Bell, BellOff, Eye, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
-import { useQueryAvisosPorGrupo } from "@/hooks/acess/use-query-avisos-por-grupo";
+import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
+
 
 function formatarExpiracao(data: string | null) {
   if (!data) return "Sem data de expiração";
@@ -45,16 +46,17 @@ export default function NotificacoesPage() {
     aviso: null,
   });
 
-  const grupoPrincipal = user?.groups?.find(
-    (group) => group.type_group === 1
-  );
+  const gruposAviso =
+    user?.groups?.filter((group) => group.type_group === 1) ?? [];
+
+  const grupoIds = gruposAviso.map((group) => group.codigo);
 
   const {
     data: avisosGrupo = [],
     isLoading,
     refetch,
-  } = useQueryAvisosPorGrupo({
-    grupoId: grupoPrincipal?.codigo,
+  } = useQueryAvisosPorGrupos({
+    grupoIds,
   });
 
   const avisosValidos = useMemo(() => {
@@ -116,7 +118,7 @@ export default function NotificacoesPage() {
             Nenhum aviso encontrado
           </p>
           <p className="text-sm text-muted-foreground">
-            Não existem avisos activos dentro do prazo para este grupo.
+            Não existem avisos activos dentro do prazo para os grupos deste utilizador.
           </p>
         </div>
       ) : (
@@ -129,11 +131,12 @@ export default function NotificacoesPage() {
                 onClick={() => abrirDetalhe(aviso)}
               >
                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 whitespace-pre-line text-sm leading-relaxed text-foreground">
-                      {aviso.DESCRICAO}
-                    </p>
-                  </div>
+                  <div className="flex items-start gap-2">
+            <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+            <span className="line-clamp-2 text-xs leading-6 text-foreground">
+              {aviso.DESCRICAO}
+            </span>
+          </div>
 
                   <div className="flex shrink-0 items-center gap-2 md:flex-col md:items-end">
                     <span className="text-xs text-muted-foreground">
@@ -180,35 +183,35 @@ export default function NotificacoesPage() {
           </DialogHeader>
 
           {detalheModal.aviso && (
-  <div className="space-y-5 py-2">
-    <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Assunto
-      </p>
-      <h2 className="text-xl font-semibold leading-snug text-foreground">
-        {detalheModal.aviso.ASSUNTO}
-      </h2>
-    </div>
+            <div className="space-y-5 py-2">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Assunto
+                </p>
+                <h2 className="text-xl font-semibold leading-snug text-foreground">
+                  {detalheModal.aviso.ASSUNTO}
+                </h2>
+              </div>
 
-    <div className="border-t pt-4">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Descrição
-      </p>
-      <p className="whitespace-pre-line text-sm leading-7 text-foreground">
-        {detalheModal.aviso.DESCRICAO}
-      </p>
-    </div>
+              <div className="border-t pt-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Descrição
+                </p>
+                <p className="whitespace-pre-line text-sm leading-7 text-foreground">
+                  {detalheModal.aviso.DESCRICAO}
+                </p>
+              </div>
 
-    <div className="border-t pt-4">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Expiração
-      </p>
-      <p className="text-sm text-muted-foreground">
-        {formatarDataCompleta(detalheModal.aviso.DATE_EXPIRACAO)}
-      </p>
-    </div>
-  </div>
-)}
+              <div className="border-t pt-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Expiração
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {formatarDataCompleta(detalheModal.aviso.DATE_EXPIRACAO)}
+                </p>
+              </div>
+            </div>
+          )}
 
           <DialogFooter>
             <Button
