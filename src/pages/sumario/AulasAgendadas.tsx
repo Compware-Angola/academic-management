@@ -406,7 +406,7 @@ export default function AulasAgendadas() {
                                 <TableRow key={a.codigo}>
                                     <TableCell className="font-medium">{a.codigo}</TableCell>
                                     <TableCell>{a.unidade_curricular}</TableCell>
-                                    <TableCell>{a.docente}</TableCell>
+                                    <TableCell>{a.docente || 'Por Definir'}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-1">
                                             <Calendar className="h-3 w-3 text-muted-foreground" />
