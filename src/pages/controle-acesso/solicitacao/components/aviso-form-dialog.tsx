@@ -55,7 +55,7 @@ export function AvisoFormDialog({
 
   const {user} = useAuth()
   //console.log("PK_UTILIZADOR", user.user.pk_utilizador)
-  console.log("initialData", initialData);
+  console.log("USER: ", user);
   // ✅ Inicializa formData com initialData quando for editar
   const getFormData = (data?: any) => ({
   codigo: data?.codigo ?? "",

@@ -67,7 +67,7 @@ type SearchByType =
   | "n_operacao_bancaria2";
 
 export default function ListarPagamentos() {
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
   const [facturaSelecionado, setFacturaSelecionado] = useState<number>(0);
   const [filters, setFilters] = useState({

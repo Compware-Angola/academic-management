@@ -52,9 +52,18 @@ export interface logoutResponse {
   mensagem: string;
 }
 
+export interface Group {
+  codigo: number;
+  designation: string;
+  sigla: string;
+  type_group: number;
+  type_group_designation: string;
+};
+
 export interface CurrentUserResponse {
   isAuthenticated: boolean;
   user: User;
+  groups: Group[];
   roles?: roles; 
   permissions?: string[] 
   message: string;

@@ -75,7 +75,7 @@ export default function PagamentoTFC() {
 
   const [page, setPage] = useState(1);
 
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(10);
 
   const [facturaSelecionado, setFacturaSelecionado] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -55,6 +55,7 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { CreateIsencaoDialog } from "./CreateIsencaoDialog";
 
 export default function IsencaoServico() {
   const [matriculaInput, setMatriculaInput] = useState("");
@@ -227,22 +228,7 @@ export default function IsencaoServico() {
     await refetch();
   };
 
-  const handleSubmit = async () => {
-    await mutateAsync({
-      codigoMatricula: Number(formData.codigoMatricula),
-      codigoServico: Number(formData.codigoServico),
-      codigoAnoLectivo: Number(formData.codigoAnoLectivo),
-      dataIsencao: formData.dataIsencao,
-    });
-    setIsModalOpen(false);
-    setFormData({
-      codigoServico: "",
-      codigoMatricula: "",
-      codigoAnoLectivo: "",
-      dataIsencao: "",
-    });
-    await refetch();
-  };
+  const handleSubmit = async () => {};
 
   const handleSearch = () => {
     setFiltersApplied(filters);
@@ -357,14 +343,14 @@ export default function IsencaoServico() {
             <TableBody>
               {isFetching && items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10">
+                  <TableCell colSpan={10} className="text-center py-10">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center">
+                  <TableCell colSpan={10} className="text-center">
                     Nenhum registro encontrado
                   </TableCell>
                 </TableRow>
@@ -444,14 +430,15 @@ export default function IsencaoServico() {
         </CardContent>
       </Card>
 
-      <CreateIsencaoServicoDialog
+      {/* <CreateIsencaoServicoDialog
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         formData={formData}
         onChange={setFormData}
         onSubmit={handleSubmit}
         isSubmitting={isPending}
-      />
+      /> */}
+      <CreateIsencaoDialog open={isModalOpen} onOpenChange={setIsModalOpen} />
 
       <EditIsencaoServicoDialog
         open={isEditOpen}

@@ -124,7 +124,7 @@ import PautaGeralExame from "./pages/access_exam/PautaGeralExame";
 import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
-
+import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 
 const App = () => {
   return (
@@ -155,8 +155,6 @@ const App = () => {
                     element={<RedefinirSenhaPrimeiroAcesso />}
                   />
                 </Route>
-              
-
 
                 <Route element={<MainLayout />}>
                   <Route path="/dashboard" element={<Index />} />
@@ -194,10 +192,7 @@ const App = () => {
                     path="/controle-acesso/all-solicitacoes"
                     element={<Solicitacoes />}
                   />
-                     <Route
-                    path="/notificacoes"
-                    element={<NotificacoesPage />}
-                  />
+                  <Route path="/notificacoes" element={<NotificacoesPage />} />
 
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
                   <Route
@@ -643,7 +638,9 @@ const App = () => {
                     path="/exame/lista-candidatos"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla!,
+                        ]}
                       >
                         <ListaCandidatos />
                       </ProtectedRoute>
@@ -654,7 +651,9 @@ const App = () => {
                     path="/exame/pauta-geral"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla!,
+                        ]}
                       >
                         <PautaGeralExame />
                       </ProtectedRoute>
@@ -665,7 +664,10 @@ const App = () => {
                     path="/exame/candidatos-prova"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla!,
+                        ]}
                       >
                         <CandidatosComESemProva />
                       </ProtectedRoute>
@@ -676,7 +678,9 @@ const App = () => {
                     path="/exame/alterar-senha"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla!,
+                        ]}
                       >
                         <AlterarSenhaExame />
                       </ProtectedRoute>
@@ -687,7 +691,10 @@ const App = () => {
                     path="/exame/epoca-especial"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL
+                            .sigla!,
+                        ]}
                       >
                         <InscricaoEpocaEspecial />
                       </ProtectedRoute>
@@ -698,13 +705,15 @@ const App = () => {
                     path="/exame/horarios"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO
+                            .sigla!,
+                        ]}
                       >
                         <HorariosPorCurso />
                       </ProtectedRoute>
                     }
                   />
-
 
                   <Route
                     path="/acessos/utilizador"
@@ -1131,6 +1140,18 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/defesa-tfc/vinculos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFESA.sigla!,
+                        ]}
+                      >
+                        <VinculosTFC />
+                      </ProtectedRoute>
+                    }
+                  />
                   {/* <Route
                     path="/docente/validacao-uc"
                     element={<ValidacaoPrograma />}
@@ -1187,11 +1208,19 @@ const App = () => {
 
                   <Route
                     path="/gestao-docentes/docentes"
-                    element={
-                      <ListagemDocentes />
-                    }
-                  />
 
+                    element={
+
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_DE_DOCENTES.sigla!,
+                        ]}
+                      >
+                        <ListagemDocentes />
+                      </ProtectedRoute>
+                  }
+
+                  />
                 </Route>
               </Routes>
             </TooltipProvider>
