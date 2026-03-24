@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { ReactElement, useEffect, useMemo, useState } from "react";
+import PDFActions from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import {
   Tabs,
   TabsContent,
@@ -39,6 +41,16 @@ export default function ControleGeralPorDocente() {
     dataReferencia: todayIso,
   });
 
+const [pdfContent, setPdfContent] = useState<ReactElement | null>(null);
+const [excelProps, setExcelProps] = useState<any | null>(null);
+const [baseFileName, setBaseFileName] = useState("controle_geral_docente");
+
+useEffect(() => {
+  setPdfContent(null);
+  setExcelProps(null);
+  setBaseFileName("controle_geral_docente");
+}, [filters.modo, filters.docenteId, filters.dataReferencia]);
+
   const docenteSelecionado = useMemo(() => {
     const id = Number(filters.docenteId || 0);
     const found = teachersData.find((t: any) => Number(t.codigo) === id);
@@ -49,16 +61,38 @@ export default function ControleGeralPorDocente() {
 
   return (
     <div className="space-y-6 pb-10">
+      
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Controle Geral de Assiduidade por Docente
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Visualize por Mês, Semana ou Dia, com resumo e detalhes claros.
-          </p>
-        </div>
-      </div>
+  <div>
+    <h1 className="text-3xl font-bold tracking-tight">
+      Controle Geral de Assiduidade por Docente
+    </h1>
+    <p className="text-muted-foreground mt-1">
+      Visualize por Mês, Semana ou Dia, com resumo e detalhes claros.
+    </p>
+  </div>
+
+  {(pdfContent || excelProps) && (
+    <div className="flex flex-wrap gap-2">
+      {pdfContent && (
+        <PDFActions
+          document={pdfContent}
+          fileName={`${baseFileName}.pdf`}
+          showDownload
+          showPrint
+        />
+      )}
+
+      {excelProps && (
+        <ExcelActions
+          excelProps={excelProps}
+          fileName={`${baseFileName}.xlsx`}
+          showDownload
+        />
+      )}
+    </div>
+  )}
+</div>
 
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-5 shadow-sm space-y-4">
@@ -117,7 +151,7 @@ export default function ControleGeralPorDocente() {
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 md:ml-3">
             <Label>Data de referência</Label>
             <Input
               type="date"
@@ -128,7 +162,8 @@ export default function ControleGeralPorDocente() {
             />
           </div>
 
-          <div className="flex items-end gap-2">
+          <div className="space-y-1.5">
+            <Label className="opacity-0">Ação</Label>
             <Button
               variant="outline"
               className="w-full"
@@ -140,18 +175,6 @@ export default function ControleGeralPorDocente() {
               Hoje
             </Button>
           </div>
-
-          {/* extras (se quiseres mais tarde) */}
-          {showMoreFilters ? (
-            <div className="space-y-1.5">
-              <Label>Modo (atalho)</Label>
-              <div className="text-sm text-muted-foreground">
-                Use as tabs abaixo.
-              </div>
-            </div>
-          ) : (
-            <div />
-          )}
         </div>
       </div>
 
@@ -179,6 +202,9 @@ export default function ControleGeralPorDocente() {
               setFilters((p) => ({ ...p, modo: "DIA", dataReferencia: isoDay }))
             }
             docenteLabel={docenteSelecionado?.nome ?? ""}
+            setPdfContent={setPdfContent}
+            setExcelProps={setExcelProps}
+            setBaseFileName={setBaseFileName}
           />
         </TabsContent>
 
@@ -192,6 +218,9 @@ export default function ControleGeralPorDocente() {
             onPickDay={(isoDay) =>
               setFilters((p) => ({ ...p, modo: "DIA", dataReferencia: isoDay }))
             }
+            setPdfContent={setPdfContent}
+            setExcelProps={setExcelProps}
+            setBaseFileName={setBaseFileName}
           />
         </TabsContent>
 
@@ -202,6 +231,9 @@ export default function ControleGeralPorDocente() {
             docenteNome={filters.docenteNome}
             dataReferencia={filters.dataReferencia}
             docenteLabel={docenteSelecionado?.nome ?? ""}
+            setPdfContent={setPdfContent}
+            setExcelProps={setExcelProps}
+            setBaseFileName={setBaseFileName}
           />
         </TabsContent>
       </Tabs>

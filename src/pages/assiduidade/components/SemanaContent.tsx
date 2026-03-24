@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import { ReactElement, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,9 @@ type Props = {
   dataReferencia: string;
   docenteLabel: string;
   onPickDay: (isoDay: string) => void;
+  setPdfContent: (value: ReactElement | null) => void;
+  setExcelProps: (value: any | null) => void;
+  setBaseFileName: (value: string) => void;
 };
 
 type Estado = 1 | 2 | 3;
@@ -81,6 +85,9 @@ export default function SemanaContent({
   docenteNome,
   dataReferencia,
   docenteLabel,
+  setPdfContent,
+  setExcelProps,
+  setBaseFileName,
 }: Props) {
   const docenteIdNum = docenteId ? Number(docenteId) : undefined;
 
@@ -132,6 +139,97 @@ export default function SemanaContent({
 
     return map;
   }, [eventos]);
+
+  const exportRows = useMemo(
+  () =>
+    eventos.map((ev) => ({
+      dia: ev.dia,
+      horaInicio: ev.hora_inicio,
+      horaFim: ev.hora_fim,
+      ordemTempo: ev.ordem_tempo ?? "—",
+      estado:
+        ev.estado === 1
+          ? "Pendente"
+          : ev.estado === 2
+          ? "Falta"
+          : ev.estado === 3
+          ? "Presença"
+          : "—",
+    })),
+  [eventos]
+);
+
+const pdfContentLocal =
+  exportRows.length > 0 ? (
+    <GenericPDFDocument
+      documentTitle="Controle Geral de Assiduidade por Docente"
+      subtitle="Visão Semanal"
+      infoSections={[
+        { title: "Docente", content: docenteLabel || "—" },
+        { title: "Data de Referência", content: dataReferencia || "—" },
+        { title: "Resumo", content: [`Total de eventos: ${exportRows.length}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "dia", label: "Dia", width: "20%" },
+          { key: "horaInicio", label: "Hora Início", width: "15%" },
+          { key: "horaFim", label: "Hora Fim", width: "15%" },
+          { key: "ordemTempo", label: "Ordem", width: "15%" },
+          { key: "estado", label: "Estado", width: "20%" },
+        ],
+        rows: exportRows,
+        headerBackground: "#1e40af",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+const excelPropsLocal =
+  exportRows.length > 0
+    ? {
+        documentTitle: "Controle Geral de Assiduidade por Docente",
+        subtitle: "Visão Semanal",
+        infoSections: [
+          { title: "Docente", content: docenteLabel || "—" },
+          { title: "Data de Referência", content: dataReferencia || "—" },
+          { title: "Resumo", content: [`Total de eventos: ${exportRows.length}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "dia", label: "Dia", width: 20 },
+            { key: "horaInicio", label: "Hora Início", width: 15 },
+            { key: "horaFim", label: "Hora Fim", width: 15 },
+            { key: "ordemTempo", label: "Ordem", width: 15 },
+            { key: "estado", label: "Estado", width: 20 },
+          ],
+          rows: exportRows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#1e40af",
+      }
+    : null;
+
+useEffect(() => {
+  setPdfContent(pdfContentLocal);
+  setExcelProps(excelPropsLocal);
+  setBaseFileName(
+    `controle_docente_semana_${dataReferencia}_${docenteId || "sem_docente"}`
+  );
+
+  return () => {
+    setPdfContent(null);
+    setExcelProps(null);
+  };
+}, [
+  pdfContentLocal,
+  excelPropsLocal,
+  dataReferencia,
+  docenteId,
+  setPdfContent,
+  setExcelProps,
+  setBaseFileName,
+]);
+    
 
   if (!canFetch) {
     return (

@@ -101,6 +101,8 @@ const {
     enabled: !!filters.curso && !!filters.semestre,
   }
 );
+
+console.log("UC: ", gradesCurriculares)
       
 
   const handleFilterChange = (key: string, value: string | number) => {
@@ -118,6 +120,7 @@ const {
     estado: filters.estado ? Number(filters.estado) : undefined,
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    curso: filters.curso,
     gradeCurricular: filters.gradeCurricular
     ? Number(filters.gradeCurricular)
     : undefined,
