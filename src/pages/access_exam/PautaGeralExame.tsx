@@ -7,13 +7,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { RefreshCw, Download, Printer, ChevronLeft, ChevronRight, Home, X } from "lucide-react";
+import { RefreshCw, Download, Printer, ChevronLeft, ChevronRight, Home, X, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useResultadoProva } from "@/hooks/access_exam/use-resultado-prova";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { useQuerySalas } from "@/hooks/salas/use-query-sala";
+import { parseFilter } from "@/util/parse-filter";
 
 type Filters = {
   codigoAnoLetivo: string;
@@ -25,6 +28,7 @@ type Filters = {
   dataInicio: string;
   dataFim: string;
   dataInicioInput: string;
+  search: string;
   dataFimInput: string;
   page: number;
   limit: number;
@@ -39,6 +43,7 @@ const FILTERS_INITIAL: Filters = {
   resultado: "",
   dataInicio: "",
   dataFim: "",
+  search: "",
   dataInicioInput: "",
   dataFimInput: "",
   page: 1,
@@ -47,7 +52,7 @@ const FILTERS_INITIAL: Filters = {
 
 export default function PautaGeralExame() {
   const [filters, setFilters] = useState<Filters>(FILTERS_INITIAL);
-
+  const { data: salas = [] } = useQuerySalas();
   const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
@@ -57,7 +62,8 @@ export default function PautaGeralExame() {
     codigoTurno: filters.codigoTurno ? Number(filters.codigoTurno) : undefined,
     codigoFaculdade: filters.codigoFaculdade ? Number(filters.codigoFaculdade) : undefined,
     codigoSala: filters.codigoSala ? Number(filters.codigoSala) : undefined,
-    resultado: filters.resultado !== "" ? Number(filters.resultado) : undefined,
+    resultado: parseFilter(filters.resultado),
+        search:filters.search || undefined,
     dataInicio: filters.dataInicio || undefined,
     dataFim: filters.dataFim || undefined,
     page: filters.page,
@@ -183,20 +189,36 @@ export default function PautaGeralExame() {
               })}
             />
           </div>
-
           <div className="space-y-2">
-            <Label>Resultado</Label>
-            <Select
-              value={filters.resultado}
-              onValueChange={(v) => setFilters((p) => ({ ...p, resultado: v, page: 1 }))}
-            >
-              <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Admitido</SelectItem>
-                <SelectItem value="0">Reprovado</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormCommandSelect
+              label="Sala"
+              value={filters.codigoSala}
+              width="full"
+              placeholder="Selecionar sala"
+              options={salas}
+              map={(sala) => ({
+                key: sala.pk,
+                value: sala.pk,
+                label: sala.descricao,
+              })}
+              onChange={(v) => setFilters({ ...filters, codigoSala: v })}
+            />
           </div>
+
+<div className="space-y-2">
+  <Label>Resultado</Label>
+  <Select
+    value={filters.resultado !== undefined ? String(filters.resultado) : 'all'}
+    onValueChange={(v) => setFilters((p) => ({ ...p, resultado: v === 'all' ? undefined : v, page: 1 }))}
+  >
+    <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
+    <SelectContent>
+      <SelectItem value="all">Todos</SelectItem>
+      <SelectItem value="1">Admitido</SelectItem>
+      <SelectItem value="0">Reprovado</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
 
           <div className="space-y-2">
             <Label>Data Início</Label>
@@ -214,6 +236,18 @@ export default function PautaGeralExame() {
               value={filters.dataFimInput}
               onChange={(e) => handleDataFim(e.target.value)}
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Pesquisar</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Pesquisar por nome ou BI"
+                value={filters.search}
+              onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))}
+              />
+            </div>
           </div>
 
         </div>
@@ -277,8 +311,8 @@ export default function PautaGeralExame() {
                       item.nota >= 14
                         ? "bg-green-500/10 text-green-600 border-green-500/20"
                         : item.nota >= 10
-                        ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
-                        : "bg-red-500/10 text-red-600 border-red-500/20"
+                          ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                          : "bg-red-500/10 text-red-600 border-red-500/20"
                     }
                   >
                     {item.nota}

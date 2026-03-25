@@ -7,6 +7,7 @@ export function useMutationCreateOrientadorTfc() {
     mutationFn: createOrientadorService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orientadores-tfc"] });
+      queryClient.invalidateQueries({ queryKey: ["vinculos"] });
     },
     onError: (error) => {
       console.error(error);

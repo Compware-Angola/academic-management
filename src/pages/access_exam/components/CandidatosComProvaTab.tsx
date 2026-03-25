@@ -39,9 +39,10 @@ export function CandidatosComProvaTab() {
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const { data, isLoading } = useCandidatosSemProva({
-    codigoAnoLetivo: filters.codigoAnoLetivo ? Number(filters.codigoAnoLetivo) : undefined,
-    codigoCurso: filters.codigoCurso ? Number(filters.codigoCurso) : undefined,
-    codigoTurno: filters.codigoTurno ? Number(filters.codigoTurno) : undefined,
+
+    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
+    codigoCurso: parseFilter(filters.codigoCurso),
+    codigoTurno: parseFilter(filters.codigoTurno),
     filtroProva: "com_prova",
     statusProva: parseFilter(filters.statusProva),
     page: filters.page,
@@ -86,22 +87,23 @@ export function CandidatosComProvaTab() {
               disabled={isLoadingPeriodos}
               loading={isLoadingPeriodos}
               label="Período"
-              value={filters.codigoTurno}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v, page: 1 }))}
-              options={periodos}
+              value={filters.codigoTurno?.toString() ?? 'all'}
+              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === 'all' ? undefined : v, page: 1 }))}
+              options={[{ codigo: 'all', designacao: 'Todos' }, ...periodos]}
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
           </div>
           <div className="space-y-2">
             <FormSelect
               label="Estado Prova"
-              value={filters.statusProva?.toString() ?? ""}
+              value={filters.statusProva?.toString() ?? 'all'}
               onChange={(v) =>
-                setFilters((p) => ({ ...p, statusProva: v, page: 1 }))
+                setFilters((p) => ({ ...p, statusProva: v === 'all' ? undefined : v, page: 1 }))
               }
               options={[
-                { key: "0", label: "Reprovado", value: "0" },
-                { key: "1", label: "Aprovado", value: "1" },
+                { key: 'all', label: 'Todos', value: 'all' },
+                { key: '0', label: 'Reprovado', value: '0' },
+                { key: '1', label: 'Aprovado', value: '1' },
               ]}
               map={(item) => item}
             />
