@@ -27,6 +27,7 @@ import { useQueryListarRoles } from "@/hooks/acess/use-query-roles";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useMutationUpdateAviso } from "@/hooks/acess/use-mutation-aviso-update";
 import { useAuth } from "@/hooks/use-auth";
+import { useGroups } from "@/hooks/acess/use-query-groups";
 
 type Props = {
   open: boolean;
@@ -52,6 +53,10 @@ export function AvisoFormDialog({
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const { data: roles } = useQueryListarRoles();
   const { data: aluno } = useQueryAlunoMatricula(matricula, pesquisar);
+  const { data: groups = [], isLoading: loadingGroups } = useGroups();
+
+  console.log("GRUPOS: ", groups)
+  console.log("ROLES: ", roles)
 
   const {user} = useAuth()
   //console.log("PK_UTILIZADOR", user.user.pk_utilizador)
@@ -281,12 +286,12 @@ export function AvisoFormDialog({
                                   </SelectTrigger>
                     
                                   <SelectContent>
-                                    {roles?.map((role: any) => (
+                                    {groups?.map((role: any) => (
                                       <SelectItem
-                                        key={role.id}
-                                        value={role.id.toString()} // ✅ usa ID
+                                        key={role.codigo}
+                                        value={role.codigo.toString()} // ✅ usa ID
                                       >
-                                        {role.name}
+                                        {role.descricao}
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
