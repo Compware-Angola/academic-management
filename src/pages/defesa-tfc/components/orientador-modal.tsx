@@ -1,8 +1,6 @@
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { DocenteTFCCommandSelect } from "@/components/common/global-selects/DocenteTFCCommandSelect";
-import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -53,31 +51,26 @@ export function OrientadorModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-2xl!"
+        className="max-w-4xl!"
         onPointerDownOutside={handleClose}
         onEscapeKeyDown={handleClose}
       >
         <DialogTitle>Adicionar Orientador</DialogTitle>
-        <div className="grid gap-4 py-4 grid-cols-2">
+        <div className="grid gap-4 py-4 grid-cols-3">
           <AcademicYearSelect
             value={filters.anoLectivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
           />
-          <FacultySelect
-            allOption
-            value={filters.faculdade}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, faculdade: v, curso: "", docente: "" })
-            }
-          />
-          <DocenteTFCCommandSelect
-            label="Docente"
-            value={filters.docente}
-            onChangeValue={(v) => setFilters({ ...filters, docente: v })}
-            params={{
-              faculdadeId: parseFilter(filters.faculdade),
-            }}
-          />
+          <div className="space-y-1.5">
+            <Label>Docente</Label>
+            <FormCommandSelect
+              value={filters.docente}
+              options={teachersData}
+              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
+              onChange={(codigo) => setFilters({ ...filters, docente: codigo })}
+            />
+          </div>
+
           <CourseSelect
             value={filters.curso}
             onChangeValue={(v) => setFilters({ ...filters, curso: v })}
@@ -92,9 +85,14 @@ export function OrientadorModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!filters.docente || !filters.curso || !filters.anoLectivo}
+            disabled={
+              !filters.docente ||
+              !filters.curso ||
+              !filters.anoLectivo ||
+              mutation.isPending
+            }
           >
-            Salvar
+            {mutation.isPending ? "A salvar..." : "Salvar"}
           </Button>
         </div>
       </DialogContent>
