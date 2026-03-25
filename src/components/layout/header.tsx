@@ -1,4 +1,4 @@
-import { useQueryAvisosPorGrupo } from "@/hooks/acess/use-query-avisos-por-grupo";
+
 import { LogOut, Search, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +32,7 @@ import { useStudentSugestoes } from "@/hooks/tudents/use-query-students";
 import { AuthStorage } from "@/util/auth-storage";
 import { getCurrentUserService } from "@/services/auth/login.service";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
 
 
 export function Header() {
@@ -58,15 +59,18 @@ export function Header() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const grupoPrincipal = user?.groups?.find(
-  (group) => group.type_group === 1
-);
+  const gruposAviso =
+  user?.groups?.filter((group) => group.type_group === 1) ?? [];
+  
+  //console.log("GRUPOS: ", gruposAviso)
 
-const { data: avisosGrupo = [] } = useQueryAvisosPorGrupo({
-  grupoId: grupoPrincipal?.codigo,
+const grupoIds = gruposAviso.map((group) => group.codigo);
+console.log("GRUPOS IDS: ", grupoIds)
+const { data: avisosGrupo = [] } = useQueryAvisosPorGrupos({
+  grupoIds,
 });
 
-console.log("AVISO GRUPO: ", grupoPrincipal)
+//console.log("DADOS: ", avisosGrupo)
 
 const agora = new Date();
 
@@ -236,32 +240,22 @@ const avisosValidos = avisosGrupo.filter((aviso) => {
                   </div>
                 ) : (
                   <div className="max-h-72 overflow-y-auto">
-                    {avisosValidos.map((aviso) => (
-                      <DropdownMenuItem
-                        key={aviso.CODIGO}
-                        className="flex cursor-default flex-col items-start gap-1 px-3 py-2.5 focus:bg-accent"
-                      >
-                        <div className="flex w-full items-start justify-between gap-2">
-                          <span className="text-sm font-medium leading-tight text-foreground">
-                            {aviso.ASSUNTO}
-                          </span>
+                    {avisosValidos.map((aviso, index) => (
+      <div key={aviso.CODIGO}>
+        <DropdownMenuItem
+          className="cursor-default px-3 py-3 focus:bg-muted/50 data-[highlighted]:bg-muted/50"
+        >
+          <div className="flex items-start gap-2">
+            <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+            <span className="line-clamp-2 text-xs leading-6 text-foreground">
+              {aviso.DESCRICAO}
+            </span>
+          </div>
+        </DropdownMenuItem>
 
-                          {aviso.DATE_EXPIRACAO && (
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(aviso.DATE_EXPIRACAO).toLocaleDateString("pt-PT", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                              })}
-                            </span>
-                          )}
-                        </div>
-
-                        <span className="text-xs leading-snug text-muted-foreground">
-                          {aviso.DESCRICAO}
-                        </span>
-                      </DropdownMenuItem>
-                    ))}
+        {index < avisosValidos.length - 1 && <DropdownMenuSeparator />}
+      </div>
+    ))}
                   </div>
                 )}
 

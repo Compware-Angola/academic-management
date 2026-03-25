@@ -28,7 +28,13 @@ import { Banknote, Eye, GraduationCap, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useMutationCreateIsencaoServico } from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-servico.ts";
 import { useToast } from "@/hooks/use-toast";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 type CreateIsencaoServicoDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -115,7 +121,6 @@ export function CreateIsencaoDialog({
       limit,
       page,
     });
-  const students = studentsResponse?.data ?? [];
   const handleSubmit = async () => {
     setSuccessFullStudents([]);
     setErroStudents([]);
@@ -140,6 +145,10 @@ export function CreateIsencaoDialog({
   const disabledIsencaoButton = isPending || selectedStudents.length == 0;
   const disabledPesquisaButtom = isPending || isLoadingStudent;
   const temErros = errorStudents.length > 0;
+  const students = studentsResponse?.data ?? [];
+  const total = studentsResponse?.total ?? 0;
+  const totalPages = studentsResponse?.totalPages ?? 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-5xl!">
@@ -258,6 +267,48 @@ export function CreateIsencaoDialog({
                 )}
               </TableBody>
             </Table>
+          </div>
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-sm text-muted-foreground">
+              A mostrar {students.length} de {total} registos
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Anterior
+              </Button>
+              <span>
+                Página {page} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Próxima
+              </Button>
+
+              <Select
+                value={String(limit)}
+                onValueChange={(v) => {
+                  setLimit(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 

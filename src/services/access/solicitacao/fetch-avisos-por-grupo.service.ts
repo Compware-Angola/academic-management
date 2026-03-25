@@ -1,8 +1,6 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { normalizeParam } from "@/util/normalize-param";
 
-/* ---------- RESPONSE ITEM ---------- */
-export type AvisoPorGrupo = {
+export type AvisoPorGrupos = {
   CODIGO: number;
   ASSUNTO: string;
   DESCRICAO: string;
@@ -17,29 +15,35 @@ export type AvisoPorGrupo = {
   DESTINO_NOME: string | null;
 };
 
-/* ---------- RESPONSE COMPLETO ---------- */
-export type AvisosPorGrupoResponse = AvisoPorGrupo[];
+type Params = {
+  grupoIds?: number[];
+};
 
-/* ---------- SERVICE ---------- */
-export async function AvisosPorGrupoService({
-  grupoId,
-  curso,
-  periodo,
-}: {
-  grupoId: number;
-  curso?: number;
-  periodo?: number;
-}): Promise<AvisosPorGrupoResponse> {
-  const { data } = await axiosNestGa.get<AvisosPorGrupoResponse>(
-    "/solicitacoa/avisos-por-grupo",
-    {
-      params: {
-        grupoId,
-        curso: normalizeParam(curso),
-        periodo: normalizeParam(periodo),
+export type AvisosPorGruposResponse = AvisoPorGrupos[];
+
+export async function AvisosPorGruposService(
+  params: Params
+): Promise<AvisosPorGruposResponse> {
+
+  const grupoIdsValidos =
+    params.grupoIds?.filter(
+      (id) => id !== undefined && id !== null && id !== 0
+    ) ?? [];
+    console.log("SERVICE: ", grupoIdsValidos)
+  if (grupoIdsValidos.length === 0) {
+    return [];
+  }
+
+  const {data} = await axiosNestGa.post<AvisosPorGruposResponse>(
+    "solicitacoa/avisos-por-grupos",
+    
+       {
+        grupoIds: grupoIdsValidos,
       },
-    }
+    
   );
+
+  console.log("DATA SERVICE: ", data)
 
   return data;
 }
