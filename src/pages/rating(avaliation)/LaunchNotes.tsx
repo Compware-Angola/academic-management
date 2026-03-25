@@ -61,7 +61,7 @@ import {
 import { useQueryPromptGetPermissionLaunch } from "@/hooks/avaliacao/use-query-prompt-get-permission-launch";
 import {
   GetAssessmentNotasItem,
-  GetAssessmentNotasResponse,
+  
 } from "@/services/avaliacao/prompt-get-permission-launch.service";
 
 export default function LaunchNotes() {
@@ -87,6 +87,7 @@ export default function LaunchNotes() {
   const {
     data: students = [],
     isLoading: loadingNoteRelease,
+    isRefetching,
     refetch,
   } = useQueryNoteReleases({
     anoLectivoId: Number(formData.anoLetivo),
@@ -107,17 +108,7 @@ export default function LaunchNotes() {
   const { user: userData } = useAuth();
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
-  const { data: teacherInfoData, isLoading: teacherInfoDataLoading } =
-    useQueryTeacherProfile(userData?.user?.pk_utilizador);
-  const { data: turmDataHorario, isLoading: isLoadingTurmaDataHorario } =
-    useQueryListSchedules({
-      teacherId: teacherInfoData?.codigo_docente,
-      anoLectivo: Number(formData.anoLetivo),
-      semestre: Number(formData.semestre),
-    });
-  const avaliacaoDescricao = tipoAvaliacao.filter(
-    (t) => t.codigo == parseFilter(formData.tipoAvaliacao),
-  );
+  
 
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
   const { data: classes = [], isLoading: isLoadingClasses } =
@@ -154,9 +145,7 @@ export default function LaunchNotes() {
       },
       { enabled: canLoadTurmas },
     );
-  const activeAcademicYearId = academicYear?.find(
-    (y) => y.estado.toLowerCase() === "activo",
-  )?.codigo;
+
 
   const { data: gradesPrompt, isLoading: isLoadingGradesPrompt } =
     useQueryGradesCreationPrompt({
@@ -673,7 +662,7 @@ export default function LaunchNotes() {
                               }
                               className="w-24 mx-auto text-center"
                               placeholder="0-20"
-                              disabled={isLocked}
+                              disabled={isLocked || isRefetching}
                             />
                           </TableCell>
 
@@ -692,7 +681,7 @@ export default function LaunchNotes() {
                           <TableCell className="text-center flex justify-center gap-2">
                             <Button
                               size="sm"
-                              disabled={shouldBlockGradesActions}
+                              disabled={shouldBlockGradesActions || isRefetching}
                               variant="ghost"
                               onClick={() =>
                                 toggleLock(student.codigo_grade_aluno)
@@ -706,14 +695,14 @@ export default function LaunchNotes() {
                             </Button>
 
                             <Button
-                              disabled={shouldBlockGradesActions}
+                              disabled={shouldBlockGradesActions || isRefetching}
                               size="sm"
                               variant={hasNota ? "default" : "outline"}
                               onClick={() => {
                                 if (
                                   student.nota === null ||
                                   student.nota === undefined
-                                ) {
+                                ) { 
                                   toast({
                                     title: "Erro",
                                     description: "Insira uma nota primeiro",
