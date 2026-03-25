@@ -14,8 +14,10 @@ import { AvisoFormDialog } from "./components/aviso-form-dialog";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutateStatusAviso } from "@/hooks/acess/use-mutate-status-aviso";
+import { Input } from "@/components/ui/input";
 
 export default function Avisos() {
+  const [assunto, setAssunto] = useState("");
 const [modalOpen, setModalOpen] = useState(false);
 const [mode, setMode] = useState<"create" | "edit">("create");
 const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
@@ -26,12 +28,17 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
   const { data, isLoading, isFetching } = useQueryAvisos({
     page: currentPage,
     limit: 5,
+    assunto
   });
 
   const { mutateAsync: alterarStatusAviso, isPending: alterandoStatus } =
   useMutateStatusAviso();
   
   //console.log("AVISO: ", data)  
+
+  useEffect(() => {
+  setCurrentPage(1);
+}, [assunto]);
 
   useEffect(() => {
   if (data?.totalPages && currentPage > data.totalPages) {
@@ -243,6 +250,23 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
           </>
         }
       />
+
+      <div className="flex items-center gap-3">
+  <Input
+    placeholder="Pesquisar por assunto..."
+    value={assunto}
+    onChange={(e) => setAssunto(e.target.value)}
+    className="max-w-sm"
+  />
+
+  <Button
+    variant="outline"
+    onClick={() => setAssunto("")}
+    disabled={!assunto}
+  >
+    Limpar
+  </Button>
+</div>
 
       <DataTable
         columns={columns}

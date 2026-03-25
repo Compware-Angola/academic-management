@@ -27,10 +27,14 @@ export type AvisosResponse = {
 };
 
 /* ---------- SERVICE ---------- */
-export async function AvisosService({ page,
-  limit,}: {
+export async function AvisosService({
+  page,
+  limit,
+  assunto
+}: {
     page: number;
   limit: number;
+  assunto?: string;
   }): Promise<AvisosResponse> {
   
     const { data } = await axiosNestGa.get<AvisosResponse>(
@@ -39,6 +43,7 @@ export async function AvisosService({ page,
       params: {
         page,
         limit,
+        assunto: normalizeParam(assunto),
       },
     }
 );
