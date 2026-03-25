@@ -1,4 +1,8 @@
-import { useState } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,6 +80,96 @@ export default function PautaGeralExame() {
   const totalPages = data?.totalpages ?? 1;
   const offset = (filters.page - 1) * filters.limit;
 
+  const exportRows = useMemo(
+  () =>
+    candidatos.map((item) => ({
+      numeroInscricao: item.numero_inscricao,
+      nome: item.nome,
+      numeroBilhete: item.numero_bilhete,
+      curso: item.curso,
+      faculdade: item.faculdade,
+      periodo: item.periodo,
+      sala: item.sala,
+      dataRealizacao: item.data_realizacao,
+      nota: item.nota,
+      resultado: item.resultado === 1 ? "Admitido" : "Reprovado",
+    })),
+  [candidatos]
+);
+
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+        filters.resultado !== "" ? `Resultado: ${filters.resultado === "1" ? "Admitido" : "Reprovado"}` : null,
+        filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
+        filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Pauta Geral do Exame de Acesso"
+    subtitle="Classificação geral dos candidatos"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+        { key: "nome", label: "Nome", width: "20%" },
+        { key: "numeroBilhete", label: "BI", width: "14%" },
+        { key: "curso", label: "Curso", width: "16%" },
+        { key: "periodo", label: "Período", width: "10%" },
+        { key: "dataRealizacao", label: "Data", width: "12%" },
+        { key: "nota", label: "Nota", width: "8%" },
+        { key: "resultado", label: "Resultado", width: "8%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Pauta Geral do Exame de Acesso",
+      subtitle: "Classificação geral dos candidatos",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "numeroBilhete", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "faculdade", label: "Faculdade", width: 25 },
+          { key: "periodo", label: "Período", width: 18 },
+          { key: "sala", label: "Sala", width: 15 },
+          { key: "dataRealizacao", label: "Data Realização", width: 18 },
+          { key: "nota", label: "Nota", width: 10 },
+          { key: "resultado", label: "Resultado", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+const baseFileName = `Pauta_Geral_Exame_${new Date().toISOString().slice(0, 10)}`;
+
   function limparFiltros() {
     setFilters({ ...FILTERS_INITIAL, limit: filters.limit });
   }
@@ -119,19 +213,28 @@ export default function PautaGeralExame() {
           <p className="text-muted-foreground mt-1">Pauta geral com a classificação de todos os candidatos.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-2" />Atualizar
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />Excel
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />PDF
-          </Button>
-          <Button variant="outline" size="sm">
-            <Printer className="h-4 w-4 mr-2" />Imprimir
-          </Button>
-        </div>
+  <Button variant="outline" size="sm" onClick={() => refetch()}>
+    <RefreshCw className="h-4 w-4 mr-2" />
+    Atualizar
+  </Button>
+
+  {pdfContent && (
+    <PDFActions
+      document={pdfContent}
+      fileName={`${baseFileName}.pdf`}
+      showDownload
+      showPrint
+    />
+  )}
+
+  {excelProps && (
+    <ExcelActions
+      excelProps={excelProps}
+      fileName={`${baseFileName}.xlsx`}
+      showDownload
+    />
+  )}
+</div>
       </div>
 
       {/* Filtros */}
