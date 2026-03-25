@@ -275,11 +275,8 @@ export default function SalarioDocente() {
       </div>
 
       {/* Resumo */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card className="p-3 text-center">
-          <p className="text-xs text-muted-foreground">Total Docentes</p>
-          <p className="text-2xl font-bold">{resumo.totalDocentes -1}</p>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+       
         <Card className="p-3 text-center">
           <p className="text-xs text-muted-foreground">Total Horas Efectivas</p>
           <p className="text-2xl font-bold text-emerald-600">
