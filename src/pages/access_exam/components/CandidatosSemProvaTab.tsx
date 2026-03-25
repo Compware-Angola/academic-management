@@ -10,6 +10,7 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCandidatosSemProva } from "@/hooks/access_exam/use-candidatos-sem-prova";
+import { parseFilter } from "@/util/parse-filter";
 
 type Filters = {
   codigoAnoLetivo: string;
@@ -34,9 +35,9 @@ export function CandidatosSemProvaTab() {
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const { data, isLoading } = useCandidatosSemProva({
-    codigoAnoLetivo: filters.codigoAnoLetivo ? Number(filters.codigoAnoLetivo) : undefined,
-    codigoCurso: filters.codigoCurso ? Number(filters.codigoCurso) : undefined,
-    codigoTurno: filters.codigoTurno ? Number(filters.codigoTurno) : undefined,
+    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo) ,
+    codigoCurso:parseFilter(filters.codigoCurso) ,
+    codigoTurno: parseFilter(filters.codigoTurno) ,
     filtroProva: "sem_prova",
     page: filters.page,
     limit: filters.limit,
@@ -80,9 +81,9 @@ export function CandidatosSemProvaTab() {
               disabled={isLoadingPeriodos}
               loading={isLoadingPeriodos}
               label="Período"
-              value={filters.codigoTurno}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v, page: 1 }))}
-              options={periodos}
+              value={filters.codigoTurno?.toString() ?? 'all'}
+              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === 'all' ? undefined : v, page: 1 }))}
+              options={[{ codigo: 'all', designacao: 'Todos' }, ...periodos]}
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
           </div>

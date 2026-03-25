@@ -127,14 +127,10 @@ export default function HorariosPorCurso() {
                             disabled={isLoadingPeriodos}
                             loading={isLoadingPeriodos}
                             label="Período"
-                            value={filters.codigoTurno?.toString() ?? ""}
-                            onChange={(v) => setFilters({ ...filters, codigoTurno: v, page: 1 })}
-                            options={periodos}
-                            map={(p) => ({
-                                key: p.codigo,
-                                label: p.designacao,
-                                value: p.codigo,
-                            })}
+                            value={filters.codigoTurno?.toString() ?? 'all'}
+                            onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === 'all' ? undefined : v, page: 1 }))}
+                            options={[{ codigo: 'all', designacao: 'Todos' }, ...periodos]}
+                            map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
                         />
                     </div>
                 </div>
