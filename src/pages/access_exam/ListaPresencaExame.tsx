@@ -120,7 +120,7 @@ const pdfContent = pdfData ? (
         { key: "horaInicio", label: "Hora", width: "10%" },
       ],
       rows: pdfData.rows,
-      headerBackground: "#1e40af",
+      headerBackground: "#0D1B48",
     }}
     footerNotice="Documento gerado automaticamente pelo sistema."
   />
@@ -148,7 +148,7 @@ const excelProps = pdfData
         rows: pdfData.rows,
       },
       footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#1e40af",
+      primaryColor: "#0D1B48",
     }
   : null;
 

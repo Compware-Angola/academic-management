@@ -34,7 +34,7 @@ export const defaultHeader: EntityHeader = {
     'Tel: +244 912 131 138 | +244 947 716 133',
     'Email: geral@uma.co.ao',
   ],
-  primaryColor: '#0d1b48',
+  primaryColor: '#0D1B48',
 };
 
 export interface TableColumn {
@@ -165,7 +165,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     primaryColor,
   } = props;
 
-  const color = primaryColor || header.primaryColor || '#0d1b48';
+  const color = primaryColor || header.primaryColor || '#0D1B48';
 
   const dynamicStyles = {
     ...baseStyles,

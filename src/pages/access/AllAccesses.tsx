@@ -129,7 +129,7 @@ export function ListarAcessos() {
           { key: "estado", label: "Estado", width: "14%" },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af",
+        headerBackground: "#0D1B48",
       }}
       footerNotice="Documento gerado automaticamente pelo sistema."
     />
@@ -165,10 +165,10 @@ export function ListarAcessos() {
         data: item.dataativacao,
         estado: item.ativo ? "Ativo" : "Inativo",
       })),
-      headerBackground: "#1e40af",
+      headerBackground: "#0D1B48",
     },
     footerNotice: "Documento gerado automaticamente pelo sistema.",
-    primaryColor: "#1e40af",
+    primaryColor: "#0D1B48",
   };
 
   const baseFileName = `Acessos_${new Date().toISOString().slice(0, 10)}`;

@@ -111,7 +111,7 @@ export default function Solicitacoes() {
             { key: "data", label: "Data", width: "15%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
         footerNotice="Documento gerado automaticamente pelo sistema."
       />
@@ -139,7 +139,7 @@ export default function Solicitacoes() {
             rows: exportRows,
           },
           footerNotice: "Documento gerado automaticamente pelo sistema.",
-          primaryColor: "#1e40af",
+          primaryColor: "#0D1B48",
         }
       : null;
 

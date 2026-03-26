@@ -245,7 +245,7 @@ export default function LaunchNotes() {
           { key: "observacao", label: "Observação", width: "20%" },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af",
+        headerBackground: "#0D1B48",
       }}
       totals={pdfData.totais}
       footerNotice="Documento gerado automaticamente. Notas pendentes devem ser lançadas conforme regulamento académico."

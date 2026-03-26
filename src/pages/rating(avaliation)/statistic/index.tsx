@@ -285,7 +285,7 @@ export default function StatisticAssessment() {
           },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af",
+        headerBackground: "#0D1B48",
       }}
       footerNotice="Estatísticas baseadas nos lançamentos registados até ao momento. Sujeito a alterações."
       customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"

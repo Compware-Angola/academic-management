@@ -1,4 +1,4 @@
-// pages/lista-candidatos.tsx
+
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
@@ -112,7 +112,7 @@ const pdfContent = pdfData ? (
     subtitle="Gestão de candidatos ao exame de acesso"
     infoSections={[
       { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
-      { title: "Resumo", content: [`Total de registos: ${total}`] },
+     // { title: "Resumo", content: [`Total de registos: ${total}`] },
     ]}
     mainTable={{
       headers: [
@@ -125,7 +125,7 @@ const pdfContent = pdfData ? (
         { key: "anoLectivo", label: "Ano Letivo", width: "14%" },
       ],
       rows: pdfData.rows,
-      headerBackground: "#1e40af",
+      headerBackground: "#0D1B48",
     }}
     footerNotice="Documento gerado automaticamente pelo sistema."
   />
@@ -153,7 +153,7 @@ const excelProps = pdfData
         rows: pdfData.rows,
       },
       footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#1e40af",
+      primaryColor: "#0D1B48",
     }
   : null;
 
@@ -566,6 +566,10 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
 
     {/* Dados do Candidato (mesmo de antes) */}
     <div className="flex-1 space-y-3 text-sm pt-3">
+       <div className="flex justify-between">
+        <span className="text-muted-foreground">Nome</span>
+        <span className="font-semibold font-mono">{modal.candidato?.nome ?? "—"}</span>
+      </div>
       <div className="flex justify-between">
         <span className="text-muted-foreground">Nº Inscrição</span>
         <span className="font-semibold font-mono">{modal.candidato?.numero_inscricao ?? "—"}</span>
@@ -574,6 +578,15 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
         <span className="text-muted-foreground">Bilhete de Identidade</span>
         <span className="font-semibold font-mono">{modal.candidato?.numero_bilhete ?? "—"}</span>
       </div>
+       <div className="flex justify-between">
+        <span className="text-muted-foreground">Sexo</span>
+        <span className="font-semibold font-mono">{modal.candidato?.sexo ?? "—"}</span>
+      </div>
+       <div className="flex justify-between">
+        <span className="text-muted-foreground">Nacionalidade</span>
+        <span className="font-semibold font-mono">{modal.candidato?.nacionalidade ?? "—"}</span>
+      </div>
+     
       <div className="flex justify-between">
         <span className="text-muted-foreground">Curso</span>
         <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.curso ?? "—"}</span>
@@ -600,6 +613,10 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
       <div className="flex justify-between">
         <span className="text-muted-foreground">Tipo Candidatura</span>
         <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.tipo_candidatura ?? "—"}</span>
+      </div>
+       <div className="flex justify-between">
+        <span className="text-muted-foreground">Data Pre-Inscrição</span>
+        <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.data_preescrincao ?? "—"}</span>
       </div>
     </div>
   </div>

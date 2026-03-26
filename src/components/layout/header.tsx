@@ -39,18 +39,18 @@ export function Header() {
   const { logout, user } = useAuth();
 
   const [token, setToken] = useState<string | null>(AuthStorage.getToken());
-            localStorage.removeItem("auth.user");
-            const {
-              data: userCurrent,
-              isLoading: gaLoading,
-              isError,
-            } = useQuery({
-              queryKey: ["current-user", "GA"],
-              queryFn: () => getCurrentUserService("GA"),
-              enabled: !!token,
-              staleTime: 5 * 60 * 1000,
-              retry: false,
-            });
+  localStorage.removeItem("auth.user");
+  const {
+    data: userCurrent,
+    isLoading: gaLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["current-user", "GA"],
+    queryFn: () => getCurrentUserService("GA"),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
 
   const { mutate: logoutUser } = useMutationLogout();
   const navigate = useNavigate();
@@ -60,33 +60,33 @@ export function Header() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const gruposAviso =
-  user?.groups?.filter((group) => group.type_group === 1) ?? [];
-  
+    user?.groups?.filter((group) => group.type_group === 1) ?? [];
+
   //console.log("GRUPOS: ", gruposAviso)
 
-const grupoIds = gruposAviso.map((group) => group.codigo);
-console.log("GRUPOS IDS: ", grupoIds)
-const { data: avisosGrupo = [] } = useQueryAvisosPorGrupos({
-  grupoIds,
-});
+  const grupoIds = gruposAviso.map((group) => group.codigo);
+  console.log("GRUPOS IDS: ", grupoIds)
+  const { data: avisosGrupo = [] } = useQueryAvisosPorGrupos({
+    grupoIds,
+  });
 
-//console.log("DADOS: ", avisosGrupo)
+  //console.log("DADOS: ", avisosGrupo)
 
-const agora = new Date();
+  const agora = new Date();
 
-const avisosValidos = avisosGrupo.filter((aviso) => {
-  const ativo = aviso.STATUS === 1;
+  const avisosValidos = avisosGrupo.filter((aviso) => {
+    const ativo = aviso.STATUS === 1;
 
-  const naoExpirado =
-    !aviso.DATE_EXPIRACAO || new Date(aviso.DATE_EXPIRACAO) >= agora;
+    const naoExpirado =
+      !aviso.DATE_EXPIRACAO || new Date(aviso.DATE_EXPIRACAO) >= agora;
 
-  return ativo && naoExpirado;
-});
+    return ativo && naoExpirado;
+  });
 
   // ─── Notificações ────────────────────────────────────────────────────────
-  
 
-  
+
+
   /** ---------------------------
    * DEBOUNCE (700ms)
    * --------------------------- */
@@ -214,13 +214,13 @@ const avisosValidos = avisosGrupo.filter((aviso) => {
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
                 {avisosValidos.length > 0 && (
-  <Badge
-    variant="destructive"
-    className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold"
-  >
-    {avisosValidos.length > 99 ? "99+" : avisosValidos.length}
-  </Badge>
-)}
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                  >
+                    {avisosValidos.length > 99 ? "99+" : avisosValidos.length}
+                  </Badge>
+                )}
               </Button>
             </DropdownMenuTrigger>
 
@@ -235,29 +235,36 @@ const avisosValidos = avisosGrupo.filter((aviso) => {
               <DropdownMenuSeparator />
 
               {avisosValidos.length === 0 ? (
-                  <div className="py-6 text-center text-sm text-muted-foreground">
-                    Sem notificações
-                  </div>
-                ) : (
-                  <div className="max-h-72 overflow-y-auto">
-                    {avisosValidos.map((aviso, index) => (
-      <div key={aviso.CODIGO}>
-        <DropdownMenuItem
-          className="cursor-default px-3 py-3 focus:bg-muted/50 data-[highlighted]:bg-muted/50"
-        >
-          <div className="flex items-start gap-2">
-            <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-            <span className="line-clamp-2 text-xs leading-6 text-foreground">
-              {aviso.DESCRICAO}
-            </span>
-          </div>
-        </DropdownMenuItem>
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Sem notificações
+                </div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto">
+                  {avisosValidos.map((aviso, index) => (
+                    <div key={aviso.CODIGO}>
+                      <DropdownMenuItem
+                        className="cursor-default px-3 py-3 focus:bg-muted/50 data-highlighted:bg-muted/50"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
 
-        {index < avisosValidos.length - 1 && <DropdownMenuSeparator />}
-      </div>
-    ))}
-                  </div>
-                )}
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-foreground">
+                              {aviso.ASSUNTO}
+                            </span>
+
+                            <span className="line-clamp-1 text-xs leading-6 text-muted-foreground">
+                              {aviso.DESCRICAO}
+                            </span>
+                          </div>
+                        </div>
+                      </DropdownMenuItem>
+
+                      {index < avisosValidos.length - 1 && <DropdownMenuSeparator />}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <DropdownMenuSeparator />
               <DropdownMenuItem
