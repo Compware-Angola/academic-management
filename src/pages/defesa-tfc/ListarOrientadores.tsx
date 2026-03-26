@@ -30,9 +30,10 @@ import {
   Plus,
   Eye,
   Trash,
+  RefreshCw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
@@ -44,6 +45,12 @@ import OrientandoModal from "./components/orientando-modal";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
 import { ApagarOrientadorAlert } from "./components/apagar-orientador-alert";
+import ExcelActions, {
+  GenericExcelProps,
+} from "@/components/views/excel/GenericExcelExport";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -92,6 +99,45 @@ export default function ListarOrientadores() {
     limit,
   });
 
+  const pdfData = useMemo(() => {
+    if (!orientadoresResponse?.data) return null;
+    return {
+      rows: orientadoresResponse.data.map((u) => ({
+        nome: u.nome_orientador,
+        curso: u.curso,
+        anoLectivo: u.ano_lectivo,
+      })),
+    };
+  }, [orientadoresResponse]);
+
+  const excelProps: GenericExcelProps | null = pdfData
+    ? {
+        documentTitle: "Orientadores",
+        mainTable: {
+          headers: [
+            { key: "nome", label: "Nome", width: 50 },
+            { key: "curso", label: "Curso", width: 35 },
+            { key: "anoLectivo", label: "Ano Letivo", width: 15 },
+          ],
+          rows: pdfData.rows,
+        },
+      }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Orientadores"
+      mainTable={{
+        headers: [
+          { key: "nome", label: "Nome", width: "50%" },
+          { key: "curso", label: "Curso", width: "35%" },
+          { key: "anoLectivo", label: "Ano Letivo", width: "15%" },
+        ],
+        rows: pdfData.rows,
+      }}
+    />
+  ) : null;
+
   const handleRefetch = () => {
     setFilters({
       anoLectivo: "23",
@@ -105,6 +151,7 @@ export default function ListarOrientadores() {
   const tableData = orientadoresResponse?.data || [];
   const total = orientadoresResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+  const baseFileName = `orientadores-${filters.anoLectivo}-${filters.curso}`;
 
   return (
     <div className="p-6 space-y-6">
@@ -129,14 +176,44 @@ export default function ListarOrientadores() {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex items-center justify-between">
-        <div>
+        <div className="space-y-2">
           <h1 className="text-2xl font-bold">Orientadores</h1>
           <p className="text-muted-foreground">Consultar orientadores.</p>
         </div>
+
         <Button onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4" />
           Adicionar
         </Button>
+
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleRefetch}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </Button>
+          {pdfData && excelProps && (
+            <>
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
+
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            </>
+          )}
+        </div>
       </div>
 
       <Card>

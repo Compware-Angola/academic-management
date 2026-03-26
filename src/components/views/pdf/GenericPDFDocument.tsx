@@ -8,12 +8,12 @@ import {
   Image,
   PDFDownloadLink,
   pdf,
-} from '@react-pdf/renderer';
-import { Button } from '@/components/ui/button';
-import { Download, Printer } from 'lucide-react';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
-import React, { ReactElement } from 'react';
+} from "@react-pdf/renderer";
+import { Button } from "@/components/ui/button";
+import { Download, Printer } from "lucide-react";
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
+import React, { ReactElement } from "react";
 
 // ──────────────────────────────────────────────
 // Tipos (mantidos iguais)
@@ -25,23 +25,23 @@ export interface EntityHeader {
 }
 
 export const defaultHeader: EntityHeader = {
-  logoSrc: '/logo_uma.png',
-  name: 'Universidade Metodista de Angola',
+  logoSrc: "/logo_uma.png",
+  name: "Universidade Metodista de Angola",
   details: [
-    'Luanda - Angola',
-    'Rua Nossa Senhora da Muxima Nº 10, Bairro Kinaxixi',
-    'NIF: 5401150865',
-    'Tel: +244 912 131 138 | +244 947 716 133',
-    'Email: geral@uma.co.ao',
+    "Luanda - Angola",
+    "Rua Nossa Senhora da Muxima Nº 10, Bairro Kinaxixi",
+    "NIF: 5401150865",
+    "Tel: +244 912 131 138 | +244 947 716 133",
+    "Email: geral@uma.co.ao",
   ],
-  primaryColor: '#0D1B48',
+  primaryColor: "#0D1B48",
 };
 
 export interface TableColumn {
   key: string;
   label: string;
   width: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
   render?: (value: any, row: any) => React.ReactNode;
 }
 
@@ -55,56 +55,66 @@ export interface TableData {
 // Estilos base
 const baseStyles = StyleSheet.create({
   page: {
-    fontFamily: 'Helvetica',
+    fontFamily: "Helvetica",
     fontSize: 11,
     padding: 40,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderBottomWidth: 2,
     paddingBottom: 10,
     marginBottom: 20,
   },
   logo: { width: 120, height: 60 },
-  entityInfo: { textAlign: 'right' },
-  entityName: { fontSize: 16, fontWeight: 'bold' },
-  entityDetail: { fontSize: 9, color: '#444', marginTop: 2 },
+  entityInfo: { textAlign: "right" },
+  entityName: { fontSize: 16, fontWeight: "bold" },
+  entityDetail: { fontSize: 9, color: "#444", marginTop: 2 },
   title: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginVertical: 12,
-    textTransform: 'uppercase' as const,
+    textTransform: "uppercase" as const,
   },
-  subtitle: { textAlign: 'center', fontSize: 12, color: '#555', marginBottom: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: 'bold', marginBottom: 8, marginTop: 16 },
+  subtitle: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#555",
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "bold",
+    marginBottom: 8,
+    marginTop: 16,
+  },
   tableContainer: {
-    width: 'auto',
-    borderStyle: 'solid',
-    borderColor: '#ccc',
+    width: "auto",
+    borderStyle: "solid",
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRightWidth: 0,
     borderBottomWidth: 0,
     marginTop: 10,
   },
-  tableRow: { flexDirection: 'row' },
+  tableRow: { flexDirection: "row" },
   tableHeaderCell: {
-    borderStyle: 'solid',
-    borderColor: '#ccc',
+    borderStyle: "solid",
+    borderColor: "#ccc",
     borderWidth: 1,
     borderLeftWidth: 0,
     borderTopWidth: 0,
     padding: 6,
     fontSize: 10,
-    fontWeight: 'bold',
-    textAlign: 'center' as const,
+    fontWeight: "bold",
+    textAlign: "center" as const,
   },
   tableCell: {
-    borderStyle: 'solid',
-    borderColor: '#ccc',
+    borderStyle: "solid",
+    borderColor: "#ccc",
     borderWidth: 1,
     borderLeftWidth: 0,
     borderTopWidth: 0,
@@ -116,18 +126,18 @@ const baseStyles = StyleSheet.create({
     padding: 12,
     borderWidth: 1.5,
     borderRadius: 6,
-    textAlign: 'center' as const,
+    textAlign: "center" as const,
   },
-  noticeTitle: { fontSize: 12, fontWeight: 'bold', marginBottom: 6 },
-  noticeText: { fontSize: 10, color: '#444' },
+  noticeTitle: { fontSize: 12, fontWeight: "bold", marginBottom: 6 },
+  noticeText: { fontSize: 10, color: "#444" },
   footer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     left: 40,
     right: 40,
     fontSize: 9,
-    textAlign: 'center' as const,
-    color: '#777',
+    textAlign: "center" as const,
+    color: "#777",
   },
 });
 
@@ -165,7 +175,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     primaryColor,
   } = props;
 
-  const color = primaryColor || header.primaryColor || '#0D1B48';
+  const color = primaryColor || header.primaryColor || "#0D1B48";
 
   const dynamicStyles = {
     ...baseStyles,
@@ -181,9 +191,13 @@ export function GenericPDFDocument(props: GenericPDFProps) {
         <View style={dynamicStyles.header}>
           <Image style={baseStyles.logo} src={header.logoSrc} />
           <View style={baseStyles.entityInfo}>
-            <Text style={{ ...baseStyles.entityName, color }}>{header.name}</Text>
+            <Text style={{ ...baseStyles.entityName, color }}>
+              {header.name}
+            </Text>
             {header.details.map((line, i) => (
-              <Text key={i} style={baseStyles.entityDetail}>{line}</Text>
+              <Text key={i} style={baseStyles.entityDetail}>
+                {line}
+              </Text>
             ))}
           </View>
         </View>
@@ -193,9 +207,15 @@ export function GenericPDFDocument(props: GenericPDFProps) {
 
         {infoSections.map((section, idx) => (
           <View key={idx} style={{ marginBottom: 12 }}>
-            {section.title && <Text style={baseStyles.sectionTitle}>{section.title}</Text>}
+            {section.title && (
+              <Text style={baseStyles.sectionTitle}>{section.title}</Text>
+            )}
             {Array.isArray(section.content) ? (
-              section.content.map((line, i) => <Text key={i} style={{ marginBottom: 4 }}>{line}</Text>)
+              section.content.map((line, i) => (
+                <Text key={i} style={{ marginBottom: 4 }}>
+                  {line}
+                </Text>
+              ))
             ) : (
               <Text>{section.content}</Text>
             )}
@@ -212,8 +232,11 @@ export function GenericPDFDocument(props: GenericPDFProps) {
                   key={i}
                   style={[
                     baseStyles.tableHeaderCell,
-                    { width: col.width, textAlign: col.align || 'left' },
-                    { backgroundColor: mainTable.headerBackground || color, color: 'white' },
+                    { width: col.width, textAlign: col.align || "left" },
+                    {
+                      backgroundColor: mainTable.headerBackground || color,
+                      color: "white",
+                    },
                   ]}
                 >
                   {col.label}
@@ -225,13 +248,15 @@ export function GenericPDFDocument(props: GenericPDFProps) {
               <View style={baseStyles.tableRow} key={rowIdx}>
                 {mainTable.headers.map((col, colIdx) => {
                   const value = row[col.key];
-                  const rendered = col.render ? col.render(value, row) : (value ?? '—');
+                  const rendered = col.render
+                    ? col.render(value, row)
+                    : (value ?? "—");
                   return (
                     <Text
                       key={colIdx}
                       style={[
                         baseStyles.tableCell,
-                        { width: col.width, textAlign: col.align || 'left' },
+                        { width: col.width, textAlign: col.align || "left" },
                       ]}
                     >
                       {rendered}
@@ -244,9 +269,17 @@ export function GenericPDFDocument(props: GenericPDFProps) {
         )}
 
         {totals.length > 0 && (
-          <View style={{ marginTop: 20, alignItems: 'flex-end' }}>
+          <View style={{ marginTop: 20, alignItems: "flex-end" }}>
             {totals.map((t, i) => (
-              <Text key={i} style={{ fontSize: 12, fontWeight: 'bold', color, marginVertical: 4 }}>
+              <Text
+                key={i}
+                style={{
+                  fontSize: 12,
+                  fontWeight: "bold",
+                  color,
+                  marginVertical: 4,
+                }}
+              >
                 {t.label}: {t.value}
               </Text>
             ))}
@@ -272,7 +305,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
 // ──────────────────────────────────────────────
 // Ações (Download + Print) – tipo corrigido aqui
 interface PDFActionsProps {
-  document: React.ReactElement;  // Solução: tipo flexível
+  document: React.ReactElement; // Solução: tipo flexível
   fileName: string;
   showDownload?: boolean;
   showPrint?: boolean;
@@ -294,7 +327,7 @@ export function PDFActions({
         win.print();
       }
     } catch (err) {
-      console.error('Erro ao preparar PDF:', err);
+      console.error("Erro ao preparar PDF:", err);
     }
   };
 
@@ -305,7 +338,7 @@ export function PDFActions({
           {({ loading }) => (
             <Button disabled={loading} variant="outline" className="gap-2">
               <Download className="h-4 w-4" />
-              {loading ? 'A gerar...' : 'Exportar PDF'}
+              {loading ? "A gerar..." : "Exportar PDF"}
             </Button>
           )}
         </PDFDownloadLink>
