@@ -1,5 +1,9 @@
 // pages/lista-candidatos.tsx
-import { useState } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useState , useMemo} from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,6 +75,89 @@ export default function ListaCandidatos() {
   const total = data?.total ?? 0;
   const totalPages = data?.totalpages ?? 1;
   const offset = ((filters.page ?? 1) - 1) * (filters.limit ?? 10);
+
+  const exportRows = useMemo(
+  () =>
+    candidatos.map((candidato) => ({
+      numeroInscricao: candidato.numero_inscricao,
+      nome: candidato.nome,
+      numeroBilhete: candidato.numero_bilhete,
+      curso: candidato.curso,
+      periodo: candidato.periodo,
+      mediaFinal: candidato.media_final ?? "N/A",
+      anoLectivo: candidato.ano_lectivo,
+      tipoCandidatura: candidato.tipo_candidatura,
+    })),
+  [candidatos]
+);
+
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        filters.search ? `Pesquisa: ${filters.search}` : null,
+        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Candidatos"
+    subtitle="Gestão de candidatos ao exame de acesso"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+        { key: "nome", label: "Nome", width: "24%" },
+        { key: "numeroBilhete", label: "BI", width: "14%" },
+        { key: "curso", label: "Curso", width: "16%" },
+        { key: "periodo", label: "Período", width: "10%" },
+        { key: "mediaFinal", label: "Média Final", width: "10%" },
+        { key: "anoLectivo", label: "Ano Letivo", width: "14%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Lista de Candidatos",
+      subtitle: "Gestão de candidatos ao exame de acesso",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "numeroBilhete", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "periodo", label: "Período", width: 18 },
+          { key: "mediaFinal", label: "Média Final", width: 15 },
+          { key: "anoLectivo", label: "Ano Letivo", width: 18 },
+          { key: "tipoCandidatura", label: "Tipo Candidatura", width: 25 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`;
 
   function handleSearchChange(value: string) {
     setFilters((prev) => ({ ...prev, search: value || undefined, page: 1 }));
@@ -150,24 +237,31 @@ export default function ListaCandidatos() {
           <h1 className="text-3xl font-bold tracking-tight">Lista de candidatos</h1>
           <p className="text-muted-foreground mt-1">Gestão de candidatos ao exame de acesso</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Atualizar lista
-          </Button>
-          <Button variant="outline" size="sm">
-            <Printer className="h-4 w-4 mr-2" />
-            Imprimir
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar Excel
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar PDF
-          </Button>
-        </div>
+
+          <div className="flex flex-wrap gap-2">
+  <Button variant="outline" size="sm" onClick={() => refetch()}>
+    <RefreshCw className="h-4 w-4 mr-2" />
+    Atualizar lista
+  </Button>
+
+  {pdfContent && (
+    <PDFActions
+      document={pdfContent}
+      fileName={`${baseFileName}.pdf`}
+      showDownload
+      showPrint
+    />
+  )}
+
+  {excelProps && (
+    <ExcelActions
+      excelProps={excelProps}
+      fileName={`${baseFileName}.xlsx`}
+      showDownload
+    />
+  )}
+</div>
+
       </div>
 
       {/* Filtros */}

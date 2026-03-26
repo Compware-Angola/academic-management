@@ -1,4 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -48,8 +53,110 @@ export function CandidatosSemProvaTab() {
   const totalPages = data?.totalpages ?? 1;
   const offset = (filters.page - 1) * filters.limit;
 
+  const exportRows = useMemo(
+  () =>
+    candidatos.map((item) => ({
+      numeroInscricao: item.codigo,
+      nome: item.nome,
+      contacto: item.contato,
+      sexo: item.sexo,
+      curso: item.curso,
+      periodo: item.periodo,
+      anoLectivo: item.ano_lectivo,
+      tipoCandidatura: item.tipo_candidatura,
+      estado: item.estado,
+    })),
+  [candidatos]
+);
+
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Candidatos sem Prova"
+    subtitle="Lista de candidatos sem prova atribuída"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+        { key: "nome", label: "Nome", width: "22%" },
+        { key: "contacto", label: "Contacto", width: "14%" },
+        { key: "sexo", label: "Sexo", width: "8%" },
+        { key: "curso", label: "Curso", width: "16%" },
+        { key: "periodo", label: "Período", width: "10%" },
+        { key: "anoLectivo", label: "Ano Lectivo", width: "10%" },
+        { key: "estado", label: "Estado", width: "8%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#1e40af",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Candidatos sem Prova",
+      subtitle: "Lista de candidatos sem prova atribuída",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "contacto", label: "Contacto", width: 20 },
+          { key: "sexo", label: "Sexo", width: 10 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "periodo", label: "Período", width: 18 },
+          { key: "anoLectivo", label: "Ano Lectivo", width: 18 },
+          { key: "tipoCandidatura", label: "Tipo Candidatura", width: 25 },
+          { key: "estado", label: "Estado", width: 18 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#1e40af",
+    }
+  : null;
+
+const baseFileName = `Candidatos_Sem_Prova_${new Date().toISOString().slice(0, 10)}`;
+
   return (
     <div className="space-y-4">
+      <div className="flex justify-end gap-2">
+  {pdfContent && (
+    <PDFActions
+      document={pdfContent}
+      fileName={`${baseFileName}.pdf`}
+      showDownload
+      showPrint
+    />
+  )}
+
+  {excelProps && (
+    <ExcelActions
+      excelProps={excelProps}
+      fileName={`${baseFileName}.xlsx`}
+      showDownload
+    />
+  )}
+</div>
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
