@@ -122,47 +122,60 @@ export default function NotificacoesPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border bg-card">
-          <div className="divide-y">
-            {avisosValidos.map((aviso) => (
-              <div
-                key={aviso.CODIGO}
-                className="cursor-pointer px-5 py-4 transition-colors hover:bg-muted/40"
-                onClick={() => abrirDetalhe(aviso)}
-              >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="flex items-start gap-2">
+      <div className="overflow-hidden rounded-lg border bg-card">
+  <div className="divide-y">
+    {avisosValidos.map((aviso) => (
+      <div
+        key={aviso.CODIGO}
+        className="cursor-pointer px-5 py-4 transition-colors hover:bg-muted/40"
+        onClick={() => abrirDetalhe(aviso)}
+      >
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          
+          {/* Lado esquerdo */}
+          <div className="flex items-start gap-2">
             <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
-            <span className="line-clamp-2 text-xs leading-6 text-foreground">
-              {aviso.DESCRICAO}
+
+            <div className="flex flex-col">
+              {/* TÍTULO */}
+              <span className="text-sm font-semibold text-foreground">
+                {aviso.ASSUNTO}
+              </span>
+
+              {/* DESCRIÇÃO (resumida) */}
+              <span className="line-clamp-1 text-xs leading-6 text-muted-foreground">
+                {aviso.DESCRICAO}
+              </span>
+            </div>
+          </div>
+
+          {/* Lado direito */}
+          <div className="flex shrink-0 items-center gap-2 md:flex-col md:items-end">
+            <span className="text-xs text-muted-foreground">
+              Expira em{" "}
+              <span className="font-medium text-foreground">
+                {formatarExpiracao(aviso.DATE_EXPIRACAO)}
+              </span>
             </span>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                abrirDetalhe(aviso);
+              }}
+            >
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </div>
 
-                  <div className="flex shrink-0 items-center gap-2 md:flex-col md:items-end">
-                    <span className="text-xs text-muted-foreground">
-                      Expira em{" "}
-                      <span className="font-medium text-foreground">
-                        {formatarExpiracao(aviso.DATE_EXPIRACAO)}
-                      </span>
-                    </span>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        abrirDetalhe(aviso);
-                      }}
-                    >
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
+      </div>
+    ))}
+  </div>
+</div>
       )}
 
       <Dialog

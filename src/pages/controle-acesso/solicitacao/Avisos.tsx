@@ -105,7 +105,7 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
             { key: "expiracao", label: "Data Expiração", width: "15%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -133,7 +133,7 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
             ],
             rows: exportRows,
           },
-          primaryColor: "#1e40af",
+          primaryColor: "#0D1B48",
         }
       : null;
 

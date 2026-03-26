@@ -1,4 +1,8 @@
-import { useState } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -44,6 +48,89 @@ export default function HorariosPorCurso() {
     const horarios = data?.data ?? [];
     const total = data?.total ?? 0;
 
+    const exportRows = useMemo(
+  () =>
+    horarios.map((item) => ({
+      curso: item.curso,
+      anoLectivo: item.ano_lectivo,
+      periodo: item.periodo,
+      dataRealizacao: item.data_realizacao,
+      horario: `${item.hora_inicio} — ${item.hora_fim}`,
+      sala: item.sala,
+      capacidadeSala: item.capacidade_sala,
+      quantidadeAlunos: item.quantidade_alunos,
+    })),
+  [horarios]
+);
+
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Horários por Curso"
+    subtitle="Horários das provas de exame de acesso"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "curso", label: "Curso", width: "20%" },
+        { key: "anoLectivo", label: "Ano Lectivo", width: "12%" },
+        { key: "periodo", label: "Período", width: "12%" },
+        { key: "dataRealizacao", label: "Data", width: "12%" },
+        { key: "horario", label: "Horário", width: "16%" },
+        { key: "sala", label: "Sala", width: "10%" },
+        { key: "capacidadeSala", label: "Capacidade", width: "9%" },
+        { key: "quantidadeAlunos", label: "Candidatos", width: "9%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#0D1B48",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Horários por Curso",
+      subtitle: "Horários das provas de exame de acesso",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "curso", label: "Curso", width: 30 },
+          { key: "anoLectivo", label: "Ano Lectivo", width: 18 },
+          { key: "periodo", label: "Período", width: 18 },
+          { key: "dataRealizacao", label: "Data", width: 18 },
+          { key: "horario", label: "Horário", width: 20 },
+          { key: "sala", label: "Sala", width: 15 },
+          { key: "capacidadeSala", label: "Capacidade", width: 15 },
+          { key: "quantidadeAlunos", label: "Candidatos", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+  : null;
+
+const baseFileName = `Horarios_Por_Curso_${new Date().toISOString().slice(0, 10)}`;
+
     function handleLimitChange(value: string) {
         setFilters((prev) => ({ ...prev, limit: Number(value), page: 1 }));
     }
@@ -79,16 +166,28 @@ export default function HorariosPorCurso() {
                     <p className="text-muted-foreground mt-1">Horários das provas de exame de acesso organizados por curso.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" onClick={() => refetch()}>
-                        <RefreshCw className="h-4 w-4 mr-2" />Atualizar
-                    </Button>
-                    <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />PDF
-                    </Button>
-                    <Button variant="outline" size="sm">
-                        <Printer className="h-4 w-4 mr-2" />Imprimir
-                    </Button>
-                </div>
+    <Button variant="outline" size="sm" onClick={() => refetch()}>
+        <RefreshCw className="h-4 w-4 mr-2" />
+        Atualizar
+    </Button>
+
+    {pdfContent && (
+        <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
+        />
+    )}
+
+    {excelProps && (
+        <ExcelActions
+            excelProps={excelProps}
+            fileName={`${baseFileName}.xlsx`}
+            showDownload
+        />
+    )}
+</div>
             </div>
 
             {/* Filtros */}

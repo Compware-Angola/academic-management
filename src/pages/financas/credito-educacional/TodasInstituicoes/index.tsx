@@ -143,7 +143,7 @@ const pdfData = exportData.length
         { key: "endereco", label: "Endereço", width: "20%" },
       ],
       rows: pdfData.rows,
-      headerBackground: "#1e40af",
+      headerBackground: "#0D1B48",
     }}
     footerNotice="Documento gerado automaticamente pelo sistema."
   />
@@ -167,7 +167,7 @@ const excelProps = {
     rows: exportData,
   },
   footerNotice: "Documento gerado automaticamente pelo sistema.",
-  primaryColor: "#1e40af",
+  primaryColor: "#0D1B48",
 };
 
 
