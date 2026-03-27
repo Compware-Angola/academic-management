@@ -61,7 +61,7 @@ export function Header() {
     return ativo && naoExpirado;
   });
 
-  // ─── Detecta novos avisos e dispara toast + swing ─────────────────────────
+
   useEffect(() => {
     if (avisosValidos.length === 0) return;
 
@@ -69,7 +69,7 @@ export function Header() {
       (aviso) => !seenAvisoIds.current.has(aviso.CODIGO)
     );
 
-    // Na primeira carga, apenas regista os IDs sem toast
+
     if (isFirstLoad.current) {
       avisosValidos.forEach((aviso) => seenAvisoIds.current.add(aviso.CODIGO));
       isFirstLoad.current = false;
