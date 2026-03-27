@@ -292,7 +292,7 @@ export default function ListarEstudanteFinalista() {
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                disabled={page === 1}
+                disabled={page === 1 || isFetching || tableData.length === 0}
                 onClick={() => setPage((p) => p - 1)}
               >
                 Anterior
@@ -302,7 +302,12 @@ export default function ListarEstudanteFinalista() {
               </span>
               <Button
                 variant="outline"
-                disabled={page === totalPages}
+                disabled={
+                  page === totalPages ||
+                  isFetching ||
+                  tableData.length === 0 ||
+                  page === 1
+                }
                 onClick={() => setPage((p) => p + 1)}
               >
                 Próxima
