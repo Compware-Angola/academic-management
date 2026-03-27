@@ -384,7 +384,7 @@ export default function EstudantesInscritos() {
           { key: "estado", label: "Estado", width: "10%", align: "center" },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af",
+        headerBackground: "#0D1B48",
       }}
       footerNotice="Documento gerado automaticamente. Lista completa baseada nos filtros aplicados."
       customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"
