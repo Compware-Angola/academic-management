@@ -7,6 +7,8 @@ export type AgendamentosDocentePayload = {
   estado?: number;
   anoLectivo?: number;
   semestre?: number;
+  curso?: string;
+  gradeCurricular?: number;
   page?: number;
   limit?: number;
 };
@@ -47,6 +49,8 @@ export async function controleAssiduidadeService(
     estado,
     anoLectivo,
     semestre,
+    curso,
+    gradeCurricular,
     page = 1,
     limit = 20,
   } = payload;
@@ -62,6 +66,7 @@ export async function controleAssiduidadeService(
           estado,
           anoLectivo,
           semestre,
+          gradeCurricular,
           page,
           limit,
         },

@@ -3,7 +3,9 @@ import { useMemo } from "react";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
-import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import ExcelActions, {
+  GenericExcelProps,
+} from "@/components/views/excel/GenericExcelExport";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCw } from "lucide-react";
+import { Home, Search, Loader2, RefreshCw, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -68,6 +70,51 @@ export default function ListarEstudanteFinalista() {
     page,
     limit,
   });
+  const pdfData = useMemo(() => {
+    if (!estudanteFinalistaResponse?.data) return null;
+    return {
+      rows: estudanteFinalistaResponse.data.map((u) => ({
+        matricula: u.matricula,
+        nome: u.nome,
+        bilhete: u.bilhete,
+        curso: u.curso,
+      })),
+    };
+  }, [estudanteFinalistaResponse]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Estudantes Finalistas"
+      mainTable={{
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: "15%" },
+          { key: "nome", label: "Nome", width: "35%" },
+          { key: "bilhete", label: "Bilhete", width: "20%" },
+          { key: "curso", label: "Curso", width: "30%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps: GenericExcelProps | null = pdfData
+    ? {
+        documentTitle: "Estudantes Finalistas",
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Nº Matrícula", width: 15 },
+            { key: "nome", label: "Nome", width: 50 },
+            { key: "bilhete", label: "Bilhete", width: 20 },
+            { key: "curso", label: "Curso", width: 30 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
   const handleRefetch = () => {
     setFilters({
       anoLectivo: "23",
@@ -80,10 +127,14 @@ export default function ListarEstudanteFinalista() {
     setPage(1);
     refetch();
   };
+
   const tableData = estudanteFinalistaResponse?.data || [];
   const total = estudanteFinalistaResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
+  const baseFileName = `estudantes_finalistas_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -106,10 +157,40 @@ export default function ListarEstudanteFinalista() {
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
+        <p className="text-muted-foreground">
+          Consultar estudantes finalistas.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleRefetch}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </Button>
+          {pdfData && excelProps && (
+            <>
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
 
-      <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
-      <p className="text-muted-foreground">Consultar estudantes finalistas.</p>
-
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            </>
+          )}
+        </div>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
