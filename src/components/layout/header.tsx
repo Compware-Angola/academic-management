@@ -83,6 +83,7 @@ export function Header() {
     return ativo && naoExpirado;
   });
 
+
   // ─── Notificações ────────────────────────────────────────────────────────
 
 
