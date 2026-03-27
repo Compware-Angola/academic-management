@@ -124,6 +124,11 @@ export function FormCommandSelect<T>({
           align="start"
           sideOffset={4}
           className={cn("p-0", widthClass)}
+          onCloseAutoFocus={(e) => {
+            // Se estiver dentro de um Dialog, não queremos que ele force o foco de volta
+            // de forma agressiva se o usuário clicou em outro input (como o Tema)
+            if (labelMode === "outside") e.preventDefault();
+          }}
         >
           <Command>
             <CommandInput

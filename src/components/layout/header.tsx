@@ -1,7 +1,9 @@
-import {  LogOut, Search, User } from "lucide-react";
+
+import { LogOut, Search, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,15 +29,63 @@ import { useMutationLogout } from "@/hooks/mutations/use-mutation-login";
 import { useState, useEffect } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/tudents/use-query-students";
+import { AuthStorage } from "@/util/auth-storage";
+import { getCurrentUserService } from "@/services/auth/login.service";
+import { useQuery } from "@tanstack/react-query";
+import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
+
 
 export function Header() {
   const { logout, user } = useAuth();
+
+  const [token, setToken] = useState<string | null>(AuthStorage.getToken());
+  localStorage.removeItem("auth.user");
+  const {
+    data: userCurrent,
+    isLoading: gaLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["current-user", "GA"],
+    queryFn: () => getCurrentUserService("GA"),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
   const { mutate: logoutUser } = useMutationLogout();
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const gruposAviso =
+    user?.groups?.filter((group) => group.type_group === 1) ?? [];
+
+  //console.log("GRUPOS: ", gruposAviso)
+
+  const grupoIds = gruposAviso.map((group) => group.codigo);
+  console.log("GRUPOS IDS: ", grupoIds)
+  const { data: avisosGrupo = [] } = useQueryAvisosPorGrupos({
+    grupoIds,
+  });
+
+  //console.log("DADOS: ", avisosGrupo)
+
+  const agora = new Date();
+
+  const avisosValidos = avisosGrupo.filter((aviso) => {
+    const ativo = aviso.STATUS === 1;
+
+    const naoExpirado =
+      !aviso.DATE_EXPIRACAO || new Date(aviso.DATE_EXPIRACAO) >= agora;
+
+    return ativo && naoExpirado;
+  });
+
+  // ─── Notificações ────────────────────────────────────────────────────────
+
+
 
   /** ---------------------------
    * DEBOUNCE (700ms)
@@ -44,7 +94,6 @@ export function Header() {
     const timer = setTimeout(() => {
       setDebouncedSearch(search.trim());
     }, 700);
-
     return () => clearTimeout(timer);
   }, [search]);
 
@@ -61,11 +110,8 @@ export function Header() {
    * CONTROLAR POPOVER
    * --------------------------- */
   useEffect(() => {
-    if (debouncedSearch.length > 0) {
-      setOpen(true);
-    } else {
-      setOpen(false);
-    }
+    if (debouncedSearch.length > 0) setOpen(true);
+    else setOpen(false);
   }, [debouncedSearch]);
 
   const handleSelect = (aluno: StudentSugestao) => {
@@ -85,7 +131,7 @@ export function Header() {
         <SidebarTrigger className="-ml-1" />
 
         <div className="ml-auto flex items-center gap-2 md:gap-4">
-          {/* Pesquisa com debounce */}
+          {/* ── Pesquisa com debounce ─────────────────────────────────── */}
           <div className="hidden md:flex items-center gap-2 w-full max-w-md">
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
@@ -162,6 +208,75 @@ export function Header() {
 
           <ThemeSwitcher />
 
+          {/* ── Sino de notificações ──────────────────────────────────── */}
+          <DropdownMenu>
+            <DropdownMenuTrigger >
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {avisosValidos.length > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                  >
+                    {avisosValidos.length > 99 ? "99+" : avisosValidos.length}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="flex items-center justify-between px-3 py-2">
+                <DropdownMenuLabel className="p-0 text-sm font-semibold">
+                  Notificações
+
+                </DropdownMenuLabel>
+
+              </div>
+              <DropdownMenuSeparator />
+
+              {avisosValidos.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Sem notificações
+                </div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto">
+                  {avisosValidos.map((aviso, index) => (
+                    <div key={aviso.CODIGO}>
+                      <DropdownMenuItem
+                        className="cursor-default px-3 py-3 focus:bg-muted/50 data-highlighted:bg-muted/50"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-foreground">
+                              {aviso.ASSUNTO}
+                            </span>
+
+                            <span className="line-clamp-1 text-xs leading-6 text-muted-foreground">
+                              {aviso.DESCRICAO}
+                            </span>
+                          </div>
+                        </div>
+                      </DropdownMenuItem>
+
+                      {index < avisosValidos.length - 1 && <DropdownMenuSeparator />}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="justify-center text-xs text-primary cursor-pointer"
+                onSelect={() => navigate("/notificacoes")}
+              >
+                Ver todas as notificações
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* ── Menu do utilizador ────────────────────────────────────── */}
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="ghost" className="gap-2">

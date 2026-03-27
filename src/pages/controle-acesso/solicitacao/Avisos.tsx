@@ -13,20 +13,32 @@ import { Button } from "@/components/ui/button";
 import { AvisoFormDialog } from "./components/aviso-form-dialog";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useMutateStatusAviso } from "@/hooks/acess/use-mutate-status-aviso";
+import { Input } from "@/components/ui/input";
 
 export default function Avisos() {
+  const [assunto, setAssunto] = useState("");
 const [modalOpen, setModalOpen] = useState(false);
 const [mode, setMode] = useState<"create" | "edit">("create");
 const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
+
 
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, isFetching } = useQueryAvisos({
     page: currentPage,
     limit: 5,
+    assunto
   });
 
+  const { mutateAsync: alterarStatusAviso, isPending: alterandoStatus } =
+  useMutateStatusAviso();
+  
   //console.log("AVISO: ", data)  
+
+  useEffect(() => {
+  setCurrentPage(1);
+}, [assunto]);
 
   useEffect(() => {
   if (data?.totalPages && currentPage > data.totalPages) {
@@ -54,7 +66,8 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       curso: item.CURSO,
       periodo: item.PERIODO,       
       destino: item.DESTINO, 
-      date_expiracao: item.DATE_EXPIRACAO, 
+      date_expiracao: item.DATE_EXPIRACAO,
+      status: item.STATUS_, 
     }));
   }, [data]);
 
@@ -92,7 +105,7 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
             { key: "expiracao", label: "Data Expiração", width: "15%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -120,11 +133,25 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
             ],
             rows: exportRows,
           },
-          primaryColor: "#1e40af",
+          primaryColor: "#0D1B48",
         }
       : null;
 
   /* ================= COLUNAS ================= */
+
+  async function handleToggleStatus(aviso: any) {
+  const novoStatus = aviso.status === 1 ? 0 : 1;
+
+  
+  try {
+    await alterarStatusAviso({
+      id: aviso.codigo,
+      status: novoStatus,
+    });
+  } catch (error) {
+    console.error("Erro ao alterar status do aviso:", error);
+  }
+}
 
   const columns = [
     { header: "Assunto", accessor: "assunto" },
@@ -165,6 +192,21 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       </Button>
     ),
   },
+
+  {
+  header: "Status",
+  accessor: "status",
+  cell: (row) => (
+    <Button
+      variant={row.status === 1 ? "destructive" : "default"}
+      size="sm"
+      disabled={alterandoStatus}
+      onClick={() => handleToggleStatus(row)}
+    >
+      {row.status === 1 ? "Desativar" : "Ativar"}
+    </Button>
+  ),
+},
 
   ];
 
@@ -208,6 +250,23 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
           </>
         }
       />
+
+      <div className="flex items-center gap-3">
+  <Input
+    placeholder="Pesquisar por assunto..."
+    value={assunto}
+    onChange={(e) => setAssunto(e.target.value)}
+    className="max-w-sm"
+  />
+
+  <Button
+    variant="outline"
+    onClick={() => setAssunto("")}
+    disabled={!assunto}
+  >
+    Limpar
+  </Button>
+</div>
 
       <DataTable
         columns={columns}

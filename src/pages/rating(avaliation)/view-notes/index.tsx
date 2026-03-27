@@ -194,7 +194,7 @@ const excelProps = pdfData
         rows: pdfData.rows,
       },
       footerNotice: "Relatório gerado a partir do sistema académico.",
-      primaryColor: "#1e40af",
+      primaryColor: "#0D1B48",
     }
   : null;
 
@@ -228,7 +228,7 @@ const pdfContent = pdfData ? (
         { key: "data", label: "Data", width: "16%" },
       ],
       rows: pdfData.rows,
-      headerBackground: "#1e40af",
+      headerBackground: "#0D1B48",
     }}
     footerNotice="Relatório gerado a partir do sistema académico."
     customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"

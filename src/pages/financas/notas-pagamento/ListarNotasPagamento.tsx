@@ -53,8 +53,7 @@ import { Separator } from "@/components/ui/separator";
 import { FacturaItem } from "@/services/finance/listar-facturas.service";
 import { PaymentNoteActions } from "../components/views/uma-payment-invoice";
 import { PermissionTypeDetails } from "@/constants/permission.type";
-import { can } from "@/auth/can";
-import { useAuth } from "@/hooks/use-auth";
+
 import { usePermission } from "@/auth/permission.helper";
 
 const estados = [

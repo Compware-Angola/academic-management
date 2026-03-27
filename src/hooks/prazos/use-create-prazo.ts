@@ -13,8 +13,9 @@ export function useCreatePrazo() {
       });
       queryClient.invalidateQueries({ queryKey: ["prazos"] });
     },
-    onError: () => {
-      toast.error("Erro ao criar prazo", { id: "create-prazo-error" });
+    onError: (error) => {
+      const backendMessage = error?.message || "Erro ao criar prazo";
+      toast.error(backendMessage, { id: "create-prazo-error" });
     },
   });
 }

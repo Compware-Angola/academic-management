@@ -5,7 +5,6 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -55,7 +54,7 @@ export default function PagamentosReferencia() {
   const closeModal = () => {
     setOpenModal(false);
   };
-  const [limit, setLimit] = useState(25);
+  const [limit, setLimit] = useState(10);
   const [selectedPagamento, setSelectedPagamento] =
     useState<ReferenciasPagamentoItem>(null);
   const [filters, setFilters] = useState({
@@ -123,100 +122,102 @@ export default function PagamentosReferencia() {
   const total = pagamentoResponse?.total || 0;
 
   const pdfData = useMemo(() => {
-  if (!tableData.length) return null;
+    if (!tableData.length) return null;
 
-  return {
-    filtros: [
-      filtersApplied.anoLectivo && `Ano letivo: ${filtersApplied.anoLectivo}`,
-      filtersApplied.servico && `Serviço: ${filtersApplied.servico}`,
-      filtersApplied.estado && `Estado: ${filtersApplied.estado}`,
-      filtersApplied.matricula && `Matrícula: ${filtersApplied.matricula}`,
-      filtersApplied.referencia && `Referência: ${filtersApplied.referencia}`,
-      filtersApplied.factura && `Factura: ${filtersApplied.factura}`,
-      filtersApplied.dataInicial &&
-        `Data inicial: ${filtersApplied.dataInicial}`,
-      filtersApplied.dataFinal && `Data final: ${filtersApplied.dataFinal}`,
-    ]
-      .filter(Boolean)
-      .join(" | ") || "Sem filtros",
+    return {
+      filtros:
+        [
+          filtersApplied.anoLectivo &&
+            `Ano letivo: ${filtersApplied.anoLectivo}`,
+          filtersApplied.servico && `Serviço: ${filtersApplied.servico}`,
+          filtersApplied.estado && `Estado: ${filtersApplied.estado}`,
+          filtersApplied.matricula && `Matrícula: ${filtersApplied.matricula}`,
+          filtersApplied.referencia &&
+            `Referência: ${filtersApplied.referencia}`,
+          filtersApplied.factura && `Factura: ${filtersApplied.factura}`,
+          filtersApplied.dataInicial &&
+            `Data inicial: ${filtersApplied.dataInicial}`,
+          filtersApplied.dataFinal && `Data final: ${filtersApplied.dataFinal}`,
+        ]
+          .filter(Boolean)
+          .join(" | ") || "Sem filtros",
 
-    total,
+      total,
 
-    rows: tableData.map((p) => ({
-      matricula: p.codigo_matricula,
-      aluno: p.nome,
-      factura: p.codigo_factura,
-      entidade: p.entidade,
-      referencia: p.referencia,
-      valor: p.preco,
-      dataReferencia: formatarData(p.data_inicio),
-      dataExpiracao: formatarData(p.data_final),
-      dataPagamento: formatarData(p.data_pagamento),
-      estado: p.estado,
-    })),
-  };
-}, [tableData, filtersApplied, total]);
+      rows: tableData.map((p) => ({
+        matricula: p.codigo_matricula,
+        aluno: p.nome,
+        factura: p.codigo_factura,
+        entidade: p.entidade,
+        referencia: p.referencia,
+        valor: p.preco,
+        dataReferencia: formatarData(p.data_inicio),
+        dataExpiracao: formatarData(p.data_final),
+        dataPagamento: formatarData(p.data_pagamento),
+        estado: p.estado,
+      })),
+    };
+  }, [tableData, filtersApplied, total]);
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Pagamentos por Referência"
-    subtitle="Lista de pagamentos realizados por referência bancária"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros },
-      { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "matricula", label: "Matrícula", width: "10%" },
-        { key: "aluno", label: "Aluno", width: "18%" },
-        { key: "factura", label: "Factura", width: "10%" },
-        { key: "entidade", label: "Entidade", width: "10%" },
-        { key: "referencia", label: "Referência", width: "12%" },
-        { key: "valor", label: "Valor", width: "10%" },
-        { key: "dataReferencia", label: "Data Ref.", width: "10%" },
-        { key: "dataExpiracao", label: "Expiração", width: "10%" },
-        { key: "dataPagamento", label: "Pagamento", width: "10%" },
-        { key: "estado", label: "Estado", width: "10%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#1e40af",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
-
-const excelProps = pdfData
-  ? {
-      documentTitle: "Pagamentos por Referência",
-      subtitle: "Lista de pagamentos realizados por referência bancária",
-      infoSections: [
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Pagamentos por Referência"
+      subtitle="Lista de pagamentos realizados por referência bancária"
+      infoSections={[
         { title: "Filtros Aplicados", content: pdfData.filtros },
         { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-      ],
-      mainTable: {
+      ]}
+      mainTable={{
         headers: [
-          { key: "matricula", label: "Matrícula", width: 18 },
-          { key: "aluno", label: "Aluno", width: 30 },
-          { key: "factura", label: "Factura", width: 20 },
-          { key: "entidade", label: "Entidade", width: 20 },
-          { key: "referencia", label: "Referência", width: 22 },
-          { key: "valor", label: "Valor", width: 18 },
-          { key: "dataReferencia", label: "Data Referência", width: 22 },
-          { key: "dataExpiracao", label: "Data Expiração", width: 22 },
-          { key: "dataPagamento", label: "Data Pagamento", width: 22 },
-          { key: "estado", label: "Estado", width: 15 },
+          { key: "matricula", label: "Matrícula", width: "10%" },
+          { key: "aluno", label: "Aluno", width: "18%" },
+          { key: "factura", label: "Factura", width: "10%" },
+          { key: "entidade", label: "Entidade", width: "10%" },
+          { key: "referencia", label: "Referência", width: "12%" },
+          { key: "valor", label: "Valor", width: "10%" },
+          { key: "dataReferencia", label: "Data Ref.", width: "10%" },
+          { key: "dataExpiracao", label: "Expiração", width: "10%" },
+          { key: "dataPagamento", label: "Pagamento", width: "10%" },
+          { key: "estado", label: "Estado", width: "10%" },
         ],
         rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#1e40af",
-    }
-  : null;
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const baseFileName = `Pagamentos_Referencia_${new Date()
-  .toISOString()
-  .slice(0, 10)}`;
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Pagamentos por Referência",
+        subtitle: "Lista de pagamentos realizados por referência bancária",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Matrícula", width: 18 },
+            { key: "aluno", label: "Aluno", width: 30 },
+            { key: "factura", label: "Factura", width: 20 },
+            { key: "entidade", label: "Entidade", width: 20 },
+            { key: "referencia", label: "Referência", width: 22 },
+            { key: "valor", label: "Valor", width: 18 },
+            { key: "dataReferencia", label: "Data Referência", width: 22 },
+            { key: "dataExpiracao", label: "Data Expiração", width: 22 },
+            { key: "dataPagamento", label: "Data Pagamento", width: 22 },
+            { key: "estado", label: "Estado", width: 15 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
 
+  const baseFileName = `Pagamentos_Referencia_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
 
   const totalPages = Math.ceil(total / limit);
   return (
@@ -357,8 +358,7 @@ const baseFileName = `Pagamentos_Referencia_${new Date()
         </CardContent>
       </Card>
       <Card>
-                
-     <CardHeader className="space-y-2">
+        <CardHeader className="space-y-2">
           {/* Exportações */}
           {pdfData && excelProps && (
             <div className="flex justify-end gap-2">
@@ -381,7 +381,6 @@ const baseFileName = `Pagamentos_Referencia_${new Date()
 
           <CardTitle>Lista de Pagamentos</CardTitle>
         </CardHeader>
-
 
         <CardContent>
           {isFetching ? (

@@ -4,7 +4,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
  * PARAMS - Sugestões de alunos
  * ======================= */
 export type StudentSugestoesParams = {
-  search?: string;   // pode ser parte do nome, BI, código de matrícula, etc.
+  search?: string; // pode ser parte do nome, BI, código de matrícula, etc.
 };
 
 /* =======================
@@ -23,7 +23,7 @@ export type StudentSugestao = {
  * FETCH - Sugestões de alunos
  * ======================= */
 export const fetchStudentsSugestoes = async (
-  params: StudentSugestoesParams = {}
+  params: StudentSugestoesParams = {},
 ): Promise<StudentSugestao[]> => {
   const { search = "" } = params;
 
@@ -32,7 +32,7 @@ export const fetchStudentsSugestoes = async (
 
   const response = await axiosNestGa.get<StudentSugestao[]>(
     "/students/find/sugestoes",
-    { params: queryParams }
+    { params: queryParams },
   );
 
   return response.data;
@@ -58,9 +58,9 @@ export type StudentDetail = {
   telefonicos: string;
   sexo: string;
   data_nascimento: string; // ISO: "1982-05-24T23:00:00.000Z"
-  foto:string;
-  saldo_atual:number;
-  saldo_anterior:number;
+  foto: string;
+  saldo_atual: number;
+  saldo_anterior: number;
   pai: string;
   mae: string;
   naturalidade: string;
@@ -72,12 +72,12 @@ export type StudentDetail = {
  * FETCH - Detalhes/estatística do aluno
  * ======================= */
 export const fetchStudentEstatisticas = async (
-  codigoMatricula: number | string
+  codigoMatricula: number | string,
 ): Promise<StudentDetail> => {
   const id = String(codigoMatricula).trim();
 
   const response = await axiosNestGa.get<StudentDetail>(
-    `/students/estatistic/${id}`
+    `/students/estatistic/${id}`,
   );
 
   return response.data;
@@ -89,14 +89,14 @@ export const fetchStudentEstatisticas = async (
 export type DisciplinaMatricula = {
   disciplina: string;
   codigo_disciplina: string;
-  semestre: string;       // ex: "I SEMESTRE", "II SEMESTRE"
-  duracao: string;        // ex: "Semestral", "Anual"
-  classe: string;         // ex: "1º ano", "2º ano"
-  ano_lectivo: string;    // ex: "2023-2024"
-  horario: string;        // ex: "CARDIO.1.BIOQUI.D-H5"
-  sala: string;   
-  codigo_horario: number;   // ex: 20373
-  estado: string;        // ex: "Aprovado", "Matriculado", etc.
+  semestre: string; // ex: "I SEMESTRE", "II SEMESTRE"
+  duracao: string; // ex: "Semestral", "Anual"
+  classe: string; // ex: "1º ano", "2º ano"
+  ano_lectivo: string; // ex: "2023-2024"
+  horario: string; // ex: "CARDIO.1.BIOQUI.D-H5"
+  sala: string;
+  codigo_horario: number; // ex: 20373
+  estado: string; // ex: "Aprovado", "Matriculado", etc.
 };
 
 export type DisciplinasResponse = {
@@ -112,8 +112,8 @@ export type DisciplinasResponse = {
  * ======================= */
 export type FetchDisciplinasMatriculadasParams = {
   matriculaId: number | string;
-  anoLectivo?: string | number;   // ex: "2023-2024" ou 2023
-  semestre?: string | number;     // ex: "1", "I", "2", "II", "I SEMESTRE"
+  anoLectivo?: string | number; // ex: "2023-2024" ou 2023
+  semestre?: string | number; // ex: "1", "I", "2", "II", "I SEMESTRE"
   page?: number;
   limit?: number;
 };
@@ -122,15 +122,9 @@ export type FetchDisciplinasMatriculadasParams = {
  * FETCH - Disciplinas / Cadeiras do aluno (matrícula atual ou histórica)
  * ======================= */
 export const fetchDisciplinasMatriculadas = async (
-  params: FetchDisciplinasMatriculadasParams
+  params: FetchDisciplinasMatriculadasParams,
 ): Promise<DisciplinasResponse> => {
-  const {
-    matriculaId,
-    anoLectivo,
-    semestre,
-    page = 1,
-    limit = 25,
-  } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25 } = params;
 
   // Monta query params apenas com os valores fornecidos
   const queryParams: Record<string, string | number> = {
@@ -147,10 +141,61 @@ export const fetchDisciplinasMatriculadas = async (
     queryParams.semestre = String(semestre).trim();
   }
 
-  const response = await axiosNestGa.get<DisciplinasResponse>(
-    "/discipline",
-    { params: queryParams }
-  );
+  const response = await axiosNestGa.get<DisciplinasResponse>("/discipline", {
+    params: queryParams,
+  });
 
   return response.data;
 };
+
+//OBTER TODOS OS ESTUDANTES
+export type ListStudentsPayload = {
+  anoLectivo: number;
+  codigoCurso?: number;
+  faculdadeId?: number;
+  codigoMatricula?: number;
+  page?: number;
+  limit?: number;
+};
+
+export type StudentItem = {
+  codigo_matricula: number;
+  nome_completo: string;
+  bi: string;
+  curso: string;
+  candidatura: string;
+};
+
+export type ListStudentsResponse = {
+  data: StudentItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export async function getListStudentsService(
+  payload: ListStudentsPayload,
+): Promise<ListStudentsResponse> {
+  const {
+    anoLectivo,
+    codigoCurso,
+    faculdadeId,
+    codigoMatricula,
+    page = 1,
+    limit = 25,
+  } = payload;
+
+  const { data } = await axiosNestGa.get<ListStudentsResponse>("/students", {
+    params: {
+      anoLectivo,
+      codigoCurso,
+      faculdadeId,
+      codigoMatricula,
+      page,
+      limit,
+    },
+  });
+
+  return data;
+}

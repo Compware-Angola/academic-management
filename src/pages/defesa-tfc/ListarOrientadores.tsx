@@ -22,15 +22,35 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCcw } from "lucide-react";
+import {
+  Home,
+  Search,
+  Loader2,
+  RefreshCcw,
+  Plus,
+  Eye,
+  Trash,
+  RefreshCw,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { OrientadorModal } from "./components/orientador-modal";
+import OrientandoModal from "./components/orientando-modal";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Input } from "@/components/ui/input";
+import { ApagarOrientadorAlert } from "./components/apagar-orientador-alert";
+import ExcelActions, {
+  GenericExcelProps,
+} from "@/components/views/excel/GenericExcelExport";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -49,33 +69,20 @@ const statusConfig = {
   },
 };
 export default function ListarOrientadores() {
-  //Options
-  const searchOptions = [
-    { id: "codigoMatricula", label: "Código da Matrícula" },
-    { id: "nome", label: "Nome do Aluno" },
-  ];
-  // paginação
   const [page, setPage] = useState(1);
-
-  const [limit, setLimit] = useState(25);
-  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
-    "codigoMatricula",
-  );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchApplied, setSearchApplied] = useState("");
+  const [docenteId, setDocenteId] = useState("");
+  const [limit, setLimit] = useState(10);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
 
   const [filters, setFilters] = useState({
-    anoLectivo: "all",
+    anoLectivo: "23",
     curso: "",
     estado: "",
   });
-  const [filtersApplied, setFiltersApplied] = useState(filters);
-  const placeholders: Record<string, string> = {
-    codigoMatricula: "Pesquisar por código da matrícula...",
-    nome: "Nome do Aluno.",
-  };
-  const placeholderText = placeholders[searchBy] || "Pesquisar...";
-
+  const [orientandoModal, setOrientandoModal] = useState(false);
+  const [apagarOrientadorModal, setApagarOrientadorModal] = useState(false);
   const {
     data: orientadoresResponse,
     refetch,
@@ -87,14 +94,64 @@ export default function ListarOrientadores() {
         : parseFilter(filters.anoLectivo),
     cursoId: parseFilter(filters.curso),
     estado: filters.estado === "all" ? undefined : filters.estado,
+    search: debouncedSearch,
     page,
     limit,
   });
 
-  console.log({ filtersApplied });
+  const pdfData = useMemo(() => {
+    if (!orientadoresResponse?.data) return null;
+    return {
+      rows: orientadoresResponse.data.map((u) => ({
+        nome: u.nome_orientador,
+        curso: u.curso,
+        anoLectivo: u.ano_lectivo,
+      })),
+    };
+  }, [orientadoresResponse]);
+
+  const excelProps: GenericExcelProps | null = pdfData
+    ? {
+        documentTitle: "Orientadores",
+        mainTable: {
+          headers: [
+            { key: "nome", label: "Nome", width: 50 },
+            { key: "curso", label: "Curso", width: 35 },
+            { key: "anoLectivo", label: "Ano Letivo", width: 15 },
+          ],
+          rows: pdfData.rows,
+        },
+      }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Orientadores"
+      mainTable={{
+        headers: [
+          { key: "nome", label: "Nome", width: "50%" },
+          { key: "curso", label: "Curso", width: "35%" },
+          { key: "anoLectivo", label: "Ano Letivo", width: "15%" },
+        ],
+        rows: pdfData.rows,
+      }}
+    />
+  ) : null;
+
+  const handleRefetch = () => {
+    setFilters({
+      anoLectivo: "23",
+      curso: "",
+      estado: "",
+    });
+    setPage(1);
+    setLimit(10);
+    refetch();
+  };
   const tableData = orientadoresResponse?.data || [];
   const total = orientadoresResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+  const baseFileName = `orientadores-${filters.anoLectivo}-${filters.curso}`;
 
   return (
     <div className="p-6 space-y-6">
@@ -118,9 +175,46 @@ export default function ListarOrientadores() {
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Orientadores</h1>
+          <p className="text-muted-foreground">Consultar orientadores.</p>
+        </div>
 
-      <h1 className="text-2xl font-bold">Orientadores</h1>
-      <p className="text-muted-foreground">Consultar orientadores.</p>
+        <Button onClick={() => setOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Adicionar
+        </Button>
+
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleRefetch}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </Button>
+          {pdfData && excelProps && (
+            <>
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
+
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            </>
+          )}
+        </div>
+      </div>
 
       <Card>
         <CardHeader>
@@ -138,7 +232,7 @@ export default function ListarOrientadores() {
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
             />
-            <div className="flex flex-col gap-2">
+            {/* <div className="flex flex-col gap-2">
               <Label>Estado</Label>
               <Select
                 value={filters.estado}
@@ -153,24 +247,23 @@ export default function ListarOrientadores() {
                   <SelectItem value="inactivo">Inactivo</SelectItem>
                 </SelectContent>
               </Select>
+            </div> */}
+
+            <div className="flex flex-col gap-2">
+              <Label>Pesquisar</Label>
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
 
             <div className="flex items-end">
               <Button
-                aria-label="Limpar filtros"
-                title="Limpar filtros"
+                aria-label="Actualizar"
                 className="cursor-pointer"
-                onClick={() => {
-                  setFilters({
-                    anoLectivo: "all",
-                    curso: "",
-                    estado: "",
-                  });
-                  setPage(1);
-                  setLimit(25);
-                  refetch();
-                }}
+                onClick={handleRefetch}
               >
+                Atualizar
                 <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
@@ -226,6 +319,9 @@ export default function ListarOrientadores() {
                       <TableHead className="w-[200px] whitespace-nowrap">
                         Criado por
                       </TableHead>
+                      <TableHead className="w-[200px] whitespace-nowrap">
+                        Acções
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -268,6 +364,30 @@ export default function ListarOrientadores() {
                           </TableCell>
                           <TableCell className="text-muted-foreground whitespace-nowrap">
                             {item.criado_por}
+                          </TableCell>
+                          <TableCell className="flex items-center gap-2 whitespace-nowrap">
+                            <Button
+                              size={"icon"}
+                              variant="outline"
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setDocenteId(item.codigo.toString());
+                                setOrientandoModal(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size={"icon"}
+                              variant="destructive"
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setDocenteId(item.codigo.toString());
+                                setApagarOrientadorModal(true);
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
@@ -316,13 +436,25 @@ export default function ListarOrientadores() {
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </CardContent>
       </Card>
+      <OrientadorModal open={open} setOpen={setOpen} />
+      <OrientandoModal
+        open={orientandoModal}
+        setOpen={setOrientandoModal}
+        docenteId={parseFilter(docenteId)}
+        anoLectivoId={parseFilter(filters.anoLectivo)}
+      />
+      <ApagarOrientadorAlert
+        open={apagarOrientadorModal}
+        onOpenChange={setApagarOrientadorModal}
+        orientadorId={parseFilter(docenteId)}
+        anoLectivoId={parseFilter(filters.anoLectivo)}
+      />
     </div>
   );
 }

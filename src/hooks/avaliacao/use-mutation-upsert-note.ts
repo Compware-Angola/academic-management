@@ -11,8 +11,9 @@ export function useUpsertNote() {
   return useMutation<NoteUpsertResponse, any, NoteUpsertPayload>({
     mutationFn: (payload: NoteUpsertPayload) => upsertNote(payload),
     onSuccess: (data, variables) => {
-      // Atualiza automaticamente a query de notas após salvar
       queryClient.invalidateQueries({ queryKey: ["note-releases"] });
+   
+      queryClient.refetchQueries({ queryKey: ["note-releases"] });
     },
     onError: (error) => {
       console.error("Erro ao lançar/atualizar nota:", error);

@@ -3,7 +3,9 @@ import { useMemo } from "react";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
-import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import ExcelActions, {
+  GenericExcelProps,
+} from "@/components/views/excel/GenericExcelExport";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,34 +32,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2 } from "lucide-react";
+import { Home, Search, Loader2, RefreshCw, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
-import { useQueryPagamentosTFC } from "@/hooks/defesa-tfc/use-query-pagamentos-tfc";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQueryEstudanteFinalista } from "@/hooks/defesa-tfc/use-query-estudante-finalista-tfc";
 
 export default function ListarEstudanteFinalista() {
-  //Options
-  const searchOptions = [
-    { id: "codigoMatricula", label: "Código da Matrícula" },
-    { id: "nome", label: "Nome do Aluno" },
-  ];
-  // paginação
   const [page, setPage] = useState(1);
 
-  const [limit, setLimit] = useState(25);
-  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
-    "codigoMatricula",
-  );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchApplied, setSearchApplied] = useState("");
+  const [limit, setLimit] = useState(10);
 
   const [filters, setFilters] = useState({
     anoLectivo: "23",
@@ -67,31 +56,85 @@ export default function ListarEstudanteFinalista() {
     periodo: "",
     tipoCandidatura: "",
   });
-  const [filtersApplied, setFiltersApplied] = useState(filters);
   const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
     useQueryTipoCandidatura();
-  const placeholders: Record<string, string> = {
-    codigoMatricula: "Pesquisar por código da matrícula...",
-    nome: "Nome do Aluno.",
-  };
-  const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
   const {
     data: estudanteFinalistaResponse,
     refetch,
     isFetching,
   } = useQueryEstudanteFinalista({
-    anoLectivo: parseFilter(filtersApplied.anoLectivo),
-    curso: parseFilter(filtersApplied.curso),
-    tipoCandidatura: parseFilter(filtersApplied.tipoCandidatura),
-
+    anoLectivo: parseFilter(filters.anoLectivo),
+    curso: parseFilter(filters.curso),
+    tipoCandidatura: parseFilter(filters.tipoCandidatura),
     page,
     limit,
   });
+  const pdfData = useMemo(() => {
+    if (!estudanteFinalistaResponse?.data) return null;
+    return {
+      rows: estudanteFinalistaResponse.data.map((u) => ({
+        matricula: u.matricula,
+        nome: u.nome,
+        bilhete: u.bilhete,
+        curso: u.curso,
+      })),
+    };
+  }, [estudanteFinalistaResponse]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Estudantes Finalistas"
+      mainTable={{
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: "15%" },
+          { key: "nome", label: "Nome", width: "35%" },
+          { key: "bilhete", label: "Bilhete", width: "20%" },
+          { key: "curso", label: "Curso", width: "30%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps: GenericExcelProps | null = pdfData
+    ? {
+        documentTitle: "Estudantes Finalistas",
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Nº Matrícula", width: 15 },
+            { key: "nome", label: "Nome", width: 50 },
+            { key: "bilhete", label: "Bilhete", width: 20 },
+            { key: "curso", label: "Curso", width: 30 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
+  const handleRefetch = () => {
+    setFilters({
+      anoLectivo: "23",
+      curso: "",
+      estado: "",
+      faculdade: "",
+      periodo: "",
+      tipoCandidatura: "",
+    });
+    setPage(1);
+    refetch();
+  };
+
   const tableData = estudanteFinalistaResponse?.data || [];
   const total = estudanteFinalistaResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
+  const baseFileName = `estudantes_finalistas_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -114,10 +157,40 @@ export default function ListarEstudanteFinalista() {
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
+        <p className="text-muted-foreground">
+          Consultar estudantes finalistas.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleRefetch}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </Button>
+          {pdfData && excelProps && (
+            <>
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
 
-      <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
-      <p className="text-muted-foreground">Consultar estudantes finalistas.</p>
-
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            </>
+          )}
+        </div>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
@@ -157,15 +230,9 @@ export default function ListarEstudanteFinalista() {
             />
 
             <div className="flex items-end">
-              <Button
-                onClick={() => {
-                  setFiltersApplied(filters);
-                  setSearchApplied(searchTerm);
-                  refetch();
-                }}
-              >
-                <Search className="h-4 w-4" />
-                Pesquisar
+              <Button onClick={handleRefetch}>
+                <RefreshCw className="h-4 w-4" />
+                Atualizar
               </Button>
             </div>
           </div>
@@ -255,7 +322,6 @@ export default function ListarEstudanteFinalista() {
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
                 </SelectContent>
               </Select>
             </div>
