@@ -190,7 +190,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             { key: "docente", label: "Docente", width: "20%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
         footerNotice="Documento gerado automaticamente pelo sistema."
       />
@@ -225,7 +225,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             rows: exportRows,
           },
           footerNotice: "Documento gerado automaticamente pelo sistema.",
-          primaryColor: "#1e40af",
+          primaryColor: "#0D1B48",
         }
       : null;
 

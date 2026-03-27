@@ -1,3 +1,8 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -152,6 +157,81 @@ export default function ListagemDocentes() {
       : (areasFormacao.find((area) => area.codigo === filters.area)
           ?.designacao ?? "Selecionar");
 
+  const exportRows = docentes.map((item) => ({
+  numeroMec: item.numeroMec,
+  nome: item.nome,
+  escalao: item.escalao,
+  categoria: item.categoria,
+  grauAcademico: item.grauAcademico,
+  email: item.email,
+  areaFormacao: item.areaFormacaoNome,
+}));
+
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        `Área de Formação: ${selectedAreaLabel}`,
+        filters.search ? `Pesquisa: ${filters.search}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Docentes"
+    subtitle="Gestão completa do corpo docente"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "numeroMec", label: "Nº Mec", width: "12%" },
+        { key: "nome", label: "Nome", width: "24%" },
+        { key: "escalao", label: "Escalão", width: "12%" },
+        { key: "categoria", label: "Categoria", width: "16%" },
+        { key: "grauAcademico", label: "Grau", width: "16%" },
+        { key: "email", label: "Email", width: "20%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#0D1B48",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Lista de Docentes",
+      subtitle: "Gestão completa do corpo docente",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroMec", label: "Nº Mec", width: 15 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "escalao", label: "Escalão", width: 18 },
+          { key: "categoria", label: "Categoria", width: 22 },
+          { key: "grauAcademico", label: "Grau", width: 20 },
+          { key: "email", label: "Email", width: 32 },
+          { key: "areaFormacao", label: "Área de Formação", width: 28 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+  : null;
+
+const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
+
+
   const handleFilterChange = <K extends keyof FiltersState>(
     field: K,
     value: FiltersState[K],
@@ -188,6 +268,8 @@ export default function ListagemDocentes() {
   const inicio = totalRegistos === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const fim = Math.min(currentPage * itemsPerPage, totalRegistos);
 
+  
+
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -212,7 +294,7 @@ export default function ListagemDocentes() {
 
         <div className="flex flex-wrap gap-2">
           <Button
-            variant="outline"
+            //variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={isFetchingDocentes}
@@ -226,21 +308,24 @@ export default function ListagemDocentes() {
             Atualizar lista
           </Button>
 
-          <Button variant="outline" size="sm">
-            <Printer className="mr-2 h-4 w-4" />
-            Imprimir
-          </Button>
+  {pdfContent && (
+    <PDFActions
+      document={pdfContent}
+      fileName={`${baseFileName}.pdf`}
+      showDownload
+      showPrint
+    />
+  )}
 
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Exportar Excel
-          </Button>
-
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Exportar PDF
-          </Button>
-        </div>
+  {excelProps && (
+    <ExcelActions
+      excelProps={excelProps}
+      fileName={`${baseFileName}.xlsx`}
+      showDownload
+    />
+  )}
+</div>
+        
       </div>
 
       <div className="rounded-lg border bg-card p-6">

@@ -22,6 +22,7 @@ export function OrientadorModal({
     anoLectivo: "23",
     curso: "",
     docente: "",
+    faculdade: "",
   });
   const handleClose = () => {
     setOpen(false);
@@ -29,6 +30,7 @@ export function OrientadorModal({
       anoLectivo: "23",
       curso: "",
       docente: "",
+      faculdade: "",
     });
   };
   const handleOpenChange = (open: boolean) => {
@@ -49,7 +51,7 @@ export function OrientadorModal({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="max-w-2xl!"
+        className="max-w-4xl!"
         onPointerDownOutside={handleClose}
         onEscapeKeyDown={handleClose}
       >
@@ -66,12 +68,15 @@ export function OrientadorModal({
               options={teachersData}
               map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
               onChange={(codigo) => setFilters({ ...filters, docente: codigo })}
-              width="full"
             />
           </div>
+
           <CourseSelect
             value={filters.curso}
             onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+            params={{
+              faculdadeId: parseFilter(filters.faculdade),
+            }}
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -80,9 +85,14 @@ export function OrientadorModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!filters.docente || !filters.curso || !filters.anoLectivo}
+            disabled={
+              !filters.docente ||
+              !filters.curso ||
+              !filters.anoLectivo ||
+              mutation.isPending
+            }
           >
-            Salvar
+            {mutation.isPending ? "A salvar..." : "Salvar"}
           </Button>
         </div>
       </DialogContent>

@@ -228,7 +228,7 @@ const pdfContent = pdfData ? (
         { key: "resultado", label: "Resultado", width: "15%" },
       ],
       rows: pdfData.rows,
-      headerBackground: "#1e40af",
+      headerBackground: "#0D1B48",
     }}
     footerNotice="Documento oficial para consulta académica."
     customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"

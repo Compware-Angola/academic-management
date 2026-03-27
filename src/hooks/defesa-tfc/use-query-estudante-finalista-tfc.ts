@@ -12,6 +12,7 @@ export const useQueryEstudanteFinalista = (
   },
 ) => {
   const {
+    search,
     anoLectivo,
     curso,
     tipoCandidatura,
@@ -26,6 +27,7 @@ export const useQueryEstudanteFinalista = (
     queryKey: [
       "estudante-finalista",
       {
+        search,
         anoLectivo,
         curso,
         tipoCandidatura,

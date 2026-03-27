@@ -1,6 +1,9 @@
+import { useMemo, useState } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -39,9 +42,10 @@ export function CandidatosComProvaTab() {
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const { data, isLoading } = useCandidatosSemProva({
-    codigoAnoLetivo: filters.codigoAnoLetivo ? Number(filters.codigoAnoLetivo) : undefined,
-    codigoCurso: filters.codigoCurso ? Number(filters.codigoCurso) : undefined,
-    codigoTurno: filters.codigoTurno ? Number(filters.codigoTurno) : undefined,
+
+    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
+    codigoCurso: parseFilter(filters.codigoCurso),
+    codigoTurno: parseFilter(filters.codigoTurno),
     filtroProva: "com_prova",
     statusProva: parseFilter(filters.statusProva),
     page: filters.page,
@@ -53,8 +57,114 @@ export function CandidatosComProvaTab() {
   const totalPages = data?.totalpages ?? 1;
   const offset = (filters.page - 1) * filters.limit;
 
+  const exportRows = useMemo(
+  () =>
+    candidatos.map((item) => ({
+      numeroInscricao: item.codigo,
+      nome: item.nome,
+      contacto: item.contato,
+      sexo: item.sexo,
+      curso: item.curso,
+      periodo: item.periodo,
+      horario: `${item.hora_inicio} - ${item.hora_fim}`,
+      anoLectivo: item.ano_lectivo,
+      tipoCandidatura: item.tipo_candidatura,
+      estadoProva: Number(item.status_prova) === 1 ? "Aprovado" : "Reprovado",
+    })),
+  [candidatos]
+);
+
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+        filters.statusProva !== "" ? `Estado Prova: ${filters.statusProva === "1" ? "Aprovado" : "Reprovado"}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Candidatos com Prova"
+    subtitle="Lista de candidatos com prova atribuída"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+        { key: "nome", label: "Nome", width: "20%" },
+        { key: "contacto", label: "Contacto", width: "12%" },
+        { key: "sexo", label: "Sexo", width: "8%" },
+        { key: "curso", label: "Curso", width: "16%" },
+        { key: "periodo", label: "Período", width: "10%" },
+        { key: "horario", label: "Horário", width: "12%" },
+        { key: "estadoProva", label: "Estado", width: "10%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#0D1B48",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Candidatos com Prova",
+      subtitle: "Lista de candidatos com prova atribuída",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "contacto", label: "Contacto", width: 20 },
+          { key: "sexo", label: "Sexo", width: 10 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "periodo", label: "Período", width: 18 },
+          { key: "horario", label: "Horário", width: 20 },
+          { key: "anoLectivo", label: "Ano Lectivo", width: 18 },
+          { key: "tipoCandidatura", label: "Tipo Candidatura", width: 25 },
+          { key: "estadoProva", label: "Estado Prova", width: 18 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+  : null;
+
+const baseFileName = `Candidatos_Com_Prova_${new Date().toISOString().slice(0, 10)}`;
+
   return (
     <div className="space-y-4">
+
+      <div className="flex justify-end gap-2">
+  {pdfContent && (
+    <PDFActions
+      document={pdfContent}
+      fileName={`${baseFileName}.pdf`}
+      showDownload
+      showPrint
+    />
+  )}
+
+  {excelProps && (
+    <ExcelActions
+      excelProps={excelProps}
+      fileName={`${baseFileName}.xlsx`}
+      showDownload
+    />
+  )}
+</div>
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
@@ -86,22 +196,23 @@ export function CandidatosComProvaTab() {
               disabled={isLoadingPeriodos}
               loading={isLoadingPeriodos}
               label="Período"
-              value={filters.codigoTurno}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v, page: 1 }))}
-              options={periodos}
+              value={filters.codigoTurno?.toString() ?? 'all'}
+              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === 'all' ? undefined : v, page: 1 }))}
+              options={[{ codigo: 'all', designacao: 'Todos' }, ...periodos]}
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
           </div>
           <div className="space-y-2">
             <FormSelect
               label="Estado Prova"
-              value={filters.statusProva?.toString() ?? ""}
+              value={filters.statusProva?.toString() ?? 'all'}
               onChange={(v) =>
-                setFilters((p) => ({ ...p, statusProva: v, page: 1 }))
+                setFilters((p) => ({ ...p, statusProva: v === 'all' ? undefined : v, page: 1 }))
               }
               options={[
-                { key: "0", label: "Reprovado", value: "0" },
-                { key: "1", label: "Aprovado", value: "1" },
+                { key: 'all', label: 'Todos', value: 'all' },
+                { key: '0', label: 'Reprovado', value: '0' },
+                { key: '1', label: 'Aprovado', value: '1' },
               ]}
               map={(item) => item}
             />

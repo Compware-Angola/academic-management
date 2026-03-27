@@ -1,4 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,6 +70,90 @@ export function ListaPresencaExame() {
     const totalPages = data?.totalpages ?? 1;
     const offset = (filters.page - 1) * filters.limit;
 
+    const exportRows = useMemo(
+  () =>
+    candidatos.map((item) => ({
+      numeroInscricao: item.numero_inscricao,
+      nome: item.nome,
+      numeroBilhete: item.numero_bilhete,
+      curso: item.curso,
+      sala: item.sala,
+      anoLectivo: item.ano_lectivo,
+      dataRealizacao: item.data_realizacao,
+      horaInicio: item.hora_inicio,
+    })),
+  [candidatos]
+);
+
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoSala ? `Sala: ${filters.codigoSala}` : null,
+        filters.dataRealizacao ? `Data: ${filters.dataRealizacao}` : null,
+        filters.horaInicio ? `Hora: ${filters.horaInicio}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Presença — Exame de Acesso"
+    subtitle="Registo de presenças dos candidatos"
+    infoSections={[
+      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${total}`] },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "numeroInscricao", label: "Nº Inscrição", width: "14%" },
+        { key: "nome", label: "Nome", width: "24%" },
+        { key: "numeroBilhete", label: "BI", width: "16%" },
+        { key: "curso", label: "Curso", width: "16%" },
+        { key: "sala", label: "Sala", width: "10%" },
+        { key: "anoLectivo", label: "Ano Lectivo", width: "12%" },
+        { key: "dataRealizacao", label: "Data", width: "12%" },
+        { key: "horaInicio", label: "Hora", width: "10%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#0D1B48",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+
+const excelProps = pdfData
+  ? {
+      documentTitle: "Lista de Presença — Exame de Acesso",
+      subtitle: "Registo de presenças dos candidatos",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "numeroBilhete", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "sala", label: "Sala", width: 15 },
+          { key: "anoLectivo", label: "Ano Lectivo", width: 18 },
+          { key: "dataRealizacao", label: "Data", width: 18 },
+          { key: "horaInicio", label: "Hora", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+  : null;
+
+const baseFileName = `Lista_Presenca_Exame_${new Date().toISOString().slice(0, 10)}`;
+
     function handleData(val: string) {
         if (val) {
             const [yyyy, mm, dd] = val.split("-");
@@ -106,12 +196,25 @@ export function ListaPresencaExame() {
                     <p className="text-muted-foreground mt-1">Registo de presenças dos candidatos no exame de acesso.</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
+  
 
-  {/* Filtros 
-                    <Button variant="outline" size="sm"><RefreshCw className="h-4 w-4 mr-2" />Atualizar</Button>
-                    <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" />Excel</Button>
-                    <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" />Imprimir</Button>*/}
-                </div>
+  {pdfContent && (
+    <PDFActions
+      document={pdfContent}
+      fileName={`${baseFileName}.pdf`}
+      showDownload
+      showPrint
+    />
+  )}
+
+  {excelProps && (
+    <ExcelActions
+      excelProps={excelProps}
+      fileName={`${baseFileName}.xlsx`}
+      showDownload
+    />
+  )}
+</div>
             </div>
             {/* Filtros */}
             <div className="bg-card border rounded-lg p-6">

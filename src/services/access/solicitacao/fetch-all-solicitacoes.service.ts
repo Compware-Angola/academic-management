@@ -1,17 +1,13 @@
-// src/services/solicitacao/listar-solicitacoes.service.ts
-
 import { axiosNestGa } from "@/lib/axios-nest-ga";
-import { normalizeParam } from "@/util/normalize-param";
-
 
 /* ---------- RESPONSE ITEM ---------- */
 export type Solicitacao = {
-  name: string;
-  descricao_servico: string;
+  codigo_solicitacao: number;
   matricula: number;
-  data_solicitacao: string;
+  nome: string;
   curso: string;
-  estado_aprovacao: string;
+  servico: string;
+  data_solicitacao: string;
 };
 
 /* ---------- RESPONSE COMPLETO ---------- */
@@ -23,24 +19,37 @@ export type ListarAllSolicitacoesResponse = {
   totalPages: number;
 };
 
-/* ---------- SERVICE ---------- */
-export async function listarAllSolicitacoesService({ page,
-  limit,}: {
-    page: number;
+/* ---------- PARAMS ---------- */
+type ListarAllSolicitacoesParams = {
+  page: number;
   limit: number;
-  }): Promise<ListarAllSolicitacoesResponse> {
-  
-    const { data } = await axiosNestGa.get<ListarAllSolicitacoesResponse>(
+  estadoSolicitacao: string;
+  tipoServicoSelecionado: number;
+  userId: number;
+};
+
+/* ---------- SERVICE ---------- */
+export async function listarAllSolicitacoesService({
+  page,
+  limit,
+  estadoSolicitacao,
+  tipoServicoSelecionado,
+  userId,
+}: ListarAllSolicitacoesParams): Promise<ListarAllSolicitacoesResponse> {
+  const { data } = await axiosNestGa.get<ListarAllSolicitacoesResponse>(
     "/solicitacoa/all-solicitacoes",
-         {
+    {
       params: {
         page,
         limit,
+        estadoSolicitacao,
+        tipoServicoSelecionado,
+        userId,
       },
     }
-);
+  );
 
-    console.log("RESPOSTA BACKEND:", data);
+  console.log("RESPOSTA BACKEND:", data);
 
   return data;
 }

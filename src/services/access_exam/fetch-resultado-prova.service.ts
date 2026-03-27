@@ -7,6 +7,7 @@ export type ResultadoProvaParams = {
   codigoTurno?: number;
   codigoFaculdade?: number;
   codigoSala?: number;
+  search?:string;
   resultado?: number;
   dataInicio?: string;
   dataFim?: string;

@@ -245,7 +245,7 @@ const pdfContent =
           { key: "posgraduacao", label: "Pós-Grad.", width: "10%" },
         ],
         rows: exportData,
-        headerBackground: "#1e40af",
+        headerBackground: "#0D1B48",
       }}
       footerNotice="Documento gerado automaticamente pelo sistema."
     />
@@ -282,7 +282,7 @@ const pdfContent =
           rows: exportData,
         },
         footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#1e40af",
+        primaryColor: "#0D1B48",
       }
     : null;
 

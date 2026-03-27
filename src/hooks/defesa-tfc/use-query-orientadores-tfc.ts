@@ -16,6 +16,7 @@ export const useQueryOrientadoresTFC = (
     cursoId,
     estado,
     page = 1,
+    search,
     limit = 10,
   } = filters;
 
@@ -29,6 +30,7 @@ export const useQueryOrientadoresTFC = (
         cursoId,
         estado,
         page,
+        search,
         limit,
       },
     ],

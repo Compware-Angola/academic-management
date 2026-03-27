@@ -1,18 +1,17 @@
-import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { EstudanteFinalistaCommandSelect } from "@/components/common/global-selects/EstudanteFinalistaCommandSelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useMutationCreateOrientadorTfc } from "@/hooks/defesa-tfc/use-mutation-criar-orientador-tfc";
+import { useMutationVincularOrientadorAluno } from "@/hooks/defesa-tfc/use-mutation-vincular-orientador-aluno";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
-import { useQueryVinculos } from "@/hooks/defesa-tfc/use-query-vinculos";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { parseFilter } from "@/util/parse-filter";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+const TIPO_CANDIDATURA_LICENCIATURA_CODIGO = 1;
 
 export function VinculosModal({
   open,
@@ -21,62 +20,57 @@ export function VinculosModal({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
-  const mutation = useMutationCreateOrientadorTfc();
+  const mutation = useMutationVincularOrientadorAluno();
 
-  const { data: teachersData = [] } = useQueryTeacther();
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     curso: "",
-    docente: "",
     faculdade: "",
     orientador: "",
+    estudante: "",
+    tema: "",
   });
-  useEffect(() => {
-    refetch();
-  }, [filters]);
-  const { data: orientadoresResponse } = useQueryOrientadoresTFC({
-    anoLectivoId: parseFilter(filters.anoLectivo),
-    cursoId: parseFilter(filters.curso),
-    estado: "activo",
-  });
-  const {
-    data: vinculosResponse,
-    refetch,
-    isFetching,
-  } = useQueryVinculos({
-    anoLectivoId:
-      filters.anoLectivo === "all"
-        ? undefined
-        : parseFilter(filters.anoLectivo),
-    cursoId: parseFilter(filters.curso),
-    search: undefined,
-  });
+
+  const { data: orientadoresResponse, isFetching: loadingOrientadores } =
+    useQueryOrientadoresTFC({
+      anoLectivoId: parseFilter(filters.anoLectivo),
+      cursoId: parseFilter(filters.curso),
+      estado: "activo",
+    });
 
   const handleClose = () => {
     setOpen(false);
     setFilters({
       anoLectivo: "23",
       curso: "",
-      docente: "",
       faculdade: "",
       orientador: "",
+      estudante: "",
+      tema: "",
     });
   };
-  const handleOpenChange = (open: boolean) => {
-    setOpen(open);
-    if (!open) {
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
       handleClose();
     }
   };
+
   const handleSubmit = async () => {
-    await mutation.mutateAsync({
-      anoLectivoId: parseFilter(filters.anoLectivo),
-      cursoId: parseFilter(filters.curso),
-      docenteId: parseFilter(filters.docente),
-      estado: "activo",
-    });
-    handleClose();
+    try {
+      await mutation.mutateAsync({
+        anoLectivoId: parseFilter(filters.anoLectivo),
+        codigoMatricula: Number(filters.estudante),
+        codigoOrientador: Number(filters.orientador),
+        tema: filters.tema.toUpperCase(),
+      });
+
+      handleClose();
+    } catch (error) {
+      console.error("Erro ao vincular:", error);
+    }
   };
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
@@ -84,51 +78,78 @@ export function VinculosModal({
         onPointerDownOutside={handleClose}
         onEscapeKeyDown={handleClose}
       >
-        <DialogTitle>Vincular Aluno ao TFC</DialogTitle>
-        <div className="grid gap-4 py-4 grid-cols-3">
+        <DialogTitle className="text-xl font-bold border-b pb-2">
+          Vincular Aluno ao TFC
+        </DialogTitle>
+
+        <div className="grid gap-6 py-4 grid-cols-1 md:grid-cols-3">
+          {/* Filtros de Localização Acadêmica */}
           <AcademicYearSelect
             value={filters.anoLectivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             onlyActive
           />
 
-          <FacultySelect
-            allOption
-            value={filters.faculdade}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, faculdade: v, curso: "" })
-            }
-          />
           <CourseSelect
-            params={{
-              faculdadeId: parseFilter(filters.faculdade),
-            }}
-            onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+            enableDefaultSelectItem
             value={filters.curso}
+            onChangeValue={(v) => setFilters({ ...filters, curso: v })}
           />
+
+          {/* Seleção de Pessoas */}
           <FormSelect
             label="Orientador"
             value={filters.orientador}
             onChange={(v) => setFilters({ ...filters, orientador: v })}
             options={orientadoresResponse?.data || []}
-            loading={isFetching}
-            disabled={isFetching}
+            loading={loadingOrientadores}
+            disabled={loadingOrientadores}
             map={(u) => ({
               key: u.codigo,
               label: u.nome_orientador,
               value: u.codigo.toString(),
             })}
           />
+
+          <EstudanteFinalistaCommandSelect
+            label="Estudante Finalista"
+            value={filters.estudante}
+            onChangeValue={(v) => setFilters({ ...filters, estudante: v })}
+            params={{
+              anoLectivo: parseFilter(filters.anoLectivo),
+              curso: parseFilter(filters.curso),
+              tipoCandidatura: TIPO_CANDIDATURA_LICENCIATURA_CODIGO,
+            }}
+          />
+
+          {/* Campo de Tema */}
+          <div className="flex flex-col gap-2 md:col-span-2">
+            <Label htmlFor="tema-tfc">Tema do Trabalho</Label>
+            <Input
+              id="tema-tfc"
+              placeholder="Ex: Sistema de Gestão Escolar..."
+              value={filters.tema}
+              onChange={(e) =>
+                setFilters({ ...filters, tema: e.target.value.trimStart() })
+              }
+            />
+          </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={handleClose}>
+
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <Button variant="outline" onClick={handleClose} type="button">
             Cancelar
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={!filters.docente || !filters.curso || !filters.anoLectivo}
+            disabled={
+              !filters.orientador ||
+              !filters.estudante ||
+              !filters.tema.trim() ||
+              mutation.isPending
+            }
           >
-            Salvar
+            {mutation.isPending ? "A processar..." : "Confirmar Vínculo"}
           </Button>
         </div>
       </DialogContent>

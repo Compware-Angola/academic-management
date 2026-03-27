@@ -137,7 +137,7 @@ const pdfContent = pdfData ? (
         },
       ],
       rows: pdfData.rows,
-      headerBackground: "#1e40af",
+      headerBackground: "#0D1B48",
     }}
     footerNotice="Permissões sujeitas a alterações conforme decisão administrativa."
     customFooter="Sistema de Gestão Académica"

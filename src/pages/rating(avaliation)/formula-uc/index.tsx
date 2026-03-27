@@ -172,7 +172,7 @@ export default function FormulaUC() {
           { key: "definido_por", label: "Definido por", width: "12%" },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af", // azul escuro (mesmo da outra tela)
+        headerBackground: "#0D1B48", // azul escuro (mesmo da outra tela)
       }}
       footerNotice="Parâmetros de avaliação sujeitos a regulamento académico da instituição."
       customFooter="Sistema de Gestão Académica – Universidade Metodista de Angola"

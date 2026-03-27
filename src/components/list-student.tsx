@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   companyName: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#0d1b48',
+    color: '#0D1B48',
   },
   companyDetails: {
     fontSize: 9,
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   tableHeader: {
-    backgroundColor: '#0d1b48',
+    backgroundColor: '#0D1B48',
     color: 'white',
     fontWeight: 'bold',
   },
