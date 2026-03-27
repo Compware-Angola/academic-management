@@ -303,10 +303,7 @@ export default function ListarEstudanteFinalista() {
               <Button
                 variant="outline"
                 disabled={
-                  page === totalPages ||
-                  isFetching ||
-                  tableData.length === 0 ||
-                  page === 1
+                  page === totalPages || isFetching || tableData.length === 0
                 }
                 onClick={() => setPage((p) => p + 1)}
               >
