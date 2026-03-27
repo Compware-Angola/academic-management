@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutationVincularOrientadorAluno } from "@/hooks/defesa-tfc/use-mutation-vincular-orientador-aluno";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
-import { useQueryVinculos } from "@/hooks/defesa-tfc/use-query-vinculos";
 import { parseFilter } from "@/util/parse-filter";
 import { useState } from "react";
 
