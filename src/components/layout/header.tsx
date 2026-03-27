@@ -25,7 +25,7 @@ import { ThemeSwitcher } from "../theme-switcher";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useMutationLogout } from "@/hooks/mutations/use-mutation-login";
-import { toast } from "@/components/ui/use-toast";
+import {  useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/tudents/use-query-students";
@@ -37,7 +37,7 @@ import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grup
 
 export function Header() {
   const { logout, user } = useAuth();
-
+const { toast } = useToast();
   const [token, setToken] = useState<string | null>(AuthStorage.getToken());
   localStorage.removeItem("auth.user");
   const {
