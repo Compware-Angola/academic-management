@@ -14,6 +14,8 @@ export const useQueryControleAssiduidade = (
     estado,
     anoLectivo,
     semestre,
+    curso,
+    gradeCurricular,
     page = 1,
     limit = 20,
   } = filters;
@@ -31,6 +33,7 @@ export const useQueryControleAssiduidade = (
         estado,
         anoLectivo,
         semestre,
+        gradeCurricular,
         page,
         limit,
       },
