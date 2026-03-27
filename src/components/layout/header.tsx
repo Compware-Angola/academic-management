@@ -25,7 +25,7 @@ import { ThemeSwitcher } from "../theme-switcher";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { useMutationLogout } from "@/hooks/mutations/use-mutation-login";
-
+import { toast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/tudents/use-query-students";
@@ -82,6 +82,12 @@ export function Header() {
 
     return ativo && naoExpirado;
   });
+  if (avisosValidos.length > 0) {
+    toast({
+      title: "Notificação",
+      description: `Você tem ${avisosValidos.length} aviso(s) pendente(s).`,
+    });
+  }
 
   // ─── Notificações ────────────────────────────────────────────────────────
 
