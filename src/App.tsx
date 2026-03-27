@@ -114,9 +114,6 @@ import GestaoAfectacao from "./pages/gestao_docente/GestaoAfectacao";
 import ListarUCDocenteSemAfetacao from "./pages/gestao_docente/listar-uc-docente-sem-afetacao";
 import { DocenteAfectacao } from "./pages/gestao_docente/DocenteAfectacao";
 import ListagemDocentes from "./pages/gestao_docente/ListDocentes";
-<<<<<<< HEAD
-import Regentes from "./pages/gestao_docente/Regentes";
-=======
 import ListaCandidatos from "./pages/access_exam/ListaCandidatos";
 import AlterarSenhaExame from "./pages/access_exam/AlterarSenhaExame";
 
@@ -128,7 +125,7 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
->>>>>>> 5f6975ddb135464a59bf95d4e89b954f97dfc51f
+import Regentes from "./pages/gestao_docente/Regentes";
 
 const App = () => {
   return (
@@ -1213,23 +1210,6 @@ const App = () => {
                   <Route
                     path="/gestao-docentes/docentes"
 
-<<<<<<< HEAD
-                  <Route
-                    path="/gestao-docentes/regentes"
-                    
-
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
-                        ]}
-                      >
-                        <Regentes />
-                      </ProtectedRoute>
-                    }
-                  />
-
-=======
                     element={
 
                       <ProtectedRoute
@@ -1242,7 +1222,22 @@ const App = () => {
                   }
 
                   />
->>>>>>> 5f6975ddb135464a59bf95d4e89b954f97dfc51f
+
+                  <Route
+                    path="/gestao-docentes/regentes"
+
+                    element={
+
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
+                        ]}
+                      >
+                        <Regentes />
+                      </ProtectedRoute>
+                  }
+
+                  />
                 </Route>
               </Routes>
             </TooltipProvider>
