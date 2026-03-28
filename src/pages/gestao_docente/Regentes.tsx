@@ -1,3 +1,15 @@
+import { toast } from "sonner";
+import { Pencil } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +34,8 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryListDocentesRegentes } from "@/hooks/gestao_docente/use-query-list-docentes-regentes";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
+import { useDefinirRegente } from "@/hooks/gestao_docente/use-definir-regente";
 
 
 type DocenteRegente = {
@@ -47,6 +61,16 @@ export default function Regentes() {
   const [classe, setClasse] = useState("");
   const [semestre, setSemestre] = useState("");
   const [estado, setEstado] = useState("0");
+
+  const { user: userData } = useAuth();
+const { mutateAsync: definirRegente, isPending: isSavingRegente } =
+  useDefinirRegente();
+
+const [openModalRegente, setOpenModalRegente] = useState(false);
+const [linhaSelecionada, setLinhaSelecionada] = useState<DocenteRegente | null>(null);
+const [docenteSelecionado, setDocenteSelecionado] = useState("");
+
+  const { data: teachersData = [] } = useQueryTeacther();
 
   const [filtrosAplicados, setFiltrosAplicados] = useState({
     anoLectivo: "",
@@ -159,11 +183,68 @@ export default function Regentes() {
       : null;
 
   const columns = [
-    { header: "Ano Curricular", accessor: "ano_curricular" },
-    { header: "Semestre", accessor: "semestre" },
-    { header: "Unidade Curricular", accessor: "unidade_curricular" },
-    { header: "Docente", accessor: "docente" },
-  ];
+  { header: "Ano Curricular", accessor: "ano_curricular" },
+  { header: "Semestre", accessor: "semestre" },
+  { header: "Unidade Curricular", accessor: "unidade_curricular" },
+  { header: "Docente", accessor: "docente" },
+  {
+    header: "Ação",
+    accessor: "acao",
+    cell: (row: DocenteRegente) => (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleOpenDefinirRegente(row)}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+    ),
+  },
+];
+
+  function handleOpenDefinirRegente(row: DocenteRegente) {
+  setLinhaSelecionada(row);
+  setDocenteSelecionado("");
+  setOpenModalRegente(true);
+}
+
+async function handleSalvarRegente() {
+  if (!linhaSelecionada) return;
+
+  if (!anoLectivo && !filtrosAplicados.anoLectivo) {
+    toast?.error?.("Selecione o ano lectivo");
+    return;
+  }
+
+  if (!semestre && !filtrosAplicados.semestre) {
+    toast?.error?.("Selecione o semestre");
+    return;
+  }
+
+  if (!docenteSelecionado) {
+    toast?.error?.("Selecione o docente");
+    return;
+  }
+
+  try {
+    await definirRegente({
+      anoLectivo: Number(filtrosAplicados.anoLectivo || anoLectivo),
+      gradeCurricular: Number(linhaSelecionada.codigo_grade),
+      docente: Number(docenteSelecionado),
+      semestre: Number(filtrosAplicados.semestre || semestre),
+      createdBy: Number(userData?.user?.codigo_importado ?? 1),
+    });
+
+    toast?.success?.("Regente definido com sucesso");
+    setOpenModalRegente(false);
+    setLinhaSelecionada(null);
+    setDocenteSelecionado("");
+  } catch (error: any) {
+    toast?.error?.(
+      error?.response?.data?.message ?? "Erro ao definir regente"
+    );
+  }
+}
 
   function handleListar() {
     setCurrentPage(1);
@@ -314,6 +395,55 @@ export default function Regentes() {
         totalPages={data?.totalPages ?? 1}
         onPageChange={setCurrentPage}
       />
+
+      <Dialog open={openModalRegente} onOpenChange={setOpenModalRegente}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Definir Regente</DialogTitle>
+    </DialogHeader>
+
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Docente</label>
+        <Select
+          value={docenteSelecionado}
+          onValueChange={setDocenteSelecionado}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o docente" />
+          </SelectTrigger>
+          <SelectContent>
+            {teachersData?.map((teacher: any) => (
+              <SelectItem
+                key={teacher.codigo ?? teacher.CODIGO}
+                value={String(teacher.codigo ?? teacher.CODIGO)}
+              >
+                {teacher.nome ?? teacher.NOME}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <DialogFooter>
+      <Button
+        variant="outline"
+        onClick={() => {
+          setOpenModalRegente(false);
+          setLinhaSelecionada(null);
+          setDocenteSelecionado("");
+        }}
+      >
+        Cancelar
+      </Button>
+
+      <Button onClick={handleSalvarRegente} disabled={isSavingRegente}>
+        {isSavingRegente ? "Salvando..." : "Salvar"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }
