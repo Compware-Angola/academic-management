@@ -126,6 +126,7 @@ import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import Regentes from "./pages/gestao_docente/Regentes";
+import ListaGeralEstudantes from "./pages/registrations/GeneralListStudents";
 
 const App = () => {
   return (
@@ -1238,6 +1239,7 @@ const App = () => {
                   }
 
                   />
+
                 </Route>
               </Routes>
             </TooltipProvider>
