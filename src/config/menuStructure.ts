@@ -986,7 +986,7 @@ export const academicStructure: MenuStructure = {
       icon: FileCheck,
       items: [
        // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-       // { title: "Admitir candidatura", url: "/exame/admitir" },
+       { title: "Admitir candidatura", url: "/exame/admitir" },
         { title: "Alterar senha", url: "/exame/alterar-senha" ,permission:[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla]},
      
        // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
