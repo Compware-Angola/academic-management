@@ -205,22 +205,22 @@ function handleRejeitar(row: Solicitacao) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Estado</label>
-      <Select value={estado} onValueChange={setEstado}>
-  <SelectTrigger>
-    <SelectValue placeholder="Todos os estados" />
-  </SelectTrigger>
+                          <label className="text-sm font-medium">Estado</label>
+              <Select value={estado} onValueChange={setEstado}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos os estados" />
+              </SelectTrigger>
 
-  <SelectContent>
-    <SelectItem value="all">Todos</SelectItem>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
 
-    {ESTADOS.map((e) => (
-      <SelectItem key={e.value} value={e.value}>
-        {e.label}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+                {ESTADOS.map((e) => (
+                  <SelectItem key={e.value} value={e.value}>
+                    {e.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
 
             </div>

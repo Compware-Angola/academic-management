@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
@@ -26,11 +27,14 @@ import {
 import { useQueryListarAllSolicitacoes } from "@/hooks/acess/use-query-listar-all-solicitacoes";
 import { useQueryServicos } from "@/hooks/acess/use-query-listar-servicos-solicitacao";
 import { useAuth } from "@/hooks/use-auth";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 const ESTADOS_SOLICITACAO = [
-  { value: "Solicitações Pendentes", label: "Solicitações Pendentes" },
-  { value: "Solicitações Respondidas", label: "Solicitações Respondidas" },
+  { value: "Solicitações Respondidas",label: "Solicitações Respondidas" },
   { value: "solicitacao encaminhada", label: "Solicitação Encaminhada" },
+  { value: "aguarda resposta",        label: "Solicitações Pendentes"},
+  { value: "resposta dada",           label: "Resposta Dada"},
+  { value: "TODOS",                   label: "Todos os estados" }
 ];
 
 type SolicitacaoItem = {
@@ -49,23 +53,35 @@ export default function Solicitacoes() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [serviceId, setServiceId] = useState("404");
-  const [estadoSolicitacao, setEstadoSolicitacao] = useState(
-    "Solicitações Respondidas"
-  );
+const [serviceSearch, setServiceSearch] = useState("");
+const [searchServico, setSearchServico] = useState("");
+const [estado, setEstado] = useState("TODOS");
+
 
   const { user } = useAuth();
   const userIdLogado = user?.user?.pk_utilizador;
 
-  const { data: servicos } = useQueryServicos({
+  const { data: servicos, isLoading: isLoadingServicos } = useQueryServicos({
     codigo_ano_lectivo: 23,
   });
+
+  const servicosOptions = [
+  { codigo: 404, designacao: "Todos" },
+  ...((servicos ?? []).map((servico: any) => ({
+    codigo: servico.CODIGO,
+    designacao: servico.DESCRICAO,
+  }))),
+];
+
+  
 
   const { data, isLoading, isFetching } = useQueryListarAllSolicitacoes({
     page: currentPage,
     limit: 10,
-    estadoSolicitacao,
+    estadoSolicitacao: estado,
     tipoServicoSelecionado: Number(serviceId),
     userId: Number(userIdLogado),
+    searchServico,
   });
 
   const solicitacoes = data?.data ?? [];
@@ -156,24 +172,7 @@ export default function Solicitacoes() {
       header: "Data de Solicitação",
       accessor: "data_solicitacao",
       cell: (row: SolicitacaoItem) => formatDate(row.data_solicitacao),
-    },
-    {
-      header: "Ações",
-      accessor: "acoes",
-      cell: (row: SolicitacaoItem) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSelectedSolicitacao(row);
-            setShowDetails(true);
-          }}
-        >
-          <Eye className="h-4 w-4 mr-1" />
-          Ver
-        </Button>
-      ),
-    },
+    }
   ];
 
   return (
@@ -211,55 +210,51 @@ export default function Solicitacoes() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Serviço</label>
-              <Select
-                value={serviceId}
-                onValueChange={(value) => {
-                  setServiceId(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os serviços" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="404">Todos</SelectItem>
-
-                  {servicos?.map((servico: any) => (
-                    <SelectItem
-                      key={servico.CODIGO}
-                      value={String(servico.CODIGO)}
-                    >
-                      {servico.DESCRICAO}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+  <FormCommandSelect
+    width="full"
+    label="Serviço"
+    value={serviceId}
+    disabled={isLoadingServicos}
+    isLoading={isLoadingServicos}
+    options={servicosOptions}
+    onSearchChange={setServiceSearch}
+    map={(item) => ({
+      key: item.codigo.toString(),
+      value: item.codigo.toString(),
+      label: item.designacao,
+    })}
+    onChange={(value) => {
+      setServiceId(value);
+      setCurrentPage(1);
+    }}
+  />
+</div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Estado</label>
               <Select
-                value={estadoSolicitacao}
-                onValueChange={(value) => {
-                  setEstadoSolicitacao(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o estado" />
-                </SelectTrigger>
+  value={estado}
+  onValueChange={(value) => {
+    setEstado(value);
+    setCurrentPage(1);
+  }}
+>
+  <SelectTrigger>
+    <SelectValue placeholder="Todos os estados" />
+  </SelectTrigger>
 
-                <SelectContent>
-                  {ESTADOS_SOLICITACAO.map((estado) => (
-                    <SelectItem key={estado.value} value={estado.value}>
-                      {estado.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+  <SelectContent>
+    {ESTADOS_SOLICITACAO.map((estado) => (
+      <SelectItem key={estado.value} value={estado.value}>
+        {estado.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
             </div>
+            
 
             <div className="flex items-end">
               <Button className="w-full" onClick={() => setCurrentPage(1)}>
@@ -268,6 +263,22 @@ export default function Solicitacoes() {
               </Button>
             </div>
           </div>
+
+          <div className="mt-4">
+  <label className="text-sm font-medium">Pesquisar por nome do serviço</label>
+  <div className="relative mt-2">
+    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <Input
+      placeholder="Digite o nome do serviço..."
+      value={searchServico}
+      onChange={(e) => {
+        setSearchServico(e.target.value);
+        setCurrentPage(1);
+      }}
+      className="pl-10"
+    />
+  </div>
+</div>
         </CardContent>
       </Card>
 
