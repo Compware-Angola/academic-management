@@ -11,6 +11,7 @@ export function useMutationVincularOrientadorAluno() {
       toast.success(response.message || "Vínculo realizado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["orientadores-tfc"] });
       queryClient.invalidateQueries({ queryKey: ["vinculos"] });
+      queryClient.invalidateQueries({ queryKey: ["docente-alunos"] });
     },
   });
 }
