@@ -115,9 +115,7 @@ export const menuStructure: MenuStructure = {
     },
     */
 
-    // ----------------------------------------------------
-    // CALENDÁRIO LIC
-    // ----------------------------------------------------
+ 
 
     // ----------------------------------------------------
     // CALENDÁRIO PÓS
@@ -1003,11 +1001,7 @@ export const academicStructure: MenuStructure = {
        // { title: "Consultar prova", url: "/exame/consultar-prova" },
         // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
         // { title: "Admitir candidatura", url: "/exame/admitir" },
-        {
-          title: "Alterar senha",
-          url: "/exame/alterar-senha",
-          permission: [PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla],
-        },
+     
 
         // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
         // { title: "Consultar prova", url: "/exame/consultar-prova" },

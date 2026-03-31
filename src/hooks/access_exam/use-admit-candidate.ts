@@ -10,6 +10,7 @@ export function useAdmitirCandidato() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["candidatos"] });
+      
     },
 
     onError: (error) => {
