@@ -181,12 +181,11 @@ export default function ListarOrientadores() {
           <p className="text-muted-foreground">Consultar orientadores.</p>
         </div>
 
-        <Button onClick={() => setOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Adicionar
-        </Button>
-
         <div className="flex justify-end gap-2">
+          <Button onClick={() => setOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Adicionar
+          </Button>
           <Button
             variant="outline"
             className="cursor-pointer"

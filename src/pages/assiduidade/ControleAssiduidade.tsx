@@ -4,12 +4,7 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -88,22 +83,18 @@ export default function ControleAssiduidade() {
     limit: 20,
   });
 
-  
-const {
-  data: gradesCurriculares = [],
-  isLoading: isLoadingGradeCurricular,
-} = useQueryDisciplinaWithFilter(
-  {
-    curso: filters.curso,
-    semestre: filters.semestre,
-  },
-  {
-    enabled: !!filters.curso && !!filters.semestre,
-  }
-);
+  const { data: gradesCurriculares = [], isLoading: isLoadingGradeCurricular } =
+    useQueryDisciplinaWithFilter(
+      {
+        curso: filters.curso,
+        semestre: filters.semestre,
+      },
+      {
+        enabled: !!filters.curso && !!filters.semestre,
+      },
+    );
 
-console.log("UC: ", gradesCurriculares)
-      
+  console.log("UC: ", gradesCurriculares);
 
   const handleFilterChange = (key: string, value: string | number) => {
     setFilters((prev) => ({
@@ -122,19 +113,21 @@ console.log("UC: ", gradesCurriculares)
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
     curso: filters.curso,
     gradeCurricular: filters.gradeCurricular
-    ? Number(filters.gradeCurricular)
-    : undefined,
+      ? Number(filters.gradeCurricular)
+      : undefined,
     page: filters.page,
     limit: filters.limit,
   };
 
-  const { data: response, isLoading } =
-    useQueryControleAssiduidade(queryFilters, {
+  const { data: response, isLoading } = useQueryControleAssiduidade(
+    queryFilters,
+    {
       enabled:
         !!queryFilters.docente &&
         !!queryFilters.dataInicial &&
         !!queryFilters.dataFinal,
-    });
+    },
+  );
 
   const aulas = response?.data ?? [];
   const resumo = response?.resumo ?? {
@@ -185,7 +178,11 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             { key: "data", label: "Data", width: "12%" },
             { key: "horario", label: "Horário", width: "16%" },
             { key: "curso", label: "Curso", width: "18%" },
-            { key: "unidade_curricular", label: "Unidade Curricular", width: "24%" },
+            {
+              key: "unidade_curricular",
+              label: "Unidade Curricular",
+              width: "24%",
+            },
             { key: "tempo", label: "Tempo", width: "10%" },
             { key: "docente", label: "Docente", width: "20%" },
           ],
@@ -217,7 +214,11 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
               { key: "data", label: "Data", width: 18 },
               { key: "horario", label: "Horário", width: 20 },
               { key: "curso", label: "Curso", width: 22 },
-              { key: "unidade_curricular", label: "Unidade Curricular", width: 35 },
+              {
+                key: "unidade_curricular",
+                label: "Unidade Curricular",
+                width: 35,
+              },
               { key: "tempo", label: "Tempo", width: 12 },
               { key: "docente", label: "Docente", width: 25 },
               { key: "estado", label: "Estado", width: 20 },
@@ -231,107 +232,101 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
   return (
     <div className="p-6 space-y-6">
-      
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-  
-  <div className="flex items-center gap-2 flex-wrap">
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink asChild>
-            <Link to="/">
-              <Home className="h-4 w-4" />
-            </Link>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbLink>Académico</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
-  </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">
+                    <Home className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Académico</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-  {exportRows.length > 0 && (
-    <div className="flex flex-wrap gap-2">
-      {pdfContent && (
-        <PDFActions
-          document={pdfContent}
-          fileName={`Controle_Assiduidade_${new Date()
-            .toISOString()
-            .slice(0, 10)}.pdf`}
-          showDownload
-          showPrint
-        />
-      )}
+        {exportRows.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`Controle_Assiduidade_${new Date()
+                  .toISOString()
+                  .slice(0, 10)}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
 
-      {excelProps && (
-        <ExcelActions
-          excelProps={excelProps}
-          fileName={`Controle_Assiduidade_${new Date()
-            .toISOString()
-            .slice(0, 10)}.xlsx`}
-          showDownload
-        />
-      )}
-    </div>
-  )}
-</div>
-
-      
+            {excelProps && (
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`Controle_Assiduidade_${new Date()
+                  .toISOString()
+                  .slice(0, 10)}.xlsx`}
+                showDownload
+              />
+            )}
+          </div>
+        )}
+      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Filtros</CardTitle>
 
-             <div className="flex items-center gap-2">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setShowMoreFilters(!showMoreFilters)}
-        className="text-muted-foreground hover:text-foreground"
-      >
-        {showMoreFilters ? (
-          <>
-            Menos filtros <ChevronUp className="ml-1 h-4 w-4" />
-          </>
-        ) : (
-          <>
-            Mais filtros <ChevronDown className="ml-1 h-4 w-4" />
-          </>
-        )}
-      </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMoreFilters(!showMoreFilters)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {showMoreFilters ? (
+                <>
+                  Menos filtros <ChevronUp className="ml-1 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Mais filtros <ChevronDown className="ml-1 h-4 w-4" />
+                </>
+              )}
+            </Button>
 
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={() =>
-          setFilters({
-            docente: "",
-            dataInicial: "",
-            dataFinal: "",
-            estado: "",
-            anoLectivo: "",
-            semestre: "",
-            curso: "",
-            gradeCurricular: "",
-            page: 1,
-            limit: 20,
-          })
-        }
-      >
-        Limpar filtros
-      </Button>
-    </div>
-         
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() =>
+                setFilters({
+                  docente: "",
+                  dataInicial: "",
+                  dataFinal: "",
+                  estado: "",
+                  anoLectivo: "",
+                  semestre: "",
+                  curso: "",
+                  gradeCurricular: "",
+                  page: 1,
+                  limit: 20,
+                })
+              }
+            >
+              Limpar filtros
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 items-end">
-
             <FormSelect
               label="Ano Letivo"
               value={filters.anoLectivo}
@@ -358,23 +353,23 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             />
 
             <FormSelect
-  label="Semestre"
-  value={filters.semestre}
-  onChange={(v) =>
-    setFilters((prev) => ({
-      ...prev,
-      semestre: v,
-      gradeCurricular: "",
-      page: 1,
-    }))
-  }
-  options={semestres ?? []}
-  map={(s) => ({
-    key: String(s.codigo),
-    label: s.designacao,
-    value: String(s.codigo),
-  })}
-/>
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  semestre: v,
+                  gradeCurricular: "",
+                  page: 1,
+                }))
+              }
+              options={semestres ?? []}
+              map={(s) => ({
+                key: String(s.codigo),
+                label: s.designacao,
+                value: String(s.codigo),
+              })}
+            />
 
             <div className="space-y-1.5">
               <FormCommandSelect
@@ -412,95 +407,87 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                 }
               />
             </div>
-                
-                {showMoreFilters && (
-  <>
 
-      <div className="space-y-1.5">
-    
-    <FormCommandSelect
-      label="Curso"
-      value={filters.curso}
-      options={cursos}
-      map={(c) => ({
-        key: String(c.codigo),
-        value: String(c.codigo),
-        label: c.designacao,
-      })}
-      placeholder="Selecionar curso..."
-      onChange={(v) =>
-        setFilters((prev) => ({
-          ...prev,
-          curso: v,
-          gradeCurricular: "",
-          page: 1,
-        }))
-      }
-    />
-  </div>
+            {showMoreFilters && (
+              <>
+                <div className="space-y-1.5">
+                  <FormCommandSelect
+                    label="Curso"
+                    value={filters.curso}
+                    options={cursos}
+                    map={(c) => ({
+                      key: String(c.codigo),
+                      value: String(c.codigo),
+                      label: c.designacao,
+                    })}
+                    placeholder="Selecionar curso..."
+                    onChange={(v) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        curso: v,
+                        gradeCurricular: "",
+                        page: 1,
+                      }))
+                    }
+                  />
+                </div>
 
-  <div className="space-y-1.5">
-    
-    <FormCommandSelect
-      label="Grade Curricular"
-      value={filters.gradeCurricular}
-      options={gradesCurriculares}
-      map={(g) => ({
-        key: String(g.pk),
-        value: String(g.pk),
-        label: g.descricao,
-      })}
-      placeholder={
-        !filters.curso
-          ? "Selecione o curso"
-          : !filters.semestre
-          ? "Selecione o semestre"
-          : isLoadingGradeCurricular
-          ? "Carregando..."
-          : "Selecionar grade curricular"
-      }
-      onChange={(v) => handleFilterChange("gradeCurricular", v)}
-    />
-  </div>
-
-  </>
-
-  
-)}
-            
+                <div className="space-y-1.5">
+                  <FormCommandSelect
+                    label="Grade Curricular"
+                    value={filters.gradeCurricular}
+                    options={gradesCurriculares}
+                    map={(g) => ({
+                      key: String(g.pk),
+                      value: String(g.pk),
+                      label: g.descricao,
+                    })}
+                    placeholder={
+                      !filters.curso
+                        ? "Selecione o curso"
+                        : !filters.semestre
+                          ? "Selecione o semestre"
+                          : isLoadingGradeCurricular
+                            ? "Carregando..."
+                            : "Selecionar grade curricular"
+                    }
+                    onChange={(v) => handleFilterChange("gradeCurricular", v)}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
 
       {!!response && (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <SummaryCard
-      title="Marcações Pendentes"
-      value={response.resumo?.marcacoesPendentes ?? 0}
-      className="border-amber-500/30 bg-amber-500/5"
-      valueClassName="text-amber-700"
-    />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <SummaryCard
+            title="Marcações Pendentes"
+            value={response.resumo?.marcacoesPendentes ?? 0}
+            className="border-amber-500/30 bg-amber-500/5"
+            valueClassName="text-amber-700"
+          />
 
-    <SummaryCard
-      title="Presenças Marcadas"
-      value={response.resumo?.presencasMarcadas ?? 0}
-      className="border-emerald-500/30 bg-emerald-500/5"
-      valueClassName="text-emerald-700"
-    />
+          <SummaryCard
+            title="Presenças Marcadas"
+            value={response.resumo?.presencasMarcadas ?? 0}
+            className="border-emerald-500/30 bg-emerald-500/5"
+            valueClassName="text-emerald-700"
+          />
 
-    <SummaryCard
-      title="Faltas Marcadas"
-      value={response.resumo?.faltasMarcadas ?? 0}
-      className="border-red-500/30 bg-red-500/5"
-      valueClassName="text-red-700"
-    />
-  </div>
-)}
+          <SummaryCard
+            title="Faltas Marcadas"
+            value={response.resumo?.faltasMarcadas ?? 0}
+            className="border-red-500/30 bg-red-500/5"
+            valueClassName="text-red-700"
+          />
+        </div>
+      )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Resultados</CardTitle>
-
         </CardHeader>
 
         <CardContent>
@@ -563,9 +550,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                   variant="outline"
                   size="sm"
                   disabled={filters.page === 1}
-                  onClick={() =>
-                    handleFilterChange("page", filters.page - 1)
-                  }
+                  onClick={() => handleFilterChange("page", filters.page - 1)}
                 >
                   Anterior
                 </Button>
@@ -574,9 +559,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                   variant="outline"
                   size="sm"
                   disabled={filters.page >= totalPages}
-                  onClick={() =>
-                    handleFilterChange("page", filters.page + 1)
-                  }
+                  onClick={() => handleFilterChange("page", filters.page + 1)}
                 >
                   Próxima
                 </Button>
