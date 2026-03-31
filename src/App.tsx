@@ -126,6 +126,8 @@ import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
+import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
+import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
 
 const App = () => {
   return (
@@ -630,6 +632,7 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
+                  
                   <Route
                     path="/exame/presenca"
                     element={<ListaPresencaExame />}
@@ -638,7 +641,16 @@ const App = () => {
                     path="/exame/admitir"
                     element={<AdmitirCandidaturaUniversidadePublica />}
                   />
-                 
+                    <Route
+                    path="/exame/provas-candidato"
+                    element={<ListaProvaPorCandidatos />}
+                  />
+
+                
+                  <Route
+                    path="/exame/consultar-prova"
+                    element={<ConsultarProvaIndividual />}
+                  />
 
                   <Route
                     path="/exame/lista-candidatos"

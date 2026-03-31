@@ -998,7 +998,7 @@ export const academicStructure: MenuStructure = {
         { title: "Alterar senha", url: "/exame/alterar-senha" ,permission:[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla]},
      
        // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-       // { title: "Consultar prova", url: "/exame/consultar-prova" },
+       { title: "Consultar prova", url: "/exame/consultar-prova" },
         // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
         // { title: "Admitir candidatura", url: "/exame/admitir" },
      
@@ -1023,7 +1023,7 @@ export const academicStructure: MenuStructure = {
         //{ title: "Admitidos", url: "/exame/admitidos" },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
-        // { title: "Provas por candidato", url: "/exame/provas-candidato" },
+       { title: "Provas por candidato", url: "/exame/provas-candidato" },
         // { title: "Resultados finais", url: "/exame/resultados" },
         {
           title: "Horários por curso",
