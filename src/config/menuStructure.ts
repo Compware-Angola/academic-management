@@ -997,7 +997,7 @@ export const academicStructure: MenuStructure = {
        { title: "Admitir candidatura", url: "/exame/admitir" },
         { title: "Alterar senha", url: "/exame/alterar-senha" ,permission:[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla]},
      
-       // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
+       { title: "Atribuir prova", url: "/exame/atribuir-prova" },
        { title: "Consultar prova", url: "/exame/consultar-prova" },
         // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
         // { title: "Admitir candidatura", url: "/exame/admitir" },
@@ -1037,7 +1037,7 @@ export const academicStructure: MenuStructure = {
           url: "/exame/pauta-geral",
           permission: [PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla],
         },
-        //{ title: "Resetar prova", url: "/exame/resetar" },
+        { title: "Resetar prova", url: "/exame/resetar" },
         { title: "Lista de presença", url: "/exame/presenca" },
         {
           title: "Candidatos com/sem prova",

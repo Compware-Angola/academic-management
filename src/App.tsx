@@ -128,6 +128,8 @@ import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
+import AtribuirProva from "./pages/access_exam/AtribuirProva";
+import ResetarProva from "./pages/access_exam/ResetarProva";
 
 const App = () => {
   return (
@@ -651,7 +653,14 @@ const App = () => {
                     path="/exame/consultar-prova"
                     element={<ConsultarProvaIndividual />}
                   />
-
+                  <Route
+                    path="/exame/atribuir-prova"
+                    element={<AtribuirProva />}
+                  />
+                 <Route
+                    path="/exame/resetar"
+                    element={<ResetarProva />}
+                  />
                   <Route
                     path="/exame/lista-candidatos"
                     element={
