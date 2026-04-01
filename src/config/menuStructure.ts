@@ -994,17 +994,14 @@ export const academicStructure: MenuStructure = {
       items: [
 
        // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-       { title: "Admitir candidatura", url: "/exame/admitir" },
+       { title: "Admitir candidatura", url: "/exame/admitir", permission: [PermissionTypeDetails.ADMITIR_CANDIDATO.sigla] },
         { title: "Alterar senha", url: "/exame/alterar-senha" ,permission:[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla]},
      
-       { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-       { title: "Consultar prova", url: "/exame/consultar-prova" },
+       { title: "Atribuir prova", url: "/exame/atribuir-prova", permission: [PermissionTypeDetails.ATRIBUIR_PROVA.sigla] },
+       { title: "Consultar prova", url: "/exame/consultar-prova", permission: [PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla] },
         // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
         // { title: "Admitir candidatura", url: "/exame/admitir" },
-     
-
-        // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-        // { title: "Consultar prova", url: "/exame/consultar-prova" },
+    
         //{ title: "Estatísticas", url: "/exame/estatisticas" },
         // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
         {
@@ -1014,7 +1011,7 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla,
           ],
         },
-         { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota-arquitectura" },
+         { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota-arquitectura", permission: [PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla] },
         {
           title: "Lista de candidatos",
           url: "/exame/lista-candidatos",
@@ -1023,7 +1020,7 @@ export const academicStructure: MenuStructure = {
         //{ title: "Admitidos", url: "/exame/admitidos" },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
-       { title: "Provas por candidato", url: "/exame/provas-candidato" },
+       { title: "Provas por candidato", url: "/exame/provas-candidato", permission: [PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla] },
         // { title: "Resultados finais", url: "/exame/resultados" },
         {
           title: "Horários por curso",
@@ -1037,8 +1034,8 @@ export const academicStructure: MenuStructure = {
           url: "/exame/pauta-geral",
           permission: [PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla],
         },
-        { title: "Resetar prova", url: "/exame/resetar" },
-        { title: "Lista de presença", url: "/exame/presenca" },
+        { title: "Resetar prova", url: "/exame/resetar", permission: [PermissionTypeDetails.RESETAR_PROVA_CANDIDATO.sigla] },
+        { title: "Lista de presença", url: "/exame/presenca", permission: [PermissionTypeDetails.LISTA_PRESENCA_PROVA_ACESSO.sigla] },
         {
           title: "Candidatos com/sem prova",
           url: "/exame/candidatos-prova",
