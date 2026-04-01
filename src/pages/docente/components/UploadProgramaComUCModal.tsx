@@ -102,7 +102,7 @@ export const UploadProgramaComUCModal = ({
             <>
               <label className="cursor-pointer" htmlFor="upload">
                 <div className="p-2">
-                  <div className="flex flex-col justify-center items-center w-full h-80 bg-[#f4f4f4] rounded-md">
+                  <div className="flex flex-col justify-center items-center w-full h-80 bg-muted rounded-md">
                     <FileText className="h-11 w-11" />
                     <p className="text-center mt-2">
                       Clique nesta área para realizar o upload do documento.
@@ -120,7 +120,7 @@ export const UploadProgramaComUCModal = ({
           )}
           {file && (
             <div className="p-2">
-              <div className="flex items-center justify-between bg-[#f4f4f4] rounded-md p-5">
+              <div className="flex items-center justify-between bg-muted rounded-md p-5">
                 <div className="flex items-center gap-2">
                   <Paperclip className="h-5 w-5" />
                   <div>
