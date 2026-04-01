@@ -37,7 +37,6 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { useQueryInscritosPorUc } from "@/hooks/enrollment/use-query-inscritos-por-uc";
 import { useQueryHorariosDisponiveisInscritosPorUc } from "@/hooks/enrollment/use-query-horarios-disponiveis-por-uc";
 
@@ -55,7 +54,6 @@ const ESTADOS = [
   { value: "0", label: "Todos" },
   { value: "1", label: "Em curso" },
   { value: "2", label: "Pendente" },
-  { value: '3',  label: "Fez com sucesso"}
 ];
 
 export default function InscritosPorUc() {
@@ -91,6 +89,8 @@ export default function InscritosPorUc() {
   const { data: periodos = [] } = useQueryPeriod();
   const { data: cursos = [] } = useCursos();
 
+  console.log("PERIODOS: ", periodos)
+
   const { data: anosCurriculares = [], isLoading: isLoadingAnoCurricular } =
     useQueryClassFilterByCurso({
       curso: filters.curso,
@@ -108,13 +108,7 @@ export default function InscritosPorUc() {
           : undefined,
     });
 
-  const canLoadHorarios =
-    !!filters.anoLectivo &&
-    !!filters.semestre &&
-    !!filters.periodo &&
-    !!filters.curso &&
-    !!filters.unidadeCurricular;
-
+  
   const { data: horarios = [], isLoading: isLoadingHorarios } =
   useQueryHorariosDisponiveisInscritosPorUc({
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
@@ -124,11 +118,28 @@ export default function InscritosPorUc() {
         ? Number(filters.anoCurricular)
         : 0,
     semestre: filters.semestre ? Number(filters.semestre) : 0,
-    periodo: filters.periodo ? Number(filters.periodo) : 0,
+    periodo: 0,
     cadeira: filters.unidadeCurricular
       ? Number(filters.unidadeCurricular)
       : 0,
   });
+
+  const horariosOptions = Array.isArray(horarios)
+  ? horarios
+      .map((item: any) => ({
+        codigo: item.codigo ?? item.CODIGO,
+        designacao: item.designacao ?? item.DESIGNACAO,
+      }))
+      .filter((item) => item.codigo)
+  : [];
+
+  const canLoadHorarios =
+    !!filters.anoLectivo &&
+    !!filters.semestre &&
+    !!filters.periodo &&
+    !!filters.curso &&
+    !!filters.unidadeCurricular;
+
 
   const canLoadInscritos =
     !!appliedFilters.anoLectivo &&
@@ -154,7 +165,7 @@ export default function InscritosPorUc() {
         ? Number(appliedFilters.anoCurricular)
         : 0,
     semestre: appliedFilters.semestre ? Number(appliedFilters.semestre) : 0,
-    periodo: appliedFilters.periodo ? Number(appliedFilters.periodo) : 0,
+    periodo: 0,
     cadeira: appliedFilters.unidadeCurricular
       ? Number(appliedFilters.unidadeCurricular)
       : 0,
@@ -235,13 +246,25 @@ export default function InscritosPorUc() {
     { header: "Estado", accessor: "estado" },
   ];
 
-  console.log("FILTER: ", filters.unidadeCurricular)
-  console.log("APPLIED FILTER: ", appliedFilters.unidadeCurricular)
-
   function handleListar() {
     setPage(1);
     setAppliedFilters(filters);
   }
+
+  console.log("PARAMS HORARIO:", {
+  anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
+  curso: filters.curso ? Number(filters.curso) : 0,
+  anoCurricular:
+    filters.anoCurricular && filters.anoCurricular !== "all"
+      ? Number(filters.anoCurricular)
+      : 0,
+  semestre: filters.semestre ? Number(filters.semestre) : 0,
+  periodo: filters.periodo ? Number(filters.periodo) : 0,
+  cadeira: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : 0,
+});
+
+console.log("HORARIOS RAW:", horarios);
+console.log("HORARIOS NORMALIZED:", horariosOptions);
 
   return (
     <div className="p-6 space-y-8">
@@ -491,7 +514,7 @@ export default function InscritosPorUc() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">Todos</SelectItem>
-                  {horarios.map((item: any) => (
+                  {horariosOptions.map((item: any) => (
                     <SelectItem
                       key={item.codigo}
                       value={item.codigo.toString()}

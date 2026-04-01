@@ -1,8 +1,8 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type HorarioDisponivelInscricao = {
-  codigo: number | string;
-  designacao: string;
+  CODIGO: number | string;
+  DESIGNACAO: string;
 };
 
 export type FetchHorariosDisponiveisInscritosPorUcParams = {
