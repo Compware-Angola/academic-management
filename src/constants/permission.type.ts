@@ -254,7 +254,18 @@ export const PermissionTypeDetails = {
     designacao: "Listagem de Solicitação de Suporte",
     sigla: "mga_su_lso",
   },
-   
+   LANCAR_NOTA_ARQUITECTURA: {
+    designacao: "Lançar Nota Candidatura Arquitetura",
+    sigla: "mgea_lnc_a",
+  },
+  LISTA_PRESENCA_PROVA_ACESSO: {
+    designacao: "Lista de Presença Prova de Acesso",
+    sigla: "mgea_lpp_acesso",
+  },
+  PROVAS_POR_CANDIDATO: {
+    designacao: "Listar Provas por Candidato",
+    sigla: "mgea_lpc",
+  },
   DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
   AULAS_AGENDADAS: { designacao: "Aulas Agendadas", sigla: "mgh_aa" },
 
