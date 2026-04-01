@@ -125,6 +125,8 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
+import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
+import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
 
 const App = () => {
   return (
@@ -1205,12 +1207,35 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/inscricoes/sem-uc"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla!,
+                        ]}
+                      >
+                        <InscricaoSemUc />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/matriculados"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <EstudantesMatriculado />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   <Route
                     path="/gestao-docentes/docentes"
-
                     element={
-
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DE_DOCENTES.sigla!,
@@ -1218,8 +1243,7 @@ const App = () => {
                       >
                         <ListagemDocentes />
                       </ProtectedRoute>
-                  }
-
+                    }
                   />
                 </Route>
               </Routes>
