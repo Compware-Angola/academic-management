@@ -1,18 +1,19 @@
-import { admitirCandidato, AdmitirCandidatoPayload } from "@/services/access_exam/admit-candidate.service";
+import {
+  lancarNotaArquitecturaEUrbanismo,
+  LancarNotaArquitecturaPayload,
+} from "@/services/access_exam/lancar-nota-arquitetura-urbanismo.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useAdmitirCandidato() {
+export function useLancarNotaArquitecturaEUrbanismo() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: AdmitirCandidatoPayload }) =>
-      admitirCandidato(id, payload),
+    mutationFn: ({ id, payload }: { id: number; payload: LancarNotaArquitecturaPayload }) =>
+      lancarNotaArquitecturaEUrbanismo(id, payload),
 
     onSuccess: () => {
-      
       queryClient.invalidateQueries({ queryKey: ["candidatos"] });
       queryClient.invalidateQueries({ queryKey: ["resultado-prova"] });
-      
     },
 
     onError: (error) => {

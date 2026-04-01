@@ -16,7 +16,7 @@ import { FilterCandidatoParams, Candidato } from "@/services/access_exam/fetch-c
 import { useCandidatos } from "@/hooks/access_exam/use-candidatos";
 import { useAdmitirCandidato } from "@/hooks/access_exam/use-admit-candidate";
 
-type Fase = "idle" | "nota_preparada";
+type Fase = "idle" | "nota_preparada" | "lancado"  ;
 
 export default function AdmitirCandidaturaUniversidadePublica() {
   const [searchInput, setSearchInput] = useState("");
@@ -53,15 +53,23 @@ export default function AdmitirCandidaturaUniversidadePublica() {
     setFase("nota_preparada");
   }
 
-  function handleAdmitir() {
-    if (!candidato) return;
-    const n = parseFloat(notaExame);
+function handleAdmitir() {
+  if (!candidato) return;
 
-    admitirCandidato(
-      { id: candidato.numero_inscricao, payload: { nota: n } },
-     
-    );
-  }
+  const n = parseFloat(notaExame);
+
+  admitirCandidato(
+    {
+      id: candidato.numero_inscricao,
+      payload: { nota: n },
+    },
+    {
+      onSuccess: () => {
+        setFase("lancado"); 
+      },
+    }
+  );
+}
 
   return (
     <div className="space-y-6">
@@ -147,10 +155,16 @@ export default function AdmitirCandidaturaUniversidadePublica() {
                   className={
                     fase === "nota_preparada"
                       ? "text-blue-600 border-blue-400 bg-blue-50"
-                      : "text-yellow-600 border-yellow-400 bg-yellow-50"
+                      : fase === "lancado"
+                        ? "text-green-600 border-green-400 bg-green-50"
+                        : "text-yellow-600 border-yellow-400 bg-yellow-50"
                   }
                 >
-                  {fase === "nota_preparada" ? "Nota Preparada" : "Pendente de Nota"}
+                  {fase === "nota_preparada"
+                    ? "Nota Preparada"
+                    : fase === "lancado"
+                      ? "Lançado"
+                      : "Pendente de Nota"}
                 </Badge>
               </div>
             </CardHeader>
