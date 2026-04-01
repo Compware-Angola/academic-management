@@ -31,6 +31,9 @@ axiosNestGa.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // ✅ Adiciona a API Key em todas as requisições
+    config.headers["x-api-key"] = import.meta.env.VITE_NEST_GA_API_KEY;
+
     return config;
   },
   (error) => Promise.reject(error)
