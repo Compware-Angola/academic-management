@@ -130,6 +130,7 @@ import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
+import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
 
 const App = () => {
   return (
@@ -656,6 +657,10 @@ const App = () => {
                   <Route
                     path="/exame/atribuir-prova"
                     element={<AtribuirProva />}
+                  />
+                  <Route
+                    path="/exame/lancar-nota-arquitectura"
+                    element={<LancarNotaArquitectura />}
                   />
                  <Route
                     path="/exame/resetar"

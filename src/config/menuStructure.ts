@@ -1014,7 +1014,7 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla,
           ],
         },
-        // { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
+         { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota-arquitectura" },
         {
           title: "Lista de candidatos",
           url: "/exame/lista-candidatos",

@@ -10,6 +10,7 @@ export function useResetarProva() {
     onSuccess: (_, id) => {
       
       queryClient.invalidateQueries({ queryKey: ["candidatos"] });
+      queryClient.invalidateQueries({ queryKey: ["resultado-prova"] });
     },
     onError: (error: any) => {
    

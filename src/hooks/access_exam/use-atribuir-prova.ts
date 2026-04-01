@@ -8,8 +8,9 @@ export function useAtribuirProva() {
   return useMutation({
     mutationFn: (id: number | string) => atribuirProva(id),
     onSuccess: (_, id) => {
-     
+      
       queryClient.invalidateQueries({ queryKey: ["candidatos"] });
+      queryClient.invalidateQueries({ queryKey: ["resultado-prova"] });
     },
     onError: (error: any) => {
      
