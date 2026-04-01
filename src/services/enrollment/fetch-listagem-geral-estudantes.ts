@@ -42,7 +42,7 @@ export async function ListagemGeralEstudantesService(
   params: ListagemGeralEstudantesParams
 ): Promise<ListagemGeralEstudantesResponse> {
   const { data } = await axiosNestGa.get<ListagemGeralEstudantesResponse>(
-    "/enrollment/listagem-geral-estudantes",
+    "/registration/listagem-geral-estudantes",
     {
       params: {
         page: params.page,

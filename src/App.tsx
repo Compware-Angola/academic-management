@@ -125,12 +125,10 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
-<<<<<<< HEAD
 import Regentes from "./pages/gestao_docente/Regentes";
 import ListaGeralEstudantes from "./pages/registrations/GeneralListStudents";
-=======
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
->>>>>>> 777e66a965ae93f1bdc9de264ad175f3d298b91d
+import InscritosPorUc from "./pages/registrations/InscritosPorUc";
 
 const App = () => {
   return (
@@ -1246,6 +1244,20 @@ const App = () => {
                         <Regentes />
                       </ProtectedRoute>
                   }
+
+                  />
+
+                  <Route
+                    path="/inscricoes/lista-geral"
+
+                    element={ <ListaGeralEstudantes />}
+
+                  />
+
+                  <Route
+                    path="/inscricoes/inscritos-uc"
+
+                    element={ <InscritosPorUc />}
 
                   />
 
