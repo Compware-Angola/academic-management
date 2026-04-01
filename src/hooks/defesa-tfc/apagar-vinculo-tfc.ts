@@ -7,6 +7,7 @@ export function useMutationApagarVinculo() {
   return useMutation({
     mutationFn: (vinculoId: number) => apagarVinculoService(vinculoId),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orientadores-tfc"] });
       queryClient.invalidateQueries({ queryKey: ["vinculos"] });
       queryClient.invalidateQueries({ queryKey: ["docente-alunos"] });
       toast.success("Vinculo apagado com sucesso!");

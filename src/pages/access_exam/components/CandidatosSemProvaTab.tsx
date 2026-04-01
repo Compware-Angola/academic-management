@@ -216,7 +216,7 @@ const baseFileName = `Candidatos_Sem_Prova_${new Date().toISOString().slice(0, 1
           <TableBody>
             {isLoading && Array.from({ length: 5 }).map((_, i) => (
               <TableRow key={`sk-${i}`}>
-                {Array.from({ length: 9 }).map((_, j) => (
+                {Array.from({ length: 8 }).map((_, j) => (
                   <TableCell key={`sk-${i}-${j}`}><Skeleton className="h-4 w-full" /></TableCell>
                 ))}
               </TableRow>
