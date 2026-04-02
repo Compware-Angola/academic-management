@@ -133,6 +133,7 @@ import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
+import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 
 const App = () => {
   return (
@@ -1257,6 +1258,19 @@ const App = () => {
                         ]}
                       >
                         <EstudantesMatriculado />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/sem-curso"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla!,
+                        ]}
+                      >
+                        <SemInscricaoCurso />
                       </ProtectedRoute>
                     }
                   />
