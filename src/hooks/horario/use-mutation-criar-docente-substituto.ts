@@ -18,7 +18,7 @@ export const useMutationCriarDocenteSubstituto = () => {
       toast.success("Substituição criada com sucesso!");
     },
     onError: () => {
-      toast.error("Erro ao criar a substituição. Tente novamente.");
+      
     },
   });
 };

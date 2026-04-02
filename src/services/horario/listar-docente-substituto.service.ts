@@ -57,6 +57,7 @@ export type DocenteSubstituto = {
 
   // Auditoria
   criadopor: string | null;
+  atualizadopor: string | null;
   datacriacao: string | null;
   dataatualizacao: string | null;
 };
