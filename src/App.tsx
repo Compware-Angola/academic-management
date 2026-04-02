@@ -134,6 +134,7 @@ import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividu
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
+import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
 
@@ -819,6 +820,19 @@ const App = () => {
                         ]}
                       >
                         <SchedulesByUC />
+                      </ProtectedRoute>
+                    }
+                  />
+                    <Route
+                    path="/horarios/docentes-substitutos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_DOCENTES_SUBSTITUTO
+                            .sigla!,
+                        ]}
+                      >
+                        <DocenteSubstitutoList />\
                       </ProtectedRoute>
                     }
                   />
