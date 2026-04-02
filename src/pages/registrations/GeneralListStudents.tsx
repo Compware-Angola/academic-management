@@ -51,14 +51,19 @@ const SEXOS = [
 
 // placeholders temporários
 const GRAUS_ACADEMICOS = [
-  { value: "0",           label: "Todos" },
-  {value: "doutoramento", label: "Doutoramento"},
-  {value: "licenciatura", label: "Licenciatura"},
-  {value: "Mestrado",     label: "Mestrado"}
+  {value: "0",           label: "Todos" },
+  {value: "1", label: "Licenciatura"},
+  {value: "2", label: "Doutoramento"},
+  {value: "3",     label: "Mestrado"}
 ];
 
 const NECESSIDADES = [
   { value: "0", label: "Todos" },
+  { value: "1", label: "N/A" },
+  { value: "2", label: "Deficiente Visual" },
+  { value: "3", label: "Deficiente Auditivo" },
+  { value: "4", label: "Outro(a)" },
+  { value: "5", label: "Deficiente Fisico" },
 ];
 
 

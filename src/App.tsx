@@ -128,9 +128,7 @@ import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import Regentes from "./pages/gestao_docente/Regentes";
 import ListaGeralEstudantes from "./pages/registrations/GeneralListStudents";
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
-<<<<<<< HEAD
 import InscritosPorUc from "./pages/registrations/InscritosPorUc";
-=======
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
@@ -138,7 +136,6 @@ import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
->>>>>>> 570e0ad8e6ba175b2314d00b358bcee8ddf8663e
 
 const App = () => {
   return (
