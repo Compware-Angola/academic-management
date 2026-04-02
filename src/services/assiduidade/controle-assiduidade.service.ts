@@ -1,7 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type AgendamentosDocentePayload = {
-  docente: number;
+  docente?: number;
   dataInicial: string;
   dataFinal: string;
   estado?: number;
@@ -9,6 +9,7 @@ export type AgendamentosDocentePayload = {
   semestre?: number;
   curso?: string;
   gradeCurricular?: number;
+  search?: string;
   page?: number;
   limit?: number;
 };
@@ -49,29 +50,29 @@ export async function controleAssiduidadeService(
     estado,
     anoLectivo,
     semestre,
-    curso,
     gradeCurricular,
+    search,
     page = 1,
     limit = 20,
   } = payload;
 
-  const { data } =
-    await axiosNestGa.get<AgendamentosDocenteResponse>(
-      "/assiduidade/controle",
-      {
-        params: {
-          docente,
-          dataInicial,
-          dataFinal,
-          estado,
-          anoLectivo,
-          semestre,
-          gradeCurricular,
-          page,
-          limit,
-        },
+  const { data } = await axiosNestGa.get<AgendamentosDocenteResponse>(
+    "/assiduidade/controle",
+    {
+      params: {
+        docente,
+        dataInicial,
+        dataFinal,
+        estado,
+        anoLectivo,
+        semestre,
+        gradeCurricular,
+        search,
+        page,
+        limit,
       },
-    );
+    },
+  );
 
   return data;
 }
