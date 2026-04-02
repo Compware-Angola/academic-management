@@ -132,6 +132,8 @@ import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
+import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
+import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
 
 const App = () => {
   return (
@@ -636,21 +638,20 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
-                  
+
                   <Route
                     path="/exame/presenca"
                     element={<ListaPresencaExame />}
                   />
-                   <Route
+                  <Route
                     path="/exame/admitir"
                     element={<AdmitirCandidaturaUniversidadePublica />}
                   />
-                    <Route
+                  <Route
                     path="/exame/provas-candidato"
                     element={<ListaProvaPorCandidatos />}
                   />
 
-                
                   <Route
                     path="/exame/consultar-prova"
                     element={<ConsultarProvaIndividual />}
@@ -663,10 +664,7 @@ const App = () => {
                     path="/exame/lancar-nota-arquitectura"
                     element={<LancarNotaArquitectura />}
                   />
-                 <Route
-                    path="/exame/resetar"
-                    element={<ResetarProva />}
-                  />
+                  <Route path="/exame/resetar" element={<ResetarProva />} />
                   <Route
                     path="/exame/lista-candidatos"
                     element={
@@ -1251,12 +1249,35 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/inscricoes/sem-uc"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla!,
+                        ]}
+                      >
+                        <InscricaoSemUc />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/matriculados"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <EstudantesMatriculado />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   <Route
                     path="/gestao-docentes/docentes"
-
                     element={
-
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DE_DOCENTES.sigla!,
@@ -1264,8 +1285,7 @@ const App = () => {
                       >
                         <ListagemDocentes />
                       </ProtectedRoute>
-                  }
-
+                    }
                   />
                 </Route>
               </Routes>
