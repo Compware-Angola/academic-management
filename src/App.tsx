@@ -125,6 +125,7 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
+import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 
 const App = () => {
   return (
@@ -1045,6 +1046,11 @@ const App = () => {
                   <Route
                     path="financas/credito/bolsa/estudante"
                     element={<ListaBolseiro />}
+                  />
+
+                  <Route
+                    path="/registo-primario/exame-de-acesso"
+                    element={<RegistoPrimarioExamesAcesso />}
                   />
 
                   <Route
