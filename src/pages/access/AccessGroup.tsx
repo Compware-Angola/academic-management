@@ -44,6 +44,7 @@ import { DeleteAccessButton } from "./components/DeleteAccessButton";
 import { formatarData } from "@/util/date-formate";
 import { CreateGroupAccessModal } from "./components/CreateGroupAccessModal";
 import { toast } from "@/components/ui/use-toast"; // opcional: se você usa toast do shadcn
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 export default function AccessGroup() {
   const [selectedGroupId, setSelectedGroupId] = useState<string>("");
@@ -237,25 +238,19 @@ const excelProps = pdfData
 
       {/* Select + Botões */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-md space-y-2">
-          <label className="text-sm font-medium">Selecionar Grupo</label>
-          <Select value={selectedGroupId} onValueChange={handleGroupChange}>
-            <SelectTrigger className="bg-background">
-              <SelectValue
-                placeholder={
-                  loadingGroups ? "Carregando grupos..." : "Escolha um grupo"
-                }
-              />
-            </SelectTrigger>
-            <SelectContent className="max-h-96">
-              {sortedGroups.map((group) => (
-                <SelectItem key={group.codigo} value={String(group.codigo)}>
-                  [{group.codigo}] {group.descricao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <FormCommandSelect
+  disabled={loadingGroups}
+  value={selectedGroupId}
+  label="Selecionar Grupo"
+  width="md"
+  options={sortedGroups}
+  map={(group) => ({
+    key: String(group.codigo),
+    value: String(group.codigo),
+    label: `[${group.codigo}] ${group.descricao}`,
+  })}
+  onChange={handleGroupChange}
+/>
 
         <div className="flex flex-wrap gap-2">
           <Button
