@@ -134,6 +134,7 @@ import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
+import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 
 const App = () => {
   return (
@@ -820,7 +821,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                    <Route
+                  <Route
                     path="/horarios/docentes-substitutos"
                     element={
                       <ProtectedRoute
@@ -1271,6 +1272,19 @@ const App = () => {
                         ]}
                       >
                         <EstudantesMatriculado />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/estatisticas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
+                        ]}
+                      >
+                        <EstatisticaDeEstudantesAprovadosEReprovados />
                       </ProtectedRoute>
                     }
                   />

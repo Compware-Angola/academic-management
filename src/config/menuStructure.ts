@@ -191,7 +191,13 @@ export const menuStructure: MenuStructure = {
       icon: FileCheck,
       items: [
         { title: "Atribuição de turma", url: "/inscricoes/turma" },
-        { title: "Estatísticas", url: "/inscricoes/estatisticas" },
+        {
+          title: "Estatística de estudantes aprovados e reprovados",
+          url: "/inscricoes/estatisticas",
+          permission: [
+            PermissionTypeDetails.ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
+          ],
+        },
         { title: "Inserir colisão", url: "/inscricoes/colisao" },
         { title: "Diplomandos", url: "/inscricoes/diplomandos" },
         { title: "Lista personalizada", url: "/inscricoes/personalizada" },
