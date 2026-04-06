@@ -26,7 +26,9 @@ import {
   ChevronRight,
   Unlock,
   Lock,
-  Download,
+  Search,
+  LockOpen,
+  SendHorizonal,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -43,31 +45,23 @@ import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliaca
 import { useQueryTipoProva } from "@/hooks/avaliacao/use-query-tipo-prova";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useAuth } from "@/hooks/use-auth";
-import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
-import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
-import { GradesCreationPrompt } from "@/services/academiccalendar/get-grades-creation-prompt";
 import { useQueryGradesCreationPrompt } from "@/hooks/academiccalendar/use-query-grades-creation-prompt";
 import { parseFilter } from "@/util/parse-filter";
-import {
-  TIPO_AVALIACAO,
-  TipoLancamentoPrazoMap,
-} from "@/constants/tipo-avalicao";
+import { TipoLancamentoPrazoMap } from "@/constants/tipo-avalicao";
 import { useQueryPromptGetPermissionLaunch } from "@/hooks/avaliacao/use-query-prompt-get-permission-launch";
-import {
-  GetAssessmentNotasItem,
-  
-} from "@/services/avaliacao/prompt-get-permission-launch.service";
+import { GetAssessmentNotasItem } from "@/services/avaliacao/prompt-get-permission-launch.service";
 
 export default function LaunchNotes() {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [isSavingAll, setIsSavingAll] = useState(false);
 
   const [formData, setFormData] = useState({
     anoLetivo: "",
@@ -79,11 +73,12 @@ export default function LaunchNotes() {
     classes: "",
     tipoAvaliacao: "",
     tipoProva: "",
-    verHoario: "",
-    filtro: "",
+    search: "",
   });
+
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
+
   const {
     data: students = [],
     isLoading: loadingNoteRelease,
@@ -96,6 +91,7 @@ export default function LaunchNotes() {
     tipoAvaliacao: Number(formData.tipoAvaliacao),
     classe: Number(formData.classes),
     turno: Number(formData.periodo),
+    search: formData.search,
   });
 
   const [localStudents, setLocalStudents] = useState(students);
@@ -103,21 +99,16 @@ export default function LaunchNotes() {
     [key: number]: boolean;
   }>({});
 
-  const { data: semestres, isLoading: isLoadingSemestres } =
-    useQuerySemestres();
+  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
   const { user: userData } = useAuth();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-  
-
-  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: cursos } = useCursos();
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
-
-  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
-    useQueryTipoProva();
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } = useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
+  // Rota única — recebe sempre NoteUpsertPayload[]
   const upsertNoteMutation = useUpsertNote();
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -146,14 +137,21 @@ export default function LaunchNotes() {
       { enabled: canLoadTurmas },
     );
 
-
   const { data: gradesPrompt, isLoading: isLoadingGradesPrompt } =
     useQueryGradesCreationPrompt({
       anoLectivo: parseFilter(formData.anoLetivo),
       semestre: parseFilter(formData.semestre),
-      typeAvaliation:
-        TipoLancamentoPrazoMap[parseFilter(formData.tipoAvaliacao)],
+      typeAvaliation: TipoLancamentoPrazoMap[parseFilter(formData.tipoAvaliacao)],
     });
+
+  const { data: promptPermissionLaunch, isLoading: isLoadingPromptPermissionLaunch } =
+    useQueryPromptGetPermissionLaunch({
+      anoLectivo: parseFilter(formData.anoLetivo),
+      grade: parseFilter(formData.unidadeCurricular),
+      tipoAvaliacao: parseFilter(formData.tipoAvaliacao),
+      utilizadorId: userData?.user?.pk_utilizador,
+    });
+
   useEffect(() => {
     setLocalStudents(students);
     const initialLocks: { [key: number]: boolean } = {};
@@ -163,27 +161,159 @@ export default function LaunchNotes() {
     setLockedStudents(initialLocks);
   }, [students]);
 
-  // Preparação dos dados para PDF
+  // ─── Helpers de lock ──────────────────────────────────────────────────────
+  const handleUnlockAll = () => {
+    const map: { [key: number]: boolean } = {};
+    localStudents.forEach((s) => { map[s.codigo_grade_aluno] = false; });
+    setLockedStudents(map);
+  };
+
+  const handleLockAll = () => {
+    const map: { [key: number]: boolean } = {};
+    localStudents.forEach((s) => { map[s.codigo_grade_aluno] = true; });
+    setLockedStudents(map);
+  };
+
+  const toggleLock = (id: number) => {
+    setLockedStudents((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const allUnlocked =
+    localStudents.length > 0 &&
+    localStudents.every((s) => lockedStudents[s.codigo_grade_aluno] === false);
+
+  // ─── Monta um item do payload ─────────────────────────────────────────────
+  const buildPayloadItem = (student: any): NoteUpsertPayload => ({
+    gradeCurricularAluno: student.codigo_grade_aluno,
+    utilizador: userData?.user?.pk_utilizador || 0,
+    nota: Number(student.nota),
+    tipoDeProva: Number(formData.tipoProva),
+    epoca: 2,
+    tipoAvaliacao: Number(formData.tipoAvaliacao),
+    observacao: student.observacao || null,
+    status: 2,
+    notaAnterior: student.notaFinalAnterior || 0,
+    codigo_grade_avaliacao_aluno: student.codigo_grade_avaliacao_aluno || undefined,
+  });
+
+  // ─── Lançar individual → array com 1 posição ─────────────────────────────
+  const handleSaveIndividual = (student: any) => {
+    if (student.nota === null || student.nota === undefined) {
+      toast({ title: "Erro", description: "Insira uma nota primeiro", variant: "destructive" });
+      return;
+    }
+    if (Number(student.nota) < 0 || Number(student.nota) > 20) {
+      toast({ title: "Erro", description: "A nota deve estar entre 0 e 20", variant: "destructive" });
+      return;
+    }
+
+    // Array com 1 posição — mesma rota do lançamento em massa
+    const payloads: NoteUpsertPayload[] = [buildPayloadItem(student)];
+
+    upsertNoteMutation.mutate(payloads as any, {
+      onSuccess: () => {
+        toggleLock(student.codigo_grade_aluno);
+        toast({
+          title: student.nota !== null ? "Nota atualizada" : "Nota lançada",
+          description: `${student.nome_completo} → ${student.nota} valores`,
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Erro",
+          description: "Não foi possível lançar/atualizar a nota.",
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
+  // ─── Lançar todos → array com N posições ─────────────────────────────────
+  const handleSaveAllStudents = () => {
+    const studentsWithNota = localStudents.filter(
+      (s) =>
+        s.nota !== null &&
+        s.nota !== undefined &&
+        Number(s.nota) >= 0 &&
+        Number(s.nota) <= 20,
+    );
+
+    if (studentsWithNota.length === 0) {
+      toast({
+        title: "Nenhuma nota para lançar",
+        description: "Insira notas válidas (0–20) antes de lançar em massa.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Array com N posições — mesma rota do lançamento individual
+    const payloads: NoteUpsertPayload[] = studentsWithNota.map(buildPayloadItem);
+
+    setIsSavingAll(true);
+
+    upsertNoteMutation.mutate(payloads as any, {
+      onSuccess: () => {
+        setIsSavingAll(false);
+        handleLockAll();
+        toast({
+          title: "Lançamento em massa concluído",
+          description: `${payloads.length} nota(s) lançada(s) com sucesso.`,
+        });
+      },
+      onError: () => {
+        setIsSavingAll(false);
+        toast({
+          title: "Erro no lançamento em massa",
+          description: "Não foi possível lançar as notas. Tente novamente.",
+          variant: "destructive",
+        });
+      },
+    });
+  };
+
+  // ─── Period / permission logic ────────────────────────────────────────────
+  const gradesPeriodStatus = useMemo(() => {
+    if (!formData.anoLetivo) return "NO_YEAR_SELECTED";
+    if (isLoadingGradesPrompt || isLoadingPromptPermissionLaunch) return "LOADING";
+    if (!gradesPrompt) return "NOT_DEFINED";
+
+    const now = new Date();
+    const start = new Date(gradesPrompt.data_inicio);
+    const end = new Date(gradesPrompt.data_fim);
+
+    return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
+  }, [formData.anoLetivo, gradesPrompt, isLoadingGradesPrompt, isLoadingPromptPermissionLaunch]);
+
+  const hasSpecialPermission = teacherHasPermissionToLaunchNotes(
+    promptPermissionLaunch?.data?.[0],
+  );
+  const isGlobalPeriodActive = gradesPeriodStatus === "ALLOWED";
+  const shouldBlockGradesActions = !(hasSpecialPermission || isGlobalPeriodActive);
+
+  const showDeadline =
+    parseFilter(formData.anoLetivo) &&
+    parseFilter(formData.semestre) &&
+    parseFilter(formData.tipoAvaliacao) &&
+    parseFilter(formData.unidadeCurricular);
+
+  // ─── PDF ──────────────────────────────────────────────────────────────────
   const pdfData = useMemo(() => {
     if (!localStudents.length) return null;
 
     const rows = localStudents.map((student) => ({
       matricula: student.numero_de_matricula,
       nome: student.nome_completo,
-      nota:
-        student.nota !== null && student.nota !== undefined
-          ? student.nota
-          : "—",
+      nota: student.nota !== null && student.nota !== undefined ? student.nota : "—",
       observacao: student.observacao || "—",
     }));
+
     const totalAlunos = localStudents.length;
     const notasLancadas = localStudents.filter(
       (s) => s.nota !== null && s.nota !== undefined,
     ).length;
     const percentLancadas =
-      totalAlunos > 0
-        ? ((notasLancadas / totalAlunos) * 100).toFixed(1)
-        : "0.0";
+      totalAlunos > 0 ? ((notasLancadas / totalAlunos) * 100).toFixed(1) : "0.0";
 
     const filtroTexto = [
       `Ano Letivo: ${academicYear?.find((a) => a.codigo === Number(formData.anoLetivo))?.designacao || "—"}`,
@@ -206,40 +336,19 @@ export default function LaunchNotes() {
       ],
       filtrosAplicados: filtroTexto || "Filtros não selecionados",
     };
-  }, [
-    localStudents,
-    formData,
-    academicYear,
-    semestres,
-    cursos,
-    unidadesCurriculares,
-    scheduleResponse,
-    tipoProva,
-    tipoAvaliacao,
-  ]);
+  }, [localStudents, formData, academicYear, semestres, cursos, unidadesCurriculares, scheduleResponse, tipoProva, tipoAvaliacao]);
 
   const pdfContent = pdfData ? (
     <GenericPDFDocument
       documentTitle="Lançamento de Notas"
       subtitle="Controle de lançamento por disciplina e turma"
       infoSections={[
-        {
-          title: "Resumo",
-          content: pdfData.filtrosAplicados,
-        },
-        {
-          title: "Resumo",
-          content: pdfData.totais.map((t) => `${t.label}: ${t.value}`),
-        },
+        { title: "Resumo", content: pdfData.filtrosAplicados },
+        { title: "Resumo", content: pdfData.totais.map((t) => `${t.label}: ${t.value}`) },
       ]}
       mainTable={{
         headers: [
-          {
-            key: "matricula",
-            label: "Nº Matrícula",
-            width: "15%",
-            align: "center",
-          },
+          { key: "matricula", label: "Nº Matrícula", width: "15%", align: "center" },
           { key: "nome", label: "Nome do Estudante", width: "50%" },
           { key: "nota", label: "Nota (0-20)", width: "15%", align: "center" },
           { key: "observacao", label: "Observação", width: "20%" },
@@ -253,8 +362,6 @@ export default function LaunchNotes() {
     />
   ) : null;
 
-  const totalPages = Math.ceil(localStudents.length / itemsPerPage);
-
   const handleNotaChange = (
     id: number,
     field: "nota" | "observacao",
@@ -264,110 +371,30 @@ export default function LaunchNotes() {
 
     if (field === "nota") {
       const num = Number(value);
-      if (!isNaN(num)) {
-        newValue = Math.max(0, Math.min(20, num));
-      } else {
-        newValue = null;
-      }
+      newValue = !isNaN(num) ? Math.max(0, Math.min(20, num)) : null;
     }
 
     setLocalStudents((prev) =>
-      prev.map((s) =>
-        s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s,
-      ),
+      prev.map((s) => (s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s)),
     );
   };
 
-  const toggleLock = (id: number) => {
-    setLockedStudents((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
+  const totalPages = Math.ceil(localStudents.length / itemsPerPage);
 
-  const handleSaveAll = (student: any) => {
-    const payload: NoteUpsertPayload = {
-      gradeCurricularAluno: student.codigo_grade_aluno,
-      utilizador: userData?.user?.pk_utilizador || 0,
-      nota: Number(student.nota),
-      tipoDeProva: Number(formData.tipoProva),
-      epoca: 2,
-      tipoAvaliacao: Number(formData.tipoAvaliacao),
-      observacao: student.observacao || null,
-      status: 2,
-      notaAnterior: student.notaFinalAnterior || 0,
-
-      codigo_grade_avaliacao_aluno:
-        student.codigo_grade_avaliacao_aluno || undefined,
-    };
-
-    upsertNoteMutation.mutate(payload, {
-      onSuccess: () => {
-        toast({
-          title: "Sucesso",
-          description: "Nota lançada/atualizada com sucesso.",
-        });
-      },
-      onError: () => {
-        toast({
-          title: "Erro",
-          description: "Não foi possível lançar/atualizar a nota.",
-          variant: "destructive",
-        });
-      },
-    });
-  };
-  const {
-    data: promptPermissionLaunch,
-    isLoading: isLoadingPromptPermissionLaunch,
-  } = useQueryPromptGetPermissionLaunch({
-    anoLectivo: parseFilter(formData.anoLetivo),
-    grade: parseFilter(formData.unidadeCurricular),
-    tipoAvaliacao: parseFilter(formData.tipoAvaliacao),
-    utilizadorId: userData?.user?.pk_utilizador,
-  });
-
-  const gradesPeriodStatus = useMemo(() => {
-    if (!formData.anoLetivo) return "NO_YEAR_SELECTED";
-    if (isLoadingGradesPrompt || isLoadingPromptPermissionLaunch)
-      return "LOADING";
-    if (!gradesPrompt) return "NOT_DEFINED";
-
-    const now = new Date();
-    const start = new Date(gradesPrompt.data_inicio);
-    const end = new Date(gradesPrompt.data_fim);
-
-    return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
-  }, [
-    formData.anoLetivo,
-    gradesPrompt,
-    isLoadingGradesPrompt,
-    isLoadingPromptPermissionLaunch,
-  ]);
-
-  const hasSpecialPermission = teacherHasPermissionToLaunchNotes(
-    promptPermissionLaunch?.data?.[0],
+  const studentsWithValidNota = localStudents.filter(
+    (s) =>
+      s.nota !== null &&
+      s.nota !== undefined &&
+      Number(s.nota) >= 0 &&
+      Number(s.nota) <= 20,
   );
 
-  const isGlobalPeriodActive = gradesPeriodStatus === "ALLOWED";
-
-  const shouldBlockGradesActions = !(
-    hasSpecialPermission || isGlobalPeriodActive
-  );
-
-  const showDeadline =
-    parseFilter(formData.anoLetivo) &&
-    parseFilter(formData.semestre) &&
-    parseFilter(formData.tipoAvaliacao) &&
-    parseFilter(formData.unidadeCurricular);
-
+  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">
-          Início
-        </Link>
+        <Link to="/" className="hover:text-foreground">Início</Link>
         <span>/</span>
         <span className="font-medium">Avaliações</span>
         <span>/</span>
@@ -377,12 +404,8 @@ export default function LaunchNotes() {
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Lançamento de notas
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Lançar notas de avaliações por UC
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">Lançamento de notas</h1>
+          <p className="text-muted-foreground mt-1">Lançar notas de avaliações por UC</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -408,29 +431,17 @@ export default function LaunchNotes() {
             value={formData.anoLetivo}
             onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
             options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
           />
 
           <FormSelect
-            disabled={
-              isLoadingPeriodos ||
-              isLoadingAcademicYear ||
-              formData.anoLetivo === ""
-            }
+            disabled={isLoadingPeriodos || isLoadingAcademicYear || formData.anoLetivo === ""}
             loading={isLoadingPeriodos}
             label="Período"
             value={formData.periodo}
             onChange={(v) => setFormData({ ...formData, periodo: v })}
             options={periodos}
-            map={(p) => ({
-              key: p.codigo,
-              label: p.designacao,
-              value: p.codigo,
-            })}
+            map={(p) => ({ key: p.codigo, label: p.designacao, value: p.codigo })}
           />
 
           <FormSelect
@@ -440,11 +451,7 @@ export default function LaunchNotes() {
             value={formData.semestre}
             onChange={(v) => setFormData({ ...formData, semestre: v })}
             options={semestres}
-            map={(s) => ({
-              key: s.codigo,
-              label: s.designacao,
-              value: s.codigo,
-            })}
+            map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
           />
 
           <CourseSelect
@@ -458,46 +465,27 @@ export default function LaunchNotes() {
             disabled={isLoadingClasses || !formData.curso}
             onChange={(v) => setFormData({ ...formData, classes: v })}
             options={classes}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
+            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
             loading={isLoadingClasses}
           />
 
           <FormSelect
             label="Unidade Curricular"
             value={formData.unidadeCurricular}
-            disabled={
-              isLoadingUC ||
-              !formData.semestre ||
-              !formData.curso ||
-              !formData.classes
-            }
+            disabled={isLoadingUC || !formData.semestre || !formData.curso || !formData.classes}
             onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
             options={unidadesCurriculares}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.descricao,
-              value: u.pk,
-            })}
+            map={(u) => ({ key: u.codigo, label: u.descricao, value: u.pk })}
             loading={isLoadingUC}
           />
 
           <FormSelectIsaac
             label="Horário"
             value={formData.horarioId}
-            disabled={
-              loadingschedule || !formData.semestre || !formData.classes
-            }
+            disabled={loadingschedule || !formData.semestre || !formData.classes}
             onChange={(v) => setFormData({ ...formData, horarioId: v })}
             options={scheduleResponse?.data}
-            map={(u, index) => ({
-              key: index,
-              value: u.codigo,
-              label: `${u.designacao}`,
-            })}
+            map={(u, index) => ({ key: index, value: u.codigo, label: `${u.designacao}` })}
             loading={loadingschedule}
           />
 
@@ -507,11 +495,7 @@ export default function LaunchNotes() {
             disabled={isLoadingTipoProva}
             onChange={(v) => setFormData({ ...formData, tipoProva: v })}
             options={tipoProva}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
+            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
             loading={isLoadingTipoProva}
           />
 
@@ -521,13 +505,22 @@ export default function LaunchNotes() {
             disabled={isLoadingTipoAvaliacao}
             onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
             options={tipoAvaliacao}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
+            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
             loading={isLoadingTipoAvaliacao}
           />
+
+          <div className="relative flex flex-col gap-1">
+            <label className="text-sm font-medium">Pesquisar por nome</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar por nome..."
+                value={formData.search}
+                onChange={(e) => setFormData({ ...formData, search: e.target.value })}
+                className="pl-9"
+              />
+            </div>
+          </div>
 
           <div className="flex items-end">
             <Button
@@ -552,11 +545,7 @@ export default function LaunchNotes() {
           </div>
         </div>
       </div>
-      {/* {gradesPeriodStatus === "LOADING" && (
-        <div className="bg-muted border rounded-lg p-4 text-sm">
-          A verificar período de lançamento de notas...
-        </div>
-      )} */}
+
       {showDeadline && (
         <StatusBanner
           gradesPeriodStatus={gradesPeriodStatus}
@@ -574,15 +563,70 @@ export default function LaunchNotes() {
         </div>
       ) : localStudents.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
-          <p className="text-muted-foreground mb-4">
-            Nenhum registo encontrado
-          </p>
+          <p className="text-muted-foreground mb-4">Nenhum registo encontrado</p>
           <p className="text-sm text-muted-foreground">
             Clique em "Listar" após selecionar os filtros
           </p>
         </div>
       ) : (
         <>
+          {/* ── Barra de ações em massa ──────────────────────────────────── */}
+          <div className="flex items-center justify-between flex-wrap gap-3 bg-muted/40 border rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>
+                <strong>{localStudents.length}</strong> aluno(s) listado(s) •{" "}
+                <strong>{studentsWithValidNota.length}</strong> com nota preenchida
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Toggle abrir / fechar todos os cadeados */}
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={shouldBlockGradesActions || isRefetching || isSavingAll}
+                onClick={allUnlocked ? handleLockAll : handleUnlockAll}
+              >
+                {allUnlocked ? (
+                  <>
+                    <Lock className="h-4 w-4 mr-2" />
+                    Fechar Todos
+                  </>
+                ) : (
+                  <>
+                    <LockOpen className="h-4 w-4 mr-2" />
+                    Abrir Todos os Cadeados
+                  </>
+                )}
+              </Button>
+
+              {/* Lançar todos em massa — array com N posições, rota única */}
+              <Button
+                size="sm"
+                disabled={
+                  shouldBlockGradesActions ||
+                  isRefetching ||
+                  isSavingAll ||
+                  studentsWithValidNota.length === 0
+                }
+                onClick={handleSaveAllStudents}
+              >
+                {isSavingAll ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    A lançar...
+                  </>
+                ) : (
+                  <>
+                    <SendHorizonal className="h-4 w-4 mr-2" />
+                    Lançar Todos ({studentsWithValidNota.length})
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* ── Tabela ──────────────────────────────────────────────────── */}
           <div className="bg-card border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
@@ -590,18 +634,10 @@ export default function LaunchNotes() {
                   <TableRow>
                     <TableHead className="w-[120px]">Nº Matrícula</TableHead>
                     <TableHead>Nome do Estudante</TableHead>
-                    <TableHead className="w-[600px] text-center">
-                      Descrição
-                    </TableHead>
-                    <TableHead className="w-[140px] text-center">
-                      Nota (0-20)
-                    </TableHead>
-                    <TableHead className="w-[140px] text-center">
-                      Estado
-                    </TableHead>
-                    <TableHead className="w-[120px] text-center">
-                      Ação
-                    </TableHead>
+                    <TableHead className="w-[600px] text-center">Descrição</TableHead>
+                    <TableHead className="w-[140px] text-center">Nota (0-20)</TableHead>
+                    <TableHead className="w-[140px] text-center">Estado</TableHead>
+                    <TableHead className="w-[120px] text-center">Ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -625,6 +661,7 @@ export default function LaunchNotes() {
                           <TableCell className="font-mono text-sm">
                             {student.numero_de_matricula}
                           </TableCell>
+
                           <TableCell className="font-medium">
                             {student.nome_completo}
                           </TableCell>
@@ -679,13 +716,12 @@ export default function LaunchNotes() {
                           </TableCell>
 
                           <TableCell className="text-center flex justify-center gap-2">
+                            {/* Cadeado individual */}
                             <Button
                               size="sm"
-                              disabled={shouldBlockGradesActions || isRefetching}
                               variant="ghost"
-                              onClick={() =>
-                                toggleLock(student.codigo_grade_aluno)
-                              }
+                              disabled={shouldBlockGradesActions || isRefetching || isSavingAll}
+                              onClick={() => toggleLock(student.codigo_grade_aluno)}
                             >
                               {isLocked ? (
                                 <Lock className="w-4 h-4" />
@@ -694,43 +730,12 @@ export default function LaunchNotes() {
                               )}
                             </Button>
 
+                            {/* Lançar individual → array[1], mesma rota */}
                             <Button
-                              disabled={shouldBlockGradesActions || isRefetching}
                               size="sm"
                               variant={hasNota ? "default" : "outline"}
-                              onClick={() => {
-                                if (
-                                  student.nota === null ||
-                                  student.nota === undefined
-                                ) { 
-                                  toast({
-                                    title: "Erro",
-                                    description: "Insira uma nota primeiro",
-                                    variant: "destructive",
-                                  });
-                                  return;
-                                }
-                                if (
-                                  Number(student.nota) < 0 ||
-                                  Number(student.nota) > 20
-                                ) {
-                                  toast({
-                                    title: "Erro",
-                                    description:
-                                      "A nota deve estar entre 0 e 20",
-                                    variant: "destructive",
-                                  });
-                                  return;
-                                }
-                                handleSaveAll(student);
-                                toggleLock(student.codigo_grade_aluno);
-                                toast({
-                                  title: hasNota
-                                    ? "Nota atualizada"
-                                    : "Nota lançada",
-                                  description: `${student.nome_completo} → ${student.nota} valores`,
-                                });
-                              }}
+                              disabled={shouldBlockGradesActions || isRefetching || isSavingAll}
+                              onClick={() => handleSaveIndividual(student)}
                             >
                               <Save className="h-4 w-4 mr-1" />
                               {hasNota ? "Atualizar" : "Lançar"}
@@ -744,7 +749,7 @@ export default function LaunchNotes() {
             </div>
           </div>
 
-          {/* Paginação */}
+          {/* ── Paginação ────────────────────────────────────────────────── */}
           {localStudents.length > 0 && (
             <div className="flex items-center justify-between mt-6 flex-wrap gap-4">
               <div className="flex items-center gap-2">
@@ -767,8 +772,8 @@ export default function LaunchNotes() {
                 </Select>
                 <span className="text-sm text-muted-foreground ml-4">
                   Mostrando {(currentPage - 1) * itemsPerPage + 1} a{" "}
-                  {Math.min(currentPage * itemsPerPage, localStudents.length)}{" "}
-                  de {localStudents.length} registos
+                  {Math.min(currentPage * itemsPerPage, localStudents.length)} de{" "}
+                  {localStudents.length} registos
                 </span>
               </div>
 
@@ -788,9 +793,7 @@ export default function LaunchNotes() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                 >
                   Seguinte
@@ -805,15 +808,15 @@ export default function LaunchNotes() {
   );
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function teacherHasPermissionToLaunchNotes(
   promptPermissionLaunch: GetAssessmentNotasItem | null | undefined,
 ) {
   if (!promptPermissionLaunch) return false;
-
   const now = new Date();
   const start = new Date(promptPermissionLaunch.DATAINICIAL);
   const end = new Date(promptPermissionLaunch.DATAFIM);
-
   return now >= start && now <= end;
 }
 
@@ -856,7 +859,9 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"}. Contacte a administração.`,
+      content: `Não existe período definido para ${
+        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+      }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",
@@ -882,17 +887,12 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
   };
 
   const config = configs[gradesPeriodStatus];
-
   if (!config) return null;
 
   return (
-    <div
-      className={`${config.className} rounded-lg p-4 transition-all duration-300`}
-    >
+    <div className={`${config.className} rounded-lg p-4 transition-all duration-300`}>
       {config.title && <p className="font-semibold mb-1">{config.title}</p>}
-      <div className={config.title ? "text-sm opacity-90" : ""}>
-        {config.content}
-      </div>
+      <div className={config.title ? "text-sm opacity-90" : ""}>{config.content}</div>
     </div>
   );
 };

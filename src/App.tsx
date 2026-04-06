@@ -135,6 +135,7 @@ import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
 import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
+import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 
 const App = () => {
   return (
@@ -1275,6 +1276,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
                     path="/inscricoes/estatisticas"
                     element={
@@ -1285,6 +1287,19 @@ const App = () => {
                         ]}
                       >
                         <EstatisticaDeEstudantesAprovadosEReprovados />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/sem-curso"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla!,
+                        ]}
+                      >
+                        <SemInscricaoCurso />
                       </ProtectedRoute>
                     }
                   />

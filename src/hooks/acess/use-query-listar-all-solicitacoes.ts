@@ -7,6 +7,7 @@ type UseQueryListarAllSolicitacoesParams = {
   estadoSolicitacao: string;
   tipoServicoSelecionado: number;
   userId: number;
+  searchServico?: string;
 };
 
 export function useQueryListarAllSolicitacoes({
@@ -15,6 +16,7 @@ export function useQueryListarAllSolicitacoes({
   estadoSolicitacao,
   tipoServicoSelecionado,
   userId,
+  searchServico,
 }: UseQueryListarAllSolicitacoesParams) {
   return useQuery({
     queryKey: [
@@ -24,6 +26,7 @@ export function useQueryListarAllSolicitacoes({
       estadoSolicitacao,
       tipoServicoSelecionado,
       userId,
+      searchServico,
     ],
     queryFn: () =>
       listarAllSolicitacoesService({
@@ -32,6 +35,7 @@ export function useQueryListarAllSolicitacoes({
         estadoSolicitacao,
         tipoServicoSelecionado,
         userId,
+        searchServico,
       }),
     staleTime: 1000 * 60 * 5,
     retry: 2,

@@ -591,6 +591,8 @@ INSCRICAO_POR_HORARIO: {
     sigla: "mgea_a_acup",
   },
   ALTERAR_PROVA: { designacao: "Alterar Prova", sigla: "mgea_a_ap" },
+
+  
   LANCAMENTO_NOTAS_MPGS: {
     designacao: "Lançamento de Notas",
     sigla: "mpgs_ln",

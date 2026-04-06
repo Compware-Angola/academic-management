@@ -929,7 +929,7 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
           ],
         },
-          { title: "Substitutos", url: "/horarios/docentes-substitutos", permission: [PermissionTypeDetails.LISTAR_DOCENTES_SUBSTITUTO.sigla!] },
+          { title: "Docentes Substitutos", url: "/horarios/docentes-substitutos", permission: [PermissionTypeDetails.LISTAR_DOCENTES_SUBSTITUTO.sigla!] },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
         {
           title: "Movimentar estudantes",
