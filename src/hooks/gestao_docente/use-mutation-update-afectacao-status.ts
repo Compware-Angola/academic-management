@@ -18,7 +18,7 @@ export const useMutationUpdateAfectacaoStatus = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["docentes-afectacao"],
+        queryKey: ["gestao-docentes-afectacao"],
       });
     },
   });

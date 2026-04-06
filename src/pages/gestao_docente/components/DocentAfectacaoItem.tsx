@@ -1,8 +1,10 @@
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,12 +28,12 @@ import { Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useId, useState } from "react";
 import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mutation-update-afectacao-status";
-import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { Input } from "@/components/ui/input";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryDocentesAfectacao } from "@/hooks/gestao_docente/use-query-docentes-afectacao";
 
-const GestaoAfectacaoPorUC = () => {
-  const unidadeCurricularKey = useId();
+const DocentAfectacaoItem = () => {
+  const id = useId();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const { mutateAsync, isPending } = useMutationUpdateAfectacaoStatus();
@@ -39,39 +41,18 @@ const GestaoAfectacaoPorUC = () => {
     anoLectivo: "23",
     semestre: "",
     docente: "",
-    curso: "",
-    anoCurricular: "all",
-    unidadeCurricular: "all",
   });
 
   const { data: teachersData = [] } = useQueryTeacther();
-  const { data: afectacoesResponse, isLoading } =
-    useQueryGestaoAfectacaoDocentes({
-      anoLectivo: parseFilter(filters.anoLectivo),
-      docente: parseFilter(filters.docente),
-      semestre: parseFilter(filters.semestre),
-      curso: parseFilter(filters.curso),
-      anoCurricular: parseFilter(filters.anoCurricular),
-      unidadeCurricular: parseFilter(filters.unidadeCurricular),
-      limit,
-      page,
-    });
+  const { data: afectacoesResponse, isLoading } = useQueryDocentesAfectacao({
+    anoLectivo: parseFilter(filters.anoLectivo),
+    docente: parseFilter(filters.docente),
+    tipoAfectacao: 1,
+    semestre: parseFilter(filters.semestre),
+    limit,
+    page,
+  });
 
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe: filters.anoCurricular == "all" ? null : filters.anoCurricular,
-    });
-  const updateAfectacaoStatus = (codigo: number, status: boolean) => {
-    mutateAsync({
-      codigo,
-      payload: {
-        status: +status,
-      },
-    });
-  };
-  const canLoadUcs = !!filters.curso && !!filters.semestre;
   const afectacoes = afectacoesResponse?.data ?? [];
   const total = afectacoesResponse?.total;
   const totalPages = afectacoesResponse?.totalPages;
@@ -88,55 +69,29 @@ const GestaoAfectacaoPorUC = () => {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <SemestreSelect
+              enableDefaultSelectItem
               value={filters.semestre}
               onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
             />
-            <CourseSelect
-              value={filters.curso}
-              onChangeValue={(v) => setFilters({ ...filters, curso: v })}
-            />
-            <AnoCurricularSelect
-              enableDefaultSelectItem
-              value={filters.anoCurricular}
-              onChangeValue={(v) =>
-                setFilters({ ...filters, anoCurricular: v })
-              }
-              curso={filters.curso}
-            />
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Unidade Curricular</label>
-              <Select
-                value={filters.unidadeCurricular}
-                onValueChange={(v) =>
-                  setFilters({ ...filters, unidadeCurricular: v })
+            <div className="space-y-1.5">
+              <Label>Docente</Label>
+              <FormCommandSelect
+                width="full"
+                value={filters.docente}
+                options={teachersData}
+                map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
+                onChange={(codigo) =>
+                  setFilters({ ...filters, docente: codigo })
                 }
-                disabled={!canLoadUcs}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione curso"
-                        : !filters.semestre
-                          ? "Selecione semestre"
-                          : isLoadingUC
-                            ? "Carregando UCs..."
-                            : "Selecionar UC"
-                    }
-                  />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem key={unidadeCurricularKey} value="all">
-                    Todos
-                  </SelectItem>
-                  {unidadesCurriculares.map((uc) => (
-                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
-                      {uc.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
+            </div>
+            <div>
+              <Label>Data Inicio</Label>
+              <Input placeholder="Data inicial" type="date" />
+            </div>
+            <div>
+              <Label>Data Fim</Label>
+              <Input placeholder="Data inicial" type="date" />
             </div>
           </div>
         </CardContent>
@@ -163,42 +118,15 @@ const GestaoAfectacaoPorUC = () => {
                     <TableRow>
                       <TableHead>Código</TableHead>
                       <TableHead>Docente</TableHead>
-                      <TableHead>Semestre</TableHead>
-                      <TableHead>Ano Curricular</TableHead>
-                      <TableHead>Curso</TableHead>
-                      <TableHead>UC</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Afectado Por</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Estado</TableHead>
+                      <TableHead>Nº Mecanográfico</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {afectacoes.map((item) => (
-                      <TableRow key={item.codigo}>
-                        <TableCell>{item.codigo}</TableCell>
+                      <TableRow key={item.codigo_docente}>
+                        <TableCell>{item.codigo_docente}</TableCell>
                         <TableCell>{item.docente}</TableCell>
-                        <TableCell>{item.semestre}</TableCell>
-                        <TableCell>{item.classe}</TableCell>
-                        <TableCell>{item.curso}</TableCell>
-                        <TableCell> {item.uc}</TableCell>
-                        <TableCell>{item.categoria}</TableCell>
-                        <TableCell>{item.afectadopor}</TableCell>
-
-                        <TableCell className="text-center flex space-x-2">
-                          {formatarData(item.data)}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              onCheckedChange={(v) =>
-                                updateAfectacaoStatus(item.codigo, v)
-                              }
-                              id="deleted-mode"
-                              checked={item.estado == 1}
-                            />
-                          </div>
-                        </TableCell>
+                        <TableCell>{item.mecanografico}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -255,4 +183,4 @@ const GestaoAfectacaoPorUC = () => {
     </>
   );
 };
-export { GestaoAfectacaoPorUC };
+export { DocentAfectacaoItem };

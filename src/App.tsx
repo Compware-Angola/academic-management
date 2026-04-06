@@ -134,6 +134,7 @@ import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
+import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 
@@ -1273,6 +1274,20 @@ const App = () => {
                         ]}
                       >
                         <EstudantesMatriculado />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/estatisticas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
+                        ]}
+                      >
+                        <EstatisticaDeEstudantesAprovadosEReprovados />
                       </ProtectedRoute>
                     }
                   />

@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, Eye } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,7 +39,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatarData } from "@/util/date-formate";
 
 const HorasVigilancia = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     estado: "",
@@ -114,11 +112,11 @@ const HorasVigilancia = () => {
   const getTableBackgroundColor = (status: string) => {
     switch (status) {
       case "Pendente":
-        return "bg-yellow-200!";
+        return "bg-yellow-600!";
       case "Realizada":
-        return "bg-success/20!";
+        return "bg-emerald-100 dark:bg-emerald-700";
       case "Falta":
-        return " bg-destructive/20!";
+        return " bg-destructive/70!";
       default:
         return "";
     }
