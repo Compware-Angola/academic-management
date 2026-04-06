@@ -32,6 +32,10 @@ export type ResultadoProva = {
   faculdade: string;
   nota: number;
   resultado: number;
+ 
+  hora_inicio: string;
+  hora_fim: string;
+  status_prova: number;
 };
 
 export type ResultadoProvaResponse = {

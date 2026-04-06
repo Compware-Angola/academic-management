@@ -4,12 +4,7 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -88,18 +83,18 @@ export default function ControleAssiduidade() {
     limit: 20,
   });
 
-  const {
-    data: gradesCurriculares = [],
-    isLoading: isLoadingGradeCurricular,
-  } = useQueryDisciplinaWithFilter(
-    {
-      curso: filters.curso,
-      semestre: filters.semestre,
-    },
-    {
-      enabled: !!filters.curso && !!filters.semestre,
-    }
-  );
+  const { data: gradesCurriculares = [], isLoading: isLoadingGradeCurricular } =
+    useQueryDisciplinaWithFilter(
+      {
+        curso: filters.curso,
+        semestre: filters.semestre,
+      },
+      {
+        enabled: !!filters.curso && !!filters.semestre,
+      },
+    );
+
+  console.log("UC: ", gradesCurriculares);
 
   const handleFilterChange = (key: string, value: string | number) => {
     setFilters((prev) => ({
@@ -120,7 +115,6 @@ export default function ControleAssiduidade() {
     gradeCurricular: filters.gradeCurricular
       ? Number(filters.gradeCurricular)
       : undefined,
-    search: filters.search || undefined,
     page: filters.page,
     limit: filters.limit,
   };
@@ -128,8 +122,11 @@ export default function ControleAssiduidade() {
   const { data: response, isLoading } = useQueryControleAssiduidade(
     queryFilters,
     {
-      enabled: !!queryFilters.dataInicial && !!queryFilters.dataFinal,
-    }
+      enabled:
+        !!queryFilters.docente &&
+        !!queryFilters.dataInicial &&
+        !!queryFilters.dataFinal,
+    },
   );
 
   const aulas = response?.data ?? [];
@@ -333,7 +330,6 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
         <CardContent>
           <div className="flex flex-wrap gap-4 items-end">
-            
             <FormSelect
               label="Ano Letivo"
               value={filters.anoLectivo}
@@ -415,8 +411,6 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
               />
             </div>
 
-            
-
             {showMoreFilters && (
               <>
                 <div className="space-y-1.5">
@@ -455,10 +449,10 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                       !filters.curso
                         ? "Selecione o curso"
                         : !filters.semestre
-                        ? "Selecione o semestre"
-                        : isLoadingGradeCurricular
-                        ? "Carregando..."
-                        : "Selecionar grade curricular"
+                          ? "Selecione o semestre"
+                          : isLoadingGradeCurricular
+                            ? "Carregando..."
+                            : "Selecionar grade curricular"
                     }
                     onChange={(v) => handleFilterChange("gradeCurricular", v)}
                   />
@@ -496,23 +490,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          
-
-          <div className="min-w-[200px] flex-1">
-              <label className="text-sm font-medium">Pesquisa</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Pesquisar por código, docente, curso ou unidade curricular"
-                  value={filters.search}
-                  onChange={(e) =>
-                    handleFilterChange("search", e.target.value)
-                  }
-                  className="pl-9"
-                />
-              </div>
-            </div>
+          <CardTitle>Resultados</CardTitle>
         </CardHeader>
 
         <CardContent>

@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useQueryDocenteAlunos } from "@/hooks/defesa-tfc/docente-aluonos";
-import { DocenteAlunoResponse } from "@/services/defesa-tfc/docente-aluno.service";
+
 type OrientandoModalProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -31,7 +31,7 @@ export default function OrientandoModal(props: OrientandoModalProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-4xl! w-full">
         <DialogHeader>
-          <DialogTitle>Orientando Modal</DialogTitle>
+          <DialogTitle>Orientando</DialogTitle>
         </DialogHeader>
         <div className="over">
           <Table>
