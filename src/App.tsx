@@ -136,6 +136,7 @@ import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
 import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
+import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 
 const App = () => {
   return (
@@ -1313,6 +1314,19 @@ const App = () => {
                         ]}
                       >
                         <ListagemDocentes />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/mensalidades-pagas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA
+                            .sigla!,
+                        ]}
+                      >
+                        <PagamentoMensal />
                       </ProtectedRoute>
                     }
                   />

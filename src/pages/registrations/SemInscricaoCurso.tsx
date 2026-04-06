@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 
 import { parseFilter } from "@/util/parse-filter";
-import { Loader2, Search } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import {
@@ -34,7 +34,6 @@ import { FacultySelect } from "@/components/common/global-selects/FacultySelect"
 import { useQueryListEstudantesSemInscricaoCurso } from "@/hooks/registrations/use-query-estudantes-sem-inscricoes-cursos";
 import { FormInput } from "@/components/common/FormInput";
 import { isNumber } from "@/util/is-number";
-import { number } from "framer-motion";
 
 const SemInscricaoCurso = () => {
   const [page, setPage] = useState(1);
