@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, AlertTriangle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { AlertCircle, AlertTriangle, ChevronLeft, ChevronRight, Edit, Eye, EyeOff, Lock, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, Calendar, Briefcase,
@@ -42,6 +42,8 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 export interface TeacherInfo {
   name: string;
@@ -260,9 +262,9 @@ function AssiduidadeTab({
               map={(u) => ({ key: u.codigo, value: u.codigo, label: u.nome_cadeira })}
               placeholder={
                 !filters.curso ? "Selecione curso"
-                : !filters.semestre ? "Selecione semestre"
-                : isLoadingUC ? "Carregando UCs..."
-                : "Selecionar UC"
+                  : !filters.semestre ? "Selecione semestre"
+                    : isLoadingUC ? "Carregando UCs..."
+                      : "Selecionar UC"
               }
               onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
             />
@@ -386,9 +388,24 @@ function AssiduidadeTab({
 
 // ===================== MAIN COMPONENT =====================
 const TeacherProfile = () => {
-  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("personal");
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
+  const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
+  const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
+  const passwordStrength = useMemo(() => {
+    const p = passwords.new;
+    let score = 0;
+    if (p.length >= 8) score += 25;
+    if (/[A-Z]/.test(p)) score += 25;
+    if (/[0-9]/.test(p)) score += 25;
+    if (/[^A-Za-z0-9]/.test(p)) score += 25;
+    return score;
+  }, [passwords.new]);
+
+  const strengthLabel = ["", "Muito fraca", "Fraca", "Boa", "Forte"][passwordStrength / 25];
+
+
 
   const { data: userDate } = useCurrentUser("GA");
   const isDocente = userDate?.roles?.docente ?? false;
@@ -445,8 +462,28 @@ const TeacherProfile = () => {
     : "";
 
   const handleSave = () => {
-    toast({ title: "Alterações guardadas!", description: "Os dados do docente foram atualizados com sucesso." });
+    switch (activeTab) {
+      case "personal":
+      case "professional":
+        handleSaveInfo();
+        break;
+      case "security":
+        handlePasswordSave();
+        break;
+    }
+  };
+  const handleSaveInfo = () => {
+    // Aqui irias chamar a tua API para salvar as alterações
+    toast.success("Informações atualizadas com sucesso!");
     setIsEditing(false);
+  }
+  const handlePasswordSave = () => {
+    if (!passwords.current) return toast.error("Introduza a senha atual.");
+    if (passwords.new.length < 8) return toast.error("Mínimo 8 caracteres.");
+    if (passwords.new !== passwords.confirm) return toast.error("As senhas não coincidem.");
+    // chamar a tua API aqui
+    toast.success("Senha atualizada com sucesso!");
+    setPasswords({ current: "", new: "", confirm: "" });
   };
 
   const isLoading = isLoadingAcademicYear || teacherInfoDataLoading || isLoadingTurmaData;
@@ -517,6 +554,13 @@ const TeacherProfile = () => {
           <h1 className="text-3xl font-bold tracking-tight">Perfil do Docente</h1>
           <p className="text-muted-foreground">Visualize e edite as suas informações profissionais</p>
         </div>
+        <Button
+          variant={isEditing ? 'default' : 'outline'}
+          onClick={() => setIsEditing(!isEditing)}
+        >
+          <Edit className="mr-2 h-4 w-4" />
+          {isEditing ? 'Cancelar' : 'Editar Dados'}
+        </Button>
       </div>
 
       {/* Secção Superior */}
@@ -556,11 +600,12 @@ const TeacherProfile = () => {
             {isEditing && <CardDescription>Campos editáveis estão ativos.</CardDescription>}
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="personal">Pessoal</TabsTrigger>
                 <TabsTrigger value="professional">Profissional</TabsTrigger>
                 <TabsTrigger value="classes">Horários</TabsTrigger>
+                <TabsTrigger value="security">Segurança</TabsTrigger>
               </TabsList>
 
               {/* PESSOAL */}
@@ -620,38 +665,71 @@ const TeacherProfile = () => {
               </TabsContent>
 
               {/* PROFISSIONAL */}
-              <TabsContent value="professional" className="space-y-4 pt-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Nº de Funcionário</Label>
-                    <Input value={teacherInfo.employeeId} disabled />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Categoria</Label>
-                    <Input value={teacherInfo.category} disabled={!isEditing}
-                      onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Faculdade / Departamento</Label>
-                    <Input value={teacherInfo.department} disabled />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Escalão</Label>
-                    <Input value={teacherInfo.office} disabled={!isEditing}
-                      onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label>Data de Admissão</Label>
-                    <Input
-                      value={teacherInfo.hireDate ? new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO") : ""}
-                      disabled />
-                  </div>
-                </div>
-              </TabsContent>
+         <TabsContent value="professional" className="space-y-4 pt-4">
+  {!isDocente ? (
+    <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+      <AlertTriangle className="h-5 w-5" />
+      <AlertTitle className="font-semibold">Acesso Restrito</AlertTitle>
+      <AlertDescription className="mt-1 space-y-1">
+        <p>
+          Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
+          a sua própria assiduidade nas aulas que leciona.
+        </p>
+        <p>
+          A sua conta não está associada a um perfil de docente, pelo que não tem permissão
+          para visualizar estes dados.
+        </p>
+      </AlertDescription>
+    </Alert>
+  ) : (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className="space-y-2">
+        <Label>Nº de Funcionário</Label>
+        <Input value={teacherInfo.employeeId} disabled />
+      </div>
+      <div className="space-y-2">
+        <Label>Categoria</Label>
+        <Input value={teacherInfo.category} disabled={!isEditing}
+          onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Faculdade / Departamento</Label>
+        <Input value={teacherInfo.department} disabled />
+      </div>
+      <div className="space-y-2">
+        <Label>Escalão</Label>
+        <Input value={teacherInfo.office} disabled={!isEditing}
+          onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
+      </div>
+      <div className="space-y-2 md:col-span-2">
+        <Label>Data de Admissão</Label>
+        <Input
+          value={teacherInfo.hireDate ? new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO") : ""}
+          disabled />
+      </div>
+    </div>
+  )}
+</TabsContent>
 
               {/* HORÁRIOS */}
               <TabsContent value="classes" className="pt-4">
-                {isLoadingTurmaData ? (
+
+                {!isDocente ? (
+                  <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+                    <AlertTriangle className="h-5 w-5" />
+                    <AlertTitle className="font-semibold">Acesso Restrito</AlertTitle>
+                    <AlertDescription className="mt-1 space-y-1">
+                      <p>
+                        Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
+                        a sua própria assiduidade nas aulas que leciona.
+                      </p>
+                      <p>
+                        A sua conta não está associada a um perfil de docente, pelo que não tem permissão
+                        para visualizar estes dados.
+                      </p>
+                    </AlertDescription>
+                  </Alert>
+                ) : isLoadingTurmaData ? (
                   <div className="space-y-4">
                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-lg" />)}
                   </div>
@@ -684,14 +762,107 @@ const TeacherProfile = () => {
                   </div>
                 )}
               </TabsContent>
-            </Tabs>
+              {/* SEGURANÇA */}
+              <TabsContent value="security" className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium border-b pb-2">Atualizar Senha</h3>
+                </div>
 
-            {isEditing && (
-              <div className="mt-8 flex gap-3">
-                <Button onClick={handleSave} className="flex-1">Guardar Alterações</Button>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>Cancelar</Button>
-              </div>
-            )}
+                {/* Senha Atual */}
+                <div className="space-y-2">
+                  <Label>Senha Atual</Label>
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <div className="relative flex-1">
+                      <Input
+                        disabled={!isEditing}
+                        type={showPasswords.current ? "text" : "password"}
+                        value={passwords.current}
+                        onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                        placeholder="••••••••"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nova Senha */}
+                <div className="space-y-2">
+                  <Label>Nova Senha</Label>
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <div className="relative flex-1">
+                      <Input
+                        disabled={!isEditing}
+                        type={showPasswords.new ? "text" : "password"}
+                        value={passwords.new}
+                        onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                        placeholder="••••••••"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <Progress value={passwordStrength} className="h-1" />
+                  <p className="text-xs text-muted-foreground">{strengthLabel}</p>
+                </div>
+
+                {/* Confirmar Senha */}
+                <div className="space-y-2">
+                  <Label>Confirmar Nova Senha</Label>
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <div className="relative flex-1">
+                      <Input
+                        disabled={!isEditing}
+                        type={showPasswords.confirm ? "text" : "password"}
+                        value={passwords.confirm}
+                        onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                        placeholder="••••••••"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  {passwords.confirm && (
+                    <p className={`text-xs ${passwords.new === passwords.confirm ? "text-green-600" : "text-red-500"}`}>
+                      {passwords.new === passwords.confirm ? "As senhas coincidem" : "As senhas não coincidem"}
+                    </p>
+                  )}
+                </div>
+
+
+              </TabsContent>
+            </Tabs>
+        {isEditing && activeTab !== "classes" && activeTab  && !(activeTab === "professional" && !isDocente) && (
+  <div className="mt-8 flex gap-3">
+    <Button onClick={handleSave} className="flex-1">
+      Guardar Alterações
+    </Button>
+    <Button variant="outline" onClick={() => setIsEditing(false)}>
+      Cancelar
+    </Button>
+  </div>
+)}
           </CardContent>
         </Card>
       </div>
