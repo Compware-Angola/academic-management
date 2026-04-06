@@ -673,7 +673,7 @@ const TeacherProfile = () => {
       <AlertDescription className="mt-1 space-y-1">
         <p>
           Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
-          a sua própria assiduidade nas aulas que leciona.
+           os seus dados profissionais.
         </p>
         <p>
           A sua conta não está associada a um perfil de docente, pelo que não tem permissão
@@ -721,7 +721,7 @@ const TeacherProfile = () => {
                     <AlertDescription className="mt-1 space-y-1">
                       <p>
                         Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
-                        a sua própria assiduidade nas aulas que leciona.
+                        seus horários.
                       </p>
                       <p>
                         A sua conta não está associada a um perfil de docente, pelo que não tem permissão
