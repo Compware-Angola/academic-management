@@ -388,7 +388,7 @@ function AssiduidadeTab({
 
 // ===================== MAIN COMPONENT =====================
 const TeacherProfile = () => {
-const [activeTab, setActiveTab] = useState("personal");
+  const [activeTab, setActiveTab] = useState("personal");
   const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
@@ -461,22 +461,22 @@ const [activeTab, setActiveTab] = useState("personal");
     ? teacherInfo.name.split(" ").map((n) => n[0]).join("").toUpperCase()
     : "";
 
-const handleSave = () => {
-  switch (activeTab) {
-    case "personal":
-    case "professional":
-      handleSaveInfo();   
-      break;
-    case "security":
-      handlePasswordSave(); 
-      break;
+  const handleSave = () => {
+    switch (activeTab) {
+      case "personal":
+      case "professional":
+        handleSaveInfo();
+        break;
+      case "security":
+        handlePasswordSave();
+        break;
+    }
+  };
+  const handleSaveInfo = () => {
+    // Aqui irias chamar a tua API para salvar as alterações
+    toast.success("Informações atualizadas com sucesso!");
+    setIsEditing(false);
   }
-};
-const handleSaveInfo = () => {
-  // Aqui irias chamar a tua API para salvar as alterações
-  toast.success("Informações atualizadas com sucesso!");
-  setIsEditing(false);
-}
   const handlePasswordSave = () => {
     if (!passwords.current) return toast.error("Introduza a senha atual.");
     if (passwords.new.length < 8) return toast.error("Mínimo 8 caracteres.");
@@ -600,7 +600,7 @@ const handleSaveInfo = () => {
             {isEditing && <CardDescription>Campos editáveis estão ativos.</CardDescription>}
           </CardHeader>
           <CardContent>
-           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="personal">Pessoal</TabsTrigger>
                 <TabsTrigger value="professional">Profissional</TabsTrigger>
@@ -665,38 +665,71 @@ const handleSaveInfo = () => {
               </TabsContent>
 
               {/* PROFISSIONAL */}
-              <TabsContent value="professional" className="space-y-4 pt-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Nº de Funcionário</Label>
-                    <Input value={teacherInfo.employeeId} disabled />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Categoria</Label>
-                    <Input value={teacherInfo.category} disabled={!isEditing}
-                      onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Faculdade / Departamento</Label>
-                    <Input value={teacherInfo.department} disabled />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Escalão</Label>
-                    <Input value={teacherInfo.office} disabled={!isEditing}
-                      onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label>Data de Admissão</Label>
-                    <Input
-                      value={teacherInfo.hireDate ? new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO") : ""}
-                      disabled />
-                  </div>
-                </div>
-              </TabsContent>
+         <TabsContent value="professional" className="space-y-4 pt-4">
+  {!isDocente ? (
+    <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+      <AlertTriangle className="h-5 w-5" />
+      <AlertTitle className="font-semibold">Acesso Restrito</AlertTitle>
+      <AlertDescription className="mt-1 space-y-1">
+        <p>
+          Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
+          a sua própria assiduidade nas aulas que leciona.
+        </p>
+        <p>
+          A sua conta não está associada a um perfil de docente, pelo que não tem permissão
+          para visualizar estes dados.
+        </p>
+      </AlertDescription>
+    </Alert>
+  ) : (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className="space-y-2">
+        <Label>Nº de Funcionário</Label>
+        <Input value={teacherInfo.employeeId} disabled />
+      </div>
+      <div className="space-y-2">
+        <Label>Categoria</Label>
+        <Input value={teacherInfo.category} disabled={!isEditing}
+          onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Faculdade / Departamento</Label>
+        <Input value={teacherInfo.department} disabled />
+      </div>
+      <div className="space-y-2">
+        <Label>Escalão</Label>
+        <Input value={teacherInfo.office} disabled={!isEditing}
+          onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
+      </div>
+      <div className="space-y-2 md:col-span-2">
+        <Label>Data de Admissão</Label>
+        <Input
+          value={teacherInfo.hireDate ? new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO") : ""}
+          disabled />
+      </div>
+    </div>
+  )}
+</TabsContent>
 
               {/* HORÁRIOS */}
               <TabsContent value="classes" className="pt-4">
-                {isLoadingTurmaData ? (
+
+                {!isDocente ? (
+                  <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+                    <AlertTriangle className="h-5 w-5" />
+                    <AlertTitle className="font-semibold">Acesso Restrito</AlertTitle>
+                    <AlertDescription className="mt-1 space-y-1">
+                      <p>
+                        Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
+                        a sua própria assiduidade nas aulas que leciona.
+                      </p>
+                      <p>
+                        A sua conta não está associada a um perfil de docente, pelo que não tem permissão
+                        para visualizar estes dados.
+                      </p>
+                    </AlertDescription>
+                  </Alert>
+                ) : isLoadingTurmaData ? (
                   <div className="space-y-4">
                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-lg" />)}
                   </div>
@@ -742,7 +775,7 @@ const handleSaveInfo = () => {
                     <Lock className="h-4 w-4 text-muted-foreground" />
                     <div className="relative flex-1">
                       <Input
-                      disabled={!isEditing}
+                        disabled={!isEditing}
                         type={showPasswords.current ? "text" : "password"}
                         value={passwords.current}
                         onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
@@ -767,7 +800,7 @@ const handleSaveInfo = () => {
                     <Lock className="h-4 w-4 text-muted-foreground" />
                     <div className="relative flex-1">
                       <Input
-                      disabled={!isEditing}
+                        disabled={!isEditing}
                         type={showPasswords.new ? "text" : "password"}
                         value={passwords.new}
                         onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
@@ -794,7 +827,7 @@ const handleSaveInfo = () => {
                     <Lock className="h-4 w-4 text-muted-foreground" />
                     <div className="relative flex-1">
                       <Input
-                      disabled={!isEditing}
+                        disabled={!isEditing}
                         type={showPasswords.confirm ? "text" : "password"}
                         value={passwords.confirm}
                         onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
@@ -817,19 +850,19 @@ const handleSaveInfo = () => {
                   )}
                 </div>
 
-              
+
               </TabsContent>
             </Tabs>
- {isEditing && activeTab !== "classes"  && (
-  <div className="mt-8 flex gap-3">
-    <Button onClick={handleSave} className="flex-1">
-      Guardar Alterações
-    </Button>
-    <Button variant="outline" onClick={() => setIsEditing(false)}>
-      Cancelar
-    </Button>
-  </div>
-)}
+            {isEditing && activeTab !== "classes" && (
+              <div className="mt-8 flex gap-3">
+                <Button onClick={handleSave} className="flex-1">
+                  Guardar Alterações
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
