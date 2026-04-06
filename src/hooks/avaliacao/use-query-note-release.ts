@@ -8,6 +8,7 @@ interface UseQueryNoteReleasesParams {
   tipoAvaliacao: number;
   classe: number;
   turno:number
+  search?: string;
   
 }
 

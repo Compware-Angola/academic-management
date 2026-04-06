@@ -1,6 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-// Tipagem do utilizador de referência
+// ====================== TIPAGENS ======================
+
 export interface RefUtilizador {
   pk: number;
   desc: string;
@@ -8,7 +9,7 @@ export interface RefUtilizador {
   disponivel: boolean;
 }
 
-// Payload para criar ou atualizar nota
+// Payload de uma única nota
 export interface NoteUpsertPayload {
   gradeCurricularAluno: number;
   utilizador: number;
@@ -19,27 +20,58 @@ export interface NoteUpsertPayload {
   observacao: string | null;
   status: number;
   notaAnterior: number;
- 
-  codigo_grade_avaliacao_aluno?: number | null; 
+  codigo_grade_avaliacao_aluno?: number | null;
 }
 
-// Resposta da API (adapte conforme necessário)
+// Payload que o Backend realmente espera
+export interface NoteUpsertRequest {
+  items: NoteUpsertPayload[];   // ← Esta é a propriedade que o backend está à espera
+}
+
+// Resposta da API
 export interface NoteUpsertResponse {
   success: boolean;
   message: string;
   data?: any;
 }
 
-// Função para criar ou atualizar nota
-export async function upsertNote(payload: NoteUpsertPayload): Promise<NoteUpsertResponse> {
+// ====================== FUNÇÃO PRINCIPAL ======================
+
+/**
+ * Cria ou atualiza uma ou várias notas
+ * Sempre envia um objeto { items: [...] } como o backend espera
+ */
+export async function upsertNote(
+  payloads: NoteUpsertPayload[]   // No frontend continuas a passar array
+): Promise<NoteUpsertResponse> {
   try {
-    const response = await axiosNestGa.post<NoteUpsertResponse>("/assessment/upsert", payload);
+    const requestBody: NoteUpsertRequest = {
+      items: payloads,   // encapsula o array dentro de "items"
+    };
+
+    const response = await axiosNestGa.post<NoteUpsertResponse>(
+      "/assessment/upsert",
+      requestBody
+    );
+
     return response.data;
   } catch (error: any) {
-    console.error("Erro ao criar/atualizar nota:", error);
+    console.error("Erro ao criar/atualizar nota(s):", error);
+
+    let errorMessage = "Erro desconhecido ao lançar as notas";
+
+    if (error?.response?.data?.message) {
+      errorMessage = Array.isArray(error.response.data.message)
+        ? error.response.data.message.join(" | ")
+        : String(error.response.data.message);
+    } else if (error?.response?.data?.error) {
+      errorMessage = error.response.data.error;
+    }
+
     return {
       success: false,
-      message: error?.response?.data?.message || "Erro desconhecido",
+      message: errorMessage,
+      data: null,
     };
   }
 }
