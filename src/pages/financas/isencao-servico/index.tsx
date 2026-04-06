@@ -36,12 +36,6 @@ import {
 } from "@/components/ui/select.tsx";
 import { formatarData } from "@/util/date-formate.ts";
 import {
-  CreateIsencaoServicoDialog,
-  CreateIsencaoServicoFormData,
-} from "@/pages/financas/isencao-servico/CreateIsencaoServicoDialog.tsx";
-import { useMutationCreateIsencaoServico } from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-servico.ts";
-
-import {
   EditIsencaoServicoDialog,
   EditIsencaoServicoFormData,
 } from "@/pages/financas/isencao-servico/EditIsencaoServicoDialog.tsx";
@@ -56,6 +50,7 @@ import { FacultySelect } from "@/components/common/global-selects/FacultySelect"
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CreateIsencaoDialog } from "./CreateIsencaoDialog";
+import { CreateIsencaoMesDialog } from "./CreateIsencaoMesDialog";
 
 export default function IsencaoServico() {
   const [matriculaInput, setMatriculaInput] = useState("");
@@ -73,6 +68,7 @@ export default function IsencaoServico() {
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMonthModalOpen, setIsMonthModalOpen] = useState(false);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -87,15 +83,6 @@ export default function IsencaoServico() {
   });
 
   const items = data?.data ?? [];
-
-  const [formData, setFormData] = useState<CreateIsencaoServicoFormData>({
-    codigoServico: "",
-    codigoMatricula: "",
-    codigoAnoLectivo: "",
-    dataIsencao: "",
-  });
-
-  const { mutateAsync, isPending } = useMutationCreateIsencaoServico();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -228,8 +215,6 @@ export default function IsencaoServico() {
     await refetch();
   };
 
-  const handleSubmit = async () => {};
-
   const handleSearch = () => {
     setFiltersApplied(filters);
     setPage(1);
@@ -317,6 +302,10 @@ export default function IsencaoServico() {
         <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
           <Plus className="h-4 w-4" />
           Isentar serviço
+        </Button>
+        <Button className="gap-2" onClick={() => setIsMonthModalOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Isentar Mensalidades
         </Button>
       </div>
 
@@ -430,16 +419,11 @@ export default function IsencaoServico() {
         </CardContent>
       </Card>
 
-      {/* <CreateIsencaoServicoDialog
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        formData={formData}
-        onChange={setFormData}
-        onSubmit={handleSubmit}
-        isSubmitting={isPending}
-      /> */}
       <CreateIsencaoDialog open={isModalOpen} onOpenChange={setIsModalOpen} />
-
+      <CreateIsencaoMesDialog
+        open={isMonthModalOpen}
+        onOpenChange={setIsMonthModalOpen}
+      />
       <EditIsencaoServicoDialog
         open={isEditOpen}
         onOpenChange={setIsEditOpen}

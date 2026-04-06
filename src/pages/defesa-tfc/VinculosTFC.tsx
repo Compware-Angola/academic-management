@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCcw, Plus } from "lucide-react";
+import { Home, Search, Loader2, RefreshCcw, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -36,6 +36,7 @@ import { useQueryVinculos } from "@/hooks/defesa-tfc/use-query-vinculos";
 import { FormSelect } from "@/components/common/FormSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { VinculosModal } from "./components/vinculos-modal";
+import { ApagarVinculoAlert } from "./components/apagar-vinculo-alert.tfc";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -64,12 +65,8 @@ export default function VinculosTFC() {
 
   const [limit, setLimit] = useState(10);
   const [open, setOpen] = useState(false);
-  const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
-    "codigoMatricula",
-  );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchApplied, setSearchApplied] = useState("");
-
+  const [openApagar, setOpenApagar] = useState(false);
+  const [vinculoId, setVinculoId] = useState<number | null>(null);
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     curso: "",
@@ -77,12 +74,6 @@ export default function VinculosTFC() {
     orientador: "",
     estado: "",
   });
-  const [filtersApplied, setFiltersApplied] = useState(filters);
-  const placeholders: Record<string, string> = {
-    codigoMatricula: "Pesquisar por código da matrícula...",
-    nome: "Nome do Aluno.",
-  };
-  const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
   const { data: orientadoresResponse } = useQueryOrientadoresTFC({
     anoLectivoId: parseFilter(filters.anoLectivo),
@@ -101,7 +92,6 @@ export default function VinculosTFC() {
         ? undefined
         : parseFilter(filters.anoLectivo),
     cursoId: parseFilter(filters.curso),
-    search: searchTerm || undefined,
     page,
     limit,
   });
@@ -152,17 +142,7 @@ export default function VinculosTFC() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
 
-            <FacultySelect
-              allOption
-              value={filters.faculdade}
-              onChangeValue={(v) =>
-                setFilters({ ...filters, faculdade: v, curso: "" })
-              }
-            />
             <CourseSelect
-              params={{
-                faculdadeId: parseFilter(filters.faculdade),
-              }}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
             />
@@ -248,6 +228,7 @@ export default function VinculosTFC() {
                       <TableHead className="whitespace-nowrap">
                         Data Vínculo
                       </TableHead>
+                      <TableHead className="whitespace-nowrap">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -270,6 +251,18 @@ export default function VinculosTFC() {
                         </TableCell>
                         <TableCell className="text-muted-foreground whitespace-nowrap text-left">
                           {item.data_cadastro}
+                        </TableCell>
+                        <TableCell className="flex items-center gap-2">
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => {
+                              setVinculoId(Number(item.codigo_vinculo));
+                              setOpenApagar(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -325,6 +318,11 @@ export default function VinculosTFC() {
         </CardContent>
       </Card>
       <VinculosModal open={open} setOpen={setOpen} />
+      <ApagarVinculoAlert
+        open={openApagar}
+        onOpenChange={setOpenApagar}
+        vinculoId={vinculoId}
+      />
     </div>
   );
 }

@@ -124,12 +124,7 @@ function truncate(text: string, max = 10) {
   return text.length > max ? text.slice(0, max) + "..." : text;
 }
 
-const mockDocumentos = [
-  { id: 1, tipo: "Declaração de Matrícula", dataEmissao: "2025-09-01", estado: "Disponível" },
-  { id: 2, tipo: "Histórico Escolar", dataEmissao: "2025-08-15", estado: "Disponível" },
-  { id: 3, tipo: "Certidão de Notas", dataEmissao: null, estado: "Pendente" },
-  { id: 4, tipo: "Comprovativo de Pagamento", dataEmissao: "2025-12-15", estado: "Disponível" },
-];
+
 
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();

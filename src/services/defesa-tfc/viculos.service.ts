@@ -1,6 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type VinculosPayload = {
+
   anoLectivoId: number;
   orientadorId?: number;
   cursoId?: number;
@@ -10,6 +11,7 @@ export type VinculosPayload = {
 };
 
 export type VinculoItem = {
+  codigo_vinculo
   nome_aluno: string;
   matricula: number;
   curso: string;

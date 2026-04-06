@@ -8,6 +8,7 @@ interface UseQueryNoteReleasesParams {
   tipoAvaliacao: number;
   classe: number;
   turno:number
+  search?: string;
   
 }
 
@@ -15,8 +16,8 @@ export function useQueryNoteReleases(params: UseQueryNoteReleasesParams) {
   return useQuery<NoteRelease[]>({
     queryKey: ["note-releases", params],
     queryFn: () => fetchNoteReleases(params),
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5, 
     retry: 1,
-    enabled: false, // NÃO buscar automaticamente
+  
   });
 }

@@ -1,6 +1,9 @@
+import { useMemo, useState } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -38,23 +41,139 @@ export function CandidatosComProvaTab() {
   const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
-  const { data, isLoading } = useCandidatosSemProva({
-    codigoAnoLetivo: filters.codigoAnoLetivo ? Number(filters.codigoAnoLetivo) : undefined,
-    codigoCurso: filters.codigoCurso ? Number(filters.codigoCurso) : undefined,
-    codigoTurno: filters.codigoTurno ? Number(filters.codigoTurno) : undefined,
+  // CORREÇÃO 1: Usar `placeholderData: undefined` para evitar que dados antigos
+  // apareçam enquanto os novos carregam (causa comum de duplicação visual).
+  const { data, isLoading, isFetching } = useCandidatosSemProva({
+    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
+    codigoCurso: parseFilter(filters.codigoCurso),
+    codigoTurno: parseFilter(filters.codigoTurno),
     filtroProva: "com_prova",
     statusProva: parseFilter(filters.statusProva),
     page: filters.page,
     limit: filters.limit,
   });
 
+  // CORREÇÃO 2: Garantir que `candidatos` é sempre um array novo por página,
+  // nunca acumulado. O operador `??` garante fallback para array vazio.
   const candidatos = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalpages ?? 1;
   const offset = (filters.page - 1) * filters.limit;
 
+  const exportRows = useMemo(
+    () =>
+      candidatos.map((item) => ({
+        numeroInscricao: item.codigo,
+        nome: item.nome,
+        contacto: item.contato,
+        sexo: item.sexo,
+        curso: item.curso,
+        periodo: item.periodo,
+        horario: `${item.hora_inicio} - ${item.hora_fim}`,
+        anoLectivo: item.ano_lectivo,
+        tipoCandidatura: item.tipo_candidatura,
+        estadoProva: Number(item.status_prova) === 1 ? "Aprovado" : "Reprovado",
+      })),
+    [candidatos]
+  );
+
+  const pdfData = exportRows.length
+    ? {
+        filtros: [
+          filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+          filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+          filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+          filters.statusProva !== ""
+            ? `Estado Prova: ${filters.statusProva === "1" ? "Aprovado" : "Reprovado"}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        rows: exportRows,
+      }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Candidatos com Prova"
+      subtitle="Lista de candidatos com prova atribuída"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+          { key: "nome", label: "Nome", width: "20%" },
+          { key: "contacto", label: "Contacto", width: "12%" },
+          { key: "sexo", label: "Sexo", width: "8%" },
+          { key: "curso", label: "Curso", width: "16%" },
+          { key: "periodo", label: "Período", width: "10%" },
+          { key: "horario", label: "Horário", width: "12%" },
+          { key: "estadoProva", label: "Estado", width: "10%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Candidatos com Prova",
+        subtitle: "Lista de candidatos com prova atribuída",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+          { title: "Resumo", content: [`Total de registos: ${total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+            { key: "nome", label: "Nome", width: 30 },
+            { key: "contacto", label: "Contacto", width: 20 },
+            { key: "sexo", label: "Sexo", width: 10 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "periodo", label: "Período", width: 18 },
+            { key: "horario", label: "Horário", width: 20 },
+            { key: "anoLectivo", label: "Ano Lectivo", width: 18 },
+            { key: "tipoCandidatura", label: "Tipo Candidatura", width: 25 },
+            { key: "estadoProva", label: "Estado Prova", width: 18 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
+
+  const baseFileName = `Candidatos_Com_Prova_${new Date().toISOString().slice(0, 10)}`;
+
+  // CORREÇÃO 3: Mostrar loading quando está a buscar nova página (isFetching)
+  // para evitar que o utilizador veja dados antigos misturados com novos.
+  const showLoading = isLoading || isFetching;
+
   return (
     <div className="space-y-4">
+
+      <div className="flex justify-end gap-2">
+        {pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
+          />
+        )}
+        {excelProps && (
+          <ExcelActions
+            excelProps={excelProps}
+            fileName={`${baseFileName}.xlsx`}
+            showDownload
+          />
+        )}
+      </div>
+
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
@@ -86,22 +205,25 @@ export function CandidatosComProvaTab() {
               disabled={isLoadingPeriodos}
               loading={isLoadingPeriodos}
               label="Período"
-              value={filters.codigoTurno}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v, page: 1 }))}
-              options={periodos}
+              value={filters.codigoTurno?.toString() ?? "all"}
+              onChange={(v) =>
+                setFilters((p) => ({ ...p, codigoTurno: v === "all" ? "" : v, page: 1 }))
+              }
+              options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
           </div>
           <div className="space-y-2">
             <FormSelect
               label="Estado Prova"
-              value={filters.statusProva?.toString() ?? ""}
+              value={filters.statusProva?.toString() ?? "all"}
               onChange={(v) =>
-                setFilters((p) => ({ ...p, statusProva: v, page: 1 }))
+                setFilters((p) => ({ ...p, statusProva: v === "all" ? "" : v, page: 1 }))
               }
               options={[
-                { key: "0", label: "Reprovado", value: "0" },
-                { key: "1", label: "Aprovado", value: "1" },
+                { key: "all", label: "Todos", value: "all" },
+                { key: "0", label: "Inactivo", value: "0" },
+                { key: "1", label: "Activo", value: "1" },
               ]}
               map={(item) => item}
             />
@@ -123,51 +245,65 @@ export function CandidatosComProvaTab() {
               <TableHead>Horário</TableHead>
               <TableHead>Ano Lectivo</TableHead>
               <TableHead>Tipo Candidatura</TableHead>
-
               <TableHead>Estado da Prova</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading && Array.from({ length: 5 }).map((_, i) => (
-              <TableRow key={`sk-${i}`}>
-                {Array.from({ length: 10 }).map((_, j) => (
-                  <TableCell key={`sk-${i}-${j}`}><Skeleton className="h-4 w-full" /></TableCell>
-                ))}
-              </TableRow>
-            ))}
-            {!isLoading && candidatos.length === 0 && (
+            {/* CORREÇÃO 4: Usar showLoading (isLoading || isFetching) para
+                limpar a tabela enquanto novos dados chegam, evitando duplicação visual */}
+            {showLoading &&
+              Array.from({ length: filters.limit }).map((_, i) => (
+                <TableRow key={`sk-${i}`}>
+                  {Array.from({ length: 10 }).map((_, j) => (
+                    <TableCell key={`sk-${i}-${j}`}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+
+            {!showLoading && candidatos.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                {/* CORREÇÃO 5: colSpan corrigido de 9 para 10 (a tabela tem 10 colunas) */}
+                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                   Nenhum registo encontrado
                 </TableCell>
               </TableRow>
             )}
-            {!isLoading && candidatos.map((item) => (
-              <TableRow key={item.codigo}>
-                <TableCell className="font-mono font-semibold">{item.codigo}</TableCell>
-                <TableCell className="font-medium">{item.nome}</TableCell>
-                <TableCell className="text-sm">{item.contato}</TableCell>
-                <TableCell className="text-sm">{item.sexo}</TableCell>
-                <TableCell className="text-sm">{item.curso}</TableCell>
-                <TableCell><Badge variant="outline">{item.periodo}</Badge></TableCell>
 
-                <TableCell className="font-medium">{item.hora_inicio}- {item.hora_fim}</TableCell>
-                <TableCell className="text-sm">{item.ano_lectivo}</TableCell>
-                <TableCell className="text-sm">{item.tipo_candidatura}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={
-                      Number(item.status_prova) == 1
-                        ? "bg-green-500/10 text-green-600 border-green-500/20"
-                        : "bg-red-500/10 text-red-600 border-red-500/20"
-                    }
-                  >
-                    {Number(item.status_prova) == 1 ? "Aprovado" : "Reprovado"}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
+            {!showLoading &&
+              candidatos.map((item) => (
+                // CORREÇÃO 6: key inclui a página actual para forçar o React a
+                // recriar as linhas ao mudar de página, eliminando duplicações
+                // causadas por reutilização de elementos com o mesmo key.
+                <TableRow key={`${filters.page}-${item.codigo}`}>
+                  <TableCell className="font-mono font-semibold">{item.codigo}</TableCell>
+                  <TableCell className="font-medium">{item.nome}</TableCell>
+                  <TableCell className="text-sm">{item.contato}</TableCell>
+                  <TableCell className="text-sm">{item.sexo}</TableCell>
+                  <TableCell className="text-sm">{item.curso}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{item.periodo}</Badge>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {item.hora_inicio} - {item.hora_fim}
+                  </TableCell>
+                  <TableCell className="text-sm">{item.ano_lectivo}</TableCell>
+                  <TableCell className="text-sm">{item.tipo_candidatura}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={
+                        Number(item.status_prova) === 1
+                          ? "bg-green-500/10 text-green-600 border-green-500/20"
+                          : "bg-red-500/10 text-red-600 border-red-500/20"
+                      }
+                    >
+                      {Number(item.status_prova) === 1 ? "Activo" : "Inactivo"}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
@@ -176,8 +312,13 @@ export function CandidatosComProvaTab() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Mostrar</span>
-          <Select value={filters.limit.toString()} onValueChange={(v) => setFilters((p) => ({ ...p, limit: Number(v), page: 1 }))}>
-            <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
+          <Select
+            value={filters.limit.toString()}
+            onValueChange={(v) => setFilters((p) => ({ ...p, limit: Number(v), page: 1 }))}
+          >
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="25">25</SelectItem>
@@ -185,15 +326,28 @@ export function CandidatosComProvaTab() {
             </SelectContent>
           </Select>
           <span className="text-sm text-muted-foreground ml-2">
-            Mostrando {total === 0 ? 0 : offset + 1} a {Math.min(offset + filters.limit, total)} de {total} registos
+            Mostrando {total === 0 ? 0 : offset + 1} a {Math.min(offset + filters.limit, total)} de{" "}
+            {total} registos
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))} disabled={filters.page === 1}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
+            disabled={filters.page === 1 || showLoading}
+          >
             <ChevronLeft className="h-4 w-4" />Anterior
           </Button>
-          <span className="text-sm">Página {filters.page} de {totalPages}</span>
-          <Button variant="outline" size="sm" onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))} disabled={filters.page === totalPages}>
+          <span className="text-sm">
+            Página {filters.page} de {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
+            disabled={filters.page === totalPages || showLoading}
+          >
             Seguinte<ChevronRight className="h-4 w-4" />
           </Button>
         </div>

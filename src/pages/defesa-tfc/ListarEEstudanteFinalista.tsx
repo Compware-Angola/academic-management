@@ -3,7 +3,9 @@ import { useMemo } from "react";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
-import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import ExcelActions, {
+  GenericExcelProps,
+} from "@/components/views/excel/GenericExcelExport";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCw } from "lucide-react";
+import { Home, Loader2, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -40,12 +42,16 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQueryEstudanteFinalista } from "@/hooks/defesa-tfc/use-query-estudante-finalista-tfc";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { TipoCandidatura } from "@/services/fecth-tipo-candidatura";
 
 export default function ListarEstudanteFinalista() {
   const [page, setPage] = useState(1);
 
   const [limit, setLimit] = useState(10);
-
+  const [search, setSearch] = useState("");
+  const debounceSearch = useDebounce(search, 500);
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     curso: "",
@@ -53,6 +59,7 @@ export default function ListarEstudanteFinalista() {
     faculdade: "",
     periodo: "",
     tipoCandidatura: "",
+    search: "",
   });
   const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
     useQueryTipoCandidatura();
@@ -67,7 +74,53 @@ export default function ListarEstudanteFinalista() {
     tipoCandidatura: parseFilter(filters.tipoCandidatura),
     page,
     limit,
+    search: debounceSearch,
   });
+  const pdfData = useMemo(() => {
+    if (!estudanteFinalistaResponse?.data) return null;
+    return {
+      rows: estudanteFinalistaResponse.data.map((u) => ({
+        matricula: u.matricula,
+        nome: u.nome,
+        bilhete: u.bilhete,
+        curso: u.curso,
+      })),
+    };
+  }, [estudanteFinalistaResponse]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Estudantes Finalistas"
+      mainTable={{
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: "15%" },
+          { key: "nome", label: "Nome", width: "35%" },
+          { key: "bilhete", label: "Bilhete", width: "20%" },
+          { key: "curso", label: "Curso", width: "30%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps: GenericExcelProps | null = pdfData
+    ? {
+        documentTitle: "Estudantes Finalistas",
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Nº Matrícula", width: 15 },
+            { key: "nome", label: "Nome", width: 50 },
+            { key: "bilhete", label: "Bilhete", width: 20 },
+            { key: "curso", label: "Curso", width: 30 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
   const handleRefetch = () => {
     setFilters({
       anoLectivo: "23",
@@ -76,14 +129,19 @@ export default function ListarEstudanteFinalista() {
       faculdade: "",
       periodo: "",
       tipoCandidatura: "",
+      search: "",
     });
     setPage(1);
     refetch();
   };
+
   const tableData = estudanteFinalistaResponse?.data || [];
   const total = estudanteFinalistaResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
+  const baseFileName = `estudantes_finalistas_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -106,10 +164,40 @@ export default function ListarEstudanteFinalista() {
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
+        <p className="text-muted-foreground">
+          Consultar estudantes finalistas.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={handleRefetch}
+          >
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </Button>
+          {pdfData && excelProps && (
+            <>
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+              )}
 
-      <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
-      <p className="text-muted-foreground">Consultar estudantes finalistas.</p>
-
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            </>
+          )}
+        </div>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Filtros</CardTitle>
@@ -128,6 +216,7 @@ export default function ListarEstudanteFinalista() {
               }
             />
             <CourseSelect
+              enableDefaultSelectItem
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
               }}
@@ -138,7 +227,13 @@ export default function ListarEstudanteFinalista() {
               label="Tipo Candidatura"
               value={filters.tipoCandidatura}
               onChange={(v) => setFilters({ ...filters, tipoCandidatura: v })}
-              options={tipoCandidatura}
+              options={[
+                {
+                  codigo: "all",
+                  designacao: "Todos",
+                } as unknown as TipoCandidatura,
+                ...tipoCandidatura,
+              ]}
               loading={isLoadingTipoCandidatura}
               disabled={isLoadingTipoCandidatura}
               map={(u) => ({
@@ -158,10 +253,17 @@ export default function ListarEstudanteFinalista() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="space-y-2">
+        <CardHeader className="flex flex-row items-center justify-between">
           {/* Exportações */}
 
           <CardTitle>Estudantes Finalistas</CardTitle>
+          <Input
+            disabled={tableData.length == 0}
+            placeholder="Pesquisar por nome de estudante"
+            className="w-1/2"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </CardHeader>
 
         <CardContent>
@@ -211,7 +313,7 @@ export default function ListarEstudanteFinalista() {
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                disabled={page === 1}
+                disabled={page === 1 || isFetching || tableData.length === 0}
                 onClick={() => setPage((p) => p - 1)}
               >
                 Anterior
@@ -221,7 +323,9 @@ export default function ListarEstudanteFinalista() {
               </span>
               <Button
                 variant="outline"
-                disabled={page === totalPages}
+                disabled={
+                  page === totalPages || isFetching || tableData.length === 0
+                }
                 onClick={() => setPage((p) => p + 1)}
               >
                 Próxima

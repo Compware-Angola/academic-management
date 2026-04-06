@@ -136,13 +136,17 @@ export function CreateIsencaoDialog({
           console.log(response);
           const sucessos = response?.sucessos ?? [];
           const erros = response?.erros ?? [];
+          setSelectedStudents([]);
           setErroStudents(erros);
           setSuccessFullStudents(sucessos);
         },
       },
     );
   };
-  const disabledIsencaoButton = isPending || selectedStudents.length == 0;
+  const disabledIsencaoButton =
+    isPending ||
+    selectedStudents.length == 0 ||
+    !parseFilter(filters.codigoServico);
   const disabledPesquisaButtom = isPending || isLoadingStudent;
   const temErros = errorStudents.length > 0;
   const students = studentsResponse?.data ?? [];
@@ -185,6 +189,7 @@ export function CreateIsencaoDialog({
             />
           </div>
           <TypeServiceSelectList
+            type="EXCEPTION"
             value={filters.codigoServico}
             onChangeValue={(v) => setFilters({ ...filters, codigoServico: v })}
           />

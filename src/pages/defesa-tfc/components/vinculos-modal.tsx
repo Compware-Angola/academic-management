@@ -2,14 +2,12 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { EstudanteFinalistaCommandSelect } from "@/components/common/global-selects/EstudanteFinalistaCommandSelect";
-import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMutationVincularOrientadorAluno } from "@/hooks/defesa-tfc/use-mutation-vincular-orientador-aluno";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
-import { useQueryVinculos } from "@/hooks/defesa-tfc/use-query-vinculos";
 import { parseFilter } from "@/util/parse-filter";
 import { useState } from "react";
 
@@ -39,14 +37,6 @@ export function VinculosModal({
       cursoId: parseFilter(filters.curso),
       estado: "activo",
     });
-
-  const { refetch: refetchVinculos } = useQueryVinculos({
-    anoLectivoId:
-      filters.anoLectivo === "all"
-        ? undefined
-        : parseFilter(filters.anoLectivo),
-    cursoId: parseFilter(filters.curso),
-  });
 
   const handleClose = () => {
     setOpen(false);
@@ -100,22 +90,11 @@ export function VinculosModal({
             onlyActive
           />
 
-          <FacultySelect
-            allOption
-            value={filters.faculdade}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, faculdade: v, curso: "" })
-            }
-          />
-
           <CourseSelect
-            params={{ faculdadeId: parseFilter(filters.faculdade) }}
             enableDefaultSelectItem
             value={filters.curso}
             onChangeValue={(v) => setFilters({ ...filters, curso: v })}
           />
-
-          <hr className="col-span-full border-muted" />
 
           {/* Seleção de Pessoas */}
           <FormSelect
@@ -144,7 +123,7 @@ export function VinculosModal({
           />
 
           {/* Campo de Tema */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 md:col-span-2">
             <Label htmlFor="tema-tfc">Tema do Trabalho</Label>
             <Input
               id="tema-tfc"

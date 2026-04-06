@@ -4,12 +4,7 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home } from "lucide-react";
+import { ChevronDown, ChevronUp, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { FormSelect } from "@/components/common/FormSelect";
@@ -39,6 +34,8 @@ import { useQueryStateLesson } from "@/hooks/use-fetch-state-lesson";
 import { useQueryControleAssiduidade } from "@/hooks/assiduidade/use-fetch-controle-assiduidade";
 import { Label } from "recharts";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { useCursos } from "@/hooks/use-cursos";
 
 function SummaryCard({
   title,
@@ -64,11 +61,14 @@ function SummaryCard({
 }
 
 export default function ControleAssiduidade() {
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+
   const { data: anosAcademicos, isLoading: loadingAno } =
     useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: teachersData = [] } = useQueryTeacther();
   const { data: lessonState = [] } = useQueryStateLesson();
+  const { data: cursos = [] } = useCursos();
 
   const [filters, setFilters] = useState({
     docente: "",
@@ -77,9 +77,24 @@ export default function ControleAssiduidade() {
     estado: "",
     anoLectivo: "",
     semestre: "",
+    curso: "",
+    gradeCurricular: "",
     page: 1,
     limit: 20,
   });
+
+  const { data: gradesCurriculares = [], isLoading: isLoadingGradeCurricular } =
+    useQueryDisciplinaWithFilter(
+      {
+        curso: filters.curso,
+        semestre: filters.semestre,
+      },
+      {
+        enabled: !!filters.curso && !!filters.semestre,
+      },
+    );
+
+  console.log("UC: ", gradesCurriculares);
 
   const handleFilterChange = (key: string, value: string | number) => {
     setFilters((prev) => ({
@@ -96,17 +111,23 @@ export default function ControleAssiduidade() {
     estado: filters.estado ? Number(filters.estado) : undefined,
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    curso: filters.curso,
+    gradeCurricular: filters.gradeCurricular
+      ? Number(filters.gradeCurricular)
+      : undefined,
     page: filters.page,
     limit: filters.limit,
   };
 
-  const { data: response, isLoading } =
-    useQueryControleAssiduidade(queryFilters, {
+  const { data: response, isLoading } = useQueryControleAssiduidade(
+    queryFilters,
+    {
       enabled:
         !!queryFilters.docente &&
         !!queryFilters.dataInicial &&
         !!queryFilters.dataFinal,
-    });
+    },
+  );
 
   const aulas = response?.data ?? [];
   const resumo = response?.resumo ?? {
@@ -157,12 +178,16 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             { key: "data", label: "Data", width: "12%" },
             { key: "horario", label: "Horário", width: "16%" },
             { key: "curso", label: "Curso", width: "18%" },
-            { key: "unidade_curricular", label: "Unidade Curricular", width: "24%" },
+            {
+              key: "unidade_curricular",
+              label: "Unidade Curricular",
+              width: "24%",
+            },
             { key: "tempo", label: "Tempo", width: "10%" },
             { key: "docente", label: "Docente", width: "20%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
         footerNotice="Documento gerado automaticamente pelo sistema."
       />
@@ -189,7 +214,11 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
               { key: "data", label: "Data", width: 18 },
               { key: "horario", label: "Horário", width: 20 },
               { key: "curso", label: "Curso", width: 22 },
-              { key: "unidade_curricular", label: "Unidade Curricular", width: 35 },
+              {
+                key: "unidade_curricular",
+                label: "Unidade Curricular",
+                width: 35,
+              },
               { key: "tempo", label: "Tempo", width: 12 },
               { key: "docente", label: "Docente", width: 25 },
               { key: "estado", label: "Estado", width: 20 },
@@ -197,41 +226,154 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             rows: exportRows,
           },
           footerNotice: "Documento gerado automaticamente pelo sistema.",
-          primaryColor: "#1e40af",
+          primaryColor: "#0D1B48",
         }
       : null;
 
   return (
     <div className="p-6 space-y-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/">
-                <Home className="h-4 w-4" />
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink>Académico</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">
+                    <Home className="h-4 w-4" />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink>Académico</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Controle de Assiduidade</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+
+        {exportRows.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`Controle_Assiduidade_${new Date()
+                  .toISOString()
+                  .slice(0, 10)}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
+
+            {excelProps && (
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`Controle_Assiduidade_${new Date()
+                  .toISOString()
+                  .slice(0, 10)}.xlsx`}
+                showDownload
+              />
+            )}
+          </div>
+        )}
+      </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Filtros</CardTitle>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMoreFilters(!showMoreFilters)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {showMoreFilters ? (
+                <>
+                  Menos filtros <ChevronUp className="ml-1 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Mais filtros <ChevronDown className="ml-1 h-4 w-4" />
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() =>
+                setFilters({
+                  docente: "",
+                  dataInicial: "",
+                  dataFinal: "",
+                  estado: "",
+                  anoLectivo: "",
+                  semestre: "",
+                  curso: "",
+                  gradeCurricular: "",
+                  page: 1,
+                  limit: 20,
+                })
+              }
+            >
+              Limpar filtros
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 items-end">
+            <FormSelect
+              label="Ano Letivo"
+              value={filters.anoLectivo}
+              onChange={(v) => handleFilterChange("anoLectivo", v)}
+              options={anosAcademicos ?? []}
+              map={(a) => ({
+                key: String(a.codigo),
+                label: a.designacao,
+                value: String(a.codigo),
+              })}
+              disabled={loadingAno}
+            />
+
+            <FormSelect
+              label="Estado da Aula"
+              value={filters.estado}
+              onChange={(v) => handleFilterChange("estado", v)}
+              options={lessonState ?? []}
+              map={(e) => ({
+                key: String(e.PK_ESTADO_AGENDAMENTO),
+                label: e.DESIGNACAO,
+                value: String(e.PK_ESTADO_AGENDAMENTO),
+              })}
+            />
+
+            <FormSelect
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  semestre: v,
+                  gradeCurricular: "",
+                  page: 1,
+                }))
+              }
+              options={semestres ?? []}
+              map={(s) => ({
+                key: String(s.codigo),
+                label: s.designacao,
+                value: String(s.codigo),
+              })}
+            />
+
             <div className="space-y-1.5">
-              <Label>Docente</Label>
               <FormCommandSelect
+                label="Docente"
                 value={filters.docente}
                 options={teachersData ?? []}
                 map={(t) => ({
@@ -266,105 +408,93 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
               />
             </div>
 
-            <FormSelect
-              label="Estado da Aula"
-              value={filters.estado}
-              onChange={(v) => handleFilterChange("estado", v)}
-              options={lessonState ?? []}
-              map={(e) => ({
-                key: String(e.PK_ESTADO_AGENDAMENTO),
-                label: e.DESIGNACAO,
-                value: String(e.PK_ESTADO_AGENDAMENTO),
-              })}
-            />
+            {showMoreFilters && (
+              <>
+                <div className="space-y-1.5">
+                  <FormCommandSelect
+                    label="Curso"
+                    value={filters.curso}
+                    options={cursos}
+                    map={(c) => ({
+                      key: String(c.codigo),
+                      value: String(c.codigo),
+                      label: c.designacao,
+                    })}
+                    placeholder="Selecionar curso..."
+                    onChange={(v) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        curso: v,
+                        gradeCurricular: "",
+                        page: 1,
+                      }))
+                    }
+                  />
+                </div>
 
-            <FormSelect
-              label="Ano Letivo"
-              value={filters.anoLectivo}
-              onChange={(v) => handleFilterChange("anoLectivo", v)}
-              options={anosAcademicos ?? []}
-              map={(a) => ({
-                key: String(a.codigo),
-                label: a.designacao,
-                value: String(a.codigo),
-              })}
-              disabled={loadingAno}
-            />
-
-            <FormSelect
-              label="Semestre"
-              value={filters.semestre}
-              onChange={(v) => handleFilterChange("semestre", v)}
-              options={semestres ?? []}
-              map={(s) => ({
-                key: String(s.codigo),
-                label: s.designacao,
-                value: String(s.codigo),
-              })}
-            />
+                <div className="space-y-1.5">
+                  <FormCommandSelect
+                    label="Grade Curricular"
+                    value={filters.gradeCurricular}
+                    options={gradesCurriculares}
+                    map={(g) => ({
+                      key: String(g.pk),
+                      value: String(g.pk),
+                      label: g.descricao,
+                    })}
+                    placeholder={
+                      !filters.curso
+                        ? "Selecione o curso"
+                        : !filters.semestre
+                          ? "Selecione o semestre"
+                          : isLoadingGradeCurricular
+                            ? "Carregando..."
+                            : "Selecionar grade curricular"
+                    }
+                    onChange={(v) => handleFilterChange("gradeCurricular", v)}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
 
       {!!response && (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <SummaryCard
-      title="Marcações Pendentes"
-      value={response.resumo?.marcacoesPendentes ?? 0}
-      className="border-amber-500/30 bg-amber-500/5"
-      valueClassName="text-amber-700"
-    />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <SummaryCard
+            title="Marcações Pendentes"
+            value={response.resumo?.marcacoesPendentes ?? 0}
+            className="border-amber-500/30 bg-amber-500/5"
+            valueClassName="text-amber-700"
+          />
 
-    <SummaryCard
-      title="Presenças Marcadas"
-      value={response.resumo?.presencasMarcadas ?? 0}
-      className="border-emerald-500/30 bg-emerald-500/5"
-      valueClassName="text-emerald-700"
-    />
+          <SummaryCard
+            title="Presenças Marcadas"
+            value={response.resumo?.presencasMarcadas ?? 0}
+            className="border-emerald-500/30 bg-emerald-500/5"
+            valueClassName="text-emerald-700"
+          />
 
-    <SummaryCard
-      title="Faltas Marcadas"
-      value={response.resumo?.faltasMarcadas ?? 0}
-      className="border-red-500/30 bg-red-500/5"
-      valueClassName="text-red-700"
-    />
-  </div>
-)}
+          <SummaryCard
+            title="Faltas Marcadas"
+            value={response.resumo?.faltasMarcadas ?? 0}
+            className="border-red-500/30 bg-red-500/5"
+            valueClassName="text-red-700"
+          />
+        </div>
+      )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Resultados</CardTitle>
-
-          {exportRows.length > 0 && (
-            <div className="flex gap-2">
-              {pdfContent && (
-                <PDFActions
-                  document={pdfContent}
-                  fileName={`Controle_Assiduidade_${new Date()
-                    .toISOString()
-                    .slice(0, 10)}.pdf`}
-                  showDownload
-                  showPrint
-                />
-              )}
-
-              {excelProps && (
-                <ExcelActions
-                  excelProps={excelProps}
-                  fileName={`Controle_Assiduidade_${new Date()
-                    .toISOString()
-                    .slice(0, 10)}.xlsx`}
-                  showDownload
-                />
-              )}
-            </div>
-          )}
         </CardHeader>
 
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Codigo</TableHead>
                 <TableHead>Data da Aula</TableHead>
                 <TableHead>Horário</TableHead>
                 <TableHead>Curso</TableHead>
@@ -392,6 +522,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
               ) : (
                 aulas.map((item: any) => (
                   <TableRow key={item.codigo}>
+                    <TableCell>{item.codigo}</TableCell>
                     <TableCell>
                       {new Date(item.data_aula).toLocaleDateString()}
                     </TableCell>
@@ -419,9 +550,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                   variant="outline"
                   size="sm"
                   disabled={filters.page === 1}
-                  onClick={() =>
-                    handleFilterChange("page", filters.page - 1)
-                  }
+                  onClick={() => handleFilterChange("page", filters.page - 1)}
                 >
                   Anterior
                 </Button>
@@ -430,9 +559,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                   variant="outline"
                   size="sm"
                   disabled={filters.page >= totalPages}
-                  onClick={() =>
-                    handleFilterChange("page", filters.page + 1)
-                  }
+                  onClick={() => handleFilterChange("page", filters.page + 1)}
                 >
                   Próxima
                 </Button>

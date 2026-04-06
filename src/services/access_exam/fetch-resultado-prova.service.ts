@@ -7,6 +7,7 @@ export type ResultadoProvaParams = {
   codigoTurno?: number;
   codigoFaculdade?: number;
   codigoSala?: number;
+  search?:string;
   resultado?: number;
   dataInicio?: string;
   dataFim?: string;
@@ -31,6 +32,10 @@ export type ResultadoProva = {
   faculdade: string;
   nota: number;
   resultado: number;
+ 
+  hora_inicio: string;
+  hora_fim: string;
+  status_prova: number;
 };
 
 export type ResultadoProvaResponse = {

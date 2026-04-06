@@ -3,6 +3,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type EstudanteFinalistaPayload = {
   anoLectivoId?: number;
   cursoId?: number;
+  search?: string;
   estado?: string;
   page?: number;
   limit?: number;
@@ -36,6 +37,7 @@ export async function getOrientadoresService(
     estado,
     page = 1,
     limit = 25,
+    search
   } = payload;
 
   const { data } = await axiosNestGa.get<OrientadoresResponse>(
@@ -47,6 +49,7 @@ export async function getOrientadoresService(
         estado,
         page,
         limit,
+        search
       },
     },
   );
