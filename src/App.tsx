@@ -135,6 +135,7 @@ import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
+import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 
 const App = () => {
   return (
@@ -821,7 +822,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                    <Route
+                  <Route
                     path="/horarios/docentes-substitutos"
                     element={
                       <ProtectedRoute
@@ -1298,6 +1299,19 @@ const App = () => {
                         ]}
                       >
                         <ListagemDocentes />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/mensalidades-pagas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA
+                            .sigla!,
+                        ]}
+                      >
+                        <PagamentoMensal />
                       </ProtectedRoute>
                     }
                   />
