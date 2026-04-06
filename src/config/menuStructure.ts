@@ -142,9 +142,9 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
-        { title: "Calendário de aulas", url: "/docente/calendario" },
+        { title: "Calendário de aulas", url: "/docente/calendario", permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla] },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
-        // { title: "Calendário de aulas", url: "/docente/calendario" },
+
         {
           title: "Horas de vigilância",
           url: "/docente/vigilancia",
@@ -188,7 +188,7 @@ export const menuStructure: MenuStructure = {
       url: "/inscricoes",
       icon: FileCheck,
       items: [
-        { title: "Atribuição de turma", url: "/inscricoes/turma" },
+
         {
           title: "Estatística de estudantes aprovados e reprovados",
           url: "/inscricoes/estatisticas",
@@ -196,20 +196,25 @@ export const menuStructure: MenuStructure = {
             PermissionTypeDetails.ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
           ],
         },
-        { title: "Inserir colisão", url: "/inscricoes/colisao" },
-        { title: "Diplomandos", url: "/inscricoes/diplomandos" },
-        { title: "Lista personalizada", url: "/inscricoes/personalizada" },
-        { title: "Lista geral", url: "/inscricoes/lista-geral" },
-        { title: "Estado por horário", url: "/inscricoes/estado-horario" },
-        { title: "Matriculados", url: "/inscricoes/matriculados" },
-        { title: "Estado da matrícula", url: "/inscricoes/estado-matricula" },
-        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc" },
-        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso" },
-        { title: "Inscritos em UC", url: "/inscricoes/inscritos-uc" },
-        {
-          title: "Mensalidades por curso",
-          url: "/inscricoes/mensalidades-curso",
-        },
+
+        { title: "Matriculados", url: "/inscricoes/matriculados", permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla] },
+
+        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla] },
+        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla] },
+        /*
+            { title: "Atribuição de turma", url: "/inscricoes/turma" },
+      { title: "Inscritos em UC", url: "/inscricoes/inscritos-uc" },
+       { title: "Estado da matrícula", url: "/inscricoes/estado-matricula" },
+          { title: "Inserir colisão", url: "/inscricoes/colisao" },
+      { title: "Diplomandos", url: "/inscricoes/diplomandos" },
+      { title: "Lista personalizada", url: "/inscricoes/personalizada" },
+      { title: "Lista geral", url: "/inscricoes/lista-geral" },
+      { title: "Estado por horário", url: "/inscricoes/estado-horario" },
+      {
+        title: "Mensalidades por curso",
+        url: "/inscricoes/mensalidades-curso",
+      },
+      */
       ],
 
       permission: ["adm", "rootAdmin"],
@@ -377,6 +382,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Estud. Mensalidades Pagas",
           url: "/financas/mensalidades-pagas",
+          permission: [PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA.sigla],
         },
         {
           title: "Notas de Pagamentos",

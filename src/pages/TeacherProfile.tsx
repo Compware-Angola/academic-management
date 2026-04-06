@@ -853,16 +853,16 @@ const TeacherProfile = () => {
 
               </TabsContent>
             </Tabs>
-            {isEditing && activeTab !== "classes" && (
-              <div className="mt-8 flex gap-3">
-                <Button onClick={handleSave} className="flex-1">
-                  Guardar Alterações
-                </Button>
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancelar
-                </Button>
-              </div>
-            )}
+        {isEditing && activeTab !== "classes" && activeTab  && !(activeTab === "professional" && !isDocente) && (
+  <div className="mt-8 flex gap-3">
+    <Button onClick={handleSave} className="flex-1">
+      Guardar Alterações
+    </Button>
+    <Button variant="outline" onClick={() => setIsEditing(false)}>
+      Cancelar
+    </Button>
+  </div>
+)}
           </CardContent>
         </Card>
       </div>
