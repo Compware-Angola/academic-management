@@ -63,3 +63,48 @@ export async function fetchNoteReleases(params: {
     return [];
   }
 }
+
+
+// ==================== NOVO - SUMMARY ====================
+
+export interface NoteSummary {
+  total_estudantes: number;
+  total_com_nota: number;
+  total_sem_nota: number;
+}
+
+export interface NoteSummaryApiResponse {
+  success: boolean;
+  data: NoteSummary;
+}
+
+// Função para buscar o resumo (total de alunos, com nota e sem nota)
+export async function fetchNoteSummary(params: {
+  anoLectivoId: number;
+  horarioId: number;
+  tipoProvaId: number;
+  tipoAvaliacao: number;
+  classe: number;
+  turno: number;
+  search?: string;
+}): Promise<NoteSummary> {
+  try {
+    const response = await axiosNestGa.get<NoteSummaryApiResponse>(
+      "/assessment/summary",
+      { params }
+    );
+
+    return response.data.data ?? {
+      total_estudantes: 0,
+      total_com_nota: 0,
+      total_sem_nota: 0,
+    };
+  } catch (error) {
+    console.error("Erro ao buscar summary das notas:", error);
+    return {
+      total_estudantes: 0,
+      total_com_nota: 0,
+      total_sem_nota: 0,
+    };
+  }
+}

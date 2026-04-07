@@ -1,4 +1,4 @@
-import { fetchNoteReleases, NoteRelease } from "@/services/featch-note-release";
+import { fetchNoteReleases, fetchNoteSummary, NoteRelease, NoteSummary } from "@/services/featch-note-release";
 import { useQuery } from "@tanstack/react-query";
 
 interface UseQueryNoteReleasesParams {
@@ -46,6 +46,25 @@ export function useQueryNoteReleases(params: UseQueryNoteReleasesParams) {
       return fetchNoteReleases(params);
     },
     staleTime: 1000 * 60 * 5,
+    retry: 1,
+    enabled: isEnabled,
+  });
+}
+
+
+// ==================== NOVO - HOOK PARA SUMMARY ====================
+export function useQueryNoteSummary(params: UseQueryNoteReleasesParams) {
+  const isEnabled = isValidParams(params);
+
+  return useQuery<NoteSummary>({
+    queryKey: ["note-summary", params],
+    queryFn: async () => {
+      if (!isValidParams(params)) {
+        throw new Error("Parâmetros inválidos para buscar summary das notas.");
+      }
+      return fetchNoteSummary(params);
+    },
+    staleTime: 1000 * 60 * 5,     // 5 minutos
     retry: 1,
     enabled: isEnabled,
   });
