@@ -29,7 +29,7 @@ export function useQueryDisciplinaWithFilter(
       params.semestre,
     ],
     queryFn: async () => {
-      if (!params.curso || !params.semestre) {
+      if (!params.curso) {
         return [];
       }
       return fetchDisciplinaWithFilter({

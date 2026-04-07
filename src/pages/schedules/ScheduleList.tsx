@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -34,6 +34,7 @@ import {
   Trash2,
   Check,
   Pencil,
+  UserCheck,
 } from "lucide-react";
 
 import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
@@ -69,6 +70,10 @@ import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { usePermission } from "@/auth/permission.helper";
+import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import { ExcelActions } from "@/components/views/excel/GenericExcelExport";
+import { useMutationCriarDocenteSubstituto } from "@/hooks/horario/use-mutation-criar-docente-substituto";
+import DocenteSubstitutoModal from "./components/DocenteSubstitutoModal";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -81,6 +86,15 @@ export default function ScheduleList() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isValidateDialogOpen, setIsValidateDialogOpen] = useState(false);
   const [itemIdToConfirm, setItemIdToConfirm] = useState<number | null>(null);
+
+  const [isSubstitutoModalOpen, setIsSubstitutoModalOpen] = useState(false);
+  const [selectedHorarioForSubstituto, setSelectedHorarioForSubstituto] = useState<number | null>(null);
+
+  const criarSubstitutoMutation = useMutationCriarDocenteSubstituto();
+  const openSubstitutoModal = (horarioId?: number) => {
+    setSelectedHorarioForSubstituto(horarioId || null);
+    setIsSubstitutoModalOpen(true);
+  };
 
   // Filtros
   const [filters, setFilters] = useState({
@@ -135,14 +149,14 @@ export default function ScheduleList() {
     ...(filters.afetacaoDocente != null &&
       filters.afetacaoDocente !== "" &&
       !isNaN(Number(filters.afetacaoDocente)) && {
-        afetacaoDocente: Number(filters.afetacaoDocente),
-      }),
+      afetacaoDocente: Number(filters.afetacaoDocente),
+    }),
 
     ...(filters.estado != null &&
       filters.estado !== "" &&
       !isNaN(Number(filters.estado)) && {
-        estado: Number(filters.estado),
-      }),
+      estado: Number(filters.estado),
+    }),
   };
 
   const {
@@ -192,7 +206,102 @@ export default function ScheduleList() {
     setSelectedTurmaId(turmaId);
     setIsModalOpen(true);
   };
+  // ====================== EXPORTAÇÃO PDF + EXCEL ======================
 
+  const exportRows = useMemo(() =>
+    tableData.map((item) => ({
+      designacao: item.designacao ?? "—",
+      curso: item.curso ?? "—",
+      unidadeCurricular: item.unidadecurricular ?? "—",
+      anoCurricular: item.ano ?? "—",
+      capacidade: item.capacidade ?? "—",
+      estado: item.estado ?? "—",
+      disponibilidade: item.disponibilidade ?? "—",
+      criadoEm: item.datacriacao ?? "—",
+      criadoPor: item.criadopor ?? "—",
+      atualizadoPor: item.atualizadopor ?? "—",
+    })),
+    [tableData]
+  );
+
+  // Filtros aplicados para mostrar no documento
+  const filtrosAplicados = [
+    filters.anoLetivo ? `Ano Letivo: ${filters.anoLetivo}` : null,
+    filters.semestre ? `Semestre: ${filters.semestre}` : null,
+    filters.periodo ? `Período: ${filters.periodo}` : null,
+    filters.curso ? `Curso: ${filters.curso}` : null,
+    filters.anoCurricular && filters.anoCurricular !== "all"
+      ? `Ano Curricular: ${filters.anoCurricular}`
+      : null,
+    filters.unidadeCurricular ? `Unidade Curricular: ${filters.unidadeCurricular}` : null,
+    filters.estado ? `Estado: ${filters.estado}` : null,
+    filters.afetacaoDocente ? `Docente: ${filters.afetacaoDocente}` : null,
+  ]
+    .filter(Boolean)
+    .join(" | ");
+
+  const pdfData = exportRows.length
+    ? {
+      filtros: filtrosAplicados || "Sem filtros aplicados",
+      rows: exportRows,
+    }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Horários Existentes"
+      subtitle="Lista de horários por curso, semestre e ano letivo"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "designacao", label: "Designação", width: "20%" },
+          { key: "curso", label: "Curso", width: "15%" },
+          { key: "unidadeCurricular", label: "Unidade Curricular", width: "20%" },
+          { key: "anoCurricular", label: "Ano Curricular", width: "10%" },
+          { key: "capacidade", label: "Capacidade", width: "8%" },
+          { key: "estado", label: "Estado", width: "10%" },
+          { key: "disponibilidade", label: "Disponibilidade", width: "10%" },
+          { key: "criadoEm", label: "Criado Em", width: "12%" },
+          { key: "criadoPor", label: "Criado Por", width: "12%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+      documentTitle: "Horários Existentes",
+      subtitle: "Lista de horários por curso, semestre e ano letivo",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "designacao", label: "Designação", width: 30 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "unidadeCurricular", label: "Unidade Curricular", width: 35 },
+          { key: "anoCurricular", label: "Ano Curricular", width: 15 },
+          { key: "capacidade", label: "Capacidade", width: 12 },
+          { key: "estado", label: "Estado", width: 15 },
+          { key: "disponibilidade", label: "Disponibilidade", width: 15 },
+          { key: "criadoEm", label: "Criado Em", width: 18 },
+          { key: "criadoPor", label: "Criado Por", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+    : null;
+
+  const baseFileName = `Horarios_Existentes_${new Date().toISOString().slice(0, 10)}`;
   return (
     <div className="p-12 space-y-12">
       {/* Breadcrumb e título */}
@@ -221,10 +330,28 @@ export default function ScheduleList() {
             período, curso e ano curricular.
           </p>
         </div>
-        <Button onClick={() => navigate("/horarios/criar")}>
-          <Plus className="mr-2 h-4 w-4" />
-          Criar Horário
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {/* Botão Criar Horário */}
+
+
+          {/* === BOTÕES DE EXPORTAÇÃO === */}
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+
+          {excelProps && (
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          )}
+        </div>
       </div>
 
       {/* Filtros */}
@@ -481,7 +608,7 @@ export default function ScheduleList() {
                           <Badge
                             variant={
                               item.estado.toLowerCase().includes("pendente") ||
-                              item.estado.toLowerCase().includes("distribuição")
+                                item.estado.toLowerCase().includes("distribuição")
                                 ? "secondary"
                                 : "default"
                             }
@@ -510,8 +637,9 @@ export default function ScheduleList() {
                         <TableCell className="text-sm text-muted-foreground">
                           {item.atualizadopor}
                         </TableCell>
-                        <TableCell className="w-40 min-w-40">
-                          <div className="flex items-center space-x-2 justify-center">
+                        <TableCell className="w-48 min-w-48">
+                          <div className="flex items-center justify-center gap-1 flex-wrap">
+                            {/* Ver Detalhes */}
                             <Button
                               variant="outline"
                               size="icon"
@@ -520,46 +648,56 @@ export default function ScheduleList() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
+
+                            {/* Editar Horário */}
                             <Button
                               variant="outline"
                               size="icon"
                               title="Editar horário"
-                              onClick={() =>
-                                navigate(`/schedule/${item.codigo}/edit`)
-                              }
+                              onClick={() => navigate(`/schedule/${item.codigo}/edit`)}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
+
+                            {/* Nova Substituição - NOVO BOTÃO */}
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => openSubstitutoModal(item.codigo)}
+                              title="Nova Substituição de Docente"
+                              className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200"
+                            >
+                              <UserCheck className="h-4 w-4" />
+                            </Button>
+
+                            {/* Eliminar */}
                             <Button
                               variant="destructive"
                               size="icon"
                               onClick={() => openDeleteDialog(item.codigo)}
                               disabled={
-                                deleteMutation.isPending &&
-                                itemIdToConfirm === item.codigo
+                                deleteMutation.isPending && itemIdToConfirm === item.codigo
                               }
                             >
-                              {deleteMutation.isPending &&
-                              itemIdToConfirm === item.codigo ? (
+                              {deleteMutation.isPending && itemIdToConfirm === item.codigo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
                               )}
                             </Button>
-                            {Number(item.estadoid) === 2 &&  hasPermission(PermissionTypeDetails.VALIDACAO_HORARIO.sigla) && (
-                              
+
+                            {/* Validar (condicional) */}
+                            {Number(item.estadoid) === 2 && hasPermission(PermissionTypeDetails.VALIDACAO_HORARIO.sigla) && (
                               <Button
                                 variant="default"
                                 size="icon"
                                 onClick={() => openValidateDialog(item.codigo)}
                                 disabled={
-                                  validarMutation.isPending &&
-                                  itemIdToConfirm === item.codigo
+                                  validarMutation.isPending && itemIdToConfirm === item.codigo
                                 }
                                 className="bg-green-500 hover:bg-green-600"
                               >
-                                {validarMutation.isPending &&
-                                itemIdToConfirm === item.codigo ? (
+                                {validarMutation.isPending && itemIdToConfirm === item.codigo ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                   <Check className="h-4 w-4" />
@@ -632,6 +770,16 @@ export default function ScheduleList() {
           setIsModalOpen(false);
           setSelectedTurmaId(null);
         }}
+
+      />
+      <DocenteSubstitutoModal
+        isOpen={isSubstitutoModalOpen}
+        onClose={() => {
+          setIsSubstitutoModalOpen(false);
+          setSelectedHorarioForSubstituto(null);
+        }}
+        horarioId={selectedHorarioForSubstituto}
+        mutation={criarSubstitutoMutation}
       />
 
       <AlertDialog

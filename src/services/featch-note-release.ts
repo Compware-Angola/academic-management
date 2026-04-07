@@ -41,7 +41,8 @@ export async function fetchNoteReleases(params: {
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;
-  turno:number
+  turno:number,
+  search?: string;
 }): Promise<NoteRelease[]> {
   try {
     const response = await axiosNestGa.get<NoteReleaseApiResponse>(
@@ -49,7 +50,7 @@ export async function fetchNoteReleases(params: {
       { params }
     );
 
-    const items = response.data.data ?? []; // <-- CORREÇÃO: pega o array dentro de `data`
+    const items = response.data.data ?? []; 
 
     // Converter campos JSON de string para objeto
     return items.map((item) => ({

@@ -32,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCw, Download } from "lucide-react";
+import { Home, Loader2, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -42,12 +42,16 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQueryEstudanteFinalista } from "@/hooks/defesa-tfc/use-query-estudante-finalista-tfc";
+import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { TipoCandidatura } from "@/services/fecth-tipo-candidatura";
 
 export default function ListarEstudanteFinalista() {
   const [page, setPage] = useState(1);
 
   const [limit, setLimit] = useState(10);
-
+  const [search, setSearch] = useState("");
+  const debounceSearch = useDebounce(search, 500);
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     curso: "",
@@ -55,6 +59,7 @@ export default function ListarEstudanteFinalista() {
     faculdade: "",
     periodo: "",
     tipoCandidatura: "",
+    search: "",
   });
   const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
     useQueryTipoCandidatura();
@@ -69,6 +74,7 @@ export default function ListarEstudanteFinalista() {
     tipoCandidatura: parseFilter(filters.tipoCandidatura),
     page,
     limit,
+    search: debounceSearch,
   });
   const pdfData = useMemo(() => {
     if (!estudanteFinalistaResponse?.data) return null;
@@ -123,6 +129,7 @@ export default function ListarEstudanteFinalista() {
       faculdade: "",
       periodo: "",
       tipoCandidatura: "",
+      search: "",
     });
     setPage(1);
     refetch();
@@ -209,6 +216,7 @@ export default function ListarEstudanteFinalista() {
               }
             />
             <CourseSelect
+              enableDefaultSelectItem
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
               }}
@@ -219,7 +227,13 @@ export default function ListarEstudanteFinalista() {
               label="Tipo Candidatura"
               value={filters.tipoCandidatura}
               onChange={(v) => setFilters({ ...filters, tipoCandidatura: v })}
-              options={tipoCandidatura}
+              options={[
+                {
+                  codigo: "all",
+                  designacao: "Todos",
+                } as unknown as TipoCandidatura,
+                ...tipoCandidatura,
+              ]}
               loading={isLoadingTipoCandidatura}
               disabled={isLoadingTipoCandidatura}
               map={(u) => ({
@@ -239,10 +253,17 @@ export default function ListarEstudanteFinalista() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader className="space-y-2">
+        <CardHeader className="flex flex-row items-center justify-between">
           {/* Exportações */}
 
           <CardTitle>Estudantes Finalistas</CardTitle>
+          <Input
+            disabled={tableData.length == 0}
+            placeholder="Pesquisar por nome de estudante"
+            className="w-1/2"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </CardHeader>
 
         <CardContent>

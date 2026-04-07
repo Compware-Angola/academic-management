@@ -116,10 +116,6 @@ export const menuStructure: MenuStructure = {
     */
 
     // ----------------------------------------------------
-    // CALENDÁRIO LIC
-    // ----------------------------------------------------
-
-    // ----------------------------------------------------
     // CALENDÁRIO PÓS
     /* ----------------------------------------------------
     {
@@ -146,9 +142,9 @@ export const menuStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
-        { title: "Calendário de aulas", url: "/docente/calendario" },
+        { title: "Calendário de aulas", url: "/docente/calendario", permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla] },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
-        // { title: "Calendário de aulas", url: "/docente/calendario" },
+
         {
           title: "Horas de vigilância",
           url: "/docente/vigilancia",
@@ -184,8 +180,6 @@ export const menuStructure: MenuStructure = {
     // GESTÃO DE DOCENTES
     // ----------------------------------------------------
 
-    /* ----------------------------------------------------
-
     // ----------------------------------------------------
     // INSCRIÇÕES E MATRÍCULA
     // ----------------------------------------------------
@@ -194,28 +188,38 @@ export const menuStructure: MenuStructure = {
       url: "/inscricoes",
       icon: FileCheck,
       items: [
-        { title: "Atribuição de turma", url: "/inscricoes/turma" },
-        { title: "Estatísticas", url: "/inscricoes/estatisticas" },
-        { title: "Inserir colisão", url: "/inscricoes/colisao" },
-        { title: "Diplomandos", url: "/inscricoes/diplomandos" },
-        { title: "Lista personalizada", url: "/inscricoes/personalizada" },
-        { title: "Mensalidades (mensal)", url: "/inscricoes/mensalidades" },
-        { title: "Lista geral", url: "/inscricoes/lista-geral" },
-        { title: "Estado por horário", url: "/inscricoes/estado-horario" },
-        { title: "Matriculados", url: "/inscricoes/matriculados" },
-        { title: "Estado da matrícula", url: "/inscricoes/estado-matricula" },
-        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc" },
-        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso" },
-        { title: "Inscritos em UC", url: "/inscricoes/inscritos-uc" },
+
         {
-          title: "Mensalidades por curso",
-          url: "/inscricoes/mensalidades-curso",
+          title: "Estatística de estudantes aprovados e reprovados",
+          url: "/inscricoes/estatisticas",
+          permission: [
+            PermissionTypeDetails.ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
+          ],
         },
+
+        { title: "Matriculados", url: "/inscricoes/matriculados", permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla] },
+
+        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla] },
+        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla] },
+        /*
+            { title: "Atribuição de turma", url: "/inscricoes/turma" },
+      { title: "Inscritos em UC", url: "/inscricoes/inscritos-uc" },
+       { title: "Estado da matrícula", url: "/inscricoes/estado-matricula" },
+          { title: "Inserir colisão", url: "/inscricoes/colisao" },
+      { title: "Diplomandos", url: "/inscricoes/diplomandos" },
+      { title: "Lista personalizada", url: "/inscricoes/personalizada" },
+      { title: "Lista geral", url: "/inscricoes/lista-geral" },
+      { title: "Estado por horário", url: "/inscricoes/estado-horario" },
+      {
+        title: "Mensalidades por curso",
+        url: "/inscricoes/mensalidades-curso",
+      },
+      */
       ],
 
       permission: ["adm", "rootAdmin"],
     },
-  */
+
     // ----------------------------------------------------
     // PLANO DE ESTUDO
     // ----------------------------------------------------
@@ -375,10 +379,11 @@ export const finaceStructure: MenuStructure = {
       icon: BadgeDollarSign,
       items: [
         /* Área Financeira */
-        // {
-        //   title: "Estud. Mensalidades Pagas",
-        //   url: "/financas/mensalidades-pagas",
-        // },
+        {
+          title: "Estud. Mensalidades Pagas",
+          url: "/financas/mensalidades-pagas",
+          permission: [PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA.sigla],
+        },
         {
           title: "Notas de Pagamentos",
           url: "/financas/notas-pagamento",
@@ -646,11 +651,10 @@ export const gestaoDocente: MenuStructure = {
             PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS.sigla,
           ],
         },
-        { title: "Lista de Docentes", 
+        {
+          title: "Lista de Docentes",
           url: "/gestao-docentes/docentes",
-          permission: [
-            PermissionTypeDetails.LISTA_DE_DOCENTES.sigla,
-          ], 
+          permission: [PermissionTypeDetails.LISTA_DE_DOCENTES.sigla],
         },
         // { title: "Sem afetação", url: "/gestao-docentes/sem-afetacao" },
         // { title: "Afetações", url: "/gestao-docentes/afetacoes" },
@@ -663,8 +667,16 @@ export const gestaoDocente: MenuStructure = {
         // { title: "Afetados", url: "/gestao-docentes/afetados" },
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
         // { title: "Candidaturas", url: "/gestao-docentes/candidaturas" },
-        { title: "Parâmetros", url: "/gestao-docentes/parametros", permission:[PermissionTypeDetails.PARAMETROS_MGD.sigla] },
-        { title: "Salário", url: "/gestao-docentes/salario" ,permission:[PermissionTypeDetails.DESEMPENHO_DOCENTE.sigla] },
+        {
+          title: "Parâmetros",
+          url: "/gestao-docentes/parametros",
+          permission: [PermissionTypeDetails.PARAMETROS_MGD.sigla],
+        },
+        {
+          title: "Salário",
+          url: "/gestao-docentes/salario",
+          permission: [PermissionTypeDetails.DESEMPENHO_DOCENTE.sigla],
+        },
         //{ title: "Validação docente", url: "/gestao-docentes/validacao" },
 
         {
@@ -754,7 +766,11 @@ export const assiduidade: MenuStructure = {
             PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
           ],
         },
-        { title: "Listar Sumários", url: "/sumario/listar",  permission:[PermissionTypeDetails.LISTAR_SUMARIO.sigla]},
+        {
+          title: "Listar Sumários",
+          url: "/sumario/listar",
+          permission: [PermissionTypeDetails.LISTAR_SUMARIO.sigla],
+        },
         {
           title: "Parâmetros",
           url: "/sumario/parametros",
@@ -920,7 +936,11 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla!,
           ],
         },
-        //  { title: "Substitutos", url: "/horarios/substitutos" },
+        {
+          title: "Docentes Substitutos",
+          url: "/horarios/docentes-substitutos",
+          permission: [PermissionTypeDetails.LISTAR_DOCENTES_SUBSTITUTO.sigla!],
+        },
         // { title: "Horários com/sem sala", url: "/horarios/salas" },
         {
           title: "Movimentar estudantes",
@@ -989,31 +1009,91 @@ export const academicStructure: MenuStructure = {
       url: "/exame",
       icon: FileCheck,
       items: [
-       // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-       // { title: "Admitir candidatura", url: "/exame/admitir" },
-        { title: "Alterar senha", url: "/exame/alterar-senha" ,permission:[PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla]},
-     
-       // { title: "Atribuir prova", url: "/exame/atribuir-prova" },
-       // { title: "Consultar prova", url: "/exame/consultar-prova" },
+        // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
+        {
+          title: "Admitir candidatura",
+          url: "/exame/admitir",
+          permission: [PermissionTypeDetails.ADMITIR_CANDIDATO.sigla],
+        },
+        {
+          title: "Alterar senha",
+          url: "/exame/alterar-senha",
+          permission: [PermissionTypeDetails.ALTERAR_SENHA_CANDIDATO.sigla],
+        },
+
+        {
+          title: "Atribuir prova",
+          url: "/exame/atribuir-prova",
+          permission: [PermissionTypeDetails.ATRIBUIR_PROVA.sigla],
+        },
+        {
+          title: "Consultar prova",
+          url: "/exame/consultar-prova",
+          permission: [PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla],
+        },
+        // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
+        // { title: "Admitir candidatura", url: "/exame/admitir" },
+
         //{ title: "Estatísticas", url: "/exame/estatisticas" },
-       // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
-       { title: "Inscrição época especial", url: "/exame/epoca-especial" ,permission:[PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla]},
-       // { title: "Lançar nota (Arq/Urbanismo)", url: "/exame/lancar-nota" },
-        { title: "Lista de candidatos", url: "/exame/lista-candidatos" ,permission:[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla]},
+        // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+        {
+          title: "Inscrição época especial",
+          url: "/exame/epoca-especial",
+          permission: [
+            PermissionTypeDetails.INSCRICAO_EXAME_ACESSO_ESPECIAL.sigla,
+          ],
+        },
+        {
+          title: "Lançar nota (Arq/Urbanismo)",
+          url: "/exame/lancar-nota-arquitectura",
+          permission: [PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla],
+        },
+        {
+          title: "Lista de candidatos",
+          url: "/exame/lista-candidatos",
+          permission: [PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla],
+        },
         //{ title: "Admitidos", url: "/exame/admitidos" },
-       // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
-       // { title: "Sem prova marcada", url: "/exame/sem-prova" },
-       // { title: "Provas por candidato", url: "/exame/provas-candidato" },
-       // { title: "Resultados finais", url: "/exame/resultados" },
-        { title: "Horários por curso", url: "/exame/horarios",permission:[PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO.sigla] },
-        { title: "Pauta geral", url: "/exame/pauta-geral" ,permission:[PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla]},
-        //{ title: "Resetar prova", url: "/exame/resetar" },
-        { title: "Lista de presença", url: "/exame/presenca" },
-        { title: "Candidatos com/sem prova", url: "/exame/candidatos-prova",permission:[PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla] },
+        // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
+        // { title: "Sem prova marcada", url: "/exame/sem-prova" },
+        {
+          title: "Provas por candidato",
+          url: "/exame/provas-candidato",
+          permission: [PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla],
+        },
+        // { title: "Resultados finais", url: "/exame/resultados" },
+        {
+          title: "Horários por curso",
+          url: "/exame/horarios",
+          permission: [
+            PermissionTypeDetails.LISTAR_HORARIO_PROVA_POR_CURSO.sigla,
+          ],
+        },
+        {
+          title: "Pauta geral",
+          url: "/exame/pauta-geral",
+          permission: [PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla],
+        },
+        {
+          title: "Resetar prova",
+          url: "/exame/resetar",
+          permission: [PermissionTypeDetails.RESETAR_PROVA_CANDIDATO.sigla],
+        },
+        {
+          title: "Lista de presença",
+          url: "/exame/presenca",
+          permission: [PermissionTypeDetails.LISTA_PRESENCA_PROVA_ACESSO.sigla],
+        },
+        {
+          title: "Candidatos com/sem prova",
+          url: "/exame/candidatos-prova",
+          permission: [
+            PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla,
+          ],
+        },
       ],
 
       permission: [],
     },
-     
   ],
 };

@@ -9,6 +9,7 @@ interface TypeServiceSelectListProps {
   label?: string;
   placeholder?: string;
   disabled?: boolean;
+  type?: "EXCEPTION";
 }
 
 const TypeServiceSelectList = ({
@@ -16,6 +17,7 @@ const TypeServiceSelectList = ({
   value,
   label = "Tipo de Serviço",
   placeholder = "Selecione um serviço...",
+  type,
   disabled,
 }: TypeServiceSelectListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,8 +28,14 @@ const TypeServiceSelectList = ({
       descricao: debouncedSearch || undefined,
       estado: "Ativo",
     },
-    { enabled: true }
+    { enabled: true },
   );
+  const EXCEPTION_SIGLA = ["IpuC", "IpuCricular(Anual)", "TdM", "PROP"];
+
+  const filteredServices =
+    type === "EXCEPTION"
+      ? services.filter((service) => !EXCEPTION_SIGLA.includes(service.sigla))
+      : services;
 
   return (
     <FormCommandSelect
@@ -38,7 +46,7 @@ const TypeServiceSelectList = ({
       onSearchChange={setSearchTerm}
       isLoading={isLoading}
       disabled={disabled}
-      options={services}
+      options={filteredServices}
       width="full"
       map={(service) => ({
         key: service.codigo.toString(),
