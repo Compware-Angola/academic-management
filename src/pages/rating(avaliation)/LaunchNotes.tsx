@@ -573,11 +573,39 @@ export default function LaunchNotes() {
           {/* ── Barra de ações em massa ──────────────────────────────────── */}
           <div className="flex items-center justify-between flex-wrap gap-3 bg-muted/40 border rounded-lg px-4 py-3">
          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-  <span>
-    <strong>{2}</strong> aluno(s) no total •{" "}
-    <strong>{2}</strong> com nota preenchida •{" "}
-    <strong>{2}</strong> sem nota
-  </span>
+<div className="flex items-center gap-4 text-sm">
+  <div className="flex items-center gap-2">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+      👥
+    </div>
+    <div>
+      <p className="font-semibold text-foreground">{2}</p>
+      <p className="text-xs text-muted-foreground">Total de alunos</p>
+    </div>
+  </div>
+
+  <div className="h-9 w-px bg-border" />
+
+  <div className="flex items-center gap-2">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+      ✓
+    </div>
+    <div>
+      <p className="font-semibold text-emerald-600">{2}</p>
+      <p className="text-xs text-muted-foreground">Com nota</p>
+    </div>
+  </div>
+
+  <div className="flex items-center gap-2">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
+      ⚠
+    </div>
+    <div>
+      <p className="font-semibold text-amber-600">{2}</p>
+      <p className="text-xs text-muted-foreground">Sem nota</p>
+    </div>
+  </div>
+</div>
 </div>
 
             <div className="flex items-center gap-2">
