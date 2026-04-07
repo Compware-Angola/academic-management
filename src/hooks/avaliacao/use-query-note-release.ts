@@ -7,17 +7,46 @@ interface UseQueryNoteReleasesParams {
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;
-  turno:number
+  turno: number;
   search?: string;
-  
+}
+
+
+function isValidId(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    Number.isFinite(value) &&
+    value > 0
+  );
+}
+
+
+function isValidParams(params: UseQueryNoteReleasesParams): boolean {
+  return (
+    isValidId(params.anoLectivoId) &&
+    isValidId(params.horarioId) &&
+    isValidId(params.tipoProvaId) &&
+    isValidId(params.tipoAvaliacao) &&
+    isValidId(params.classe) &&
+    isValidId(params.turno)
+  );
 }
 
 export function useQueryNoteReleases(params: UseQueryNoteReleasesParams) {
+  const isEnabled = isValidParams(params);
+
   return useQuery<NoteRelease[]>({
     queryKey: ["note-releases", params],
-    queryFn: () => fetchNoteReleases(params),
-    staleTime: 1000 * 60 * 5, 
+    queryFn: async () => {
+     
+      if (!isValidParams(params)) {
+        throw new Error("Parâmetros inválidos para buscar lançamentos de notas.");
+      }
+      return fetchNoteReleases(params);
+    },
+    staleTime: 1000 * 60 * 5,
     retry: 1,
-  
+    enabled: isEnabled,
   });
 }
