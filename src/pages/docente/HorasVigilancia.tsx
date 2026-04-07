@@ -114,7 +114,7 @@ const HorasVigilancia = () => {
       case "Pendente":
         return "bg-yellow-600!";
       case "Realizada":
-        return "bg-emerald-100 dark:bg-emerald-700";
+        return "bg-emerald-700! dark:bg-emerald-700!";
       case "Falta":
         return " bg-destructive/70!";
       default:
