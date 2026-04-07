@@ -572,12 +572,13 @@ export default function LaunchNotes() {
         <>
           {/* ── Barra de ações em massa ──────────────────────────────────── */}
           <div className="flex items-center justify-between flex-wrap gap-3 bg-muted/40 border rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>
-                <strong>{localStudents.length}</strong> aluno(s) listado(s) •{" "}
-                <strong>{studentsWithValidNota.length}</strong> com nota preenchida
-              </span>
-            </div>
+         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+  <span>
+    <strong>{2}</strong> aluno(s) no total •{" "}
+    <strong>{2}</strong> com nota preenchida •{" "}
+    <strong>{2}</strong> sem nota
+  </span>
+</div>
 
             <div className="flex items-center gap-2">
               {/* Toggle abrir / fechar todos os cadeados */}
