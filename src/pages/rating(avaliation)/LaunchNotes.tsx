@@ -187,6 +187,20 @@ export default function LaunchNotes() {
     });
     setLockedStudents(initialLocks);
   }, [students]);
+  useEffect(() => {
+    setPage(1);
+  }, [
+    formData.anoLetivo,
+    formData.semestre,
+    formData.periodo,
+    formData.curso,
+    formData.unidadeCurricular,
+    formData.horarioId,
+    formData.classes,
+    formData.tipoAvaliacao,
+    formData.tipoProva,
+    formData.search,
+  ]);
 
   // ─── Helpers de lock ──────────────────────────────────────────────────────
   const handleUnlockAll = () => {
