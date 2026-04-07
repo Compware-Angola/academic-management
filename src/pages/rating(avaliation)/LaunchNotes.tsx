@@ -32,7 +32,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryNoteReleases } from "@/hooks/avaliacao/use-query-note-release";
+import {
+  useQueryNoteReleases,
+  useQueryNoteSummary,
+} from "@/hooks/avaliacao/use-query-note-release";
 import { useUpsertNote } from "@/hooks/avaliacao/use-mutation-upsert-note";
 import { NoteUpsertPayload } from "@/services/update-or-create-note-release";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
@@ -98,6 +101,18 @@ export default function LaunchNotes() {
     page,
     limit,
   });
+
+  const { data: statisticResponse, isLoading: loadingStatistic } =
+    useQueryNoteSummary({
+      anoLectivoId: Number(formData.anoLetivo),
+      horarioId: Number(formData.horarioId),
+      tipoProvaId: Number(formData.tipoProva),
+      tipoAvaliacao: Number(formData.tipoAvaliacao),
+      classe: Number(formData.classes),
+      turno: Number(formData.periodo),
+      search: formData.search,
+    });
+
   const students = studentsResponse?.data ?? [];
 
   const [localStudents, setLocalStudents] = useState(students);
@@ -689,7 +704,9 @@ export default function LaunchNotes() {
                     👥
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">{2}</p>
+                    <p className="font-semibold text-foreground">
+                      {statisticResponse?.total_estudantes ?? 0}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Total de alunos
                     </p>
@@ -703,7 +720,9 @@ export default function LaunchNotes() {
                     ✓
                   </div>
                   <div>
-                    <p className="font-semibold text-emerald-600">{2}</p>
+                    <p className="font-semibold text-emerald-600">
+                      {statisticResponse?.total_com_nota ?? 0}
+                    </p>
                     <p className="text-xs text-muted-foreground">Com nota</p>
                   </div>
                 </div>
@@ -713,7 +732,9 @@ export default function LaunchNotes() {
                     ⚠
                   </div>
                   <div>
-                    <p className="font-semibold text-amber-600">{2}</p>
+                    <p className="font-semibold text-amber-600">
+                      {statisticResponse?.total_sem_nota ?? 0}
+                    </p>
                     <p className="text-xs text-muted-foreground">Sem nota</p>
                   </div>
                 </div>
