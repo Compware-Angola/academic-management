@@ -125,6 +125,7 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
+import Regentes from "./pages/gestao_docente/Regentes";
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
@@ -1329,6 +1330,22 @@ const App = () => {
                         <PagamentoMensal />
                       </ProtectedRoute>
                     }
+                  />
+
+                  <Route
+                    path="/gestao-docentes/regentes"
+
+                    element={
+
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
+                        ]}
+                      >
+                        <Regentes />
+                      </ProtectedRoute>
+                  }
+
                   />
                 </Route>
               </Routes>
