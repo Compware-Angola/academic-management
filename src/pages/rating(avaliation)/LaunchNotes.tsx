@@ -510,11 +510,11 @@ export default function LaunchNotes() {
           />
 
           <div className="relative flex flex-col gap-1">
-            <label className="text-sm font-medium">Pesquisar por nome</label>
+            <label className="text-sm font-medium">Pesquisar por nome Ou Nº Matrícula</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Pesquisar por nome..."
+                placeholder="Pesquisar por nome ou número de matrícula..."
                 value={formData.search}
                 onChange={(e) => setFormData({ ...formData, search: e.target.value })}
                 className="pl-9"
