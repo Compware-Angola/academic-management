@@ -125,9 +125,7 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
-<<<<<<< HEAD
 import Regentes from "./pages/gestao_docente/Regentes";
-=======
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
@@ -140,7 +138,6 @@ import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatricula
 import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
->>>>>>> 7f8a54b4caf2d2c4fbf35a0914953aec451d1d1c
 
 const App = () => {
   return (
