@@ -1,4 +1,5 @@
 // hooks/useStudents.ts
+import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password";
 import {
   fetchStudentEstatisticas,
   fetchStudentsSugestoes,
@@ -15,7 +16,8 @@ import {
   ListStudentsResponse,
 } from "@/services/students/students.service";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 /* =============================================
    Sugestões de alunos (busca por nome, BI, etc.)
@@ -112,5 +114,14 @@ export function useQueryStudents(payload: ListStudentsPayload) {
     ],
     enabled,
     queryFn: () => getListStudentsService(payload),
+  });
+}
+
+export function useResetPassword() {
+  return useMutation<void, Error, ResetPasswordPayload>({
+    mutationFn: (payload) => resetPassword(payload),
+    onSuccess: () => {
+      toast.success("Senha redefinida com sucesso!");
+    },
   });
 }

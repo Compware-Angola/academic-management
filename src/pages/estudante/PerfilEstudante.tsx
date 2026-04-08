@@ -153,7 +153,7 @@ function truncate(text: string, max = 10) {
 
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
-  const [activeTab, setActiveTab] = useState("geral");
+  const [activeTab, setActiveTab] = useState("perfil");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [anoLetivo, setAnoLetivo] = useState<string | undefined>("23");
@@ -449,6 +449,7 @@ export default function PerfilEstudante() {
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
+        defaultValue="perfil"
         className="space-y-4"
       >
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
@@ -477,7 +478,10 @@ export default function PerfilEstudante() {
           </TabsTrigger>
         </TabsList>
 
-        <PerfilSection value="perfil" />
+        <PerfilSection
+          value="perfil"
+          codigoMatricula={student.codigo_matricula}
+        />
         <DocumentsSection value="documentacao" />
         <AreaFinanceira value="area-financeira" />
         <AvaliacaoSection value="avaliacao" />

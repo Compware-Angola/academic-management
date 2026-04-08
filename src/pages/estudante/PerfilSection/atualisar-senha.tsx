@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
-import { Eye, EyeOff, KeyRound, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,13 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CardDescription, CardTitle } from "@/components/ui/card";
+import { useResetPassword } from "@/hooks/tudents/use-query-students";
+import { TabsContent } from "@/components/ui/tabs";
 
 const schema = z.object({
   novaSenha: z
@@ -86,9 +82,15 @@ function PasswordStrength({ password }: { password: string }) {
   );
 }
 
-export function AtualizarSenha() {
+export function AtualizarSenha({
+  codigoMatricula,
+  value = "atualizar-senha",
+}: {
+  codigoMatricula: number;
+  value?: string;
+}) {
   const [show, setShow] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const resetPassword = useResetPassword();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -99,13 +101,12 @@ export function AtualizarSenha() {
 
   function onSubmit(values: FormValues) {
     console.log(values);
-    // await resetarSenhaEstudante({ novaSenha: values.novaSenha })
-    setSuccess(true);
+    resetPassword.mutateAsync({ codigoMatricula, senha: values.novaSenha });
     form.reset();
   }
 
   return (
-    <div className="space-y-4 px-4">
+    <TabsContent value={value} className="space-y-4 px-4">
       <div className="flex items-center gap-2">
         <KeyRound className="h-5 w-5 text-muted-foreground" />
         <CardTitle className="text-lg">Atualizar Senha</CardTitle>
@@ -113,13 +114,6 @@ export function AtualizarSenha() {
       <CardDescription>
         Define uma nova senha para este estudante.
       </CardDescription>
-
-      {success && (
-        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 mb-5">
-          <ShieldCheck className="h-4 w-4 shrink-0" />
-          Senha atualizada com sucesso.
-        </div>
-      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -160,15 +154,19 @@ export function AtualizarSenha() {
             <Button
               type="submit"
               className="w-full md:w-auto"
-              disabled={form.formState.isSubmitting}
+              disabled={resetPassword.isPending}
             >
-              {form.formState.isSubmitting
-                ? "A redefinir..."
-                : "Redefinir Senha"}
+              {resetPassword.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />A redefinir...
+                </>
+              ) : (
+                "Redefinir Senha"
+              )}
             </Button>
           </div>
         </form>
       </Form>
-    </div>
+    </TabsContent>
   );
 }

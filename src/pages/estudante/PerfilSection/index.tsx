@@ -3,10 +3,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
 import { Contact, FileText, Key } from "lucide-react";
+import { DadosPessoais } from "./dados-pessoais";
 type PerfilSectionProps = {
   value?: string;
+  codigoMatricula: number;
 };
-export function PerfilSection({ value = "perfil" }: PerfilSectionProps) {
+export function PerfilSection({
+  value = "perfil",
+  codigoMatricula,
+}: PerfilSectionProps) {
   return (
     <TabsContent value={value}>
       <Tabs
@@ -28,14 +33,18 @@ export function PerfilSection({ value = "perfil" }: PerfilSectionProps) {
             <span className="hidden md:inline">Contacto</span>
             <span className="md:hidden">Contacto</span>
           </TabsTrigger>
+          <TabsTrigger
+            className="w-full justify-start gap-2"
+            value="dados-pessoais"
+          >
+            <Contact className="h-4 w-4" />
+            <span className="hidden md:inline">Dados Pessoais</span>
+            <span className="md:hidden">Dados Pessoais</span>
+          </TabsTrigger>
         </TabsList>
         <Card className="flex-1 p-6">
-          <TabsContent value="atualizar-senha">
-            <AtualizarSenha />
-          </TabsContent>
-          <TabsContent value="contacto">
-            <Contacto />
-          </TabsContent>
+          <AtualizarSenha codigoMatricula={codigoMatricula} />
+          <DadosPessoais codigoMatricula={codigoMatricula} />
         </Card>
       </Tabs>
     </TabsContent>
