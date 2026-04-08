@@ -317,6 +317,27 @@ export const menuStructure: MenuStructure = {
       permission: ["adm", "rootAdmin"],
     },
 */
+
+    // ----------------------------------------------------
+    // DOCUMENTOS MINISTÉRIO
+    // ----------------------------------------------------
+
+    {
+      title: "Documentos para o Ministério",
+      url: "/ministerio",
+      icon: FileText,
+      items: [
+        { title: "Mapa finalistas", url: "/ministerio/mapa-finalistas" },
+        {
+          title: "Registro exame de acesso",
+          url: "/ministerio/registro-exame",
+        },
+        { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
+      ],
+
+      permission: ["adm", "rootAdmin"],
+    },
+
     // ----------------------------------------------------
     // SALAS
     // ----------------------------------------------------

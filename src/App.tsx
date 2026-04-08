@@ -125,6 +125,9 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
+import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
+import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
+import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 
 const App = () => {
   return (
@@ -1221,6 +1224,55 @@ const App = () => {
                   }
 
                   />
+
+                  <Route
+                    path="/ministerio/mapa-finalistas"
+
+                    element={
+
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla!,
+                        ]}
+                      >
+                        <MapaAnualEstudantesFinalistas />
+                      </ProtectedRoute>
+                  }
+
+                  />
+
+                  <Route
+                    path="/ministerio/registro-exame"
+
+                    element={
+
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <RegistoPrimarioExamesAcesso />
+                      </ProtectedRoute>
+                  }
+
+                  />
+
+                  <Route
+                    path="/ministerio/registro-matricula"
+
+                    element={
+
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <RegistoPrimarioMatriculados />
+                      </ProtectedRoute>
+                  }
+
+                  />
+
                 </Route>
               </Routes>
             </TooltipProvider>
