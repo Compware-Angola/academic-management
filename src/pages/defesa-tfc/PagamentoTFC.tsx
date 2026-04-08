@@ -210,6 +210,7 @@ export default function PagamentoTFC() {
               value={filters.curso}
             />
             <PeriodoSelect
+              enabledDefaultSelectItem
               onChangeValue={(v) => setFilters({ ...filters, periodo: v })}
               value={filters.periodo}
             />

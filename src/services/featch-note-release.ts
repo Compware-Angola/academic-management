@@ -32,6 +32,9 @@ export interface NoteRelease {
 export interface NoteReleaseApiResponse {
   success: boolean;
   data: NoteRelease[];
+  page: number;
+  limit: number;
+  hasNextPage: boolean;
 }
 
 // Função para buscar notas com filtros obrigatórios
@@ -41,25 +44,85 @@ export async function fetchNoteReleases(params: {
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;
-  turno:number,
+  turno: number;
   search?: string;
-}): Promise<NoteRelease[]> {
+  page?: number;
+  limit?: number;
+}): Promise<NoteReleaseApiResponse> {
   try {
     const response = await axiosNestGa.get<NoteReleaseApiResponse>(
       "/assessment/filtrar",
+      { params },
+    );
+
+    //const items = response.data.data ?? [];
+
+    // Converter campos JSON de string para objeto
+    // return items.map((item) => ({
+    //   ...item,
+    //   horario:
+    //     typeof item.horario === "string"
+    //       ? JSON.parse(item.horario)
+    //       : item.horario,
+    //   docente:
+    //     typeof item.docente === "string"
+    //       ? JSON.parse(item.docente)
+    //       : item.docente,
+    // }));
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar notas:", error);
+    return {
+      success: false,
+      data: [],
+      page: 0,
+      limit: 0,
+      hasNextPage: false,
+    } as NoteReleaseApiResponse;
+  }
+}
+
+
+// ==================== NOVO - SUMMARY ====================
+
+export interface NoteSummary {
+  total_estudantes: number;
+  total_com_nota: number;
+  total_sem_nota: number;
+}
+
+export interface NoteSummaryApiResponse {
+  success: boolean;
+  data: NoteSummary;
+}
+
+// Função para buscar o resumo (total de alunos, com nota e sem nota)
+export async function fetchNoteSummary(params: {
+  anoLectivoId: number;
+  horarioId: number;
+  tipoProvaId: number;
+  tipoAvaliacao: number;
+  classe: number;
+  turno: number;
+  search?: string;
+}): Promise<NoteSummary> {
+  try {
+    const response = await axiosNestGa.get<NoteSummaryApiResponse>(
+      "/assessment/summary",
       { params }
     );
 
-    const items = response.data.data ?? []; 
-
-    // Converter campos JSON de string para objeto
-    return items.map((item) => ({
-      ...item,
-      horario: typeof item.horario === "string" ? JSON.parse(item.horario) : item.horario,
-      docente: typeof item.docente === "string" ? JSON.parse(item.docente) : item.docente,
-    }));
+    return response.data.data ?? {
+      total_estudantes: 0,
+      total_com_nota: 0,
+      total_sem_nota: 0,
+    };
   } catch (error) {
-    console.error("Erro ao buscar notas:", error);
-    return [];
+    console.error("Erro ao buscar summary das notas:", error);
+    return {
+      total_estudantes: 0,
+      total_com_nota: 0,
+      total_sem_nota: 0,
+    };
   }
 }

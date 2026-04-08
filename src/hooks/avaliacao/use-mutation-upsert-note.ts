@@ -16,6 +16,9 @@ export function useUpsertNote() {
       queryClient.invalidateQueries({
         queryKey: ["note-releases"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["note-summary"],
+      });
     },
 
     onError: (error) => {
