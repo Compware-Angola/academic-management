@@ -44,6 +44,7 @@ export function PerfilSection({
         </TabsList>
         <Card className="flex-1 p-6">
           <AtualizarSenha codigoMatricula={codigoMatricula} />
+          <Contacto codigoMatricula={codigoMatricula} />
           <DadosPessoais codigoMatricula={codigoMatricula} />
         </Card>
       </Tabs>
