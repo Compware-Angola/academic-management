@@ -147,7 +147,7 @@ function truncate(text: string, max = 10) {
   return text.length > max ? text.slice(0, max) + "..." : text;
 }
 
-export default function PerfilEstudante() {
+export  function PerfilEstudanteLegado() {
   const { matricula } = useParams<{ matricula: string }>();
   const [activeTab, setActiveTab] = useState("geral");
   const [page, setPage] = useState(1);
@@ -422,7 +422,7 @@ export default function PerfilEstudante() {
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />
-                    <span>{student.telefonicos || "N/A"}</span>
+                    <span>{student.contacto || "N/A"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-4 w-4" />
@@ -537,7 +537,7 @@ export default function PerfilEstudante() {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Telefone:</span>
-                  <span className="font-medium">{student.telefonicos}</span>
+                  <span className="font-medium">{student.contacto}</span>
 
                   <span className="text-muted-foreground">Email Pessoal:</span>
                   <span className="font-medium">{student.email}</span>
