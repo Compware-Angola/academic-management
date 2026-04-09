@@ -725,10 +725,10 @@ const TeacherProfile = () => {
     () =>
       teacherInfo.name
         ? teacherInfo.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
         : "",
     [teacherInfo.name],
   );
@@ -763,12 +763,16 @@ const TeacherProfile = () => {
       // Error toast handled by the mutation hook
     }
   }, [passwords, updatePassword]);
-
+function convertPTDateToISO(date: string) {
+  if (!date) return "";
+  const [day, month, year] = date.split("/");
+  return `${year}-${month}-${day}`;
+}
   const handlePersonalUpdate = useCallback(async () => {
     if (!teacherInfo.name || !teacherInfo.email) {
       return toast.error("Nome e email são obrigatórios.");
     }
-  if (teacherInfo.numero_documento && teacherInfo.numero_documento.length < 5) {
+    if (teacherInfo.numero_documento && teacherInfo.numero_documento.length < 5) {
       return toast.error("O número de documento deve ter pelo menos 5 caracteres.");
     }
     if (teacherInfo.phone && !/^\d{9,}$/.test(teacherInfo.phone)) {
@@ -781,7 +785,7 @@ const TeacherProfile = () => {
     if (teacherInfo.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teacherInfo.email)) {
       return toast.error("Introduza um endereço de email válido.");
     }
-    if(!teacherInfo.pessoaid){
+    if (!teacherInfo.pessoaid) {
       return toast.error("ID do docente não encontrado. Impossível atualizar informações.");
     }
     try {
@@ -968,10 +972,14 @@ const TeacherProfile = () => {
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <Input
-                        value={formatDatePT(teacherInfo.birthDate)}
+                        type="date"
+                        value={convertPTDateToISO(teacherInfo.birthDate)}
                         disabled={!isEditing}
                         onChange={(e) =>
-                          setTeacherInfo((prev) => ({ ...prev, birthDate: e.target.value }))
+                          setTeacherInfo((prev) => ({
+                            ...prev,
+                            birthDate: e.target.value,
+                          }))
                         }
                       />
                     </div>
@@ -1122,9 +1130,8 @@ const TeacherProfile = () => {
                   />
                   {passwords.confirm && (
                     <p
-                      className={`text-xs ${
-                        passwords.new === passwords.confirm ? "text-green-600" : "text-red-500"
-                      }`}
+                      className={`text-xs ${passwords.new === passwords.confirm ? "text-green-600" : "text-red-500"
+                        }`}
                     >
                       {passwords.new === passwords.confirm
                         ? "As senhas coincidem"
