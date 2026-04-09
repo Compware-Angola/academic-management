@@ -4,6 +4,6 @@ export type ResetPasswordPayload = {
   senha: string;
 };
 export async function resetPassword(payload: ResetPasswordPayload) {
-  const { data } = await axiosNestGa.patch(`/students/reset-password`, payload);
+  const { data } = await axiosNestGa.put(`/students/reset-password`, payload);
   return data;
 }

@@ -15,6 +15,7 @@ import {
   ListStudentsPayload,
   ListStudentsResponse,
 } from "@/services/students/students.service";
+import { updateContacts, UpdateContactsPayload } from "@/services/students/update-contacts";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -122,6 +123,19 @@ export function useResetPassword() {
     mutationFn: (payload) => resetPassword(payload),
     onSuccess: () => {
       toast.success("Senha redefinida com sucesso!");
+    },
+  });
+}
+
+export function useUpdateContacts() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, UpdateContactsPayload>({
+    mutationFn: (payload) => updateContacts(payload),
+    onSuccess: () => {
+      toast.success("Contactos atualizados com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
     },
   });
 }

@@ -74,7 +74,6 @@ import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida"
 import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
-import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
@@ -138,6 +137,7 @@ import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatricula
 import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
+import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 
 const App = () => {
   return (
@@ -638,7 +638,7 @@ const App = () => {
                   />
                   <Route
                     path="/estudante/:matricula"
-                    element={<PerfilEstudante />}
+                    element={<PerfilEstudanteLegado />}
                   />
 
                   {/* EXAME ACESSO */}
@@ -1334,9 +1334,7 @@ const App = () => {
 
                   <Route
                     path="/gestao-docentes/regentes"
-
                     element={
-
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
@@ -1344,8 +1342,7 @@ const App = () => {
                       >
                         <Regentes />
                       </ProtectedRoute>
-                  }
-
+                    }
                   />
                 </Route>
               </Routes>

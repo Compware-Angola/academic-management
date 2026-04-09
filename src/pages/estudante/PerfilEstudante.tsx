@@ -1,26 +1,10 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,60 +13,23 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  Home,
-  User,
-  GraduationCap,
-  CreditCard,
-  FileText,
-  Calendar,
-  Phone,
-  Mail,
-  MapPin,
-  Download,
-  Printer,
-  ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertTriangle,
-  Eye,
-  RefreshCw,
-  Search,
-  Pencil,
-} from "lucide-react";
-import {
-  useStudentDetail,
-  useStudentDisciplinas,
-} from "@/hooks/tudents/use-query-students";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Home, User, CreditCard, FileText, Pencil } from "lucide-react";
+import { useStudentDisciplinas } from "@/hooks/tudents/use-query-students";
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { FormSelect } from "@/components/common/FormSelect";
-import ScheduleDetailsModal from "../schedules/components/ScheduleDetailsModal";
+
 import {
   useQueryFacturaItens,
   useQueryFacturas,
 } from "@/hooks/horario/use-query-invoice";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { PaymentNoteActions } from "../financas/components/views/uma-payment-invoice";
+
 import { buildImageAssets } from "@/util/build-image-assets";
-import { PerfilSection } from "./PerfilSection";
+
 import { AreaFinanceira } from "./AreaFinanceira";
 import { DocumentsSection } from "./DocumentsSection";
 import { AvaliacaoSection } from "./AvaliacaoSection";
+import { StudentProfileHeader } from "./StudentProfileHeader";
+import { PerfilSection } from "./PerfilSection";
 
 // Mock data for a complete student profile
 const mockEstudante = {
@@ -132,24 +79,6 @@ const mockEstudante = {
   tipoPagamento: "Mensal",
   bolseiro: false,
 };
-
-const estados = [
-  { id: undefined, label: "Todos" },
-  { id: "0", label: "Pendente" },
-  { id: "1", label: "Pago" },
-  { id: "2", label: "Parcelado" },
-  { id: "3", label: "Anulado" },
-];
-
-const searchOptions = [
-  { id: "reference", label: "Referência da Factura" },
-  { id: "codigoFatura", label: "Codigo da Factura" },
-];
-
-function truncate(text: string, max = 10) {
-  if (!text) return "";
-  return text.length > max ? text.slice(0, max) + "..." : text;
-}
 
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
@@ -275,13 +204,6 @@ export default function PerfilEstudante() {
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
   const {
-    data: student,
-    isLoading,
-    isFetching,
-    error,
-  } = useStudentDetail(matricula);
-
-  const {
     data: response,
     isLoading: isDisciplinasLoading,
     isError,
@@ -312,16 +234,8 @@ export default function PerfilEstudante() {
     if (page < totalPages) setPage((prev) => prev + 1);
   };
 
-  if (!matricula) {
+  if (!Number(matricula)) {
     return <div>Matrícula inválida</div>;
-  }
-
-  if (isLoading || isFetching) {
-    return <div>A carregar dados do estudante...</div>;
-  }
-
-  if (error || !student) {
-    return <div>Estudante não encontrado</div>;
   }
 
   const estudante = mockEstudante;
@@ -350,7 +264,6 @@ export default function PerfilEstudante() {
     return estado;
   };
 
-  const currentPhotoUrl = buildImageAssets(student.foto);
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb>
@@ -373,79 +286,10 @@ export default function PerfilEstudante() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Header with student info */}
       <div className="flex flex-col md:flex-row gap-6">
-        <Card className="flex-1">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              <Avatar className="h-32 w-32">
-                <AvatarImage
-                  src={currentPhotoUrl}
-                  alt={student.nome_completo || "Foto do estudante"}
-                  key={currentPhotoUrl}
-                />
-
-                <AvatarFallback className="text-3xl font-medium bg-linear-to-br from-gray-100 to-gray-200 text-gray-600">
-                  {student?.nome_completo
-                    ? student.nome_completo
-                        .trim()
-                        .split(/\s+/)
-                        .map((n) => n[0]?.toUpperCase() ?? "")
-                        .join("")
-                        .slice(0, 2)
-                    : "??"}
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="flex-1 space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                  <h1 className="text-2xl font-bold">
-                    {student.nome_completo}
-                  </h1>
-                  {getEstadoBadge(student.estado)}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <GraduationCap className="h-4 w-4" />
-                    <span>
-                      <strong>Matrícula:</strong> {student.codigo_matricula}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <FileText className="h-4 w-4" />
-                    <span>
-                      <strong>Curso:</strong> {student.curso}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      <strong>Ano:</strong> {"-"}º Ano
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Phone className="h-4 w-4" />
-                    <span>{student.telefonicos || "N/A"}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    <span>{student.email || "N/A"}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>
-                      {student.morada}, {estudante.provincia}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StudentProfileHeader matricula={matricula} />
       </div>
 
-      {/* Tabs with detailed information */}
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
@@ -478,10 +322,7 @@ export default function PerfilEstudante() {
           </TabsTrigger>
         </TabsList>
 
-        <PerfilSection
-          value="perfil"
-          codigoMatricula={student.codigo_matricula}
-        />
+        <PerfilSection value="perfil" codigoMatricula={Number(matricula)} />
         <DocumentsSection value="documentacao" />
         <AreaFinanceira value="area-financeira" />
         <AvaliacaoSection value="avaliacao" />

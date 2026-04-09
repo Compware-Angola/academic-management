@@ -40,10 +40,7 @@ export function AtualizarSenha({
     defaultValues: { novaSenha: "" },
   });
 
-  const novaSenha = form.watch("novaSenha");
-
   function onSubmit(values: FormValues) {
-    console.log(values);
     resetPassword.mutateAsync({ codigoMatricula, senha: values.novaSenha });
     form.reset();
   }
@@ -58,7 +55,13 @@ export function AtualizarSenha({
         Define uma nova senha para este estudante.
       </CardDescription>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <form
+          onSubmit={(e) => {
+            e.stopPropagation();
+            form.handleSubmit(onSubmit)(e);
+          }}
+          className="space-y-5"
+        >
           <PasswordFormField
             control={form.control}
             name="novaSenha"
