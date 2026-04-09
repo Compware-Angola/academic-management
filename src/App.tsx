@@ -138,6 +138,7 @@ import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registratio
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
+import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 
 const App = () => {
   return (
@@ -638,6 +639,10 @@ const App = () => {
                   />
                   <Route
                     path="/estudante/:matricula"
+                    element={<PerfilEstudante />}
+                  />
+                  <Route
+                    path="/estudante-legado/:matricula"
                     element={<PerfilEstudanteLegado />}
                   />
 

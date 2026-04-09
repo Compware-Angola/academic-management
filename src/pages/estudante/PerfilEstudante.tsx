@@ -13,7 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Home, User, CreditCard, FileText, Pencil } from "lucide-react";
+import { Home, User, CreditCard, FileText, Pencil, Book } from "lucide-react";
 import { useStudentDisciplinas } from "@/hooks/tudents/use-query-students";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
@@ -30,6 +30,7 @@ import { DocumentsSection } from "./DocumentsSection";
 import { AvaliacaoSection } from "./AvaliacaoSection";
 import { StudentProfileHeader } from "./StudentProfileHeader";
 import { PerfilSection } from "./PerfilSection";
+import { DisciplinasSection } from "./disciplina";
 
 // Mock data for a complete student profile
 const mockEstudante = {
@@ -296,7 +297,7 @@ export default function PerfilEstudante() {
         defaultValue="perfil"
         className="space-y-4"
       >
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto">
           <TabsTrigger value="perfil" className="gap-2">
             <User className="h-4 w-4" />
             <span className="hidden md:inline">Perfil</span>
@@ -314,6 +315,11 @@ export default function PerfilEstudante() {
             <span className="hidden md:inline">Área Financeira</span>
             <span className="md:hidden">Área Financeira</span>
           </TabsTrigger>
+          <TabsTrigger value="disciplinas" className="gap-2">
+            <Book className="h-4 w-4" />
+            <span className="hidden md:inline">Disciplinas</span>
+            <span className="md:hidden">Disciplinas</span>
+          </TabsTrigger>
 
           <TabsTrigger value="avaliacao" className="gap-2">
             <Pencil className="h-4 w-4" />
@@ -324,7 +330,15 @@ export default function PerfilEstudante() {
 
         <PerfilSection value="perfil" codigoMatricula={Number(matricula)} />
         <DocumentsSection value="documentacao" />
-        <AreaFinanceira value="area-financeira" />
+        <DisciplinasSection
+          value="disciplinas"
+          codigoMatricula={Number(matricula)}
+        />
+        <AreaFinanceira
+          codigoMatricula={Number(matricula)}
+          value="area-financeira"
+        />
+
         <AvaliacaoSection value="avaliacao" />
       </Tabs>
     </div>
