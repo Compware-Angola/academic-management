@@ -95,22 +95,17 @@ export const invalidateStudentQueries = (
 };
 
 export function useQueryStudents(payload: ListStudentsPayload) {
-  const { anoLectivo, codigoCurso, faculdadeId, codigoMatricula, page, limit } =
-    payload;
-
-  const enabled = !!anoLectivo;
+  const { codigoCurso, faculdadeId, codigoMatricula, page, limit } = payload;
 
   return useQuery<ListStudentsResponse>({
     queryKey: [
       "students",
-      anoLectivo,
       codigoCurso,
       faculdadeId,
       codigoMatricula,
       page,
       limit,
     ],
-    enabled,
     queryFn: () => getListStudentsService(payload),
   });
 }

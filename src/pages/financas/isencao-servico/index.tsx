@@ -218,7 +218,10 @@ export default function IsencaoServico() {
   };
 
   const handleSearch = () => {
-    setFiltersApplied(filters);
+    setFiltersApplied({
+      ...filters,
+      matricula: matriculaInput,
+    });
     setPage(1);
   };
 
@@ -265,10 +268,12 @@ export default function IsencaoServico() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <FacultySelect
+              placeholder="Faculdade"
               value={filters.faculdade}
               onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
             />
             <CourseSelect
+              placeholder="Cursos"
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
               }}

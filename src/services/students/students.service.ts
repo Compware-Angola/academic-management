@@ -150,7 +150,7 @@ export const fetchDisciplinasMatriculadas = async (
 
 //OBTER TODOS OS ESTUDANTES
 export type ListStudentsPayload = {
-  anoLectivo: number;
+  anoLectivo?: number;
   codigoCurso?: number;
   faculdadeId?: number;
   codigoMatricula?: number;
@@ -188,7 +188,7 @@ export async function getListStudentsService(
 
   const { data } = await axiosNestGa.get<ListStudentsResponse>("/students", {
     params: {
-      anoLectivo,
+      //anoLectivo,
       codigoCurso,
       faculdadeId,
       codigoMatricula,
