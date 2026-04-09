@@ -620,6 +620,12 @@ const EMPTY_TEACHER: TeacherInfo = {
   birthDate: "",
   address: "",
 };
+function convertPTDateToISO(date: string) {
+  if (!date) return "";
+
+  const [day, month, year] = date.split("/");
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
 
 function mapTeacherData(data: NonNullable<ReturnType<typeof useQueryTeacherProfile>["data"]>): TeacherInfo {
   return {
@@ -634,7 +640,7 @@ function mapTeacherData(data: NonNullable<ReturnType<typeof useQueryTeacherProfi
     category: data.descricao_categoria || "",
     office: data.escalao || "",
     hireDate: data.data_inicio_docente || "",
-    birthDate: data.data_nascimento || "",
+    birthDate: convertPTDateToISO(data.data_nascimento) || "",
     address: data.endereco || "",
   };
 }
@@ -979,12 +985,12 @@ const TeacherProfile = () => {
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <Input
                         type="date"
-                        value={convertPTDateToISO(teacherInfo.birthDate)}
+                        value={teacherInfo.birthDate || ""}
                         disabled={!isEditing}
                         onChange={(e) =>
                           setTeacherInfo((prev) => ({
                             ...prev,
-                            birthDate: convertISOToPTDate(e.target.value),
+                            birthDate: e.target.value,
                           }))
                         }
                       />
