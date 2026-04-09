@@ -763,11 +763,17 @@ const TeacherProfile = () => {
       // Error toast handled by the mutation hook
     }
   }, [passwords, updatePassword]);
-function convertPTDateToISO(date: string) {
-  if (!date) return "";
-  const [day, month, year] = date.split("/");
-  return `${year}-${month}-${day}`;
-}
+  function convertPTDateToISO(date: string) {
+    if (!date) return "";
+    const [day, month, year] = date.split("/");
+    return `${year}-${month}-${day}`;
+  }
+  function convertISOToPTDate(date: string) {
+    if (!date) return "";
+
+    const [year, month, day] = date.split("-");
+    return `${day}/${month}/${year}`;
+  }
   const handlePersonalUpdate = useCallback(async () => {
     if (!teacherInfo.name || !teacherInfo.email) {
       return toast.error("Nome e email são obrigatórios.");
@@ -978,7 +984,7 @@ function convertPTDateToISO(date: string) {
                         onChange={(e) =>
                           setTeacherInfo((prev) => ({
                             ...prev,
-                            birthDate: e.target.value,
+                            birthDate: convertISOToPTDate(e.target.value),
                           }))
                         }
                       />
