@@ -1,5 +1,6 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 export interface TeacherProfile {
+  pessoaid: number;
   codigo_docente: number;
   email: string | null;
   username: string;
