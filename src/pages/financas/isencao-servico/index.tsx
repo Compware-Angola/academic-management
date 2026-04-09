@@ -110,6 +110,7 @@ export default function IsencaoServico() {
       estadoIsencao: item.estado_isensao ?? "",
       codigo: item.codigo,
     };
+    console.log(initial);
     setEditForm(initial);
     setOriginalEditForm(initial);
     setIsEditOpen(true);
@@ -142,7 +143,7 @@ export default function IsencaoServico() {
     if (!codigo) return;
 
     const body: UpdateIsencaoServicoBody = {};
-
+    console.log("edit form", editForm);
     if (originalEditForm) {
       if (
         String(editForm.codigoMatricula ?? "") !==
@@ -209,6 +210,7 @@ export default function IsencaoServico() {
       return;
     }
 
+    console.log(body);
     await mutateUpdate({ codigo, body });
     setIsEditOpen(false);
     setOriginalEditForm(null);

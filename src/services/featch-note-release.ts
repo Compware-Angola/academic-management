@@ -32,6 +32,9 @@ export interface NoteRelease {
 export interface NoteReleaseApiResponse {
   success: boolean;
   data: NoteRelease[];
+  page: number;
+  limit: number;
+  hasNextPage: boolean;
 }
 
 // Função para buscar notas com filtros obrigatórios
@@ -41,26 +44,41 @@ export async function fetchNoteReleases(params: {
   tipoProvaId: number;
   tipoAvaliacao: number;
   classe: number;
-  turno:number,
+  turno: number;
   search?: string;
-}): Promise<NoteRelease[]> {
+  page?: number;
+  limit?: number;
+}): Promise<NoteReleaseApiResponse> {
   try {
     const response = await axiosNestGa.get<NoteReleaseApiResponse>(
       "/assessment/filtrar",
-      { params }
+      { params },
     );
 
-    const items = response.data.data ?? []; 
+    //const items = response.data.data ?? [];
 
     // Converter campos JSON de string para objeto
-    return items.map((item) => ({
-      ...item,
-      horario: typeof item.horario === "string" ? JSON.parse(item.horario) : item.horario,
-      docente: typeof item.docente === "string" ? JSON.parse(item.docente) : item.docente,
-    }));
+    // return items.map((item) => ({
+    //   ...item,
+    //   horario:
+    //     typeof item.horario === "string"
+    //       ? JSON.parse(item.horario)
+    //       : item.horario,
+    //   docente:
+    //     typeof item.docente === "string"
+    //       ? JSON.parse(item.docente)
+    //       : item.docente,
+    // }));
+    return response.data;
   } catch (error) {
     console.error("Erro ao buscar notas:", error);
-    return [];
+    return {
+      success: false,
+      data: [],
+      page: 0,
+      limit: 0,
+      hasNextPage: false,
+    } as NoteReleaseApiResponse;
   }
 }
 

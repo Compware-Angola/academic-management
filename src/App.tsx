@@ -74,7 +74,6 @@ import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida"
 import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
-import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
@@ -125,6 +124,7 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
+import Regentes from "./pages/gestao_docente/Regentes";
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
@@ -137,6 +137,8 @@ import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatricula
 import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
+import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
+import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 
 const App = () => {
   return (
@@ -638,6 +640,10 @@ const App = () => {
                   <Route
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
+                  />
+                  <Route
+                    path="/estudante-legado/:matricula"
+                    element={<PerfilEstudanteLegado />}
                   />
 
                   {/* EXAME ACESSO */}
@@ -1327,6 +1333,19 @@ const App = () => {
                         ]}
                       >
                         <PagamentoMensal />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/gestao-docentes/regentes"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
+                        ]}
+                      >
+                        <Regentes />
                       </ProtectedRoute>
                     }
                   />
