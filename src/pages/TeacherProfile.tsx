@@ -44,9 +44,13 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { parseFilter } from "@/util/parse-filter";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useUpdatePassword } from "@/hooks/auth/use-query-auth";
+import { useUpdatePersonUser } from "@/hooks/acess/useUpdatePersonUser";
 
 export interface TeacherInfo {
+  pessoaid: number;
   name: string;
+  numero_documento: string;
   employeeId: string | number;
   email: string;
   phone: string;
@@ -405,8 +409,8 @@ const TeacherProfile = () => {
 
   const strengthLabel = ["", "Muito fraca", "Fraca", "Boa", "Forte"][passwordStrength / 25];
 
-
-
+  const { mutateAsync: updatePassword, isPending: isUpdatingPassword } = useUpdatePassword();
+  const { mutateAsync: updateUser, isPending: isUpdatingUser } = useUpdatePersonUser();
   const { data: userDate } = useCurrentUser("GA");
   const isDocente = userDate?.roles?.docente ?? false;
 
@@ -437,12 +441,16 @@ const TeacherProfile = () => {
     name: "", employeeId: "", email: "", phone: "", phone2: "",
     department: "", category: "", office: "", hireDate: "",
     birthDate: "", address: "",
+    pessoaid: 0,
+    numero_documento: "",
   });
 
   useEffect(() => {
     if (teacherInfoData) {
       setTeacherInfo({
+        pessoaid: teacherInfoData.pessoaid,
         name: teacherInfoData.nome || "",
+        numero_documento: teacherInfoData.numero_documento || "",
         employeeId: teacherInfoData.n_mecanografico || "",
         email: teacherInfoData.email || "",
         phone: teacherInfoData.contacto_1 || "",
@@ -464,8 +472,9 @@ const TeacherProfile = () => {
   const handleSave = () => {
     switch (activeTab) {
       case "personal":
+        handleUserPersonalUpdate();
       case "professional":
-        handleSaveInfo();
+       
         break;
       case "security":
         handlePasswordSave();
@@ -477,14 +486,48 @@ const TeacherProfile = () => {
     toast.success("Informações atualizadas com sucesso!");
     setIsEditing(false);
   }
-  const handlePasswordSave = () => {
+  const handlePasswordSave = async () => {
     if (!passwords.current) return toast.error("Introduza a senha atual.");
     if (passwords.new.length < 8) return toast.error("Mínimo 8 caracteres.");
     if (passwords.new !== passwords.confirm) return toast.error("As senhas não coincidem.");
-    // chamar a tua API aqui
-    toast.success("Senha atualizada com sucesso!");
+    // chamar a tua API aqui para atualizar a senha
+    await updatePassword({
+      senhaAtual: passwords.current,
+      novaSenha: passwords.new,
+      confirmarNovaSenha: passwords.confirm,
+      platform: "GA",
+    });
+
     setPasswords({ current: "", new: "", confirm: "" });
   };
+
+  const handleUserPersonalUpdate = async () => {
+    if (!teacherInfo.name || !teacherInfo.email) {
+      return toast.error("Nome e email são obrigatórios.");
+    }
+
+    try {
+
+      await updateUser({
+        id: teacherInfo.pessoaid,
+        payload: {
+          nomeCompleto: teacherInfo.name,
+          numDocIdentificacao: teacherInfo.numero_documento || null,
+          email: teacherInfo.email || null,
+          dataDeNascimento: teacherInfo.birthDate,
+          telefone1: teacherInfo.phone || null,
+          telefone2: teacherInfo.phone2 || null,
+
+
+        },
+      });
+
+
+    } catch (error) {
+      toast.error("Erro ao atualizar informações pessoais.");
+    }
+
+  }
 
   const isLoading = isLoadingAcademicYear || teacherInfoDataLoading || isLoadingTurmaData;
   const hasError = isErrorAcademicYear || teacherInfoError || isErrorTurma;
@@ -653,6 +696,15 @@ const TeacherProfile = () => {
                         onChange={(e) => setTeacherInfo({ ...teacherInfo, birthDate: e.target.value })} />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label>Documento</Label>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <Input value={teacherInfo.numero_documento} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, numero_documento: e.target.value })} />
+                    </div>
+                  </div>
+                  {/*
                   <div className="space-y-2 md:col-span-2">
                     <Label>Endereço</Label>
                     <div className="flex items-center gap-2">
@@ -661,55 +713,56 @@ const TeacherProfile = () => {
                         onChange={(e) => setTeacherInfo({ ...teacherInfo, address: e.target.value })} />
                     </div>
                   </div>
+                  */}
                 </div>
               </TabsContent>
 
               {/* PROFISSIONAL */}
-         <TabsContent value="professional" className="space-y-4 pt-4">
-  {!isDocente ? (
-    <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
-      <AlertTriangle className="h-5 w-5" />
-      <AlertTitle className="font-semibold">Acesso Restrito</AlertTitle>
-      <AlertDescription className="mt-1 space-y-1">
-        <p>
-          Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
-           os seus dados profissionais.
-        </p>
-        <p>
-          A sua conta não está associada a um perfil de docente, pelo que não tem permissão
-          para visualizar estes dados.
-        </p>
-      </AlertDescription>
-    </Alert>
-  ) : (
-    <div className="grid gap-4 md:grid-cols-2">
-      <div className="space-y-2">
-        <Label>Nº de Funcionário</Label>
-        <Input value={teacherInfo.employeeId} disabled />
-      </div>
-      <div className="space-y-2">
-        <Label>Categoria</Label>
-        <Input value={teacherInfo.category} disabled={!isEditing}
-          onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
-      </div>
-      <div className="space-y-2">
-        <Label>Faculdade / Departamento</Label>
-        <Input value={teacherInfo.department} disabled />
-      </div>
-      <div className="space-y-2">
-        <Label>Escalão</Label>
-        <Input value={teacherInfo.office} disabled={!isEditing}
-          onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
-      </div>
-      <div className="space-y-2 md:col-span-2">
-        <Label>Data de Admissão</Label>
-        <Input
-          value={teacherInfo.hireDate ? new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO") : ""}
-          disabled />
-      </div>
-    </div>
-  )}
-</TabsContent>
+              <TabsContent value="professional" className="space-y-4 pt-4">
+                {!isDocente ? (
+                  <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+                    <AlertTriangle className="h-5 w-5" />
+                    <AlertTitle className="font-semibold">Acesso Restrito</AlertTitle>
+                    <AlertDescription className="mt-1 space-y-1">
+                      <p>
+                        Esta secção destina-se exclusivamente a <strong>docentes</strong> e permite consultar
+                        os seus dados profissionais.
+                      </p>
+                      <p>
+                        A sua conta não está associada a um perfil de docente, pelo que não tem permissão
+                        para visualizar estes dados.
+                      </p>
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Nº de Funcionário</Label>
+                      <Input value={teacherInfo.employeeId} disabled />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Categoria</Label>
+                      <Input value={teacherInfo.category} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, category: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Faculdade / Departamento</Label>
+                      <Input value={teacherInfo.department} disabled />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Escalão</Label>
+                      <Input value={teacherInfo.office} disabled={!isEditing}
+                        onChange={(e) => setTeacherInfo({ ...teacherInfo, office: e.target.value })} />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label>Data de Admissão</Label>
+                      <Input
+                        value={teacherInfo.hireDate ? new Date(teacherInfo.hireDate).toLocaleDateString("pt-AO") : ""}
+                        disabled />
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
 
               {/* HORÁRIOS */}
               <TabsContent value="classes" className="pt-4">
@@ -853,16 +906,16 @@ const TeacherProfile = () => {
 
               </TabsContent>
             </Tabs>
-        {isEditing && activeTab !== "classes" && activeTab  && !(activeTab === "professional" && !isDocente) && (
-  <div className="mt-8 flex gap-3">
-    <Button onClick={handleSave} className="flex-1">
-      Guardar Alterações
-    </Button>
-    <Button variant="outline" onClick={() => setIsEditing(false)}>
-      Cancelar
-    </Button>
-  </div>
-)}
+            {isEditing && activeTab !== "classes" && activeTab && !(activeTab === "professional" && !isDocente) && (
+              <div className="mt-8 flex gap-3">
+                <Button onClick={handleSave} className="flex-1" disabled={isUpdatingPassword || isUpdatingUser}>
+                  Guardar Alterações
+                </Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

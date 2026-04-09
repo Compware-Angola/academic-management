@@ -1,4 +1,5 @@
 // hooks/useStudents.ts
+import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password";
 import {
   fetchStudentEstatisticas,
   fetchStudentsSugestoes,
@@ -7,6 +8,8 @@ import {
   StudentSugestao,
   DisciplinasResponse,
   FetchDisciplinasMatriculadasParams,
+  UpdatePersonalDataPayload,
+  updatePersonalData,
 } from "@/services/students/students.service";
 
 import {
@@ -14,8 +17,10 @@ import {
   ListStudentsPayload,
   ListStudentsResponse,
 } from "@/services/students/students.service";
+import { updateContacts, UpdateContactsPayload } from "@/services/students/update-contacts";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 /* =============================================
    Sugestões de alunos (busca por nome, BI, etc.)
@@ -107,5 +112,43 @@ export function useQueryStudents(payload: ListStudentsPayload) {
       limit,
     ],
     queryFn: () => getListStudentsService(payload),
+  });
+}
+
+export function useResetPassword() {
+  return useMutation<void, Error, ResetPasswordPayload>({
+    mutationFn: (payload) => resetPassword(payload),
+    onSuccess: () => {
+      toast.success("Senha redefinida com sucesso!");
+    },
+  });
+}
+
+export function useUpdateContacts() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, UpdateContactsPayload>({
+    mutationFn: (payload) => updateContacts(payload),
+    onSuccess: () => {
+      toast.success("Contactos atualizados com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+
+
+export function useUpdatePersonalData() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdatePersonalDataPayload) => updatePersonalData(payload),
+    onSuccess: () => {
+      toast.success("Dados pessoais atualizados com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
   });
 }

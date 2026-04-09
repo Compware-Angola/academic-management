@@ -1,16 +1,16 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export interface UpdatePersonUserRequest {
-  nomeCompleto: string;
-  numDocIdentificacao: string;
-  email: string;
-  dataDeNascimento: string; 
-  tipoDocumentoId: number;
-  sexoId: number;
-  estadoCivilId: number;
-  nacionalidadeId: number;
-  telefone1: string;
-  telefone2: string;
+  nomeCompleto?: string;
+  numDocIdentificacao?: string;
+  email?: string;
+  dataDeNascimento?: string; 
+  tipoDocumentoId?: number;
+  sexoId?: number;
+  estadoCivilId?: number;
+  nacionalidadeId?: number;
+  telefone1?: string;
+  telefone2?: string;
 }
 
 export interface UpdatePersonUserResponse {
