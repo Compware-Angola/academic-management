@@ -8,8 +8,11 @@ interface CourseSelectProps {
   labelMode?: "inside" | "outside"; // 👈 decisão sobe
   onChangeValue: (v: string) => void;
   params?: CursoParams;
+  showLabel?: boolean;
   disabled?: boolean;
-  label?:string
+  placeholder?: string;
+  width?: string;
+  label?: string;
   enableDefaultSelectItem?: boolean;
 }
 const CourseSelect = ({
@@ -18,8 +21,11 @@ const CourseSelect = ({
   value,
   params,
   enableDefaultSelectItem,
-  label="Cursos",
+  label = "Cursos",
+  placeholder,
+  width = "full",
   labelMode = "outside",
+  showLabel = true,
 }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
   const id = useId();
@@ -37,11 +43,12 @@ const CourseSelect = ({
       <FormCommandSelect
         disabled={disabled || loadingCursos}
         value={value}
-        label= {label}
+        label={showLabel ? label : undefined}
         labelMode={labelMode}
         isLoading={loadingCursos}
+        placeholder={placeholder}
         defaultSelectItem={defaultSelectItem}
-        width="full"
+        width={width}
         options={cursos}
         map={(f) => ({
           key: f.codigo.toString(),

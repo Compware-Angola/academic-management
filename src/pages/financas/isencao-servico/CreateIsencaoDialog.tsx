@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { useQueryStudents } from "@/hooks/tudents/use-query-students";
 import { parseFilter } from "@/util/parse-filter";
-import { Banknote, Eye, GraduationCap, RefreshCw } from "lucide-react";
+import { Banknote, Eye, GraduationCap, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
 import { useMutationCreateIsencaoServico } from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-servico.ts";
 import { useToast } from "@/hooks/use-toast";
@@ -114,7 +114,6 @@ export function CreateIsencaoDialog({
 
   const { data: studentsResponse, isLoading: isLoadingStudent } =
     useQueryStudents({
-      anoLectivo: parseFilter(filtersApplied.anoLectivo),
       codigoCurso: parseFilter(filtersApplied.curso),
       codigoMatricula: parseFilter(filtersApplied.matricula),
       faculdadeId: parseFilter(filtersApplied.faculdade),
@@ -129,7 +128,7 @@ export function CreateIsencaoDialog({
       {
         codigoMatriculas: selectedStudents,
         codigoServico: parseFilter(filters.codigoServico),
-        codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
+        codigoAnoLectivo: parseFilter(filters.anoLectivo),
       },
       {
         onSuccess(response) {
@@ -162,16 +161,17 @@ export function CreateIsencaoDialog({
             <DialogTitle>Criar Nova Isenção de Serviço</DialogTitle>
           </div>
         </DialogHeader>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <AcademicYearSelect
             value={filters.anoLectivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
           />
+          {/*
           <FacultySelect
             value={filters.faculdade}
             onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
           />
-          <CourseSelect
+           <CourseSelect
             params={{
               faculdadeId: parseFilter(filters.faculdade),
             }}
@@ -187,27 +187,58 @@ export function CreateIsencaoDialog({
                 setFilters({ ...filters, matricula: e.target.value })
               }
             />
-          </div>
+
+          </div> */}
           <TypeServiceSelectList
             type="EXCEPTION"
             value={filters.codigoServico}
             onChangeValue={(v) => setFilters({ ...filters, codigoServico: v })}
           />
-          <div className="flex items-end">
-            <Button onClick={handleSearch} disabled={disabledPesquisaButtom}>
-              <RefreshCw
-                className={`h-4 w-4 mr-2 ${isLoadingStudent ? "animate-spin" : ""}`}
-              />
-              Pesquisar
-            </Button>
-          </div>
         </div>
 
         <div className="mt-5">
-          <h3 className="flex items-center gap-2 font-semibold text-lg mb-4">
-            <GraduationCap className="h-5 w-5 text-primary" />
-            Estudantes
-          </h3>
+          <div className="flex justify-between  mb-2">
+            <h3 className="flex items-center gap-2 font-semibold text-lg">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              Estudantes
+            </h3>
+            <div className="flex space-x-2">
+              <FacultySelect
+                allOption
+                width="sm"
+                placeholder="Faculdade"
+                showLabel={false}
+                value={filters.faculdade}
+                onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+              />
+              <CourseSelect
+                enableDefaultSelectItem
+                width="sm"
+                showLabel={false}
+                params={{
+                  faculdadeId: parseFilter(filters.faculdade),
+                }}
+                value={filters.curso}
+                onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+              />
+              <Input
+                placeholder="Matricula"
+                className="w-[200px]!"
+                value={filters.matricula}
+                onChange={(e) =>
+                  setFilters({ ...filters, matricula: e.target.value })
+                }
+              />
+              <div className="flex items-end">
+                <Button
+                  onClick={handleSearch}
+                  disabled={disabledPesquisaButtom}
+                >
+                  <Search />
+                </Button>
+              </div>
+            </div>
+          </div>
           <div className="h-[400px] overflow-y-auto border rounded-md">
             <Table>
               <TableHeader className="sticky top-0 z-10">
