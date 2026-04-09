@@ -74,7 +74,6 @@ import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida"
 import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
-import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
@@ -137,6 +136,11 @@ import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
+import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
+import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
+import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
+import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
+import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 
 const App = () => {
   return (
@@ -639,6 +643,10 @@ const App = () => {
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
+                  <Route
+                    path="/estudante-legado/:matricula"
+                    element={<PerfilEstudanteLegado />}
+                  />
 
                   {/* EXAME ACESSO */}
 
@@ -823,7 +831,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                    <Route
+                  <Route
                     path="/horarios/docentes-substitutos"
                     element={
                       <ProtectedRoute
@@ -1279,6 +1287,33 @@ const App = () => {
                   />
 
                   <Route
+                    path="/inscricoes/estatisticas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
+                        ]}
+                      >
+                        <EstatisticaDeEstudantesAprovadosEReprovados />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/sem-curso"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla!,
+                        ]}
+                      >
+                        <SemInscricaoCurso />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
                     path="/gestao-docentes/docentes"
                     element={
                       <ProtectedRoute
@@ -1290,12 +1325,23 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/financas/mensalidades-pagas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA
+                            .sigla!,
+                        ]}
+                      >
+                        <PagamentoMensal />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   <Route
                     path="/gestao-docentes/regentes"
-
                     element={
-
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
@@ -1303,8 +1349,7 @@ const App = () => {
                       >
                         <Regentes />
                       </ProtectedRoute>
-                  }
-
+                    }
                   />
 
                   <Route

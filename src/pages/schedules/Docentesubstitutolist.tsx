@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -72,11 +72,16 @@ import { useQueryDocenteSubstituto } from "@/hooks/horario/use-docente-substitut
 import { useMutationDeletarDocenteSubstituto } from "@/hooks/horario/use-mutation-deletar-docente-substituto";
 import { useMutationAtualizarDocenteSubstituto } from "@/hooks/horario/use-mutation-atualizar-docente-substituto";
 import { DocenteSubstituto } from "@/services/horario/listar-docente-substituto.service";
+import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
+import { i } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 
 
 type EditForm = {
   fkDocenteOriginal: string;
   fkDocenteSubstituto: string;
+  nomeDocenteOriginal: string;
   fkHorario: string;
   dataInicio: string;
   dataTermino: string;
@@ -85,6 +90,13 @@ type EditForm = {
 
 export default function DocenteSubstitutoList() {
   const navigate = useNavigate();
+
+    const {
+      data: docentes = [],
+  
+      refetch,
+      error,
+    } = useQueryTeacther();
 
   // Delete
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -99,6 +111,7 @@ export default function DocenteSubstitutoList() {
     fkHorario: "",
     dataInicio: "",
     dataTermino: "",
+    nomeDocenteOriginal: "",
     obs: "",
   });
 
@@ -210,6 +223,7 @@ export default function DocenteSubstitutoList() {
       dataInicio: parseDate(item.datainicio),
       dataTermino: parseDate(item.datatermino),
       obs: item.obs ?? "",
+      nomeDocenteOriginal: item.nomedocenteoriginal ?? "",
     });
     setIsEditDialogOpen(true);
   };
@@ -257,6 +271,101 @@ export default function DocenteSubstitutoList() {
     !!filters.dataInicio ||
     !!filters.dataTermino;
 
+  // ====================== EXPORTAÇÃO ======================
+
+  const exportRows = useMemo(() =>
+    tableData.map((item) => ({
+      docenteOriginal: item.nomedocenteoriginal ?? "—",
+      idDocenteOriginal: item.fkdocenteoriginal ?? "",
+      docenteSubstituto: item.nomedocentesubstituto ?? "—",
+      idDocenteSubstituto: item.fkdocentesubstituto ?? "",
+      unidadeCurricular: item.unidadecurricular ?? "—",
+      curso: item.curso ?? "—",
+
+      periodoSubstituicao: `${item.datainicio ?? "—"} → ${item.datatermino ?? "—"}`,
+      criadoPor: item.criadopor ?? "—",
+      criadoEm: item.datacriacao ?? "—",
+    })),
+    [tableData]
+  );
+
+  // Filtros aplicados para mostrar no PDF/Excel
+  const filtrosAplicados = [
+    filters.anoLetivo ? `Ano Letivo: ${filters.anoLetivo}` : null,
+    filters.semestre ? `Semestre: ${filters.semestre}` : null,
+    filters.periodo ? `Período: ${filters.periodo}` : null,
+    filters.curso ? `Curso: ${filters.curso}` : null,
+    filters.anoCurricular && filters.anoCurricular !== "all"
+      ? `Ano Curricular: ${filters.anoCurricular}`
+      : null,
+    filters.unidadeCurricular ? `UC: ${filters.unidadeCurricular}` : null,
+    filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
+    filters.dataTermino ? `Data Término: ${filters.dataTermino}` : null,
+  ]
+    .filter(Boolean)
+    .join(" | ");
+
+  const pdfData = exportRows.length
+    ? {
+      filtros: filtrosAplicados || "Sem filtros aplicados",
+      rows: exportRows,
+    }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Docentes Substitutos"
+      subtitle="Lista de substituições de docentes por horário"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "docenteOriginal", label: "Docente Original", width: "22%" },
+          { key: "docenteSubstituto", label: "Docente Substituto", width: "22%" },
+          { key: "unidadeCurricular", label: "Unidade Curricular", width: "20%" },
+          { key: "curso", label: "Curso", width: "12%" },
+
+          { key: "periodoSubstituicao", label: "Período Substituição", width: "18%" },
+          { key: "criadoPor", label: "Criado Por", width: "10%" },
+          { key: "criadoEm", label: "Criado Em", width: "10%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+      documentTitle: "Docentes Substitutos",
+      subtitle: "Lista de substituições de docentes por horário",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "docenteOriginal", label: "Docente Original", width: 30 },
+          { key: "docenteSubstituto", label: "Docente Substituto", width: 30 },
+          { key: "unidadeCurricular", label: "Unidade Curricular", width: 35 },
+          { key: "curso", label: "Curso", width: 25 },
+
+          { key: "periodoSubstituicao", label: "Período Substituição", width: 25 },
+          { key: "criadoPor", label: "Criado Por", width: 20 },
+          { key: "criadoEm", label: "Criado Em", width: 18 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+    : null;
+
+  const baseFileName = `Docentes_Substitutos_${new Date().toISOString().slice(0, 10)}`;
+
   return (
     <div className="p-12 space-y-12">
       {/* Breadcrumb e título */}
@@ -286,7 +395,25 @@ export default function DocenteSubstitutoList() {
             Gerencie as substituições de docentes por horário, período e curso.
           </p>
         </div>
-       
+        <div className="flex flex-wrap gap-2">
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+
+          {excelProps && (
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          )}
+        </div>
+
       </div>
 
       {/* Filtros */}
@@ -328,17 +455,17 @@ export default function DocenteSubstitutoList() {
               map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
             />
 
-           <div className="space-y-2">
-            <FormSelect
-              disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLetivo === ""}
-              loading={isLoadingPeriodos}
-              label="Período"
-              value={filters.periodo?.toString() ?? "all"}
-              onChange={(v) => setFilters((p) => ({ ...p, periodo: v === "all" ? undefined : v, page: 1 }))}
-              options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
-              map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
-            />
-          </div>
+            <div className="space-y-2">
+              <FormSelect
+                disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLetivo === ""}
+                loading={isLoadingPeriodos}
+                label="Período"
+                value={filters.periodo?.toString() ?? "all"}
+                onChange={(v) => setFilters((p) => ({ ...p, periodo: v === "all" ? undefined : v, page: 1 }))}
+                options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
+                map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+              />
+            </div>
             <FormCommandSelect
               value={filters.curso}
               label="Curso"
@@ -465,9 +592,10 @@ export default function DocenteSubstitutoList() {
                       <TableHead>Unidade Curricular</TableHead>
                       <TableHead>Curso</TableHead>
                       <TableHead>Horário</TableHead>
-                      
+
                       <TableHead>Período Substituição</TableHead>
                       <TableHead>Criado por</TableHead>
+                      <TableHead>Atualizado por</TableHead>
                       <TableHead>Criado em</TableHead>
                       <TableHead className="text-center">Ações</TableHead>
                     </TableRow>
@@ -504,7 +632,7 @@ export default function DocenteSubstitutoList() {
                             {item.designacaohorario ?? "—"}
                           </span>
                         </TableCell>
-                      
+
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm">
                             <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -515,6 +643,9 @@ export default function DocenteSubstitutoList() {
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {item.criadopor ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {item.atualizadopor ?? "—"}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {item.datacriacao ?? "—"}
@@ -540,7 +671,7 @@ export default function DocenteSubstitutoList() {
                               }
                             >
                               {deleteMutation.isPending &&
-                              itemIdToDelete === item.codigo ? (
+                                itemIdToDelete === item.codigo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
@@ -605,7 +736,7 @@ export default function DocenteSubstitutoList() {
 
       {/* ===== DIALOG EDITAR ===== */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[520px]">
+        <DialogContent className="sm:max-w-[580px]!">
           <DialogHeader>
             <DialogTitle>Editar Substituição</DialogTitle>
             <DialogDescription>
@@ -616,37 +747,36 @@ export default function DocenteSubstitutoList() {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>ID Docente Original</Label>
+                <Label>Docente Original</Label>
                 <Input
-                  type="number"
-                  value={editForm.fkDocenteOriginal}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, fkDocenteOriginal: e.target.value })
-                  }
+                  value={editForm.nomeDocenteOriginal}
+                  disabled
+                  className="bg-muted/50 cursor-not-allowed font-medium"
                 />
+                <p className="text-xs text-muted-foreground">
+                  ID: {editForm.fkDocenteOriginal}
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label>ID Docente Substituto</Label>
-                <Input
-                  type="number"
-                  value={editForm.fkDocenteSubstituto}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, fkDocenteSubstituto: e.target.value })
-                  }
-                />
-              </div>
+             
+                  <div className="space-y-2">
+                            <Label>Docente Substituto <span className="text-red-500">*</span></Label>
+                            <FormCommandSelect
+                              value={editForm.fkDocenteSubstituto}
+                              placeholder="Selecione o docente substituto"
+                              options={docentes}
+                              map={(d: any) => ({
+                                key: d.codigo?.toString(),
+                                value: d.codigo?.toString(),
+                                label: d.nome,
+                              })}
+                              onChange={(v) => setEditForm((p) => ({ ...p, fkDocenteSubstituto: v }))}
+                              disabled={isLoadingSubstitutos || docentes.length === 0}
+                            />
+                          </div>
+              
             </div>
 
-            <div className="space-y-2">
-              <Label>ID Horário</Label>
-              <Input
-                type="number"
-                value={editForm.fkHorario}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, fkHorario: e.target.value })
-                }
-              />
-            </div>
+         
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">

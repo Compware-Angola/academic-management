@@ -55,7 +55,8 @@ export type StudentDetail = {
   bi_aluno: string;
 
   email: string | null; // pode vir null
-  telefonicos: string;
+  contacto: string | null;
+  contacto_alternativo: string | null;
   sexo: string;
   data_nascimento: string; // ISO: "1982-05-24T23:00:00.000Z"
   foto: string;

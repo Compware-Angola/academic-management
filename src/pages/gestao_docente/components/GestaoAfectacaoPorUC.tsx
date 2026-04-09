@@ -189,13 +189,15 @@ const GestaoAfectacaoPorUC = () => {
                           {formatarData(item.data)}
                         </TableCell>
                         <TableCell>
-                          <Switch
-                            onCheckedChange={(v) =>
-                              updateAfectacaoStatus(item.codigo, v)
-                            }
-                            id="deleted-mode"
-                            checked={item.estado == 1}
-                          />
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              onCheckedChange={(v) =>
+                                updateAfectacaoStatus(item.codigo, v)
+                              }
+                              id="deleted-mode"
+                              checked={item.estado == 1}
+                            />
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
