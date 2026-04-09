@@ -117,3 +117,22 @@ export async function resetPassword(token: string, newPassword: string): Promise
     .post('auth/reset-password', { token, newPassword, platform: 'GA' 
     })
 }
+export class UpdatePasswordPayload {
+  senhaAtual: string;
+  novaSenha: string;
+  confirmarNovaSenha: string;
+  platform?: 'GA' | 'PORTAL' = 'GA';
+}
+export interface UpdatePasswordResponse {
+  mensagem: string;
+}
+export async function updatePasswordService(
+  payload: UpdatePasswordPayload
+): Promise<UpdatePasswordResponse> {
+  const { data } = await axiosNestAuth.put<UpdatePasswordResponse>(
+    "/auth/update-password",
+    payload
+  );
+
+  return data;
+}

@@ -8,6 +8,8 @@ import {
   StudentSugestao,
   DisciplinasResponse,
   FetchDisciplinasMatriculadasParams,
+  UpdatePersonalDataPayload,
+  updatePersonalData,
 } from "@/services/students/students.service";
 
 import {
@@ -98,22 +100,17 @@ export const invalidateStudentQueries = (
 };
 
 export function useQueryStudents(payload: ListStudentsPayload) {
-  const { anoLectivo, codigoCurso, faculdadeId, codigoMatricula, page, limit } =
-    payload;
-
-  const enabled = !!anoLectivo;
+  const { codigoCurso, faculdadeId, codigoMatricula, page, limit } = payload;
 
   return useQuery<ListStudentsResponse>({
     queryKey: [
       "students",
-      anoLectivo,
       codigoCurso,
       faculdadeId,
       codigoMatricula,
       page,
       limit,
     ],
-    enabled,
     queryFn: () => getListStudentsService(payload),
   });
 }
@@ -133,6 +130,22 @@ export function useUpdateContacts() {
     mutationFn: (payload) => updateContacts(payload),
     onSuccess: () => {
       toast.success("Contactos atualizados com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+
+
+export function useUpdatePersonalData() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdatePersonalDataPayload) => updatePersonalData(payload),
+    onSuccess: () => {
+      toast.success("Dados pessoais atualizados com sucesso!");
       queryClient.invalidateQueries({
         queryKey: ["student-detail"],
       });

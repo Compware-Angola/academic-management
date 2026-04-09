@@ -53,12 +53,15 @@ export type StudentDetail = {
   morada: string;
   nome_completo: string;
   bi_aluno: string;
-
+  data_emissao_bi: string;
+  data_validade_bi: string;
   email: string | null; // pode vir null
   contacto: string | null;
   contacto_alternativo: string | null;
   sexo: string;
-  data_nascimento: string; // ISO: "1982-05-24T23:00:00.000Z"
+  data_nascimento: string; 
+  ocupacao_codigo: number;
+  profissao_codigo: number;
   foto: string;
   saldo_atual: number;
   saldo_anterior: number;
@@ -151,7 +154,7 @@ export const fetchDisciplinasMatriculadas = async (
 
 //OBTER TODOS OS ESTUDANTES
 export type ListStudentsPayload = {
-  anoLectivo: number;
+  anoLectivo?: number;
   codigoCurso?: number;
   faculdadeId?: number;
   codigoMatricula?: number;
@@ -189,7 +192,7 @@ export async function getListStudentsService(
 
   const { data } = await axiosNestGa.get<ListStudentsResponse>("/students", {
     params: {
-      anoLectivo,
+      //anoLectivo,
       codigoCurso,
       faculdadeId,
       codigoMatricula,
@@ -199,4 +202,27 @@ export async function getListStudentsService(
   });
 
   return data;
+}
+
+
+export type UpdatePersonalDataPayload = {
+  codigoMatricula: number;
+  nomeCompleto?: string;
+  dataNascimento?: string;
+  genero?: string;
+  numeroBI?: string;
+  dataEmissao?: string;
+  dataValidade?: string;
+  nacionalidade?: string;
+  nomePai?: string;
+  nomeMae?: string;
+  profissao?: number;
+  ocupacao?: number;
+  naturalidade?: string;
+  morada?: string;
+};
+
+export async function updatePersonalData(data: UpdatePersonalDataPayload) { 
+  const response = await axiosNestGa.put(`/students/personal-data`, data);
+  return response.data;
 }
