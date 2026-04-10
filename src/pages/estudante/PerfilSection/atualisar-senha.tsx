@@ -12,7 +12,7 @@ import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   useResetPassword,
   useStudentDetail,
-} from "@/hooks/tudents/use-query-students";
+} from "@/hooks/students/use-query-students";
 import { TabsContent } from "@/components/ui/tabs";
 import { PasswordFormField } from "@/components/PasswordFormField";
 

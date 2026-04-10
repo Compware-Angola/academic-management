@@ -1,4 +1,5 @@
 // hooks/useStudents.ts
+import { GetAcademicHistoryParams, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
 import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
 import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
 import {
@@ -166,3 +167,12 @@ export function useActiveRegistration() {
     },
   });
 }
+
+export const useStudentAcademicHistory = (params: GetAcademicHistoryParams) => {
+  return useQuery({
+    queryKey: ['student-academic-history', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryFn: () => studentAcademicHistoryService(params),
+    enabled: !!params.matriculaId && !!params.anoLectivoId,
+    staleTime: 1000 * 60 * 5,
+  });
+};

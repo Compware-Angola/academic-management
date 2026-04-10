@@ -13,7 +13,7 @@ import {
   useStudentDetail,
   useUpdatePersonalData,
   // useUpdateStudentDetails <- Supondo que você criará este hook
-} from "@/hooks/tudents/use-query-students";
+} from "@/hooks/students/use-query-students";
 import { useEffect, useState } from "react";
 import {
   useNacionalidadesDropdownFilter,
