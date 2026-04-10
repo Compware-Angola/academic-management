@@ -46,7 +46,6 @@ export function AtualizarSenha({
     },
   });
 
-
   useEffect(() => {
     if (student?.bi) {
       form.reset({
