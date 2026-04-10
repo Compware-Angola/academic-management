@@ -751,6 +751,12 @@ const TeacherProfile = () => {
     setPasswords({ current: "", new: "", confirm: "" });
   }, [teacherInfoData]);
 
+  function formatToInputDate(date: string | null) {
+    if (!date) return "";
+    const [day, month, year] = date.split("/");
+    return `${year}-${month}-${day}`;
+  }
+
   const handlePasswordSave = useCallback(async () => {
     if (!passwords.current) return toast.error("Introduza a senha atual.");
     if (passwords.new.length < 8) return toast.error("A senha deve ter no mínimo 8 caracteres.");
@@ -769,17 +775,7 @@ const TeacherProfile = () => {
       // Error toast handled by the mutation hook
     }
   }, [passwords, updatePassword]);
-  function convertPTDateToISO(date: string) {
-    if (!date) return "";
-    const [day, month, year] = date.split("/");
-    return `${year}-${month}-${day}`;
-  }
-  function convertISOToPTDate(date: string) {
-    if (!date) return "";
 
-    const [year, month, day] = date.split("-");
-    return `${day}/${month}/${year}`;
-  }
   const handlePersonalUpdate = useCallback(async () => {
     if (!teacherInfo.name || !teacherInfo.email) {
       return toast.error("Nome e email são obrigatórios.");
@@ -807,7 +803,7 @@ const TeacherProfile = () => {
           nomeCompleto: teacherInfo.name,
           numDocIdentificacao: teacherInfo.numero_documento || null,
           email: teacherInfo.email || null,
-          dataDeNascimento: teacherInfo.birthDate,
+          dataDeNascimento: formatToInputDate(teacherInfo.birthDate),
           telefone1: teacherInfo.phone || null,
           telefone2: teacherInfo.phone2 || null,
         },

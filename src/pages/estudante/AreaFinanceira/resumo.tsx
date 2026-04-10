@@ -301,14 +301,6 @@ export function Resumo({
     return <div>Matrícula inválida</div>;
   }
 
-  if (isLoading || isFetching) {
-    return <div>A carregar dados do estudante...</div>;
-  }
-
-  if (error || !student) {
-    return <div>Estudante não encontrado</div>;
-  }
-
   const estudante = mockEstudante;
 
   const getEstadoLabel = (estado: string | undefined) => {
