@@ -179,6 +179,7 @@ export default function VinculosTFC() {
                 }}
               >
                 <RefreshCcw className="h-4 w-4" />
+                Atualizar
               </Button>
             </div>
           </div>
