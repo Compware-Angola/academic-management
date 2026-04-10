@@ -1,15 +1,7 @@
 import { TabsContent } from "@/components/ui/tabs";
-import { useQueryStudentNotes } from "@/hooks/tudents/use-query-student-notes";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Table,
   TableBody,
@@ -20,17 +12,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  RefreshCw,
-  Search,
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  AlertCircle,
-  Info,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { FileText, AlertCircle, Info } from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
@@ -40,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryStudentNotes } from "@/hooks/students/use-query-student-notes";
 
 type NotesProps = {
   codigoMatricula: number;
