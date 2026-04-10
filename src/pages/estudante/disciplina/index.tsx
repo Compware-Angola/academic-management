@@ -94,14 +94,6 @@ export function DisciplinasSection({
     return <div>Matrícula inválida</div>;
   }
 
-  if (isLoading || isFetching) {
-    return <div>A carregar dados do estudante...</div>;
-  }
-
-  if (error || !student) {
-    return <div>Estudante não encontrado</div>;
-  }
-
   const getEstadoLabel = (estado: string | undefined) => {
     if (!estado) return "—";
     if (estado === "Fez com Sucesso") return "Aprovado";

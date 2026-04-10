@@ -110,9 +110,6 @@ export function DadosPessoais({
     }
   }, [student, form]);
 
-  if (isLoading)
-    return <div className="p-4 text-center">A carregar dados...</div>;
-
   async function onSubmit(values: FormValues) {
     try {
       await updateMutation.mutateAsync({

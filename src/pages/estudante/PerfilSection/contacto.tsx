@@ -12,7 +12,6 @@ import {
   useUpdateContacts,
 } from "@/hooks/tudents/use-query-students";
 import { useEffect } from "react";
-import { toast } from "sonner";
 
 const schema = z.object({
   email: z.string().email("Email inválido").optional().or(z.literal("")),
@@ -35,7 +34,7 @@ export function Contacto({
   codigoMatricula,
   value = "contacto",
 }: ContactoProps) {
-  const { data: student, isLoading } = useStudentDetail(codigoMatricula);
+  const { data: student } = useStudentDetail(codigoMatricula);
   const updateContacts = useUpdateContacts();
 
   const form = useForm<FormValues>({
@@ -62,8 +61,6 @@ export function Contacto({
     student?.email !== watched.email ||
     student?.contacto !== watched.telefone ||
     student?.contacto_alternativo !== watched.telefoneAlternativo;
-
-  if (isLoading) return <div>A carregar dados do estudante...</div>;
 
   function onSubmit(values: FormValues) {
     updateContacts.mutateAsync({
