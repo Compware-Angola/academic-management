@@ -339,7 +339,10 @@ export default function PerfilEstudante() {
           value="area-financeira"
         />
 
-        <AvaliacaoSection value="avaliacao" />
+        <AvaliacaoSection
+          value="avaliacao"
+          codigoMatricula={Number(matricula)}
+        />
       </Tabs>
     </div>
   );
