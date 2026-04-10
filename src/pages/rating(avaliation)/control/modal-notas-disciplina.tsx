@@ -1,3 +1,7 @@
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { useMemo, useState } from "react";
 import {
   Dialog,
@@ -59,13 +63,101 @@ export function ModalNotasDisciplina({
     );
   }, [search, data]);
 
+    const exportRows = useMemo(
+    () =>
+      alunosFiltrados.map((aluno) => ({
+        matricula: aluno.matricula,
+        aluno: aluno.alunoNome,
+        nota: aluno.nota,
+        dataLancamento: format(new Date(aluno.dataLancamento), "dd/MM/yyyy"),
+      })),
+    [alunosFiltrados],
+  );
+
+  const pdfData = exportRows.length
+    ? {
+        total: exportRows.length,
+        rows: exportRows,
+      }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Notas lançadas"
+      subtitle={`Lista de alunos — ${pdfData.total} aluno(s)`}
+      infoSections={[
+        {
+          title: "Resumo",
+          content: [`Total de alunos: ${pdfData.total}`],
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: "18%" },
+          { key: "aluno", label: "Aluno", width: "44%" },
+          { key: "nota", label: "Nota", width: "12%" },
+          { key: "dataLancamento", label: "Data Lançamento", width: "26%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#1e40af",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Notas lançadas",
+        subtitle: `Lista de alunos — ${pdfData.total} aluno(s)`,
+        infoSections: [
+          {
+            title: "Resumo",
+            content: [`Total de alunos: ${pdfData.total}`],
+          },
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Nº Matrícula", width: 18 },
+            { key: "aluno", label: "Aluno", width: 35 },
+            { key: "nota", label: "Nota", width: 12 },
+            { key: "dataLancamento", label: "Data Lançamento", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#1e40af",
+      }
+    : null;
+
+  const baseFileName = `Notas_Lancadas_${new Date().toISOString().slice(0, 10)}`;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl!">
-        <DialogHeader>
-          <DialogTitle>
-            Notas lançadas — {alunosFiltrados.length} aluno(s)
-          </DialogTitle>
+        
+                <DialogHeader>
+          <div className="flex items-start justify-between gap-4">
+            <DialogTitle>
+              Notas lançadas — {alunosFiltrados.length} aluno(s)
+            </DialogTitle>
+
+            {pdfContent && excelProps && (
+              <div className="flex gap-2 shrink-0">
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+
+                <ExcelActions
+                  excelProps={excelProps}
+                  fileName={`${baseFileName}.xlsx`}
+                  showDownload
+                />
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
         {/* 🔎 Campo de pesquisa */}
