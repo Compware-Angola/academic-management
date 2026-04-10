@@ -310,6 +310,13 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
             />
           </div>
           <div className="space-y-2">
+            <FacultySelect
+            allOption
+            value={filters.codigoFaculdade}
+            onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
+          />
+          </div>
+            <div className="space-y-2">
             <CourseSelect
               value={filters.codigoCurso}
               onChangeValue={(v) => setFilters({ ...filters, codigoCurso: v })}
@@ -326,11 +333,7 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
           </div>
-          <FacultySelect
-            allOption
-            value={filters.codigoFaculdade}
-            onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
-          />
+        
         </div>
       </div>
 
@@ -565,60 +568,59 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
     </div>
 
     {/* Dados do Candidato (mesmo de antes) */}
-    <div className="flex-1 space-y-3 text-sm pt-3">
-       <div className="flex justify-between">
-        <span className="text-muted-foreground">Nome</span>
-        <span className="font-semibold font-mono">{modal.candidato?.nome ?? "—"}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Nº Inscrição</span>
-        <span className="font-semibold font-mono">{modal.candidato?.numero_inscricao ?? "—"}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Bilhete de Identidade</span>
-        <span className="font-semibold font-mono">{modal.candidato?.numero_bilhete ?? "—"}</span>
-      </div>
-       <div className="flex justify-between">
-        <span className="text-muted-foreground">Sexo</span>
-        <span className="font-semibold font-mono">{modal.candidato?.sexo ?? "—"}</span>
-      </div>
-       <div className="flex justify-between">
-        <span className="text-muted-foreground">Nacionalidade</span>
-        <span className="font-semibold font-mono">{modal.candidato?.nacionalidade ?? "—"}</span>
-      </div>
-     
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Curso</span>
-        <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.curso ?? "—"}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Média Final</span>
-        <span className="font-semibold">
-          <span className={
-            (modal.candidato?.media_final ?? 0) >= 14 ? "text-green-600" :
-            (modal.candidato?.media_final ?? 0) >= 10 ? "text-yellow-600" : "text-red-600"
-          }>
-            {modal.candidato?.media_final ?? "N/A"}
-          </span>
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Período</span>
-        <span className="font-semibold">{modal.candidato?.periodo ?? "—"}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Ano Lectivo</span>
-        <span className="font-semibold">{modal.candidato?.ano_lectivo ?? "—"}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-muted-foreground">Tipo Candidatura</span>
-        <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.tipo_candidatura ?? "—"}</span>
-      </div>
-       <div className="flex justify-between">
-        <span className="text-muted-foreground">Data Pre-Inscrição</span>
-        <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.data_preescrincao ?? "—"}</span>
-      </div>
-    </div>
+    <div className="flex-1 space-y-3 text-sm pt-3 overflow-y-auto max-h-[60vh] pr-1">
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Nome</span>
+    <span className="font-semibold font-mono">{modal.candidato?.nome ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Nº Inscrição</span>
+    <span className="font-semibold font-mono">{modal.candidato?.numero_inscricao ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Bilhete de Identidade</span>
+    <span className="font-semibold font-mono">{modal.candidato?.numero_bilhete ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Sexo</span>
+    <span className="font-semibold font-mono">{modal.candidato?.sexo ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Nacionalidade</span>
+    <span className="font-semibold font-mono">{modal.candidato?.nacionalidade ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Curso</span>
+    <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.curso ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Média Final</span>
+    <span className="font-semibold">
+      <span className={
+        (modal.candidato?.media_final ?? 0) >= 14 ? "text-green-600" :
+        (modal.candidato?.media_final ?? 0) >= 10 ? "text-yellow-600" : "text-red-600"
+      }>
+        {modal.candidato?.media_final ?? "N/A"}
+      </span>
+    </span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Período</span>
+    <span className="font-semibold">{modal.candidato?.periodo ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Ano Lectivo</span>
+    <span className="font-semibold">{modal.candidato?.ano_lectivo ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Tipo Candidatura</span>
+    <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.tipo_candidatura ?? "—"}</span>
+  </div>
+  <div className="flex justify-between">
+    <span className="text-muted-foreground">Data Pre-Inscrição</span>
+    <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.data_preescrincao ?? "—"}</span>
+  </div>
+</div>
   </div>
 </div>
           {/* Tabs + conteúdo scrollável */}

@@ -4,11 +4,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { KeyRound, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import { useResetPassword } from "@/hooks/tudents/use-query-students";
+import {
+  useResetPassword,
+  useStudentDetail,
+} from "@/hooks/students/use-query-students";
 import { TabsContent } from "@/components/ui/tabs";
 import { PasswordFormField } from "@/components/PasswordFormField";
 
@@ -18,7 +22,6 @@ const schema = z.object({
     .min(8, "A senha deve ter pelo menos 8 caracteres")
     .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
     .regex(
-      // eslint-disable-next-line no-useless-escape
       /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\/\\]/,
       "Deve conter pelo menos um caractere especial",
     ),
@@ -33,16 +36,37 @@ export function AtualizarSenha({
   codigoMatricula: number;
   value?: string;
 }) {
+  const { data: student, isLoading } = useStudentDetail(codigoMatricula);
   const resetPassword = useResetPassword();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { novaSenha: "" },
+    defaultValues: {
+      novaSenha: "",
+    },
   });
 
-  function onSubmit(values: FormValues) {
-    resetPassword.mutateAsync({ codigoMatricula, senha: values.novaSenha });
-    form.reset();
+  useEffect(() => {
+    if (student?.bi) {
+      form.reset({
+        novaSenha: `${student.bi}@`,
+      });
+    } else {
+      form.reset({
+        novaSenha: "",
+      });
+    }
+  }, [student, form]);
+
+  async function onSubmit(values: FormValues) {
+    await resetPassword.mutateAsync({
+      codigoMatricula,
+      senha: values.novaSenha,
+    });
+
+    form.reset({
+      novaSenha: student?.bi ? `${student.bi}@` : "",
+    });
   }
 
   return (
@@ -51,9 +75,27 @@ export function AtualizarSenha({
         <KeyRound className="h-5 w-5 text-muted-foreground" />
         <CardTitle className="text-lg">Atualizar Senha</CardTitle>
       </div>
-      <CardDescription>
-        Define uma nova senha para este estudante.
+
+      <CardDescription className="flex flex-col gap-2">
+        {isLoading ? (
+          <div className="space-y-2">
+            <div className="h-4 w-40 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-64 bg-muted animate-pulse rounded" />
+          </div>
+        ) : (
+          <>
+            <span>Define uma nova senha para este estudante.</span>
+
+            {student?.bi && (
+              <span className="text-red-500">
+                <span className="font-bold">Atenção:</span> A senha padrão é o
+                BI do estudante seguido de "@".
+              </span>
+            )}
+          </>
+        )}
       </CardDescription>
+
       <Form {...form}>
         <form
           onSubmit={(e) => {
@@ -69,11 +111,12 @@ export function AtualizarSenha({
             label="Nova Senha"
             showStrength
           />
+
           <div className="flex justify-end">
             <Button
               type="submit"
               className="w-full md:w-auto"
-              disabled={resetPassword.isPending}
+              disabled={resetPassword.isPending || isLoading}
             >
               {resetPassword.isPending ? (
                 <>

@@ -9,19 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCandidatosSemProva } from "@/hooks/access_exam/use-candidatos-sem-prova";
 import { parseFilter } from "@/util/parse-filter";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type Filters = {
   codigoAnoLetivo: string;
   codigoCurso: string;
   codigoTurno: string;
   statusProva: string;
+  search: string;
   page: number;
   limit: number;
 };
@@ -31,6 +34,7 @@ const INITIAL: Filters = {
   codigoCurso: "",
   codigoTurno: "",
   statusProva: "",
+  search: "",
   page: 1,
   limit: 10,
 };
@@ -49,6 +53,7 @@ export function CandidatosComProvaTab() {
     codigoTurno: parseFilter(filters.codigoTurno),
     filtroProva: "com_prova",
     statusProva: parseFilter(filters.statusProva),
+    search: filters.search,
     page: filters.page,
     limit: filters.limit,
   });
@@ -228,6 +233,18 @@ export function CandidatosComProvaTab() {
               map={(item) => item}
             />
           </div>
+                <div className="space-y-2">
+                      <Label>Pesquisar</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          className="pl-9"
+                          placeholder="Pesquisar por nome ou BI"
+                          value={filters.search}
+                          onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))}
+                        />
+                      </div>
+                    </div>
         </div>
       </div>
 
@@ -245,6 +262,7 @@ export function CandidatosComProvaTab() {
               <TableHead>Horário</TableHead>
               <TableHead>Ano Lectivo</TableHead>
               <TableHead>Tipo Candidatura</TableHead>
+              <TableHead>Data Candidatura</TableHead>
               <TableHead>Estado da Prova</TableHead>
             </TableRow>
           </TableHeader>
@@ -290,6 +308,7 @@ export function CandidatosComProvaTab() {
                   </TableCell>
                   <TableCell className="text-sm">{item.ano_lectivo}</TableCell>
                   <TableCell className="text-sm">{item.tipo_candidatura}</TableCell>
+                  <TableCell className="text-sm">{item.data_candidatura}</TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"

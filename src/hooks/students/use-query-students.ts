@@ -1,5 +1,7 @@
 // hooks/useStudents.ts
-import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password";
+import { GetAcademicHistoryParams, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
+import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
+import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
 import {
   fetchStudentEstatisticas,
   fetchStudentsSugestoes,
@@ -152,3 +154,25 @@ export function useUpdatePersonalData() {
     },
   });
 }
+
+export function useActiveRegistration() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, ActiveRegistrationPayload>({
+    mutationFn: (payload) => activeRegistration(payload),
+    onSuccess: () => {
+      toast.success("Matrícula ativada com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+export const useStudentAcademicHistory = (params: GetAcademicHistoryParams) => {
+  return useQuery({
+    queryKey: ['student-academic-history', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryFn: () => studentAcademicHistoryService(params),
+    enabled: !!params.matriculaId && !!params.anoLectivoId,
+    staleTime: 1000 * 60 * 5,
+  });
+};

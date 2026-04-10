@@ -4,6 +4,7 @@ import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
 import { Contact, Key } from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
+import { AtivarMatricula } from "./ativar-matricula";
 
 type PerfilSectionProps = {
   value?: string;
@@ -42,7 +43,20 @@ export function PerfilSection({
             <span className="hidden md:inline">Dados Pessoais</span>
             <span className="md:hidden">Dados Pessoais</span>
           </TabsTrigger>
+          <TabsTrigger
+            className="w-full justify-start gap-2"
+            value="ativar-matricula"
+          >
+            <Key className="h-4 w-4" />
+            <span className="hidden md:inline truncate">
+              Ativar Matricula Cancelada
+            </span>
+            <span className="md:hidden truncate">
+              Ativar Matricula Cancelada
+            </span>
+          </TabsTrigger>
         </TabsList>
+
         <Card className="flex-1 p-6">
           <AtualizarSenha
             value="atualizar-senha"
@@ -51,6 +65,10 @@ export function PerfilSection({
           <Contacto value="contacto" codigoMatricula={codigoMatricula} />
           <DadosPessoais
             value="dados-pessoais"
+            codigoMatricula={codigoMatricula}
+          />
+          <AtivarMatricula
+            value="ativar-matricula"
             codigoMatricula={codigoMatricula}
           />
         </Card>

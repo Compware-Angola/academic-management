@@ -35,7 +35,7 @@ import {
 
 import { useState, useEffect, useRef } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
-import { useStudentSugestoes } from "@/hooks/tudents/use-query-students";
+import { useStudentSugestoes } from "@/hooks/students/use-query-students";
 import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
 
 export function Header() {

@@ -53,7 +53,7 @@ import {
 import {
   useStudentDetail,
   useStudentDisciplinas,
-} from "@/hooks/tudents/use-query-students";
+} from "@/hooks/students/use-query-students";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -147,7 +147,7 @@ function truncate(text: string, max = 10) {
   return text.length > max ? text.slice(0, max) + "..." : text;
 }
 
-export  function PerfilEstudanteLegado() {
+export function PerfilEstudanteLegado() {
   const { matricula } = useParams<{ matricula: string }>();
   const [activeTab, setActiveTab] = useState("geral");
   const [page, setPage] = useState(1);
@@ -310,14 +310,6 @@ export  function PerfilEstudanteLegado() {
 
   if (!matricula) {
     return <div>Matrícula inválida</div>;
-  }
-
-  if (isLoading || isFetching) {
-    return <div>A carregar dados do estudante...</div>;
-  }
-
-  if (error || !student) {
-    return <div>Estudante não encontrado</div>;
   }
 
   const estudante = mockEstudante;
