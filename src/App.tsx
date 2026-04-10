@@ -141,6 +141,7 @@ import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+import EstadoMatriculaPorHorario from "./pages/registrations/EstadoDoEstudanteMatriculadoPorHorario";
 
 const App = () => {
   return (
@@ -1309,6 +1310,19 @@ const App = () => {
                         ]}
                       >
                         <SemInscricaoCurso />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/estado-horario"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_ESTADO_MATRICULA_ESTUDANTE_POR_HORARIO.sigla!,
+                        ]}
+                      >
+                        <EstadoMatriculaPorHorario />
                       </ProtectedRoute>
                     }
                   />
