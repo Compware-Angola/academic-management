@@ -1,5 +1,6 @@
 // hooks/useStudents.ts
-import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password";
+import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
+import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
 import {
   fetchStudentEstatisticas,
   fetchStudentsSugestoes,
@@ -146,6 +147,19 @@ export function useUpdatePersonalData() {
     mutationFn: (payload: UpdatePersonalDataPayload) => updatePersonalData(payload),
     onSuccess: () => {
       toast.success("Dados pessoais atualizados com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+export function useActiveRegistration() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, ActiveRegistrationPayload>({
+    mutationFn: (payload) => activeRegistration(payload),
+    onSuccess: () => {
+      toast.success("Matrícula ativada com sucesso!");
       queryClient.invalidateQueries({
         queryKey: ["student-detail"],
       });
