@@ -142,6 +142,7 @@ import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import EstadoMatriculaPorHorario from "./pages/registrations/EstadoDoEstudanteMatriculadoPorHorario";
+import ListarEstudantesPorEstadoMatricula from "./pages/registrations/ListarEstudantesPorEstadoMatricula";
 
 const App = () => {
   return (
@@ -1323,6 +1324,19 @@ const App = () => {
                         ]}
                       >
                         <EstadoMatriculaPorHorario />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/estado-matricula"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla!,
+                        ]}
+                      >
+                        <ListarEstudantesPorEstadoMatricula />
                       </ProtectedRoute>
                     }
                   />
