@@ -1034,8 +1034,8 @@ export const academicStructure: MenuStructure = {
         // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
         // { title: "Admitir candidatura", url: "/exame/admitir" },
 
-        //{ title: "Estatísticas", url: "/exame/estatisticas" },
-        // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+        { title: "Estatísticas", url: "/exame/estatisticas" },
+         { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
         {
           title: "Inscrição época especial",
           url: "/exame/epoca-especial",
