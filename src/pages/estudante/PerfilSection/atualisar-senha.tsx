@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -23,7 +24,7 @@ const schema = z.object({
     .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
     .regex(
       /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\/\\]/,
-      "Deve conter pelo menos um caractere especial",
+      "Deve conter pelo menos um caracter especial",
     ),
 });
 

@@ -2,9 +2,10 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
-import { Contact, Key } from "lucide-react";
+import { Book, Contact, Key } from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
+import { InscricoesSection } from "./ver-inscricoes";
 const TABS_CONFIG = [
   {
     value: "atualizar-senha",
@@ -31,10 +32,10 @@ const TABS_CONFIG = [
     component: AtivarMatricula,
   },
   {
-    value: "transferencia-dados",
-    label: "Transferência de Dados",
-    icon: Key,
-    component: null,
+    value: "ver-inscricoes",
+    label: "Ver Inscrições",
+    icon: Book,
+    component: InscricoesSection,
   },
 ] as const;
 

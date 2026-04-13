@@ -60,7 +60,7 @@ export const useStudentDetail = (codigoMatricula?: number | string) => {
 export const useStudentDisciplinas = (
   params: FetchDisciplinasMatriculadasParams,
 ) => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25 } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25,classes } = params;
 
   // Chave única que considera todos os filtros importantes
   const queryKey = [
@@ -68,6 +68,7 @@ export const useStudentDisciplinas = (
     String(matriculaId ?? "").trim(),
     anoLectivo ? String(anoLectivo) : null,
     semestre ? String(semestre) : null,
+    classes ? String(classes) : null,
     page,
     limit,
   ].filter(Boolean); // remove null/undefined

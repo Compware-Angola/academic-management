@@ -12,7 +12,6 @@ import { Loader2, Pencil, Save } from "lucide-react";
 import {
   useStudentDetail,
   useUpdatePersonalData,
-  // useUpdateStudentDetails <- Supondo que você criará este hook
 } from "@/hooks/students/use-query-students";
 import { useEffect, useState } from "react";
 import {
@@ -108,7 +107,7 @@ export function DadosPessoais({
         morada: student.morada ?? "",
       });
     }
-  }, [student, form]);
+  }, [student, form, nacionalidades]);
 
   if (isLoading)
     return <div className="p-4 text-center">A carregar dados...</div>;
