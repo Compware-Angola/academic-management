@@ -3,6 +3,7 @@ import { FormSelect } from "../FormSelect";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 
 interface SemestreSelectProps {
+  label?: string;
   value: string;
   onChangeValue: (v: string) => void;
   disabled?: boolean;
@@ -13,6 +14,7 @@ const SemestreSelect = ({
   value,
   disabled,
   enableDefaultSelectItem,
+  label = "Semestre",
 }: SemestreSelectProps) => {
   const id = useId();
   const defaultSelectItem = enableDefaultSelectItem
@@ -32,7 +34,7 @@ const SemestreSelect = ({
         disabled={isLoadingSemestre || disabled}
         loading={isLoadingSemestre}
         defaultSelectItem={defaultSelectItem}
-        label="Semestre"
+        label={label}
         value={value}
         onChange={(v) => onChangeValue(v)}
         options={semestre ?? []}

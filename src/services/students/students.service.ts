@@ -53,6 +53,7 @@ export type StudentDetail = {
   morada: string;
   nome_completo: string;
   bi_aluno: string;
+  curso_codigo: number;
   data_emissao_bi: string;
   data_validade_bi: string;
   email: string | null; // pode vir null
@@ -116,8 +117,9 @@ export type DisciplinasResponse = {
  * ======================= */
 export type FetchDisciplinasMatriculadasParams = {
   matriculaId: number | string;
-  anoLectivo?: string | number; // ex: "2023-2024" ou 2023
-  semestre?: string | number; // ex: "1", "I", "2", "II", "I SEMESTRE"
+  anoLectivo?: string | number; 
+  semestre?: string | number; 
+  classes?: string | number; 
   page?: number;
   limit?: number;
 };
@@ -128,7 +130,7 @@ export type FetchDisciplinasMatriculadasParams = {
 export const fetchDisciplinasMatriculadas = async (
   params: FetchDisciplinasMatriculadasParams,
 ): Promise<DisciplinasResponse> => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25 } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes } = params;
 
   // Monta query params apenas com os valores fornecidos
   const queryParams: Record<string, string | number> = {
@@ -143,6 +145,10 @@ export const fetchDisciplinasMatriculadas = async (
 
   if (semestre !== undefined && semestre !== null) {
     queryParams.semestre = String(semestre).trim();
+  }
+
+  if (classes !== undefined && classes !== null) {
+    queryParams.classes = String(classes).trim();
   }
 
   const response = await axiosNestGa.get<DisciplinasResponse>("/discipline", {

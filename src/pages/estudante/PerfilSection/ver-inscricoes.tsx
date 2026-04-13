@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -32,40 +31,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { FormSelect } from "@/components/common/FormSelect";
 
 import ScheduleDetailsModal from "@/pages/schedules/components/ScheduleDetailsModal";
+import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { parseFilter } from "@/util/parse-filter";
+import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 
 type Props = {
   codigoMatricula: number;
   value?: string;
 };
-export function DisciplinasSection({
+export function InscricoesSection({
   codigoMatricula: matricula,
-  value = "disciplinas",
+  value = "inscricoes",
 }: Props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
-  const [anoLetivo, setAnoLetivo] = useState<string | undefined>("23");
 
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-
-  const {
-    data: student,
-    isLoading,
-    isFetching,
-    error,
-  } = useStudentDetail(matricula);
-
+  const [filter, setFilter] = useState({
+    anoLetivo: "23",
+    semestre: "1",
+    classes: "",
+  });
+  const { data: student } = useStudentDetail(matricula);
   const {
     data: response,
     isLoading: isDisciplinasLoading,
     isError,
   } = useStudentDisciplinas({
     matriculaId: matricula ?? "",
-    anoLectivo: Number(anoLetivo),
+    anoLectivo: parseFilter(filter.anoLetivo),
+    semestre: parseFilter(filter.semestre),
+    classes: parseFilter(filter.classes),
     page,
     limit,
   });
@@ -102,8 +100,8 @@ export function DisciplinasSection({
   };
 
   return (
-    <TabsContent value="disciplinas" className="space-y-4">
-      <Card>
+    <TabsContent value={value} className="space-y-4">
+      <div>
         <CardHeader>
           <CardTitle className="text-lg">Histórico de Disciplinas</CardTitle>
           <CardDescription>
@@ -112,22 +110,21 @@ export function DisciplinasSection({
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="min-w-[200px] max-w-[300px] w-full sm:w-auto">
-              <FormSelect
-                label="Ano Letivo"
-                disabled={isLoadingAcademicYear}
-                loading={isLoadingAcademicYear}
-                value={anoLetivo ?? ""}
-                onChange={(v) => setAnoLetivo(v)}
-                options={anosAcademicos}
-                map={(a) => ({
-                  key: a.codigo,
-                  label: a.designacao,
-                  value: a.codigo,
-                })}
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <AcademicYearSelect
+              value={filter.anoLetivo}
+              onChangeValue={(v) => setFilter({ ...filter, anoLetivo: v })}
+            />
+            <SemestreSelect
+              label="Semestre"
+              value={filter.semestre}
+              onChangeValue={(v) => setFilter({ ...filter, semestre: v })}
+            />
+            <AnoCurricularSelect
+              value={filter.classes}
+              curso={student?.curso_codigo.toString()}
+              onChangeValue={(v) => setFilter({ ...filter, classes: v })}
+            />
           </div>
 
           {isDisciplinasLoading ? (
@@ -231,8 +228,6 @@ export function DisciplinasSection({
                         <SelectItem value="5">5</SelectItem>
                         <SelectItem value="10">10</SelectItem>
                         <SelectItem value="20">20</SelectItem>
-                        <SelectItem value="25">25</SelectItem>
-                        <SelectItem value="50">50</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -263,7 +258,7 @@ export function DisciplinasSection({
             </>
           )}
         </CardContent>
-      </Card>
+      </div>
 
       <ScheduleDetailsModal
         horarioId={selectedTurmaId}

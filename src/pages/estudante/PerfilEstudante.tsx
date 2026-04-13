@@ -14,7 +14,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Home, User, CreditCard, FileText, Pencil, Book } from "lucide-react";
-import { useStudentDisciplinas } from "@/hooks/tudents/use-query-students";
+import { useStudentDisciplinas } from "@/hooks/students/use-query-students";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
@@ -339,7 +339,10 @@ export default function PerfilEstudante() {
           value="area-financeira"
         />
 
-        <AvaliacaoSection value="avaliacao" />
+        <AvaliacaoSection
+          value="avaliacao"
+          codigoMatricula={Number(matricula)}
+        />
       </Tabs>
     </div>
   );

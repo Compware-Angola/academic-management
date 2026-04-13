@@ -5,7 +5,7 @@ import { Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
-import { useActiveRegistration } from "@/hooks/tudents/use-query-students";
+import { useActiveRegistration } from "@/hooks/students/use-query-students";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { useState } from "react";
 import { parseFilter } from "@/util/parse-filter";

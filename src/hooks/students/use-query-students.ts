@@ -1,4 +1,5 @@
 // hooks/useStudents.ts
+import { GetAcademicHistoryParams, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
 import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
 import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
 import {
@@ -59,7 +60,7 @@ export const useStudentDetail = (codigoMatricula?: number | string) => {
 export const useStudentDisciplinas = (
   params: FetchDisciplinasMatriculadasParams,
 ) => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25 } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25,classes } = params;
 
   // Chave única que considera todos os filtros importantes
   const queryKey = [
@@ -67,6 +68,7 @@ export const useStudentDisciplinas = (
     String(matriculaId ?? "").trim(),
     anoLectivo ? String(anoLectivo) : null,
     semestre ? String(semestre) : null,
+    classes ? String(classes) : null,
     page,
     limit,
   ].filter(Boolean); // remove null/undefined
@@ -166,3 +168,12 @@ export function useActiveRegistration() {
     },
   });
 }
+
+export const useStudentAcademicHistory = (params: GetAcademicHistoryParams) => {
+  return useQuery({
+    queryKey: ['student-academic-history', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryFn: () => studentAcademicHistoryService(params),
+    enabled: !!params.matriculaId && !!params.anoLectivoId,
+    staleTime: 1000 * 60 * 5,
+  });
+};
