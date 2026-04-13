@@ -1053,7 +1053,7 @@ export const academicStructure: MenuStructure = {
           url: "/exame/lista-candidatos",
           permission: [PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla],
         },
-        //{ title: "Admitidos", url: "/exame/admitidos" },
+        { title: "Admitidos", url: "/exame/admitidos" },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
         {

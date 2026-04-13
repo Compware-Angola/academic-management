@@ -139,6 +139,7 @@ import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+import Admitidos from "./pages/access_exam/Admitidos";
 
 const App = () => {
   return (
@@ -647,6 +648,11 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
+
+                  <Route
+                    path="/exame/admitidos"
+                    element={<Admitidos />}
+                  />
 
                   <Route
                     path="/exame/presenca"
