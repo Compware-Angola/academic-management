@@ -51,7 +51,7 @@ export function ChartLineInteractive({
 
         return {
           originalDate: item.data,
-          date: dateObj.toISOString().split("T")[0], // yyyy-mm-dd
+          date: dateObj.toISOString().split("T")[0], 
           subtotal: item.subtotal || 0,
         }
       })
@@ -121,7 +121,7 @@ export function ChartLineInteractive({
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  className="w-[160px]"
+                  className="w-40"
                   labelFormatter={(value) =>
                     new Date(value).toLocaleDateString("pt-PT", {
                       day: "numeric",
