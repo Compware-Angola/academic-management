@@ -142,6 +142,7 @@ import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import Admitidos from "./pages/access_exam/Admitidos";
 import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
 import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
+import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
 
 const App = () => {
   return (
@@ -663,9 +664,11 @@ const App = () => {
                     path="/exame/estatisticas"
                     element={<EstatisticasExame />}
                   />
-
-                   
-                   
+                 
+                  <Route
+                    path="/exame/resultados-finais"
+                    element={<ResultadoFinais />}
+                  />
 
                   <Route
                     path="/exame/presenca"

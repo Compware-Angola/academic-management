@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,113 +8,201 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { RefreshCw, Download, Printer, Home, ChevronLeft, ChevronRight, CalendarDays, Users, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
 import { ChartLineInteractive } from "./components/chart-line-interactive";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-
-const mockResponse = {
-  data: [
-    { data: "30/08/2021", subtotal: 2 },
-    { data: "18/08/2025", subtotal: 176 },
-    { data: "19/08/2025", subtotal: 118 },
-    { data: "20/08/2025", subtotal: 112 },
-    { data: "21/08/2025", subtotal: 81 },
-    { data: "22/08/2025", subtotal: 86 },
-    { data: "23/08/2025", subtotal: 12 },
-    { data: "24/08/2025", subtotal: 14 },
-    { data: "25/08/2025", subtotal: 74 },
-    { data: "26/08/2025", subtotal: 85 },
-  ],
-  total: 75,
-  totalgeralcandidatos: 3181,
-  page: 1,
-  limit: 10,
-  totalpages: 8,
-};
+import { parseFilter } from "@/util/parse-filter";
+import { useInscricoesPorDia } from "@/hooks/access_exam/use-estatistica-por-dia";
 
 export default function EstatisticasDiaria() {
-    const { data: academicYear, isLoading: isLoadingAcademicYear } =
-      useQueryAnoAcademico();
-    const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
-  
-  const [filters, setFilters] = useState({
+  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
+  const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
     codigoAnoLetivo: "23",
     codigoCurso: undefined,
     codigoTurno: undefined,
     codigoFaculdade: undefined,
-
   });
 
-  const [currentPage, setCurrentPage] = useState(mockResponse.page);
+  const { data: estatisticaDiaria, isLoading: isLoadingEstatisticaDiaria, refetch } = useInscricoesPorDia({
+    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
+    codigoCurso: parseFilter(filters.codigoCurso),
+    codigoTurno: parseFilter(filters.codigoTurno),
+    codigoFaculdade: parseFilter(filters.codigoFaculdade),
+    page: filters.page,
+    limit: filters.limit,
+  });
 
-  const subtotalPagina = mockResponse.data.reduce((a, b) => a + b.subtotal, 0);
-  const maxSubtotal = Math.max(...mockResponse.data.map((d) => d.subtotal));
+  const totalPages = estatisticaDiaria?.totalpages || 1;
+  const currentPage = filters.page;
 
+  // ==================== PREPARAÇÃO PARA EXPORTAÇÃO ====================
 
+  const exportRows = useMemo(() => {
+    return (estatisticaDiaria?.data ?? []).map((item, index) => ({
+      numero: (currentPage - 1) * filters.limit + index + 1,
+      data: item.data,
+      subtotal: item.subtotal,
+      percentagem: estatisticaDiaria?.data?.length 
+        ? Math.round((item.subtotal / Math.max(...estatisticaDiaria.data.map(d => d.subtotal || 0))) * 100) 
+        : 0,
+    }));
+  }, [estatisticaDiaria, currentPage, filters.limit]);
+
+  const pdfData = exportRows.length
+    ? {
+        filtros: [
+          filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+          filters.codigoFaculdade ? `Faculdade: ${filters.codigoFaculdade}` : null,
+          filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+          filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        total: estatisticaDiaria?.totalgeralcandidatos ?? 0,
+        rows: exportRows,
+      }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Estatísticas Diárias - Exame de Acesso"
+      subtitle="Número de candidatos por dia de inscrição"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de candidatos: ${pdfData.total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "numero", label: "#", width: "8%" },
+          { key: "data", label: "Data", width: "25%" },
+          { key: "subtotal", label: "Subtotal", width: "25%" },
+          { key: "percentagem", label: "Percentagem", width: "25%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Estatísticas Diárias - Exame de Acesso",
+        subtitle: "Número de candidatos por dia de inscrição",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+          { title: "Resumo", content: [`Total de candidatos: ${pdfData.total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "numero", label: "#", width: 10 },
+            { key: "data", label: "Data", width: 25 },
+            { key: "subtotal", label: "Subtotal", width: 20 },
+            { key: "percentagem", label: "Percentagem (%)", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
+
+  const baseFileName = `Estatisticas_Diarias_Exame_${new Date().toISOString().slice(0, 10)}`;
+
+  // ==================== HANDLERS ====================
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setFilters(prev => ({ ...prev, page: newPage }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      page: 1,
+      limit: filters.limit,
+      codigoAnoLetivo: "23",
+      codigoCurso: undefined,
+      codigoTurno: undefined,
+      codigoFaculdade: undefined,
+    });
+  };
 
   return (
     <div className="space-y-6">
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink asChild><Link to="/"><Home className="h-4 w-4" /></Link></BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/"><Home className="h-4 w-4" /></Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbLink>Exame de Acesso</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbPage>Estatísticas Diária</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Estatísticas Diárias
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Estatísticas Diárias</h1>
           <p className="text-muted-foreground mt-1">
             Número de candidatos por dia de inscrição no exame de acesso.
           </p>
         </div>
 
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
 
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+
+          {excelProps && (
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          )}
+        </div>
       </div>
+
+      {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Filtros</h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() =>
-              setFilters({
-
-                codigoAnoLetivo: "23",
-                codigoCurso: undefined,
-                codigoTurno: undefined,
-                codigoFaculdade: undefined,
-
-                page: 1,
-                limit: filters.limit,
-              })
-            }
-          >
+          <Button variant="ghost" size="sm" onClick={resetFilters}>
             <X className="h-4 w-4 mr-2" />
             Limpar filtros
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <FormSelect
             label="Ano Letivo"
             disabled={isLoadingAcademicYear}
             loading={isLoadingAcademicYear}
             value={filters.codigoAnoLetivo?.toString() ?? "all"}
-            onChange={(v) =>
-              setFilters({ ...filters, codigoAnoLetivo: v, page: 1 })
-            }
+            onChange={(v) => setFilters({ ...filters, codigoAnoLetivo: v, page: 1 })}
             options={academicYear}
             map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
           />
@@ -123,20 +211,13 @@ export default function EstatisticasDiaria() {
             allOption
             value={filters.codigoFaculdade}
             onChangeValue={(v) =>
-              setFilters({
-                ...filters,
-                codigoFaculdade: v,
-                codigoCurso: undefined,
-                page: 1,
-              })
+              setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined, page: 1 })
             }
           />
 
           <CourseSelect
             value={filters.codigoCurso}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, codigoCurso: v, page: 1 })
-            }
+            onChangeValue={(v) => setFilters({ ...filters, codigoCurso: v, page: 1 })}
           />
 
           <FormSelect
@@ -158,13 +239,10 @@ export default function EstatisticasDiaria() {
               value: p.codigo.toString(),
             })}
           />
-
-
         </div>
       </div>
 
-
-      {/* Table */}
+      {/* Tabela */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -184,52 +262,88 @@ export default function EstatisticasDiaria() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockResponse.data.map((item, index) => {
-                  const pct = maxSubtotal > 0 ? (item.subtotal / maxSubtotal) * 100 : 0;
-                  return (
-                    <TableRow key={index} className="hover:bg-muted/30">
-                      <TableCell className="text-muted-foreground">{(currentPage - 1) * mockResponse.limit + index + 1}</TableCell>
-                      <TableCell className="font-mono font-medium">{item.data}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 h-5 rounded-full bg-muted overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-primary transition-all duration-500"
-                              style={{ width: `${pct}%` }}
-                            />
+                {isLoadingEstatisticaDiaria ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">Carregando...</TableCell>
+                  </TableRow>
+                ) : estatisticaDiaria?.data?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                      Nenhum resultado encontrado
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  estatisticaDiaria?.data?.map((item, index) => {
+                    const maxSubtotal = Math.max(...(estatisticaDiaria.data?.map((d) => d.subtotal) || [0]));
+                    const pct = maxSubtotal > 0 ? (item.subtotal / maxSubtotal) * 100 : 0;
+
+                    return (
+                      <TableRow key={index} className="hover:bg-muted/30">
+                        <TableCell className="text-muted-foreground">
+                          {(currentPage - 1) * filters.limit + index + 1}
+                        </TableCell>
+                        <TableCell className="font-mono font-medium">{item.data}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-5 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-primary transition-all duration-500"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground w-10 text-right">
+                              {Math.round(pct)}%
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground w-10 text-right">{Math.round(pct)}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
-                          {item.subtotal}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
+                            {item.subtotal}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
               <TableFooter>
                 <TableRow className="font-bold">
                   <TableCell colSpan={3}>Total na Página</TableCell>
-                  <TableCell className="text-right text-primary">{subtotalPagina}</TableCell>
+                  <TableCell className="text-right text-primary">
+                    {estatisticaDiaria?.total?.toLocaleString() || 0}
+                  </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
           </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between">
+          {/* Paginação */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              Página {currentPage} de {mockResponse.totalpages} — {mockResponse.totalgeralcandidatos.toLocaleString()} candidatos no total
+              Página <span className="font-medium">{currentPage}</span> de{" "}
+              <span className="font-medium">{totalPages}</span> •{" "}
+              {estatisticaDiaria?.totalgeralcandidatos?.toLocaleString() || 0} candidatos no total
             </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}>
-                <ChevronLeft className="h-4 w-4 mr-1" />Anterior
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Anterior
               </Button>
-              <Button variant="outline" size="sm" disabled={currentPage === mockResponse.totalpages} onClick={() => setCurrentPage((p) => p + 1)}>
-                Próxima<ChevronRight className="h-4 w-4 ml-1" />
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Próxima
+                <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
@@ -237,7 +351,10 @@ export default function EstatisticasDiaria() {
       </Card>
 
       {/* Chart */}
-     <ChartLineInteractive/>
+      <ChartLineInteractive 
+        data={estatisticaDiaria?.data} 
+        isLoading={isLoadingEstatisticaDiaria} 
+      />
     </div>
   );
 }
