@@ -143,6 +143,7 @@ import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado"
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import EstadoMatriculaPorHorario from "./pages/registrations/EstadoDoEstudanteMatriculadoPorHorario";
 import ListarEstudantesPorEstadoMatricula from "./pages/registrations/ListarEstudantesPorEstadoMatricula";
+import IsentarColisao from "./pages/registrations/IsentarColisao";
 
 const App = () => {
   return (
@@ -1338,6 +1339,13 @@ const App = () => {
                       >
                         <ListarEstudantesPorEstadoMatricula />
                       </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/colisao"
+                    element={
+                          <IsentarColisao />
                     }
                   />
 
