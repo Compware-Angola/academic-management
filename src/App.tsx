@@ -140,6 +140,8 @@ import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import Admitidos from "./pages/access_exam/Admitidos";
+import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
+import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
 
 const App = () => {
   return (
@@ -653,6 +655,17 @@ const App = () => {
                     path="/exame/admitidos"
                     element={<Admitidos />}
                   />
+                   <Route
+                    path="/exame/estatisticas-diaria"
+                    element={<EstatisticasDiaria />}
+                  />
+                   <Route
+                    path="/exame/estatisticas"
+                    element={<EstatisticasExame />}
+                  />
+
+                   
+                   
 
                   <Route
                     path="/exame/presenca"
