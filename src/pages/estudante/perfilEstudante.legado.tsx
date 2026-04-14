@@ -53,7 +53,7 @@ import {
 import {
   useStudentDetail,
   useStudentDisciplinas,
-} from "@/hooks/tudents/use-query-students";
+} from "@/hooks/students/use-query-students";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,

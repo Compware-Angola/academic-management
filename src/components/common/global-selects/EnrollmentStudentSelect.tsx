@@ -1,6 +1,6 @@
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryFetchInstituicao } from "@/hooks/financas/instituicao/use-query-fetch-instituicao";
-import { useQueryStudents } from "@/hooks/tudents/use-query-students";
+import { useQueryStudents } from "@/hooks/students/use-query-students";
 
 import { useDebounce } from "@/hooks/use-debounce";
 import { parseFilter } from "@/util/parse-filter";

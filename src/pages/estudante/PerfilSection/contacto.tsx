@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import {
   useStudentDetail,
   useUpdateContacts,
-} from "@/hooks/tudents/use-query-students";
+} from "@/hooks/students/use-query-students";
 import { useEffect } from "react";
 
 const schema = z.object({

@@ -1031,11 +1031,10 @@ export const academicStructure: MenuStructure = {
           url: "/exame/consultar-prova",
           permission: [PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla],
         },
-        // { title: "Candidatos do preparatório", url: "/exame/candidatos-prep" },
-        // { title: "Admitir candidatura", url: "/exame/admitir" },
+      
 
-        //{ title: "Estatísticas", url: "/exame/estatisticas" },
-        // { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+        { title: "Estatísticas", url: "/exame/estatisticas" },
+         { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
         {
           title: "Inscrição época especial",
           url: "/exame/epoca-especial",
@@ -1053,7 +1052,7 @@ export const academicStructure: MenuStructure = {
           url: "/exame/lista-candidatos",
           permission: [PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla],
         },
-        //{ title: "Admitidos", url: "/exame/admitidos" },
+        { title: "Admitidos", url: "/exame/admitidos" },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
         {
@@ -1061,7 +1060,7 @@ export const academicStructure: MenuStructure = {
           url: "/exame/provas-candidato",
           permission: [PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla],
         },
-        // { title: "Resultados finais", url: "/exame/resultados" },
+        { title: "Resultados finais", url: "/exame/resultados-finais" },
         {
           title: "Horários por curso",
           url: "/exame/horarios",

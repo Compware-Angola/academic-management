@@ -139,6 +139,10 @@ import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+import Admitidos from "./pages/access_exam/Admitidos";
+import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
+import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
+import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
 
 const App = () => {
   return (
@@ -647,6 +651,24 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
+
+                  <Route
+                    path="/exame/admitidos"
+                    element={<Admitidos />}
+                  />
+                   <Route
+                    path="/exame/estatisticas-diaria"
+                    element={<EstatisticasDiaria />}
+                  />
+                   <Route
+                    path="/exame/estatisticas"
+                    element={<EstatisticasExame />}
+                  />
+                 
+                  <Route
+                    path="/exame/resultados-finais"
+                    element={<ResultadoFinais />}
+                  />
 
                   <Route
                     path="/exame/presenca"

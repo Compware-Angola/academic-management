@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQueryStudents } from "@/hooks/tudents/use-query-students";
+import { useQueryStudents } from "@/hooks/students/use-query-students";
 import { parseFilter } from "@/util/parse-filter";
 import { Banknote, Eye, GraduationCap, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";

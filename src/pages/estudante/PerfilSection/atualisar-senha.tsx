@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -12,7 +13,7 @@ import { CardDescription, CardTitle } from "@/components/ui/card";
 import {
   useResetPassword,
   useStudentDetail,
-} from "@/hooks/tudents/use-query-students";
+} from "@/hooks/students/use-query-students";
 import { TabsContent } from "@/components/ui/tabs";
 import { PasswordFormField } from "@/components/PasswordFormField";
 
@@ -23,7 +24,7 @@ const schema = z.object({
     .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
     .regex(
       /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\/\\]/,
-      "Deve conter pelo menos um caractere especial",
+      "Deve conter pelo menos um caracter especial",
     ),
 });
 

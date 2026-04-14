@@ -274,7 +274,7 @@ export default function ListarEstudanteFinalista() {
             </div>
           ) : tableData.length == 0 ? (
             <div className="text-center py-16 text-muted-foreground">
-              Nenhuma Pagamento encontrada.
+              Nenhum estudante encontrado.
             </div>
           ) : (
             <>
