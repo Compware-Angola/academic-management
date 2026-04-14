@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { NavMain } from "@/components/layout/nav-main";
+import { Administration } from "@/components/layout/nav-adm";
 import { TeamSwitcher } from "@/components/layout/team-switcher";
 import {
   Sidebar,
@@ -12,37 +12,34 @@ import {
 } from "@/components/ui/sidebar";
 import {
   finaceStructure,
-  menuStructure,
+  administracaoStructure,
+  ingressoStructure,
   academicStructure,
-  healpStructure,
+
   suporteStructure,
-  defenseTFC,
-  assiduidade,
-  gestaoDocente,
+  operacionalStructure,
+  comunicationStructure,
 } from "@/config/menuStructure";
 import { NavFinance } from "./nav-finance";
 import { NavAcademic } from "./nav-academic";
 
 import { NavHealp } from "./nav-healp";
 import { NavSuporte } from "./nav-suporte";
-import { NavDefenseTFC } from "./nav-defense-tfc";
-import { NavAssiduidade } from "./nav-assiduidade";
+import { NavOperacional } from "./nav-operacional";
+import { NavIngresso } from "./nav-ingresso";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
-import { NavGestaoDocente } from "./nav-gestao-docente";
+import { NavCommunication } from "./nav-comunication";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const mainItems = useFilterMenuByPermission(menuStructure?.items ?? []);
-  const academicItems = useFilterMenuByPermission(
-    academicStructure?.items ?? [],
-  );
+  const adminItems = useFilterMenuByPermission(administracaoStructure?.items ?? []);
+  const ingressoItems = useFilterMenuByPermission(ingressoStructure?.items ?? []);
+  const academicItems = useFilterMenuByPermission(academicStructure?.items ?? []);
   const financeItems = useFilterMenuByPermission(finaceStructure?.items ?? []);
-  const helpItems = useFilterMenuByPermission(healpStructure?.items ?? []);
+  const operacionalItems = useFilterMenuByPermission(operacionalStructure?.items ?? []);
+  const comunicationItems = useFilterMenuByPermission(comunicationStructure?.items ?? []);
+
   const suporteItems = useFilterMenuByPermission(suporteStructure?.items ?? []);
-  const defenseTFCItems = useFilterMenuByPermission(defenseTFC?.items ?? []);
-  const assiduidadeItems = useFilterMenuByPermission(assiduidade?.items ?? []);
-  const gestaoDocenteItems = useFilterMenuByPermission(
-    gestaoDocente?.items ?? [],
-  );
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -50,14 +47,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={mainItems} />
-        <NavAssiduidade items={assiduidadeItems} />
-        <NavDefenseTFC items={defenseTFCItems} />
-        <NavGestaoDocente items={gestaoDocenteItems} />
+        <Administration items={adminItems} />
+        <NavIngresso items={ingressoItems} />
         <NavAcademic items={academicItems} />
-        <NavFinance items={financeItems} />
-        <NavHealp items={helpItems} />
+        <NavOperacional items={operacionalItems} />
+
+
+        <NavCommunication items={comunicationItems} />
+
+
         <NavSuporte items={suporteItems} />
+
+        <NavFinance items={financeItems} />
       </SidebarContent>
 
       <SidebarRail />

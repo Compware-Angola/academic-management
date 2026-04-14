@@ -17,7 +17,7 @@ import {
 import { useNavigate, useLocation, matchPath, Link } from "react-router-dom";
 import clsx from "clsx";
 
-export function NavDefenseTFC({
+export function NavOperacional({
   items,
 }: {
   items: {
@@ -41,7 +41,7 @@ export function NavDefenseTFC({
   return (
     <SidebarGroup>
       {hasAnyItem && (
-        <SidebarGroupLabel>Gestão de Defesa e TFC</SidebarGroupLabel>
+        <SidebarGroupLabel>Operacional</SidebarGroupLabel>
       )}
       <SidebarMenu>
         {items.map((item) => {

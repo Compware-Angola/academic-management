@@ -17,7 +17,7 @@ import {
 import { useNavigate, useLocation, matchPath, Link } from "react-router-dom";
 import clsx from "clsx";
 
-export function NavGestaoDocente({
+export function Administration({
   items,
 }: {
   items: {
@@ -34,19 +34,23 @@ export function NavGestaoDocente({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const hasAnyItem = items.some(
-    (item) => item.url || (item.items && item.items.length > 0),
-  );
+    const hasAnyItem = items.some(
+  (item) =>
+    item.url || (item.items && item.items.length > 0)
+);
 
   return (
     <SidebarGroup>
-      {hasAnyItem && <SidebarGroupLabel>Gestão de Docente</SidebarGroupLabel>}
+                     {hasAnyItem && (
+       <SidebarGroupLabel>Administração</SidebarGroupLabel>
+  )}
+   
       <SidebarMenu>
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0;
           const isActive = !!matchPath(
             { path: item.url, end: item.url === "/" },
-            location.pathname,
+            location.pathname
           );
 
           if (hasSubItems) {
@@ -64,7 +68,7 @@ export function NavGestaoDocente({
                       className={clsx(
                         "transition-colors",
                         isActive &&
-                          "bg-primary text-primary-foreground hover:bg-primary/90",
+                          "bg-primary text-primary-foreground hover:bg-primary/90"
                       )}
                     >
                       {item.icon && <item.icon />}
@@ -84,7 +88,7 @@ export function NavGestaoDocente({
                               asChild
                               className={clsx(
                                 subActive &&
-                                  "bg-primary text-primary-foreground hover:bg-primary/90",
+                                  "bg-primary text-primary-foreground hover:bg-primary/90"
                               )}
                             >
                               <Link to={subItem.url}>
@@ -109,7 +113,7 @@ export function NavGestaoDocente({
                 className={clsx(
                   "transition-colors",
                   isActive &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90",
+                    "bg-primary text-primary-foreground hover:bg-primary/90"
                 )}
               >
                 {item.icon && <item.icon />}

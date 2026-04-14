@@ -32,7 +32,8 @@ type Filters = {
 
   dataInicio: string;
   dataFim: string;
-
+ dataFimInput: string;
+ dataInicioInput: string;
   search: string;
  
   page: number;
@@ -45,8 +46,9 @@ const FILTERS_INITIAL: Filters = {
   codigoTurno: "",
   codigoFaculdade: "",
   codigoSala: "",
-
+ dataFimInput: "",
   dataInicio: "",
+  dataInicioInput: "",
   dataFim: "",
   search: "",
 
@@ -96,7 +98,7 @@ export default function ResultadoFinais() {
         numeroBilhete: item.bilhete_identidade,
         curso: item.curso,
         faculdade: item.faculdade,
-        periodo: "", // Campo não existe no novo endpoint (pode remover se não precisar)
+       
         sala: item.sala,
         dataRealizacao: item.data_realizacao,
         nota: item.nota,
@@ -181,24 +183,48 @@ export default function ResultadoFinais() {
     setFilters({ ...FILTERS_INITIAL, limit: filters.limit });
   }
 
-  function handleDataInicio(val: string) {
-    if (val) {
-      const [yyyy, mm, dd] = val.split("-");
-      setFilters((p) => ({ ...p, dataInicioInput: val, dataInicio: `${dd}/${mm}/${yyyy}`, page: 1 }));
-    } else {
-      setFilters((p) => ({ ...p, dataInicioInput: "", dataInicio: "", page: 1 }));
-    }
-  }
+// ==================== FUNÇÕES  ====================
+function handleDataInicio(val: string) {
+  if (val) {
+    const [yyyy, mm, dd] = val.split("-");
+    const dataFormatada = `${dd}/${mm}/${yyyy}`;
 
-  function handleDataFim(val: string) {
-    if (val) {
-      const [yyyy, mm, dd] = val.split("-");
-      setFilters((p) => ({ ...p, dataFimInput: val, dataFim: `${dd}/${mm}/${yyyy}`, page: 1 }));
-    } else {
-      setFilters((p) => ({ ...p, dataFimInput: "", dataFim: "", page: 1 }));
-    }
+    setFilters((prev) => ({
+      ...prev,
+      dataInicioInput: val,        // para o input
+      dataInicio: dataFormatada,   // para a API
+      page: 1,
+    }));
+  } else {
+    setFilters((prev) => ({
+      ...prev,
+      dataInicioInput: "",
+      dataInicio: "",
+      page: 1,
+    }));
   }
+}
 
+function handleDataFim(val: string) {
+  if (val) {
+    const [yyyy, mm, dd] = val.split("-");
+    const dataFormatada = `${dd}/${mm}/${yyyy}`;
+
+    setFilters((prev) => ({
+      ...prev,
+      dataFimInput: val,
+      dataFim: dataFormatada,
+      page: 1,
+    }));
+  } else {
+    setFilters((prev) => ({
+      ...prev,
+      dataFimInput: "",
+      dataFim: "",
+      page: 1,
+    }));
+  }
+}
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -313,23 +339,23 @@ export default function ResultadoFinais() {
 
    
 
-          <div className="space-y-2">
-            <Label>Data Início</Label>
-            <Input
-              type="date"
-              value={filters.dataInicio}
-              onChange={(e) => handleDataInicio(e.target.value)}
-            />
-          </div>
+        <div className="space-y-2">
+  <Label>Data Início</Label>
+  <Input
+    type="date"
+    value={filters.dataInicioInput}       
+    onChange={(e) => handleDataInicio(e.target.value)}
+  />
+</div>
 
-          <div className="space-y-2">
-            <Label>Data Fim</Label>
-            <Input
-              type="date"
-              value={filters.dataFim}
-              onChange={(e) => handleDataFim(e.target.value)}
-            />
-          </div>
+<div className="space-y-2">
+  <Label>Data Fim</Label>
+  <Input
+    type="date"
+    value={filters.dataFimInput}          
+    onChange={(e) => handleDataFim(e.target.value)}
+  />
+</div>
 
           <div className="space-y-2">
             <Label>Pesquisar</Label>
