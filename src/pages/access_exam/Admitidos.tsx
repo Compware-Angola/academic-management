@@ -369,7 +369,7 @@ export default function CandidatosAdmitidos() {
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="1">Universidade Pública</SelectItem>
-                <SelectItem value="0">UMA</SelectItem>
+                <SelectItem value="0">Universidade Metodista de Angola</SelectItem>
               </SelectContent>
             </Select>
           </div>
