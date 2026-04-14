@@ -37,6 +37,7 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
+import { HorarioSelect } from "@/components/common/global-selects/HorarioSelect";
 
 type Props = {
   codigoMatricula: number;
@@ -175,6 +176,20 @@ export function InscricoesSection({
                           {disc.semestre}
                         </TableCell>
                         <TableCell className="text-center text-sm text-muted-foreground">
+                          <HorarioSelect
+                            value={disc.codigo_horario?.toString()}
+                            onChangeValue={(v) =>
+                              setFilter({ ...filter, classes: v })
+                            }
+                            anoLectivo={filter.anoLetivo}
+                            curso={student?.curso_codigo.toString()}
+                            periodo={"5"}
+                            semestre={filter.semestre}
+                            unidadeCurricular={disc.codigo_disciplina.toString()}
+                            estado={"3"}
+                            labelMode="inside"
+                            // "anoLectivo":23,"curso":1,"estado":3,"limit":10,"page":1,"periodo":5,"semestre":1,"unidadeCurricular":710
+                          />
                           {disc.sala} • {disc.horario}
                           {disc.codigo_horario && (
                             <Button

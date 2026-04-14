@@ -26,7 +26,7 @@ type MapResult = {
 
 type WidthPreset = "auto" | "sm" | "md" | "lg" | "full";
 
-type LabelMode = "outside" | "inside";
+export type LabelMode = "outside" | "inside";
 
 type FormCommandSelectProps<T> = {
   label?: string;

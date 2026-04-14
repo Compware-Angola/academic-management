@@ -1,6 +1,4 @@
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { useToast } from "@/hooks/use-toast";
 import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdown-disciplines";
 
 interface CourseMultiSelectProps {
