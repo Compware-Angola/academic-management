@@ -69,14 +69,6 @@ export function InscricoesSection({
     limit,
   });
 
-  const [isModalOpenDisciplina, setIsModalOpenDisciplina] = useState(false);
-  const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
-
-  const openDetails = (turmaId: number) => {
-    setSelectedTurmaId(turmaId);
-    setIsModalOpenDisciplina(true);
-  };
-
   const disciplinas = response?.data ?? [];
   const total = response?.total ?? 0;
   const totalPages = response?.totalPages ?? 1;
@@ -98,6 +90,29 @@ export function InscricoesSection({
     if (estado === "Fez com Sucesso") return "Aprovado";
     if (estado === "Pendente") return "Pendente";
     return estado;
+  };
+
+  // Exemplo de como seria a lógica dentro do seu componente
+  const handleTrocarHorario = async (
+    disciplinaId: number,
+    novoHorarioId: string,
+  ) => {
+    try {
+      // 1. Chame seu serviço/hook de atualização
+      // await updateStudentHorario({ disciplinaId, novoHorarioId });
+
+      console.log(
+        `Trocando disciplina ${disciplinaId} para o horário ${novoHorarioId}`,
+      );
+
+      // 2. Feedback visual
+      // toast.success("Horário atualizado com sucesso!");
+
+      // 3. Opcional: Recarregar os dados para o Select refletir o novo valor
+      // queryClient.invalidateQueries(['student-disciplinas']);
+    } catch (error) {
+      // toast.error("Erro ao trocar horário");
+    }
   };
 
   return (
@@ -177,28 +192,21 @@ export function InscricoesSection({
                         </TableCell>
                         <TableCell className="text-center text-sm text-muted-foreground">
                           <HorarioSelect
-                            value={disc.codigo_horario?.toString()}
-                            onChangeValue={(v) =>
-                              setFilter({ ...filter, classes: v })
-                            }
+                            value={disc.codigo_horario?.toString() || ""}
+                            onChangeValue={(novoId) => {
+                              handleTrocarHorario(
+                                Number(disc.codigo_disciplina),
+                                novoId,
+                              );
+                            }}
+                            showDetails={true}
                             anoLectivo={filter.anoLetivo}
                             curso={student?.curso_codigo.toString()}
                             periodo={student?.periodo_codigo.toString()}
                             semestre={filter.semestre}
                             unidadeCurricular={disc.codigo_grade_curricular.toString()}
                             estado={"3"}
-                            labelMode="inside"
                           />
-                          {disc.codigo_horario && (
-                            <Button
-                              variant="link"
-                              size="sm"
-                              className="ml-2"
-                              onClick={() => openDetails(disc.codigo_horario!)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge
@@ -272,15 +280,6 @@ export function InscricoesSection({
           )}
         </CardContent>
       </div>
-
-      <ScheduleDetailsModal
-        horarioId={selectedTurmaId}
-        isOpen={isModalOpenDisciplina}
-        onClose={() => {
-          setIsModalOpenDisciplina(false);
-          setSelectedTurmaId(null);
-        }}
-      />
     </TabsContent>
   );
 }
