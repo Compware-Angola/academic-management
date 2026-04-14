@@ -425,7 +425,7 @@ export const academicStructure: MenuStructure = {
         },
 
 
-                {
+        {
           title: "Fórmula por unidade curricular",
           url: "/avaliacoes/formula-uc",
           permission: [
