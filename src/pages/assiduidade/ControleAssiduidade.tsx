@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, ChevronUp, Home } from "lucide-react";
+import { ChevronDown, ChevronUp, Home, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { FormSelect } from "@/components/common/FormSelect";
@@ -32,7 +32,6 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryStateLesson } from "@/hooks/use-fetch-state-lesson";
 import { useQueryControleAssiduidade } from "@/hooks/assiduidade/use-fetch-controle-assiduidade";
-import { Label } from "recharts";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useCursos } from "@/hooks/use-cursos";
@@ -79,6 +78,7 @@ export default function ControleAssiduidade() {
     semestre: "",
     curso: "",
     gradeCurricular: "",
+    search: "",
     page: 1,
     limit: 20,
   });
@@ -161,6 +161,7 @@ export default function ControleAssiduidade() {
 Docente: ${filters.docente || "—"}
 Data Inicial: ${filters.dataInicial || "—"}
 Data Final: ${filters.dataFinal || "—"}
+Pesquisa: ${filters.search || "—"}
             `,
           },
           {
@@ -316,6 +317,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                   semestre: "",
                   curso: "",
                   gradeCurricular: "",
+                  search: "",
                   page: 1,
                   limit: 20,
                 })
@@ -325,6 +327,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             </Button>
           </div>
         </CardHeader>
+
         <CardContent>
           <div className="flex flex-wrap gap-4 items-end">
             <FormSelect
@@ -434,7 +437,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
                 <div className="space-y-1.5">
                   <FormCommandSelect
-                    label="Grade Curricular"
+                    label="Unidade Curricular"
                     value={filters.gradeCurricular}
                     options={gradesCurriculares}
                     map={(g) => ({
@@ -494,7 +497,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Codigo</TableHead>
+                <TableHead>Código</TableHead>
                 <TableHead>Data da Aula</TableHead>
                 <TableHead>Horário</TableHead>
                 <TableHead>Curso</TableHead>
@@ -503,17 +506,18 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                 <TableHead>Docente</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     A carregar aulas...
                   </TableCell>
                 </TableRow>
               ) : aulas.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Nenhuma aula encontrada

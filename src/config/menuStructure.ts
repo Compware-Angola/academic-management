@@ -125,8 +125,8 @@ export const ingressoStructure: MenuStructure = {
         },
 
 
-        { title: "Estatísticas", url: "/exame/estatisticas" },
-        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria" },
+        { title: "Estatísticas", url: "/exame/estatisticas", permission: [PermissionTypeDetails.ESTATISTICA_CANDIDATOS_INSCRITOS.sigla] },
+        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria", permission: [PermissionTypeDetails.ESTATISTICA_CANDIDATOS_POR_DIA.sigla] },
         {
           title: "Inscrição época especial",
           url: "/exame/epoca-especial",
@@ -144,7 +144,7 @@ export const ingressoStructure: MenuStructure = {
           url: "/exame/lista-candidatos",
           permission: [PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla],
         },
-        { title: "Admitidos", url: "/exame/admitidos" },
+        { title: "Admitidos", url: "/exame/admitidos", permission: [PermissionTypeDetails.LISTA_CANDIDATOS_ADMITIDOS.sigla] },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
         {
@@ -152,7 +152,7 @@ export const ingressoStructure: MenuStructure = {
           url: "/exame/provas-candidato",
           permission: [PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla],
         },
-        { title: "Resultados finais", url: "/exame/resultados-finais" },
+        { title: "Resultados finais", url: "/exame/resultados-finais", permission: [PermissionTypeDetails.LISTA_RESULTADOS_FINAIS.sigla] },
         {
           title: "Horários por curso",
           url: "/exame/horarios",
@@ -423,6 +423,42 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/controle",
           permission: [PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla],
         },
+
+        { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
+      ],
+
+      permission: ["adm", "rootAdmin"],
+    },
+
+
+    // ----------------------------------------------------
+    // DOCUMENTOS MINISTÉRIO
+    // ----------------------------------------------------
+
+    {
+      title: "Documentos para o Ministério",
+      url: "/ministerio",
+      icon: FileText,
+      items: [
+        { title: "Mapa finalistas", url: "/ministerio/mapa-finalistas", permission: [PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla] },
+        {
+          title: "Registro exame de acesso",
+          url: "/ministerio/registro-exame",
+        },
+        { title: "Registro matrícula", url: "/ministerio/registro-matricula", permission: [PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla] },
+      ],
+
+      permission: [],
+    },
+
+    // ----------------------------------------------------
+    // SALAS
+    // ----------------------------------------------------
+    {
+      title: "Gestão de Salas",
+      url: "/salas",
+      icon: Building,
+      items: [
         {
           title: "Fórmula por unidade curricular",
           url: "/avaliacoes/formula-uc",
@@ -868,9 +904,6 @@ export const finaceStructure: MenuStructure = {
     },
   ],
 };
-
-
-
 export const comunicationStructure: MenuStructure = {
   items: [
     {

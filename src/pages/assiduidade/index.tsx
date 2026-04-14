@@ -38,7 +38,7 @@ export default function ControleGeralPorDocente() {
     docenteId: "", // string porque vem do FormCommandSelect
     docenteNome: "", // opcional, mas dá pra preencher quando escolhe
     modo: "MES" as CalendarMode,
-    dataReferencia: todayIso,
+    dataReferencia: "",
   });
 
 const [pdfContent, setPdfContent] = useState<ReactElement | null>(null);

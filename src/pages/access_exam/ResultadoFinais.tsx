@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { RefreshCw, Download, Printer, ChevronLeft, ChevronRight, Home, X, Search } from "lucide-react";
+import { RefreshCw, Download, Printer, ChevronLeft, ChevronRight, Home, X, Search, PlayCircle, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
@@ -22,6 +22,7 @@ import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 import { parseFilter } from "@/util/parse-filter";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { useCorrigirProvas } from "@/hooks/access_exam/use-corrigir-provas";
 
 type Filters = {
   codigoAnoLetivo: string;
@@ -32,10 +33,10 @@ type Filters = {
 
   dataInicio: string;
   dataFim: string;
- dataFimInput: string;
- dataInicioInput: string;
+  dataFimInput: string;
+  dataInicioInput: string;
   search: string;
- 
+
   page: number;
   limit: number;
 };
@@ -46,7 +47,7 @@ const FILTERS_INITIAL: Filters = {
   codigoTurno: "",
   codigoFaculdade: "",
   codigoSala: "",
- dataFimInput: "",
+  dataFimInput: "",
   dataInicio: "",
   dataInicioInput: "",
   dataFim: "",
@@ -70,15 +71,15 @@ export default function ResultadoFinais() {
     codigoTurno: parseFilter(filters.codigoTurno),
     codigoFaculdade: filters.codigoFaculdade ? Number(filters.codigoFaculdade) : undefined,
     codigoSala: filters.codigoSala ? Number(filters.codigoSala) : undefined,
-    
+
     search: filters.search || undefined,
     dataInicio: filters.dataInicio || undefined,
     dataFim: filters.dataFim || undefined,
     page: filters.page,
     limit: filters.limit,
   });
+  const { mutate: corrigirProvas, isPending } = useCorrigirProvas();
 
-  // Remove duplicados pelo numero_inscricao
   const seen = new Set<number>();
   const candidatos = (data?.data ?? []).filter((item) => {
     if (seen.has(item.numero_inscricao)) return false;
@@ -98,7 +99,7 @@ export default function ResultadoFinais() {
         numeroBilhete: item.bilhete_identidade,
         curso: item.curso,
         faculdade: item.faculdade,
-       
+
         sala: item.sala,
         dataRealizacao: item.data_realizacao,
         nota: item.nota,
@@ -109,24 +110,24 @@ export default function ResultadoFinais() {
 
   const pdfData = exportRows.length
     ? {
-        filtros: [
-          filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
-          filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
-          filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
-        
-          filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
-          filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
-        ]
-          .filter(Boolean)
-          .join(" | "),
-        total: exportRows.length,
-        rows: exportRows,
-      }
+      filtros: [
+        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+
+        filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
+        filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
     : null;
 
   const pdfContent = pdfData ? (
     <GenericPDFDocument
-      documentTitle="Pauta Geral do Exame de Acesso"
+      documentTitle="Resultado Final"
       subtitle="Classificação geral dos candidatos"
       infoSections={[
         { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
@@ -152,29 +153,29 @@ export default function ResultadoFinais() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Pauta Geral do Exame de Acesso",
-        subtitle: "Classificação geral dos candidatos",
-        infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
-          { title: "Resumo", content: [`Total de registos: ${total}`] },
+      documentTitle: "Resultado Final",
+      subtitle: "Classificação geral dos candidatos",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+          { key: "nome", label: "Nome", width: 35 },
+          { key: "numeroBilhete", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 30 },
+          { key: "faculdade", label: "Faculdade", width: 30 },
+          { key: "sala", label: "Sala", width: 15 },
+          { key: "dataRealizacao", label: "Data Realização", width: 18 },
+          { key: "nota", label: "Nota", width: 10 },
+          { key: "resultado", label: "Resultado", width: 15 },
         ],
-        mainTable: {
-          headers: [
-            { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
-            { key: "nome", label: "Nome", width: 35 },
-            { key: "numeroBilhete", label: "BI", width: 20 },
-            { key: "curso", label: "Curso", width: 30 },
-            { key: "faculdade", label: "Faculdade", width: 30 },
-            { key: "sala", label: "Sala", width: 15 },
-            { key: "dataRealizacao", label: "Data Realização", width: 18 },
-            { key: "nota", label: "Nota", width: 10 },
-            { key: "resultado", label: "Resultado", width: 15 },
-          ],
-          rows: pdfData.rows,
-        },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Pauta_Geral_Exame_${new Date().toISOString().slice(0, 10)}`;
@@ -183,48 +184,48 @@ export default function ResultadoFinais() {
     setFilters({ ...FILTERS_INITIAL, limit: filters.limit });
   }
 
-// ==================== FUNÇÕES  ====================
-function handleDataInicio(val: string) {
-  if (val) {
-    const [yyyy, mm, dd] = val.split("-");
-    const dataFormatada = `${dd}/${mm}/${yyyy}`;
+  // ==================== FUNÇÕES  ====================
+  function handleDataInicio(val: string) {
+    if (val) {
+      const [yyyy, mm, dd] = val.split("-");
+      const dataFormatada = `${dd}/${mm}/${yyyy}`;
 
-    setFilters((prev) => ({
-      ...prev,
-      dataInicioInput: val,        // para o input
-      dataInicio: dataFormatada,   // para a API
-      page: 1,
-    }));
-  } else {
-    setFilters((prev) => ({
-      ...prev,
-      dataInicioInput: "",
-      dataInicio: "",
-      page: 1,
-    }));
+      setFilters((prev) => ({
+        ...prev,
+        dataInicioInput: val,        // para o input
+        dataInicio: dataFormatada,   // para a API
+        page: 1,
+      }));
+    } else {
+      setFilters((prev) => ({
+        ...prev,
+        dataInicioInput: "",
+        dataInicio: "",
+        page: 1,
+      }));
+    }
   }
-}
 
-function handleDataFim(val: string) {
-  if (val) {
-    const [yyyy, mm, dd] = val.split("-");
-    const dataFormatada = `${dd}/${mm}/${yyyy}`;
+  function handleDataFim(val: string) {
+    if (val) {
+      const [yyyy, mm, dd] = val.split("-");
+      const dataFormatada = `${dd}/${mm}/${yyyy}`;
 
-    setFilters((prev) => ({
-      ...prev,
-      dataFimInput: val,
-      dataFim: dataFormatada,
-      page: 1,
-    }));
-  } else {
-    setFilters((prev) => ({
-      ...prev,
-      dataFimInput: "",
-      dataFim: "",
-      page: 1,
-    }));
+      setFilters((prev) => ({
+        ...prev,
+        dataFimInput: val,
+        dataFim: dataFormatada,
+        page: 1,
+      }));
+    } else {
+      setFilters((prev) => ({
+        ...prev,
+        dataFimInput: "",
+        dataFim: "",
+        page: 1,
+      }));
+    }
   }
-}
   return (
     <div className="space-y-6">
       <Breadcrumb>
@@ -242,7 +243,7 @@ function handleDataFim(val: string) {
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Pauta Geral do Exame de Acesso</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Resultado Final</h1>
           <p className="text-muted-foreground mt-1">Pauta geral com a classificação de todos os candidatos.</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -250,6 +251,22 @@ function handleDataFim(val: string) {
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
+
+          {candidatos.length > 0
+            && (
+              <Button onClick={() => corrigirProvas()} disabled={isPending} className="gap-2">
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <PlayCircle className="h-4 w-4" />
+                )}
+                {isPending ? "Corrigindo provas..." : "Corrigir Provas Agora"}
+              </Button>
+
+            )
+
+          }
+
 
           {pdfContent && (
             <PDFActions
@@ -296,19 +313,20 @@ function handleDataFim(val: string) {
             />
           </div>
 
+         
           <div className="space-y-2">
+            <FacultySelect
+              allOption
+              value={filters.codigoFaculdade}
+              onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
+            />
+          </div>
+           <div className="space-y-2">
             <CourseSelect
               value={filters.codigoCurso}
               onChangeValue={(v) => setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))}
             />
           </div>
-            <div className="space-y-2">
-            <FacultySelect
-            allOption
-            value={filters.codigoFaculdade}
-            onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
-          />
-</div>
           <div className="space-y-2">
             <FormSelect
               disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.codigoAnoLetivo === ""}
@@ -337,25 +355,25 @@ function handleDataFim(val: string) {
             />
           </div>
 
-   
 
-        <div className="space-y-2">
-  <Label>Data Início</Label>
-  <Input
-    type="date"
-    value={filters.dataInicioInput}       
-    onChange={(e) => handleDataInicio(e.target.value)}
-  />
-</div>
 
-<div className="space-y-2">
-  <Label>Data Fim</Label>
-  <Input
-    type="date"
-    value={filters.dataFimInput}          
-    onChange={(e) => handleDataFim(e.target.value)}
-  />
-</div>
+          <div className="space-y-2">
+            <Label>Data Início</Label>
+            <Input
+              type="date"
+              value={filters.dataInicioInput}
+              onChange={(e) => handleDataInicio(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Data Fim</Label>
+            <Input
+              type="date"
+              value={filters.dataFimInput}
+              onChange={(e) => handleDataFim(e.target.value)}
+            />
+          </div>
 
           <div className="space-y-2">
             <Label>Pesquisar</Label>
