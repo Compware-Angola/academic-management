@@ -423,6 +423,42 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/controle",
           permission: [PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla],
         },
+
+        { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
+      ],
+
+      permission: ["adm", "rootAdmin"],
+    },
+
+
+    // ----------------------------------------------------
+    // DOCUMENTOS MINISTÉRIO
+    // ----------------------------------------------------
+
+    {
+      title: "Documentos para o Ministério",
+      url: "/ministerio",
+      icon: FileText,
+      items: [
+        { title: "Mapa finalistas", url: "/ministerio/mapa-finalistas", permission: [PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla] },
+        {
+          title: "Registro exame de acesso",
+          url: "/ministerio/registro-exame",
+        },
+        { title: "Registro matrícula", url: "/ministerio/registro-matricula", permission: [PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla] },
+      ],
+
+      permission: ["adm", "rootAdmin"],
+    },
+
+    // ----------------------------------------------------
+    // SALAS
+    // ----------------------------------------------------
+    {
+      title: "Gestão de Salas",
+      url: "/salas",
+      icon: Building,
+      items: [
         {
           title: "Fórmula por unidade curricular",
           url: "/avaliacoes/formula-uc",
