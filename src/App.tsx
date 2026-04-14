@@ -124,18 +124,6 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
-<<<<<<< HEAD
-import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
-import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
-import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
-import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
-import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
-import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
-import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
-import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
-import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
-import Regentes from "./pages/gestao_docente/Regentes";
-=======
 import Regentes from "./pages/gestao_docente/Regentes";
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
@@ -155,7 +143,9 @@ import Admitidos from "./pages/access_exam/Admitidos";
 import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
 import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
 import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
->>>>>>> 3afcc5cca4de7b0818b15b6650f44b6c110dab16
+import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
+import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
+import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 
 const App = () => {
   return (
@@ -1365,6 +1355,43 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="/ministerio/mapa-finalistas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla!,
+                        ]}
+                      >
+                        <MapaAnualEstudantesFinalistas />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/ministerio/registro-exame"
+                    element={
+                      
+                        <RegistoPrimarioExamesAcesso />
+                      
+                    }
+                  />
+
+                  <Route
+                    path="/ministerio/registro-matricula"
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <RegistoPrimarioMatriculados />
+                      </ProtectedRoute>
+                    }
+                  />
+
                 </Route>
               </Routes>
             </TooltipProvider>

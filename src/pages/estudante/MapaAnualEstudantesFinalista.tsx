@@ -19,7 +19,8 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useQueryMapaAnualFinalistas } from "@/hooks/tudents/use-query-mapa-anual-finalistas";
+import { useQueryMapaAnualFinalistas } from "@/hooks/students/use-query-mapa-anual-finalistas";
+
 
 type Finalista = {
   numero: number;
@@ -294,8 +295,20 @@ export default function MapaAnualEstudantesFinalistas() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="space-y-2">
+          <div className="flex justify-start">
+            <Button onClick={handleListar}>
+              <List className="h-4 w-4 mr-2" />
+              Listar
+            </Button>
+
+            
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y">
               <label className="text-sm font-medium">Pesquisar</label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -311,17 +324,7 @@ export default function MapaAnualEstudantesFinalistas() {
                   className="pl-9"
                 />
               </div>
-            </div>
-          </div>
-
-          <div className="flex justify-start">
-            <Button onClick={handleListar}>
-              <List className="h-4 w-4 mr-2" />
-              Listar
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      </div>
 
       <div className="text-primary font-semibold">
         Total De Registros : {data?.total ?? 0}

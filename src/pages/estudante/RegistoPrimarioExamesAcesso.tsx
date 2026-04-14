@@ -19,7 +19,8 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useQueryRegistoPrimarioExamesAcesso } from "@/hooks/tudents/use-query-registo-primario-exames-acesso";
+import { useQueryRegistoPrimarioExamesAcesso } from "@/hooks/students/use-query-registo-primario-exames-acesso";
+
 
 type RegistoPrimarioExameAcesso = {
   numero: number;

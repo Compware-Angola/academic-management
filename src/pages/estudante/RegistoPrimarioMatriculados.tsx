@@ -20,7 +20,7 @@ import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryRegistoPrimarioMatriculados } from "@/hooks/tudents/use-query-registo-primario-matriculados";
+import { useQueryRegistoPrimarioMatriculados } from "@/hooks/students/use-query-registo-primario-matriculados";
 
 
 type RegistoPrimarioMatriculado = {

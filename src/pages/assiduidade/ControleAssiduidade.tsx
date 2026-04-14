@@ -437,7 +437,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
                 <div className="space-y-1.5">
                   <FormCommandSelect
-                    label="Grade Curricular"
+                    label="Unidade Curricular"
                     value={filters.gradeCurricular}
                     options={gradesCurriculares}
                     map={(g) => ({
