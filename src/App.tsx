@@ -681,6 +681,82 @@ const App = () => {
                   />
 
                   <Route
+                    path="/exame/admitir"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ADMITIR_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <AdmitirCandidaturaUniversidadePublica />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/exame/atribuir-prova"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUIR_PROVA.sigla!,
+                        ]}
+                      >
+                        <AtribuirProva />
+                      </ProtectedRoute>
+                    }
+                  />
+                       <Route
+                    path="/exame/consultar-prova"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ConsultarProvaIndividual />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                
+                   <Route
+                    path="/exame/provas-candidato"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ListaProvaPorCandidatos />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                     <Route
+                    path="/exame/resetar"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.RESETAR_PROVA_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ResetarProva />
+                      </ProtectedRoute>
+                    }
+                  />
+                    <Route
+                    path="/exame/lancar-nota-arquitectura"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla!,
+                        ]}
+                      >
+                        <LancarNotaArquitectura />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
                     path="/exame/lista-candidatos"
                     element={
                       <ProtectedRoute
