@@ -143,6 +143,9 @@ import Admitidos from "./pages/access_exam/Admitidos";
 import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
 import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
 import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
+import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
+import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
+import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 
 const App = () => {
   return (
@@ -651,7 +654,6 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
-
                   <Route
                     path="/exame/admitidos"
                     element={<Admitidos />}
@@ -674,28 +676,7 @@ const App = () => {
                     path="/exame/presenca"
                     element={<ListaPresencaExame />}
                   />
-                  <Route
-                    path="/exame/admitir"
-                    element={<AdmitirCandidaturaUniversidadePublica />}
-                  />
-                  <Route
-                    path="/exame/provas-candidato"
-                    element={<ListaProvaPorCandidatos />}
-                  />
 
-                  <Route
-                    path="/exame/consultar-prova"
-                    element={<ConsultarProvaIndividual />}
-                  />
-                  <Route
-                    path="/exame/atribuir-prova"
-                    element={<AtribuirProva />}
-                  />
-                  <Route
-                    path="/exame/lancar-nota-arquitectura"
-                    element={<LancarNotaArquitectura />}
-                  />
-                  <Route path="/exame/resetar" element={<ResetarProva />} />
                   <Route
                     path="/exame/lista-candidatos"
                     element={
@@ -1335,7 +1316,9 @@ const App = () => {
 
                   <Route
                     path="/gestao-docentes/docentes"
+
                     element={
+
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DE_DOCENTES.sigla!,
@@ -1343,7 +1326,8 @@ const App = () => {
                       >
                         <ListagemDocentes />
                       </ProtectedRoute>
-                    }
+                  }
+
                   />
                   <Route
                     path="/financas/mensalidades-pagas"
@@ -1371,6 +1355,43 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="/ministerio/mapa-finalistas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla!,
+                        ]}
+                      >
+                        <MapaAnualEstudantesFinalistas />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/ministerio/registro-exame"
+                    element={
+                      
+                        <RegistoPrimarioExamesAcesso />
+                      
+                    }
+                  />
+
+                  <Route
+                    path="/ministerio/registro-matricula"
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <RegistoPrimarioMatriculados />
+                      </ProtectedRoute>
+                    }
+                  />
+
                 </Route>
               </Routes>
             </TooltipProvider>

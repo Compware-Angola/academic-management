@@ -313,17 +313,18 @@ export default function ResultadoFinais() {
             />
           </div>
 
-          <div className="space-y-2">
-            <CourseSelect
-              value={filters.codigoCurso}
-              onChangeValue={(v) => setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))}
-            />
-          </div>
+         
           <div className="space-y-2">
             <FacultySelect
               allOption
               value={filters.codigoFaculdade}
               onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
+            />
+          </div>
+           <div className="space-y-2">
+            <CourseSelect
+              value={filters.codigoCurso}
+              onChangeValue={(v) => setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))}
             />
           </div>
           <div className="space-y-2">
