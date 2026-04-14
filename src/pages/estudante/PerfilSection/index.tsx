@@ -6,6 +6,7 @@ import { Book, Contact, Key } from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
+import { InscricoesUC } from "./inscricoes-uc";
 const TABS_CONFIG = [
   {
     value: "atualizar-senha",
@@ -36,6 +37,12 @@ const TABS_CONFIG = [
     label: "Ver Inscrições",
     icon: Book,
     component: InscricoesSection,
+  },
+  {
+    value: "inscricoes-uc",
+    label: "Fazer Inscrições em UC",
+    icon: Book,
+    component: InscricoesUC,
   },
 ] as const;
 
