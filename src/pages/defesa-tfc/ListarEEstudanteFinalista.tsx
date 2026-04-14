@@ -270,7 +270,7 @@ export default function ListarEstudanteFinalista() {
           {isFetching ? (
             <div className="flex flex-col items-center justify-center py-16">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Carregando Pagamento...</p>
+              <p className="text-muted-foreground">Carregando Estudantes...</p>
             </div>
           ) : tableData.length == 0 ? (
             <div className="text-center py-16 text-muted-foreground">
