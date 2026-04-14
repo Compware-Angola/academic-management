@@ -17,7 +17,7 @@ import {
 import { useNavigate, useLocation, matchPath, Link } from "react-router-dom";
 import clsx from "clsx";
 
-export function NavAssiduidade({
+export function NavCommunication({
   items,
 }: {
   items: {
@@ -40,9 +40,7 @@ export function NavAssiduidade({
 
   return (
     <SidebarGroup>
-      {hasAnyItem && (
-        <SidebarGroupLabel>Assiduidade</SidebarGroupLabel>
-      )}
+      {hasAnyItem && <SidebarGroupLabel>Comunicação</SidebarGroupLabel>}
       <SidebarMenu>
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0;
