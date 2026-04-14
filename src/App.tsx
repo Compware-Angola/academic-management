@@ -125,12 +125,15 @@ import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import Regentes from "./pages/gestao_docente/Regentes";
+
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
+
+
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
@@ -675,6 +678,82 @@ const App = () => {
                   <Route
                     path="/exame/presenca"
                     element={<ListaPresencaExame />}
+                  />
+
+                  <Route
+                    path="/exame/admitir"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ADMITIR_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <AdmitirCandidaturaUniversidadePublica />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/exame/atribuir-prova"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUIR_PROVA.sigla!,
+                        ]}
+                      >
+                        <AtribuirProva />
+                      </ProtectedRoute>
+                    }
+                  />
+                       <Route
+                    path="/exame/consultar-prova"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ConsultarProvaIndividual />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                
+                   <Route
+                    path="/exame/provas-candidato"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ListaProvaPorCandidatos />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                     <Route
+                    path="/exame/resetar"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.RESETAR_PROVA_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ResetarProva />
+                      </ProtectedRoute>
+                    }
+                  />
+                    <Route
+                    path="/exame/lancar-nota-arquitectura"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla!,
+                        ]}
+                      >
+                        <LancarNotaArquitectura />
+                      </ProtectedRoute>
+                    }
                   />
 
                   <Route
