@@ -183,14 +183,12 @@ export function InscricoesSection({
                             }
                             anoLectivo={filter.anoLetivo}
                             curso={student?.curso_codigo.toString()}
-                            periodo={"5"}
+                            periodo={student?.periodo_codigo.toString()}
                             semestre={filter.semestre}
-                            unidadeCurricular={disc.codigo_disciplina.toString()}
+                            unidadeCurricular={disc.codigo_grade_curricular.toString()}
                             estado={"3"}
                             labelMode="inside"
-                            // "anoLectivo":23,"curso":1,"estado":3,"limit":10,"page":1,"periodo":5,"semestre":1,"unidadeCurricular":710
                           />
-                          {disc.sala} • {disc.horario}
                           {disc.codigo_horario && (
                             <Button
                               variant="link"

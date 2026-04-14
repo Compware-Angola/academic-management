@@ -71,6 +71,7 @@ export type StudentDetail = {
   naturalidade: string;
   nacionalidade: string;
   estado_civil: string;
+  periodo_codigo:number;
 };
 
 /* =======================
@@ -94,6 +95,7 @@ export const fetchStudentEstatisticas = async (
 export type DisciplinaMatricula = {
   disciplina: string;
   codigo_disciplina: string;
+  codigo_grade_curricular:number;
   semestre: string; // ex: "I SEMESTRE", "II SEMESTRE"
   duracao: string; // ex: "Semestral", "Anual"
   classe: string; // ex: "1º ano", "2º ano"
