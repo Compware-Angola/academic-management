@@ -61,7 +61,7 @@ export function HorarioSelect({
           />
         </div>
 
-        {showDetails && value && (
+        {/* {showDetails && value && (
           <Button
             variant="ghost"
             size="icon"
@@ -71,17 +71,16 @@ export function HorarioSelect({
           >
             <Eye className="h-4 w-4" />
           </Button>
-        )}
+        )} */}
       </div>
 
-      {/* O Modal agora é gerenciado internamente */}
-      {showDetails && (
+      {/* {showDetails && (
         <ScheduleDetailsModal
           horarioId={Number(value)}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         />
-      )}
+      )} */}
     </>
   );
 }
