@@ -125,12 +125,15 @@ import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import Regentes from "./pages/gestao_docente/Regentes";
+
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
+
+
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
