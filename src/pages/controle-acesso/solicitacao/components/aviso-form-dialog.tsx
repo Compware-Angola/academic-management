@@ -127,11 +127,7 @@ export function AvisoFormDialog({
       toast.error("O assunto é obrigatório.");
       return;
     }
-    if (!formData.periodo) {
-      toast.error("O período é obrigatório.");
-      return;
-    }
-
+    
     const payload = {
       assunto: formData.assunto,
       descricao: formData.descricao,
@@ -215,54 +211,7 @@ export function AvisoFormDialog({
             />
           </div>
 
-          {/* Curso */}
-                    <div className="space-y-2">
-                      <CourseSelect
-                        value={formData.curso}
-                        onChangeValue={(v) =>
-                        setFormData({
-                          ...formData,
-                            curso: v,
-                            })
-                            }
-                        />
-                    </div>
-
-          {/* Período */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Período
-                      </label>
-                      <Select
-                        value={formData.periodo}
-                        onValueChange={(v) =>
-                          setFormData({
-                            ...formData,
-                            periodo: v,
-                          })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              isLoadingPeriodos
-                                ? "Carregando períodos..."
-                                : "Selecionar período"
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {periodos?.map((p: any) => (
-                            <SelectItem
-                              key={p.codigo}
-                              value={p.codigo.toString()}
-                            >
-                              {p.designacao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+          </div>
 
                     {/* DESTINO (Roles) */}
                               <div className="space-y-2">
@@ -297,6 +246,61 @@ export function AvisoFormDialog({
                                   </SelectContent>
                                 </Select>
                               </div>
+
+          {/* Curso */}
+                    <div className="space-y-2">
+                      <CourseSelect
+                        value={formData.curso}
+                        onChangeValue={(v) =>
+                        setFormData({
+                          ...formData,
+                            curso: v,
+                            })
+                            }
+                        />
+                    </div>
+
+          {/* Período */}
+                    <div className="space-y-2">
+                      <div className="space-y-2">
+  <label className="text-sm font-medium">
+    Período
+  </label>
+
+  <Select
+    value={formData.periodo}
+    onValueChange={(v) =>
+      setFormData({
+        ...formData,
+        periodo: v,
+      })
+    }
+  >
+    <SelectTrigger>
+      <SelectValue
+        placeholder={
+          isLoadingPeriodos
+            ? "Carregando períodos..."
+            : "Selecionar período"
+        }
+      />
+    </SelectTrigger>
+
+    <SelectContent>
+      <SelectItem value="todos">Todos</SelectItem>
+
+      {periodos?.map((p: any) => (
+        <SelectItem
+          key={p.codigo}
+          value={p.codigo.toString()}
+        >
+          {p.designacao}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
+                    
                     
                               {/* Data Expiração */}
                               <div className="space-y-2">

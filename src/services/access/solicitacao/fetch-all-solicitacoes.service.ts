@@ -26,6 +26,7 @@ type ListarAllSolicitacoesParams = {
   estadoSolicitacao: string;
   tipoServicoSelecionado: number;
   userId: number;
+  searchServico?: string;
 };
 
 /* ---------- SERVICE ---------- */
@@ -35,6 +36,7 @@ export async function listarAllSolicitacoesService({
   estadoSolicitacao,
   tipoServicoSelecionado,
   userId,
+  searchServico,
 }: ListarAllSolicitacoesParams): Promise<ListarAllSolicitacoesResponse> {
   const { data } = await axiosNestGa.get<ListarAllSolicitacoesResponse>(
     "/solicitacoa/all-solicitacoes",
@@ -45,11 +47,10 @@ export async function listarAllSolicitacoesService({
         estadoSolicitacao,
         tipoServicoSelecionado,
         userId,
+        searchServico,
       },
     }
   );
-
-  console.log("RESPOSTA BACKEND:", data);
 
   return data;
 }

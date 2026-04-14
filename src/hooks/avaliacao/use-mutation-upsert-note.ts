@@ -8,15 +8,21 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 export function useUpsertNote() {
   const queryClient = useQueryClient();
 
-  return useMutation<NoteUpsertResponse, any, NoteUpsertPayload>({
-    mutationFn: (payload: NoteUpsertPayload) => upsertNote(payload),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["note-releases"] });
-   
-      queryClient.refetchQueries({ queryKey: ["note-releases"] });
+  return useMutation<NoteUpsertResponse, any, NoteUpsertPayload[]>({
+    mutationFn: (payloads: NoteUpsertPayload[]) => upsertNote(payloads), // agora aceita array
+
+    onSuccess: () => {
+      // Melhor prática: só invalidar (não precisa refetch imediato)
+      queryClient.invalidateQueries({
+        queryKey: ["note-releases"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["note-summary"],
+      });
     },
+
     onError: (error) => {
-      console.error("Erro ao lançar/atualizar nota:", error);
+      console.error("Erro ao lançar/atualizar nota(s):", error);
     },
   });
 }

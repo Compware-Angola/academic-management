@@ -45,7 +45,7 @@ const TypeServiceSelectList = ({
       onChange={onChangeValue}
       onSearchChange={setSearchTerm}
       isLoading={isLoading}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       options={filteredServices}
       width="full"
       map={(service) => ({

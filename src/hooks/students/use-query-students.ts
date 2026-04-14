@@ -1,4 +1,7 @@
 // hooks/useStudents.ts
+import { GetAcademicHistoryParams, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
+import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
+import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
 import {
   fetchStudentEstatisticas,
   fetchStudentsSugestoes,
@@ -7,6 +10,8 @@ import {
   StudentSugestao,
   DisciplinasResponse,
   FetchDisciplinasMatriculadasParams,
+  UpdatePersonalDataPayload,
+  updatePersonalData,
 } from "@/services/students/students.service";
 
 import {
@@ -14,8 +19,10 @@ import {
   ListStudentsPayload,
   ListStudentsResponse,
 } from "@/services/students/students.service";
+import { updateContacts, UpdateContactsPayload } from "@/services/students/update-contacts";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 /* =============================================
    Sugestões de alunos (busca por nome, BI, etc.)
@@ -53,7 +60,7 @@ export const useStudentDetail = (codigoMatricula?: number | string) => {
 export const useStudentDisciplinas = (
   params: FetchDisciplinasMatriculadasParams,
 ) => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25 } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25,classes } = params;
 
   // Chave única que considera todos os filtros importantes
   const queryKey = [
@@ -61,6 +68,7 @@ export const useStudentDisciplinas = (
     String(matriculaId ?? "").trim(),
     anoLectivo ? String(anoLectivo) : null,
     semestre ? String(semestre) : null,
+    classes ? String(classes) : null,
     page,
     limit,
   ].filter(Boolean); // remove null/undefined
@@ -95,22 +103,77 @@ export const invalidateStudentQueries = (
 };
 
 export function useQueryStudents(payload: ListStudentsPayload) {
-  const { anoLectivo, codigoCurso, faculdadeId, codigoMatricula, page, limit } =
-    payload;
-
-  const enabled = !!anoLectivo;
+  const { codigoCurso, faculdadeId, codigoMatricula, page, limit } = payload;
 
   return useQuery<ListStudentsResponse>({
     queryKey: [
       "students",
-      anoLectivo,
       codigoCurso,
       faculdadeId,
       codigoMatricula,
       page,
       limit,
     ],
-    enabled,
     queryFn: () => getListStudentsService(payload),
   });
 }
+
+export function useResetPassword() {
+  return useMutation<void, Error, ResetPasswordPayload>({
+    mutationFn: (payload) => resetPassword(payload),
+    onSuccess: () => {
+      toast.success("Senha redefinida com sucesso!");
+    },
+  });
+}
+
+export function useUpdateContacts() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, UpdateContactsPayload>({
+    mutationFn: (payload) => updateContacts(payload),
+    onSuccess: () => {
+      toast.success("Contactos atualizados com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+
+
+export function useUpdatePersonalData() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdatePersonalDataPayload) => updatePersonalData(payload),
+    onSuccess: () => {
+      toast.success("Dados pessoais atualizados com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+export function useActiveRegistration() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, ActiveRegistrationPayload>({
+    mutationFn: (payload) => activeRegistration(payload),
+    onSuccess: () => {
+      toast.success("Matrícula ativada com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+export const useStudentAcademicHistory = (params: GetAcademicHistoryParams) => {
+  return useQuery({
+    queryKey: ['student-academic-history', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryFn: () => studentAcademicHistoryService(params),
+    enabled: !!params.matriculaId && !!params.anoLectivoId,
+    staleTime: 1000 * 60 * 5,
+  });
+};

@@ -74,7 +74,6 @@ import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida"
 import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
-import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
 import ListarBolsa from "./pages/financas/credito-educacional/bolsa/ListarBolsa";
 import ListaBolseiro from "./pages/financas/credito-educacional/bolsa/ListarBolsaEstudante";
@@ -125,9 +124,38 @@ import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
+<<<<<<< HEAD
 import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
+import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
+import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
+import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
+import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
+import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
+import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
+import Regentes from "./pages/gestao_docente/Regentes";
+=======
+import Regentes from "./pages/gestao_docente/Regentes";
+import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
+import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
+import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
+import AtribuirProva from "./pages/access_exam/AtribuirProva";
+import ResetarProva from "./pages/access_exam/ResetarProva";
+import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
+import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
+import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
+import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
+import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
+import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
+import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
+import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
+import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+import Admitidos from "./pages/access_exam/Admitidos";
+import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
+import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
+import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
+>>>>>>> 3afcc5cca4de7b0818b15b6650f44b6c110dab16
 
 const App = () => {
   return (
@@ -630,8 +658,30 @@ const App = () => {
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
+                  <Route
+                    path="/estudante-legado/:matricula"
+                    element={<PerfilEstudanteLegado />}
+                  />
 
                   {/* EXAME ACESSO */}
+                  <Route
+                    path="/exame/admitidos"
+                    element={<Admitidos />}
+                  />
+                   <Route
+                    path="/exame/estatisticas-diaria"
+                    element={<EstatisticasDiaria />}
+                  />
+                   <Route
+                    path="/exame/estatisticas"
+                    element={<EstatisticasExame />}
+                  />
+                 
+                  <Route
+                    path="/exame/resultados-finais"
+                    element={<ResultadoFinais />}
+                  />
+
                   <Route
                     path="/exame/presenca"
                     element={<ListaPresencaExame />}
@@ -789,6 +839,19 @@ const App = () => {
                         ]}
                       >
                         <SchedulesByUC />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/horarios/docentes-substitutos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_DOCENTES_SUBSTITUTO
+                            .sigla!,
+                        ]}
+                      >
+                        <DocenteSubstitutoList />\
                       </ProtectedRoute>
                     }
                   />
@@ -1208,6 +1271,58 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/inscricoes/sem-uc"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla!,
+                        ]}
+                      >
+                        <InscricaoSemUc />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/matriculados"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <EstudantesMatriculado />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/estatisticas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
+                        ]}
+                      >
+                        <EstatisticaDeEstudantesAprovadosEReprovados />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inscricoes/sem-curso"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla!,
+                        ]}
+                      >
+                        <SemInscricaoCurso />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   <Route
                     path="/gestao-docentes/docentes"
@@ -1224,55 +1339,32 @@ const App = () => {
                   }
 
                   />
-
                   <Route
-                    path="/ministerio/mapa-finalistas"
-
+                    path="/financas/mensalidades-pagas"
                     element={
-
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla!,
+                          PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA
+                            .sigla!,
                         ]}
                       >
-                        <MapaAnualEstudantesFinalistas />
+                        <PagamentoMensal />
                       </ProtectedRoute>
-                  }
-
+                    }
                   />
 
                   <Route
-                    path="/ministerio/registro-exame"
-
+                    path="/gestao-docentes/regentes"
                     element={
-
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
+                          PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla!,
                         ]}
                       >
-                        <RegistoPrimarioExamesAcesso />
+                        <Regentes />
                       </ProtectedRoute>
-                  }
-
+                    }
                   />
-
-                  <Route
-                    path="/ministerio/registro-matricula"
-
-                    element={
-
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
-                        ]}
-                      >
-                        <RegistoPrimarioMatriculados />
-                      </ProtectedRoute>
-                  }
-
-                  />
-
                 </Route>
               </Routes>
             </TooltipProvider>

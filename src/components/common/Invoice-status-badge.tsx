@@ -20,11 +20,24 @@ export function InvoiceStatusBadge({ status }: InvoiceStatusBadgeProps) {
           Pendente
         </Badge>
       );
+    case InvoiceEnum.PARCELADO:
+      return (
+        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+          Parcelado
+        </Badge>
+      );
     case InvoiceEnum.ISENTO:
       return (
         <Badge variant="secondary" className="bg-gray-100 text-gray-600">
           <span className="size-1.5 rounded-full bg-gray-600 mr-1.5" />
           Isento
+        </Badge>
+      );
+
+    case InvoiceEnum.ANULADO:
+      return (
+        <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+          Rejeitado
         </Badge>
       );
   }

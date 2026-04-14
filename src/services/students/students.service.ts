@@ -53,11 +53,16 @@ export type StudentDetail = {
   morada: string;
   nome_completo: string;
   bi_aluno: string;
-
+  curso_codigo: number;
+  data_emissao_bi: string;
+  data_validade_bi: string;
   email: string | null; // pode vir null
-  telefonicos: string;
+  contacto: string | null;
+  contacto_alternativo: string | null;
   sexo: string;
-  data_nascimento: string; // ISO: "1982-05-24T23:00:00.000Z"
+  data_nascimento: string; 
+  ocupacao_codigo: number;
+  profissao_codigo: number;
   foto: string;
   saldo_atual: number;
   saldo_anterior: number;
@@ -66,6 +71,7 @@ export type StudentDetail = {
   naturalidade: string;
   nacionalidade: string;
   estado_civil: string;
+  periodo_codigo:number;
 };
 
 /* =======================
@@ -89,6 +95,7 @@ export const fetchStudentEstatisticas = async (
 export type DisciplinaMatricula = {
   disciplina: string;
   codigo_disciplina: string;
+  codigo_grade_curricular:number;
   semestre: string; // ex: "I SEMESTRE", "II SEMESTRE"
   duracao: string; // ex: "Semestral", "Anual"
   classe: string; // ex: "1º ano", "2º ano"
@@ -112,8 +119,9 @@ export type DisciplinasResponse = {
  * ======================= */
 export type FetchDisciplinasMatriculadasParams = {
   matriculaId: number | string;
-  anoLectivo?: string | number; // ex: "2023-2024" ou 2023
-  semestre?: string | number; // ex: "1", "I", "2", "II", "I SEMESTRE"
+  anoLectivo?: string | number; 
+  semestre?: string | number; 
+  classes?: string | number; 
   page?: number;
   limit?: number;
 };
@@ -124,7 +132,7 @@ export type FetchDisciplinasMatriculadasParams = {
 export const fetchDisciplinasMatriculadas = async (
   params: FetchDisciplinasMatriculadasParams,
 ): Promise<DisciplinasResponse> => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25 } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes } = params;
 
   // Monta query params apenas com os valores fornecidos
   const queryParams: Record<string, string | number> = {
@@ -141,6 +149,10 @@ export const fetchDisciplinasMatriculadas = async (
     queryParams.semestre = String(semestre).trim();
   }
 
+  if (classes !== undefined && classes !== null) {
+    queryParams.classes = String(classes).trim();
+  }
+
   const response = await axiosNestGa.get<DisciplinasResponse>("/discipline", {
     params: queryParams,
   });
@@ -150,7 +162,7 @@ export const fetchDisciplinasMatriculadas = async (
 
 //OBTER TODOS OS ESTUDANTES
 export type ListStudentsPayload = {
-  anoLectivo: number;
+  anoLectivo?: number;
   codigoCurso?: number;
   faculdadeId?: number;
   codigoMatricula?: number;
@@ -188,7 +200,7 @@ export async function getListStudentsService(
 
   const { data } = await axiosNestGa.get<ListStudentsResponse>("/students", {
     params: {
-      anoLectivo,
+      //anoLectivo,
       codigoCurso,
       faculdadeId,
       codigoMatricula,
@@ -198,4 +210,27 @@ export async function getListStudentsService(
   });
 
   return data;
+}
+
+
+export type UpdatePersonalDataPayload = {
+  codigoMatricula: number;
+  nomeCompleto?: string;
+  dataNascimento?: string;
+  genero?: string;
+  numeroBI?: string;
+  dataEmissao?: string;
+  dataValidade?: string;
+  nacionalidade?: string;
+  nomePai?: string;
+  nomeMae?: string;
+  profissao?: number;
+  ocupacao?: number;
+  naturalidade?: string;
+  morada?: string;
+};
+
+export async function updatePersonalData(data: UpdatePersonalDataPayload) { 
+  const response = await axiosNestGa.put(`/students/personal-data`, data);
+  return response.data;
 }

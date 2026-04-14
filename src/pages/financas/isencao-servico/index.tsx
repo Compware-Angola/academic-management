@@ -110,6 +110,7 @@ export default function IsencaoServico() {
       estadoIsencao: item.estado_isensao ?? "",
       codigo: item.codigo,
     };
+    console.log(initial);
     setEditForm(initial);
     setOriginalEditForm(initial);
     setIsEditOpen(true);
@@ -142,7 +143,7 @@ export default function IsencaoServico() {
     if (!codigo) return;
 
     const body: UpdateIsencaoServicoBody = {};
-
+    console.log("edit form", editForm);
     if (originalEditForm) {
       if (
         String(editForm.codigoMatricula ?? "") !==
@@ -209,6 +210,7 @@ export default function IsencaoServico() {
       return;
     }
 
+    console.log(body);
     await mutateUpdate({ codigo, body });
     setIsEditOpen(false);
     setOriginalEditForm(null);
@@ -216,7 +218,10 @@ export default function IsencaoServico() {
   };
 
   const handleSearch = () => {
-    setFiltersApplied(filters);
+    setFiltersApplied({
+      ...filters,
+      matricula: matriculaInput,
+    });
     setPage(1);
   };
 
@@ -263,10 +268,12 @@ export default function IsencaoServico() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <FacultySelect
+              placeholder="Faculdade"
               value={filters.faculdade}
               onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
             />
             <CourseSelect
+              placeholder="Cursos"
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
               }}

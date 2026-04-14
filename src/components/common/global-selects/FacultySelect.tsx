@@ -5,13 +5,19 @@ import { Faculdade } from "@/services/faculdades/fetch-faculdades.service";
 
 interface FacultySelectProps {
   value: string;
+  showLabel?: boolean;
   onChangeValue: (v: string) => void;
   allOption?: boolean;
+  width?: string;
+  placeholder?: string;
 }
 const FacultySelect = ({
   onChangeValue,
   value,
   allOption = false,
+  showLabel = true,
+  placeholder,
+  width = "full",
 }: FacultySelectProps) => {
   const { data: faculdades = [], isLoading: isLoadingFaculdades } =
     useQueryFetchFaculdades();
@@ -36,9 +42,10 @@ const FacultySelect = ({
     <>
       <FormCommandSelect
         disabled={isLoadingFaculdades}
+        placeholder={placeholder}
         value={value}
-        label="Faculdade"
-        width="full"
+        label={showLabel ? "Faculdade" : undefined}
+        width={width}
         options={allfaculdades}
         map={(f) => ({
           key: f.codigo.toString(),
