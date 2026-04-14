@@ -448,7 +448,7 @@ export const academicStructure: MenuStructure = {
         { title: "Registro matrícula", url: "/ministerio/registro-matricula", permission: [PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla] },
       ],
 
-      permission: ["adm", "rootAdmin"],
+      permission: [],
     },
 
     // ----------------------------------------------------
