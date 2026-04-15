@@ -125,7 +125,10 @@ import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import Regentes from "./pages/gestao_docente/Regentes";
+
 import ListaGeralEstudantes from "./pages/registrations/GeneralListStudents";
+
+
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import InscritosPorUc from "./pages/registrations/InscritosPorUc";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
@@ -133,6 +136,8 @@ import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividu
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
+
+
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
 import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
@@ -141,10 +146,19 @@ import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+
 import EstadoMatriculaPorHorario from "./pages/registrations/EstadoDoEstudanteMatriculadoPorHorario";
 import ListarEstudantesPorEstadoMatricula from "./pages/registrations/ListarEstudantesPorEstadoMatricula";
 import IsentarColisao from "./pages/registrations/IsentarColisao";
 import ListagemColisoesIsentas from "./pages/registrations";
+
+import Admitidos from "./pages/access_exam/Admitidos";
+import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
+import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
+import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
+import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
+import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
+import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 
 const App = () => {
   return (
@@ -653,33 +667,105 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
+                  <Route
+                    path="/exame/admitidos"
+                    element={<Admitidos />}
+                  />
+                   <Route
+                    path="/exame/estatisticas-diaria"
+                    element={<EstatisticasDiaria />}
+                  />
+                   <Route
+                    path="/exame/estatisticas"
+                    element={<EstatisticasExame />}
+                  />
+                 
+                  <Route
+                    path="/exame/resultados-finais"
+                    element={<ResultadoFinais />}
+                  />
 
                   <Route
                     path="/exame/presenca"
                     element={<ListaPresencaExame />}
                   />
-                  <Route
-                    path="/exame/admitir"
-                    element={<AdmitirCandidaturaUniversidadePublica />}
-                  />
-                  <Route
-                    path="/exame/provas-candidato"
-                    element={<ListaProvaPorCandidatos />}
-                  />
 
                   <Route
-                    path="/exame/consultar-prova"
-                    element={<ConsultarProvaIndividual />}
+                    path="/exame/admitir"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ADMITIR_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <AdmitirCandidaturaUniversidadePublica />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/exame/atribuir-prova"
-                    element={<AtribuirProva />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ATRIBUIR_PROVA.sigla!,
+                        ]}
+                      >
+                        <AtribuirProva />
+                      </ProtectedRoute>
+                    }
                   />
-                  <Route
+                       <Route
+                    path="/exame/consultar-prova"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ConsultarProvaIndividual />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                
+                   <Route
+                    path="/exame/provas-candidato"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ListaProvaPorCandidatos />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                     <Route
+                    path="/exame/resetar"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.RESETAR_PROVA_CANDIDATO.sigla!,
+                        ]}
+                      >
+                        <ResetarProva />
+                      </ProtectedRoute>
+                    }
+                  />
+                    <Route
                     path="/exame/lancar-nota-arquitectura"
-                    element={<LancarNotaArquitectura />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla!,
+                        ]}
+                      >
+                        <LancarNotaArquitectura />
+                      </ProtectedRoute>
+                    }
                   />
-                  <Route path="/exame/resetar" element={<ResetarProva />} />
+
                   <Route
                     path="/exame/lista-candidatos"
                     element={
@@ -1352,7 +1438,9 @@ const App = () => {
 
                   <Route
                     path="/gestao-docentes/docentes"
+
                     element={
+
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DE_DOCENTES.sigla!,
@@ -1360,7 +1448,8 @@ const App = () => {
                       >
                         <ListagemDocentes />
                       </ProtectedRoute>
-                    }
+                  }
+
                   />
                   <Route
                     path="/financas/mensalidades-pagas"
@@ -1400,6 +1489,43 @@ const App = () => {
                     path="/inscricoes/inscritos-uc"
 
                     element={ <InscritosPorUc />}
+                      />
+
+
+                  <Route
+                    path="/ministerio/mapa-finalistas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla!,
+                        ]}
+                      >
+                        <MapaAnualEstudantesFinalistas />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/ministerio/registro-exame"
+                    element={
+                      
+                        <RegistoPrimarioExamesAcesso />
+                      
+                    }
+                  />
+
+                  <Route
+                    path="/ministerio/registro-matricula"
+
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
+                        ]}
+                      >
+                        <RegistoPrimarioMatriculados />
+                      </ProtectedRoute>
+                    }
 
                   />
 

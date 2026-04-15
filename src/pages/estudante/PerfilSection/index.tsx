@@ -2,8 +2,42 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
-import { Contact, Key } from "lucide-react";
+import { Book, Contact, Key } from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
+import { AtivarMatricula } from "./ativar-matricula";
+import { InscricoesSection } from "./ver-inscricoes";
+const TABS_CONFIG = [
+  {
+    value: "atualizar-senha",
+    label: "Atualizar Senha",
+    icon: Key,
+    component: AtualizarSenha,
+  },
+  {
+    value: "contacto",
+    label: "Contacto",
+    icon: Contact,
+    component: Contacto,
+  },
+  {
+    value: "dados-pessoais",
+    label: "Dados Pessoais",
+    icon: Contact,
+    component: DadosPessoais,
+  },
+  {
+    value: "ativar-matricula",
+    label: "Ativar Matricula Cancelada",
+    icon: Key,
+    component: AtivarMatricula,
+  },
+  {
+    value: "ver-inscricoes",
+    label: "Ver Inscrições",
+    icon: Book,
+    component: InscricoesSection,
+  },
+] as const;
 
 type PerfilSectionProps = {
   value?: string;
@@ -21,38 +55,35 @@ export function PerfilSection({
         className="flex flex-row gap-6"
       >
         <TabsList className="flex justify-start flex-col h-auto w-52">
-          <TabsTrigger
-            className="w-full justify-start gap-2"
-            value="atualizar-senha"
-          >
-            <Key className="h-4 w-4" />
-            <span className="hidden md:inline">Atualizar Senha</span>
-            <span className="md:hidden">Atualizar Senha</span>
-          </TabsTrigger>
-          <TabsTrigger className="w-full justify-start gap-2" value="contacto">
-            <Contact className="h-4 w-4" />
-            <span className="hidden md:inline">Contacto</span>
-            <span className="md:hidden">Contacto</span>
-          </TabsTrigger>
-          <TabsTrigger
-            className="w-full justify-start gap-2"
-            value="dados-pessoais"
-          >
-            <Contact className="h-4 w-4" />
-            <span className="hidden md:inline">Dados Pessoais</span>
-            <span className="md:hidden">Dados Pessoais</span>
-          </TabsTrigger>
+          {TABS_CONFIG.map((tab) => {
+            const Icon = tab.icon;
+
+            return (
+              <TabsTrigger
+                key={tab.value}
+                className="w-full justify-start gap-2"
+                value={tab.value}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="hidden md:inline truncate">{tab.label}</span>
+                <span className="md:hidden truncate">{tab.label}</span>
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
+
         <Card className="flex-1 p-6">
-          <AtualizarSenha
-            value="atualizar-senha"
-            codigoMatricula={codigoMatricula}
-          />
-          <Contacto value="contacto" codigoMatricula={codigoMatricula} />
-          <DadosPessoais
-            value="dados-pessoais"
-            codigoMatricula={codigoMatricula}
-          />
+          {TABS_CONFIG.map((tab) => {
+            const Component = tab.component;
+            if (!Component) return null;
+            return (
+              <Component
+                key={tab.value}
+                value={tab.value}
+                codigoMatricula={codigoMatricula}
+              />
+            );
+          })}
         </Card>
       </Tabs>
     </TabsContent>

@@ -1,4 +1,8 @@
-import { AgendamentosDocentePayload, AgendamentosDocenteResponse, controleAssiduidadeService } from "@/services/assiduidade/controle-assiduidade.service";
+import {
+  AgendamentosDocentePayload,
+  AgendamentosDocenteResponse,
+  controleAssiduidadeService,
+} from "@/services/assiduidade/controle-assiduidade.service";
 import { useQuery } from "@tanstack/react-query";
 
 export const useQueryControleAssiduidade = (
@@ -14,8 +18,8 @@ export const useQueryControleAssiduidade = (
     estado,
     anoLectivo,
     semestre,
-    curso,
     gradeCurricular,
+    search,
     page = 1,
     limit = 20,
   } = filters;
@@ -34,14 +38,15 @@ export const useQueryControleAssiduidade = (
         anoLectivo,
         semestre,
         gradeCurricular,
+        search,
         page,
         limit,
       },
     ],
     queryFn: () => controleAssiduidadeService(filters),
     enabled,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 20,   // 20 minutos
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 20,
     retry: 2,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,

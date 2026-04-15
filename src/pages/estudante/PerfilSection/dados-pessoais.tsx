@@ -11,9 +11,15 @@ import { z } from "zod";
 import { Loader2, Pencil, Save } from "lucide-react";
 import {
   useStudentDetail,
-  // useUpdateStudentDetails <- Supondo que você criará este hook
-} from "@/hooks/tudents/use-query-students";
+  useUpdatePersonalData,
+} from "@/hooks/students/use-query-students";
 import { useEffect, useState } from "react";
+import {
+  useNacionalidadesDropdownFilter,
+  useOcupacoesDropdownFilter,
+  useProfissoesDropdownFilter,
+} from "@/hooks/dropdown-filters";
+import { SelectFormField } from "@/components/selectFormField";
 
 const schema = z.object({
   nomeCompleto: z.string().min(3, "Nome muito curto"),
@@ -34,6 +40,10 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+function formatDate(date?: string | null) {
+  if (!date) return "";
+  return new Date(date).toISOString().split("T")[0];
+}
 
 type DadosPessoaisProps = {
   codigoMatricula: number;
@@ -45,54 +55,110 @@ export function DadosPessoais({
   value = "dados-pessoais",
 }: DadosPessoaisProps) {
   const { data: student, isLoading } = useStudentDetail(codigoMatricula);
+  const { data: profissoes = [] } = useProfissoesDropdownFilter();
+  const { data: ocupacoes = [] } = useOcupacoesDropdownFilter();
+  const { data: nacionalidades = [] } = useNacionalidadesDropdownFilter();
+  const updateMutation = useUpdatePersonalData();
   const [isEditing, setIsEditing] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nomeCompleto: student?.nome_completo ?? "",
-      dataNascimento: student?.data_nascimento ?? "",
-      genero: student?.sexo ?? "",
-      numeroBI: student?.bi ?? "",
+      nomeCompleto: "",
+      dataNascimento: "",
+      genero: "",
+      numeroBI: "",
       dataEmissao: "",
       dataValidade: "",
-      nacionalidade: student?.nacionalidade ?? "",
-      nomePai: student?.pai ?? "",
-      nomeMae: student?.mae ?? "",
+      nacionalidade: "",
+      nomePai: "",
+      nomeMae: "",
       profissao: "",
       ocupacao: "",
-      naturalidade: student?.naturalidade ?? "",
-      provincia: student?.naturalidade ?? "",
-      municipio: student?.naturalidade ?? "",
-      morada: student?.morada ?? "",
+      naturalidade: "",
+      provincia: "",
+      municipio: "",
+      morada: "",
     },
   });
-
+  const { isDirty } = form.formState;
   useEffect(() => {
     if (student) {
       form.reset({
-        nomeCompleto: student.nome_completo,
-        dataNascimento: student.data_nascimento,
-        genero: student.sexo,
-        numeroBI: student.bi,
-        nacionalidade: student.nacionalidade,
-        nomePai: student.pai,
-        nomeMae: student.mae,
-        naturalidade: student.naturalidade,
-        provincia: student.naturalidade,
-        municipio: student.naturalidade,
-        morada: student.morada,
+        nomeCompleto: student.nome_completo ?? "",
+        dataNascimento: formatDate(student.data_nascimento),
+        genero: student.sexo ?? "",
+        numeroBI: student.bi ?? "",
+        dataEmissao: formatDate(student.data_emissao_bi),
+        dataValidade: formatDate(student.data_validade_bi),
+        nacionalidade:
+          nacionalidades
+            .find(
+              (nacionalidade) => nacionalidade.label === student.nacionalidade,
+            )
+            ?.value.toString() ?? "",
+        nomePai: student.pai ?? "",
+        nomeMae: student.mae ?? "",
+        profissao: student.profissao_codigo?.toString() ?? "",
+        ocupacao: student.ocupacao_codigo?.toString() ?? "",
+        naturalidade: student.naturalidade ?? "",
+        provincia: student.naturalidade ?? "",
+        municipio: student.naturalidade ?? "",
+        morada: student.morada ?? "",
       });
     }
-  }, [form, student]);
+  }, [student, form, nacionalidades]);
 
   if (isLoading)
     return <div className="p-4 text-center">A carregar dados...</div>;
 
-  function onSubmit(values: FormValues) {
-    console.log("Dados atualizados:", values);
-    // Aqui chamarias a tua mutation: updateDetails.mutateAsync(...)
-    setIsEditing(false);
+  async function onSubmit(values: FormValues) {
+    try {
+      await updateMutation.mutateAsync({
+        codigoMatricula,
+        nomeCompleto:
+          values.nomeCompleto !== student?.nome_completo
+            ? values.nomeCompleto
+            : undefined,
+        dataNascimento:
+          values.dataNascimento !== formatDate(student?.data_nascimento)
+            ? values.dataNascimento
+            : undefined,
+        genero: values.genero !== student?.sexo ? values.genero : undefined,
+        numeroBI: values.numeroBI !== student?.bi ? values.numeroBI : undefined,
+        dataEmissao:
+          values.dataEmissao !== formatDate(student?.data_emissao_bi)
+            ? values.dataEmissao
+            : undefined,
+        dataValidade:
+          values.dataValidade !== formatDate(student?.data_validade_bi)
+            ? values.dataValidade
+            : undefined,
+        nacionalidade:
+          values.nacionalidade !== student?.nacionalidade
+            ? values.nacionalidade
+            : undefined,
+        nomePai: values.nomePai !== student?.pai ? values.nomePai : undefined,
+        nomeMae: values.nomeMae !== student?.mae ? values.nomeMae : undefined,
+        profissao:
+          Number(values.profissao) !== student?.profissao_codigo
+            ? Number(values.profissao)
+            : undefined,
+        ocupacao:
+          Number(values.ocupacao) !== student?.ocupacao_codigo
+            ? Number(values.ocupacao)
+            : undefined,
+        naturalidade:
+          values.naturalidade !== student?.naturalidade
+            ? values.naturalidade
+            : undefined,
+        morada: values.morada !== student?.morada ? values.morada : undefined,
+      });
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -111,18 +177,31 @@ export function DadosPessoais({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              setIsEditing(!isEditing);
+              form.reset();
+            }}
             className="flex gap-2"
           >
             <Pencil className="h-4 w-4" /> {isEditing ? "Cancelar" : "Editar"}
           </Button>
           {isEditing && (
             <Button
+              disabled={!isDirty || updateMutation.isPending}
               size="sm"
               className="bg-green-600 hover:bg-green-700 flex gap-2"
               onClick={form.handleSubmit(onSubmit)}
             >
-              <Save className="h-4 w-4" /> Salvar
+              {updateMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" /> Salvar
+                </>
+              )}
             </Button>
           )}
         </div>
@@ -142,6 +221,7 @@ export function DadosPessoais({
               control={form.control}
               name="dataNascimento"
               label="Data de Nascimento:"
+              type="date"
               disabled={!isEditing}
             />
             <InputFormField
@@ -159,19 +239,25 @@ export function DadosPessoais({
             <InputFormField
               control={form.control}
               name="dataEmissao"
+              type="date"
               label="Data de Emissao:"
               disabled={!isEditing}
             />
             <InputFormField
               control={form.control}
               name="dataValidade"
+              type="date"
               label="Data de Validade:"
               disabled={!isEditing}
             />
-            <InputFormField
+            <SelectFormField
               control={form.control}
               name="nacionalidade"
               label="Nacionalidade:"
+              items={nacionalidades.map((nacionalidade) => ({
+                value: nacionalidade.value.toString(),
+                label: nacionalidade.label,
+              }))}
               disabled={!isEditing}
             />
             <InputFormField
@@ -186,17 +272,25 @@ export function DadosPessoais({
               label="Nome da Mae:"
               disabled={!isEditing}
             />
-            <InputFormField
+            <SelectFormField
               control={form.control}
               name="profissao"
               label="Profissao:"
               disabled={!isEditing}
+              items={profissoes.map((profissao) => ({
+                value: profissao.value.toString(),
+                label: profissao.label,
+              }))}
             />
-            <InputFormField
+            <SelectFormField
               control={form.control}
               name="ocupacao"
               label="Ocupacao:"
               disabled={!isEditing}
+              items={ocupacoes.map((ocupacao) => ({
+                value: ocupacao.value.toString(),
+                label: ocupacao.label,
+              }))}
             />
             <InputFormField
               control={form.control}

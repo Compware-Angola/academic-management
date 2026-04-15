@@ -12,8 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -22,25 +20,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQueryStudents } from "@/hooks/tudents/use-query-students";
 import { parseFilter } from "@/util/parse-filter";
-import {
-  Banknote,
-  Calendar,
-  Eye,
-  GraduationCap,
-  RefreshCw,
-} from "lucide-react";
+import { Calendar, Eye, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import { useMutationCreateIsencaoServico } from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-servico.ts";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
 import { InvoiceStatusBadge } from "@/components/common/Invoice-status-badge";
 import { InvoiceEnum } from "@/enums/invoice.enum";

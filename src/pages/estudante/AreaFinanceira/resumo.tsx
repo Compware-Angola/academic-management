@@ -53,7 +53,7 @@ import {
 import {
   useStudentDetail,
   useStudentDisciplinas,
-} from "@/hooks/tudents/use-query-students";
+} from "@/hooks/students/use-query-students";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -299,14 +299,6 @@ export function Resumo({
 
   if (!matricula) {
     return <div>Matrícula inválida</div>;
-  }
-
-  if (isLoading || isFetching) {
-    return <div>A carregar dados do estudante...</div>;
-  }
-
-  if (error || !student) {
-    return <div>Estudante não encontrado</div>;
   }
 
   const estudante = mockEstudante;

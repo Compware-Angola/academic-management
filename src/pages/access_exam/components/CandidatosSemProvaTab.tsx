@@ -9,18 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCandidatosSemProva } from "@/hooks/access_exam/use-candidatos-sem-prova";
 import { parseFilter } from "@/util/parse-filter";
+import { Input } from "@/components/ui/input";
+import { Label } from "recharts";
 
 type Filters = {
   codigoAnoLetivo: string;
   codigoCurso: string;
   codigoTurno: string;
+  search: string;
+
   page: number;
   limit: number;
 };
@@ -29,6 +33,7 @@ const INITIAL: Filters = {
   codigoAnoLetivo: "",
   codigoCurso: "",
   codigoTurno: "",
+  search: "",
   page: 1,
   limit: 10,
 };
@@ -40,10 +45,11 @@ export function CandidatosSemProvaTab() {
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const { data, isLoading } = useCandidatosSemProva({
-    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo) ,
-    codigoCurso:parseFilter(filters.codigoCurso) ,
-    codigoTurno: parseFilter(filters.codigoTurno) ,
+    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
+    codigoCurso: parseFilter(filters.codigoCurso),
+    codigoTurno: parseFilter(filters.codigoTurno),
     filtroProva: "sem_prova",
+    search: filters.search,
     page: filters.page,
     limit: filters.limit,
   });
@@ -54,23 +60,23 @@ export function CandidatosSemProvaTab() {
   const offset = (filters.page - 1) * filters.limit;
 
   const exportRows = useMemo(
-  () =>
-    candidatos.map((item) => ({
-      numeroInscricao: item.codigo,
-      nome: item.nome,
-      contacto: item.contato,
-      sexo: item.sexo,
-      curso: item.curso,
-      periodo: item.periodo,
-      anoLectivo: item.ano_lectivo,
-      tipoCandidatura: item.tipo_candidatura,
-      estado: item.estado,
-    })),
-  [candidatos]
-);
+    () =>
+      candidatos.map((item) => ({
+        numeroInscricao: item.codigo,
+        nome: item.nome,
+        contacto: item.contato,
+        sexo: item.sexo,
+        curso: item.curso,
+        periodo: item.periodo,
+        anoLectivo: item.ano_lectivo,
+        tipoCandidatura: item.tipo_candidatura,
+        estado: item.estado,
+      })),
+    [candidatos]
+  );
 
-const pdfData = exportRows.length
-  ? {
+  const pdfData = exportRows.length
+    ? {
       filtros: [
         filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
         filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
@@ -80,36 +86,36 @@ const pdfData = exportRows.length
         .join(" | "),
       rows: exportRows,
     }
-  : null;
+    : null;
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Candidatos sem Prova"
-    subtitle="Lista de candidatos sem prova atribuída"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
-      { title: "Resumo", content: [`Total de registos: ${total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
-        { key: "nome", label: "Nome", width: "22%" },
-        { key: "contacto", label: "Contacto", width: "14%" },
-        { key: "sexo", label: "Sexo", width: "8%" },
-        { key: "curso", label: "Curso", width: "16%" },
-        { key: "periodo", label: "Período", width: "10%" },
-        { key: "anoLectivo", label: "Ano Lectivo", width: "10%" },
-        { key: "estado", label: "Estado", width: "8%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Candidatos sem Prova"
+      subtitle="Lista de candidatos sem prova atribuída"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+          { key: "nome", label: "Nome", width: "22%" },
+          { key: "contacto", label: "Contacto", width: "14%" },
+          { key: "sexo", label: "Sexo", width: "8%" },
+          { key: "curso", label: "Curso", width: "16%" },
+          { key: "periodo", label: "Período", width: "10%" },
+          { key: "anoLectivo", label: "Ano Lectivo", width: "10%" },
+          { key: "estado", label: "Estado", width: "8%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const excelProps = pdfData
-  ? {
+  const excelProps = pdfData
+    ? {
       documentTitle: "Candidatos sem Prova",
       subtitle: "Lista de candidatos sem prova atribuída",
       infoSections: [
@@ -133,30 +139,30 @@ const excelProps = pdfData
       footerNotice: "Documento gerado automaticamente pelo sistema.",
       primaryColor: "#0D1B48",
     }
-  : null;
+    : null;
 
-const baseFileName = `Candidatos_Sem_Prova_${new Date().toISOString().slice(0, 10)}`;
+  const baseFileName = `Candidatos_Sem_Prova_${new Date().toISOString().slice(0, 10)}`;
 
   return (
     <div className="space-y-4">
       <div className="flex justify-end gap-2">
-  {pdfContent && (
-    <PDFActions
-      document={pdfContent}
-      fileName={`${baseFileName}.pdf`}
-      showDownload
-      showPrint
-    />
-  )}
+        {pdfContent && (
+          <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
+          />
+        )}
 
-  {excelProps && (
-    <ExcelActions
-      excelProps={excelProps}
-      fileName={`${baseFileName}.xlsx`}
-      showDownload
-    />
-  )}
-</div>
+        {excelProps && (
+          <ExcelActions
+            excelProps={excelProps}
+            fileName={`${baseFileName}.xlsx`}
+            showDownload
+          />
+        )}
+      </div>
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
@@ -194,6 +200,18 @@ const baseFileName = `Candidatos_Sem_Prova_${new Date().toISOString().slice(0, 1
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
           </div>
+          <div className="space-y-2">
+            <Label>Pesquisar</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Pesquisar por nome ou BI"
+                value={filters.search}
+                onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -210,6 +228,7 @@ const baseFileName = `Candidatos_Sem_Prova_${new Date().toISOString().slice(0, 1
               <TableHead>Período</TableHead>
               <TableHead>Ano Lectivo</TableHead>
               <TableHead>Tipo Candidatura</TableHead>
+              <TableHead>Data Candidatura</TableHead>
               <TableHead>Estado</TableHead>
             </TableRow>
           </TableHeader>
@@ -238,6 +257,7 @@ const baseFileName = `Candidatos_Sem_Prova_${new Date().toISOString().slice(0, 1
                 <TableCell><Badge variant="outline">{item.periodo}</Badge></TableCell>
                 <TableCell className="text-sm">{item.ano_lectivo}</TableCell>
                 <TableCell className="text-sm">{item.tipo_candidatura}</TableCell>
+                <TableCell className="text-sm">{item.data_candidatura}</TableCell>
                 <TableCell>
                   <Badge
                     variant="outline"

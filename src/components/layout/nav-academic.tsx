@@ -42,7 +42,7 @@ export function NavAcademic({
   return (
     <SidebarGroup>
             {hasAnyItem && (
-    <SidebarGroupLabel>Académico</SidebarGroupLabel>
+    <SidebarGroupLabel>Acadêmico</SidebarGroupLabel>
   )}
       
       <SidebarMenu>
