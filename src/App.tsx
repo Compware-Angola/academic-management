@@ -144,6 +144,7 @@ import PerfilEstudante from "./pages/estudante/PerfilEstudante";
 import EstadoMatriculaPorHorario from "./pages/registrations/EstadoDoEstudanteMatriculadoPorHorario";
 import ListarEstudantesPorEstadoMatricula from "./pages/registrations/ListarEstudantesPorEstadoMatricula";
 import IsentarColisao from "./pages/registrations/IsentarColisao";
+import ListagemColisoesIsentas from "./pages/registrations";
 
 const App = () => {
   return (
@@ -1345,7 +1346,7 @@ const App = () => {
                   <Route
                     path="/inscricoes/colisao"
                     element={
-                          <IsentarColisao />
+                          <ListagemColisoesIsentas />
                     }
                   />
 

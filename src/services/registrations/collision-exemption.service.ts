@@ -19,7 +19,7 @@ export async function isentarColisaoMatriculaService(
   payload: IsentarColisaoMatriculaPayload
 ): Promise<IsentarColisaoResponse> {
   const { data } = await axiosNestGa.post<IsentarColisaoResponse>(
-    "/colisoes/matricula",
+    "/registration/colisoes/matricula",
     payload
   );
 
@@ -30,7 +30,7 @@ export async function isentarColisaoCursoService(
   payload: IsentarColisaoCursoPayload
 ): Promise<IsentarColisaoResponse> {
   const { data } = await axiosNestGa.post<IsentarColisaoResponse>(
-    "/colisoes/curso",
+    "/registration/colisoes/curso",
     payload
   );
 
