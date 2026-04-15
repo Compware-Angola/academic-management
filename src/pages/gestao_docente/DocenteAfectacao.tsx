@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Book, BookUser, CheckCircle2, CircleX, Plus } from "lucide-react";
+import { Book, BookUser } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,10 +9,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { GestaoAfectacaoPorUC } from "./components/GestaoAfectacaoPorUC";
-import { Button } from "@/components/ui/button";
 import { GestaoAfectacaoModal } from "./components/GestaoAfectacaoModal";
 import { DocentAfectacaoItem } from "./components/DocentAfectacaoItem";
+import { DocenteSemAfectacaoItem } from "./components/DocenteSemAfectacaoItem";
 
 export const DocenteAfectacao = () => {
   const [activeTab, setActiveTab] = useState<"docente" | "uc">("docente");
@@ -57,7 +56,7 @@ export const DocenteAfectacao = () => {
           <DocentAfectacaoItem />
         </TabsContent>
         <TabsContent value="uc">
-          <GestaoAfectacaoPorUC />
+          <DocenteSemAfectacaoItem />
         </TabsContent>
       </Tabs>
       <GestaoAfectacaoModal

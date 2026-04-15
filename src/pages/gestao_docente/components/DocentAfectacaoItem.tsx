@@ -29,13 +29,15 @@ import { Switch } from "@/components/ui/switch";
 import { useId, useState } from "react";
 import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mutation-update-afectacao-status";
 import { Input } from "@/components/ui/input";
-import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryDocentesAfectacao } from "@/hooks/gestao_docente/use-query-docentes-afectacao";
+import { FormInput } from "@/components/common/FormInput";
 
 const DocentAfectacaoItem = () => {
   const id = useId();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const { mutateAsync, isPending } = useMutationUpdateAfectacaoStatus();
   const [filters, setFilters] = useState({
     anoLectivo: "23",
@@ -49,6 +51,7 @@ const DocentAfectacaoItem = () => {
     docente: parseFilter(filters.docente),
     tipoAfectacao: 1,
     semestre: parseFilter(filters.semestre),
+    search: search,
     limit,
     page,
   });
@@ -98,7 +101,15 @@ const DocentAfectacaoItem = () => {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Afectação</CardTitle>
+          <div className="flex justify-between">
+            <CardTitle>Lista de Afectação</CardTitle>
+            <FormInput
+              placeholder="Pesquisa por Docente, Nº Mecanográfico, Nº de Docente"
+              value={searchValue}
+              onValueChange={(v) => setSearchValue(v)}
+              onDebounce={(v) => setSearch(v)}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
