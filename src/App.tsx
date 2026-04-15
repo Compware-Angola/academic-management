@@ -126,7 +126,11 @@ import NotificacoesPage from "./pages/notification/Notificacoespage";
 import VinculosTFC from "./pages/defesa-tfc/VinculosTFC";
 import Regentes from "./pages/gestao_docente/Regentes";
 
+import ListaGeralEstudantes from "./pages/registrations/GeneralListStudents";
+
+
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
+import InscritosPorUc from "./pages/registrations/InscritosPorUc";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
 import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividual";
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
@@ -142,6 +146,12 @@ import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
 import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
+
+import EstadoMatriculaPorHorario from "./pages/registrations/EstadoDoEstudanteMatriculadoPorHorario";
+import ListarEstudantesPorEstadoMatricula from "./pages/registrations/ListarEstudantesPorEstadoMatricula";
+import IsentarColisao from "./pages/registrations/IsentarColisao";
+import ListagemColisoesIsentas from "./pages/registrations";
+
 import Admitidos from "./pages/access_exam/Admitidos";
 import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
 import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
@@ -1394,6 +1404,39 @@ const App = () => {
                   />
 
                   <Route
+                    path="/inscricoes/estado-horario"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_ESTADO_MATRICULA_ESTUDANTE_POR_HORARIO.sigla!,
+                        ]}
+                      >
+                        <EstadoMatriculaPorHorario />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/estado-matricula"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla!,
+                        ]}
+                      >
+                        <ListarEstudantesPorEstadoMatricula />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/colisao"
+                    element={
+                          <ListagemColisoesIsentas />
+                    }
+                  />
+
+                  <Route
                     path="/gestao-docentes/docentes"
 
                     element={
@@ -1436,6 +1479,20 @@ const App = () => {
                   />
 
                   <Route
+                    path="/inscricoes/lista-geral"
+
+                    element={ <ListaGeralEstudantes />}
+
+                  />
+
+                  <Route
+                    path="/inscricoes/inscritos-uc"
+
+                    element={ <InscritosPorUc />}
+                      />
+
+
+                  <Route
                     path="/ministerio/mapa-finalistas"
                     element={
                       <ProtectedRoute
@@ -1469,6 +1526,7 @@ const App = () => {
                         <RegistoPrimarioMatriculados />
                       </ProtectedRoute>
                     }
+
                   />
 
                 </Route>
