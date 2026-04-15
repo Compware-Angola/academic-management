@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { RefreshCw, Download, Printer, ChevronLeft, ChevronRight, Home, X, Search, PlayCircle, Loader2 } from "lucide-react";
+import { RefreshCw, ChevronLeft, ChevronRight, Home, X, Search, PlayCircle, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
@@ -327,13 +327,13 @@ export default function ResultadoFinais() {
               onChangeValue={(v) => setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))}
             />
           </div>
-          <div className="space-y-2">
+         <div className="space-y-2">
             <FormSelect
               disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.codigoAnoLetivo === ""}
               loading={isLoadingPeriodos}
               label="Período"
               value={filters.codigoTurno?.toString() ?? "all"}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? "" : v, page: 1 }))}
+              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? undefined : v, page: 1 }))}
               options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
