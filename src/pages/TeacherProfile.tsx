@@ -857,7 +857,7 @@ const TeacherProfile = () => {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Perfil do Docente</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Perfil do  {teacherInfo.name}</h1>
           <p className="text-muted-foreground">Visualize e edite as suas informações profissionais</p>
         </div>
         <Button variant={isEditing ? "default" : "outline"} onClick={() => setIsEditing((v) => !v)}>
@@ -869,36 +869,46 @@ const TeacherProfile = () => {
       {/* Secção Superior */}
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Avatar + Info Rápida */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Foto do Perfil</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex justify-center">
-              <Avatar className="h-40 w-40 border-4 border-background">
-                <AvatarImage src="" />
-                <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
-                  {initials || "NA"}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-            <div className="text-center space-y-3">
-              <h3 className="text-2xl font-semibold">{teacherInfo.name}</h3>
-              <p className="text-sm text-muted-foreground">Nº Mec: {teacherInfo.employeeId || "N/A"}</p>
-              <div className="flex items-center justify-center gap-2 text-sm">
-                <Briefcase className="h-4 w-4" />
-                <span>{teacherInfo.category || "N/A"}</span>
-              </div>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Building className="h-4 w-4" />
-                <span>{teacherInfo.department || "N/A"}</span>
-              </div>
-            </div>
-            <Button className="w-full" variant="outline" disabled={!isEditing}>
-              Alterar Foto
-            </Button>
-          </CardContent>
-        </Card>
+      <Card className="flex flex-col min-h-[500px]">
+  <CardHeader>
+    <CardTitle>Foto do Perfil</CardTitle>
+  </CardHeader>
+
+  <CardContent className="flex flex-col flex-1 space-y-6">
+    <div className="flex justify-center">
+      <Avatar className="h-40 w-40 border-4 border-background">
+        <AvatarImage src="" />
+        <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
+          {initials || "NA"}
+        </AvatarFallback>
+      </Avatar>
+    </div>
+
+    {isDocente && (
+      <div className="text-center space-y-3">
+        <h3 className="text-2xl font-semibold">{teacherInfo.name}</h3>
+        <p className="text-sm text-muted-foreground">
+          Nº Mec: {teacherInfo.employeeId || "N/A"}
+        </p>
+        <div className="flex items-center justify-center gap-2 text-sm">
+          <Briefcase className="h-4 w-4" />
+          <span>{teacherInfo.category || "N/A"}</span>
+        </div>
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Building className="h-4 w-4" />
+          <span>{teacherInfo.department || "N/A"}</span>
+        </div>
+      </div>
+    )}
+
+   
+    <div className="mt-auto">
+      <Button className="w-full" variant="outline" disabled={!isEditing}>
+        Alterar Foto
+      </Button>
+    </div>
+  </CardContent>
+</Card>
 
         {/* Informações Detalhadas */}
         <Card className="lg:col-span-2">
