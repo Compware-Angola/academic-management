@@ -1,4 +1,8 @@
-import { useState } from "react";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,7 +21,6 @@ import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assidui
 import { useQueryControloGeralAssiduidade } from "@/hooks/sumario/use-fetch-controle-geral-assiduidade-sumario";
 import { FormSelect } from "@/components/common/FormSelect";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ControloItem } from "@/services/sumario/fetch-controlo-geral-sumario.service";
 
 
 
@@ -25,7 +28,6 @@ export default function ControleGeral() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-
 
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
@@ -38,7 +40,6 @@ export default function ControleGeral() {
   ];
 
   const { data: teachersData = [] } = useQueryTeacther();
-
 
   const [filters, setFilters] = useState({
     docente: "",
@@ -84,20 +85,14 @@ export default function ControleGeral() {
 
   const totais = currentData.reduce(
     (acc, item) => {
-      // Controle de sumários
       acc.sumariosPendentes += item.controleSumarios.pendentes;
       acc.sumariosLancados += item.controleSumarios.lancados;
       acc.sumariosTotal += item.controleSumarios.total;
-
-      // Controle de assiduidade
       acc.assiduidadePendentes += item.controleAssiduidade.pendentes;
       acc.assiduidadePresenca += item.controleAssiduidade.presenca;
       acc.assiduidadeFalta += item.controleAssiduidade.falta;
       acc.assiduidadeTotal += item.controleAssiduidade.total;
-
-      // Sumários com assiduidade
       acc.sumarioComAssiduidade += item.sumarioComAssiduidade;
-
       return acc;
     },
     {
@@ -112,8 +107,126 @@ export default function ControleGeral() {
     }
   );
 
-  console.log(totais);
+  // ==================== EXPORTAÇÃO ====================
+  const exportRows = useMemo(
+    () =>
+      currentData.map((item) => ({
+        codigoAgendamento: item.codigo_agendamento,
+        curso: item.curso,
+        unidadeCurricular: item.unidadeCurricular,
+        docente: item.docente,
+        horario: item.horario,
+        // Sumários
+        sumariosPendentes: item.controleSumarios.pendentes,
+        sumariosLancados: item.controleSumarios.lancados,
+        sumariosTotal: item.controleSumarios.total,
+        // Assiduidades
+        assiduidadePendentes: item.controleAssiduidade.pendentes,
+        assiduidadePresenca: item.controleAssiduidade.presenca,
+        assiduidadeFalta: item.controleAssiduidade.falta,
+        assiduidadeTotal: item.controleAssiduidade.total,
+        // Sum c/ Assid.
+        sumarioComAssiduidade: item.sumarioComAssiduidade,
+      })),
+    [currentData]
+  );
 
+  const filtrosAplicados = [
+    filters.anoLectivo ? `Ano Letivo: ${filters.anoLectivo}` : null,
+    filters.semestre ? `Semestre: ${filters.semestre}º` : null,
+    filters.estado ? `Estado: ${filters.estado}` : null,
+    filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
+    filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
+  ]
+    .filter(Boolean)
+    .join(" | ");
+
+  const pdfData = exportRows.length
+    ? {
+      filtros: filtrosAplicados,
+      total: exportRows.length,
+      rows: exportRows,
+    }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Controle Geral de Sumário & Assiduidade"
+      subtitle="Visão consolidada de sumários e assiduidades por aula agendada"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        {
+          title: "Resumo",
+          content: [
+            `Total de registos: ${totalItems}`,
+            `Sumários Pendentes: ${totais.sumariosPendentes} | Lançados: ${totais.sumariosLancados} | Total: ${totais.sumariosTotal}`,
+            `Assiduidade Pendentes: ${totais.assiduidadePendentes} | Presença: ${totais.assiduidadePresenca} | Falta: ${totais.assiduidadeFalta} | Total: ${totais.assiduidadeTotal}`,
+          ],
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "codigoAgendamento", label: "Código", width: "8%" },
+          { key: "curso", label: "Curso", width: "12%" },
+          { key: "unidadeCurricular", label: "UC", width: "16%" },
+          { key: "docente", label: "Docente", width: "14%" },
+          { key: "horario", label: "Horário", width: "10%" },
+          { key: "sumariosPendentes", label: "S.Pend.", width: "6%" },
+          { key: "sumariosLancados", label: "S.Lanç.", width: "6%" },
+          { key: "sumariosTotal", label: "S.Tot.", width: "6%" },
+          { key: "assiduidadePendentes", label: "A.Pend.", width: "6%" },
+          { key: "assiduidadePresenca", label: "A.Pres.", width: "6%" },
+          { key: "assiduidadeFalta", label: "A.Falt.", width: "6%" },
+          { key: "assiduidadeTotal", label: "A.Tot.", width: "6%" },
+          { key: "sumarioComAssiduidade", label: "S.c/A.", width: "6%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+      documentTitle: "Controle Geral de Sumário & Assiduidade",
+      subtitle: "Visão consolidada de sumários e assiduidades por aula agendada",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        {
+          title: "Resumo",
+          content: [
+            `Total de registos: ${totalItems}`,
+            `Sumários Pendentes: ${totais.sumariosPendentes} | Lançados: ${totais.sumariosLancados} | Total: ${totais.sumariosTotal}`,
+            `Assiduidade Pendentes: ${totais.assiduidadePendentes} | Presença: ${totais.assiduidadePresenca} | Falta: ${totais.assiduidadeFalta} | Total: ${totais.assiduidadeTotal}`,
+          ],
+        },
+      ],
+      mainTable: {
+        headers: [
+          { key: "codigoAgendamento", label: "Código", width: 14 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "unidadeCurricular", label: "Unidade Curricular", width: 30 },
+          { key: "docente", label: "Docente", width: 30 },
+          { key: "horario", label: "Horário", width: 18 },
+          { key: "sumariosPendentes", label: "Sum. Pendentes", width: 16 },
+          { key: "sumariosLancados", label: "Sum. Lançados", width: 16 },
+          { key: "sumariosTotal", label: "Sum. Total", width: 14 },
+          { key: "assiduidadePendentes", label: "Assid. Pendentes", width: 18 },
+          { key: "assiduidadePresenca", label: "Assid. Presença", width: 18 },
+          { key: "assiduidadeFalta", label: "Assid. Falta", width: 15 },
+          { key: "assiduidadeTotal", label: "Assid. Total", width: 14 },
+          { key: "sumarioComAssiduidade", label: "Sum. c/ Assid.", width: 16 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+    : null;
+
+  const baseFileName = `Controle_Geral_Sumario_Assiduidade_${new Date().toISOString().slice(0, 10)}`;
+  // ==================== FIM EXPORTAÇÃO ====================
 
   const handleItemsPerPageChange = (value: string) => {
     const newLimit = Number(value);
@@ -149,11 +262,33 @@ export default function ControleGeral() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex items-center gap-3">
-        <BarChart3 className="h-8 w-8 text-primary" />
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Controle Geral de Sumário & Assiduidade</h1>
-          <p className="text-sm text-muted-foreground">Visão consolidada de sumários e assiduidades por aula agendada</p>
+      {/* Cabeçalho */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Controle Geral de Sumário & Assiduidade</h1>
+            <p className="text-sm text-muted-foreground">Visão consolidada de sumários e assiduidades por aula agendada</p>
+          </div>
+        </div>
+
+        {/* Botões de exportação */}
+        <div className="flex flex-wrap gap-2">
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+          {excelProps && (
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          )}
         </div>
       </div>
 
@@ -386,6 +521,7 @@ export default function ControleGeral() {
           </div>
         </Card>
       </div>
+
       {/* Tabela Principal */}
       <Card>
         <div className="overflow-x-auto">
@@ -393,13 +529,10 @@ export default function ControleGeral() {
             <TableHeader>
               <TableRow>
                 <TableHead rowSpan={2} className="border-r align-middle">Código</TableHead>
-
                 <TableHead rowSpan={2} className="border-r align-middle">Curso</TableHead>
                 <TableHead rowSpan={2} className="border-r align-middle">UC</TableHead>
                 <TableHead rowSpan={2} className="border-r align-middle">Docente</TableHead>
-
                 <TableHead rowSpan={2} className="border-r align-middle">Horário</TableHead>
-
                 <TableHead colSpan={3} className="text-center border-r bg-blue-50 dark:bg-blue-950/30 font-semibold">Controle de Sumários</TableHead>
                 <TableHead colSpan={4} className="text-center border-r bg-emerald-50 dark:bg-emerald-950/30 font-semibold">Controle de Assiduidades</TableHead>
                 <TableHead rowSpan={2} className="text-center align-middle bg-purple-50 dark:bg-purple-950/30 font-semibold">Sum. c/ Assid.</TableHead>
@@ -436,12 +569,9 @@ export default function ControleGeral() {
                   <TableRow key={item.codigo_agendamento}>
                     <TableCell className="border-r font-mono text-xs">{item.codigo_agendamento}</TableCell>
                     <TableCell className="border-r font-mono text-xs">{item.curso}</TableCell>
-
                     <TableCell className="border-r text-sm font-medium">{item.unidadeCurricular}</TableCell>
                     <TableCell className="border-r text-sm">{item.docente}</TableCell>
-
                     <TableCell className="border-r text-sm whitespace-nowrap">{item.horario}</TableCell>
-
                     {/* Sumários */}
                     <TableCell className="text-center border-r bg-blue-50/50 dark:bg-blue-950/10">
                       <span className={item.controleSumarios.pendentes > 0 ? "text-amber-600 font-semibold" : "text-muted-foreground"}>{item.controleSumarios.pendentes}</span>

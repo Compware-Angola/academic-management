@@ -204,7 +204,9 @@ export const ingressoStructure: MenuStructure = {
 
         { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla] },
         { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla] },
-
+      { title: "Estado por horário", url: "/inscricoes/estado-horario" ,permission: [PermissionTypeDetails.LISTAR_ESTADO_MATRICULA_ESTUDANTE_POR_HORARIO.sigla] },
+        { title: "Estado da matrícula", url: "/inscricoes/estado-matricula", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla] },
+        { title: "Insentar colisão", url: "/inscricoes/colisao" },
       ],
 
       permission: ["adm", "rootAdmin"],
@@ -424,41 +426,7 @@ export const academicStructure: MenuStructure = {
           permission: [PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla],
         },
 
-        { title: "Registro matrícula", url: "/ministerio/registro-matricula" },
-      ],
 
-      permission: ["adm", "rootAdmin"],
-    },
-
-
-    // ----------------------------------------------------
-    // DOCUMENTOS MINISTÉRIO
-    // ----------------------------------------------------
-
-    {
-      title: "Documentos para o Ministério",
-      url: "/ministerio",
-      icon: FileText,
-      items: [
-        { title: "Mapa finalistas", url: "/ministerio/mapa-finalistas", permission: [PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla] },
-        {
-          title: "Registro exame de acesso",
-          url: "/ministerio/registro-exame",
-        },
-        { title: "Registro matrícula", url: "/ministerio/registro-matricula", permission: [PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla] },
-      ],
-
-      permission: [],
-    },
-
-    // ----------------------------------------------------
-    // SALAS
-    // ----------------------------------------------------
-    {
-      title: "Gestão de Salas",
-      url: "/salas",
-      icon: Building,
-      items: [
         {
           title: "Fórmula por unidade curricular",
           url: "/avaliacoes/formula-uc",
@@ -545,7 +513,30 @@ export const academicStructure: MenuStructure = {
       ],
 
       permission: [],
-    }, {
+    },
+
+
+    // ----------------------------------------------------
+    // DOCUMENTOS MINISTÉRIO
+    // ----------------------------------------------------
+
+    {
+      title: "Documentos para o Ministério",
+      url: "/ministerio",
+      icon: FileText,
+      items: [
+        { title: "Mapa finalistas", url: "/ministerio/mapa-finalistas", permission: [PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla] },
+        {
+          title: "Registro exame de acesso",
+          url: "/ministerio/registro-exame",
+        },
+        { title: "Registro matrícula", url: "/ministerio/registro-matricula", permission: [PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla] },
+      ],
+
+      permission: [],
+    },
+
+    {
       title: "Marcação de Provas",
       url: "/marcacao",
       icon: FileCheck,
@@ -623,6 +614,28 @@ export const academicStructure: MenuStructure = {
           url: "/defesa-tfc/vinculos",
           permission: [PermissionTypeDetails.DEFESA.sigla],
         },
+
+
+        { title: "Matriculados", url: "/inscricoes/matriculados", permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla] },
+
+        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla] },
+        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla] },
+   
+        /*
+            { title: "Atribuição de turma", url: "/inscricoes/turma" },
+      { title: "Inscritos em UC", url: "/inscricoes/inscritos-uc" },
+       { title: "Estado da matrícula", url: "/inscricoes/estado-matricula" },
+          { title: "Inserir colisão", url: "/inscricoes/colisao" },
+      { title: "Diplomandos", url: "/inscricoes/diplomandos" },
+      { title: "Lista personalizada", url: "/inscricoes/personalizada" },
+      { title: "Lista geral", url: "/inscricoes/lista-geral" },
+      { title: "Estado por horário", url: "/inscricoes/estado-horario" },
+      {
+        title: "Mensalidades por curso",
+        url: "/inscricoes/mensalidades-curso",
+      },
+      */
+
       ],
     },
 
