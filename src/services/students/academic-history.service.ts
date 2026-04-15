@@ -50,3 +50,53 @@ export const studentAcademicHistoryService = async ({
     );
     return data;
   }
+
+  export type AcademicHistoryEquivalencyRecord = {
+  codigo: number
+  unidade_curricular: string
+  classes: string
+  nota: number
+  ano_lectivo: string
+  curso: string
+}
+export type AcademicHistoryEquivalencyResponse = {
+  success: boolean
+  data: AcademicHistoryEquivalencyRecord[]
+  page: number
+  limit: number
+  hasNextPage: boolean
+}
+
+
+
+export type GetAcademicHistoryEquivalencyParams = {
+  anoLectivoId?: number;
+  matriculaId: number;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+  export const studentAcademicHistoryEquivalencyService = async ({
+    anoLectivoId,
+    matriculaId,
+    search,
+    page = 1,
+    limit = 25
+  }: GetAcademicHistoryEquivalencyParams): Promise<AcademicHistoryEquivalencyResponse> => {
+    const { data } = await axiosNestGa.get<AcademicHistoryEquivalencyResponse>(
+      '/students/academic-history-equivalencia',
+      {
+        params: {
+          anoLectivoId,
+          matriculaId,
+          page,
+          search,
+          limit
+        }
+      }
+    );
+    return data;
+  }
+
+
+ 
