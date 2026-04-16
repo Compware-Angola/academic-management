@@ -139,7 +139,9 @@ export function FiltrarPorEquivalencia({
                       {item.ano_lectivo}
                     </TableCell>
                     <TableCell className="text-sm whitespace-nowrap px-4">
-                      <span className="text-muted-foreground">---</span>
+                      <span className="text-muted-foreground">
+                        {item.epoca}
+                      </span>
                     </TableCell>
                   </TableRow>
                 ))

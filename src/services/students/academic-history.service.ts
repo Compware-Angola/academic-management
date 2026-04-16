@@ -58,6 +58,7 @@ export const studentAcademicHistoryService = async ({
   nota: number
   ano_lectivo: string
   curso: string
+  epoca: string
 }
 export type AcademicHistoryEquivalencyResponse = {
   success: boolean
@@ -99,4 +100,50 @@ export type GetAcademicHistoryEquivalencyParams = {
   }
 
 
- 
+ export type AcademicHistoryMigrationRecord = {
+  codigo: number
+  unidade_curricular: string
+  classes: string
+  nota: number
+  ano_lectivo: string
+  curso: string
+  epoca: string
+}
+export type AcademicHistoryMigrationResponse = {
+  success: boolean
+  data: AcademicHistoryMigrationRecord[]
+  page: number
+  limit: number
+  hasNextPage: boolean
+}
+
+
+
+export type GetAcademicHistoryMigrationParams = {
+  anoLectivoId?: number;
+  matriculaId: number;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+  export const studentAcademicHistoryMigrationService = async ({
+    anoLectivoId,
+    matriculaId,
+    search,
+    page = 1,
+    limit = 25
+  }: GetAcademicHistoryMigrationParams): Promise<AcademicHistoryMigrationResponse> => {
+    const { data } = await axiosNestGa.get<AcademicHistoryMigrationResponse>(
+      '/students/academic-history-migracao-dados',
+      {
+        params: {
+          anoLectivoId,
+          matriculaId,
+          page,
+          search,
+          limit
+        }
+      }
+    );
+    return data;
+  }

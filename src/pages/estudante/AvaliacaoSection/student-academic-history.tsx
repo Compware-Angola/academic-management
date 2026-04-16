@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FiltrarPorAvaliacoes } from "./filtrar-por-avaliacoes";
 import { FiltrarPorEquivalencia } from "./filtrar-por-equivalencia";
+import { FiltrarPorMigracaoDados } from "./filtrar-por-migracao-dados";
 
 export function StudentAcademicHistory({
   value = "avaliacao",
@@ -17,7 +18,7 @@ export function StudentAcademicHistory({
           <TabsTrigger value="filtrar-por-equivalencia">
             Equivalência
           </TabsTrigger>
-          <TabsTrigger value="migracao-dados">Migração</TabsTrigger>
+          <TabsTrigger value="filtrar-por-migracao-dados">Migração</TabsTrigger>
         </TabsList>
 
         <FiltrarPorAvaliacoes
@@ -29,11 +30,10 @@ export function StudentAcademicHistory({
           value="filtrar-por-equivalencia"
           codigoMatricula={codigoMatricula}
         />
-        <TabsContent value="migracao-dados">
-          <div className="p-4 border rounded-md text-muted-foreground">
-            Conteúdo de migração de dados
-          </div>
-        </TabsContent>
+        <FiltrarPorMigracaoDados
+          value="filtrar-por-migracao-dados"
+          codigoMatricula={codigoMatricula}
+        />
       </Tabs>
     </TabsContent>
   );
