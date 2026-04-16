@@ -147,6 +147,7 @@ interface GenericPDFProps {
   header?: EntityHeader;
   documentTitle: string;
   subtitle?: string;
+  orientation?: "vertical" | "horizontal";
   infoSections?: Array<{
     title?: string;
     content: React.ReactNode | string[];
@@ -166,6 +167,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     header = defaultHeader,
     documentTitle,
     subtitle,
+    orientation = "portrait",
     infoSections = [],
     mainTable,
     totals = [],
@@ -187,7 +189,11 @@ export function GenericPDFDocument(props: GenericPDFProps) {
 
   return (
     <Document>
-      <Page size="A4" style={dynamicStyles.page}>
+      <Page
+        size="A4"
+        style={dynamicStyles.page}
+        orientation={orientation === "vertical" ? "portrait" : "landscape"}
+      >
         <View style={dynamicStyles.header}>
           <Image style={baseStyles.logo} src={header.logoSrc} />
           <View style={baseStyles.entityInfo}>
