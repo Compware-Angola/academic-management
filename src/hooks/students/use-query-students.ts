@@ -1,5 +1,5 @@
 // hooks/useStudents.ts
-import { GetAcademicHistoryParams, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
+import { GetAcademicHistoryEquivalencyParams, GetAcademicHistoryParams, studentAcademicHistoryEquivalencyService, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
 import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
 import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
 import {
@@ -174,6 +174,16 @@ export const useStudentAcademicHistory = (params: GetAcademicHistoryParams) => {
     queryKey: ['student-academic-history', params.matriculaId, params.anoLectivoId, params.page, params.search],
     queryFn: () => studentAcademicHistoryService(params),
     enabled: !!params.matriculaId && !!params.anoLectivoId,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+
+export const useStudentAcademicHistoryEquivalency = (params: GetAcademicHistoryEquivalencyParams) => {
+  return useQuery({
+    queryKey: ['student-academic-history-equivalency', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryFn: () => studentAcademicHistoryEquivalencyService(params),
+    enabled: !!params.matriculaId,
     staleTime: 1000 * 60 * 5,
   });
 };
