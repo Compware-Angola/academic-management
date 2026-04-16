@@ -28,11 +28,14 @@ import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mut
 import { Input } from "@/components/ui/input";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryDocentesAfectacao } from "@/hooks/gestao_docente/use-query-docentes-afectacao";
+import { FormInput } from "@/components/common/FormInput";
 
 const DocenteSemAfectacaoItem = () => {
   const id = useId();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const { mutateAsync, isPending } = useMutationUpdateAfectacaoStatus();
   const [filters, setFilters] = useState({
     anoLectivo: "23",
@@ -47,6 +50,7 @@ const DocenteSemAfectacaoItem = () => {
     docente: parseFilter(filters.docente),
     tipoAfectacao: 2,
     semestre: parseFilter(filters.semestre),
+    search,
     limit,
     page,
   });
@@ -96,7 +100,15 @@ const DocenteSemAfectacaoItem = () => {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Afectação</CardTitle>
+          <div className="flex justify-between">
+            <CardTitle>Lista de Afectação</CardTitle>
+            <FormInput
+              placeholder="Pesquisa por Docente, Nº Mecanográfico, Nº de Docente"
+              value={searchValue}
+              onValueChange={(v) => setSearchValue(v)}
+              onDebounce={(v) => setSearch(v)}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (

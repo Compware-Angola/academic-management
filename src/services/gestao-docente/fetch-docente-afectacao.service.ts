@@ -7,6 +7,7 @@ export type ListDocentesAfectacaoPayload = {
   docente?: number;
   dataInicial?: string;
   dataFinal?: string;
+  search?: string;
   page?: number;
   limit?: number;
 };
@@ -35,6 +36,7 @@ export async function getListDocentesAfectacaoService(
     docente,
     dataInicial,
     dataFinal,
+    search,
     page = 1,
     limit = 25,
   } = payload;
@@ -51,6 +53,7 @@ export async function getListDocentesAfectacaoService(
         dataFinal,
         page,
         limit,
+        search,
       },
     },
   );

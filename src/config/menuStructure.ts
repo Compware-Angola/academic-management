@@ -90,8 +90,6 @@ export const administracaoStructure: MenuStructure = {
 
       permission: [],
     },
-
-
   ],
 };
 export const ingressoStructure: MenuStructure = {
@@ -124,9 +122,20 @@ export const ingressoStructure: MenuStructure = {
           permission: [PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla],
         },
 
-
-        { title: "Estatísticas", url: "/exame/estatisticas", permission: [PermissionTypeDetails.ESTATISTICA_CANDIDATOS_INSCRITOS.sigla] },
-        { title: "Estatísticas diária", url: "/exame/estatisticas-diaria", permission: [PermissionTypeDetails.ESTATISTICA_CANDIDATOS_POR_DIA.sigla] },
+        {
+          title: "Estatísticas",
+          url: "/exame/estatisticas",
+          permission: [
+            PermissionTypeDetails.ESTATISTICA_CANDIDATOS_INSCRITOS.sigla,
+          ],
+        },
+        {
+          title: "Estatísticas diária",
+          url: "/exame/estatisticas-diaria",
+          permission: [
+            PermissionTypeDetails.ESTATISTICA_CANDIDATOS_POR_DIA.sigla,
+          ],
+        },
         {
           title: "Inscrição época especial",
           url: "/exame/epoca-especial",
@@ -144,7 +153,11 @@ export const ingressoStructure: MenuStructure = {
           url: "/exame/lista-candidatos",
           permission: [PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla],
         },
-        { title: "Admitidos", url: "/exame/admitidos", permission: [PermissionTypeDetails.LISTA_CANDIDATOS_ADMITIDOS.sigla] },
+        {
+          title: "Admitidos",
+          url: "/exame/admitidos",
+          permission: [PermissionTypeDetails.LISTA_CANDIDATOS_ADMITIDOS.sigla],
+        },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
         {
@@ -152,7 +165,11 @@ export const ingressoStructure: MenuStructure = {
           url: "/exame/provas-candidato",
           permission: [PermissionTypeDetails.PROVAS_POR_CANDIDATO.sigla],
         },
-        { title: "Resultados finais", url: "/exame/resultados-finais", permission: [PermissionTypeDetails.LISTA_RESULTADOS_FINAIS.sigla] },
+        {
+          title: "Resultados finais",
+          url: "/exame/resultados-finais",
+          permission: [PermissionTypeDetails.LISTA_RESULTADOS_FINAIS.sigla],
+        },
         {
           title: "Horários por curso",
           url: "/exame/horarios",
@@ -191,28 +208,57 @@ export const ingressoStructure: MenuStructure = {
       url: "/inscricoes",
       icon: FileCheck,
       items: [
-
         {
           title: "Estatística de estudantes aprovados e reprovados",
           url: "/inscricoes/estatisticas",
           permission: [
-            PermissionTypeDetails.ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS.sigla!,
+            PermissionTypeDetails.ESTATISTICA_ESTUDANTES_APROVADOS_REPROVADOS
+              .sigla!,
           ],
         },
 
-        { title: "Matriculados", url: "/inscricoes/matriculados", permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla] },
+        {
+          title: "Matriculados",
+          url: "/inscricoes/matriculados",
+          permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla],
+        },
 
-        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla] },
-        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla] },
-      { title: "Estado por horário", url: "/inscricoes/estado-horario" ,permission: [PermissionTypeDetails.LISTAR_ESTADO_MATRICULA_ESTUDANTE_POR_HORARIO.sigla] },
-        { title: "Estado da matrícula", url: "/inscricoes/estado-matricula", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla] },
+        {
+          title: "Sem inscrição em UC",
+          url: "/inscricoes/sem-uc",
+          permission: [
+            PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla,
+          ],
+        },
+        {
+          title: "Sem inscrição no curso",
+          url: "/inscricoes/sem-curso",
+          permission: [
+            PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla,
+          ],
+        },
+        {
+          title: "Estado por horário",
+          url: "/inscricoes/estado-horario",
+          permission: [
+            PermissionTypeDetails.LISTAR_ESTADO_MATRICULA_ESTUDANTE_POR_HORARIO
+              .sigla,
+          ],
+        },
+        {
+          title: "Estado da matrícula",
+          url: "/inscricoes/estado-matricula",
+          permission: [
+            PermissionTypeDetails.LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla,
+          ],
+        },
         { title: "Insentar colisão", url: "/inscricoes/colisao" },
       ],
 
       permission: ["adm", "rootAdmin"],
     },
-  ]
-}
+  ],
+};
 export const academicStructure: MenuStructure = {
   items: [
     {
@@ -389,7 +435,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Regentes",
           url: "/gestao-docentes/regentes",
-          permission: [PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla]
+          permission: [PermissionTypeDetails.LISTA_DOCENTES_REGENTES.sigla],
         },
         // { title: "Afetados", url: "/gestao-docentes/afetados" },
         // { title: "UC sem docentes", url: "/gestao-docentes/uc-sem-docentes" },
@@ -425,7 +471,6 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/controle",
           permission: [PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla],
         },
-
 
         {
           title: "Fórmula por unidade curricular",
@@ -515,7 +560,6 @@ export const academicStructure: MenuStructure = {
       permission: [],
     },
 
-
     // ----------------------------------------------------
     // DOCUMENTOS MINISTÉRIO
     // ----------------------------------------------------
@@ -525,12 +569,24 @@ export const academicStructure: MenuStructure = {
       url: "/ministerio",
       icon: FileText,
       items: [
-        { title: "Mapa finalistas", url: "/ministerio/mapa-finalistas", permission: [PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla] },
+        {
+          title: "Mapa finalistas",
+          url: "/ministerio/mapa-finalistas",
+          permission: [
+            PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla,
+          ],
+        },
         {
           title: "Registro exame de acesso",
           url: "/ministerio/registro-exame",
         },
-        { title: "Registro matrícula", url: "/ministerio/registro-matricula", permission: [PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla] },
+        {
+          title: "Registro matrícula",
+          url: "/ministerio/registro-matricula",
+          permission: [
+            PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla,
+          ],
+        },
       ],
 
       permission: [],
@@ -561,7 +617,13 @@ export const academicStructure: MenuStructure = {
       url: "/docente",
       icon: GraduationCap,
       items: [
-        { title: "Calendário de aulas", url: "/docente/calendario", permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla] },
+        {
+          title: "Calendário de aulas",
+          url: "/docente/calendario",
+          permission: [
+            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
+          ],
+        },
         // { title: "Horas de vigilância", url: "/docente/vigilancia" },
 
         {
@@ -615,31 +677,13 @@ export const academicStructure: MenuStructure = {
           permission: [PermissionTypeDetails.DEFESA.sigla],
         },
 
-
-        { title: "Matriculados", url: "/inscricoes/matriculados", permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla] },
-
-        { title: "Sem inscrição em UC", url: "/inscricoes/sem-uc", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICAO_UC.sigla] },
-        { title: "Sem inscrição no curso", url: "/inscricoes/sem-curso", permission: [PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla] },
-   
-        /*
-            { title: "Atribuição de turma", url: "/inscricoes/turma" },
-      { title: "Inscritos em UC", url: "/inscricoes/inscritos-uc" },
-       { title: "Estado da matrícula", url: "/inscricoes/estado-matricula" },
-          { title: "Inserir colisão", url: "/inscricoes/colisao" },
-      { title: "Diplomandos", url: "/inscricoes/diplomandos" },
-      { title: "Lista personalizada", url: "/inscricoes/personalizada" },
-      { title: "Lista geral", url: "/inscricoes/lista-geral" },
-      { title: "Estado por horário", url: "/inscricoes/estado-horario" },
-      {
-        title: "Mensalidades por curso",
-        url: "/inscricoes/mensalidades-curso",
-      },
-      */
-
+        {
+          title: "Matriculados",
+          url: "/inscricoes/matriculados",
+          permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla],
+        },
       ],
     },
-
-
   ],
 };
 export const operacionalStructure: MenuStructure = {
@@ -719,10 +763,8 @@ export const operacionalStructure: MenuStructure = {
 
       permission: [],
     },
-  ]
-
-
-}
+  ],
+};
 export const finaceStructure: MenuStructure = {
   items: [
     /* -------------------------------------------------------- */
@@ -737,7 +779,9 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Estud. Mensalidades Pagas",
           url: "/financas/mensalidades-pagas",
-          permission: [PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA.sigla],
+          permission: [
+            PermissionTypeDetails.ESTUDANTES_COM_PROPINAS_PAGA.sigla,
+          ],
         },
         {
           title: "Notas de Pagamentos",
@@ -952,8 +996,6 @@ export const comunicationStructure: MenuStructure = {
 
       permission: [],
     },
-
-
   ],
 };
 export const suporteStructure: MenuStructure = {
@@ -978,4 +1020,3 @@ export const suporteStructure: MenuStructure = {
     },
   ],
 };
-
