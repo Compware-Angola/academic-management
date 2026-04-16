@@ -21,6 +21,7 @@ import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryRegistoPrimarioMatriculados } from "@/hooks/students/use-query-registo-primario-matriculados";
+import { useClasses } from "@/hooks/use-classes";
 
 
 type RegistoPrimarioMatriculado = {
@@ -75,9 +76,19 @@ export default function RegistoPrimarioMatriculados() {
 
   const { data: anosLectivos = [] } = useQueryAnoAcademico();
 
-  const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
+  const { data: classes = [] } = useQueryClassFilterByCurso({
     curso: filters.grau,
   });
+
+  const { data: anosCurriculares = [] , isLoading: loadingClasses } = useClasses();
+
+  //console.log("Ano curricular: ", classes)
+
+  const anosFiltrados = anosCurriculares.filter(
+  (item) =>
+    item.designacao !== 'Poś-Graduação' &&
+    item.designacao !== 'Todos'
+);
 
   const { data, isLoading, isFetching } =
     useQueryRegistoPrimarioMatriculados({
@@ -93,7 +104,7 @@ export default function RegistoPrimarioMatriculados() {
       estado: filtrosAplicados.estado
         ? Number(filtrosAplicados.estado)
         : 2,
-      search: filtrosAplicados.search ?? "",
+      search: filters.search ?? "",
     });
 
   const registos = data?.data ?? [];
@@ -137,6 +148,7 @@ export default function RegistoPrimarioMatriculados() {
   const pdfContent =
     exportRows.length > 0 ? (
       <GenericPDFDocument
+        orientation="horizontal"
         documentTitle="Registo Primário de Matriculados"
         subtitle="Listagem de estudantes matriculados"
         infoSections={[
@@ -357,7 +369,7 @@ export default function RegistoPrimarioMatriculados() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="0">Todos</SelectItem>
-                  {anosCurriculares.map((item: any) => (
+                  {anosFiltrados.map((item: any) => (
                     <SelectItem
                       key={item.codigo ?? item.CODIGO}
                       value={String(item.codigo ?? item.CODIGO)}
