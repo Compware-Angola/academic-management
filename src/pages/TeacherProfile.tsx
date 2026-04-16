@@ -71,6 +71,8 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { parseFilter } from "@/util/parse-filter";
 import { useUpdatePassword } from "@/hooks/auth/use-query-auth";
 import { useUpdatePersonUser } from "@/hooks/acess/useUpdatePersonUser";
+import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 // ===================== TYPES =====================
 
@@ -263,7 +265,6 @@ function AssiduidadeTab({
   const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useAssiduidadeDocente({
     docenteId: parseFilter(docenteId),
     gradeId: parseFilter(filters.unidadeCurricular),
-    // NOTE: dataFim/dataInicio estavam trocados na versão original — corrigido aqui
     dataInicio: filters.dataInicio || undefined,
     dataFim: filters.dataFim || undefined,
     estadoAgendamento: parseFilter(filters.estado),
@@ -302,6 +303,107 @@ function AssiduidadeTab({
       ),
     [assiduidadeAula?.data],
   );
+
+  // ── Export ────────────────────────────────────────────────────────────────
+  const exportRows = useMemo(
+    () =>
+      (assiduidadeAula?.data ?? []).map((r) => ({
+        codigo: r.codigo,
+        docente: r.docente ?? "N/A",
+        curso: r.curso,
+        unidadeCurricular: r.unidade_curricular,
+        ordemTempo: r.ordem_tempo,
+        dataAula: r["data aula"],
+        horaInicio: r.hora_inicio,
+        horaTermino: r.hora_termino,
+        estado: r.estado,
+      })),
+    [assiduidadeAula?.data],
+  );
+
+  const filtrosLabel = [
+    filters.anoLectivo ? `Ano Letivo: ${filters.anoLectivo}` : null,
+    filters.semestre ? `Semestre: ${filters.semestre}` : null,
+    filters.curso ? `Curso: ${filters.curso}` : null,
+    filters.estado ? `Estado: ${filters.estado}` : null,
+    filters.dataInicio ? `De: ${filters.dataInicio}` : null,
+    filters.dataFim ? `Até: ${filters.dataFim}` : null,
+    filters.unidadeCurricular ? `UC: ${filters.unidadeCurricular}` : null,
+  ]
+    .filter(Boolean)
+    .join(" | ");
+
+  const pdfContent =
+    exportRows.length > 0 ? (
+      <GenericPDFDocument
+        documentTitle="Assiduidade do Docente"
+        subtitle="Registo de assiduidade nas aulas lecionadas"
+        infoSections={[
+          { title: "Filtros Aplicados", content: filtrosLabel || "Sem filtros" },
+          {
+            title: "Resumo",
+            content: [
+              `Realizadas: ${contagem?.["Realizada"] ?? 0}`,
+              `Pendentes: ${contagem?.["Pendente"] ?? 0}`,
+              `Faltas: ${contagem?.["Falta"] ?? 0}`,
+            ],
+          },
+        ]}
+        mainTable={{
+          headers: [
+            { key: "codigo", label: "Código", width: "8%" },
+            { key: "docente", label: "Docente", width: "15%" },
+            { key: "curso", label: "Horário", width: "12%" },
+            { key: "unidadeCurricular", label: "Unidade Curricular", width: "20%" },
+            { key: "ordemTempo", label: "Tempo", width: "7%" },
+            { key: "dataAula", label: "Data da Aula", width: "12%" },
+            { key: "horaInicio", label: "Hora Início", width: "10%" },
+            { key: "horaTermino", label: "Hora Término", width: "10%" },
+            { key: "estado", label: "Assiduidade", width: "10%" },
+          ],
+          rows: exportRows,
+          headerBackground: "#0D1B48",
+        }}
+        footerNotice="Documento gerado automaticamente pelo sistema."
+      />
+    ) : null;
+
+  const excelProps =
+    exportRows.length > 0
+      ? {
+          documentTitle: "Assiduidade do Docente",
+          subtitle: "Registo de assiduidade nas aulas lecionadas",
+          infoSections: [
+            { title: "Filtros Aplicados", content: filtrosLabel || "Sem filtros" },
+            {
+              title: "Resumo",
+              content: [
+                `Realizadas: ${contagem?.["Realizada"] ?? 0}`,
+                `Pendentes: ${contagem?.["Pendente"] ?? 0}`,
+                `Faltas: ${contagem?.["Falta"] ?? 0}`,
+              ],
+            },
+          ],
+          mainTable: {
+            headers: [
+              { key: "codigo", label: "Código", width: 12 },
+              { key: "docente", label: "Docente", width: 25 },
+              { key: "curso", label: "Horário", width: 20 },
+              { key: "unidadeCurricular", label: "Unidade Curricular", width: 30 },
+              { key: "ordemTempo", label: "Tempo", width: 10 },
+              { key: "dataAula", label: "Data da Aula", width: 15 },
+              { key: "horaInicio", label: "Hora Início", width: 14 },
+              { key: "horaTermino", label: "Hora Término", width: 14 },
+              { key: "estado", label: "Assiduidade", width: 14 },
+            ],
+            rows: exportRows,
+          },
+          footerNotice: "Documento gerado automaticamente pelo sistema.",
+          primaryColor: "#0D1B48",
+        }
+      : null;
+
+  const baseFileName = `Assiduidade_Docente_${new Date().toISOString().slice(0, 10)}`;
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -461,20 +563,43 @@ function AssiduidadeTab({
 
       {isDocente && (
         <>
-          {/* Legenda */}
-          <div className="flex flex-wrap gap-4">
-            {[
-              { color: "bg-yellow-300", label: "Marcações Pendentes", key: "Pendente" },
-              { color: "bg-green-200", label: "Presenças Marcadas", key: "Realizada" },
-              { color: "bg-red-300", label: "Faltas Marcadas", key: "Falta" },
-            ].map(({ color, label, key }) => (
-              <div key={key} className="flex items-center gap-2">
-                <div className={`w-4 h-4 rounded ${color}`} />
-                <span className="text-sm">
-                  {label} ({contagem?.[key] ?? 0})
-                </span>
+          {/* Legenda + Botões de Exportação */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-4">
+              {[
+                { color: "bg-yellow-300", label: "Marcações Pendentes", key: "Pendente" },
+                { color: "bg-green-200", label: "Presenças Marcadas", key: "Realizada" },
+                { color: "bg-red-300", label: "Faltas Marcadas", key: "Falta" },
+              ].map(({ color, label, key }) => (
+                <div key={key} className="flex items-center gap-2">
+                  <div className={`w-4 h-4 rounded ${color}`} />
+                  <span className="text-sm">
+                    {label} ({contagem?.[key] ?? 0})
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Botões de exportação — só aparecem quando há dados */}
+            {exportRows.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {pdfContent && (
+                  <PDFActions
+                    document={pdfContent}
+                    fileName={`${baseFileName}.pdf`}
+                    showDownload
+                    showPrint
+                  />
+                )}
+                {excelProps && (
+                  <ExcelActions
+                    excelProps={excelProps}
+                    fileName={`${baseFileName}.xlsx`}
+                    showDownload
+                  />
+                )}
               </div>
-            ))}
+            )}
           </div>
 
           {/* Tabela */}
@@ -620,9 +745,9 @@ const EMPTY_TEACHER: TeacherInfo = {
   birthDate: "",
   address: "",
 };
+
 function convertPTDateToISO(date: string) {
   if (!date) return "";
-
   const [day, month, year] = date.split("/");
   return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
@@ -731,10 +856,10 @@ const TeacherProfile = () => {
     () =>
       teacherInfo.name
         ? teacherInfo.name
-          .split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase()
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase()
         : "",
     [teacherInfo.name],
   );
@@ -746,7 +871,6 @@ const TeacherProfile = () => {
 
   const handleCancelEdit = useCallback(() => {
     setIsEditing(false);
-    // Revert unsaved changes
     if (teacherInfoData) setTeacherInfo(mapTeacherData(teacherInfoData));
     setPasswords({ current: "", new: "", confirm: "" });
   }, [teacherInfoData]);
@@ -786,7 +910,6 @@ const TeacherProfile = () => {
     if (teacherInfo.phone && !/^\d{9,}$/.test(teacherInfo.phone)) {
       return toast.error("O número de telefone deve conter apenas dígitos e ter pelo menos 9 caracteres.");
     }
-
     if (teacherInfo.phone2 && !/^\d{9,}$/.test(teacherInfo.phone2)) {
       return toast.error("O número de telefone 2 deve conter apenas dígitos e ter pelo menos 9 caracteres.");
     }
@@ -857,7 +980,7 @@ const TeacherProfile = () => {
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Perfil do  {teacherInfo.name}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Perfil do {teacherInfo.name}</h1>
           <p className="text-muted-foreground">Visualize e edite as suas informações profissionais</p>
         </div>
         <Button variant={isEditing ? "default" : "outline"} onClick={() => setIsEditing((v) => !v)}>
@@ -869,46 +992,45 @@ const TeacherProfile = () => {
       {/* Secção Superior */}
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Avatar + Info Rápida */}
-      <Card className="flex flex-col min-h-[500px]">
-  <CardHeader>
-    <CardTitle>Foto do Perfil</CardTitle>
-  </CardHeader>
+        <Card className="flex flex-col min-h-[500px]">
+          <CardHeader>
+            <CardTitle>Foto do Perfil</CardTitle>
+          </CardHeader>
 
-  <CardContent className="flex flex-col flex-1 space-y-6">
-    <div className="flex justify-center">
-      <Avatar className="h-40 w-40 border-4 border-background">
-        <AvatarImage src="" />
-        <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
-          {initials || "NA"}
-        </AvatarFallback>
-      </Avatar>
-    </div>
+          <CardContent className="flex flex-col flex-1 space-y-6">
+            <div className="flex justify-center">
+              <Avatar className="h-40 w-40 border-4 border-background">
+                <AvatarImage src="" />
+                <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
+                  {initials || "NA"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
 
-    {isDocente && (
-      <div className="text-center space-y-3">
-        <h3 className="text-2xl font-semibold">{teacherInfo.name}</h3>
-        <p className="text-sm text-muted-foreground">
-          Nº Mec: {teacherInfo.employeeId || "N/A"}
-        </p>
-        <div className="flex items-center justify-center gap-2 text-sm">
-          <Briefcase className="h-4 w-4" />
-          <span>{teacherInfo.category || "N/A"}</span>
-        </div>
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Building className="h-4 w-4" />
-          <span>{teacherInfo.department || "N/A"}</span>
-        </div>
-      </div>
-    )}
+            {isDocente && (
+              <div className="text-center space-y-3">
+                <h3 className="text-2xl font-semibold">{teacherInfo.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  Nº Mec: {teacherInfo.employeeId || "N/A"}
+                </p>
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  <Briefcase className="h-4 w-4" />
+                  <span>{teacherInfo.category || "N/A"}</span>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Building className="h-4 w-4" />
+                  <span>{teacherInfo.department || "N/A"}</span>
+                </div>
+              </div>
+            )}
 
-   
-    <div className="mt-auto">
-      <Button className="w-full" variant="outline" disabled={!isEditing}>
-        Alterar Foto
-      </Button>
-    </div>
-  </CardContent>
-</Card>
+            <div className="mt-auto">
+              <Button className="w-full" variant="outline" disabled={!isEditing}>
+                Alterar Foto
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Informações Detalhadas */}
         <Card className="lg:col-span-2">
@@ -1148,8 +1270,9 @@ const TeacherProfile = () => {
                   />
                   {passwords.confirm && (
                     <p
-                      className={`text-xs ${passwords.new === passwords.confirm ? "text-green-600" : "text-red-500"
-                        }`}
+                      className={`text-xs ${
+                        passwords.new === passwords.confirm ? "text-green-600" : "text-red-500"
+                      }`}
                     >
                       {passwords.new === passwords.confirm
                         ? "As senhas coincidem"
