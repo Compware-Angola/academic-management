@@ -652,10 +652,11 @@ function AssiduidadeTab({
                         <TableRow key={r.codigo} className="hover:bg-muted/50">
                           <TableCell className="font-mono text-sm">{r.codigo}</TableCell>
                           <TableCell className="font-medium">{r.docente ?? "N/A"}</TableCell>
-                          <TableCell>{r.curso}</TableCell>
+                          <TableCell>{r.horario}</TableCell>
+                        
                           <TableCell>{r.unidade_curricular}</TableCell>
                           <TableCell>{r.ordem_tempo}</TableCell>
-                          <TableCell>{r["data aula"]}</TableCell>
+                          <TableCell>{r.data_aula}</TableCell>
                           <TableCell>{r.hora_inicio}</TableCell>
                           <TableCell>{r.hora_termino}</TableCell>
                           <TableCell>
