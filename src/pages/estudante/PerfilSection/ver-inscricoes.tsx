@@ -37,7 +37,7 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
-import { HorarioSelect } from "@/components/common/global-selects/HorarioSelect";
+import { HorarioDetails, ModalHorario } from "./ModalHorario";
 
 type Props = {
   codigoMatricula: number;
@@ -55,6 +55,10 @@ export function InscricoesSection({
     semestre: "1",
     classes: "",
   });
+
+  const [horarionDetails, setHorarionDetails] = useState<HorarioDetails | null>(
+    null,
+  );
   const { data: student } = useStudentDetail(matricula);
   const {
     data: response,
@@ -71,10 +75,21 @@ export function InscricoesSection({
 
   const [isModalOpenDisciplina, setIsModalOpenDisciplina] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
+  const [isModalOpenHorario, setIsModalOpenHorario] = useState(false);
 
   const openDetails = (turmaId: number) => {
     setSelectedTurmaId(turmaId);
     setIsModalOpenDisciplina(true);
+  };
+
+  const openModalHorario = (horarionDetails: HorarioDetails) => {
+    setHorarionDetails(horarionDetails);
+    setIsModalOpenHorario(true);
+  };
+
+  const closeModalHorario = () => {
+    setHorarionDetails(null);
+    setIsModalOpenHorario(false);
   };
 
   const disciplinas = response?.data ?? [];
@@ -206,6 +221,19 @@ export function InscricoesSection({
                                 aria-label="Editar"
                                 title="Editar"
                                 className="cursor-pointer"
+                                onClick={() => {
+                                  openModalHorario({
+                                    anoLectivo: filter.anoLetivo,
+                                    curso: student.curso_codigo.toString(),
+                                    semestre: filter.semestre,
+                                    unidadeCurricular:
+                                      disc.codigo_grade_curricular.toString(),
+                                    estado: "3",
+                                    periodo: student.periodo_codigo.toString(),
+                                    classes: disc.codigo_classe.toString(),
+                                    disciplina: disc.disciplina,
+                                  });
+                                }}
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
@@ -288,6 +316,13 @@ export function InscricoesSection({
         onClose={() => {
           setIsModalOpenDisciplina(false);
           setSelectedTurmaId(null);
+        }}
+      />
+      <ModalHorario
+        isOpen={isModalOpenHorario}
+        horarionDetails={horarionDetails}
+        onClose={() => {
+          closeModalHorario();
         }}
       />
     </TabsContent>

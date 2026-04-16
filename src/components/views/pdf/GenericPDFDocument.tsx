@@ -167,7 +167,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     header = defaultHeader,
     documentTitle,
     subtitle,
-    orientation = "vertical",
+    orientation = "horizontal",
     infoSections = [],
     mainTable,
     totals = [],
