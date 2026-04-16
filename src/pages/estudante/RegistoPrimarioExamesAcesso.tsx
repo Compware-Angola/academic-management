@@ -76,7 +76,7 @@ export default function RegistoPrimarioExamesAcesso() {
       ? Number(filtrosAplicados.anoLectivo)
       : 0,
     grau: filtrosAplicados.grau ? Number(filtrosAplicados.grau) : 0,
-    search: filtrosAplicados.search ?? "",
+    search: filters.search ?? "",
   });
 
   const registos = data?.data ?? [];
@@ -106,12 +106,12 @@ export default function RegistoPrimarioExamesAcesso() {
         provincia_residencia: item.provincia_residencia,
         pais_origem: item.pais_origem,
         municipio: item.municipio,
-        periodo_estudo: item.periodo_estudo,
+        unidade_organica: item.unidade_organica,
         curso: item.curso,
         nota_exame_acesso: formatNota(item.nota_exame_acesso),
         escola_ensino_medio: item.escola_ensino_medio,
         trabalhador: item.trabalhador,
-        unidade_organica: item.unidade_organica,
+        periodo_estudo: item.periodo_estudo,
         necessidade_especial: item.necessidade_especial,
         proveniencia: item.proveniencia,
         curso_ensino_medio: item.curso_ensino_medio,
@@ -125,6 +125,7 @@ export default function RegistoPrimarioExamesAcesso() {
   const pdfContent =
     exportRows.length > 0 ? (
       <GenericPDFDocument
+        orientation="horizontal"
         documentTitle="Registo Primário de Exames de Acesso"
         subtitle="Listagem de candidatos dos exames de acesso"
         infoSections={[
@@ -218,7 +219,7 @@ export default function RegistoPrimarioExamesAcesso() {
     { header: "Província", accessor: "provincia_residencia" },
     { header: "País", accessor: "pais_origem" },
     { header: "Município", accessor: "municipio" },
-    { header: "Período", accessor: "periodo_estudo" },
+    { header: "Unidade Orgânica", accessor: "unidade_organica" },
     { header: "Curso", accessor: "curso" },
     {
       header: "Nota Exame",
@@ -229,7 +230,7 @@ export default function RegistoPrimarioExamesAcesso() {
     { header: "Escola", accessor: "escola_ensino_medio" },
     { header: "Trabalhador", accessor: "trabalhador" },
     { header: "Unidade Orgânica", accessor: "unidade_organica" },
-    { header: "Necessidade", accessor: "necessidade_especial" },
+    { header: "Período", accessor: "periodo_estudo" },
     { header: "Proveniência", accessor: "proveniencia" },
     { header: "Curso Ens. Médio", accessor: "curso_ensino_medio" },
     {
