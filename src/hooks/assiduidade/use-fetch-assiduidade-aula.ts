@@ -12,6 +12,7 @@ export const useQueryFiltroAssiduidade = (
     unidadeCurricular,
     docente,
     dataInicial,
+    periodoId,
     dataFinal,
     estado,
     anoLectivo,
@@ -45,6 +46,7 @@ export const useQueryFiltroAssiduidade = (
     ...(estado !== undefined && Number(estado) >= 1 && { estado: Number(estado) }),
     ...(hasAno && { anoLectivo: Number(anoLectivo) }),
     ...(semestre !== undefined && Number(semestre) > 0 && { semestre: Number(semestre) }),
+      ...(periodoId !== undefined && Number(periodoId) > 0 && { periodoId: Number(periodoId) }),
     // Só inclui datas se ambas forem válidas
     ...(hasBothDates && { dataInicial, dataFinal }),
   };

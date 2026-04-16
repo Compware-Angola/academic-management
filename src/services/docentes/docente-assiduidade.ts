@@ -1,6 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type FiltroAssiduidadePayload ={
+  periodoId?: number;
   docenteId: number; 
   gradeId?: number;
   estadoAgendamento?: number;
