@@ -254,6 +254,10 @@ export const PermissionTypeDetails = {
     designacao: "Listagem de Solicitação de Suporte",
     sigla: "mga_su_lso",
   },
+  REGISTRO_PRIMARIO_EXAME_ACESSO: {
+    designacao: "Registro Primário de Exame de Acesso",
+    sigla: "mgea_rpe_acesso",
+  },
    LANCAR_NOTA_ARQUITECTURA: {
     designacao: "Lançar Nota Candidatura Arquitetura",
     sigla: "mgea_lnc_a",
