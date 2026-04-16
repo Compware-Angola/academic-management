@@ -72,7 +72,7 @@ export default function MapaAnualEstudantesFinalistas() {
       ? Number(filtrosAplicados.anoLectivo)
       : 0,
     grau: filtrosAplicados.grau ? Number(filtrosAplicados.grau) : 0,
-    search: filtrosAplicados.search ?? "",
+    search: filters.search ?? "",
   });
 
   const finalistas = data?.data ?? [];
@@ -116,6 +116,7 @@ export default function MapaAnualEstudantesFinalistas() {
   const pdfContent =
     exportRows.length > 0 ? (
       <GenericPDFDocument
+        orientation="horizontal"
         documentTitle="Mapa Anual de Estudantes Finalistas"
         subtitle="Listagem de estudantes finalistas"
         infoSections={[
