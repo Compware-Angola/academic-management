@@ -743,7 +743,7 @@ export const operacionalStructure: MenuStructure = {
           ],
         },
         {
-          title: "Registro matrícula",
+          title: "Registro de Matriculados",
           url: "/ministerio/registro-matricula",
           permission: [
             PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla,
