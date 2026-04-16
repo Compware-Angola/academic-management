@@ -16,7 +16,8 @@ export type FiltroAssiduidadePayload ={
 // Interface que reflete exatamente o seu JSON de retorno
 export type AssiduidadeDocenteItem = {
   codigo: number;
-  "data aula": string;
+  data_aula: string;
+  horario: string;
   estado: string;
   docente: string | null;
   ordem_tempo: number;
