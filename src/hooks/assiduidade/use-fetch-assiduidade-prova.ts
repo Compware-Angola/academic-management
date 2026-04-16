@@ -13,6 +13,7 @@ export const useQueryProvaAssiduidade = (
     docente,
     disciplina,
     dataInicio,
+    periodoId,
     dataFim,
     estado,
     anoLectivo,
@@ -37,6 +38,7 @@ export const useQueryProvaAssiduidade = (
   const payload: ProvaAssiduidadePayload = {
     ...(docente !== undefined && { docente }),
     ...(disciplina !== undefined && { disciplina }),
+    ...(periodoId !== undefined && { periodoId }),
     ...(estado !== undefined && { estado }),
     ...(anoLectivo !== undefined && { anoLectivo }),
     ...(semestre !== undefined && { semestre }),

@@ -282,7 +282,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
         )}
       </div>
 
-   <Card>
+<Card>
   <CardHeader className="flex flex-row items-center justify-between">
     <CardTitle>Filtros</CardTitle>
 
@@ -330,7 +330,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
   <CardContent>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-5">
-      {/* Ano Letivo */}
+      {/* Filtros principais - sempre visíveis */}
       <FormSelect
         label="Ano Letivo"
         value={filters.anoLectivo}
@@ -344,7 +344,6 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
         disabled={loadingAno}
       />
 
-      {/* Estado da Aula */}
       <FormSelect
         label="Estado da Aula"
         value={filters.estado}
@@ -357,7 +356,6 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
         })}
       />
 
-      {/* Semestre */}
       <FormSelect
         label="Semestre"
         value={filters.semestre}
@@ -377,7 +375,6 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
         })}
       />
 
-      {/* Docente */}
       <div className="space-y-1.5">
         <FormCommandSelect
           label="Docente"
@@ -394,7 +391,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
       </div>
 
       {/* Datas */}
-      <div className="grid grid-cols-2 gap-4 col-span-1 md:col-span-2 lg:col-span-1 xl:col-span-2">
+      <div className="grid grid-cols-2 gap-4 col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-2">
         <div className="space-y-1.5">
           <label className="text-sm font-medium">Data Inicial</label>
           <Input
@@ -437,92 +434,6 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                 }))
               }
             />
-
-            <div className="space-y-1.5">
-              <FormCommandSelect
-                label="Docente"
-                value={filters.docente}
-                options={teachersData ?? []}
-                map={(t) => ({
-                  key: String(t.codigo),
-                  label: t.nome,
-                  value: String(t.codigo),
-                })}
-                placeholder="Selecionar docente..."
-                onChange={(v) => handleFilterChange("docente", v)}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Data Inicial *</label>
-              <Input
-                type="date"
-                value={filters.dataInicial}
-                onChange={(e) =>
-                  handleFilterChange("dataInicial", e.target.value)
-                }
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Data Final *</label>
-              <Input
-                type="date"
-                value={filters.dataFinal}
-                onChange={(e) =>
-                  handleFilterChange("dataFinal", e.target.value)
-                }
-              />
-            </div>
-
-            {showMoreFilters && (
-              <>
-                <div className="space-y-1.5">
-                  <FormCommandSelect
-                    label="Curso"
-                    value={filters.curso}
-                    options={cursos}
-                    map={(c) => ({
-                      key: String(c.codigo),
-                      value: String(c.codigo),
-                      label: c.designacao,
-                    })}
-                    placeholder="Selecionar curso..."
-                    onChange={(v) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        curso: v,
-                        gradeCurricular: "",
-                        page: 1,
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <FormCommandSelect
-                    label="Unidade Curricular"
-                    value={filters.gradeCurricular}
-                    options={gradesCurriculares}
-                    map={(g) => ({
-                      key: String(g.pk),
-                      value: String(g.pk),
-                      label: g.descricao,
-                    })}
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione o curso"
-                        : !filters.semestre
-                          ? "Selecione o semestre"
-                          : isLoadingGradeCurricular
-                            ? "Carregando..."
-                            : "Selecionar grade curricular"
-                    }
-                    onChange={(v) => handleFilterChange("gradeCurricular", v)}
-                  />
-                </div>
-              </>
-            )}
           </div>
 
           <div className="space-y-1.5">
@@ -539,10 +450,10 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
                 !filters.curso
                   ? "Selecione o curso"
                   : !filters.semestre
-                    ? "Selecione o semestre"
-                    : isLoadingGradeCurricular
-                      ? "Carregando..."
-                      : "Selecionar grade curricular"
+                  ? "Selecione o semestre"
+                  : isLoadingGradeCurricular
+                  ? "Carregando..."
+                  : "Selecionar grade curricular"
               }
               onChange={(v) => handleFilterChange("gradeCurricular", v)}
               disabled={!filters.curso || !filters.semestre}

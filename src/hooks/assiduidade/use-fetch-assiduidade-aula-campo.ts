@@ -13,6 +13,7 @@ export const useQueryFiltroAssiduidadeCampo = (
     unidadeCurricular,
     docente,
     dataInicial,
+    periodoId,
     dataFinal,
     estado,
     anoLectivo,
@@ -43,6 +44,7 @@ export const useQueryFiltroAssiduidadeCampo = (
     ...(estado !== undefined && { estado }),
     ...(anoLectivo !== undefined && { anoLectivo }),
     ...(semestre !== undefined && { semestre }),
+      ...(periodoId !== undefined && { periodoId }),
     page,
     limit,
     // só envia datas se ambas existirem

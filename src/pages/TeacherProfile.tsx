@@ -73,6 +73,7 @@ import { useUpdatePassword } from "@/hooks/auth/use-query-auth";
 import { useUpdatePersonUser } from "@/hooks/acess/useUpdatePersonUser";
 import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
 // ===================== TYPES =====================
 
@@ -107,6 +108,7 @@ interface ShowPasswordState {
 interface AssiduidadeFilters {
   anoCurricular: string;
   unidadeCurricular: string;
+  codigoTurno?: string;
   dataInicio: string;
   dataFim: string;
   estado: string;
@@ -261,13 +263,14 @@ function AssiduidadeTab({
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } =
     useQueryStatusAgendamento({ enabled: true });
-
+ const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useAssiduidadeDocente({
     docenteId: parseFilter(docenteId),
     gradeId: parseFilter(filters.unidadeCurricular),
     dataInicio: filters.dataInicio || undefined,
     dataFim: filters.dataFim || undefined,
     estadoAgendamento: parseFilter(filters.estado),
+    periodoId: parseFilter(filters.codigoTurno),
     anoLectivo: parseFilter(filters.anoLectivo),
     semestre: parseFilter(filters.semestre),
     page: filters.page,
@@ -475,6 +478,17 @@ function AssiduidadeTab({
               placeholder="Selecione o estado..."
             />
           </div>
+            <div className="space-y-2">
+                                <FormSelect
+                                  disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLectivo === ""}
+                                  loading={isLoadingPeriodos}
+                                  label="Período"
+                                  value={filters.codigoTurno?.toString() ?? "all"}
+                                  onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? undefined : v, page: 1 }))}
+                                  options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
+                                  map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+                                />
+                              </div>
 
           <SemestreSelect
             onChangeValue={(v) => setFilters((prev) => ({ ...prev, semestre: v, page: 1 }))}
@@ -638,10 +652,11 @@ function AssiduidadeTab({
                         <TableRow key={r.codigo} className="hover:bg-muted/50">
                           <TableCell className="font-mono text-sm">{r.codigo}</TableCell>
                           <TableCell className="font-medium">{r.docente ?? "N/A"}</TableCell>
-                          <TableCell>{r.curso}</TableCell>
+                          <TableCell>{r.horario}</TableCell>
+                        
                           <TableCell>{r.unidade_curricular}</TableCell>
                           <TableCell>{r.ordem_tempo}</TableCell>
-                          <TableCell>{r["data aula"]}</TableCell>
+                          <TableCell>{r.data_aula}</TableCell>
                           <TableCell>{r.hora_inicio}</TableCell>
                           <TableCell>{r.hora_termino}</TableCell>
                           <TableCell>

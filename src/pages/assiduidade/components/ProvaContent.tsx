@@ -64,6 +64,7 @@ import { useQueryProvaAssiduidade } from "@/hooks/assiduidade/use-fetch-assiduid
 import { useMutationMarcarProva } from "@/hooks/assiduidade/use-mutation-marcar-assiduidade-prova";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { usePermission } from "@/auth/permission.helper";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -99,7 +100,7 @@ export default function ProvaContent() {
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } = useQueryStatusAgendamento({ enabled: true });
-
+ const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const SEMESTRE = [
     { key: "1", label: "1º Semestre", value: "1" },
     { key: "2", label: "2º Semestre", value: "2" },
@@ -113,6 +114,7 @@ export default function ProvaContent() {
   const [filters, setFilters] = useState({
     docente: "",
     anoCurricular: "all",
+    codigoTurno: "",
     unidadeCurricular: "",
     dataInicio: "",
     dataFim: "",
@@ -143,6 +145,7 @@ export default function ProvaContent() {
       ...(toNumber(filters.estado) && { estado: toNumber(filters.estado) }),
       ...(toNumber(filters.anoLectivo) && { anoLectivo: toNumber(filters.anoLectivo) }),
       ...(toNumber(filters.semestre) && { semestre: toNumber(filters.semestre) }),
+      ...(toNumber(filters.codigoTurno) && { periodoId: toNumber(filters.codigoTurno) }),
       ...(filters.page && { page: filters.page }),
       ...(filters.limit && { limit: filters.limit }),
     }
@@ -229,6 +232,7 @@ export default function ProvaContent() {
                 estado: "",
                 dataInicio: "",
                 dataFim: "",
+                codigoTurno: "",
                 curso: "",
                 anoCurricular: "all",
                 unidadeCurricular: "",
@@ -308,6 +312,17 @@ export default function ProvaContent() {
               onChange={(codigo) => setFilters({ ...filters, docente: codigo, page: 1 })}
             />
           </div>
+            <div className="space-y-2">
+                      <FormSelect
+                        disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLectivo === ""}
+                        loading={isLoadingPeriodos}
+                        label="Período"
+                        value={filters.codigoTurno?.toString() ?? "all"}
+                        onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? undefined : v, page: 1 }))}
+                        options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
+                        map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+                      />
+                    </div>
 
           <div className="space-y-1.5">
             <Label>Data início</Label>
