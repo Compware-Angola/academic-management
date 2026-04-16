@@ -5,6 +5,7 @@ export interface FiltroAssiduidadePayload {
   docente?: number;
   dataInicial?: string;
   dataFinal?: string;
+  periodoId?: number;
   estado?: number;
   anoLectivo?: number;
   semestre?: number;
@@ -44,6 +45,7 @@ export async function filtroAssiduidadeService(
     dataInicial,
     dataFinal,
     estado,
+    periodoId,
     anoLectivo,
     semestre,
     page = 1,
@@ -59,6 +61,7 @@ export async function filtroAssiduidadeService(
           docente,
           dataInicial,
           dataFinal,
+          periodoId,
           estado,
           anoLectivo,
           semestre,
@@ -78,7 +81,9 @@ export async function filtroAssiduidadeCampoService(
     docente,
     dataInicial,
     dataFinal,
+    
     estado,
+    periodoId,
     anoLectivo,
     semestre,
     page = 1,
@@ -94,6 +99,7 @@ export async function filtroAssiduidadeCampoService(
           docente,
           dataInicial,
           dataFinal,
+          periodoId,
           estado,
           anoLectivo,
           semestre,
@@ -111,6 +117,7 @@ export interface ProvaAssiduidadePayload {
   docente?: number;
   disciplina?: number;
   dataInicio?: string;
+  periodoId?: number;
   dataFim?: string;
   estado?: number;
   anoLectivo?: number;
@@ -149,6 +156,7 @@ export async function provaAssiduidadeService(
     docente,
     disciplina,
     dataInicio,
+    periodoId,
     dataFim,
     estado,
     anoLectivo,
@@ -165,6 +173,7 @@ export async function provaAssiduidadeService(
           docente,
           disciplina,
           dataInicio,
+          periodoId,
           dataFim,
           estado,
           anoLectivo,

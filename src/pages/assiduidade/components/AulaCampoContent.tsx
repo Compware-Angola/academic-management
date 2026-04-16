@@ -61,6 +61,7 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { useQueryFiltroAssiduidadeCampo } from "@/hooks/assiduidade/use-fetch-assiduidade-aula-campo";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -96,7 +97,7 @@ export default function AulaCampoContent() {
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } = useQueryStatusAgendamento({ enabled: true });
-
+ const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const SEMESTRE = [
     { key: "1", label: "1º Semestre", value: "1" },
     { key: "2", label: "2º Semestre", value: "2" },
@@ -111,6 +112,7 @@ export default function AulaCampoContent() {
     docente: "",
     anoCurricular: "all",
     unidadeCurricular: "",
+      codigoTurno: "",
     dataInicio: "",
     dataFim: "",
     estado: "",
@@ -138,6 +140,7 @@ const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltr
     ...(toNumber(filters.estado) && { estado: toNumber(filters.estado) }),
     ...(toNumber(filters.anoLectivo) && { anoLectivo: toNumber(filters.anoLectivo) }),
     ...(toNumber(filters.semestre) && { semestre: toNumber(filters.semestre) }),
+      ...(toNumber(filters.codigoTurno) && { periodoId: toNumber(filters.codigoTurno) }),
     ...(filters.page && { page: filters.page }),
     ...(filters.limit && { limit: filters.limit }),
   }
@@ -222,6 +225,7 @@ const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltr
                 anoLectivo: "",
                 semestre: "",
                 estado: "",
+                codigoTurno: "",
                 dataInicio: "",
                 dataFim: "",
                 curso: "",
@@ -303,6 +307,17 @@ const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltr
               onChange={(codigo) => setFilters({ ...filters, docente: codigo, page: 1 })}
             />
           </div>
+             <div className="space-y-2">
+                      <FormSelect
+                        disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLectivo === ""}
+                        loading={isLoadingPeriodos}
+                        label="Período"
+                        value={filters.codigoTurno?.toString() ?? "all"}
+                        onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? undefined : v, page: 1 }))}
+                        options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
+                        map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+                      />
+                    </div>
 
           <div className="space-y-1.5">
             <Label>Data início</Label>
