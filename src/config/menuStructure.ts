@@ -564,33 +564,7 @@ export const academicStructure: MenuStructure = {
     // DOCUMENTOS MINISTÉRIO
     // ----------------------------------------------------
 
-    {
-      title: "Documentos para o Ministério",
-      url: "/ministerio",
-      icon: FileText,
-      items: [
-        {
-          title: "Mapa finalistas",
-          url: "/ministerio/mapa-finalistas",
-          permission: [
-            PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla,
-          ],
-        },
-        {
-          title: "Registro exame de acesso",
-          url: "/ministerio/registro-exame",
-        },
-        {
-          title: "Registro matrícula",
-          url: "/ministerio/registro-matricula",
-          permission: [
-            PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla,
-          ],
-        },
-      ],
-
-      permission: [],
-    },
+  
 
     {
       title: "Marcação de Provas",
@@ -747,6 +721,36 @@ export const operacionalStructure: MenuStructure = {
           permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
         },
       ],
+      permission: [],
+    },
+      {
+      title: "Documentos para o Ministério",
+      url: "/ministerio",
+      icon: FileText,
+      items: [
+        {
+          title: "Mapa finalistas",
+          url: "/ministerio/mapa-finalistas",
+          permission: [
+            PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla,
+          ],
+        },
+        {
+          title: "Registro exame de acesso",
+          url: "/ministerio/registro-exame",
+          permission: [
+            PermissionTypeDetails.REGISTRO_PRIMARIO_EXAME_ACESSO.sigla,
+          ],
+        },
+        {
+          title: "Registro de Matriculados",
+          url: "/ministerio/registro-matricula",
+          permission: [
+            PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla,
+          ],
+        },
+      ],
+
       permission: [],
     },
     {

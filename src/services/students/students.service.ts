@@ -104,6 +104,7 @@ export type DisciplinaMatricula = {
   sala: string;
   codigo_horario: number; // ex: 20373
   estado: string; // ex: "Aprovado", "Matriculado", etc.
+  codigo_classe: number;
 };
 
 export type DisciplinasResponse = {
