@@ -1,12 +1,11 @@
 // src/pages/UserAccess.tsx
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,8 +24,9 @@ import {
   TableHead,
   TableHeader,
 } from "@/components/ui/table";
-
+import { Switch } from "@/components/ui/switch";   // ← Novo
 import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   RefreshCw,
   Plus,
@@ -35,31 +35,31 @@ import {
   ChevronRight,
   Edit,
   Lock,
-  User as UserIcon, // Novo ícone
+  User as UserIcon,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { useUsers, useUsersNoPagination } from "@/hooks/acess/use-query-users";
+import { useUsers } from "@/hooks/acess/use-query-users";
+import { useToggleUserStatus } from "@/hooks/acess/use-query-users"; // ← Novo
 import { User } from "@/services/access/fect-users.service";
+
 import { UserPermissionsModal } from "./components/UserPermissionsModal";
-// Nova modal para edição
 import { PasswordEditModal } from "./components/UserEditPassword";
 import { UserEditModal } from "./components/UserEditModal";
+
 type UserActionType = "password" | "permissions" | "profile" | null;
+
 export default function UserAccess() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
+  
   const navigate = useNavigate();
-
   const [typeToEdit, setTypeToEdit] = useState<UserActionType>(null);
-  const handleEditUser = (user: User, type: UserActionType) => {
-    setSelectedUser(user);
-    setTypeToEdit(type);
-  };
-  // Passa os parâmetros diretamente para o hook
+
+  // Hooks
   const {
     data: usersResponse,
     isLoading,
@@ -72,7 +72,24 @@ export default function UserAccess() {
     ativo,
   });
 
-  const { data: usersNoPagination } = useUsersNoPagination();
+  const toggleMutation = useToggleUserStatus();
+
+  const handleEditUser = (user: User, type: UserActionType) => {
+    setSelectedUser(user);
+    setTypeToEdit(type);
+  };
+
+  // Função para alternar estado com Switch
+  const handleToggleStatus = (userId: number) => {
+    toggleMutation.mutate(userId, {
+      onSuccess: (result) => {
+        console.log(result.message);
+      },
+      onError: (error: any) => {
+        alert(`Erro ao alterar estado: ${error.message}`);
+      },
+    });
+  };
 
   // Dados extraídos da resposta paginada
   const users = usersResponse?.data ?? [];
@@ -163,13 +180,11 @@ export default function UserAccess() {
 
   const baseFileName = `Utilizadores_${new Date().toISOString().slice(0, 10)}`;
 
-  // Atualiza página ao mudar itens por página
   const handleItemsPerPageChange = (value: string) => {
     setItemsPerPage(Number(value));
-    setCurrentPage(1); // volta para página 1
+    setCurrentPage(1);
   };
 
-  // Atualiza busca e reseta página
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
@@ -178,9 +193,7 @@ export default function UserAccess() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-
       <div className="flex items-center justify-between flex-wrap gap-3">
-        {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-foreground">
             Início
@@ -340,6 +353,7 @@ export default function UserAccess() {
                     <TableHead>Username</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Telefone</TableHead>
+                    <TableHead>Estado</TableHead>
                     <TableHead>Telefone (2)</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
@@ -360,9 +374,25 @@ export default function UserAccess() {
                       <TableCell className="text-sm text-muted-foreground">
                         {user.telefone1 || "N/A"}
                       </TableCell>
+
+                      {/* === SWITCH DE ESTADO === */}
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Switch
+                            checked={user.activestate === 1}
+                            disabled={toggleMutation.isPending}
+                            onCheckedChange={() => handleToggleStatus(user.codigo)}
+                          />
+                          <span className="text-sm font-medium">
+                            {user.activestate === 1 ? "Ativo" : "Inativo"}
+                          </span>
+                        </div>
+                      </TableCell>
+
                       <TableCell className="text-sm text-muted-foreground">
                         {user.telefone2 || "N/A"}
                       </TableCell>
+
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -370,7 +400,6 @@ export default function UserAccess() {
                             size="icon"
                             aria-label="Editar Perfil"
                             title="Editar Perfil"
-                            className="cursor-pointer"
                             onClick={() => handleEditUser(user, "profile")}
                           >
                             <UserIcon className="h-4 w-4" />
@@ -380,19 +409,16 @@ export default function UserAccess() {
                             size="icon"
                             aria-label="Editar Senha"
                             title="Editar Senha"
-                            className="cursor-pointer"
                             onClick={() => handleEditUser(user, "password")}
                           >
                             <Lock className="h-4 w-4" />
                           </Button>
 
-                          {/* Botão Permissões */}
                           <Button
                             aria-label="Gerenciar Permissões"
                             title="Gerenciar Permissões"
                             variant="outline"
                             size="icon"
-                            className="cursor-pointer"
                             onClick={() => handleEditUser(user, "permissions")}
                           >
                             <Shield className="h-4 w-4" />
@@ -441,7 +467,7 @@ export default function UserAccess() {
         </>
       )}
 
-      {/* Modal de permissões */}
+      {/* Modals */}
       {typeToEdit === "permissions" && selectedUser && (
         <UserPermissionsModal
           user={selectedUser}
@@ -450,7 +476,6 @@ export default function UserAccess() {
         />
       )}
 
-      {/* Nova Modal de edição */}
       {typeToEdit === "password" && selectedUser && (
         <PasswordEditModal
           user={selectedUser}
