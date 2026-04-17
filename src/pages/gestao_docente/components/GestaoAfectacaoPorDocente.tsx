@@ -173,6 +173,7 @@ const GestaoAfectacaoPorDocente = () => {
                             onCheckedChange={(v) =>
                               updateAfectacaoStatus(item.codigo, v)
                             }
+                            disabled={isPending}
                             id="deleted-mode"
                             checked={item.estado == 1}
                           />
