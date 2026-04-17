@@ -36,7 +36,9 @@ export const DocenteAfectacao = () => {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-
+      <h1 className="text-3xl font-bold mb-6 text-foreground">
+        Docentes Afectados
+      </h1>
       <Tabs
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as typeof activeTab)}
