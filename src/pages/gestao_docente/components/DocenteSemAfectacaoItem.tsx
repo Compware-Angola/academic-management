@@ -23,12 +23,17 @@ import {
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { parseFilter } from "@/util/parse-filter";
 import { Loader2 } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mutation-update-afectacao-status";
 import { Input } from "@/components/ui/input";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryDocentesAfectacao } from "@/hooks/gestao_docente/use-query-docentes-afectacao";
 import { FormInput } from "@/components/common/FormInput";
+import { buildExport } from "@/components/common/exports/docExport";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 
 const DocenteSemAfectacaoItem = () => {
   const id = useId();
@@ -58,6 +63,32 @@ const DocenteSemAfectacaoItem = () => {
   const afectacoes = afectacoesResponse?.data ?? [];
   const total = afectacoesResponse?.total;
   const totalPages = afectacoesResponse?.totalPages;
+  const exportData = useMemo(
+    () =>
+      buildExport({
+        data: afectacoes,
+        title: "Docentes Afectados",
+        subtitle: "Lista de Docentes Afectados (s)",
+        content: [`Total de Docentes Afectados (s): ${afectacoes.length}`],
+        headers: [
+          { key: "codigo", label: "Código", pdfWidth: 30, excelWidth: 30 },
+          { key: "docente", label: "Docente", pdfWidth: 30, excelWidth: 30 },
+          {
+            key: "mecanografico",
+            label: "Nº Mecanográfico",
+            pdfWidth: 40,
+            excelWidth: 40,
+          },
+        ],
+
+        mapRow: (afectacao) => ({
+          codigo: afectacao.codigo_docente,
+          docente: afectacao.docente,
+          mecanografico: afectacao.mecanografico,
+        }),
+      }),
+    [afectacoes],
+  );
   return (
     <>
       <Card className="mb-6">
@@ -98,6 +129,24 @@ const DocenteSemAfectacaoItem = () => {
           </div>
         </CardContent>
       </Card>
+      {exportData?.excelProps &&
+        exportData?.excelProps &&
+        exportData?.fileName && (
+          <div className="flex justify-end gap-2 mb-2">
+            <PDFActions
+              document={<GenericPDFDocument {...exportData?.pdfProps} />}
+              fileName={`${exportData.fileName}.pdf`}
+              showDownload
+              showPrint
+            />
+
+            <ExcelActions
+              excelProps={exportData?.excelProps}
+              fileName={`${exportData.fileName}.xlsx`}
+              showDownload
+            />
+          </div>
+        )}
       <Card>
         <CardHeader>
           <div className="flex justify-between">
