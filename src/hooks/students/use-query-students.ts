@@ -62,7 +62,7 @@ export const useStudentDisciplinas = (
 ) => {
   const { matriculaId, anoLectivo, semestre, page = 1, limit = 25,classes } = params;
 
-  // Chave única que considera todos os filtros importantes
+
   const queryKey = [
     "student-disciplinas",
     String(matriculaId ?? "").trim(),
@@ -71,7 +71,7 @@ export const useStudentDisciplinas = (
     classes ? String(classes) : null,
     page,
     limit,
-  ].filter(Boolean); // remove null/undefined
+  ].filter(Boolean); 
 
   return useQuery<DisciplinasResponse, Error>({
     queryKey,
@@ -80,7 +80,7 @@ export const useStudentDisciplinas = (
     staleTime: 5 * 60 * 1000, // 5 minutos (disciplinas mudam pouco)
     gcTime: 30 * 60 * 1000,
     retry: 1,
-    // keepPreviousData: true,                 // descomente se quiser manter dados antigos durante refetch
+   
   });
 };
 
