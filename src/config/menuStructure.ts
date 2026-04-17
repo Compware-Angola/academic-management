@@ -246,6 +246,11 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
+          title:"Listagem Geral Estudantes",
+          url:"inscricoes/estudantes/listagem/geral",
+          permission:[PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!]
+        },
+        {
           title: "Estado da matrícula",
           url: "/inscricoes/estado-matricula",
           permission: [
@@ -255,7 +260,7 @@ export const ingressoStructure: MenuStructure = {
         { title: "Insentar colisão", url: "/inscricoes/colisao" },
       ],
 
-      permission: ["adm", "rootAdmin"],
+      permission: [],
     },
   ],
 };
