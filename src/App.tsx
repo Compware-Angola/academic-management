@@ -159,6 +159,7 @@ import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
 import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
+import HorariosParametros from "./pages/schedules/HorariosParametros";
 
 const App = () => {
   return (
@@ -958,6 +959,19 @@ const App = () => {
                         ]}
                       >
                         <HorariosSemanais />
+                      </ProtectedRoute>
+                    }
+                  />
+                     <Route
+                    path="/horarios/parametros"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PARAMETROS_MGH
+                            .sigla!,
+                        ]}
+                      >
+                        <HorariosParametros />
                       </ProtectedRoute>
                     }
                   />
