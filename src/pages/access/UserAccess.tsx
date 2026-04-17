@@ -46,15 +46,19 @@ import { User } from "@/services/access/fect-users.service";
 import { UserPermissionsModal } from "./components/UserPermissionsModal";
 import { PasswordEditModal } from "./components/UserEditPassword";
 import { UserEditModal } from "./components/UserEditModal";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 type UserActionType = "password" | "permissions" | "profile" | null;
 
 export default function UserAccess() {
+  const { hasPermission } = usePermission();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
+  console.log( hasPermission(PermissionTypeDetails.BLOQUEAR_ACESSOS.sigla));
   
   const navigate = useNavigate();
   const [typeToEdit, setTypeToEdit] = useState<UserActionType>(null);
@@ -379,8 +383,9 @@ export default function UserAccess() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Switch
+
                             checked={user.activestate === 1}
-                            disabled={toggleMutation.isPending}
+                            disabled={toggleMutation.isPending||  !hasPermission(PermissionTypeDetails.BLOQUEAR_ACESSOS.sigla)}
                             onCheckedChange={() => handleToggleStatus(user.codigo)}
                           />
                           <span className="text-sm font-medium">
