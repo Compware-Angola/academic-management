@@ -96,6 +96,7 @@ export type DisciplinaMatricula = {
   disciplina: string;
   codigo_disciplina: string;
   codigo_grade_curricular:number;
+  codigo:number;
   semestre: string; // ex: "I SEMESTRE", "II SEMESTRE"
   duracao: string; // ex: "Semestral", "Anual"
   classe: string; // ex: "1º ano", "2º ano"
@@ -105,6 +106,7 @@ export type DisciplinaMatricula = {
   codigo_horario: number; // ex: 20373
   estado: string; // ex: "Aprovado", "Matriculado", etc.
   codigo_classe: number;
+  estado_codigo:number;
 };
 
 export type DisciplinasResponse = {
@@ -234,4 +236,14 @@ export type UpdatePersonalDataPayload = {
 export async function updatePersonalData(data: UpdatePersonalDataPayload) { 
   const response = await axiosNestGa.put(`/students/personal-data`, data);
   return response.data;
+}
+
+export type UpdateGradeCurricularHorarioAlunoPayload = {
+    codigoGradeCurricularAluno: number;
+    horarioID: number;
+};
+
+export async function updateGradeCurricularHorarioAluno(params: UpdateGradeCurricularHorarioAlunoPayload): Promise<{message: string}> {
+  const { data } = await axiosNestGa.put(`/students/horario-grade-curricular`, params);
+  return data;
 }

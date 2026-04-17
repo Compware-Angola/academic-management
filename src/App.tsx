@@ -159,6 +159,7 @@ import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
 import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
+import HorariosParametros from "./pages/schedules/HorariosParametros";
 
 const App = () => {
   return (
@@ -961,6 +962,19 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                     <Route
+                    path="/horarios/parametros"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PARAMETROS_MGH
+                            .sigla!,
+                        ]}
+                      >
+                        <HorariosParametros />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   <Route
                     path="/docente/calendario"
@@ -1412,6 +1426,32 @@ const App = () => {
                         ]}
                       >
                         <EstadoMatriculaPorHorario />
+                      </ProtectedRoute>
+                    }
+                  />
+  
+
+     <Route
+                    path="/inscricoes/inscritos-uc"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla!,
+                        ]}
+                      >
+                        <InscritosPorUc />
+                      </ProtectedRoute>
+                    }
+                  />
+                     <Route
+                    path="/inscricoes/estudantes/listagem/geral"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!,
+                        ]}
+                      >
+                        <ListaGeralEstudantes />
                       </ProtectedRoute>
                     }
                   />
