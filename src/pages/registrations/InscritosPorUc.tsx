@@ -87,7 +87,7 @@ export default function InscritosPorUc() {
   const { data: anosAcademicos = [] } = useQueryAnoAcademico();
   const { data: semestres = [] } = useQuerySemestres();
   const { data: periodos = [] } = useQueryPeriod();
-  const { data: cursos = [] } = useCursos();
+
 
   console.log("PERIODOS: ", periodos)
 

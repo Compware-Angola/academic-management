@@ -246,9 +246,15 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title:"Listagem Geral Estudantes",
-          url:"inscricoes/estudantes/listagem/geral",
-          permission:[PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!]
+          title: "Lista inscritos por UC",
+          url:"/inscricoes/inscritos-uc",
+          permission:[PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla]
+
+        },
+        {
+          title: "Listagem Geral Estudantes",
+          url: "/inscricoes/estudantes/listagem/geral",
+          permission: [PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!]
         },
         {
           title: "Estado da matrícula",
@@ -569,7 +575,7 @@ export const academicStructure: MenuStructure = {
     // DOCUMENTOS MINISTÉRIO
     // ----------------------------------------------------
 
-  
+
 
     {
       title: "Marcação de Provas",
@@ -728,7 +734,7 @@ export const operacionalStructure: MenuStructure = {
       ],
       permission: [],
     },
-      {
+    {
       title: "Documentos para o Ministério",
       url: "/ministerio",
       icon: FileText,
