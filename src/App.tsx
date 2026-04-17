@@ -1429,6 +1429,32 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+  
+
+     <Route
+                    path="/inscricoes/inscritos-uc"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla!,
+                        ]}
+                      >
+                        <InscritosPorUc />
+                      </ProtectedRoute>
+                    }
+                  />
+                     <Route
+                    path="/inscricoes/estudantes/listagem/geral"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!,
+                        ]}
+                      >
+                        <ListaGeralEstudantes />
+                      </ProtectedRoute>
+                    }
+                  />
 
                   <Route
                     path="/inscricoes/estado-matricula"

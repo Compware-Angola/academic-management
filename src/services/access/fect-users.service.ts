@@ -1,6 +1,17 @@
 // src/services/users.service.ts
 
 import { axiosNestGa } from "@/lib/axios-nest-ga";
+// Tipagem da resposta do toggle
+export type ToggleUserResponse = {
+  success: boolean;
+  userId: number;
+  nome: string;
+  previousState: string;
+  newState: string;
+  action: string;
+  message: string;
+  active: boolean;
+};
 
 // Tipagem do usuário conforme o retorno da API
 export type User = {
@@ -90,31 +101,25 @@ export async function fetchUsers(params: FetchUsersParams = {}): Promise<UsersRe
     };
   }
 }
-
 /**
- * Busca todos os utilizadores da API de acess_management (sem paginação)
+ * Alterna o estado (ativo ↔ inativo) de um utilizador
+ * @param userId - ID do utilizador (PK_UTILIZADOR)
  */
-export async function fetchUsersNoPagination(params: FetchUsersParams = {}): Promise<UsersListResponse> {
+export async function toggleUserStatus(userId: number): Promise<ToggleUserResponse> {
   try {
-    const { ativo, search = "" } = params;
+    const { data } = await axiosNestGa.patch<ToggleUserResponse>(
+      `/acess_management/user/${userId}/toggle-status`
+    );
 
-    const { data } = await axiosNestGa.get<UsersListResponse>("/acess_management/users-no-pagination", {
-      params: {
-        ativo,
-        ...(search && { search }),
-      },
-    });
-
-    return {
-      data: data.data ?? [],
-      total: data.total ?? 0,
-    };
-  } catch (error) {
-    console.error("Erro ao carregar utilizadores sem paginação:", error);
-    return {
-      data: [],
-      total: 0,
-    };
+    return data;
+  } catch (error: any) {
+    console.error(`Erro ao alterar estado do utilizador ${userId}:`, error);
+    
+    // Retorno amigável em caso de erro
+    throw new Error(
+      error.response?.data?.message || 
+      `Não foi possível alterar o estado do utilizador.`
+    );
   }
 }
 
@@ -124,14 +129,5 @@ export async function fetchUsersNoPagination(params: FetchUsersParams = {}): Pro
  */
 export async function fetchUsersList(params?: FetchUsersParams): Promise<User[]> {
   const response = await fetchUsers(params);
-  return response.data;
-}
-
-/**
- * Versão simplificada para autocomplete/select:
- * - Sem paginação retorna só o array de users
- */
-export async function fetchUsersListNoPagination(params?: FetchUsersParams): Promise<User[]> {
-  const response = await fetchUsersNoPagination(params);
   return response.data;
 }

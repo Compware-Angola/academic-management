@@ -246,6 +246,17 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
+          title: "Lista inscritos por UC",
+          url:"/inscricoes/inscritos-uc",
+          permission:[PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla]
+
+        },
+        {
+          title: "Listagem Geral Estudantes",
+          url: "/inscricoes/estudantes/listagem/geral",
+          permission: [PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!]
+        },
+        {
           title: "Estado da matrícula",
           url: "/inscricoes/estado-matricula",
           permission: [
@@ -255,7 +266,7 @@ export const ingressoStructure: MenuStructure = {
         { title: "Insentar colisão", url: "/inscricoes/colisao" },
       ],
 
-      permission: ["adm", "rootAdmin"],
+      permission: [],
     },
   ],
 };
@@ -564,7 +575,7 @@ export const academicStructure: MenuStructure = {
     // DOCUMENTOS MINISTÉRIO
     // ----------------------------------------------------
 
-  
+
 
     {
       title: "Marcação de Provas",
@@ -723,7 +734,7 @@ export const operacionalStructure: MenuStructure = {
       ],
       permission: [],
     },
-      {
+    {
       title: "Documentos para o Ministério",
       url: "/ministerio",
       icon: FileText,
