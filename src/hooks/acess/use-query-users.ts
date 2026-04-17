@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUsers, FetchUsersParams, ToggleUserResponse, toggleUserStatus, UsersResponse } from "@/services/access/fect-users.service";
+import { toast } from "sonner";
 export function useUsers(params: FetchUsersParams = {}) {
   return useQuery<UsersResponse, Error>({
     queryKey: ["users", params],
@@ -21,10 +22,7 @@ export function useToggleUserStatus() {
     mutationFn: (userId: number) => toggleUserStatus(userId),
 
     onSuccess: (data) => {
-      // Mostra mensagem de sucesso (opcional)
-      console.log(data.message);
-
-      // Invalida/refaz a query da lista de utilizadores para atualizar automaticamente
+     toast.success(`${data.message}`)
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
 
