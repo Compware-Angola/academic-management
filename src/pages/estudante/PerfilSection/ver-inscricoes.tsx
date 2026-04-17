@@ -18,7 +18,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { Eye, Pencil, Trash } from "lucide-react";
+import {
+  Eye,
+  Loader2,
+  LucideArchiveRestore,
+  Pencil,
+  Trash,
+} from "lucide-react";
 import {
   useStudentDetail,
   useStudentDisciplinas,
@@ -39,6 +45,10 @@ import { parseFilter } from "@/util/parse-filter";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { HorarioDetails, ModalHorario } from "./ModalHorario";
 import { StatusDisciplina } from "@/enums/status-disciplina";
+import {
+  useMutationDeleteGradeCurricularAluno,
+  useMutationRestoreGradeCurricularAluno,
+} from "@/hooks/students/use-mutation-student-grade";
 
 type Props = {
   codigoMatricula: number;
@@ -50,6 +60,7 @@ export function InscricoesSection({
 }: Props) {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const [filter, setFilter] = useState({
     anoLetivo: "23",
@@ -77,7 +88,10 @@ export function InscricoesSection({
   const [isModalOpenDisciplina, setIsModalOpenDisciplina] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
   const [isModalOpenHorario, setIsModalOpenHorario] = useState(false);
-
+  const { mutateAsync: deleteGradeCurricularAluno } =
+    useMutationDeleteGradeCurricularAluno();
+  const { mutateAsync: restoreGradeCurricularAluno } =
+    useMutationRestoreGradeCurricularAluno();
   const openDetails = (turmaId: number) => {
     setSelectedTurmaId(turmaId);
     setIsModalOpenDisciplina(true);
@@ -103,6 +117,27 @@ export function InscricoesSection({
 
   const handleNext = () => {
     if (page < totalPages) setPage((prev) => prev + 1);
+  };
+  const handleDeleteGradeCurricularAluno = async (
+    codigoGradeCurricularAluno: number,
+  ) => {
+    setLoadingId(codigoGradeCurricularAluno);
+    try {
+      await deleteGradeCurricularAluno({ codigoGradeCurricularAluno });
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleRestoreGradeCurricularAluno = async (
+    codigoGradeCurricularAluno: number,
+  ) => {
+    setLoadingId(codigoGradeCurricularAluno);
+    try {
+      await restoreGradeCurricularAluno({ codigoGradeCurricularAluno });
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   if (!matricula) {
@@ -178,7 +213,7 @@ export function InscricoesSection({
                   </TableHeader>
                   <TableBody>
                     {disciplinas.map((disc) => (
-                      <TableRow key={disc.codigo_disciplina}>
+                      <TableRow key={disc.codigo}>
                         <TableCell className="font-mono text-sm">
                           {disc.codigo_disciplina}
                         </TableCell>
@@ -243,14 +278,46 @@ export function InscricoesSection({
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
-                              <Button
-                                size="icon"
-                                className="cursor-pointer"
-                                aria-label="Eliminar Inscrição"
-                                title="Eliminar Inscrição"
-                              >
-                                <Trash className="h-4 w-4" />
-                              </Button>
+                              {StatusDisciplina.ELIMINADO ===
+                              disc.estado_codigo ? (
+                                <Button
+                                  onClick={() =>
+                                    handleRestoreGradeCurricularAluno(
+                                      disc.codigo,
+                                    )
+                                  }
+                                  size="icon"
+                                  variant="outline"
+                                  className="text-green-600 border-green-600 hover:bg-green-50"
+                                  disabled={loadingId === disc.codigo}
+                                >
+                                  {loadingId === disc.codigo ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <LucideArchiveRestore className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              ) : (
+                                <Button
+                                  onClick={() =>
+                                    handleDeleteGradeCurricularAluno(
+                                      disc.codigo,
+                                    )
+                                  }
+                                  size="icon"
+                                  disabled={
+                                    disc.estado_codigo ===
+                                      StatusDisciplina.FEZ_COM_SUCESSO ||
+                                    loadingId === disc.codigo
+                                  }
+                                >
+                                  {loadingId === disc.codigo ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           )}
                         </TableCell>
@@ -262,7 +329,7 @@ export function InscricoesSection({
 
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
                 <div className="text-sm text-muted-foreground order-2 sm:order-1">
-                  Mostrando {disciplinas.length} de {total} disciplinas
+                  Mostrando {disciplinas.length} disciplinas
                 </div>
 
                 <div className="flex items-center gap-6 order-1 sm:order-2">
