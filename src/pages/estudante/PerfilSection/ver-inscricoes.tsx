@@ -38,6 +38,7 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { parseFilter } from "@/util/parse-filter";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { HorarioDetails, ModalHorario } from "./ModalHorario";
+import { StatusDisciplina } from "@/enums/status-disciplina";
 
 type Props = {
   codigoMatricula: number;
@@ -221,12 +222,17 @@ export function InscricoesSection({
                                 aria-label="Editar"
                                 title="Editar"
                                 className="cursor-pointer"
+                                disabled={
+                                  disc.estado_codigo !==
+                                  StatusDisciplina.EM_CURSO
+                                }
                                 onClick={() => {
                                   openModalHorario({
+                                    codigo: disc.codigo.toString(),
                                     anoLectivo: filter.anoLetivo,
                                     curso: student.curso_codigo.toString(),
                                     semestre: filter.semestre,
-                                    unidadeCurricular:
+                                    codigoGradeCurricular:
                                       disc.codigo_grade_curricular.toString(),
                                     estado: "3",
                                     periodo: student.periodo_codigo.toString(),

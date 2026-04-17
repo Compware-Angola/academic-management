@@ -26,15 +26,6 @@ export function HorarioSelect({
   unidadeCurricular,
   estado,
 }: Props) {
-  console.log({
-    anoLectivo,
-    curso,
-    periodo,
-    semestre,
-    classes,
-    unidadeCurricular,
-    estado,
-  });
   const { data: horarios, isLoading } = useQueryHorariosExistentes({
     page: 1,
     limit: 100,

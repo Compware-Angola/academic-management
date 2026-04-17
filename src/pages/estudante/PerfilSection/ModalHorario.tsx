@@ -10,14 +10,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useQueryScheduleDetails } from "@/hooks/horario/use-query-schedule-details";
-import { Loader2 } from "lucide-react";
+import { Loader2, Save } from "lucide-react";
+import { useMutationUpdateGradeCurricularHorarioAluno } from "@/hooks/students/use-Mutation-update-grade-curricular-horario-aluno";
 
 export type HorarioDetails = {
+  codigo: string;
   disciplina: string;
   anoLectivo: string;
   curso: string;
   semestre: string;
-  unidadeCurricular: string;
+  codigoGradeCurricular: string;
   estado: string;
   periodo: string;
   classes: string;
@@ -34,7 +36,16 @@ export const ModalHorario = ({
   horarionDetails,
   onClose,
 }: ModalHorarioProps) => {
+  const mutation = useMutationUpdateGradeCurricularHorarioAluno();
   const [horarioId, setHorarioId] = useState<number | null>(null);
+
+  const handleSave = () => {
+    mutation.mutate({
+      horarioID: horarioId!,
+      codigoGradeCurricularAluno: Number(horarionDetails?.codigo!),
+    });
+    onClose();
+  };
 
   // ✅ reset ao fechar
   useEffect(() => {
@@ -94,7 +105,7 @@ export const ModalHorario = ({
             anoLectivo={horarionDetails?.anoLectivo ?? ""}
             curso={horarionDetails?.curso ?? ""}
             semestre={horarionDetails?.semestre ?? ""}
-            unidadeCurricular={horarionDetails?.unidadeCurricular ?? ""}
+            unidadeCurricular={horarionDetails?.codigoGradeCurricular ?? ""}
             estado={horarionDetails?.estado ?? ""}
             periodo={horarionDetails?.periodo ?? ""}
             classes={horarionDetails?.classes ?? ""}
@@ -226,7 +237,10 @@ export const ModalHorario = ({
 
         <DialogFooter>
           <Button onClick={onClose}>Cancelar</Button>
-          <Button onClick={onClose}>Salvar</Button>
+          <Button disabled={!horarioId} onClick={handleSave}>
+            <Save />
+            Salvar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
