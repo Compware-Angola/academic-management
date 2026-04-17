@@ -247,3 +247,21 @@ export async function updateGradeCurricularHorarioAluno(params: UpdateGradeCurri
   const { data } = await axiosNestGa.put(`/students/horario-grade-curricular`, params);
   return data;
 }
+
+export type RestoreGradeCurricularAlunoPayload = {
+    codigoGradeCurricularAluno: number;
+};
+
+export async function restoreGradeCurricularAluno(params: RestoreGradeCurricularAlunoPayload): Promise<{message: string}> {
+  const { data } = await axiosNestGa.put(`/students/restore-grade-curricular/${params.codigoGradeCurricularAluno}`);
+  return data;
+}
+
+export type DeleteGradeCurricularAlunoPayload = {
+    codigoGradeCurricularAluno: number;
+};
+
+export async function deleteGradeCurricularAluno(params: DeleteGradeCurricularAlunoPayload): Promise<{message: string}> {
+  const { data } = await axiosNestGa.delete(`/students/grade-curricular/${params.codigoGradeCurricularAluno}`);
+  return data;
+}
