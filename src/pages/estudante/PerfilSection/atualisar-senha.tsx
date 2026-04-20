@@ -57,7 +57,7 @@ export function AtualizarSenha({
         novaSenha: "",
       });
     }
-  }, [student, form]);
+  }, [student?.codigo_matricula]);
 
   async function onSubmit(values: FormValues) {
     await resetPassword.mutateAsync({
@@ -79,10 +79,10 @@ export function AtualizarSenha({
 
       <CardDescription className="flex flex-col gap-2">
         {isLoading ? (
-          <div className="space-y-2">
-            <div className="h-4 w-40 bg-muted animate-pulse rounded" />
-            <div className="h-4 w-64 bg-muted animate-pulse rounded" />
-          </div>
+          <span className="space-y-2">
+            <span className="h-4 w-40 bg-muted animate-pulse rounded" />
+            <span className="h-4 w-64 bg-muted animate-pulse rounded" />
+          </span>
         ) : (
           <>
             <span>Define uma nova senha para este estudante.</span>

@@ -154,7 +154,7 @@ export function FiltrarPorEquivalencia({
       {/* Paginação */}
       <div className="flex items-center justify-between py-4">
         <div className="text-sm text-muted-foreground">
-          Mostrando página <strong>{page}</strong>
+          Avaliações <strong>{response?.data?.length ?? 0}</strong>
         </div>
         <div className="flex items-center space-x-2">
           <Button
