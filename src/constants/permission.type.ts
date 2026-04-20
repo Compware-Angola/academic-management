@@ -246,9 +246,14 @@ export enum PermissionType {
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
   LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL",
   LIQUIDAR_PAGAMENTO = "LIQUIDAR_FACTURA",
+  INSENCAO_COLISAO_CURSO_ESTUDANTE = "INSENCAO_COLISAO_CURSO_ESTUDANTE"
 }
 
 export const PermissionTypeDetails = {
+  INSENCAO_COLISAO_CURSO_ESTUDANTE: {
+    designacao: "Insencao de Colisão por Curso e Estudante",
+    sigla: "cls_scl"
+  },
   FULL_ACCESS: { designacao: "Todos os acesso", sigla: "full.access" },
   LSOLICITACAO_SUPORTE: {
     designacao: "Listagem de Solicitação de Suporte",
