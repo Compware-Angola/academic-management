@@ -5,10 +5,12 @@ import { CertidoesSection } from "./components/CertidoesSection";
 
 
 interface DocumentsSectionProps {
+  codigoMatricula:number
   value?: string;
 }
 
 export function DocumentsSection({
+  codigoMatricula,
   value = "documentos",
 }: DocumentsSectionProps) {
   return (
@@ -36,7 +38,7 @@ export function DocumentsSection({
             <h1>Carta de Conclusão – conteúdo aqui</h1>
           </TabsContent>
           <TabsContent value="certidoes">
-            <CertidoesSection />
+            <CertidoesSection codigoMatricula={codigoMatricula}/>
           </TabsContent>
         </Card>
       </Tabs>

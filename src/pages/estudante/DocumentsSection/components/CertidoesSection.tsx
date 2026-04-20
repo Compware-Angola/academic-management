@@ -5,8 +5,13 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { CertidaoUMA } from "@/components/views/docs-students/GerarCertidao";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
+type Props = {
+  codigoMatricula: number;
+};
 
-export function CertidoesSection() {
+export function CertidoesSection({ codigoMatricula }: Props)  {
+      const { data: student, isLoading } = useStudentDetail(codigoMatricula);
     const [anoLectivo, setAnoLectivo] = useState<string>("");
     const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
         useQueryAnoAcademico();
@@ -47,14 +52,14 @@ export function CertidoesSection() {
                 <PDFDownloadLink
                     document={
                         <CertidaoUMA
-                            nome="Paulo Jacob Camavo"
-                            filho_de="Francisco Camavo Alfredo"
-                            mae="Jandira Aulária António"
-                            bi="005382568LA046"
-                            num_estudante="42093"
+                            nome={student.nome_completo || 'N/A'}
+                            filho_de={student.pai || 'N/A'}
+                            mae={student.mae || 'N/A'}
+                            bi={student.bi_aluno || 'N/A'}
+                            num_estudante={student.codigo_matricula || 'N/A'}
                             ano_curso="5º"
-                            curso="Engenharia Informática"
-                            grau="Licenciatura"
+                            curso={student.curso || 'N/A'}
+                            grau={student.grau || 'N/A'}
                             turno="Diurno"
                             ano_lectivo={anoLectivo}
                             data_emissao="20 de Abril de 2026"

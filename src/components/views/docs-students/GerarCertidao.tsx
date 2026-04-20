@@ -93,7 +93,7 @@ type CertidaoProps = {
   filho_de: string;
   mae: string;
   bi: string;
-  num_estudante: string;
+  num_estudante: string|number;
   ano_curso: string;
   curso: string;
   grau: string;
