@@ -263,7 +263,12 @@ export const ingressoStructure: MenuStructure = {
             PermissionTypeDetails.LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla,
           ],
         },
-        { title: "Insentar colisão", url: "/inscricoes/colisao" },
+        {
+           title: "Insentar colisão", url: "/inscricoes/colisao" ,
+           permission: [
+            PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla,
+          ],
+        },
       ],
 
       permission: [],

@@ -316,7 +316,7 @@ export function Header() {
 
             {/* ── Menu do utilizador ─────────────────────────────────────── */}
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/placeholder.svg" alt="Utilizador" />

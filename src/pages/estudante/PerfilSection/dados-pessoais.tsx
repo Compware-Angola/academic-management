@@ -107,7 +107,7 @@ export function DadosPessoais({
         morada: student.morada ?? "",
       });
     }
-  }, [student, form, nacionalidades]);
+  }, [student?.codigo_matricula]);
 
   if (isLoading)
     return <div className="p-4 text-center">A carregar dados...</div>;

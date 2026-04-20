@@ -101,6 +101,7 @@ export function PasswordFormField<T extends FieldValues>({
                   type={show ? "text" : "password"}
                   placeholder={placeholder}
                   className="pr-10"
+                  autoComplete="new-password"
                 />
 
                 <button
