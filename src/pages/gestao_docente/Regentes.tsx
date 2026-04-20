@@ -1,3 +1,4 @@
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -59,7 +60,7 @@ export default function Regentes() {
   const [anoLectivo, setAnoLectivo] = useState("");
   const [curso, setCurso] = useState("");
   const [classe, setClasse] = useState("");
-  const [semestre, setSemestre] = useState("");
+  const [semestre, setSemestre] = useState("0");
   const [estado, setEstado] = useState("0");
 
   const { user: userData } = useAuth();
@@ -76,7 +77,7 @@ const [docenteSelecionado, setDocenteSelecionado] = useState("");
     anoLectivo: "",
     curso: "",
     classe: "0",
-    semestre: "",
+    semestre: "0",
     estado: "0",
   });
 
@@ -322,38 +323,41 @@ async function handleSalvarRegente() {
 
             <div className="space-y-2">
               <FormSelect
-                label="Ano Curricular"
-                value={classe}
-                disabled={isLoadingClasses || !curso}
-                onChange={(v) => setClasse(String(v))}
-                options={classes}
-                map={(c: any) => ({
-                  key: c.codigo,
-                  label: c.designacao,
-                  value: String(c.codigo),
-                })}
-                loading={isLoadingClasses}
-              />
+  label="Ano Curricular"
+  value={classe}
+  disabled={isLoadingClasses || !curso}
+  onChange={(v) => setClasse(String(v))}
+  options={[{ codigo: "0", designacao: "Todos" }, ...classes]}
+  map={(c: any) => ({
+    key: c.codigo,
+    label: c.designacao,
+    value: String(c.codigo),
+  })}
+  loading={isLoadingClasses}
+/>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Semestre</label>
-              <Select value={semestre} onValueChange={setSemestre}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o semestre" />
-                </SelectTrigger>
-                <SelectContent>
-                  {semestres?.map((item: any) => (
-                    <SelectItem
-                      key={item.codigo ?? item.CODIGO}
-                      value={String(item.codigo ?? item.CODIGO)}
-                    >
-                      {item.designacao ?? item.DESIGNACAO}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+  <label className="text-sm font-medium">Semestre</label>
+  <Select value={semestre} onValueChange={setSemestre}>
+    <SelectTrigger>
+      <SelectValue placeholder="Todos" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectItem value="0">Todos</SelectItem>
+
+      {semestres?.map((item: any) => (
+        <SelectItem
+          key={item.codigo ?? item.CODIGO}
+          value={String(item.codigo ?? item.CODIGO)}
+        >
+          {item.designacao ?? item.DESIGNACAO}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
+            
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -404,26 +408,19 @@ async function handleSalvarRegente() {
 
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Docente</label>
-        <Select
-          value={docenteSelecionado}
-          onValueChange={setDocenteSelecionado}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione o docente" />
-          </SelectTrigger>
-          <SelectContent>
-            {teachersData?.map((teacher: any) => (
-              <SelectItem
-                key={teacher.codigo ?? teacher.CODIGO}
-                value={String(teacher.codigo ?? teacher.CODIGO)}
-              >
-                {teacher.nome ?? teacher.NOME}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+  <label className="text-sm font-medium">Docente</label>
+  <FormCommandSelect
+    width="full"
+    value={docenteSelecionado}
+    options={teachersData}
+    map={(t: any) => ({
+      key: t.codigo ?? t.CODIGO,
+      value: String(t.codigo ?? t.CODIGO),
+      label: t.nome ?? t.NOME,
+    })}
+    onChange={(codigo) => setDocenteSelecionado(String(codigo))}
+  />
+</div>
     </div>
 
     <DialogFooter>
