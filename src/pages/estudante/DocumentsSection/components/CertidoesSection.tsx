@@ -4,7 +4,7 @@ import { Printer, CalendarDays, } from "lucide-react";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { CertidaoUMA } from "@/components/views/docs-students/GerarCertidao";
+import GerarCertidao from "@/components/views/docs-students/GerarCertidao";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 type Props = {
   codigoMatricula: number;
@@ -49,34 +49,13 @@ export function CertidoesSection({ codigoMatricula }: Props)  {
                     />
                 </div>
 
-                <PDFDownloadLink
-                    document={
-                        <CertidaoUMA
-                            nome={student.nome_completo || 'N/A'}
-                            filho_de={student.pai || 'N/A'}
-                            mae={student.mae || 'N/A'}
-                            bi={student.bi_aluno || 'N/A'}
-                            num_estudante={student.codigo_matricula || 'N/A'}
-                            ano_curso="5º"
-                            curso={student.curso || 'N/A'}
-                            grau={student.grau || 'N/A'}
-                            turno="Diurno"
-                            ano_lectivo={anoLectivo}
-                            data_emissao="20 de Abril de 2026"
-                            cod_validacao="23456FGGEF"
-                            directora="Margarida da Silva Rodrigues"
-                            cargo_directora="Directora dos Serviços Académicos"
-                        />
-                    }
-                    fileName={`certidao-${anoLectivo}.pdf`}
-                >
-                    {({ loading }) => (
-                        <Button disabled={!anoLectivo || loading}>
-                            <Printer className="mr-2 h-4 w-4" />
-                            {loading ? "Gerando..." : "Gerar Certidão"}
-                        </Button>
-                    )}
-                </PDFDownloadLink>
+            
+                <GerarCertidao
+  dados={student}
+  logoSrc="/logo_uma.png"
+  bgSrc="/logo_bg.png"
+  borduraSrc="/bordura_africana.png"
+/>
             </div>
 
             {/* Info de Ajuda */}
