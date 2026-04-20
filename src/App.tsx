@@ -1472,7 +1472,13 @@ const App = () => {
                   <Route
                     path="/inscricoes/colisao"
                     element={
-                          <ListagemColisoesIsentas />
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla!,
+                        ]}
+                      >
+                        < ListagemColisoesIsentas />
+                      </ProtectedRoute>
                     }
                   />
 
