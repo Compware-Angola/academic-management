@@ -316,7 +316,7 @@ export function Resumo({
         {/* Novo Card - Saldo do Estudante */}
         <Card
           className={
-            student.saldo_atual >= 0 ? "border-green-500" : "border-amber-500"
+            student?.saldo_atual >= 0 ? "border-green-500" : "border-amber-500"
           }
         >
           <CardHeader className="pb-2">
@@ -327,20 +327,20 @@ export function Resumo({
           <CardContent>
             <p
               className={`text-3xl font-bold ${
-                student.saldo_atual > 0
+                student?.saldo_atual > 0
                   ? "text-green-600"
-                  : student.saldo_atual < 0
+                  : student?.saldo_atual < 0
                     ? "text-destructive"
                     : "text-muted-foreground"
               }`}
             >
-              {student.saldo_atual >= 0 ? "+" : ""}
-              {formatCurrency(student.saldo_atual || 0)}
+              {student?.saldo_atual >= 0 ? "+" : ""}
+              {formatCurrency(student?.saldo_atual || 0)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {student.saldo_atual > 0
+              {student?.saldo_atual > 0
                 ? "Crédito disponível"
-                : student.saldo_atual < 0
+                : student?.saldo_atual < 0
                   ? "Saldo negativo (ver detalhes)"
                   : "Sem saldo"}
             </p>
