@@ -128,7 +128,6 @@ import Regentes from "./pages/gestao_docente/Regentes";
 
 import ListaGeralEstudantes from "./pages/registrations/GeneralListStudents";
 
-
 import AdmitirCandidaturaUniversidadePublica from "./pages/access_exam/AdmitirCandidaturaUniversidadePublica";
 import InscritosPorUc from "./pages/registrations/InscritosPorUc";
 import ListaProvaPorCandidatos from "./pages/access_exam/ListaProvaPorCandidatos";
@@ -136,7 +135,6 @@ import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividu
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
-
 
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
@@ -160,6 +158,7 @@ import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantes
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
+import PDF from "./pages/estudante/DocumentsSection/components/certificado-notas";
 
 const App = () => {
   return (
@@ -662,25 +661,18 @@ const App = () => {
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
-                  <Route
-                    path="/estudante-legado/:matricula"
-                    element={<PerfilEstudanteLegado />}
-                  />
 
                   {/* EXAME ACESSO */}
+                  <Route path="/exame/admitidos" element={<Admitidos />} />
                   <Route
-                    path="/exame/admitidos"
-                    element={<Admitidos />}
-                  />
-                   <Route
                     path="/exame/estatisticas-diaria"
                     element={<EstatisticasDiaria />}
                   />
-                   <Route
+                  <Route
                     path="/exame/estatisticas"
                     element={<EstatisticasExame />}
                   />
-                 
+
                   <Route
                     path="/exame/resultados-finais"
                     element={<ResultadoFinais />}
@@ -715,12 +707,13 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                       <Route
+                  <Route
                     path="/exame/consultar-prova"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO.sigla!,
+                          PermissionTypeDetails.CONSULTAR_PROVA_CANDIDATO
+                            .sigla!,
                         ]}
                       >
                         <ConsultarProvaIndividual />
@@ -728,8 +721,7 @@ const App = () => {
                     }
                   />
 
-                
-                   <Route
+                  <Route
                     path="/exame/provas-candidato"
                     element={
                       <ProtectedRoute
@@ -741,8 +733,8 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  
-                     <Route
+
+                  <Route
                     path="/exame/resetar"
                     element={
                       <ProtectedRoute
@@ -754,7 +746,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                    <Route
+                  <Route
                     path="/exame/lancar-nota-arquitectura"
                     element={
                       <ProtectedRoute
@@ -962,13 +954,12 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                     <Route
+                  <Route
                     path="/horarios/parametros"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PARAMETROS_MGH
-                            .sigla!,
+                          PermissionTypeDetails.PARAMETROS_MGH.sigla!,
                         ]}
                       >
                         <HorariosParametros />
@@ -1422,16 +1413,17 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LISTAR_ESTADO_MATRICULA_ESTUDANTE_POR_HORARIO.sigla!,
+                          PermissionTypeDetails
+                            .LISTAR_ESTADO_MATRICULA_ESTUDANTE_POR_HORARIO
+                            .sigla!,
                         ]}
                       >
                         <EstadoMatriculaPorHorario />
                       </ProtectedRoute>
                     }
                   />
-  
 
-     <Route
+                  <Route
                     path="/inscricoes/inscritos-uc"
                     element={
                       <ProtectedRoute
@@ -1443,12 +1435,13 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                     <Route
+                  <Route
                     path="/inscricoes/estudantes/listagem/geral"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!,
+                          PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES
+                            .sigla!,
                         ]}
                       >
                         <ListaGeralEstudantes />
@@ -1461,7 +1454,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla!,
+                          PermissionTypeDetails
+                            .LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA.sigla!,
                         ]}
                       >
                         <ListarEstudantesPorEstadoMatricula />
@@ -1474,19 +1468,18 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla!,
+                          PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE
+                            .sigla!,
                         ]}
                       >
-                        < ListagemColisoesIsentas />
+                        <ListagemColisoesIsentas />
                       </ProtectedRoute>
                     }
                   />
 
                   <Route
                     path="/gestao-docentes/docentes"
-
                     element={
-
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DE_DOCENTES.sigla!,
@@ -1494,8 +1487,7 @@ const App = () => {
                       >
                         <ListagemDocentes />
                       </ProtectedRoute>
-                  }
-
+                    }
                   />
                   <Route
                     path="/financas/mensalidades-pagas"
@@ -1526,24 +1518,21 @@ const App = () => {
 
                   <Route
                     path="/inscricoes/lista-geral"
-
-                    element={ <ListaGeralEstudantes />}
-
+                    element={<ListaGeralEstudantes />}
                   />
 
                   <Route
                     path="/inscricoes/inscritos-uc"
-
-                    element={ <InscritosPorUc />}
-                      />
-
+                    element={<InscritosPorUc />}
+                  />
 
                   <Route
                     path="/ministerio/mapa-finalistas"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS.sigla!,
+                          PermissionTypeDetails.MAPA_ANUAL_ESTUDANTES_FINALISTAS
+                            .sigla!,
                         ]}
                       >
                         <MapaAnualEstudantesFinalistas />
@@ -1553,28 +1542,26 @@ const App = () => {
 
                   <Route
                     path="/ministerio/registro-exame"
-                    element={
-                      
-                        <RegistoPrimarioExamesAcesso />
-                      
-                    }
+                    element={<RegistoPrimarioExamesAcesso />}
                   />
 
                   <Route
                     path="/ministerio/registro-matricula"
-
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla!,
+                          PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS
+                            .sigla!,
                         ]}
                       >
                         <RegistoPrimarioMatriculados />
                       </ProtectedRoute>
                     }
-
                   />
 
+                  {process.env.NODE_ENV === "development" && (
+                    <Route path="/pdf" element={<PDF />} />
+                  )}
                 </Route>
               </Routes>
             </TooltipProvider>

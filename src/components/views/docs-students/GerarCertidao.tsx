@@ -19,9 +19,9 @@ import { StudentDetail } from "@/services/students/students.service";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const COR = {
-  azul:       "#0D1B48",
+  azul: "#0D1B48",
   cinzaClaro: "#888888",
-  preto:      "#111111",
+  preto: "#111111",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -211,9 +211,14 @@ interface CertidaoDocumentProps {
   borduraSrc?: string;
 }
 
-export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: CertidaoDocumentProps) {
-  const logoDefault    = "/logo_uma.png";
-  const bgDefault      = "/logo_bg.png";
+export function CertidaoDocument({
+  dados,
+  logoSrc,
+  bgSrc,
+  borduraSrc,
+}: CertidaoDocumentProps) {
+  const logoDefault = "/logo_uma.png";
+  const bgDefault = "/logo_bg.png";
   const borduraDefault = "/bordura_africana.png";
 
   return (
@@ -223,21 +228,23 @@ export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: Certidao
       subject="Certidão de Frequência"
     >
       <Page size="A4" style={s.page}>
-
         {/* ── Marca d'água centrada e reduzida ── */}
         <Image style={s.bgWatermark} src={bgSrc || bgDefault} />
 
         {/* ── CONTEÚDO PRINCIPAL ── */}
         <View style={s.content}>
-
           {/* 1. Logo — alinhado à direita */}
           <View style={s.logoWrap}>
             <Image style={s.logo} src={logoSrc || logoDefault} />
           </View>
 
           {/* 2. Nome da instituição — centrado, logo abaixo do logo, sem barra */}
-          <Text style={s.nomeInstituicao}>Universidade Metodista de Angola</Text>
-          <Text style={s.decretoText}>(Aprovada pelo Decreto nº 30/07 de 07/05)</Text>
+          <Text style={s.nomeInstituicao}>
+            Universidade Metodista de Angola
+          </Text>
+          <Text style={s.decretoText}>
+            (Aprovada pelo Decreto nº 30/07 de 07/05)
+          </Text>
 
           {/* 3. Título CERTIDÃO */}
           <Text style={s.titulo}>Certidão</Text>
@@ -245,7 +252,9 @@ export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: Certidao
           {/* Corpo */}
           <View style={s.corpoWrap}>
             <Text style={s.corpoTexto}>
-              {"Para os devidos efeitos, a Universidade Metodista de Angola certifica que o Senhor "}
+              {
+                "Para os devidos efeitos, a Universidade Metodista de Angola certifica que o Senhor "
+              }
               <Text style={s.bold}>{dados.nome_completo}</Text>
               {", filho de "}
               {dados.pai}
@@ -271,15 +280,14 @@ export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: Certidao
 
           {/* Código de validação */}
           <View style={s.validacaoWrap}>
-            <Text style={s.validacaoTexto}>
-              Código de Validação: {"00000"}
-            </Text>
+            <Text style={s.validacaoTexto}>Código de Validação: {"00000"}</Text>
           </View>
 
           {/* Nota de autenticação */}
           <View style={s.notaWrap}>
             <Text style={s.notaTexto}>
-              A presente certidão vai assinada e autenticada com o carimbo a óleo, em uso nesta
+              A presente certidão vai assinada e autenticada com o carimbo a
+              óleo, em uso nesta
               {"\n"}Instituição.
             </Text>
           </View>
@@ -297,23 +305,23 @@ export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: Certidao
             <View style={s.linhaAssinatura} />
             <Text style={s.nomeDiretora}>{"Isaac Bunga"}</Text>
           </View>
-
         </View>
 
         {/* ── Rodapé — texto institucional ── */}
         <View style={s.rodapeWrap}>
           <View style={s.rodapeSeparador} />
           <Text style={s.rodapeLinha1}>
-            UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) - Rua Nossa Senhora da Muxima, nº 10 -8º Andar - Luanda
+            UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) - Rua
+            Nossa Senhora da Muxima, nº 10 -8º Andar - Luanda
           </Text>
           <Text style={s.rodapeLinha2}>
-            www.uma.co.ao | E-mail: geral@uma.co.ao | Tel: (244) 222 338 984 /(244) 222 332 905 / Fax: (244) 222 339 572
+            www.uma.co.ao | E-mail: geral@uma.co.ao | Tel: (244) 222 338 984
+            /(244) 222 332 905 / Fax: (244) 222 339 572
           </Text>
         </View>
 
         {/* ── Bordura decorativa africana — APENAS no rodapé ── */}
         <Image style={s.borduraRodape} src={borduraSrc || borduraDefault} />
-
       </Page>
     </Document>
   );
