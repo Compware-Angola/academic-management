@@ -27,15 +27,24 @@ export function CertidoesSection({ codigoMatricula }: Props) {
 
     const dadosProntos = !isLoadingClassInfo && !!studentClassInfo;
 
-    const handleExportar = (onReady: (codigo: string) => void) => {
-        gerarCodigo(undefined, {
-            onSuccess: (data) => {
-                setCodigoValidacao(data.codigo);
-                onReady(data.codigo);
-            },
-        });
-    };
-
+ const handleExportar = (onReady: (codigo: string) => void) => {
+  gerarCodigo(
+    {
+      codigoMatricula: codigoMatricula, 
+      tipoDocumento: 6,     
+     
+      documento: "Certidão",
+      anoLetivo: anoLectivo,
+      status: "Ativo",
+    },
+    {
+      onSuccess: (data) => {
+        setCodigoValidacao(data.codigo);
+        onReady(data.codigo);
+      },
+    }
+  );
+};
     return (
         <div className="space-y-8">
             {/* Cabeçalho Interno */}

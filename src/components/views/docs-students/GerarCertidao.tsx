@@ -115,7 +115,7 @@ const s = StyleSheet.create({
     alignItems: "center" as const,
   },
   dataTexto: {
-    fontSize: 11,
+    fontSize: 9,
     textAlign: "center" as const,
     color: COR.preto,
   },
