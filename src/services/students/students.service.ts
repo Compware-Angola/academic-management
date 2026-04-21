@@ -62,6 +62,7 @@ export type StudentDetail = {
   sexo: string;
   data_nascimento: string; 
   ocupacao_codigo: number;
+  classe:string;
   profissao_codigo: number;
   foto: string;
   saldo_atual: number;

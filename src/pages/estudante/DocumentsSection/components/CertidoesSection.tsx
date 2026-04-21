@@ -1,20 +1,28 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Printer, CalendarDays, } from "lucide-react";
+import { CalendarDays, Loader2 } from "lucide-react";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import GerarCertidao from "@/components/views/docs-students/GerarCertidao";
-import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { useStudentClassInfo } from "@/hooks/students/use-query-students-class-info";
+
+
 type Props = {
-  codigoMatricula: number;
+    codigoMatricula: number;
 };
 
-export function CertidoesSection({ codigoMatricula }: Props)  {
-      const { data: student, isLoading } = useStudentDetail(codigoMatricula);
+export function CertidoesSection({ codigoMatricula }: Props) {
     const [anoLectivo, setAnoLectivo] = useState<string>("");
+
     const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
         useQueryAnoAcademico();
+
+    const { data: studentClassInfo, isLoading: isLoadingClassInfo } = useStudentClassInfo({
+        numeroDeMatricula: codigoMatricula,
+        anoLectivo: anoLectivo ? Number(anoLectivo) : undefined,
+    });
+
+    const dadosProntos = !isLoadingClassInfo && !!studentClassInfo;
+
     return (
         <div className="space-y-8">
             {/* Cabeçalho Interno */}
@@ -35,7 +43,6 @@ export function CertidoesSection({ codigoMatricula }: Props)  {
                         Ano Lectivo
                     </label>
                     <FormSelect
-
                         disabled={isLoadingAcademicYear}
                         loading={isLoadingAcademicYear}
                         value={anoLectivo ?? ""}
@@ -49,13 +56,30 @@ export function CertidoesSection({ codigoMatricula }: Props)  {
                     />
                 </div>
 
-            
-                <GerarCertidao
-  dados={student}
-  logoSrc="/logo_uma.png"
-  bgSrc="/logo_bg.png"
-  borduraSrc="/bordura_africana.png"
-/>
+                {/* Botão — só aparece quando ano lectivo selecionado */}
+                {anoLectivo && (
+                    isLoadingClassInfo ? (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground px-4 py-2 rounded-lg border bg-background">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            A carregar dados...
+                        </div>
+                    ) : dadosProntos ? (
+                        <GerarCertidao
+                            dados={studentClassInfo}
+                             cargoDiretor="Directora dos Serviços Académicos"
+                             nomeDiretor="Margarida da Silva Rodrigues"  
+                             codigo_validacao={"1111"}   
+                            showDownload={true}
+                            logoSrc="/logo_uma.png"
+                            bgSrc="/logo_bg.png"
+                            borduraSrc="/bordura_africana.png"
+                        />
+                    ) : (
+                        <div className="flex items-center gap-2 text-sm text-destructive px-4 py-2 rounded-lg border border-destructive/30 bg-destructive/5">
+                            Não foi possível carregar os dados do estudante.
+                        </div>
+                    )
+                )}
             </div>
 
             {/* Info de Ajuda */}

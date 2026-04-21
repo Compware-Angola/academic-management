@@ -1,5 +1,4 @@
-// src/components/pdf/GerarCertificado.tsx
-import React from "react";
+import React, { useState } from "react";
 import {
   Page,
   Text,
@@ -7,26 +6,17 @@ import {
   Document,
   StyleSheet,
   Image,
-  PDFDownloadLink,
   pdf,
 } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
-import { Download, Printer } from "lucide-react";
-import { StudentDetail } from "@/services/students/students.service";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// CORES INSTITUCIONAIS UMA
-// ─────────────────────────────────────────────────────────────────────────────
+import { Download, Printer, Loader2 } from "lucide-react";
+import { StudentClassInfo } from "@/services/students/students-class-info.service";
 
 const COR = {
-  azul:       "#0D1B48",
+  azul: "#0D1B48",
   cinzaClaro: "#888888",
-  preto:      "#111111",
+  preto: "#111111",
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ESTILOS
-// ─────────────────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
   page: {
@@ -35,8 +25,6 @@ const s = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     position: "relative",
   },
-
-  // ── Marca d'água centrada e reduzida ──
   bgWatermark: {
     position: "absolute",
     top: "25%",
@@ -45,8 +33,6 @@ const s = StyleSheet.create({
     height: "45%",
     opacity: 0.1,
   },
-
-  // ── Bordura decorativa africana — APENAS no rodapé ──
   borduraRodape: {
     position: "absolute",
     bottom: 0,
@@ -54,16 +40,12 @@ const s = StyleSheet.create({
     right: 0,
     height: 28,
   },
-
-  // ── Conteúdo principal ──
   content: {
     marginTop: 30,
     marginBottom: 50,
     marginHorizontal: 70,
     flexGrow: 1,
   },
-
-  // ── 1. Logo sozinho alinhado à direita ──
   logoWrap: {
     alignItems: "flex-end" as const,
     marginBottom: 8,
@@ -72,8 +54,6 @@ const s = StyleSheet.create({
     width: 150,
     height: 90,
   },
-
-  // ── 2. Nome da instituição — centrado, logo abaixo do logo ──
   nomeInstituicao: {
     fontFamily: "Helvetica-Bold",
     fontSize: 16,
@@ -89,8 +69,6 @@ const s = StyleSheet.create({
     textAlign: "center" as const,
     marginBottom: 18,
   },
-
-  // ── 3. Título CERTIDÃO ──
   titulo: {
     fontFamily: "Helvetica-Bold",
     fontSize: 26,
@@ -100,8 +78,6 @@ const s = StyleSheet.create({
     letterSpacing: 4,
     marginBottom: 20,
   },
-
-  // ── Corpo do texto ──
   corpoWrap: {
     marginTop: 8,
     marginBottom: 10,
@@ -115,10 +91,8 @@ const s = StyleSheet.create({
   bold: {
     fontFamily: "Helvetica-Bold",
   },
-
-  // ── Código de validação ──
   validacaoWrap: {
-    marginTop: 40,
+    marginTop: 80,
     alignItems: "center" as const,
   },
   validacaoTexto: {
@@ -126,10 +100,8 @@ const s = StyleSheet.create({
     color: COR.preto,
     textAlign: "center" as const,
   },
-
-  // ── Nota de autenticação ──
   notaWrap: {
-    marginTop: 18,
+    marginTop: 20,
     alignItems: "center" as const,
   },
   notaTexto: {
@@ -138,8 +110,6 @@ const s = StyleSheet.create({
     color: COR.preto,
     lineHeight: 1.6,
   },
-
-  // ── Data ──
   dataWrap: {
     marginTop: 16,
     alignItems: "center" as const,
@@ -149,10 +119,8 @@ const s = StyleSheet.create({
     textAlign: "center" as const,
     color: COR.preto,
   },
-
-  // ── Assinatura ──
   assinaturaWrap: {
-    marginTop: 36,
+    marginTop: 75,
     alignItems: "center" as const,
   },
   cargoDiretora: {
@@ -173,8 +141,6 @@ const s = StyleSheet.create({
     textAlign: "center" as const,
     color: COR.preto,
   },
-
-  // ── Rodapé — texto institucional (acima da bordura decorativa) ──
   rodapeWrap: {
     position: "absolute",
     bottom: 34,
@@ -200,83 +166,72 @@ const s = StyleSheet.create({
   },
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPONENTE PDF
-// ─────────────────────────────────────────────────────────────────────────────
-
 interface CertidaoDocumentProps {
-  dados: StudentDetail;
+  dados: StudentClassInfo;
+  cargoDiretor:string;
+  nomeDiretor:string;
+  codigo_validacao:string;
   logoSrc?: string;
   bgSrc?: string;
   borduraSrc?: string;
 }
 
-export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: CertidaoDocumentProps) {
-  const logoDefault    = "/logo_uma.png";
-  const bgDefault      = "/logo_bg.png";
+export function CertidaoDocument({ dados,cargoDiretor, nomeDiretor,codigo_validacao,logoSrc, bgSrc, borduraSrc }: CertidaoDocumentProps) {
+  const logoDefault = "/logo_uma.png";
+  const bgDefault = "/logo_bg.png";
   const borduraDefault = "/bordura_africana.png";
 
   return (
     <Document
-      title={`Certidão de Frequência - ${dados.nome_completo}`}
+      title={`Certidão de Frequência - ${dados?.nome_completo}`}
       author="Universidade Metodista de Angola"
       subject="Certidão de Frequência"
     >
       <Page size="A4" style={s.page}>
-
-        {/* ── Marca d'água centrada e reduzida ── */}
         <Image style={s.bgWatermark} src={bgSrc || bgDefault} />
 
-        {/* ── CONTEÚDO PRINCIPAL ── */}
         <View style={s.content}>
-
-          {/* 1. Logo — alinhado à direita */}
           <View style={s.logoWrap}>
             <Image style={s.logo} src={logoSrc || logoDefault} />
           </View>
 
-          {/* 2. Nome da instituição — centrado, logo abaixo do logo, sem barra */}
           <Text style={s.nomeInstituicao}>Universidade Metodista de Angola</Text>
           <Text style={s.decretoText}>(Aprovada pelo Decreto nº 30/07 de 07/05)</Text>
 
-          {/* 3. Título CERTIDÃO */}
           <Text style={s.titulo}>Certidão</Text>
 
-          {/* Corpo */}
           <View style={s.corpoWrap}>
             <Text style={s.corpoTexto}>
               {"Para os devidos efeitos, a Universidade Metodista de Angola certifica que o Senhor "}
-              <Text style={s.bold}>{dados.nome_completo}</Text>
+              <Text style={s.bold}>{dados?.nome_completo}</Text>
               {", filho de "}
-              {dados.pai}
+              {dados?.pai}
               {" e de "}
-              {dados.mae}
+              {dados?.mae}
               {", titular do Bilhete de Identidade nº "}
-              <Text style={s.bold}>{dados.bi}</Text>
+              <Text style={s.bold}>{dados?.bi}</Text>
               {", matriculado nesta Instituição sob o número de estudante "}
-              <Text style={s.bold}>{dados.codigo_matricula}</Text>
-              {", frequentou o "}
-              {5}
-              {" ano de "}
-              <Text style={s.bold}>{dados.grau}</Text>
+              <Text style={s.bold}>{dados?.codigo_matricula}</Text>
+              {`, ${dados?.status_lectivo2?.toLowerCase() === "activo" ? "frequenta" : "frequentou"} o `}
+              {dados?.classe}
+              {"  de "}
+              <Text style={s.bold}>{dados?.grau}</Text>
               {" em "}
-              <Text style={s.bold}>{dados.curso}</Text>
+              <Text style={s.bold}>{dados?.curso}</Text>
               {", turno "}
-              <Text style={s.bold}>{dados.periodo}</Text>
+              <Text style={s.bold}>{dados?.periodo}</Text>
               {", no ano lectivo "}
-              {"2023/2024"}
+              {dados?.ano_lectivo}
               {"."}
             </Text>
           </View>
 
-          {/* Código de validação */}
           <View style={s.validacaoWrap}>
             <Text style={s.validacaoTexto}>
-              Código de Validação: {"00000"}
+              Código de Validação: {codigo_validacao}
             </Text>
           </View>
 
-          {/* Nota de autenticação */}
           <View style={s.notaWrap}>
             <Text style={s.notaTexto}>
               A presente certidão vai assinada e autenticada com o carimbo a óleo, em uso nesta
@@ -284,23 +239,24 @@ export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: Certidao
             </Text>
           </View>
 
-          {/* Data */}
           <View style={s.dataWrap}>
             <Text style={s.dataTexto}>
-              Universidade Metodista de Angola em Luanda, aos {"..."}
+              Universidade Metodista de Angola em Luanda, aos{" "}
+              {new Date().toLocaleDateString("pt-AO", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
             </Text>
           </View>
 
-          {/* Assinatura */}
           <View style={s.assinaturaWrap}>
-            <Text style={s.cargoDiretora}>{"TESTE"}</Text>
+            <Text style={s.cargoDiretora}>{cargoDiretor}</Text>
             <View style={s.linhaAssinatura} />
-            <Text style={s.nomeDiretora}>{"Isaac Bunga"}</Text>
+            <Text style={s.nomeDiretora}>{nomeDiretor}</Text>
           </View>
-
         </View>
 
-        {/* ── Rodapé — texto institucional ── */}
         <View style={s.rodapeWrap}>
           <View style={s.rodapeSeparador} />
           <Text style={s.rodapeLinha1}>
@@ -311,20 +267,19 @@ export function CertidaoDocument({ dados, logoSrc, bgSrc, borduraSrc }: Certidao
           </Text>
         </View>
 
-        {/* ── Bordura decorativa africana — APENAS no rodapé ── */}
         <Image style={s.borduraRodape} src={borduraSrc || borduraDefault} />
-
       </Page>
     </Document>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COMPONENTE DE ACÇÕES (Download + Imprimir)
-// ─────────────────────────────────────────────────────────────────────────────
 
 interface GerarCertidaoProps {
-  dados: StudentDetail;
+  dados: StudentClassInfo;
+  cargoDiretor:string;
+  nomeDiretor:string;
+  codigo_validacao:string;
   logoSrc?: string;
   bgSrc?: string;
   borduraSrc?: string;
@@ -334,25 +289,53 @@ interface GerarCertidaoProps {
 
 export function GerarCertidao({
   dados,
+  cargoDiretor,
+  nomeDiretor,
+  codigo_validacao,
   logoSrc,
   bgSrc,
   borduraSrc,
   showDownload = true,
   showPrint = false,
 }: GerarCertidaoProps) {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+
   const documento = (
     <CertidaoDocument
       dados={dados}
+      cargoDiretor={cargoDiretor}
+      nomeDiretor={nomeDiretor}
+      codigo_validacao={codigo_validacao}
       logoSrc={logoSrc}
       bgSrc={bgSrc}
       borduraSrc={borduraSrc}
     />
   );
 
-  const nomeArquivo = `Certidao_Frequencia_${dados.nome_completo.replace(/\s+/g, "_")}.pdf`;
+  const nomeArquivo = `Certidao_Frequencia_${dados?.nome_completo.replace(/\s+/g, "_")}.pdf`;
+
+  // ── Download manual com estado de loading ──
+  const handleDownload = async () => {
+    try {
+      setIsDownloading(true);
+      const blob = await pdf(documento).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivo;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Erro ao gerar PDF:", err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const handlePrint = async () => {
     try {
+      setIsPrinting(true);
       const blob = await pdf(documento).toBlob();
       const url = URL.createObjectURL(blob);
       const win = window.open(url);
@@ -362,26 +345,52 @@ export function GerarCertidao({
       }
     } catch (err) {
       console.error("Erro ao preparar impressão:", err);
+    } finally {
+      setIsPrinting(false);
     }
   };
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {showDownload && (
-        <PDFDownloadLink document={documento} fileName={nomeArquivo}>
-          {({ loading }) => (
-            <Button disabled={loading} variant="outline" className="gap-2">
+        <Button
+          disabled={isDownloading}
+          variant="outline"
+          className="gap-2"
+          onClick={handleDownload}
+        >
+          {isDownloading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              A gerar PDF...
+            </>
+          ) : (
+            <>
               <Download className="h-4 w-4" />
-              {loading ? "A gerar..." : "Exportar Certidão PDF"}
-            </Button>
+              Exportar Certidão PDF
+            </>
           )}
-        </PDFDownloadLink>
+        </Button>
       )}
 
       {showPrint && (
-        <Button variant="outline" onClick={handlePrint} className="gap-2">
-          <Printer className="h-4 w-4" />
-          Imprimir
+        <Button
+          variant="outline"
+          onClick={handlePrint}
+          disabled={isPrinting}
+          className="gap-2"
+        >
+          {isPrinting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              A preparar...
+            </>
+          ) : (
+            <>
+              <Printer className="h-4 w-4" />
+              Imprimir
+            </>
+          )}
         </Button>
       )}
     </div>
@@ -389,14 +398,3 @@ export function GerarCertidao({
 }
 
 export default GerarCertidao;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// EXEMPLO DE USO
-// ─────────────────────────────────────────────────────────────────────────────
-//
-// <GerarCertidao
-//   dados={studentDetail}
-//   logoSrc="/logo_uma.png"
-//   bgSrc="/logo_bg.png"
-//   borduraSrc="/bordura_africana.png"
-// />
