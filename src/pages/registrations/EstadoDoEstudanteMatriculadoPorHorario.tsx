@@ -366,7 +366,7 @@ export default function EstadoMatriculaPorHorario() {
                   <SelectValue placeholder="Selecionar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Todos</SelectItem>
+                  <SelectItem value="0">Selecionar um ano</SelectItem>
                   {anosCurriculares.map((ac: any) => (
                     <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
                       {ac.designacao}
@@ -375,7 +375,7 @@ export default function EstadoMatriculaPorHorario() {
                 </SelectContent>
               </Select>
             </div>
-
+            
             <div className="space-y-2">
               <label className="text-sm font-medium">Semestre</label>
               <Select
