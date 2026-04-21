@@ -53,13 +53,6 @@ export function DisciplinasSection({
     useQueryAnoAcademico();
 
   const {
-    data: student,
-    isLoading,
-    isFetching,
-    error,
-  } = useStudentDetail(matricula);
-
-  const {
     data: response,
     isLoading: isDisciplinasLoading,
     isError,
@@ -102,7 +95,7 @@ export function DisciplinasSection({
   };
 
   return (
-    <TabsContent value="disciplinas" className="space-y-4">
+    <TabsContent value={value} className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Histórico de Disciplinas</CardTitle>
