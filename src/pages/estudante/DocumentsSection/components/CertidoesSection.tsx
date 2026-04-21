@@ -4,6 +4,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import GerarCertidao from "@/components/views/docs-students/GerarCertidao";
 import { useStudentClassInfo } from "@/hooks/students/use-query-students-class-info";
+import { useGenerateDocumentCode } from "@/hooks/documents/use-generate-code";
 
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 
 export function CertidoesSection({ codigoMatricula }: Props) {
     const [anoLectivo, setAnoLectivo] = useState<string>("");
+    const [codigoValidacao, setCodigoValidacao] = useState<string | null>(null);
 
     const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
         useQueryAnoAcademico();
@@ -21,7 +23,18 @@ export function CertidoesSection({ codigoMatricula }: Props) {
         anoLectivo: anoLectivo ? Number(anoLectivo) : undefined,
     });
 
+    const { mutate: gerarCodigo, isPending: isGeneratingCode } = useGenerateDocumentCode();
+
     const dadosProntos = !isLoadingClassInfo && !!studentClassInfo;
+
+    const handleExportar = (onReady: (codigo: string) => void) => {
+        gerarCodigo(undefined, {
+            onSuccess: (data) => {
+                setCodigoValidacao(data.codigo);
+                onReady(data.codigo);
+            },
+        });
+    };
 
     return (
         <div className="space-y-8">
@@ -46,7 +59,10 @@ export function CertidoesSection({ codigoMatricula }: Props) {
                         disabled={isLoadingAcademicYear}
                         loading={isLoadingAcademicYear}
                         value={anoLectivo ?? ""}
-                        onChange={(v) => setAnoLectivo(v)}
+                        onChange={(v) => {
+                            setAnoLectivo(v);
+                            setCodigoValidacao(null); // reset código ao mudar ano
+                        }}
                         options={anosAcademicos}
                         map={(a) => ({
                             key: a.codigo,
@@ -56,7 +72,6 @@ export function CertidoesSection({ codigoMatricula }: Props) {
                     />
                 </div>
 
-                {/* Botão — só aparece quando ano lectivo selecionado */}
                 {anoLectivo && (
                     isLoadingClassInfo ? (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground px-4 py-2 rounded-lg border bg-background">
@@ -66,13 +81,15 @@ export function CertidoesSection({ codigoMatricula }: Props) {
                     ) : dadosProntos ? (
                         <GerarCertidao
                             dados={studentClassInfo}
-                             cargoDiretor="Directora dos Serviços Académicos"
-                             nomeDiretor="Margarida da Silva Rodrigues"  
-                             codigo_validacao={"1111"}   
+                            cargoDiretor="Directora dos Serviços Académicos"
+                            nomeDiretor="Margarida da Silva Rodrigues"
+                            codigo_validacao={codigoValidacao ?? ""}
                             showDownload={true}
                             logoSrc="/logo_uma.png"
                             bgSrc="/logo_bg.png"
                             borduraSrc="/bordura_africana.png"
+                            isGeneratingCode={isGeneratingCode}
+                            onBeforeDownload={handleExportar}
                         />
                     ) : (
                         <div className="flex items-center gap-2 text-sm text-destructive px-4 py-2 rounded-lg border border-destructive/30 bg-destructive/5">

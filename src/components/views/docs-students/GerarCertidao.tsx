@@ -168,15 +168,23 @@ const s = StyleSheet.create({
 
 interface CertidaoDocumentProps {
   dados: StudentClassInfo;
-  cargoDiretor:string;
-  nomeDiretor:string;
-  codigo_validacao:string;
+  cargoDiretor: string;
+  nomeDiretor: string;
+  codigo_validacao: string;
   logoSrc?: string;
   bgSrc?: string;
   borduraSrc?: string;
 }
 
-export function CertidaoDocument({ dados,cargoDiretor, nomeDiretor,codigo_validacao,logoSrc, bgSrc, borduraSrc }: CertidaoDocumentProps) {
+export function CertidaoDocument({
+  dados,
+  cargoDiretor,
+  nomeDiretor,
+  codigo_validacao,
+  logoSrc,
+  bgSrc,
+  borduraSrc,
+}: CertidaoDocumentProps) {
   const logoDefault = "/logo_uma.png";
   const bgDefault = "/logo_bg.png";
   const borduraDefault = "/bordura_africana.png";
@@ -277,14 +285,16 @@ export function CertidaoDocument({ dados,cargoDiretor, nomeDiretor,codigo_valida
 
 interface GerarCertidaoProps {
   dados: StudentClassInfo;
-  cargoDiretor:string;
-  nomeDiretor:string;
+  cargoDiretor: string;
+  nomeDiretor: string;
   codigo_validacao:string;
   logoSrc?: string;
   bgSrc?: string;
   borduraSrc?: string;
   showDownload?: boolean;
   showPrint?: boolean;
+  onBeforeDownload: (onReady: (codigo: string) => void) => void;
+  isGeneratingCode?: boolean;
 }
 
 export function GerarCertidao({
@@ -297,38 +307,48 @@ export function GerarCertidao({
   borduraSrc,
   showDownload = true,
   showPrint = false,
+  onBeforeDownload,
+  isGeneratingCode = false,
 }: GerarCertidaoProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
 
-  const documento = (
+  const nomeArquivo = `Certidao_Frequencia_${dados?.nome_completo?.replace(/\s+/g, "_")}.pdf`;
+
+  const buildDocumento = (codigo: string) => (
     <CertidaoDocument
       dados={dados}
       cargoDiretor={cargoDiretor}
       nomeDiretor={nomeDiretor}
-      codigo_validacao={codigo_validacao}
+      codigo_validacao={codigo}
       logoSrc={logoSrc}
       bgSrc={bgSrc}
       borduraSrc={borduraSrc}
     />
   );
 
-  const nomeArquivo = `Certidao_Frequencia_${dados?.nome_completo.replace(/\s+/g, "_")}.pdf`;
-
-  // ── Download manual com estado de loading ──
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
-      const blob = await pdf(documento).toBlob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = nomeArquivo;
-      a.click();
-      URL.revokeObjectURL(url);
+
+      // Pede novo código e só gera o PDF após receber
+      onBeforeDownload(async (codigo) => {
+        try {
+          const blob = await pdf(buildDocumento(codigo)).toBlob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = nomeArquivo;
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          console.error("Erro ao gerar PDF:", err);
+        } finally {
+          setIsDownloading(false);
+        }
+      });
     } catch (err) {
-      console.error("Erro ao gerar PDF:", err);
-    } finally {
+      console.error("Erro ao iniciar download:", err);
       setIsDownloading(false);
     }
   };
@@ -336,33 +356,43 @@ export function GerarCertidao({
   const handlePrint = async () => {
     try {
       setIsPrinting(true);
-      const blob = await pdf(documento).toBlob();
-      const url = URL.createObjectURL(blob);
-      const win = window.open(url);
-      if (win) {
-        win.focus();
-        win.print();
-      }
+
+      onBeforeDownload(async (codigo) => {
+        try {
+          const blob = await pdf(buildDocumento(codigo)).toBlob();
+          const url = URL.createObjectURL(blob);
+          const win = window.open(url);
+          if (win) {
+            win.focus();
+            win.print();
+          }
+        } catch (err) {
+          console.error("Erro ao preparar impressão:", err);
+        } finally {
+          setIsPrinting(false);
+        }
+      });
     } catch (err) {
-      console.error("Erro ao preparar impressão:", err);
-    } finally {
+      console.error("Erro ao iniciar impressão:", err);
       setIsPrinting(false);
     }
   };
+
+  const isBusy = isDownloading || isPrinting || isGeneratingCode;
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {showDownload && (
         <Button
-          disabled={isDownloading}
+          disabled={isBusy}
           variant="outline"
           className="gap-2"
           onClick={handleDownload}
         >
-          {isDownloading ? (
+          {isBusy && !isPrinting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              A gerar PDF...
+              {isGeneratingCode ? "A gerar código..." : "A gerar PDF..."}
             </>
           ) : (
             <>
@@ -377,13 +407,13 @@ export function GerarCertidao({
         <Button
           variant="outline"
           onClick={handlePrint}
-          disabled={isPrinting}
+          disabled={isBusy}
           className="gap-2"
         >
           {isPrinting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              A preparar...
+              {isGeneratingCode ? "A gerar código..." : "A preparar..."}
             </>
           ) : (
             <>

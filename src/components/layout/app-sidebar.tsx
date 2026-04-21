@@ -19,16 +19,17 @@ import {
   suporteStructure,
   operacionalStructure,
   comunicationStructure,
+  documentStructure
 } from "@/config/menuStructure";
 import { NavFinance } from "./nav-finance";
 import { NavAcademic } from "./nav-academic";
 
-import { NavHealp } from "./nav-healp";
 import { NavSuporte } from "./nav-suporte";
 import { NavOperacional } from "./nav-operacional";
 import { NavIngresso } from "./nav-ingresso";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { NavCommunication } from "./nav-comunication";
+import { NavDocs } from "./nav-documentos";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const adminItems = useFilterMenuByPermission(administracaoStructure?.items ?? []);
@@ -37,6 +38,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const financeItems = useFilterMenuByPermission(finaceStructure?.items ?? []);
   const operacionalItems = useFilterMenuByPermission(operacionalStructure?.items ?? []);
   const comunicationItems = useFilterMenuByPermission(comunicationStructure?.items ?? []);
+  const docsItems = useFilterMenuByPermission(documentStructure?.items ?? []);
 
   const suporteItems = useFilterMenuByPermission(suporteStructure?.items ?? []);
 
@@ -59,6 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSuporte items={suporteItems} />
 
         <NavFinance items={financeItems} />
+        <NavDocs items={docsItems} />
       </SidebarContent>
 
       <SidebarRail />
