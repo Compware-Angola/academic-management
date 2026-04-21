@@ -98,7 +98,7 @@ export function StudentProfileHeader({ matricula }: Props) {
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  <strong>Ano:</strong> —º Ano
+                  <strong>Ano:</strong> {student.classe}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">

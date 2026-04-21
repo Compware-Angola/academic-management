@@ -12,6 +12,8 @@ import {
   FetchDisciplinasMatriculadasParams,
   UpdatePersonalDataPayload,
   updatePersonalData,
+  definirEspecialidade,
+  DefinirEspecialidadePayload,
 } from "@/services/students/students.service";
 
 import {
@@ -196,3 +198,16 @@ export const useStudentAcademicHistoryMigration = (params: GetAcademicHistoryMig
     staleTime: 1000 * 60 * 5,
   });
 };
+
+export function useDefinirEspecialidade() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: DefinirEspecialidadePayload) => definirEspecialidade(payload),
+    onSuccess: () => {
+      toast.success("Especialidade definida com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
