@@ -195,7 +195,7 @@ export default function ValidarDocumento() {
                     <div className="flex items-center gap-2 mb-0.5">
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
                       <CardTitle className="text-base">Documento Válido</CardTitle>
-                      <Badge variant="secondary" className="text-xs">Autenticado</Badge>
+                      <Badge variant="secondary" className="text-xs">Verificado</Badge>
                     </div>
                     <p className="text-sm font-semibold truncate">{data.nome_completo}</p>
                     <p className="text-xs text-muted-foreground truncate">{data.curso}</p>
