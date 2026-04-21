@@ -114,6 +114,7 @@ export default function ValidarDocumento() {
 
               <div className="flex gap-2">
                 <Button
+                hidden={!!data}
                   type="submit"
                   disabled={!codigo.trim() || loading}
                   className="flex-1"
