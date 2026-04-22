@@ -40,6 +40,13 @@ export function DocumentsSection({
             <GraduationCap className="h-4 w-4" />
             <span>Gerar Diploma</span>
           </TabsTrigger>
+          <TabsTrigger
+            className="w-full justify-start gap-2"
+            value="certificado-notas"
+          >
+            <GraduationCap className="h-4 w-4" />
+            <span className="truncate">Certificado de Notas</span>
+          </TabsTrigger>
         </TabsList>
         <Card className="flex-1 p-6">
           <TabsContent value="carta-de-conclusao">
