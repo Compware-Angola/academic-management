@@ -1,6 +1,5 @@
 import { useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+
 
 type DiplomaData = {
   codigoMatricula: number;
@@ -32,41 +31,10 @@ type DiplomaPreviewProps = {
 export function DiplomaPreview({ data }: DiplomaPreviewProps) {
   const diplomaRef = useRef<HTMLDivElement>(null);
 
-  async function handleExportPdf() {
-    if (!diplomaRef.current) return;
-
-    const html2pdf = (await import("html2pdf.js")).default;
-
-    const element = diplomaRef.current;
-
-    const options = {
-      margin: 0,
-      filename: `diploma-${data.codigoMatricula}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait",
-      },
-    } as const;
-
-    await html2pdf().set(options).from(element).save();
-  }
-
+  
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={handleExportPdf} className="gap-2">
-          <Download className="h-4 w-4" />
-          Exportar PDF
-        </Button>
-      </div>
-
+      
       <div
         ref={diplomaRef}
         className="bg-white text-black w-full max-w-[900px] mx-auto border shadow-sm"

@@ -1,36 +1,18 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Contact } from "lucide-react";
+import { Contact, FileText, GraduationCap } from "lucide-react";
 import { CertidoesSection } from "./components/CertidoesSection";
-
-import { FileText, ScrollText, BookOpen, GraduationCap } from "lucide-react";
 import { GerarDiploma } from "./gerar-diploma";
 
 
-const DOCUMENTS_TABS_CONFIG = [
-  {
-    value: "gerar-diploma",
-    label: "Gerar Diploma",
-    icon: GraduationCap,
-    component: GerarDiploma,
-  },
-  {
-    value: "certidoe",
-    label: "Certidoẽs",
-    icon: Contact,
-    component: CertidoesSection,
-  }
-
-] as const;
-
 interface DocumentsSectionProps {
+  codigoMatricula:number
   value?: string;
-  codigoMatricula: number;
 }
 
 export function DocumentsSection({
-  value = "documentacao",
   codigoMatricula,
+  value = "documentos",
 }: DocumentsSectionProps) {
   return (
     <TabsContent value={value}>
@@ -39,36 +21,36 @@ export function DocumentsSection({
         orientation="vertical"
         className="flex flex-row gap-6"
       >
-        <TabsList className="flex justify-start flex-col h-auto w-56">
-          {DOCUMENTS_TABS_CONFIG.map((tab) => {
-            const Icon = tab.icon;
-
-            return (
-              <TabsTrigger
-                key={tab.value}
-                className="w-full justify-start gap-2"
-                value={tab.value}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="hidden md:inline truncate">{tab.label}</span>
-                <span className="md:hidden truncate">{tab.label}</span>
-              </TabsTrigger>
-            );
-          })}
+        <TabsList className="flex justify-start flex-col h-auto w-52">
+          <TabsTrigger
+            className="w-full justify-start gap-2"
+            value="carta-de-conclusao"
+          >
+            <FileText className="h-4 w-4" />
+            <span>Carta de Conclusão</span>
+          </TabsTrigger>
+          <TabsTrigger className="w-full justify-start gap-2" value="certidoes">
+            <Contact className="h-4 w-4" />
+            <span>Certidões</span>
+          </TabsTrigger>
+          <TabsTrigger
+            className="w-full justify-start gap-2"
+            value="gerar-diploma"
+          >
+            <GraduationCap className="h-4 w-4" />
+            <span>Gerar Diploma</span>
+          </TabsTrigger>
         </TabsList>
-
         <Card className="flex-1 p-6">
-          {DOCUMENTS_TABS_CONFIG.map((tab) => {
-            const Component = tab.component;
-
-            return (
-              <Component
-                key={tab.value}
-                value={tab.value}
-                codigoMatricula={codigoMatricula}
-              />
-            );
-          })}
+          <TabsContent value="carta-de-conclusao">
+            <h1>Carta de Conclusão – conteúdo aqui</h1>
+          </TabsContent>
+          <TabsContent value="certidoes">
+            <CertidoesSection codigoMatricula={codigoMatricula}/>
+          </TabsContent>
+          <TabsContent value="gerar-diploma">
+            <GerarDiploma codigoMatricula={codigoMatricula} value="gerar-diploma" />
+          </TabsContent>
         </Card>
       </Tabs>
     </TabsContent>
