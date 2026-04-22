@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Contact, FileText, GraduationCap } from "lucide-react";
 import { CertidoesSection } from "./components/CertidoesSection";
 import { GerarDiploma } from "./gerar-diploma";
+import { CartaConclusaoSection } from "./components/CartaConclusaoSection";
 
 
 interface DocumentsSectionProps {
@@ -43,7 +44,7 @@ export function DocumentsSection({
         </TabsList>
         <Card className="flex-1 p-6">
           <TabsContent value="carta-de-conclusao">
-            <h1>Carta de Conclusão – conteúdo aqui</h1>
+             <CartaConclusaoSection codigoMatricula={codigoMatricula}/>
           </TabsContent>
           <TabsContent value="certidoes">
             <CertidoesSection codigoMatricula={codigoMatricula}/>
