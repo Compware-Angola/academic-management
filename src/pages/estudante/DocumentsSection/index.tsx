@@ -2,10 +2,10 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Contact, FileText } from "lucide-react";
 import { CertidoesSection } from "./components/CertidoesSection";
-
+import { CertificadoNotas } from "./components/certificado-notas";
 
 interface DocumentsSectionProps {
-  codigoMatricula:number
+  codigoMatricula: number;
   value?: string;
 }
 
@@ -32,13 +32,23 @@ export function DocumentsSection({
             <Contact className="h-4 w-4" />
             <span>Certidões</span>
           </TabsTrigger>
+          <TabsTrigger
+            className="w-full justify-start gap-2"
+            value="certificado-notas"
+          >
+            <FileText className="h-4 w-4" />
+            <span className="truncate">Certificado com Notas</span>
+          </TabsTrigger>
         </TabsList>
         <Card className="flex-1 p-6">
           <TabsContent value="carta-de-conclusao">
             <h1>Carta de Conclusão – conteúdo aqui</h1>
           </TabsContent>
           <TabsContent value="certidoes">
-            <CertidoesSection codigoMatricula={codigoMatricula}/>
+            <CertidoesSection codigoMatricula={codigoMatricula} />
+          </TabsContent>
+          <TabsContent value="certificado-notas">
+            <CertificadoNotas codigoMatricula={codigoMatricula} />
           </TabsContent>
         </Card>
       </Tabs>

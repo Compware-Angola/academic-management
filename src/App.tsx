@@ -158,7 +158,6 @@ import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantes
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
-import PDF from "./pages/estudante/DocumentsSection/components/certificado-notas";
 
 const App = () => {
   return (
@@ -1558,10 +1557,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
-                  {process.env.NODE_ENV === "development" && (
-                    <Route path="/pdf" element={<PDF />} />
-                  )}
                 </Route>
               </Routes>
             </TooltipProvider>

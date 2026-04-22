@@ -9,6 +9,7 @@ interface AnoCurricularSelectProps {
   onChangeValue: (v: string) => void;
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
+  label?: string;
 }
 const AnoCurricularSelect = ({
   onChangeValue,
@@ -16,6 +17,7 @@ const AnoCurricularSelect = ({
   value,
   disabled,
   enableDefaultSelectItem,
+  label = "Ano Curricular",
 }: AnoCurricularSelectProps) => {
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso });
@@ -37,7 +39,7 @@ const AnoCurricularSelect = ({
         disabled={isLoadingClasses || disabled}
         defaultSelectItem={defaultSelectItem}
         loading={isLoadingClasses}
-        label="Ano Curricular"
+        label={label}
         value={value}
         onChange={(v) => onChangeValue(v)}
         options={classes ?? []}
