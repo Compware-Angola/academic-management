@@ -36,7 +36,7 @@ const podeGerarCarta =
         gerarCodigo(
             {
                 codigoMatricula: codigoMatricula,
-                tipoDocumento: 4,
+                tipoDocumento: 8,
 
                 documento: "Carta de Conclusão",
 
