@@ -15,6 +15,7 @@ export type ScheduleParamItem = {
   designacao: string;
   descricao: string;
   sigla: string;
+  args:any
   obs: string | null;
   ordem: number;
   active_state: number;
