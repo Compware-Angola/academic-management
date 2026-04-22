@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Contact, FileText } from "lucide-react";
+import { Contact, FileText, GraduationCap } from "lucide-react";
 import { CertidoesSection } from "./components/CertidoesSection";
+import { GerarDiploma } from "./gerar-diploma";
 
 
 interface DocumentsSectionProps {
@@ -32,6 +33,13 @@ export function DocumentsSection({
             <Contact className="h-4 w-4" />
             <span>Certidões</span>
           </TabsTrigger>
+          <TabsTrigger
+            className="w-full justify-start gap-2"
+            value="gerar-diploma"
+          >
+            <GraduationCap className="h-4 w-4" />
+            <span>Gerar Diploma</span>
+          </TabsTrigger>
         </TabsList>
         <Card className="flex-1 p-6">
           <TabsContent value="carta-de-conclusao">
@@ -39,6 +47,9 @@ export function DocumentsSection({
           </TabsContent>
           <TabsContent value="certidoes">
             <CertidoesSection codigoMatricula={codigoMatricula}/>
+          </TabsContent>
+          <TabsContent value="gerar-diploma">
+            <GerarDiploma codigoMatricula={codigoMatricula} value="gerar-diploma" />
           </TabsContent>
         </Card>
       </Tabs>

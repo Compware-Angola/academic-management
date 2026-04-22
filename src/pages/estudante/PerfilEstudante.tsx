@@ -148,7 +148,10 @@ export default function PerfilEstudante() {
         </TabsList>
 
         <PerfilSection value="perfil" codigoMatricula={Number(matricula)} />
-        <DocumentsSection value="documentacao" codigoMatricula={Number(matricula)} />
+        <DocumentsSection 
+            value="documentacao"
+            codigoMatricula={Number(matricula)} 
+          />
         <DisciplinasSection
           value="disciplinas"
           codigoMatricula={Number(matricula)}
