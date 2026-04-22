@@ -14,6 +14,13 @@ const DOCUMENTS_TABS_CONFIG = [
     icon: GraduationCap,
     component: GerarDiploma,
   },
+  {
+    value: "certidoe",
+    label: "Certidoẽs",
+    icon: Contact,
+    component: CertidoesSection,
+  }
+
 ] as const;
 
 interface DocumentsSectionProps {
