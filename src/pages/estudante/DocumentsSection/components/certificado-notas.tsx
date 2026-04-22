@@ -64,7 +64,7 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
           estudante={{
             nome: student.nome_completo ?? "",
             codigoMatricula: student.codigo_matricula,
-            dataNascimento: student.data_nascimento ?? "",
+            dataNascimento: formatDate(student.data_nascimento) ?? "",
             curso: student.curso,
             bi: student.bi ?? "",
           }}
@@ -75,3 +75,11 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
     </div>
   );
 }
+
+const formatDate = (date: string) => {
+  return new Intl.DateTimeFormat("pt-AO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(date));
+};
