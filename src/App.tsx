@@ -158,6 +158,7 @@ import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantes
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
+import ValidarDocumento from "./pages/documents/ValidarDocumento";
 
 const App = () => {
   return (
@@ -1301,10 +1302,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route
-                    path="/docente/validacao-uc"
-                    element={<ValidacaoPrograma />}
-                  /> */}
+                 <Route
+                    path="/documentos/validar"
+                    element={<ValidarDocumento />}
+                  /> 
                   <Route
                     path="/docente/vigilancia"
                     element={
@@ -1422,7 +1423,7 @@ const App = () => {
                     }
                   />
 
-                  <Route
+                    <Route
                     path="/inscricoes/inscritos-uc"
                     element={
                       <ProtectedRoute

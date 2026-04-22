@@ -13,6 +13,7 @@ import {
   GraduationCap,
   FileText,
   BookUser,
+  Files,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -1035,6 +1036,22 @@ export const suporteStructure: MenuStructure = {
           url: "/suporte/tipos",
           permission: [PermissionTypeDetails.TIPO_SUPORTE.sigla],
         },
+      ],
+      permission: [],
+    },
+  ],
+};
+export const documentStructure: MenuStructure = {
+  items: [
+    {
+      title: "Documentos",
+      url: "/documentos",
+      icon: Files,
+      items: [
+        {
+          title: "Validar Documentos",
+          url: "/documentos/validar"
+        }
       ],
       permission: [],
     },

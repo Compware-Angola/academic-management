@@ -42,7 +42,6 @@ type Finalista = {
 };
 
 const GRAUS = [
-  { value: "0", label: "Todos" },
   { value: "1", label: "Licenciatura" },
   { value: "2", label: "Mestrado" },
   { value: "3", label: "Doutoramento" },
