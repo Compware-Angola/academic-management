@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 /* =============================================
    Classe com mais grades inscritas do aluno
    ============================================= */
-export const useStudentClassInfo = (params: StudentClassInfoParams) => {
+export const useStudentClassInfo = (params: StudentClassInfoParams,  enabled: boolean = true) => {
   const { numeroDeMatricula, anoLectivo } = params;
 
   const queryKey = [
@@ -19,7 +19,7 @@ export const useStudentClassInfo = (params: StudentClassInfoParams) => {
   return useQuery<StudentClassInfo, Error>({
     queryKey,
     queryFn: () => fetchStudentClassInfo(params),
-   enabled: !!numeroDeMatricula && !!anoLectivo,
+   enabled,
     staleTime: 10 * 60 * 1000, 
     gcTime: 30 * 60 * 1000,
     retry: 1,

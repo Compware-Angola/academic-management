@@ -7,7 +7,7 @@ export type StudentClassInfoParams = {
   numeroDeMatricula: number | string;
   anoLectivo?: number | string;
 };
-
+ 
 /* =======================
  * TIPO - Retorno da Classe Info
  * ======================= */
@@ -25,11 +25,14 @@ export type StudentClassInfo = {
   data_nascimento: string;
   data_emissao_bi: string;
   data_validade_bi: string;
+  data_conclusao:string;
+  nota_obtida:string;
   pai: string;
   mae: string;
   naturalidade: string;
   estado_civil: string;
   sexo: string;
+
   morada: string;
   nacionalidade: string;
   curso_codigo: number;
