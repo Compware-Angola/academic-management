@@ -183,7 +183,49 @@ export default function ValidarDocumento() {
         title="Validar Documento"
         subtitle="Verifique a autenticidade de documentos institucionais"
       />
+{/* Card informativo sobre documentos verificáveis */}
+<Card className="border-primary/20 bg-primary/5">
+  <CardHeader className="pb-3">
+    <div className="flex items-center gap-2">
+      <ShieldCheck className="h-4 w-4 text-primary" />
+      <CardTitle className="text-sm font-semibold">Documentos que podem ser verificados</CardTitle>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {[
+        {
+          icon: "🎓",
+          title: "Certidão",
+          desc: "Certidão académica que comprova a situação do estudante na instituição.",
+        },
+        {
+          icon: "📄",
+          title: "Declaração com Notas",
+          desc: "Declaração oficial com o registo de aproveitamento académico do estudante.",
+        },
+        {
+          icon: "📋",
+          title: "Declaração sem Notas",
+          desc: "Declaração simples de matrícula ou frequência, sem detalhes de notas.",
+        },
+      ].map((item) => (
+        <div
+          key={item.title}
+          className="flex gap-3 rounded-lg border border-border/60 bg-background/60 px-4 py-3"
+        >
+          <span className="text-xl shrink-0 mt-0.5">{item.icon}</span>
+          <div>
+            <p className="text-xs font-semibold mb-0.5">{item.title}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>
 
+{/* Grid: form fixo à esquerda, resultado à direita com scroll */}
       {/* Grid: form fixo à esquerda, resultado à direita com scroll */}
       <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
 
