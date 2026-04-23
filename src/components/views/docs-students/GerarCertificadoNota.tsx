@@ -10,7 +10,8 @@ import {
   PDFDownloadLink,
   pdf,
 } from "@react-pdf/renderer";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Printer } from "lucide-react";
+import { useState } from "react";
 
 const COR = {
   azul: "#0D1B48",
@@ -50,6 +51,7 @@ type Props = {
   logoSrc?: string;
   bgSrc?: string;
   borduraSrc?: string;
+  codigoValidacao: string;
 };
 
 const estudante = {
@@ -382,7 +384,7 @@ const FooterBar = () => (
   </View>
 );
 
-const RodapeAssinatura = () => (
+const RodapeAssinatura = ({ codigoValidacao }: { codigoValidacao: string }) => (
   <>
     <View style={s.dividerGold} />
 
@@ -395,7 +397,7 @@ const RodapeAssinatura = () => (
 
     <View style={s.validationWrap}>
       <Text style={s.validationLabel}>Código de Validação: </Text>
-      <Text style={s.validationCode}>{estudante.codigoValidacao}</Text>
+      <Text style={s.validationCode}>{codigoValidacao}</Text>
     </View>
 
     <View style={s.sigRow}>
@@ -440,13 +442,9 @@ const InfoEstudanteSection = ({ estudante }: { estudante: Student }) => {
   );
 };
 
-export const PDFDocumentStudent = ({
-  notas,
-  estudante,
-  logoSrc,
-  bgSrc,
-  borduraSrc,
-}: Props) => {
+export const PDFDocumentStudent = (props: Props) => {
+  const { notas, estudante, logoSrc, bgSrc, borduraSrc, codigoValidacao } =
+    props;
   const logo = logoSrc || "/logo_uma.png";
   const bg = bgSrc || "/logo_bg.png";
   const bordura = borduraSrc || "/bordura_africana.png";
@@ -467,7 +465,7 @@ export const PDFDocumentStudent = ({
           <Text>CH: T – Teórica, TP – Teórico-Prática, P – Prática</Text>
           <Text>AC: Ano Curricular</Text>
         </View>
-        <RodapeAssinatura />
+        <RodapeAssinatura codigoValidacao={codigoValidacao} />
         <FooterBar />
       </Page>
     </Document>
@@ -487,62 +485,128 @@ type GerarCertidaoProps = {
   borduraSrc?: string;
   showDownload?: boolean;
   showPrint?: boolean;
+  onBeforeDownload: (onReady: (codigo: string) => void) => void;
+  isGeneratingCode?: boolean;
 };
-export const GerarCertificadoNotas = (props: GerarCertidaoProps) => {
-  const {
-    notas,
-    estudante,
-    logoSrc,
-    bgSrc,
-    borduraSrc,
-    showDownload,
-    showPrint,
-  } = props;
-  const nomeArquivo = `certificado_nota_${estudante.nome.replace(/\s+/g, "_")}_${new Date().getDate()}_${new Date().getMonth() + 1}_${new Date().getFullYear()}.pdf`;
+export const GerarCertificadoNotas = ({
+  notas,
+  estudante,
+  logoSrc,
+  bgSrc,
+  borduraSrc,
+  showDownload,
+  isGeneratingCode,
+  onBeforeDownload,
+  showPrint,
+}: GerarCertidaoProps) => {
+  const nomeArquivo = `certificado_nota_${estudante.nome.replace(
+    /\s+/g,
+    "_",
+  )}_${new Date().getTime()}.pdf`;
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const buildDocumento = (codigo: string) => (
+    <PDFDocumentStudent
+      estudante={estudante}
+      notas={notas}
+      logoSrc={logoSrc}
+      bgSrc={bgSrc}
+      borduraSrc={borduraSrc}
+      codigoValidacao={codigo}
+    />
+  );
+
   const handleDownload = async () => {
     try {
-      const blob = await pdf(<PDFDocumentStudent {...props} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const win = window.open(url);
-      if (win) {
-        win.print();
-        win.print();
-      }
-    } catch (error) {
-      console.error("Erro ao preparar impressão:", error);
+      setIsDownloading(true);
+      onBeforeDownload(async (codigo) => {
+        try {
+          const blob = await pdf(buildDocumento(codigo)).toBlob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = nomeArquivo;
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          console.error("Erro ao gerar PDF:", err);
+        } finally {
+          setIsDownloading(false);
+        }
+      });
+    } catch (err) {
+      console.error("Erro ao iniciar download:", err);
+      setIsDownloading(false);
     }
   };
+
+  const handlePrint = async () => {
+    try {
+      setIsPrinting(true);
+
+      onBeforeDownload(async (codigo) => {
+        try {
+          const blob = await pdf(buildDocumento(codigo)).toBlob();
+          const url = URL.createObjectURL(blob);
+          const win = window.open(url);
+          if (win) {
+            win.focus();
+            win.print();
+          }
+        } catch (err) {
+          console.error("Erro ao preparar impressão:", err);
+        } finally {
+          setIsPrinting(false);
+        }
+      });
+    } catch (err) {
+      console.error("Erro ao iniciar impressão:", err);
+      setIsPrinting(false);
+    }
+  };
+  const isBusy = isDownloading || isPrinting || isGeneratingCode;
   return (
     <div className="flex items-center gap-2 flex-wrap">
       {showDownload && (
-        <PDFDownloadLink
-          document={
-            <PDFDocumentStudent
-              estudante={estudante}
-              notas={notas}
-              logoSrc={logoSrc}
-              bgSrc={bgSrc}
-              borduraSrc={borduraSrc}
-            />
-          }
-          fileName={nomeArquivo}
+        <Button
+          disabled={isBusy}
+          variant="outline"
+          className="gap-2"
+          onClick={handleDownload}
         >
-          {({ loading }) => (
-            <Button disabled={loading} onClick={handleDownload}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Gerando PDF...
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" />
-                  Baixar Certidão
-                </>
-              )}
-            </Button>
+          {isBusy && !isPrinting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {isGeneratingCode ? "A gerar código..." : "A gerar PDF..."}
+            </>
+          ) : (
+            <>
+              <Download className="h-4 w-4" />
+              Exportar Certidão PDF
+            </>
           )}
-        </PDFDownloadLink>
+        </Button>
+      )}
+
+      {showPrint && (
+        <Button
+          variant="outline"
+          onClick={handlePrint}
+          disabled={isBusy}
+          className="gap-2"
+        >
+          {isPrinting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {isGeneratingCode ? "A gerar código..." : "A preparar..."}
+            </>
+          ) : (
+            <>
+              <Printer className="h-4 w-4" />
+              Imprimir
+            </>
+          )}
+        </Button>
       )}
     </div>
   );
