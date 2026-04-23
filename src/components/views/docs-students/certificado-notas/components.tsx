@@ -273,6 +273,7 @@ export const PDFDocumentStudent = (props: PDFDocumentStudentProps) => {
         <Legend />
         <ServicoAcademicos />
         <Assinatura codigoValidacao={codigoValidacao} diretora={diretora} />
+        <FooterBar />
       </Page>
     </Document>
   );
