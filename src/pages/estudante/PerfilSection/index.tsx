@@ -8,9 +8,13 @@ import { AtivarMatricula } from "./ativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
 import { InscricoesUC } from "./inscricoes-uc";
 
+
 import { DefinirEspecialidade } from "./definir-especialidade";
 
 import { Diplomar } from "./Diplomar";
+
+
+import { MudarCurso } from "./mudar-curso";
 
 const TABS_CONFIG = [
   {
@@ -51,6 +55,7 @@ const TABS_CONFIG = [
   },
   {
 
+
     value: "definir-especialidade",
     label: "Definir Especialidade",
     icon: Book,
@@ -62,8 +67,17 @@ const TABS_CONFIG = [
   label: "Diplomar",
   icon: GraduationCap,
   component: Diplomar,
-  }  
+  } , 
 
+
+  {
+    value: "mudar-curso",
+    label: "Mudança do Curso",
+    icon: Book,
+    component: MudarCurso,
+  }
+    
+  
 
 ] as const;
 
