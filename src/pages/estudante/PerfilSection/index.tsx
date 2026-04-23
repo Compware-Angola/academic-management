@@ -7,6 +7,7 @@ import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
 import { InscricoesUC } from "./inscricoes-uc";
+import { MudarCurso } from "./mudar-curso";
 const TABS_CONFIG = [
   {
     value: "atualizar-senha",
@@ -43,6 +44,12 @@ const TABS_CONFIG = [
     label: "Fazer Inscrições em UC",
     icon: Book,
     component: InscricoesUC,
+  },
+  {
+    value: "mudar-curso",
+    label: "Mudança do Curso",
+    icon: Book,
+    component: MudarCurso,
   },
 ] as const;
 
