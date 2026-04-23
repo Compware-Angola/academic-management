@@ -175,19 +175,17 @@ const Assinatura = ({
 }) => (
   <View
     style={{
-      width: "50%",
+      width: "55%",
       marginTop: 20,
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "red",
       gap: 10,
     }}
   >
     <Text>Código de Validação: {codigoValidacao}</Text>
     <Text
       style={{
-        marginTop: 10,
         textAlign: "center",
       }}
     >
@@ -196,6 +194,24 @@ const Assinatura = ({
       outros documentos escolares do estudante acima indicado arquivados nestes
       serviços.
     </Text>
+
+    <Text
+      style={{
+        fontWeight: "bold",
+        marginTop: 30,
+      }}
+    >
+      Directora dos Serviços Académicos
+    </Text>
+    <View
+      style={{
+        width: "100%",
+        height: 1,
+        marginTop: 10,
+        backgroundColor: "black",
+      }}
+    />
+    <Text>Margarida da Silva Rodrigues</Text>
   </View>
 );
 
