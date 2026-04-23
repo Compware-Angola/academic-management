@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
-import { GerarCertificadoNotas } from "@/components/views/docs-students/GerarCertificadoNota";
+import { GerarCertificadoNotas } from "@/components/views/docs-students/certificado-notas";
 
 import { useGenerateDocumentCode } from "@/hooks/documents/use-generate-code";
 import { useGetNotas } from "@/hooks/students/use-get-notas";
@@ -93,6 +93,7 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
         showDownload
         isGeneratingCode={isGeneratingCode}
         onBeforeDownload={handleExportar}
+        diretora="Margarida da Silva Rodrigues"
       />
     );
   }
