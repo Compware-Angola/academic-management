@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,33 +40,36 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useDebounce } from "@/hooks/use-debounce"; // opcional, pode remover se não tiver
+
 import { useCreateTopico, useDeleteTopico, useTopicos, useUpdateTopico } from "@/hooks/access_exam/use-exames-de-acesso.hooks";
 import { Topico } from "@/services/access_exam/topic-exam.service";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { parseFilter } from "@/util/parse-filter";
+import { useUploadSingle } from "@/hooks/upload/use-upload-single";
+import { viewFile } from "@/services/upload/upload-single.service";
+import { toast } from "sonner";
+import { ApiError } from "@/error";
 
 
 
-const ANOS_LETIVOS = [
-  { id: 21, label: "2022/2023" },
-  { id: 22, label: "2023/2024" },
-  { id: 23, label: "2024/2025" },
-  { id: 24, label: "2025/2026" },
-];
+
 
 const PAGE_SIZE = 10;
 
 export default function ListarTopicos() {
-  const { toast } = useToast();
 
+  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   // ── filtros ──────────────────────────────────────────
   const [search, setSearch] = useState("");
-  const [filtroAno, setFiltroAno] = useState("todos");
+  const [filtroAno, setFiltroAno] = useState("all");
   const [page, setPage] = useState(1);
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   // ── query ────────────────────────────────────────────
   const { data, isLoading, isError } = useTopicos({
     designacao: search || undefined,
-    anoLetivoId: filtroAno !== "todos" ? Number(filtroAno) : undefined,
+    anoLetivoId: parseFilter(filtroAno),
     page,
     limit: PAGE_SIZE,
   });
@@ -75,6 +78,7 @@ export default function ListarTopicos() {
   const pagination = data?.pagination;
 
   // ── mutations ────────────────────────────────────────
+  const uploadMutation = useUploadSingle();
   const createMutation = useCreateTopico();
   const updateMutation = useUpdateTopico();
   const deleteMutation = useDeleteTopico();
@@ -102,6 +106,7 @@ export default function ListarTopicos() {
   // ── handlers ─────────────────────────────────────────
   const openCreate = () => {
     setEditingTopico(null);
+    clearFileInput()
     setFormData({ designacao: "", anoLetivoId: "", arquivo: null, arquivoNome: "" });
     setDialogOpen(true);
   };
@@ -117,26 +122,40 @@ export default function ListarTopicos() {
     setDialogOpen(true);
   };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.type !== "application/pdf") {
-      toast({
-        title: "Formato inválido",
-        description: "Apenas ficheiros PDF são aceites.",
-        variant: "destructive",
+    if (file) {
+      if (file.type !== "application/pdf") {
+      
+         toast.error(`Formato inválido`, {
+        position: "top-right",
+      });
+        e.target.value = "";
+        return;
+      }
+      setSelectedFile(file);
+       toast.success(`Arquivo selecionado.${file.name} pronto para submissão.`, {
+        position: "top-right",
+      });
+     
+    }
+  };
+  const clearFileInput = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+  const handleSave = async () => {
+    if (!formData.designacao.trim() || !formData.anoLetivoId) {
+      
+      toast.error(`Campos obrigatórios.Preencha a designação e o ano letivo.`, {
+        position: "top-right",
       });
       return;
     }
-    setFormData((p) => ({ ...p, arquivo: file, arquivoNome: file.name }));
-  };
-
-  const handleSave = () => {
-    if (!formData.designacao.trim() || !formData.anoLetivoId) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha a designação e o ano letivo.",
-        variant: "destructive",
+    const uploadResponse = await uploadMutation.mutateAsync(selectedFile!);
+    if (!uploadResponse.file?.path) {
+    toast.error(`Erro ao Fazer upload`, {
+        position: "top-right",
       });
       return;
     }
@@ -147,16 +166,20 @@ export default function ListarTopicos() {
           id: editingTopico.id,
           payload: {
             designacao: formData.designacao,
-            arquivo: formData.arquivoNome || editingTopico.arquivo,
+            arquivo: uploadResponse.file.filename || editingTopico.arquivo,
           },
         },
         {
           onSuccess: () => {
-            toast({ title: "Tópico atualizado", description: `"${formData.designacao}" guardado com sucesso.` });
+           toast.success(`Tópico ${ formData.designacao} Atualizado`, {
+        position: "top-right",
+      });
             setDialogOpen(false);
           },
           onError: () => {
-            toast({ title: "Erro ao atualizar", description: "Tente novamente.", variant: "destructive" });
+          toast.error(`Erro ao Atualizar`, {
+        position: "top-right",
+      });
           },
         }
       );
@@ -165,48 +188,87 @@ export default function ListarTopicos() {
         {
           designacao: formData.designacao,
           anoLetivoId: Number(formData.anoLetivoId),
-          arquivo: formData.arquivoNome || "documento.pdf",
+          arquivo: uploadResponse.file.filename || "documento.pdf",
         },
         {
           onSuccess: () => {
-            toast({ title: "Tópico criado", description: `"${formData.designacao}" adicionado.` });
+           toast.success(`Tópico criado`, {
+        position: "top-right",
+      });
             setDialogOpen(false);
           },
           onError: () => {
-            toast({ title: "Erro ao criar", description: "Tente novamente.", variant: "destructive" });
+            
+           toast.error(`Erro ao Criar`, {
+        position: "top-right",
+      });
           },
         }
       );
     }
   };
 
-  const openPdf = (t: Topico) => {
+  const openPdf = async (t: Topico) => {
     if (!t.arquivo) return;
-    // ajuste o base URL conforme o teu ambiente
-    const url = `/uploads/${t.arquivo}`;
-    setPdfPreview({ titulo: t.designacao, url });
-    setPdfDialogOpen(true);
+
+    try {
+      const blob = await viewFile(t.arquivo);
+
+      const fileUrl = URL.createObjectURL(blob);
+
+      setPdfPreview({
+        titulo: t.designacao,
+        url: fileUrl,
+      });
+
+      setPdfDialogOpen(true);
+    } catch (error: any) {
+      console.error("Erro ao abrir PDF:", error.message);
+     toast.error(`Documento Não foi encontrado`, {
+        position: "top-right",
+      });
+    }
   };
 
-  const downloadPdf = (t: Topico) => {
-    if (!t.arquivo) return;
-    const url = `/uploads/${t.arquivo}`;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = t.arquivo;
-    a.click();
-    toast({ title: "Download iniciado", description: t.arquivo });
+  const downloadPdf = async (t: Topico) => {
+    try {
+      if (!t.arquivo) return;
+      const blob = await viewFile(t.arquivo);
+      const fileUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = fileUrl;
+      a.download = t.arquivo;
+      a.click();
+     
+       toast.success(`Download iniciado`, {
+        position: "top-right",
+      });
+
+    } catch (error: any) {
+      console.error("Erro ao abrir PDF:", error.message);
+      toast.error(`Documento Não foi encontrado`, {
+        position: "top-right",
+      });
+
+    }
+
   };
 
   const handleDelete = () => {
     if (confirmDeleteId == null) return;
     deleteMutation.mutate(confirmDeleteId, {
       onSuccess: () => {
-        toast({ title: "Tópico removido" });
+       toast.success(`Tópico removido`, {
+        position: "top-right",
+      });
         setConfirmDeleteId(null);
       },
       onError: () => {
-        toast({ title: "Erro ao remover", variant: "destructive" });
+   
+        toast.error(`Erro ao remover`, {
+        position: "top-right",
+      });
         setConfirmDeleteId(null);
       },
     });
@@ -232,32 +294,45 @@ export default function ListarTopicos() {
       <Card>
         <CardContent className="pt-6">
           {/* Filtros */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 items-end">
+
+            {/* Pesquisa */}
+            <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Pesquisar designação..."
                 value={search}
-                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                className="pl-10"
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="pl-10 w-full"
               />
             </div>
-            <Select
-              value={filtroAno}
-              onValueChange={(v) => { setFiltroAno(v); setPage(1); }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Ano letivo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os anos</SelectItem>
-                {ANOS_LETIVOS.map((a) => (
-                  <SelectItem key={a.id} value={String(a.id)}>
-                    {a.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+            {/* Ano Letivo */}
+            <div className="w-full">
+              <FormSelect
+                label="Ano Letivo"
+                disabled={isLoadingAcademicYear}
+                loading={isLoadingAcademicYear}
+                value={filtroAno?.toString() ?? "all"}
+                onChange={(v) => {
+                  setFiltroAno(v === "all" ? undefined : v);
+                  setPage(1);
+                }}
+                options={[
+                  { codigo: "all", designacao: "Todos" },
+                  ...(academicYear ?? [])
+                ]}
+                map={(a) => ({
+                  key: a.codigo,
+                  label: a.designacao,
+                  value: a.codigo,
+                })}
+              />
+            </div>
+
           </div>
 
           {/* Tabela */}
@@ -309,7 +384,7 @@ export default function ListarTopicos() {
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-primary" />
                         <span
-                          className="text-sm truncate max-w-[160px]"
+                          className="text-sm truncate max-w-40"
                           title={t.arquivo}
                         >
                           {t.arquivo}
@@ -396,7 +471,7 @@ export default function ListarTopicos() {
 
       {/* ── Create / Edit Dialog ── */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg!">
           <DialogHeader>
             <DialogTitle>
               {editingTopico ? "Editar Tópico" : "Novo Tópico"}
@@ -420,24 +495,19 @@ export default function ListarTopicos() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ano">Ano Letivo *</Label>
-              <Select
+
+
+              <FormSelect
+                label="Ano Letivo"
+                disabled={isLoadingAcademicYear}
+                loading={isLoadingAcademicYear}
                 value={formData.anoLetivoId}
-                onValueChange={(v) =>
+                onChange={(v) =>
                   setFormData((p) => ({ ...p, anoLetivoId: v }))
                 }
-              >
-                <SelectTrigger id="ano">
-                  <SelectValue placeholder="Seleccione um ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ANOS_LETIVOS.map((a) => (
-                    <SelectItem key={a.id} value={String(a.id)}>
-                      {a.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                options={academicYear}
+                map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="arquivo">Arquivo (PDF)</Label>
@@ -449,6 +519,15 @@ export default function ListarTopicos() {
                   onChange={handleFile}
                   className="flex-1"
                 />
+                {selectedFile && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    {selectedFile.name}
+                    <Button variant="ghost" size="sm" onClick={clearFileInput}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </p>
+                )}
                 <Upload className="h-4 w-4 text-muted-foreground" />
               </div>
               {formData.arquivoNome && (
@@ -473,7 +552,7 @@ export default function ListarTopicos() {
 
       {/* ── PDF Preview Dialog ── */}
       <Dialog open={pdfDialogOpen} onOpenChange={setPdfDialogOpen}>
-        <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+        <DialogContent className="max-w-4xl! h-[80vh]! flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
