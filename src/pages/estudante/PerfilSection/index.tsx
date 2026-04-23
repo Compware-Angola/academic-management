@@ -10,8 +10,6 @@ import { InscricoesUC } from "./inscricoes-uc";
 import { DefinirEspecialidade } from "./definir-especialidade";
 
 import { Diplomar } from "./Diplomar";
-
-
 import { MudarCurso } from "./mudar-curso";
 
 const TABS_CONFIG = [
@@ -64,11 +62,13 @@ const TABS_CONFIG = [
     icon: GraduationCap,
     component: Diplomar,
   },
+
   {
     value: "mudar-curso",
     label: "Mudança do Curso",
     icon: Book,
     component: MudarCurso,
+
   }
     
 ] as const;
