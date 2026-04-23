@@ -200,6 +200,8 @@ export const ingressoStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla,
           ],
         },
+      { title: "Listar Tópicos", url: "/exame/topicos" },
+      { title: "Listar Perguntas",  url: "/exame/perguntas" },
       ],
 
       permission: [],
@@ -274,6 +276,7 @@ export const ingressoStructure: MenuStructure = {
 
       permission: [],
     },
+    
   ],
 };
 export const academicStructure: MenuStructure = {
