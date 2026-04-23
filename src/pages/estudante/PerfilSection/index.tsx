@@ -55,7 +55,6 @@ const TABS_CONFIG = [
   },
   {
 
-
     value: "definir-especialidade",
     label: "Definir Especialidade",
     icon: Book,
@@ -64,11 +63,11 @@ const TABS_CONFIG = [
 
   {
     value: "diplomar",
+
   label: "Diplomar",
   icon: GraduationCap,
   component: Diplomar,
   } , 
-
 
   {
     value: "mudar-curso",
@@ -77,8 +76,6 @@ const TABS_CONFIG = [
     component: MudarCurso,
   }
     
-  
-
 ] as const;
 
 type PerfilSectionProps = {
