@@ -52,13 +52,13 @@ export default function MapaAnualEstudantesFinalistas() {
 
   const [filters, setFilters] = useState({
     anoLectivo: "",
-    grau: "0",
+    grau: "1",
     search: "",
   });
 
   const [filtrosAplicados, setFiltrosAplicados] = useState({
     anoLectivo: "",
-    grau: "0",
+    grau: "1",
     search: "",
   });
 

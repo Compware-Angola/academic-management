@@ -16,13 +16,12 @@ import { List, Search } from "lucide-react";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
+
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryRegistoPrimarioMatriculados } from "@/hooks/students/use-query-registo-primario-matriculados";
 import { useClasses } from "@/hooks/use-classes";
-
 
 type RegistoPrimarioMatriculado = {
   numero: number;
@@ -55,62 +54,62 @@ const ESTADOS = [
   { value: "1", label: "Estudantes Novos" },
 ];
 
+type FiltersState = {
+  anoLectivo: string;
+  grau: string;
+  anoCurricular: string;
+  estado: string;
+  search: string;
+};
+
+const initialFilters: FiltersState = {
+  anoLectivo: "",
+  grau: "0",
+  anoCurricular: "0",
+  estado: "2",
+  search: "",
+};
+
 export default function RegistoPrimarioMatriculados() {
+  const [shouldFetch, setShouldFetch] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [filters, setFilters] = useState({
-    anoLectivo: "",
-    grau: "0",
-    anoCurricular: "0",
-    estado: "2",
-    search: "",
-  });
-
-  const [filtrosAplicados, setFiltrosAplicados] = useState({
-    anoLectivo: "",
-    grau: "0",
-    anoCurricular: "0",
-    estado: "2",
-    search: "",
-  });
+  const [filters, setFilters] = useState<FiltersState>(initialFilters);
+  const [filtrosAplicados, setFiltrosAplicados] =
+    useState<FiltersState>(initialFilters);
 
   const { data: anosLectivos = [] } = useQueryAnoAcademico();
-
-  const { data: classes = [] } = useQueryClassFilterByCurso({
-    curso: filters.grau,
-  });
-
-  const { data: anosCurriculares = [] , isLoading: loadingClasses } = useClasses();
-
-  //console.log("Ano curricular: ", classes)
+  const { data: anosCurriculares = [] } = useClasses();
 
   const anosFiltrados = anosCurriculares.filter(
-  (item) =>
-    item.designacao !== 'Poś-Graduação' &&
-    item.designacao !== 'Todos'
-);
+    (item) =>
+      item.designacao !== "Poś-Graduação" && item.designacao !== "Todos"
+  );
 
-  const { data, isLoading, isFetching } =
-    useQueryRegistoPrimarioMatriculados({
+  const queryParams = useMemo(
+    () => ({
       page: currentPage,
       limit: 10,
       anoLectivo: filtrosAplicados.anoLectivo
         ? Number(filtrosAplicados.anoLectivo)
-        : 0,
-      grau: filtrosAplicados.grau ? Number(filtrosAplicados.grau) : 0,
-      anoCurricular: filtrosAplicados.anoCurricular
-        ? Number(filtrosAplicados.anoCurricular)
-        : 0,
-      estado: filtrosAplicados.estado
-        ? Number(filtrosAplicados.estado)
-        : 2,
-      search: filters.search ?? "",
+        : undefined,
+      grau: Number(filtrosAplicados.grau),
+      anoCurricular: Number(filtrosAplicados.anoCurricular),
+      estado: Number(filtrosAplicados.estado),
+      search: filtrosAplicados.search.trim() || undefined,
+    }),
+    [currentPage, filtrosAplicados]
+  );
+
+  const { data, isLoading, isFetching } =
+    useQueryRegistoPrimarioMatriculados(queryParams, {
+      enabled: shouldFetch && !!filtrosAplicados.anoLectivo,
     });
 
-  const registos = data?.data ?? [];
+  const registos = Array.isArray(data?.data) ? data.data : [];
 
   function formatDate(dateString: string) {
     if (!dateString) return "-";
+
     return new Date(dateString).toLocaleDateString("pt-PT", {
       day: "2-digit",
       month: "2-digit",
@@ -272,9 +271,22 @@ export default function RegistoPrimarioMatriculados() {
     },
   ];
 
+  function handleFilterChange<K extends keyof FiltersState>(
+    key: K,
+    value: FiltersState[K]
+  ) {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  }
+
   function handleListar() {
+    if (!filters.anoLectivo) return;
+
     setCurrentPage(1);
     setFiltrosAplicados(filters);
+    setShouldFetch(true);
   }
 
   return (
@@ -309,20 +321,19 @@ export default function RegistoPrimarioMatriculados() {
 
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Lectivo</label>
               <Select
                 value={filters.anoLectivo}
-                onValueChange={(v) =>
-                  setFilters((prev) => ({ ...prev, anoLectivo: v }))
+                onValueChange={(value) =>
+                  handleFilterChange("anoLectivo", value)
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o ano lectivo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Todos</SelectItem>
                   {anosLectivos.map((ano: any) => (
                     <SelectItem
                       key={ano.codigo ?? ano.CODIGO}
@@ -339,9 +350,7 @@ export default function RegistoPrimarioMatriculados() {
               <label className="text-sm font-medium">Grau</label>
               <Select
                 value={filters.grau}
-                onValueChange={(v) =>
-                  setFilters((prev) => ({ ...prev, grau: v }))
-                }
+                onValueChange={(value) => handleFilterChange("grau", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o grau" />
@@ -360,8 +369,8 @@ export default function RegistoPrimarioMatriculados() {
               <label className="text-sm font-medium">Ano Curricular</label>
               <Select
                 value={filters.anoCurricular}
-                onValueChange={(v) =>
-                  setFilters((prev) => ({ ...prev, anoCurricular: v }))
+                onValueChange={(value) =>
+                  handleFilterChange("anoCurricular", value)
                 }
               >
                 <SelectTrigger>
@@ -385,9 +394,7 @@ export default function RegistoPrimarioMatriculados() {
               <label className="text-sm font-medium">Estado</label>
               <Select
                 value={filters.estado}
-                onValueChange={(v) =>
-                  setFilters((prev) => ({ ...prev, estado: v }))
-                }
+                onValueChange={(value) => handleFilterChange("estado", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o estado" />
@@ -403,7 +410,7 @@ export default function RegistoPrimarioMatriculados() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium">Pesquisar</label>
               <div className="relative">
@@ -412,10 +419,7 @@ export default function RegistoPrimarioMatriculados() {
                   placeholder="Pesquisar por nome, bilhete, curso ou unidade orgânica"
                   value={filters.search}
                   onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      search: e.target.value,
-                    }))
+                    handleFilterChange("search", e.target.value)
                   }
                   className="pl-9"
                 />
@@ -424,7 +428,7 @@ export default function RegistoPrimarioMatriculados() {
 
             <div className="flex items-end md:col-span-1">
               <Button className="w-full" onClick={handleListar}>
-                <List className="h-4 w-4 mr-2" />
+                <List className="mr-2 h-4 w-4" />
                 Listar
               </Button>
             </div>
@@ -432,7 +436,7 @@ export default function RegistoPrimarioMatriculados() {
         </CardContent>
       </Card>
 
-      <div className="text-primary font-semibold">
+      <div className="font-semibold text-primary">
         Total De Registros : {data?.total ?? 0}
       </div>
 

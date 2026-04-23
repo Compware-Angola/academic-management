@@ -1,9 +1,17 @@
-import { FetchRegistoPrimarioMatriculadosParams, FetchRegistoPrimarioMatriculadosResponse, fetchRegistoPrimarioMatriculadosService } from "@/services/students/fetch-registo-primario-matriculados.service";
+import {
+  FetchRegistoPrimarioMatriculadosParams,
+  FetchRegistoPrimarioMatriculadosResponse,
+  fetchRegistoPrimarioMatriculadosService,
+} from "@/services/students/fetch-registo-primario-matriculados.service";
 import { useQuery } from "@tanstack/react-query";
 
+type UseQueryRegistoPrimarioMatriculadosOptions = {
+  enabled?: boolean;
+};
 
 export function useQueryRegistoPrimarioMatriculados(
-  params: FetchRegistoPrimarioMatriculadosParams
+  params: FetchRegistoPrimarioMatriculadosParams,
+  options?: UseQueryRegistoPrimarioMatriculadosOptions
 ) {
   return useQuery<FetchRegistoPrimarioMatriculadosResponse>({
     queryKey: [
@@ -17,6 +25,7 @@ export function useQueryRegistoPrimarioMatriculados(
       params.search,
     ],
     queryFn: () => fetchRegistoPrimarioMatriculadosService(params),
+    enabled: options?.enabled ?? true,
     staleTime: 1000 * 60 * 5,
     retry: 2,
   });

@@ -46,7 +46,6 @@ type RegistoPrimarioExameAcesso = {
 };
 
 const GRAUS = [
-  { value: "0", label: "Todos" },
   { value: "1", label: "Licenciatura" },
   { value: "2", label: "Mestrado" },
   { value: "3", label: "Doutoramento" },
@@ -56,14 +55,14 @@ export default function RegistoPrimarioExamesAcesso() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState({
-    anoLectivo: "",
-    grau: "0",
+    anoLectivo: "23",
+    grau: "1",
     search: "",
   });
 
   const [filtrosAplicados, setFiltrosAplicados] = useState({
-    anoLectivo: "",
-    grau: "0",
+    anoLectivo: "23",
+    grau: "1",
     search: "",
   });
 
@@ -151,8 +150,7 @@ export default function RegistoPrimarioExamesAcesso() {
             { key: "trabalhador", label: "Trabalhador", width: "10%" },
             { key: "unidade_organica", label: "Unidade Orgânica", width: "14%" },
             { key: "necessidade_especial", label: "Necessidade", width: "12%" },
-            { key: "proveniencia", label: "Proveniência", width: "12%" },
-            { key: "curso_ensino_medio", label: "Curso Ensino Médio", width: "14%" },
+        
             {
               key: "estudante_matriculado_primeira_vez",
               label: "1ª Vez",
@@ -211,7 +209,7 @@ export default function RegistoPrimarioExamesAcesso() {
     { header: "Sexo", accessor: "sexo" },
     { header: "Idade", accessor: "idade" },
     {
-      header: "Nascimento",
+      header: "Data Nascimento",
       accessor: "data_nascimento",
       cell: (row: RegistoPrimarioExameAcesso) =>
         formatDate(row.data_nascimento),
@@ -220,30 +218,35 @@ export default function RegistoPrimarioExamesAcesso() {
     { header: "País", accessor: "pais_origem" },
     { header: "Município", accessor: "municipio" },
     { header: "Unidade Orgânica", accessor: "unidade_organica" },
-    { header: "Curso", accessor: "curso" },
+    { header: "Curso Inscrito no Ensino superior", accessor: "curso" },
     {
-      header: "Nota Exame",
+      header: "Nota Exame de Acesso",
       accessor: "nota_exame_acesso",
       cell: (row: RegistoPrimarioExameAcesso) =>
         formatNota(row.nota_exame_acesso),
     },
-    { header: "Escola", accessor: "escola_ensino_medio" },
-    { header: "Trabalhador", accessor: "trabalhador" },
+
     { header: "Unidade Orgânica", accessor: "unidade_organica" },
-    { header: "Período", accessor: "periodo_estudo" },
-    { header: "Proveniência", accessor: "proveniencia" },
-    { header: "Curso Ens. Médio", accessor: "curso_ensino_medio" },
+    { header: "Turno de Estudo", accessor: "periodo_estudo" },
+    
+    
     {
-      header: "1ª Vez",
+      header: "Estudantes Matriculados pela 1ª Vez",
       accessor: "estudante_matriculado_primeira_vez",
     },
     { header: "Admissão", accessor: "admissao" },
+    {
+      header: "Necessidade Especial", accessor: "necessidade_especial" ,
+    }
+
   ];
 
   function handleListar() {
-    setCurrentPage(1);
-    setFiltrosAplicados(filters);
-  }
+  if (!filters.anoLectivo || !filters.grau || filters.grau === "0") return;
+
+  setCurrentPage(1);
+  setFiltrosAplicados(filters);
+}
 
   return (
     <div className="space-y-6">
@@ -290,7 +293,6 @@ export default function RegistoPrimarioExamesAcesso() {
                   <SelectValue placeholder="Selecione o ano lectivo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Todos</SelectItem>
                   {anosLectivos.map((ano: any) => (
                     <SelectItem
                       key={ano.codigo ?? ano.CODIGO}
