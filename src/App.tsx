@@ -159,6 +159,8 @@ import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExames
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
+import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
+import ListarTopicos from "./pages/access_exam/ListarTopicos";
 
 const App = () => {
   return (
@@ -663,7 +665,10 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
+               
                   <Route path="/exame/admitidos" element={<Admitidos />} />
+                  <Route path="/exame/topicos" element={<ListarTopicos />} />
+                  <Route path="/exame/perguntas" element={<ListarPerguntas />} />
                   <Route
                     path="/exame/estatisticas-diaria"
                     element={<EstatisticasDiaria />}

@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
+import { FormInput } from "@/components/common/FormInput";
 import { TabsContent } from "@/components/ui/tabs";
 
 import {
@@ -51,11 +50,36 @@ export function StudentResultPlan({
   if (!codigoMatricula) {
     return <div>Matrícula inválida</div>;
   }
+  const [search, setSearch] = useState("");
+  const [searchValue, setSearchValue] = useState("");
   const plans = planResponse?.grades ?? [];
+  const totalGradesCurso = planResponse?.totalGradesCurso;
+  const totalGradesAluno = planResponse?.totalGrasesAluno;
+
+  const filteredPlans = useMemo(() => {
+    const term = search.toLowerCase().trim();
+
+    if (!term) return plans;
+
+    return plans.filter((plan) => {
+      const resultado = plan.nota ? "concluido" : "";
+      const ano = `${plan.codigo_classe} ano`;
+      return (
+        plan.disciplina.toLowerCase().includes(term) ||
+        plan.semestre.toLowerCase().includes(term) ||
+        plan.duracao.toLowerCase().includes(term) ||
+        String(plan.nota).includes(term) ||
+        String(plan.classe).includes(term) ||
+        ano.includes(term) ||
+        resultado.includes(term)
+      );
+    });
+  }, [plans, search]);
+
   const exportData = useMemo(
     () =>
       buildExport({
-        data: plans,
+        data: filteredPlans,
         title: "Resultados do Plano de Estudos",
         subtitle: "Lista de Plano de Estudos (s)",
         content: [`Total de Plano de Estudos (s): ${plans.length}`],
@@ -97,7 +121,7 @@ export function StudentResultPlan({
           resultado: plan.nota ? "Concluido" : "",
         }),
       }),
-    [plans],
+    [filteredPlans],
   );
   const enabledExportPdf =
     exportData?.excelProps && exportData?.excelProps && exportData?.fileName;
@@ -109,31 +133,45 @@ export function StudentResultPlan({
           <CardTitle className="text-lg">
             Resultado do plano de Estudo
           </CardTitle>
-          <CardDescription className="flex space-x-2">
-            <div className="flex space-x-1 items-center">
-              <div className="w-4 h-4 bg-emerald-100 dark:bg-emerald-700 rounded-full"></div>
-              <span className="text-xs">U.Curricular concluídas</span>
-            </div>
-            <div className="flex space-x-1 items-center">
-              <div className="w-4 h-4 bg-destructive/70 rounded-full"></div>
-              <span className="text-xs"> U.Curricular não concluídas</span>
+          <CardDescription>
+            <p className="text-xs mb-2 font-medium">
+              {totalGradesAluno} Cadeiras concluidas em um total de {` `}
+              {totalGradesCurso}
+            </p>
+            <div className="flex space-x-2">
+              <div className="flex space-x-1 items-center">
+                <div className="w-4 h-4 bg-emerald-100 dark:bg-emerald-700 rounded-full"></div>
+                <span className="text-xs">U.Curricular concluídas</span>
+              </div>
+              <div className="flex space-x-1 items-center">
+                <div className="w-4 h-4 bg-destructive/70 rounded-full"></div>
+                <span className="text-xs"> U.Curricular não concluídas</span>
+              </div>
             </div>
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
           {enabledExportPdf && (
-            <div className="flex justify-end gap-2 mb-2">
-              <PDFActions
-                document={<GenericPDFDocument {...exportData?.pdfProps} />}
-                fileName={`${exportData.fileName}.pdf`}
-                showDownload
-                showPrint
-              />
-              <ExcelActions
-                excelProps={exportData?.excelProps}
-                fileName={`${exportData.fileName}.xlsx`}
-                showDownload
+            <div className="flex justify-between gap-2 mb-2">
+              <div className="flex">
+                <PDFActions
+                  document={<GenericPDFDocument {...exportData?.pdfProps} />}
+                  fileName={`${exportData.fileName}.pdf`}
+                  showDownload
+                  showPrint
+                />
+                <ExcelActions
+                  excelProps={exportData?.excelProps}
+                  fileName={`${exportData.fileName}.xlsx`}
+                  showDownload
+                />
+              </div>
+              <FormInput
+                placeholder="Entra com uma pesquisa"
+                value={searchValue}
+                onValueChange={(v) => setSearchValue(v)}
+                onDebounce={(v) => setSearch(v)}
               />
             </div>
           )}
@@ -166,7 +204,7 @@ export function StudentResultPlan({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {plans.map((plan) => (
+                    {filteredPlans.map((plan) => (
                       <TableRow
                         key={plan.codigo}
                         className={getRowStyle(plan.nota)}
