@@ -52,7 +52,6 @@ const TABS_CONFIG = [
     component: InscricoesUC,
   },
   {
-
     value: "definir-especialidade",
     label: "Definir Especialidade",
     icon: Book,
@@ -60,12 +59,11 @@ const TABS_CONFIG = [
   },
 
   {
-  value: "diplomar",
-  label: "Diplomar",
-  icon: GraduationCap,
-  component: Diplomar,
-  } , 
-
+    value: "diplomar",
+    label: "Diplomar",
+    icon: GraduationCap,
+    component: Diplomar,
+  },
   {
     value: "mudar-curso",
     label: "Mudança do Curso",
