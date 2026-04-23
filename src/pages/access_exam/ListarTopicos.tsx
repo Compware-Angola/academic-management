@@ -112,6 +112,7 @@ export default function ListarTopicos() {
   };
 
   const openEdit = (t: Topico) => {
+    clearFileInput()
     setEditingTopico(t);
     setFormData({
       designacao: t.designacao,
@@ -126,18 +127,18 @@ export default function ListarTopicos() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type !== "application/pdf") {
-      
-         toast.error(`Formato inválido`, {
-        position: "top-right",
-      });
+
+        toast.error(`Formato inválido`, {
+          position: "top-right",
+        });
         e.target.value = "";
         return;
       }
       setSelectedFile(file);
-       toast.success(`Arquivo selecionado.${file.name} pronto para submissão.`, {
+      toast.success(`Arquivo selecionado.${file.name} pronto para submissão.`, {
         position: "top-right",
       });
-     
+
     }
   };
   const clearFileInput = () => {
@@ -145,20 +146,33 @@ export default function ListarTopicos() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
   const handleSave = async () => {
+    let uploadResponse: any
     if (!formData.designacao.trim() || !formData.anoLetivoId) {
-      
+
       toast.error(`Campos obrigatórios.Preencha a designação e o ano letivo.`, {
         position: "top-right",
       });
       return;
     }
-    const uploadResponse = await uploadMutation.mutateAsync(selectedFile!);
-    if (!uploadResponse.file?.path) {
-    toast.error(`Erro ao Fazer upload`, {
+    if (selectedFile == null && editingTopico == null) {
+      toast.error(`Arquivo obrigatório`, {
         position: "top-right",
       });
       return;
     }
+
+    if (selectedFile) {
+
+      uploadResponse = await uploadMutation.mutateAsync(selectedFile);
+      if (!uploadResponse.file?.path) {
+        toast.error(`Erro ao Fazer upload`, {
+          position: "top-right",
+        });
+        return;
+      }
+
+    }
+
 
     if (editingTopico) {
       updateMutation.mutate(
@@ -166,20 +180,20 @@ export default function ListarTopicos() {
           id: editingTopico.id,
           payload: {
             designacao: formData.designacao,
-            arquivo: uploadResponse.file.filename || editingTopico.arquivo,
+            arquivo: uploadResponse?.file?.filename || editingTopico.arquivo,
           },
         },
         {
           onSuccess: () => {
-           toast.success(`Tópico ${ formData.designacao} Atualizado`, {
-        position: "top-right",
-      });
+            toast.success(`Tópico ${formData.designacao} Atualizado`, {
+              position: "top-right",
+            });
             setDialogOpen(false);
           },
           onError: () => {
-          toast.error(`Erro ao Atualizar`, {
-        position: "top-right",
-      });
+            toast.error(`Erro ao Atualizar`, {
+              position: "top-right",
+            });
           },
         }
       );
@@ -188,20 +202,20 @@ export default function ListarTopicos() {
         {
           designacao: formData.designacao,
           anoLetivoId: Number(formData.anoLetivoId),
-          arquivo: uploadResponse.file.filename || "documento.pdf",
+          arquivo: uploadResponse?.file?.filename || "documento.pdf",
         },
         {
           onSuccess: () => {
-           toast.success(`Tópico criado`, {
-        position: "top-right",
-      });
+            toast.success(`Tópico criado`, {
+              position: "top-right",
+            });
             setDialogOpen(false);
           },
           onError: () => {
-            
-           toast.error(`Erro ao Criar`, {
-        position: "top-right",
-      });
+
+            toast.error(`Erro ao Criar`, {
+              position: "top-right",
+            });
           },
         }
       );
@@ -224,7 +238,7 @@ export default function ListarTopicos() {
       setPdfDialogOpen(true);
     } catch (error: any) {
       console.error("Erro ao abrir PDF:", error.message);
-     toast.error(`Documento Não foi encontrado`, {
+      toast.error(`Documento Não foi encontrado`, {
         position: "top-right",
       });
     }
@@ -240,8 +254,8 @@ export default function ListarTopicos() {
       a.href = fileUrl;
       a.download = t.arquivo;
       a.click();
-     
-       toast.success(`Download iniciado`, {
+
+      toast.success(`Download iniciado`, {
         position: "top-right",
       });
 
@@ -259,16 +273,16 @@ export default function ListarTopicos() {
     if (confirmDeleteId == null) return;
     deleteMutation.mutate(confirmDeleteId, {
       onSuccess: () => {
-       toast.success(`Tópico removido`, {
-        position: "top-right",
-      });
+        toast.success(`Tópico removido`, {
+          position: "top-right",
+        });
         setConfirmDeleteId(null);
       },
       onError: () => {
-   
+
         toast.error(`Erro ao remover`, {
-        position: "top-right",
-      });
+          position: "top-right",
+        });
         setConfirmDeleteId(null);
       },
     });
