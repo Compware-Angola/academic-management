@@ -2,11 +2,16 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
-import { Book, Contact, Key } from "lucide-react";
+import { Book, Contact, GraduationCap, Key } from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
 import { InscricoesUC } from "./inscricoes-uc";
+
+import { DefinirEspecialidade } from "./definir-especialidade";
+
+import { Diplomar } from "./Diplomar";
+
 import { MudarCurso } from "./mudar-curso";
 const TABS_CONFIG = [
   {
@@ -45,6 +50,22 @@ const TABS_CONFIG = [
     icon: Book,
     component: InscricoesUC,
   },
+  {
+
+    value: "definir-especialidade",
+    label: "Definir Especialidade",
+    icon: Book,
+    component: DefinirEspecialidade,
+  },
+
+  {
+    value: "diplomar",
+  label: "Diplomar",
+  icon: GraduationCap,
+  component: Diplomar,
+  }
+
+
   {
     value: "mudar-curso",
     label: "Mudança do Curso",
