@@ -3,13 +3,11 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -39,7 +37,7 @@ import {
   Upload,
   Loader2,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+
 
 import { useCreateTopico, useDeleteTopico, useTopicos, useUpdateTopico } from "@/hooks/access_exam/use-exames-de-acesso.hooks";
 import { Topico } from "@/services/access_exam/topic-exam.service";
@@ -49,9 +47,6 @@ import { parseFilter } from "@/util/parse-filter";
 import { useUploadSingle } from "@/hooks/upload/use-upload-single";
 import { viewFile } from "@/services/upload/upload-single.service";
 import { toast } from "sonner";
-import { ApiError } from "@/error";
-
-
 
 
 
@@ -291,19 +286,120 @@ export default function ListarTopicos() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
 
+
+  // EXPORT
+  const exportRows = useMemo(
+  () =>
+    topicos.map((t) => ({
+      id: t.id,
+      designacao: t.designacao,
+      anoLetivo: t.ano_letivo,
+     
+      criadoEm: t.created_at
+        ? new Date(t.created_at).toLocaleDateString("pt-AO")
+        : "—",
+    })),
+  [topicos]
+);
+const pdfData = exportRows.length
+  ? {
+      filtros: [
+        search ? `Pesquisa: ${search}` : null,
+        filtroAno && filtroAno !== "all"
+          ? `Ano Letivo: ${filtroAno}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
+  : null;
+
+const pdfContent = pdfData ? (
+  <GenericPDFDocument
+    documentTitle="Lista de Tópicos"
+    subtitle="Tópicos dos exames de acesso"
+    infoSections={[
+      {
+        title: "Filtros Aplicados",
+        content: pdfData.filtros || "Sem filtros",
+      },
+    ]}
+    mainTable={{
+      headers: [
+        { key: "id", label: "ID", width: "10%" },
+        { key: "designacao", label: "Designação", width: "30%" },
+        { key: "anoLetivo", label: "Ano Letivo", width: "20%" },
+     
+        { key: "criadoEm", label: "Criado Em", width: "20%" },
+      ],
+      rows: pdfData.rows,
+      headerBackground: "#0D1B48",
+    }}
+    footerNotice="Documento gerado automaticamente pelo sistema."
+  />
+) : null;
+const excelProps = pdfData
+  ? {
+      documentTitle: "Lista de Tópicos",
+      subtitle: "Tópicos dos exames de acesso",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
+        { title: "Resumo", content: [`Total: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "id", label: "ID", width: 10 },
+          { key: "designacao", label: "Designação", width: 30 },
+          { key: "anoLetivo", label: "Ano Letivo", width: 20 },
+          
+          { key: "criadoEm", label: "Criado Em", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+  : null;
+const baseFileName = `Topicos_${new Date()
+  .toISOString()
+  .slice(0, 10)}`;
   // ── render ────────────────────────────────────────────
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Listar Tópicos"
-        subtitle="Gestão de tópicos para os exames de acesso"
-        actions={
-          <Button onClick={openCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Tópico
-          </Button>
-        }
-      />
+   <PageHeader
+  title="Listar Tópicos"
+  subtitle="Gestão de tópicos para os exames de acesso"
+  actions={
+    <div className="flex gap-2">
+      <Button onClick={openCreate}>
+        <Plus className="h-4 w-4 mr-2" />
+        Novo Tópico
+      </Button>
+
+      {pdfContent && (
+        <PDFActions
+          document={pdfContent}
+          fileName={`${baseFileName}.pdf`}
+          showDownload
+          showPrint
+        />
+      )}
+
+      {excelProps && (
+        <ExcelActions
+          excelProps={excelProps}
+          fileName={`${baseFileName}.xlsx`}
+          showDownload
+        />
+      )}
+    </div>
+  }
+/>
 
       <Card>
         <CardContent className="pt-6">
@@ -413,42 +509,47 @@ export default function ListarTopicos() {
                       ? new Date(t.created_at).toLocaleDateString("pt-AO")
                       : "—"}
                   </TableCell>
-                  <TableCell className="text-right space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={!t.arquivo}
-                      onClick={() => openPdf(t)}
-                      title="Ver PDF"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={!t.arquivo}
-                      onClick={() => downloadPdf(t)}
-                      title="Baixar PDF"
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openEdit(t)}
-                      title="Editar"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setConfirmDeleteId(t.id)}
-                      title="Remover"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </TableCell>
+                 <TableCell className="text-right">
+  <div className="flex items-center justify-end gap-1">
+    <Button
+      variant="ghost"
+      size="icon"
+      disabled={!t.arquivo}
+      onClick={() => openPdf(t)}
+      title="Ver PDF"
+    >
+      <Eye className="h-4 w-4" />
+    </Button>
+
+    <Button
+      variant="ghost"
+      size="icon"
+      disabled={!t.arquivo}
+      onClick={() => downloadPdf(t)}
+      title="Baixar PDF"
+    >
+      <Download className="h-4 w-4" />
+    </Button>
+
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => openEdit(t)}
+      title="Editar"
+    >
+      <Edit className="h-4 w-4" />
+    </Button>
+
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setConfirmDeleteId(t.id)}
+      title="Remover"
+    >
+      <Trash2 className="h-4 w-4 text-destructive" />
+    </Button>
+  </div>
+</TableCell>
                 </TableRow>
               ))}
             </TableBody>
