@@ -18,10 +18,14 @@ export function CertidoesSection({ codigoMatricula }: Props) {
     const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
         useQueryAnoAcademico();
 
-    const { data: studentClassInfo, isLoading: isLoadingClassInfo } = useStudentClassInfo({
-        numeroDeMatricula: codigoMatricula,
-        anoLectivo: anoLectivo ? Number(anoLectivo) : undefined,
-    });
+    const { data: studentClassInfo, isLoading: isLoadingClassInfo } =
+  useStudentClassInfo(
+    {
+      numeroDeMatricula: codigoMatricula,
+      anoLectivo: anoLectivo ? Number(anoLectivo) : undefined,
+    },
+    !!codigoMatricula && !!anoLectivo
+  );
 
     const { mutate: gerarCodigo, isPending: isGeneratingCode } = useGenerateDocumentCode();
 
