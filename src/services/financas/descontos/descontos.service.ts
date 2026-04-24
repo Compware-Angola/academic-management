@@ -135,3 +135,8 @@ export async function updateDescontoAdd(
   const { data } = await axiosNestFinance.patch(`/discount/add/${id}`, body);
   return data;
 }
+
+export async function removeAddDiscount(codigo: number) {
+  const { data } = await axiosNestFinance.delete(`/discount/add/${codigo}`);
+  return data;
+}

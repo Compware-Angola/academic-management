@@ -7,12 +7,12 @@ import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
 import { InscricoesUC } from "./inscricoes-uc";
-
 import { DefinirEspecialidade } from "./definir-especialidade";
 
 import { Diplomar } from "./Diplomar";
-
 import { MudarCurso } from "./mudar-curso";
+
+
 const TABS_CONFIG = [
   {
     value: "atualizar-senha",

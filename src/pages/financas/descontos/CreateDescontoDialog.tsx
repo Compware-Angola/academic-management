@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.tsx";
-import { Loader2 } from "lucide-react";
+import { Delete, Loader2 } from "lucide-react";
 
 export type CreateDescontoFormData = {
   descricao: string;
@@ -137,10 +137,16 @@ export function CreateDescontoDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            className="cursor-pointer"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Cancelar
           </Button>
+
           <Button
+            className="cursor-pointer"
             onClick={onSubmit}
             disabled={
               isSubmitting ||
