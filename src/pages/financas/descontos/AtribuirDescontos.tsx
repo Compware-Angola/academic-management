@@ -13,6 +13,9 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Trash,
+  Edit,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -44,6 +47,7 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { useMutationRemoveDiscount } from "@/hooks/financas/descontos/use-mutation-remove-discount";
 
 interface AtribuirItem {
   codigo_matricula: number;
@@ -71,6 +75,8 @@ export default function AtribuirDescontos() {
   // filter inputs
 
   const [matriculaInput, setMatriculaInput] = useState("");
+  const [codigoDesconto, setCodigoDesconto] = useState<number | null>(null);
+  const mutationRemoveDiscount = useMutationRemoveDiscount();
 
   const [filters, setFilters] = useState({
     desconto: "",
@@ -117,6 +123,7 @@ export default function AtribuirDescontos() {
   const {
     data,
     isFetching: queryFetching,
+    isLoading: isQueryLoading,
     refetch,
   } = useQueryFetchDescontosAdd({
     page: page,
@@ -150,7 +157,7 @@ export default function AtribuirDescontos() {
   >(undefined);
 
   const openEditModal = (row: AtribuirItem) => {
-    setEditingId(row.codigo ?? null); // 'codigo' parece ser o ID da atribuição na sua interface
+    setEditingId(row.codigo ?? null);
     setModalInitial({
       observacao: row.observacao ?? undefined,
       codigoMatricula: row.codigo_matricula,
@@ -160,6 +167,17 @@ export default function AtribuirDescontos() {
       semestre: row.semestre ?? undefined,
     });
     setIsModalOpen(true);
+  };
+
+  const handleRemoveDiscount = async (codigo: number) => {
+    setCodigoDesconto(codigo);
+    try {
+      await mutationRemoveDiscount.mutateAsync(codigo);
+    } catch (error) {
+      toast.error("Erro ao remover desconto: " + getErrorMessage(error));
+    } finally {
+      setCodigoDesconto(null);
+    }
   };
 
   const handleSubmitAssign = async (body: CreateDescontoAddBody) => {
@@ -353,7 +371,7 @@ export default function AtribuirDescontos() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {effectiveFetching ? (
+              {isQueryLoading ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
                     Carregando...
@@ -378,11 +396,33 @@ export default function AtribuirDescontos() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
-                          size="sm"
+                          aria-label="Editar desconto"
                           variant="outline"
+                          title="Editar desconto"
+                          size="icon"
                           onClick={() => openEditModal(item)}
                         >
-                          Editar
+                          <Edit aria-hidden="true" />
+                        </Button>
+                        <Button
+                          aria-label="Deletar desconto"
+                          title="Deletar desconto"
+                          className="cursor-pointer"
+                          size="icon"
+                          disabled={codigoDesconto === item.codigo}
+                          variant="destructive"
+                          onClick={() => {
+                            if (item.codigo) {
+                              handleRemoveDiscount(item.codigo);
+                            }
+                          }}
+                        >
+                          {codigoDesconto === item.codigo &&
+                          mutationRemoveDiscount.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash aria-hidden="true" className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </TableCell>
