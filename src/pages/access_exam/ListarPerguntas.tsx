@@ -406,7 +406,7 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
                       <XCircle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm leading-snug break-words">
+                      <p className="text-sm leading-snug wrap-break-word">
                         <LatexText text={r.descricao} />
                       </p>
                       {isCorreta && (
