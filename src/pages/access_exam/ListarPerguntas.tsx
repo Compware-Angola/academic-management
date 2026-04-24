@@ -31,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import {
   Plus,
   Search,
@@ -42,6 +43,7 @@ import {
   Save,
   Loader2,
   AlertTriangle,
+  Eye,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -64,8 +66,6 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { LatexText } from "@/util/LatexText";
 
-import { Editor } from 'primereact/editor';
-
 // ─── constantes ──────────────────────────────────────────────────────────────
 
 const TIPO_RESPOSTA_CORRETA_ID = 1;
@@ -83,8 +83,113 @@ export const tipoBadgeVariant: Record<
   3: { label: "Normal", variant: "outline" },
 };
 
+// ─── VisualizarPergunta ───────────────────────────────────────────────────────
+// Dialog de visualização completa — enunciado + todas as respostas
+
+function VisualizarPergunta({ pergunta }: { pergunta: Pergunta }) {
+  const { data: respostas = [], isLoading } = useRespostasByPergunta(
+    pergunta.id
+  );
+
+  return (
+    <div className="space-y-5">
+      {/* enunciado */}
+      <div className="space-y-1">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Enunciado
+        </p>
+        <div className="rounded-md border bg-muted/40 p-4 text-sm leading-relaxed">
+          <LatexText text={pergunta.descricao} />
+        </div>
+      </div>
+
+      {/* meta */}
+      <div className="flex flex-wrap gap-3 text-sm">
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Disciplina:</span>
+          <span className="font-medium">{pergunta.disciplina}</span>
+        </div>
+        <Separator orientation="vertical" className="h-4 self-center" />
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Tipo:</span>
+          <Badge variant={tipoBadgeVariant[pergunta.tipo_pergunta_id]?.variant}>
+            {tipoBadgeVariant[pergunta.tipo_pergunta_id]?.label ??
+              pergunta.tipo_pergunta}
+          </Badge>
+        </div>
+        <Separator orientation="vertical" className="h-4 self-center" />
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Cotação:</span>
+          <Badge variant="outline">{pergunta.cotacao}</Badge>
+        </div>
+        {pergunta.created_at && (
+          <>
+            <Separator orientation="vertical" className="h-4 self-center" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground">Criado em:</span>
+              <span className="font-medium">
+                {new Date(pergunta.created_at).toLocaleDateString("pt-AO")}
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+
+      <Separator />
+
+      {/* respostas */}
+      <div className="space-y-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Respostas ({isLoading ? "…" : respostas.length})
+        </p>
+
+        {isLoading && (
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
+        {!isLoading && respostas.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            Sem respostas registadas.
+          </p>
+        )}
+
+        <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+          {respostas.map((r, idx) => {
+            const isCorreta = r.tipo_resposta_id === TIPO_RESPOSTA_CORRETA_ID;
+            return (
+              <div
+                key={r.id}
+                className={`flex items-start gap-3 rounded-md border p-3 text-sm transition-colors ${
+                  isCorreta
+                    ? "border-primary/30 bg-primary/5"
+                    : "bg-muted/20"
+                }`}
+              >
+                <span className="shrink-0 mt-0.5 font-semibold text-muted-foreground w-5 text-center">
+                  {String.fromCharCode(65 + idx)}.
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="leading-snug break-words">
+                    <LatexText text={r.descricao} />
+                  </p>
+                </div>
+                {isCorreta ? (
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── RespostasManager ─────────────────────────────────────────────────────────
-// Sem Dialog aninhado — confirmação de delete é inline no próprio card
 
 function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
   const { toast } = useToast();
@@ -187,7 +292,7 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
         <TabsTrigger value="nova">Nova resposta</TabsTrigger>
       </TabsList>
 
-      {/* ── lista ─────────────────────────────────────────────────────────── */}
+      {/* ── lista ── */}
       <TabsContent
         value="lista"
         className="space-y-2 mt-4 max-h-[360px] overflow-y-auto pr-1"
@@ -211,7 +316,6 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
 
           return (
             <div key={r.id} className="rounded-md border p-3 text-sm">
-
               {/* modo edição */}
               {isEditing && (
                 <div className="space-y-3">
@@ -303,7 +407,7 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
                       <XCircle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm leading-snug wrap-break-word">
+                      <p className="text-sm leading-snug break-words">
                         <LatexText text={r.descricao} />
                       </p>
                       {isCorreta && (
@@ -340,7 +444,7 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
         })}
       </TabsContent>
 
-      {/* ── nova ──────────────────────────────────────────────────────────── */}
+      {/* ── nova ── */}
       <TabsContent value="nova" className="space-y-4 mt-4">
         <div className="space-y-2">
           <Label htmlFor="novoTexto">Texto da resposta</Label>
@@ -394,7 +498,7 @@ export default function ListarPerguntas() {
 
   // ── filtros ───────────────────────────────────────────────────────────────
   const [searchInput, setSearchInput] = useState("");
-  const search = useDebounce(searchInput, 400); // evita query a cada tecla
+  const search = useDebounce(searchInput, 400);
   const [filtroDisciplina, setFiltroDisciplina] = useState("todos");
   const [page, setPage] = useState(1);
 
@@ -423,11 +527,13 @@ export default function ListarPerguntas() {
     cotacao: 1,
   });
 
-  // ── respostas dialog ──────────────────────────────────────────────────────
+  // ── dialogs ───────────────────────────────────────────────────────────────
   const [rDialogOpen, setRDialogOpen] = useState(false);
   const [activePergunta, setActivePergunta] = useState<Pergunta | null>(null);
 
-  // ── delete confirm (pergunta) ─────────────────────────────────────────────
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewingPergunta, setViewingPergunta] = useState<Pergunta | null>(null);
+
   const [confirmDeletePergunta, setConfirmDeletePergunta] = useState<number | null>(null);
 
   // ── handlers ──────────────────────────────────────────────────────────────
@@ -446,6 +552,16 @@ export default function ListarPerguntas() {
       cotacao: p.cotacao,
     });
     setPDialogOpen(true);
+  };
+
+  const openViewPergunta = (p: Pergunta) => {
+    setViewingPergunta(p);
+    setViewDialogOpen(true);
+  };
+
+  const closeViewPergunta = () => {
+    setViewDialogOpen(false);
+    setTimeout(() => setViewingPergunta(null), 300);
   };
 
   const savePergunta = () => {
@@ -505,7 +621,6 @@ export default function ListarPerguntas() {
 
   const closeRespostas = () => {
     setRDialogOpen(false);
-    // limpa após animação de fecho
     setTimeout(() => setActivePergunta(null), 300);
   };
 
@@ -529,16 +644,16 @@ export default function ListarPerguntas() {
 
   const pdfData = exportRows.length
     ? {
-      filtros: [
-        searchInput ? `Pesquisa: ${searchInput}` : null,
-        filtroDisciplina && filtroDisciplina !== "todos"
-          ? `Disciplina: ${filtroDisciplina}`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" | "),
-      rows: exportRows,
-    }
+        filtros: [
+          searchInput ? `Pesquisa: ${searchInput}` : null,
+          filtroDisciplina && filtroDisciplina !== "todos"
+            ? `Disciplina: ${filtroDisciplina}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        rows: exportRows,
+      }
     : null;
 
   const pdfContent = pdfData ? (
@@ -568,29 +683,29 @@ export default function ListarPerguntas() {
 
   const excelProps = pdfData
     ? {
-      documentTitle: "Lista de Perguntas",
-      subtitle: "Banco de perguntas dos exames de acesso",
-      infoSections: [
-        {
-          title: "Filtros Aplicados",
-          content: pdfData.filtros || "Sem filtros",
-        },
-        { title: "Resumo", content: [`Total: ${exportRows.length}`] },
-      ],
-      mainTable: {
-        headers: [
-          { key: "id", label: "ID", width: 10 },
-          { key: "enunciado", label: "Enunciado", width: 50 },
-          { key: "disciplina", label: "Disciplina", width: 25 },
-          { key: "tipo", label: "Tipo", width: 20 },
-          { key: "cotacao", label: "Cotação", width: 15 },
-          { key: "criadoEm", label: "Criado Em", width: 20 },
+        documentTitle: "Lista de Perguntas",
+        subtitle: "Banco de perguntas dos exames de acesso",
+        infoSections: [
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
+          { title: "Resumo", content: [`Total: ${exportRows.length}`] },
         ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
+        mainTable: {
+          headers: [
+            { key: "id", label: "ID", width: 10 },
+            { key: "enunciado", label: "Enunciado", width: 50 },
+            { key: "disciplina", label: "Disciplina", width: 25 },
+            { key: "tipo", label: "Tipo", width: 20 },
+            { key: "cotacao", label: "Cotação", width: 15 },
+            { key: "criadoEm", label: "Criado Em", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
     : null;
 
   const baseFileName = `Perguntas_${new Date().toISOString().slice(0, 10)}`;
@@ -700,10 +815,7 @@ export default function ListarPerguntas() {
               {perguntas.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{p.id}</TableCell>
-                  <TableCell
-                    className="max-w-[320px]"
-                    title={p.descricao}
-                  >
+                  <TableCell className="max-w-[320px]" title={p.descricao}>
                     <div className="truncate">
                       <LatexText text={p.descricao} />
                     </div>
@@ -727,6 +839,16 @@ export default function ListarPerguntas() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
+                      {/* ── Ver ── */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openViewPergunta(p)}
+                        title="Ver pergunta"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {/* ── Gerir respostas ── */}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -735,6 +857,7 @@ export default function ListarPerguntas() {
                       >
                         <ListChecks className="h-4 w-4" />
                       </Button>
+                      {/* ── Editar ── */}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -743,6 +866,7 @@ export default function ListarPerguntas() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+                      {/* ── Remover ── */}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -788,6 +912,58 @@ export default function ListarPerguntas() {
         </CardContent>
       </Card>
 
+      {/* ── Ver Pergunta ──────────────────────────────────────────────────── */}
+  <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+  <DialogHeader>
+    <DialogTitle className="flex items-center gap-2">
+      <Eye className="h-5 w-5" />
+      Detalhes da Pergunta
+      {viewingPergunta && (
+        <Badge variant="outline" className="ml-1 text-xs font-normal">
+          #{viewingPergunta.id}
+        </Badge>
+      )}
+    </DialogTitle>
+  </DialogHeader>
+
+  <div className="flex-1 overflow-y-auto px-1">
+    {viewingPergunta && (
+      <VisualizarPergunta pergunta={viewingPergunta} />
+    )}
+  </div>
+
+  <DialogFooter className="gap-2 mt-2">
+    <Button variant="outline" onClick={closeViewPergunta}>
+      Fechar
+    </Button>
+
+    {viewingPergunta && (
+      <>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            closeViewPergunta();
+            setTimeout(() => openRespostas(viewingPergunta!), 350);
+          }}
+        >
+          <ListChecks className="h-4 w-4 mr-2" />
+          Gerir respostas
+        </Button>
+
+        <Button
+          onClick={() => {
+            closeViewPergunta();
+            setTimeout(() => openEditPergunta(viewingPergunta!), 350);
+          }}
+        >
+          <Edit className="h-4 w-4 mr-2" />
+          Editar
+        </Button>
+      </>
+    )}
+  </DialogFooter>
+</DialogContent>
+
       {/* ── Pergunta Create / Edit ─────────────────────────────────────────── */}
       <Dialog open={pDialogOpen} onOpenChange={setPDialogOpen}>
         <DialogContent className="max-w-2xl">
@@ -802,19 +978,6 @@ export default function ListarPerguntas() {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="enunciado">Enunciado *</Label>
-              {/*
-              <Editor
-                value={pForm.enunciado}
-                onTextChange={(e) =>
-                  setPForm((prev) => ({
-                    ...prev,
-                    enunciado: e.htmlValue ?? "",
-                  }))
-                }
-                style={{ height: "320px" }}
-              />
-              */}
-
               <Textarea
                 id="enunciado"
                 rows={6}
@@ -828,7 +991,6 @@ export default function ListarPerguntas() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Disciplina *</Label>
-                {/* sem enableDefaultSelectItem — "Todos" não faz sentido num form */}
                 <DisciplinaCommandSelect
                   value={pForm.disciplinaId}
                   onChangeValue={(v) =>
@@ -942,7 +1104,6 @@ export default function ListarPerguntas() {
             <Button
               variant="destructive"
               onClick={() => {
-                // trocar por useDeletePergunta quando o endpoint existir
                 toast({ title: "Funcionalidade em desenvolvimento." });
                 setConfirmDeletePergunta(null);
               }}
