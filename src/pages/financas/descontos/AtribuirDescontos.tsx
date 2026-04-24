@@ -48,6 +48,7 @@ import { InstituicaoSelect } from "@/components/common/global-selects/Instituica
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { useMutationRemoveDiscount } from "@/hooks/financas/descontos/use-mutation-remove-discount";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AtribuirItem {
   codigo_matricula: number;
@@ -77,6 +78,7 @@ export default function AtribuirDescontos() {
   const [matriculaInput, setMatriculaInput] = useState("");
   const [codigoDesconto, setCodigoDesconto] = useState<number | null>(null);
   const mutationRemoveDiscount = useMutationRemoveDiscount();
+  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
 
   const [filters, setFilters] = useState({
     desconto: "",
@@ -177,6 +179,39 @@ export default function AtribuirDescontos() {
       toast.error("Erro ao remover desconto: " + getErrorMessage(error));
     } finally {
       setCodigoDesconto(null);
+    }
+  };
+  const handleRemoveSelected = async () => {
+    try {
+      const ids = Array.from(selectedItems);
+
+      await Promise.all(
+        ids.map((id) => mutationRemoveDiscount.mutateAsync(id)),
+      );
+
+      setSelectedItems(new Set());
+      await refetch();
+    } catch (error) {
+      toast.error("Erro ao remover selecionados");
+    }
+  };
+
+  const toggleSelect = (codigo: number) => {
+    setSelectedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(codigo)) {
+        newSet.delete(codigo);
+      } else {
+        newSet.add(codigo);
+      }
+      return newSet;
+    });
+  };
+  const toggleSelectAll = () => {
+    if (selectedItems.size === items.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(items.map((i) => i.codigo!).filter(Boolean)));
     }
   };
 
@@ -343,23 +378,45 @@ export default function AtribuirDescontos() {
           </div>
         </CardContent>
       </Card>
-
-      <Button
-        className="gap-2 mb-2"
-        onClick={() => {
-          setEditingId(null);
-          setModalInitial(undefined);
-          setIsModalOpen(true);
-        }}
-      >
-        Atribuir Desconto
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          className="gap-2 mb-2"
+          onClick={() => {
+            setEditingId(null);
+            setModalInitial(undefined);
+            setIsModalOpen(true);
+          }}
+        >
+          Atribuir Desconto
+        </Button>
+        <Button
+          variant="destructive"
+          disabled={
+            selectedItems.size === 0 || mutationRemoveDiscount.isPending
+          }
+          onClick={handleRemoveSelected}
+        >
+          {mutationRemoveDiscount.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : null}
+          Remover selecionados ({selectedItems.size})
+        </Button>
+      </div>
 
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>
+                  <Checkbox
+                    className="cursor-pointer"
+                    checked={
+                      selectedItems.size === items.length && items.length > 0
+                    }
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead>Matrícula</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Instituição</TableHead>
@@ -379,7 +436,19 @@ export default function AtribuirDescontos() {
                 </TableRow>
               ) : (
                 items.map((item, idx) => (
-                  <TableRow key={`${item.codigo_matricula}-${idx}`}>
+                  <TableRow
+                    key={`${item.codigo_matricula}-${idx}`}
+                    className={
+                      selectedItems.has(item.codigo!) ? "opacity-50" : ""
+                    }
+                  >
+                    <TableCell>
+                      <Checkbox
+                        className="cursor-pointer"
+                        checked={selectedItems.has(item.codigo!)}
+                        onCheckedChange={() => toggleSelect(item.codigo!)}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       {item.codigo_matricula}
                     </TableCell>
@@ -400,6 +469,7 @@ export default function AtribuirDescontos() {
                           variant="outline"
                           title="Editar desconto"
                           size="icon"
+                          disabled={selectedItems.has(item.codigo!)}
                           onClick={() => openEditModal(item)}
                         >
                           <Edit aria-hidden="true" />
@@ -409,7 +479,7 @@ export default function AtribuirDescontos() {
                           title="Deletar desconto"
                           className="cursor-pointer"
                           size="icon"
-                          disabled={codigoDesconto === item.codigo}
+                          disabled={codigoDesconto === item.codigo || selectedItems.has(item.codigo!)}
                           variant="destructive"
                           onClick={() => {
                             if (item.codigo) {
