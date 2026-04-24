@@ -64,6 +64,8 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { LatexText } from "@/util/LatexText";
 
+import { Editor } from 'primereact/editor';
+
 // ─── constantes ──────────────────────────────────────────────────────────────
 
 const TIPO_RESPOSTA_CORRETA_ID = 1;
@@ -527,16 +529,16 @@ export default function ListarPerguntas() {
 
   const pdfData = exportRows.length
     ? {
-        filtros: [
-          searchInput ? `Pesquisa: ${searchInput}` : null,
-          filtroDisciplina && filtroDisciplina !== "todos"
-            ? `Disciplina: ${filtroDisciplina}`
-            : null,
-        ]
-          .filter(Boolean)
-          .join(" | "),
-        rows: exportRows,
-      }
+      filtros: [
+        searchInput ? `Pesquisa: ${searchInput}` : null,
+        filtroDisciplina && filtroDisciplina !== "todos"
+          ? `Disciplina: ${filtroDisciplina}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      rows: exportRows,
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -566,29 +568,29 @@ export default function ListarPerguntas() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Lista de Perguntas",
-        subtitle: "Banco de perguntas dos exames de acesso",
-        infoSections: [
-          {
-            title: "Filtros Aplicados",
-            content: pdfData.filtros || "Sem filtros",
-          },
-          { title: "Resumo", content: [`Total: ${exportRows.length}`] },
-        ],
-        mainTable: {
-          headers: [
-            { key: "id", label: "ID", width: 10 },
-            { key: "enunciado", label: "Enunciado", width: 50 },
-            { key: "disciplina", label: "Disciplina", width: 25 },
-            { key: "tipo", label: "Tipo", width: 20 },
-            { key: "cotacao", label: "Cotação", width: 15 },
-            { key: "criadoEm", label: "Criado Em", width: 20 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Lista de Perguntas",
+      subtitle: "Banco de perguntas dos exames de acesso",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        { title: "Resumo", content: [`Total: ${exportRows.length}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "id", label: "ID", width: 10 },
+          { key: "enunciado", label: "Enunciado", width: 50 },
+          { key: "disciplina", label: "Disciplina", width: 25 },
+          { key: "tipo", label: "Tipo", width: 20 },
+          { key: "cotacao", label: "Cotação", width: 15 },
+          { key: "criadoEm", label: "Criado Em", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Perguntas_${new Date().toISOString().slice(0, 10)}`;
@@ -800,9 +802,22 @@ export default function ListarPerguntas() {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="enunciado">Enunciado *</Label>
+              {/*
+              <Editor
+                value={pForm.enunciado}
+                onTextChange={(e) =>
+                  setPForm((prev) => ({
+                    ...prev,
+                    enunciado: e.htmlValue ?? "",
+                  }))
+                }
+                style={{ height: "320px" }}
+              />
+              */}
+
               <Textarea
                 id="enunciado"
-                rows={3}
+                rows={6}
                 value={pForm.enunciado}
                 onChange={(e) =>
                   setPForm((s) => ({ ...s, enunciado: e.target.value }))
