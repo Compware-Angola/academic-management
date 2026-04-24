@@ -161,10 +161,11 @@ function VisualizarPergunta({ pergunta }: { pergunta: Pergunta }) {
             return (
               <div
                 key={r.id}
-                className={`flex items-start gap-3 rounded-md border p-3 text-sm transition-colors ${isCorreta
-                    ? "border-primary/30 bg-primary/5"
-                    : "bg-muted/20"
-                  }`}
+               className={`flex items-start gap-3 rounded-md border p-3 text-sm transition-colors ${
+  isCorreta
+    ? "border-green-500 bg-green-50 text-green-700"
+    : "bg-muted/20 border-border"
+}`}
               >
                 <span className="shrink-0 mt-0.5 font-semibold text-muted-foreground w-5 text-center">
                   {String.fromCharCode(65 + idx)}.
@@ -409,11 +410,11 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
                       <p className="text-sm leading-snug wrap-break-word">
                         <LatexText text={r.descricao} />
                       </p>
-                      {isCorreta && (
-                        <Badge variant="default" className="mt-1 text-xs">
-                          Resposta correcta
-                        </Badge>
-                      )}
+                     {isCorreta && (
+  <Badge className="mt-1 text-xs bg-green-100 text-green-700 border-green-300 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700">
+    Resposta correcta
+  </Badge>
+)}
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
@@ -1064,7 +1065,7 @@ export default function ListarPerguntas() {
 
       {/* ── Respostas Manager ─────────────────────────────────────────────── */}
       <Dialog open={rDialogOpen} onOpenChange={(o) => !o && closeRespostas()}>
-        <DialogContent className="max-w-2xl">
+         <DialogContent className="max-w-2xl! w-full! max-h-[90vh]! overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ListChecks className="h-5 w-5" />
