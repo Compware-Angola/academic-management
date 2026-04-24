@@ -4,427 +4,903 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Edit, Trash2, ListChecks, CheckCircle2, XCircle, Save } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  ListChecks,
+  CheckCircle2,
+  XCircle,
+  Save,
+  Loader2,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Pergunta, Resposta } from "@/services/access_exam/questions.service";
+import { useCreatePergunta, useCreateResposta, useDeleteResposta, usePerguntas, useRespostasByPergunta, useUpdatePergunta, useUpdateResposta } from "@/hooks/access_exam/use-exames-de-acesso.hooks";
+import { useTiposPerguntaList } from "@/hooks/access_exam/use-tipos-disciplinas.hooks";
+import { DisciplinaCommandSelect } from "./components/Disciplinacommandselect";
+import { parseFilter } from "@/util/parse-filter";
 
-interface Resposta {
-  id: number;
-  perguntaId: number;
-  texto: string;
-  correta: boolean;
-}
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { LatexText } from "@/util/LatexText";
 
-interface Pergunta {
-  id: number;
-  enunciado: string;
-  topicoId: number;
-  topico: string;
-  dificuldade: "Fácil" | "Médio" | "Difícil";
-  tipo: "Escolha Múltipla" | "Desenvolvimento";
-  estado: "Activa" | "Inactiva";
-  pontuacao: number;
-}
 
-const TOPICOS = [
-  { id: 1, nome: "Matemática Geral" },
-  { id: 2, nome: "Física Mecânica" },
-  { id: 3, nome: "Química Orgânica" },
-  { id: 4, nome: "Biologia Celular" },
-  { id: 5, nome: "Português - Gramática" },
-];
 
-const initialPerguntas: Pergunta[] = [
-  { id: 1, enunciado: "Qual é a derivada de x²?", topicoId: 1, topico: "Matemática Geral", dificuldade: "Fácil", tipo: "Escolha Múltipla", estado: "Activa", pontuacao: 2 },
-  { id: 2, enunciado: "Calcule a força resultante de duas forças perpendiculares de 3N e 4N.", topicoId: 2, topico: "Física Mecânica", dificuldade: "Médio", tipo: "Desenvolvimento", estado: "Activa", pontuacao: 4 },
-  { id: 3, enunciado: "Identifique o grupo funcional do composto CH3-CO-CH3.", topicoId: 3, topico: "Química Orgânica", dificuldade: "Difícil", tipo: "Escolha Múltipla", estado: "Inactiva", pontuacao: 5 },
-  { id: 4, enunciado: "Descreva as fases da mitose celular.", topicoId: 4, topico: "Biologia Celular", dificuldade: "Médio", tipo: "Desenvolvimento", estado: "Activa", pontuacao: 4 },
-  { id: 5, enunciado: "Classifique a oração subordinada substantiva.", topicoId: 5, topico: "Português - Gramática", dificuldade: "Fácil", tipo: "Escolha Múltipla", estado: "Activa", pontuacao: 2 },
-];
+const TIPO_RESPOSTA_CORRETA_ID = 1; // id que representa "Verdadeira / Correcta"
+const TIPO_RESPOSTA_ERRADA_ID = 2;  // id que representa "Falsa / Errada"
 
-const initialRespostas: Resposta[] = [
-  { id: 1, perguntaId: 1, texto: "2x", correta: true },
-  { id: 2, perguntaId: 1, texto: "x", correta: false },
-  { id: 3, perguntaId: 1, texto: "x²/2", correta: false },
-  { id: 4, perguntaId: 1, texto: "2", correta: false },
-  { id: 5, perguntaId: 3, texto: "Cetona", correta: true },
-  { id: 6, perguntaId: 3, texto: "Aldeído", correta: false },
-  { id: 7, perguntaId: 3, texto: "Éter", correta: false },
-  { id: 8, perguntaId: 5, texto: "Objectiva directa", correta: true },
-  { id: 9, perguntaId: 5, texto: "Adverbial", correta: false },
-];
+type BadgeVariant = "default" | "secondary" | "outline" | "destructive";
 
-const dificuldadeBadge = (d: Pergunta["dificuldade"]) =>
-  d === "Fácil" ? "default" : d === "Médio" ? "secondary" : "destructive";
+export const tipoBadgeVariant: Record<number, { label: string; variant: BadgeVariant }> = {
+  1: { label: "Verdadeiro/Falso", variant: "secondary" },
+  2: { label: "Múltipla", variant: "default" },
+  3: { label: "Normal", variant: "outline" },
+};
+// ─── componente interno: respostas de uma pergunta ───────────────────────────
 
-export default function ListarPerguntas() {
+function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
   const { toast } = useToast();
-  const [perguntas, setPerguntas] = useState<Pergunta[]>(initialPerguntas);
-  const [respostas, setRespostas] = useState<Resposta[]>(initialRespostas);
 
-  const [search, setSearch] = useState("");
-  const [filtroDificuldade, setFiltroDificuldade] = useState("todos");
-  const [filtroTopico, setFiltroTopico] = useState("todos");
+  const { data: respostas = [], isLoading } = useRespostasByPergunta(pergunta.id);
 
-  // Pergunta dialog (create/edit)
-  const [pDialogOpen, setPDialogOpen] = useState(false);
-  const [editingPergunta, setEditingPergunta] = useState<Pergunta | null>(null);
-  const [pForm, setPForm] = useState({
-    enunciado: "", topicoId: "", dificuldade: "Fácil" as Pergunta["dificuldade"],
-    tipo: "Escolha Múltipla" as Pergunta["tipo"], estado: true, pontuacao: 1,
-  });
+  const createResposta = useCreateResposta();
+  const updateResposta = useUpdateResposta();
+  const deleteResposta = useDeleteResposta();
 
-  // Respostas manager dialog
-  const [rDialogOpen, setRDialogOpen] = useState(false);
-  const [activePergunta, setActivePergunta] = useState<Pergunta | null>(null);
   const [novaResposta, setNovaResposta] = useState({ texto: "", correta: false });
   const [editingRespostaId, setEditingRespostaId] = useState<number | null>(null);
   const [editRespostaForm, setEditRespostaForm] = useState({ texto: "", correta: false });
-
-  const [confirmDeletePergunta, setConfirmDeletePergunta] = useState<number | null>(null);
   const [confirmDeleteResposta, setConfirmDeleteResposta] = useState<number | null>(null);
 
-  const filtered = useMemo(() => perguntas.filter((p) => {
-    const matchSearch = p.enunciado.toLowerCase().includes(search.toLowerCase());
-    const matchDif = filtroDificuldade === "todos" || p.dificuldade === filtroDificuldade;
-    const matchTop = filtroTopico === "todos" || p.topicoId === Number(filtroTopico);
-    return matchSearch && matchDif && matchTop;
-  }), [perguntas, search, filtroDificuldade, filtroTopico]);
+  const addResposta = () => {
+    if (!novaResposta.texto.trim()) return;
+    createResposta.mutate(
+      {
+        descricao: novaResposta.texto,
+        tipoRespostaId: novaResposta.correta
+          ? TIPO_RESPOSTA_CORRETA_ID
+          : TIPO_RESPOSTA_ERRADA_ID,
+        perguntaId: pergunta.id,
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Resposta adicionada" });
+          setNovaResposta({ texto: "", correta: false });
+        },
+        onError: () =>
+          toast({ title: "Erro ao adicionar resposta", variant: "destructive" }),
+      }
+    );
+  };
 
-  const respostasDe = (perguntaId: number) => respostas.filter((r) => r.perguntaId === perguntaId);
+  const startEditResposta = (r: Resposta) => {
+    setEditingRespostaId(r.id);
+    setEditRespostaForm({
+      texto: r.descricao,
+      correta: r.tipo_resposta_id === TIPO_RESPOSTA_CORRETA_ID,
+    });
+  };
 
+  const saveEditResposta = () => {
+    if (editingRespostaId == null) return;
+    updateResposta.mutate(
+      {
+        id: editingRespostaId,
+        payload: {
+          descricao: editRespostaForm.texto,
+          tipoRespostaId: editRespostaForm.correta
+            ? TIPO_RESPOSTA_CORRETA_ID
+            : TIPO_RESPOSTA_ERRADA_ID,
+          perguntaId: pergunta.id,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast({ title: "Resposta atualizada" });
+          setEditingRespostaId(null);
+        },
+        onError: () =>
+          toast({ title: "Erro ao atualizar resposta", variant: "destructive" }),
+      }
+    );
+  };
+
+  const handleDeleteResposta = () => {
+    if (confirmDeleteResposta == null) return;
+    deleteResposta.mutate(
+      { id: confirmDeleteResposta, perguntaId: pergunta.id },
+      {
+        onSuccess: () => {
+          toast({ title: "Resposta removida" });
+          setConfirmDeleteResposta(null);
+        },
+        onError: () =>
+          toast({ title: "Erro ao remover resposta", variant: "destructive" }),
+      }
+    );
+  };
+
+  return (
+    <>
+      <Tabs defaultValue="lista" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="lista">
+            Lista ({isLoading ? "…" : respostas.length})
+          </TabsTrigger>
+          <TabsTrigger value="nova">Nova resposta</TabsTrigger>
+        </TabsList>
+
+        {/* ── lista ── */}
+        <TabsContent
+          value="lista"
+          className="space-y-2 mt-4 max-h-[400px] overflow-y-auto"
+        >
+          {isLoading && (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {!isLoading && respostas.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              Sem respostas. Adicione uma na aba "Nova resposta".
+            </p>
+          )}
+
+          {respostas.map((r) => {
+            const isCorreta = r.tipo_resposta_id === TIPO_RESPOSTA_CORRETA_ID;
+            return (
+              <div key={r.id} className="rounded-md border p-3">
+                {editingRespostaId === r.id ? (
+                  <div className="space-y-3">
+                    <Textarea
+                      rows={2}
+                      value={editRespostaForm.texto}
+                      onChange={(e) =>
+                        setEditRespostaForm((s) => ({
+                          ...s,
+                          texto: e.target.value,
+                        }))
+                      }
+                    />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={editRespostaForm.correta}
+                          onCheckedChange={(v) =>
+                            setEditRespostaForm((s) => ({ ...s, correta: v }))
+                          }
+                        />
+                        <Label className="text-sm">Correcta</Label>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setEditingRespostaId(null)}
+                          disabled={updateResposta.isPending}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={saveEditResposta}
+                          disabled={updateResposta.isPending}
+                        >
+                          {updateResposta.isPending ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <Save className="h-3 w-3 mr-1" />
+                          )}
+                          Guardar
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2 flex-1">
+                      {isCorreta ? (
+                        <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm">{r.descricao}</p>
+                        {isCorreta && (
+                          <Badge variant="default" className="mt-1 text-xs">
+                            Resposta correcta
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => startEditResposta(r)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setConfirmDeleteResposta(r.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </TabsContent>
+
+        {/* ── nova ── */}
+        <TabsContent value="nova" className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="novoTexto">Texto da resposta</Label>
+            <Textarea
+              id="novoTexto"
+              rows={3}
+              value={novaResposta.texto}
+              onChange={(e) =>
+                setNovaResposta((s) => ({ ...s, texto: e.target.value }))
+              }
+              placeholder="Escreva a resposta..."
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-md border p-3">
+            <Label htmlFor="correta">Marcar como correcta</Label>
+            <Switch
+              id="correta"
+              checked={novaResposta.correta}
+              onCheckedChange={(v) =>
+                setNovaResposta((s) => ({ ...s, correta: v }))
+              }
+            />
+          </div>
+          <Button
+            onClick={addResposta}
+            className="w-full"
+            disabled={!novaResposta.texto.trim() || createResposta.isPending}
+          >
+            {createResposta.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
+            Adicionar resposta
+          </Button>
+        </TabsContent>
+      </Tabs>
+
+      {/* Confirm delete resposta */}
+      <Dialog
+        open={confirmDeleteResposta !== null}
+        onOpenChange={(o) => !o && setConfirmDeleteResposta(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remover resposta</DialogTitle>
+            <DialogDescription>
+              Esta acção não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDeleteResposta(null)}
+              disabled={deleteResposta.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteResposta}
+              disabled={deleteResposta.isPending}
+            >
+              {deleteResposta.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              Remover
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// ─── página principal ────────────────────────────────────────────────────────
+
+const PAGE_SIZE_PERGUNTAS = 10;
+
+export default function ListarPerguntas() {
+  const { toast } = useToast();
+  const { data: tiposPergunta } = useTiposPerguntaList();
+
+  // ── filtros ──────────────────────────────────────────────────────────────
+  const [search, setSearch] = useState("");
+  const [filtroDisciplina, setFiltroDisciplina] = useState("todos");
+  const [page, setPage] = useState(1);
+
+  // ── query ────────────────────────────────────────────────────────────────
+  const { data, isLoading, isError } = usePerguntas({
+    descricao: search || undefined,
+    disciplinaId: parseFilter(filtroDisciplina),
+    page,
+    limit: PAGE_SIZE_PERGUNTAS,
+  });
+
+  const perguntas = data?.data ?? [];
+  const pagination = data?.pagination;
+
+
+
+  // ── mutations ────────────────────────────────────────────────────────────
+  const createPergunta = useCreatePergunta();
+  const updatePergunta = useUpdatePergunta();
+
+  // ── form state (pergunta) ────────────────────────────────────────────────
+  const [pDialogOpen, setPDialogOpen] = useState(false);
+  const [editingPergunta, setEditingPergunta] = useState<Pergunta | null>(null);
+  const [pForm, setPForm] = useState({
+    enunciado: "",
+    disciplinaId: "",
+    tipoPerguntaId: "1",
+    cotacao: 1,
+  });
+
+  // ── respostas dialog ─────────────────────────────────────────────────────
+  const [rDialogOpen, setRDialogOpen] = useState(false);
+  const [activePergunta, setActivePergunta] = useState<Pergunta | null>(null);
+
+  // ── delete confirm (pergunta) ────────────────────────────────────────────
+  // Nota: a API não expõe DELETE /perguntas/:id no spec fornecido,
+  // mas mantemos o botão desabilitado / comentado para quando existir.
+  const [confirmDeletePergunta, setConfirmDeletePergunta] = useState<
+    number | null
+  >(null);
+
+  // ── handlers ─────────────────────────────────────────────────────────────
   const openCreatePergunta = () => {
     setEditingPergunta(null);
-    setPForm({ enunciado: "", topicoId: "", dificuldade: "Fácil", tipo: "Escolha Múltipla", estado: true, pontuacao: 1 });
+    setPForm({ enunciado: "", disciplinaId: "", tipoPerguntaId: "1", cotacao: 1 });
     setPDialogOpen(true);
   };
 
   const openEditPergunta = (p: Pergunta) => {
     setEditingPergunta(p);
     setPForm({
-      enunciado: p.enunciado, topicoId: String(p.topicoId), dificuldade: p.dificuldade,
-      tipo: p.tipo, estado: p.estado === "Activa", pontuacao: p.pontuacao,
+      enunciado: p.descricao,
+      disciplinaId: String(p.disciplina_id),
+      tipoPerguntaId: String(p.tipo_pergunta_id),
+      cotacao: p.cotacao,
     });
     setPDialogOpen(true);
   };
 
   const savePergunta = () => {
-    if (!pForm.enunciado.trim() || !pForm.topicoId) {
-      toast({ title: "Campos obrigatórios", description: "Preencha o enunciado e o tópico.", variant: "destructive" });
+    if (!pForm.enunciado.trim() || !pForm.disciplinaId) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha o enunciado e a disciplina.",
+        variant: "destructive",
+      });
       return;
     }
-    const topico = TOPICOS.find((t) => t.id === Number(pForm.topicoId));
+
     if (editingPergunta) {
-      setPerguntas((prev) => prev.map((p) => p.id === editingPergunta.id ? {
-        ...p,
-        enunciado: pForm.enunciado, topicoId: Number(pForm.topicoId), topico: topico?.nome ?? p.topico,
-        dificuldade: pForm.dificuldade, tipo: pForm.tipo, estado: pForm.estado ? "Activa" : "Inactiva",
-        pontuacao: pForm.pontuacao,
-      } : p));
-      toast({ title: "Pergunta atualizada" });
+      updatePergunta.mutate(
+        {
+          id: editingPergunta.id,
+          payload: {
+            descricao: pForm.enunciado,
+            disciplinaId: Number(pForm.disciplinaId),
+            tipoPerguntaId: Number(pForm.tipoPerguntaId),
+            cotacao: pForm.cotacao,
+          },
+        },
+        {
+          onSuccess: () => {
+            toast({ title: "Pergunta atualizada" });
+            setPDialogOpen(false);
+          },
+          onError: () =>
+            toast({ title: "Erro ao atualizar", variant: "destructive" }),
+        }
+      );
     } else {
-      const newId = Math.max(...perguntas.map((p) => p.id), 0) + 1;
-      setPerguntas((prev) => [{
-        id: newId, enunciado: pForm.enunciado, topicoId: Number(pForm.topicoId), topico: topico?.nome ?? "",
-        dificuldade: pForm.dificuldade, tipo: pForm.tipo, estado: pForm.estado ? "Activa" : "Inactiva",
-        pontuacao: pForm.pontuacao,
-      }, ...prev]);
-      toast({ title: "Pergunta criada" });
+      createPergunta.mutate(
+        {
+          descricao: pForm.enunciado,
+          disciplinaId: Number(pForm.disciplinaId),
+          tipoPerguntaId: Number(pForm.tipoPerguntaId),
+          cotacao: pForm.cotacao,
+        },
+        {
+          onSuccess: () => {
+            toast({ title: "Pergunta criada" });
+            setPDialogOpen(false);
+          },
+          onError: () =>
+            toast({ title: "Erro ao criar", variant: "destructive" }),
+        }
+      );
     }
-    setPDialogOpen(false);
   };
 
   const openRespostas = (p: Pergunta) => {
     setActivePergunta(p);
-    setNovaResposta({ texto: "", correta: false });
-    setEditingRespostaId(null);
     setRDialogOpen(true);
   };
 
-  const addResposta = () => {
-    if (!activePergunta || !novaResposta.texto.trim()) return;
-    const newId = Math.max(...respostas.map((r) => r.id), 0) + 1;
-    setRespostas((prev) => [...prev, { id: newId, perguntaId: activePergunta.id, texto: novaResposta.texto, correta: novaResposta.correta }]);
-    setNovaResposta({ texto: "", correta: false });
-    toast({ title: "Resposta adicionada" });
-  };
+  const isSaving = createPergunta.isPending || updatePergunta.isPending;
 
-  const startEditResposta = (r: Resposta) => {
-    setEditingRespostaId(r.id);
-    setEditRespostaForm({ texto: r.texto, correta: r.correta });
-  };
+  // EXPORT
+  const exportRows = useMemo(
+    () =>
+      perguntas.map((p) => ({
+        id: p.id,
+        enunciado: p.descricao,
+        disciplina: p.disciplina,
+        tipo: p.tipo_pergunta,
+        cotacao: p.cotacao,
+        criadoEm: p.created_at
+          ? new Date(p.created_at).toLocaleDateString("pt-AO")
+          : "—",
+      })),
+    [perguntas]
+  );
+  const pdfData = exportRows.length
+    ? {
+      filtros: [
+        search ? `Pesquisa: ${search}` : null,
+        filtroDisciplina && filtroDisciplina !== "todos"
+          ? `Disciplina: ${filtroDisciplina}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
+    : null;
 
-  const saveEditResposta = () => {
-    if (editingRespostaId == null) return;
-    setRespostas((prev) => prev.map((r) => r.id === editingRespostaId ? { ...r, texto: editRespostaForm.texto, correta: editRespostaForm.correta } : r));
-    setEditingRespostaId(null);
-    toast({ title: "Resposta atualizada" });
-  };
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lista de Perguntas"
+      subtitle="Banco de perguntas dos exames de acesso"
+      infoSections={[
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "id", label: "ID", width: "10%" },
+          { key: "enunciado", label: "Enunciado", width: "40%" },
+          { key: "disciplina", label: "Disciplina", width: "20%" },
+          { key: "tipo", label: "Tipo", width: "15%" },
+          { key: "cotacao", label: "Cotação", width: "15%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+  const excelProps = pdfData
+    ? {
+      documentTitle: "Lista de Perguntas",
+      subtitle: "Banco de perguntas dos exames de acesso",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
+        { title: "Resumo", content: [`Total: ${exportRows.length}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "id", label: "ID", width: 10 },
+          { key: "enunciado", label: "Enunciado", width: 50 },
+          { key: "disciplina", label: "Disciplina", width: 25 },
+          { key: "tipo", label: "Tipo", width: 20 },
+          { key: "cotacao", label: "Cotação", width: 15 },
+          { key: "criadoEm", label: "Criado Em", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
+    : null;
+  const baseFileName = `Perguntas_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
 
-  const deleteResposta = () => {
-    if (confirmDeleteResposta == null) return;
-    setRespostas((prev) => prev.filter((r) => r.id !== confirmDeleteResposta));
-    setConfirmDeleteResposta(null);
-    toast({ title: "Resposta removida" });
-  };
-
-  const deletePergunta = () => {
-    if (confirmDeletePergunta == null) return;
-    setPerguntas((prev) => prev.filter((p) => p.id !== confirmDeletePergunta));
-    setRespostas((prev) => prev.filter((r) => r.perguntaId !== confirmDeletePergunta));
-    setConfirmDeletePergunta(null);
-    toast({ title: "Pergunta removida" });
-  };
-
+  // ── render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       <PageHeader
         title="Listar Perguntas"
         subtitle="Banco de perguntas e respostas para exames de acesso"
-        actions={<Button onClick={openCreatePergunta}><Plus className="h-4 w-4 mr-2" />Nova Pergunta</Button>}
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={openCreatePergunta}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Pergunta
+            </Button>
+
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`${baseFileName}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
+
+            {excelProps && (
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            )}
+          </div>
+        }
       />
 
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Pesquisar enunciado..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
-            </div>
-            <Select value={filtroTopico} onValueChange={setFiltroTopico}>
-              <SelectTrigger className="w-[200px]"><SelectValue placeholder="Tópico" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os tópicos</SelectItem>
-                {TOPICOS.map((t) => <SelectItem key={t.id} value={String(t.id)}>{t.nome}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={filtroDificuldade} onValueChange={setFiltroDificuldade}>
-              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Dificuldade" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todas</SelectItem>
-                <SelectItem value="Fácil">Fácil</SelectItem>
-                <SelectItem value="Médio">Médio</SelectItem>
-                <SelectItem value="Difícil">Difícil</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Filtros */}
+          <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
 
+            {/* Pesquisa */}
+            <div className="relative flex-1 min-w-[250px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Pesquisar enunciado..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="pl-10 h-10"
+              />
+            </div>
+
+            {/* Select Disciplina */}
+            <div className="w-[260px]">
+              <DisciplinaCommandSelect
+                value={filtroDisciplina}
+                onChangeValue={(v) => {
+                  setFiltroDisciplina(v);
+                  setPage(1);
+                }}
+                label="Disciplina"
+                labelMode="inside"
+                enableDefaultSelectItem
+              />
+            </div>
+
+          </div>
+          {/* Tabela */}
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>Enunciado</TableHead>
-                <TableHead>Tópico</TableHead>
-                <TableHead>Dificuldade</TableHead>
+                <TableHead>Disciplina</TableHead>
                 <TableHead>Tipo</TableHead>
-                <TableHead className="text-center">Respostas</TableHead>
-                <TableHead>Estado</TableHead>
+                <TableHead className="text-center">Cotação</TableHead>
+                <TableHead>Criado Em</TableHead>
                 <TableHead className="text-right">Acções</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhuma pergunta encontrada.</TableCell></TableRow>
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={7} className="h-24 text-center">
+                    <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+                  </TableCell>
+                </TableRow>
               )}
-              {filtered.map((p) => {
-                const total = respostasDe(p.id).length;
-                return (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-medium">{p.id}</TableCell>
-                    <TableCell className="max-w-[320px] truncate" title={p.enunciado}>{p.enunciado}</TableCell>
-                    <TableCell>{p.topico}</TableCell>
-                    <TableCell><Badge variant={dificuldadeBadge(p.dificuldade)}>{p.dificuldade}</Badge></TableCell>
-                    <TableCell>{p.tipo}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="outline">{total}</Badge>
-                    </TableCell>
-                    <TableCell><Badge variant={p.estado === "Activa" ? "default" : "secondary"}>{p.estado}</Badge></TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button variant="ghost" size="icon" onClick={() => openRespostas(p)} title="Gerir respostas">
-                        <ListChecks className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => openEditPergunta(p)} title="Editar">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setConfirmDeletePergunta(p.id)} title="Remover">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+
+              {isError && (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="h-24 text-center text-destructive"
+                  >
+                    Erro ao carregar perguntas.
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!isLoading && !isError && perguntas.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    Nenhuma pergunta encontrada.
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {perguntas.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell className="font-medium">{p.id}</TableCell>
+
+                  <TableCell
+                    className="max-w-[320px] truncate"
+                    title={p.descricao}
+                  >
+
+                    <LatexText text={p.descricao} /></TableCell>
+                  <TableCell>{p.disciplina}</TableCell>
+                  <TableCell>
+                    <Badge variant={tipoBadgeVariant[p.tipo_pergunta_id]?.variant}>
+                      {tipoBadgeVariant[p.tipo_pergunta_id]?.label ?? p.tipo_pergunta}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline">{p.cotacao}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {p.created_at
+                      ? new Date(p.created_at).toLocaleDateString("pt-AO")
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="text-right space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openRespostas(p)}
+                      title="Gerir respostas"
+                    >
+                      <ListChecks className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEditPergunta(p)}
+                      title="Editar"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setConfirmDeletePergunta(p.id)}
+                      title="Remover"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
+
+          {/* Paginação */}
+          {pagination && pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+              <span>
+                Página {pagination.page} de {pagination.totalPages} —{" "}
+                {pagination.total} resultados
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= pagination.totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Próxima
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Pergunta Create/Edit */}
+      {/* ── Pergunta Create / Edit Dialog ── */}
       <Dialog open={pDialogOpen} onOpenChange={setPDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingPergunta ? "Editar Pergunta" : "Nova Pergunta"}</DialogTitle>
+            <DialogTitle>
+              {editingPergunta ? "Editar Pergunta" : "Nova Pergunta"}
+            </DialogTitle>
             <DialogDescription>Preencha os dados da pergunta.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="enunciado">Enunciado *</Label>
-              <Textarea id="enunciado" rows={3} value={pForm.enunciado} onChange={(e) => setPForm((s) => ({ ...s, enunciado: e.target.value }))} placeholder="Escreva o enunciado da pergunta..." />
+              <Textarea
+                id="enunciado"
+                rows={3}
+                value={pForm.enunciado}
+                onChange={(e) =>
+                  setPForm((s) => ({ ...s, enunciado: e.target.value }))
+                }
+                placeholder="Escreva o enunciado da pergunta..."
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Disciplina */}
               <div className="space-y-2">
-                <Label>Tópico *</Label>
-                <Select value={pForm.topicoId} onValueChange={(v) => setPForm((s) => ({ ...s, topicoId: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Seleccione" /></SelectTrigger>
+                <Label>Disciplina *</Label>
+                <DisciplinaCommandSelect
+                  value={pForm.disciplinaId}
+                  onChangeValue={(v) =>
+                    setPForm((s) => ({ ...s, disciplinaId: v }))
+                  }
+                  label="Disciplina"
+                  labelMode="inside"
+                  enableDefaultSelectItem
+                />
+              </div>
+
+              {/* Tipo de pergunta */}
+              <div className="space-y-2">
+                <Label>Tipo de pergunta</Label>
+                <Select
+                  value={pForm.tipoPerguntaId?.toString()}
+                  onValueChange={(v) =>
+                    setPForm((s) => ({ ...s, tipoPerguntaId: v }))
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+
                   <SelectContent>
-                    {TOPICOS.map((t) => <SelectItem key={t.id} value={String(t.id)}>{t.nome}</SelectItem>)}
+                    {tiposPergunta?.map((tipo) => (
+                      <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
+                        {tipo.designacao}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Dificuldade</Label>
-                <Select value={pForm.dificuldade} onValueChange={(v) => setPForm((s) => ({ ...s, dificuldade: v as Pergunta["dificuldade"] }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Fácil">Fácil</SelectItem>
-                    <SelectItem value="Médio">Médio</SelectItem>
-                    <SelectItem value="Difícil">Difícil</SelectItem>
-                  </SelectContent>
-                </Select>
+
+              {/* Cotação */}
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="cotacao">Cotação</Label>
+                <Input
+                  id="cotacao"
+                  type="number"
+                  min={0}
+                  step={0.5}
+                  value={pForm.cotacao}
+                  onChange={(e) =>
+                    setPForm((s) => ({
+                      ...s,
+                      cotacao: Number(e.target.value),
+                    }))
+                  }
+                />
               </div>
-              <div className="space-y-2">
-                <Label>Tipo</Label>
-                <Select value={pForm.tipo} onValueChange={(v) => setPForm((s) => ({ ...s, tipo: v as Pergunta["tipo"] }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Escolha Múltipla">Escolha Múltipla</SelectItem>
-                    <SelectItem value="Desenvolvimento">Desenvolvimento</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pontuacao">Pontuação</Label>
-                <Input id="pontuacao" type="number" min={0} step={0.5} value={pForm.pontuacao} onChange={(e) => setPForm((s) => ({ ...s, pontuacao: Number(e.target.value) }))} />
-              </div>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-3">
-              <div>
-                <Label htmlFor="estado">Pergunta activa</Label>
-                <p className="text-xs text-muted-foreground">Inactivas não entram em provas.</p>
-              </div>
-              <Switch id="estado" checked={pForm.estado} onCheckedChange={(v) => setPForm((s) => ({ ...s, estado: v }))} />
+
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={savePergunta}>{editingPergunta ? "Guardar" : "Criar"}</Button>
+            <Button
+              variant="outline"
+              onClick={() => setPDialogOpen(false)}
+              disabled={isSaving}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={savePergunta} disabled={isSaving}>
+              {isSaving && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              {editingPergunta ? "Guardar" : "Criar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Respostas Manager */}
+      {/* ── Respostas Manager Dialog ── */}
       <Dialog open={rDialogOpen} onOpenChange={setRDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><ListChecks className="h-5 w-5" />Respostas</DialogTitle>
-            <DialogDescription className="line-clamp-2">{activePergunta?.enunciado}</DialogDescription>
+            <DialogTitle className="flex items-center gap-2">
+              <ListChecks className="h-5 w-5" />
+              Respostas
+            </DialogTitle>
+            <DialogDescription className="line-clamp-2">
+              {activePergunta?.descricao}
+            </DialogDescription>
           </DialogHeader>
-          <Tabs defaultValue="lista" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="lista">Lista ({activePergunta ? respostasDe(activePergunta.id).length : 0})</TabsTrigger>
-              <TabsTrigger value="nova">Nova resposta</TabsTrigger>
-            </TabsList>
-            <TabsContent value="lista" className="space-y-2 mt-4 max-h-[400px] overflow-y-auto">
-              {activePergunta && respostasDe(activePergunta.id).length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-6">Sem respostas. Adicione uma na aba "Nova resposta".</p>
-              )}
-              {activePergunta && respostasDe(activePergunta.id).map((r) => (
-                <div key={r.id} className="rounded-md border p-3">
-                  {editingRespostaId === r.id ? (
-                    <div className="space-y-3">
-                      <Textarea rows={2} value={editRespostaForm.texto} onChange={(e) => setEditRespostaForm((s) => ({ ...s, texto: e.target.value }))} />
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Switch checked={editRespostaForm.correta} onCheckedChange={(v) => setEditRespostaForm((s) => ({ ...s, correta: v }))} />
-                          <Label className="text-sm">Correcta</Label>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => setEditingRespostaId(null)}>Cancelar</Button>
-                          <Button size="sm" onClick={saveEditResposta}><Save className="h-3 w-3 mr-1" />Guardar</Button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-2 flex-1">
-                        {r.correta ? (
-                          <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                        )}
-                        <div className="flex-1">
-                          <p className="text-sm">{r.texto}</p>
-                          {r.correta && <Badge variant="default" className="mt-1 text-xs">Resposta correcta</Badge>}
-                        </div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => startEditResposta(r)}><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => setConfirmDeleteResposta(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </TabsContent>
-            <TabsContent value="nova" className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="novoTexto">Texto da resposta</Label>
-                <Textarea id="novoTexto" rows={3} value={novaResposta.texto} onChange={(e) => setNovaResposta((s) => ({ ...s, texto: e.target.value }))} placeholder="Escreva a resposta..." />
-              </div>
-              <div className="flex items-center justify-between rounded-md border p-3">
-                <Label htmlFor="correta">Marcar como correcta</Label>
-                <Switch id="correta" checked={novaResposta.correta} onCheckedChange={(v) => setNovaResposta((s) => ({ ...s, correta: v }))} />
-              </div>
-              <Button onClick={addResposta} className="w-full" disabled={!novaResposta.texto.trim()}>
-                <Plus className="h-4 w-4 mr-2" />Adicionar resposta
-              </Button>
-            </TabsContent>
-          </Tabs>
+
+          {activePergunta && <RespostasManager pergunta={activePergunta} />}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRDialogOpen(false)}>Fechar</Button>
+            <Button variant="outline" onClick={() => setRDialogOpen(false)}>
+              Fechar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Confirm delete pergunta */}
-      <Dialog open={confirmDeletePergunta !== null} onOpenChange={(o) => !o && setConfirmDeletePergunta(null)}>
+      {/* ── Confirm delete pergunta ── */}
+      <Dialog
+        open={confirmDeletePergunta !== null}
+        onOpenChange={(o) => !o && setConfirmDeletePergunta(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Remover pergunta</DialogTitle>
-            <DialogDescription>Todas as respostas associadas serão também removidas. Continuar?</DialogDescription>
+            <DialogDescription>
+              Todas as respostas associadas serão também removidas. Continuar?
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDeletePergunta(null)}>Cancelar</Button>
-            <Button variant="destructive" onClick={deletePergunta}>Remover</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Confirm delete resposta */}
-      <Dialog open={confirmDeleteResposta !== null} onOpenChange={(o) => !o && setConfirmDeleteResposta(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Remover resposta</DialogTitle>
-            <DialogDescription>Esta acção não pode ser desfeita.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDeleteResposta(null)}>Cancelar</Button>
-            <Button variant="destructive" onClick={deleteResposta}>Remover</Button>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDeletePergunta(null)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                // Adicionar useDeletePergunta quando o endpoint estiver disponível
+                toast({ title: "Funcionalidade em desenvolvimento." });
+                setConfirmDeletePergunta(null);
+              }}
+            >
+              Remover
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
