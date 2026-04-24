@@ -155,23 +155,22 @@ function VisualizarPergunta({ pergunta }: { pergunta: Pergunta }) {
           </p>
         )}
 
-        <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
           {respostas.map((r, idx) => {
             const isCorreta = r.tipo_resposta_id === TIPO_RESPOSTA_CORRETA_ID;
             return (
               <div
                 key={r.id}
-                className={`flex items-start gap-3 rounded-md border p-3 text-sm transition-colors ${
-                  isCorreta
+                className={`flex items-start gap-3 rounded-md border p-3 text-sm transition-colors ${isCorreta
                     ? "border-primary/30 bg-primary/5"
                     : "bg-muted/20"
-                }`}
+                  }`}
               >
                 <span className="shrink-0 mt-0.5 font-semibold text-muted-foreground w-5 text-center">
                   {String.fromCharCode(65 + idx)}.
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="leading-snug break-words">
+                  <p className="leading-snug wrap-break-word">
                     <LatexText text={r.descricao} />
                   </p>
                 </div>
@@ -644,16 +643,16 @@ export default function ListarPerguntas() {
 
   const pdfData = exportRows.length
     ? {
-        filtros: [
-          searchInput ? `Pesquisa: ${searchInput}` : null,
-          filtroDisciplina && filtroDisciplina !== "todos"
-            ? `Disciplina: ${filtroDisciplina}`
-            : null,
-        ]
-          .filter(Boolean)
-          .join(" | "),
-        rows: exportRows,
-      }
+      filtros: [
+        searchInput ? `Pesquisa: ${searchInput}` : null,
+        filtroDisciplina && filtroDisciplina !== "todos"
+          ? `Disciplina: ${filtroDisciplina}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      rows: exportRows,
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -683,29 +682,29 @@ export default function ListarPerguntas() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Lista de Perguntas",
-        subtitle: "Banco de perguntas dos exames de acesso",
-        infoSections: [
-          {
-            title: "Filtros Aplicados",
-            content: pdfData.filtros || "Sem filtros",
-          },
-          { title: "Resumo", content: [`Total: ${exportRows.length}`] },
-        ],
-        mainTable: {
-          headers: [
-            { key: "id", label: "ID", width: 10 },
-            { key: "enunciado", label: "Enunciado", width: 50 },
-            { key: "disciplina", label: "Disciplina", width: 25 },
-            { key: "tipo", label: "Tipo", width: 20 },
-            { key: "cotacao", label: "Cotação", width: 15 },
-            { key: "criadoEm", label: "Criado Em", width: 20 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Lista de Perguntas",
+      subtitle: "Banco de perguntas dos exames de acesso",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        { title: "Resumo", content: [`Total: ${exportRows.length}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "id", label: "ID", width: 10 },
+          { key: "enunciado", label: "Enunciado", width: 50 },
+          { key: "disciplina", label: "Disciplina", width: 25 },
+          { key: "tipo", label: "Tipo", width: 20 },
+          { key: "cotacao", label: "Cotação", width: 15 },
+          { key: "criadoEm", label: "Criado Em", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Perguntas_${new Date().toISOString().slice(0, 10)}`;
@@ -866,7 +865,7 @@ export default function ListarPerguntas() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      {/* ── Remover ── */}
+                      {/* ── Remover ── 
                       <Button
                         variant="ghost"
                         size="icon"
@@ -875,6 +874,7 @@ export default function ListarPerguntas() {
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
+                      */}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -913,56 +913,61 @@ export default function ListarPerguntas() {
       </Card>
 
       {/* ── Ver Pergunta ──────────────────────────────────────────────────── */}
-  <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-  <DialogHeader>
-    <DialogTitle className="flex items-center gap-2">
-      <Eye className="h-5 w-5" />
-      Detalhes da Pergunta
-      {viewingPergunta && (
-        <Badge variant="outline" className="ml-1 text-xs font-normal">
-          #{viewingPergunta.id}
-        </Badge>
-      )}
-    </DialogTitle>
-  </DialogHeader>
+      <Dialog
+        open={viewDialogOpen}
+        onOpenChange={(o) => !o && closeViewPergunta()}
+      >
+        <DialogContent className="max-w-2xl! w-full! max-h-[90vh]! overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Detalhes da Pergunta
+              {viewingPergunta && (
+                <Badge variant="outline" className="ml-1 text-xs font-normal">
+                  #{viewingPergunta.id}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
 
-  <div className="flex-1 overflow-y-auto px-1">
-    {viewingPergunta && (
-      <VisualizarPergunta pergunta={viewingPergunta} />
-    )}
-  </div>
+          <div className="flex-1 overflow-y-auto px-1">
+            {viewingPergunta && (
+              <VisualizarPergunta pergunta={viewingPergunta} />
+            )}
+          </div>
 
-  <DialogFooter className="gap-2 mt-2">
-    <Button variant="outline" onClick={closeViewPergunta}>
-      Fechar
-    </Button>
+          <DialogFooter className="gap-2 mt-2">
+            <Button variant="outline" onClick={closeViewPergunta}>
+              Fechar
+            </Button>
 
-    {viewingPergunta && (
-      <>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            closeViewPergunta();
-            setTimeout(() => openRespostas(viewingPergunta!), 350);
-          }}
-        >
-          <ListChecks className="h-4 w-4 mr-2" />
-          Gerir respostas
-        </Button>
+            {viewingPergunta && (
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    closeViewPergunta();
+                    setTimeout(() => openRespostas(viewingPergunta!), 350);
+                  }}
+                >
+                  <ListChecks className="h-4 w-4 mr-2" />
+                  Gerir respostas
+                </Button>
 
-        <Button
-          onClick={() => {
-            closeViewPergunta();
-            setTimeout(() => openEditPergunta(viewingPergunta!), 350);
-          }}
-        >
-          <Edit className="h-4 w-4 mr-2" />
-          Editar
-        </Button>
-      </>
-    )}
-  </DialogFooter>
-</DialogContent>
+                <Button
+                  onClick={() => {
+                    closeViewPergunta();
+                    setTimeout(() => openEditPergunta(viewingPergunta!), 350);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Pergunta Create / Edit ─────────────────────────────────────────── */}
       <Dialog open={pDialogOpen} onOpenChange={setPDialogOpen}>
