@@ -867,6 +867,7 @@ export default function ListarPerguntas() {
                         <Edit className="h-4 w-4" />
                       </Button>
                       {/* ── Remover ── */}
+
                       <Button
                         variant="ghost"
                         size="icon"
