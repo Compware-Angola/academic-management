@@ -65,6 +65,7 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { LatexText } from "@/util/LatexText";
+import { useDeletePergunta } from "@/hooks/access_exam/use-delete-pergunta.hook";
 
 // ─── constantes ──────────────────────────────────────────────────────────────
 
@@ -161,11 +162,10 @@ function VisualizarPergunta({ pergunta }: { pergunta: Pergunta }) {
             return (
               <div
                 key={r.id}
-               className={`flex items-start gap-3 rounded-md border p-3 text-sm transition-colors ${
-  isCorreta
-    ? "border-green-500 bg-green-50 text-green-700"
-    : "bg-muted/20 border-border"
-}`}
+                className={`flex items-start gap-3 rounded-md border p-3 text-sm transition-colors ${isCorreta
+                  ? "border-green-500 bg-green-50 text-green-700"
+                  : "bg-muted/20 border-border"
+                  }`}
               >
                 <span className="shrink-0 mt-0.5 font-semibold text-muted-foreground w-5 text-center">
                   {String.fromCharCode(65 + idx)}.
@@ -410,11 +410,11 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
                       <p className="text-sm leading-snug wrap-break-word">
                         <LatexText text={r.descricao} />
                       </p>
-                     {isCorreta && (
-  <Badge className="mt-1 text-xs bg-green-100 text-green-700 border-green-300 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700">
-    Resposta correcta
-  </Badge>
-)}
+                      {isCorreta && (
+                        <Badge className="mt-1 text-xs bg-green-100 text-green-700 border-green-300 dark:bg-green-900/20 dark:text-green-400 dark:border-green-700">
+                          Resposta correcta
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-1 shrink-0">
@@ -516,7 +516,7 @@ export default function ListarPerguntas() {
   // ── mutations ─────────────────────────────────────────────────────────────
   const createPergunta = useCreatePergunta();
   const updatePergunta = useUpdatePergunta();
-
+  const deletePerguntaMutation = useDeletePergunta();
   // ── form state ────────────────────────────────────────────────────────────
   const [pDialogOpen, setPDialogOpen] = useState(false);
   const [editingPergunta, setEditingPergunta] = useState<Pergunta | null>(null);
@@ -866,7 +866,7 @@ export default function ListarPerguntas() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      {/* ── Remover ── 
+                      {/* ── Remover ── */}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -875,7 +875,7 @@ export default function ListarPerguntas() {
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
-                      */}
+
                     </div>
                   </TableCell>
                 </TableRow>
@@ -1065,7 +1065,7 @@ export default function ListarPerguntas() {
 
       {/* ── Respostas Manager ─────────────────────────────────────────────── */}
       <Dialog open={rDialogOpen} onOpenChange={(o) => !o && closeRespostas()}>
-         <DialogContent className="max-w-2xl! w-full! max-h-[90vh]! overflow-hidden flex flex-col">
+        <DialogContent className="max-w-2xl! w-full! max-h-[90vh]! overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ListChecks className="h-5 w-5" />
@@ -1109,11 +1109,24 @@ export default function ListarPerguntas() {
             </Button>
             <Button
               variant="destructive"
+              disabled={deletePerguntaMutation.isPending}
               onClick={() => {
-                toast({ title: "Funcionalidade em desenvolvimento." });
-                setConfirmDeletePergunta(null);
+                if (confirmDeletePergunta == null) return;
+                deletePerguntaMutation.mutate(confirmDeletePergunta, {
+                  onSuccess: () => {
+                    toast({ title: "Pergunta removida com sucesso." });
+                    setConfirmDeletePergunta(null);
+                  },
+                  onError: () => {
+                    toast({ title: "Erro ao remover pergunta.", variant: "destructive" });
+                    setConfirmDeletePergunta(null);
+                  },
+                });
               }}
             >
+              {deletePerguntaMutation.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
               Remover
             </Button>
           </DialogFooter>
