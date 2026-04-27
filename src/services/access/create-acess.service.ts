@@ -22,7 +22,7 @@ export interface CreateAcessoResponse {
 export async function createAcessoService(
   payload: CreateAcessoRequest
 ): Promise<CreateAcessoResponse> {
-  console.log("SERVICE: ", payload)
+
   const { data } = await axiosNestGa.post(
     "acess_management/novo-acesso",
     payload
