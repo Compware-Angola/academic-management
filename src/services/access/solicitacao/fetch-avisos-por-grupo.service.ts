@@ -29,7 +29,7 @@ export async function AvisosPorGruposService(
     params.grupoIds?.filter(
       (id) => id !== undefined && id !== null && id !== 0
     ) ?? [];
-  console.log("SERVICE: ", grupoIdsValidos)
+
   if (grupoIdsValidos.length === 0) {
     return [];
   }

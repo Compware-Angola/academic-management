@@ -22,7 +22,7 @@ export async function fetchAcessosPorGrupo(
   grupoId: number
 ): Promise<GrupoAcesso[]> {
 
-  console.log("SERVICE ID: ", grupoId)
+
 
   const response = await axiosNestGa.get<GrupoAcesso[]>(
     `/acess_management/grupo/${grupoId}`
