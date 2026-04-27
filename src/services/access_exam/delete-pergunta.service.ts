@@ -1,4 +1,3 @@
-// ── adiciona esta função ao teu exames-de-acesso.service.ts existente ────────
 
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 import { MessageResponse } from "./topic-exam.service";
