@@ -19,8 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useIsPublicRoute } from "./helpers/verify-public.routes";
 
-const INACTIVITY_TIMEOUT = 10 * 1000;
-const WARNING_TIME = 5 * 1000;
+const INACTIVITY_TIMEOUT = 20 * 60 * 1000;
+const WARNING_TIME = 10 * 1000;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
@@ -45,9 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { data: user, isLoading, isError } = useQuery({
     queryKey: ["current-user", "GA"],
     queryFn: () => getCurrentUserService("GA"),
-    enabled: !!token,
-    staleTime: 5 * 60 * 1000,
-    retry: false,
+    enabled: !!token && !isPublicRoute,
   });
 
   useEffect(() => {
