@@ -29,21 +29,19 @@ export async function AvisosPorGruposService(
     params.grupoIds?.filter(
       (id) => id !== undefined && id !== null && id !== 0
     ) ?? [];
-    console.log("SERVICE: ", grupoIdsValidos)
+  console.log("SERVICE: ", grupoIdsValidos)
   if (grupoIdsValidos.length === 0) {
     return [];
   }
 
-  const {data} = await axiosNestGa.post<AvisosPorGruposResponse>(
+  const { data } = await axiosNestGa.post<AvisosPorGruposResponse>(
     "solicitacoa/avisos-por-grupos",
-    
-       {
-        grupoIds: grupoIdsValidos,
-      },
-    
-  );
 
-  console.log("DATA SERVICE: ", data)
+    {
+      grupoIds: grupoIdsValidos,
+    },
+
+  );
 
   return data;
 }
