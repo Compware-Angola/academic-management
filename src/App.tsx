@@ -161,6 +161,7 @@ import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
 import ListarTopicos from "./pages/access_exam/ListarTopicos";
+import ListagemProvas from "./pages/access_exam/ListagemProvas";
 
 const App = () => {
   return (
@@ -665,10 +666,46 @@ const App = () => {
                   />
 
                   {/* EXAME ACESSO */}
-               
+
                   <Route path="/exame/admitidos" element={<Admitidos />} />
-                  <Route path="/exame/topicos" element={<ListarTopicos />} />
-                  <Route path="/exame/perguntas" element={<ListarPerguntas />} />
+
+                  <Route
+                    path="/exame/topicos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.TOPICO_PROVA.sigla!,
+                        ]}
+                      >
+                        <ListarTopicos />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/exame/perguntas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PERGUNTA_PROVA.sigla!,
+                        ]}
+                      >
+                        <ListarPerguntas />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/exame/provas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PROVA.sigla!,
+                        ]}
+                      >
+                        <ListagemProvas />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/exame/estatisticas-diaria"
                     element={<EstatisticasDiaria />}
@@ -1307,10 +1344,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                 <Route
+                  <Route
                     path="/documentos/validar"
                     element={<ValidarDocumento />}
-                  /> 
+                  />
                   <Route
                     path="/docente/vigilancia"
                     element={
@@ -1428,7 +1465,7 @@ const App = () => {
                     }
                   />
 
-                    <Route
+                  <Route
                     path="/inscricoes/inscritos-uc"
                     element={
                       <ProtectedRoute
