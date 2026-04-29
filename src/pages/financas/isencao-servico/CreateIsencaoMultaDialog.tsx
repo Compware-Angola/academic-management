@@ -27,7 +27,8 @@ import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-
 import { InvoiceStatusBadge } from "@/components/common/Invoice-status-badge";
 import { InvoiceEnum } from "@/enums/invoice.enum";
 import { EnrollmentStudentSelect } from "@/components/common/global-selects/EnrollmentStudentSelect";
-import { useMutationCreateIsencaoMensalidade } from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-mensalidade";
+import { useMutationCreateIsencaoMulta } from "@/hooks/financas/isencao-servico/use-mutation-create-isensao-multa";
+import { formatNumber } from "@/util/format-number";
 type CreateIsencaoServicoDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,7 +41,7 @@ type MesTemp = {
   mesTempId: number;
   servicoId: number;
 };
-export function CreateIsencaoMesDialog({
+export default function CreateIsencaoMultaDialog({
   open,
   onOpenChange,
 }: CreateIsencaoServicoDialogProps) {
@@ -56,7 +57,7 @@ export function CreateIsencaoMesDialog({
   const [errorMesTemp, setErrorMesTemp] = useState<
     CreateIsencaoResponseError[]
   >([]);
-  const { mutateAsync, isPending } = useMutationCreateIsencaoMensalidade();
+  const { mutateAsync, isPending } = useMutationCreateIsencaoMulta();
   const { toast } = useToast();
 
   const toggleStudent = ({ mesTempId, servicoId }: MesTemp) => {
@@ -109,7 +110,6 @@ export function CreateIsencaoMesDialog({
         codigoMatricula: parseFilter(filters.matricula),
         mesTemps: selectedMesTemp,
         codigoAnoLectivo: parseFilter(filters.anoLectivo),
-        codigoPreInscricao: null,
       },
       {
         onSuccess(response) {
@@ -135,7 +135,7 @@ export function CreateIsencaoMesDialog({
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Calendar />
-            <DialogTitle>Criar Nova Isenção de Mensalidade</DialogTitle>
+            <DialogTitle>Criar Nova Isenção de Multa</DialogTitle>
           </div>
         </DialogHeader>
         <div className="grid grid-cols-3 gap-4">
@@ -223,7 +223,12 @@ export function CreateIsencaoMesDialog({
                         <TableCell>{month?.mes ?? "-"}</TableCell>
                         <TableCell>{month?.descricao_servico ?? "-"}</TableCell>
                         <TableCell>{month?.semestre ?? "-"}</TableCell>
-                        <TableCell>{month?.total_preco ?? "-"}</TableCell>
+                        <TableCell>
+                          {formatNumber(month?.total_preco) ?? "-"}
+                        </TableCell>
+                        <TableCell>
+                          {month?.multa > 0 ? formatNumber(month.multa) : "-"}
+                        </TableCell>
                         <TableCell>
                           <InvoiceStatusBadge status={invoiceStatus} />
                         </TableCell>

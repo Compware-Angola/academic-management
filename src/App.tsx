@@ -1302,10 +1302,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                 <Route
+                  <Route
                     path="/documentos/validar"
                     element={<ValidarDocumento />}
-                  /> 
+                  />
                   <Route
                     path="/docente/vigilancia"
                     element={
@@ -1423,7 +1423,7 @@ const App = () => {
                     }
                   />
 
-                    <Route
+                  <Route
                     path="/inscricoes/inscritos-uc"
                     element={
                       <ProtectedRoute
