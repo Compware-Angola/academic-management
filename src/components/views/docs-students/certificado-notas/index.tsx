@@ -102,7 +102,7 @@ export const GerarCertificadoNotas = (props: GerarCertidaoProps) => {
           ) : (
             <>
               <Download className="h-4 w-4" />
-              Exportar Certidão PDF
+              Certificado com Notas PDF
             </>
           )}
         </Button>
@@ -118,7 +118,9 @@ export const GerarCertificadoNotas = (props: GerarCertidaoProps) => {
           {isPrinting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              {isGeneratingCode ? "A gerar código..." : "A preparar..."}
+              {isGeneratingCode
+                ? "A gerar código..."
+                : "A gerar Certificado com Notas PDF..."}
             </>
           ) : (
             <>

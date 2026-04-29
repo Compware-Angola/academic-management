@@ -200,6 +200,9 @@ export const ingressoStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla,
           ],
         },
+        { title: "Listar Tópicos", url: "/exame/topicos", permission: [PermissionTypeDetails.TOPICO_PROVA.sigla] },
+        { title: "Listar Perguntas", url: "/exame/perguntas", permission: [PermissionTypeDetails.PERGUNTA_PROVA.sigla] },
+        { title: "Listagem Provas", url: "/exame/provas", permission: [PermissionTypeDetails.PROVA.sigla] },
       ],
 
       permission: [],
@@ -248,8 +251,8 @@ export const ingressoStructure: MenuStructure = {
         },
         {
           title: "Lista inscritos por UC",
-          url:"/inscricoes/inscritos-uc",
-          permission:[PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla]
+          url: "/inscricoes/inscritos-uc",
+          permission: [PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla]
 
         },
         {
@@ -265,8 +268,8 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-           title: "Insentar colisão", url: "/inscricoes/colisao" ,
-           permission: [
+          title: "Insentar colisão", url: "/inscricoes/colisao",
+          permission: [
             PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla,
           ],
         },
@@ -274,6 +277,7 @@ export const ingressoStructure: MenuStructure = {
 
       permission: [],
     },
+
   ],
 };
 export const academicStructure: MenuStructure = {

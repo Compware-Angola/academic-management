@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Trash,
+  Edit,
 } from "lucide-react";
 import {
   Card,
@@ -66,7 +68,6 @@ export default function ListarDescontos() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  // Estado para edição
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
@@ -118,12 +119,10 @@ export default function ListarDescontos() {
     return pages;
   }, [page, totalPages]);
 
-  // normalize any date-string to yyyy-mm-dd (returns empty string for falsy)
   const toYYYYMMDD = (value?: string | null) => {
     if (!value) return "";
     const d = new Date(value);
     if (isNaN(d.getTime())) {
-      // if parsing fails, try simple regex for yyyy-mm-dd-like input
       const m = String(value).match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
       if (m) {
         const yyyy = m[1];
@@ -336,7 +335,7 @@ export default function ListarDescontos() {
                 <TableHead>Data Inicial</TableHead>
                 <TableHead>Data Final</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead className="w-[110px]">Editar</TableHead>
+                <TableHead className="w-[110px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -372,12 +371,13 @@ export default function ListarDescontos() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         <Button
+                          aria-label="Editar desconto"
                           variant="outline"
-                          size="sm"
+                          title="Editar desconto"
+                          size="icon"
                           onClick={() => {
-                            // popular form e abrir modal para edição
                             setEditingId(item.id);
                             setFormData({
                               descricao: item.descricao ?? "",
@@ -390,7 +390,7 @@ export default function ListarDescontos() {
                             setIsModalOpen(true);
                           }}
                         >
-                          Editar
+                          <Edit aria-hidden="true" />
                         </Button>
                       </div>
                     </TableCell>

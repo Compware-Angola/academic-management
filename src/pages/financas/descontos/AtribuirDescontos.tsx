@@ -13,6 +13,9 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  Trash,
+  Edit,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -44,6 +47,8 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { useMutationRemoveDiscount } from "@/hooks/financas/descontos/use-mutation-remove-discount";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AtribuirItem {
   codigo_matricula: number;
@@ -71,6 +76,9 @@ export default function AtribuirDescontos() {
   // filter inputs
 
   const [matriculaInput, setMatriculaInput] = useState("");
+  const [codigoDesconto, setCodigoDesconto] = useState<number | null>(null);
+  const mutationRemoveDiscount = useMutationRemoveDiscount();
+  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
 
   const [filters, setFilters] = useState({
     desconto: "",
@@ -117,6 +125,7 @@ export default function AtribuirDescontos() {
   const {
     data,
     isFetching: queryFetching,
+    isLoading: isQueryLoading,
     refetch,
   } = useQueryFetchDescontosAdd({
     page: page,
@@ -150,7 +159,7 @@ export default function AtribuirDescontos() {
   >(undefined);
 
   const openEditModal = (row: AtribuirItem) => {
-    setEditingId(row.codigo ?? null); // 'codigo' parece ser o ID da atribuição na sua interface
+    setEditingId(row.codigo ?? null);
     setModalInitial({
       observacao: row.observacao ?? undefined,
       codigoMatricula: row.codigo_matricula,
@@ -160,6 +169,50 @@ export default function AtribuirDescontos() {
       semestre: row.semestre ?? undefined,
     });
     setIsModalOpen(true);
+  };
+
+  const handleRemoveDiscount = async (codigo: number) => {
+    setCodigoDesconto(codigo);
+    try {
+      await mutationRemoveDiscount.mutateAsync(codigo);
+    } catch (error) {
+      toast.error("Erro ao remover desconto: " + getErrorMessage(error));
+    } finally {
+      setCodigoDesconto(null);
+    }
+  };
+  const handleRemoveSelected = async () => {
+    try {
+      const ids = Array.from(selectedItems);
+
+      await Promise.all(
+        ids.map((id) => mutationRemoveDiscount.mutateAsync(id)),
+      );
+
+      setSelectedItems(new Set());
+      await refetch();
+    } catch (error) {
+      toast.error("Erro ao remover selecionados");
+    }
+  };
+
+  const toggleSelect = (codigo: number) => {
+    setSelectedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(codigo)) {
+        newSet.delete(codigo);
+      } else {
+        newSet.add(codigo);
+      }
+      return newSet;
+    });
+  };
+  const toggleSelectAll = () => {
+    if (selectedItems.size === items.length) {
+      setSelectedItems(new Set());
+    } else {
+      setSelectedItems(new Set(items.map((i) => i.codigo!).filter(Boolean)));
+    }
   };
 
   const handleSubmitAssign = async (body: CreateDescontoAddBody) => {
@@ -325,23 +378,45 @@ export default function AtribuirDescontos() {
           </div>
         </CardContent>
       </Card>
-
-      <Button
-        className="gap-2 mb-2"
-        onClick={() => {
-          setEditingId(null);
-          setModalInitial(undefined);
-          setIsModalOpen(true);
-        }}
-      >
-        Atribuir Desconto
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          className="gap-2 mb-2"
+          onClick={() => {
+            setEditingId(null);
+            setModalInitial(undefined);
+            setIsModalOpen(true);
+          }}
+        >
+          Atribuir Desconto
+        </Button>
+        <Button
+          variant="destructive"
+          disabled={
+            selectedItems.size === 0 || mutationRemoveDiscount.isPending
+          }
+          onClick={handleRemoveSelected}
+        >
+          {mutationRemoveDiscount.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : null}
+          Remover selecionados ({selectedItems.size})
+        </Button>
+      </div>
 
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>
+                  <Checkbox
+                    className="cursor-pointer"
+                    checked={
+                      selectedItems.size === items.length && items.length > 0
+                    }
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead>Matrícula</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Instituição</TableHead>
@@ -353,7 +428,7 @@ export default function AtribuirDescontos() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {effectiveFetching ? (
+              {isQueryLoading ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
                     Carregando...
@@ -361,7 +436,19 @@ export default function AtribuirDescontos() {
                 </TableRow>
               ) : (
                 items.map((item, idx) => (
-                  <TableRow key={`${item.codigo_matricula}-${idx}`}>
+                  <TableRow
+                    key={`${item.codigo_matricula}-${idx}`}
+                    className={
+                      selectedItems.has(item.codigo!) ? "opacity-50" : ""
+                    }
+                  >
+                    <TableCell>
+                      <Checkbox
+                        className="cursor-pointer"
+                        checked={selectedItems.has(item.codigo!)}
+                        onCheckedChange={() => toggleSelect(item.codigo!)}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       {item.codigo_matricula}
                     </TableCell>
@@ -378,11 +465,34 @@ export default function AtribuirDescontos() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
-                          size="sm"
+                          aria-label="Editar desconto"
                           variant="outline"
+                          title="Editar desconto"
+                          size="icon"
+                          disabled={selectedItems.has(item.codigo!)}
                           onClick={() => openEditModal(item)}
                         >
-                          Editar
+                          <Edit aria-hidden="true" />
+                        </Button>
+                        <Button
+                          aria-label="Deletar desconto"
+                          title="Deletar desconto"
+                          className="cursor-pointer"
+                          size="icon"
+                          disabled={codigoDesconto === item.codigo || selectedItems.has(item.codigo!)}
+                          variant="destructive"
+                          onClick={() => {
+                            if (item.codigo) {
+                              handleRemoveDiscount(item.codigo);
+                            }
+                          }}
+                        >
+                          {codigoDesconto === item.codigo &&
+                          mutationRemoveDiscount.isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash aria-hidden="true" className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </TableCell>

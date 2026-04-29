@@ -254,6 +254,18 @@ export const PermissionTypeDetails = {
     designacao: "Insencao de Colisão por Curso e Estudante",
     sigla: "cls_scl"
   },
+  PROVA: {
+    designacao: "Lista de Provas",
+    sigla: "mgea_lp",
+  },
+  TOPICO_PROVA: {
+    designacao: "Lista de Tópicos",
+    sigla: "mgea_ltp",
+  },
+  PERGUNTA_PROVA: {
+    designacao: "Lista de Perguntas",
+    sigla: "mgea_lpq",
+  },
   FULL_ACCESS: { designacao: "Todos os acesso", sigla: "full.access" },
   LSOLICITACAO_SUPORTE: {
     designacao: "Listagem de Solicitação de Suporte",
@@ -263,7 +275,7 @@ export const PermissionTypeDetails = {
     designacao: "Registro Primário de Exame de Acesso",
     sigla: "mgea_rpe_acesso",
   },
-   LANCAR_NOTA_ARQUITECTURA: {
+  LANCAR_NOTA_ARQUITECTURA: {
     designacao: "Lançar Nota Candidatura Arquitetura",
     sigla: "mgea_lnc_a",
   },
@@ -278,15 +290,15 @@ export const PermissionTypeDetails = {
   DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
   AULAS_AGENDADAS: { designacao: "Aulas Agendadas", sigla: "mgh_aa" },
 
-REACTIVAR_FACTURA: { designacao: "Reactivar Factura", sigla: "maf_react_factura" },
-VALIDACAO_LANCAMENTO_PAUTA: {
-  designacao: "Validação de lançamento de pauta",
-  sigla: "valid_lanc_pauta",
-},
-INSCRICAO_POR_HORARIO: {
-  designacao: "Inscrição de estudantes por horário",
-  sigla: "insc_por_horario",
-},
+  REACTIVAR_FACTURA: { designacao: "Reactivar Factura", sigla: "maf_react_factura" },
+  VALIDACAO_LANCAMENTO_PAUTA: {
+    designacao: "Validação de lançamento de pauta",
+    sigla: "valid_lanc_pauta",
+  },
+  INSCRICAO_POR_HORARIO: {
+    designacao: "Inscrição de estudantes por horário",
+    sigla: "insc_por_horario",
+  },
   TIPO_SUPORTE: {
     designacao: "Tipo de Suporte",
     sigla: "mga_su_tip",
@@ -456,7 +468,7 @@ INSCRICAO_POR_HORARIO: {
     designacao: "Marcar Assiduidade Prova",
     sigla: "mav_a_map",
   },
-    VALIDACAO_HORARIO: { designacao: "Validação de Horário", sigla: "mga_h_val" },
+  VALIDACAO_HORARIO: { designacao: "Validação de Horário", sigla: "mga_h_val" },
   LISTAR_ESTUDANTES_POR_ESTADO_MATRICULA: {
     designacao: "Listar Estudantes Por Estado Da Matricula",
     sigla: "mgim_a_lepem",
@@ -601,7 +613,7 @@ INSCRICAO_POR_HORARIO: {
   },
   ALTERAR_PROVA: { designacao: "Alterar Prova", sigla: "mgea_a_ap" },
 
-  
+
   LANCAMENTO_NOTAS_MPGS: {
     designacao: "Lançamento de Notas",
     sigla: "mpgs_ln",
@@ -817,10 +829,10 @@ INSCRICAO_POR_HORARIO: {
   },
   SUMARIO_POR_VALIDAR: { designacao: "Sumário Por Validar", sigla: "msa_spv" },
   PARAMETROS_MGD: { designacao: "parametros", sigla: "mgd_p" },
-  DESEMPENHO_DOCENTE: { 
-  designacao: "desempenho docente", 
-  sigla: "desempenho_docente" 
-},
+  DESEMPENHO_DOCENTE: {
+    designacao: "desempenho docente",
+    sigla: "desempenho_docente"
+  },
   LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO: {
     designacao: "Listar Estudantes Sem Inscrições No Curso",
     sigla: "mgim_esi",
@@ -1050,43 +1062,43 @@ INSCRICAO_POR_HORARIO: {
     sigla: "doc_lanc_prog_uc",
   },
 
-CONTROLE_NOTA: {
-  designacao: "Controle de nota",
-  sigla: "controle_nota",
-},
-CRIAR_PRAZO_ACADEMICO: {
-  designacao: "Criação de prazo académico",
-  sigla: "criar_prazo_acad",
-},
-CRIAR_DIAS_ISENTOS: {
-  designacao: "Criação de dias isentos",
-  sigla: "criar_dias_isentos",
-},
-PARAMETROS_CALENDARIO_ACADEMICO: {
-  designacao: "Parâmetros do calendário académico",
-  sigla: "param_calend_acad",
-},
+  CONTROLE_NOTA: {
+    designacao: "Controle de nota",
+    sigla: "controle_nota",
+  },
+  CRIAR_PRAZO_ACADEMICO: {
+    designacao: "Criação de prazo académico",
+    sigla: "criar_prazo_acad",
+  },
+  CRIAR_DIAS_ISENTOS: {
+    designacao: "Criação de dias isentos",
+    sigla: "criar_dias_isentos",
+  },
+  PARAMETROS_CALENDARIO_ACADEMICO: {
+    designacao: "Parâmetros do calendário académico",
+    sigla: "param_calend_acad",
+  },
 
-PRAZO_ACADEMICO: {
-  designacao: "Prazo académico",
-  sigla: "prazo_acad",
-},
+  PRAZO_ACADEMICO: {
+    designacao: "Prazo académico",
+    sigla: "prazo_acad",
+  },
 
-CONTROLE_LANCAMENTO: {
-  designacao: "Controle de lançamento",
-  sigla: "controle_lancamento",
-},
+  CONTROLE_LANCAMENTO: {
+    designacao: "Controle de lançamento",
+    sigla: "controle_lancamento",
+  },
 
 
-SUMARIO_PARAMETROS:{
-  designacao: "Parâmetros do sumário",
-  sigla: "sumario_parametros",
-},
+  SUMARIO_PARAMETROS: {
+    designacao: "Parâmetros do sumário",
+    sigla: "sumario_parametros",
+  },
 
-LISTAR_SUMARIO: {
-  designacao: "Listar sumários",
-  sigla: "listar_sumario",
-}
+  LISTAR_SUMARIO: {
+    designacao: "Listar sumários",
+    sigla: "listar_sumario",
+  }
 
 
 } as const;
