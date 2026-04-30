@@ -202,7 +202,7 @@ export const ingressoStructure: MenuStructure = {
         },
         { title: "Listar Tópicos", url: "/exame/topicos", permission: [PermissionTypeDetails.TOPICO_PROVA.sigla] },
         { title: "Listar Perguntas", url: "/exame/perguntas", permission: [PermissionTypeDetails.PERGUNTA_PROVA.sigla] },
-        { title: "Listagem Provas", url: "/exame/provas", permission: [PermissionTypeDetails.PROVA.sigla] },
+        // { title: "Listagem Provas", url: "/exame/provas", permission: [PermissionTypeDetails.PROVA.sigla] },
       ],
 
       permission: [],
