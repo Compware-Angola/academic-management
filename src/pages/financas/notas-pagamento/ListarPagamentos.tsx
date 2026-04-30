@@ -1,3 +1,4 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -44,6 +45,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { Label } from "@/components/ui/label";
 import { parseFilter } from "@/util/parse-filter";
 import { ListaPagamentoModal } from "./components/ListaPagamentoModal";
+import { useQueryServicosPagosAluno } from "@/hooks/financas/pagamentos-mensais/use-query-servicos-pagos-aluno";
 
 const getStatusPagamentoBadge = (status: string) => {
   switch (status) {
@@ -67,6 +69,18 @@ type SearchByType =
   | "n_operacao_bancaria2";
 
 export default function ListarPagamentos() {
+
+const [tipoServicoPago, setTipoServicoPago] = useState<
+  "TODOS" | "MENSALIDADES" | "SERVICOS"
+>("TODOS");
+
+const [mostrarServicosPagos, setMostrarServicosPagos] = useState(false);
+const [servicosParams, setServicosParams] = useState({
+  anoLectivo: 0,
+  codigoMatricula: 0,
+  tipo: "TODOS" as "TODOS" | "MENSALIDADES" | "SERVICOS",
+});
+
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(1);
   const [facturaSelecionado, setFacturaSelecionado] = useState<number>(0);
@@ -129,6 +143,18 @@ export default function ListarPagamentos() {
     page,
     limit,
   });
+
+  
+const {
+  data: servicosPagosAluno = [],
+  isLoading: loadingServicosPagos,
+} = useQueryServicosPagosAluno(servicosParams, {
+  enabled:
+    mostrarServicosPagos &&
+    !!servicosParams.anoLectivo &&
+    !!servicosParams.codigoMatricula,
+});
+
   const tipoEstados = [
     {
       key: "all",
@@ -179,6 +205,15 @@ export default function ListarPagamentos() {
           de pagamento e estado.
         </p>
       </div>
+
+      <Tabs defaultValue="pagamentos" className="space-y-6">
+  <TabsList>
+    <TabsTrigger value="pagamentos">Pagamentos</TabsTrigger>
+    <TabsTrigger value="servicos">Serviços pagos do aluno</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="pagamentos" className="space-y-6">
+
 
       {/* Filtros */}
       <Card>
@@ -256,14 +291,16 @@ export default function ListarPagamentos() {
                   setFiltersApplied(filters);
                   setSearchApplied(searchTerm);
                   setSearchByApplied(searchBy);
-                  refetch();
+                  refetch(); 
                 }}
               >
                 <Search className="h-4 w-4" size="sm" />
                 Pesquisar
               </Button>
             </div>
+            
           </div>
+
         </CardContent>
       </Card>
 
@@ -311,7 +348,7 @@ export default function ListarPagamentos() {
               {loadingPayments ? (
                 <TableRow>
                   <TableCell
-                    colSpan={16}
+                    colSpan={17}
                     className="text-center py-8 text-muted-foreground"
                   >
                     <div className="flex justify-center items-center">
@@ -322,7 +359,7 @@ export default function ListarPagamentos() {
               ) : payments.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={10}
+                    colSpan={17}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Nenhum pagamento encontrado com os filtros aplicados
@@ -436,6 +473,136 @@ export default function ListarPagamentos() {
           </div>
         </CardContent>
       </Card>
+    
+    </TabsContent>
+
+
+    <TabsContent value="servicos" className="space-y-6">
+  <Card>
+    <CardHeader>
+      <CardTitle>Consulta de serviços pagos do aluno</CardTitle>
+    </CardHeader>
+
+    <CardContent className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <AcademicYearSelect
+          value={String(servicosParams.anoLectivo || filters.anoLectivo)}
+          onChangeValue={(v) =>
+            setServicosParams((prev) => ({
+              ...prev,
+              anoLectivo: parseFilter(v),
+            }))
+          }
+        />
+
+        <div>
+          <Label>Código da Matrícula</Label>
+          <Input
+            type="number"
+            placeholder="Código da matrícula"
+            value={servicosParams.codigoMatricula || ""}
+            onChange={(e) =>
+              setServicosParams((prev) => ({
+                ...prev,
+                codigoMatricula: parseFilter(e.target.value),
+              }))
+            }
+          />
+        </div>
+
+        <div>
+          <Label>Tipo</Label>
+          <Select
+            value={tipoServicoPago}
+            onValueChange={(value) => {
+              const tipo = value as "TODOS" | "MENSALIDADES" | "SERVICOS";
+
+              setTipoServicoPago(tipo);
+              setServicosParams((prev) => ({
+                ...prev,
+                tipo,
+              }));
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="TODOS">Todos</SelectItem>
+              <SelectItem value="MENSALIDADES">Mensalidades</SelectItem>
+              <SelectItem value="SERVICOS">Serviços</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <Button
+        onClick={() => {
+          setMostrarServicosPagos(true);
+        }}
+      >
+        <Search className="h-4 w-4 mr-2" />
+        Consultar Serviços
+      </Button>
+    </CardContent>
+  </Card>
+
+  {mostrarServicosPagos && (
+    <Card>
+      <CardHeader>
+        <CardTitle>Serviços pagos do aluno</CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Código</TableHead>
+              <TableHead>Serviço</TableHead>
+              <TableHead>Valor</TableHead>
+              <TableHead>Data pag. Banco</TableHead>
+              <TableHead>Data de validação</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {loadingServicosPagos ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8">
+                  <Loader2 className="animate-spin text-primary mx-auto" />
+                </TableCell>
+              </TableRow>
+            ) : servicosPagosAluno.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center py-8 text-muted-foreground"
+                >
+                  Nenhum serviço pago encontrado
+                </TableCell>
+              </TableRow>
+            ) : (
+              servicosPagosAluno.map((item) => (
+                <TableRow key={item.codigo}>
+                  <TableCell>{item.codigo}</TableCell>
+                  <TableCell>{item.servico}</TableCell>
+                  <TableCell>{formatNumber(item.valor)}</TableCell>
+                  <TableCell>
+                    {formatarData(item.data_pagamento_banco)}
+                  </TableCell>
+                  <TableCell>{formatarData(item.data_validacao)}</TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )}
+</TabsContent>
+</Tabs>
+
+    
 
       {/* Modal de Detalhes */}
       <ListaPagamentoModal
