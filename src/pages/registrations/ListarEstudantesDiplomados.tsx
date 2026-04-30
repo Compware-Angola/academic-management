@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Loader2, Search } from "lucide-react";
 
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -28,26 +28,28 @@ import {
 import { parseFilter } from "@/util/parse-filter";
 import { useQuerySexo } from "@/hooks/acess/use-query-sexo";
 import { useQueryEstudantesDiplomados } from "@/hooks/students/use-query-estudantes-diplomados";
+import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 type GeneroDiplomado = "todos" | "Masculino" | "Feminino";
 
 export function ListaEstudantesDiplomados() {
-const [page, setPage] = useState(1);
-const limit = 10;
-    
-const [filters, setFilters] = useState<{
-  anoLectivo: string;
-  faculdade: string;
-  curso: string;
-  genero: GeneroDiplomado;
-  tipoCandidatura: string;
-}>({
-  anoLectivo: "",
-  faculdade: "",
-  curso: "",
-  genero: "todos",
-  tipoCandidatura: "0",
-});
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  const [filters, setFilters] = useState<{
+    anoLectivo: string;
+    faculdade: string;
+    curso: string;
+    genero: GeneroDiplomado;
+    tipoCandidatura: string;
+  }>({
+    anoLectivo: "",
+    faculdade: "",
+    curso: "",
+    genero: "todos",
+    tipoCandidatura: "0",
+  });
 
   const [appliedFilters, setAppliedFilters] = useState<typeof filters | null>(
     null,
@@ -79,6 +81,80 @@ const [filters, setFilters] = useState<{
   const estudantes = data?.data ?? [];
   const total = data?.total ?? 0;
 
+  const exportRows = useMemo(
+    () =>
+      estudantes.map((e) => ({
+        matricula: e.matricula,
+        nome: e.nome,
+        bilhete: e.bilhete,
+        curso: e.curso,
+        tipoCandidatura: e.tipo_candidatura,
+        dataMatricula: e.data_matricula,
+        dataConclusao: e.data_conclusao,
+        genero: e.genero,
+        idade: e.idade,
+        media: e.media,
+      })),
+    [estudantes]
+  );
+  const pdfData = exportRows.length
+    ? {
+      filtros: [
+        filters.anoLectivo ? `Ano Letivo: ${filters.anoLectivo}` : null,
+        filters.faculdade ? `Faculdade: ${filters.faculdade}` : null,
+        filters.curso ? `Curso: ${filters.curso}` : null,
+        filters.genero ? `Género: ${filters.genero}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      rows: exportRows,
+    }
+    : null;
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lista de Estudantes Diplomados"
+      subtitle="Relatório académico"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "matricula", label: "Matrícula", width: "12%" },
+          { key: "nome", label: "Nome", width: "20%" },
+          { key: "bilhete", label: "BI", width: "15%" },
+          { key: "curso", label: "Curso", width: "20%" },
+          { key: "media", label: "Média", width: "10%" },
+          { key: "genero", label: "Género", width: "10%" },
+        ],
+        rows: pdfData.rows,
+      }}
+      footerNotice="Documento gerado automaticamente"
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+      documentTitle: "Lista de Estudantes Diplomados",
+      subtitle: "Relatório académico",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        { title: "Total", content: [`${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Matrícula", width: 18 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "bilhete", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "media", label: "Média", width: 15 },
+          { key: "genero", label: "Género", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente",
+    }
+    : null;
+
   return (
     <>
       <Breadcrumb className="mb-4">
@@ -93,10 +169,16 @@ const [filters, setFilters] = useState<{
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex justify-between">
-        <h1 className="text-3xl font-bold mb-6 text-foreground">
-          Lista de Estudantes Diplomados
-        </h1>
+
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold mb-6">Lista de Estudantes Diplomados</h1>
+
+        {pdfContent && (
+          <div className="flex gap-2">
+            <PDFActions document={pdfContent} fileName="estudantes_diplomados.pdf" />
+            <ExcelActions excelProps={excelProps!} fileName="estudantes_diplomados.xlsx" />
+          </div>
+        )}
       </div>
 
       <Card className="mb-6">
@@ -137,10 +219,10 @@ const [filters, setFilters] = useState<{
               loading={isLoadingSexo}
               onChange={(v) =>
                 setFilters({
-                    ...filters,
-                    genero: v as GeneroDiplomado,
+                  ...filters,
+                  genero: v as GeneroDiplomado,
                 })
-                }
+              }
               options={[
                 {
                   codigo: "todos",
@@ -149,10 +231,10 @@ const [filters, setFilters] = useState<{
                 ...sexos.filter((s) => s.codigo !== 3),
               ]}
               map={(s) => ({
-  key: s.codigo,
-  label: s.designacao,
-  value: s.codigo === "todos" ? "todos" : s.designacao,
-})}
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo === "todos" ? "todos" : s.designacao,
+              })}
             />
 
             <FormSelect
@@ -172,9 +254,9 @@ const [filters, setFilters] = useState<{
             <Button
               className="gap-2"
               onClick={() => {
-                    setPage(1);
-                    setAppliedFilters(filters);
-                }}
+                setPage(1);
+                setAppliedFilters(filters);
+              }}
               disabled={!filters.anoLectivo}
             >
               <Search className="h-4 w-4" />
@@ -242,30 +324,30 @@ const [filters, setFilters] = useState<{
               </Table>
 
 
-                  <div className="flex items-center justify-between mt-4">
-  <p className="text-sm text-muted-foreground">
-    Página {data?.page ?? 1} de {data?.totalPages ?? 1}
-  </p>
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-muted-foreground">
+                  Página {data?.page ?? 1} de {data?.totalPages ?? 1}
+                </p>
 
-  <div className="flex gap-2">
-    <Button
-      variant="outline"
-      disabled={page === 1}
-      onClick={() => setPage((p) => p - 1)}
-    >
-      Anterior
-    </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Anterior
+                  </Button>
 
-    <Button
-      variant="outline"
-      disabled={page >= (data?.totalPages ?? 1)}
-      onClick={() => setPage((p) => p + 1)}
-    >
-      Próxima
-    </Button>
-  </div>
-</div>
-              
+                  <Button
+                    variant="outline"
+                    disabled={page >= (data?.totalPages ?? 1)}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Próxima
+                  </Button>
+                </div>
+              </div>
+
             </div>
           )}
         </CardContent>
