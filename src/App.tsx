@@ -162,6 +162,7 @@ import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
 import ListarTopicos from "./pages/access_exam/ListarTopicos";
 import ListagemProvas from "./pages/access_exam/ListagemProvas";
+import { ListaEstudantesDiplomados } from "./pages/registrations/ListarEstudantesDiplomados";
 
 const App = () => {
   return (
@@ -1515,6 +1516,20 @@ const App = () => {
                         ]}
                       >
                         <ListagemColisoesIsentas />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/inscricoes/estudantes-diplomados"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTA_ESTUDANTES_DIPLOMANDOS.sigla!,
+                        ]}
+                      >
+                        <ListaEstudantesDiplomados />
                       </ProtectedRoute>
                     }
                   />
