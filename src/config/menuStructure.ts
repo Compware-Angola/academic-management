@@ -273,6 +273,14 @@ export const ingressoStructure: MenuStructure = {
             PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla,
           ],
         },
+
+        {
+          title: "Estudantes Diplomados",
+          url: "/inscricoes/estudantes-diplomados",
+          permission: [
+            PermissionTypeDetails.LISTA_ESTUDANTES_DIPLOMANDOS.sigla,
+          ],
+        },
       ],
 
       permission: [],
