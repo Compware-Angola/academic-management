@@ -5,6 +5,7 @@ export type ListarDiplomadosPayload = {
   codigoCurso?: number;
   genero?: "todos" | "Masculino" | "Feminino";
   tipoCandidatura?: number;
+  search?: string;
   page?: number;
   limit?: number;
 };
@@ -23,6 +24,7 @@ export type EstudanteDiplomado = {
   genero: string;
   idade: number;
   media: number;
+  tipo_aluno: string;
 };
 
 export type ListarDiplomadosResponse = {
