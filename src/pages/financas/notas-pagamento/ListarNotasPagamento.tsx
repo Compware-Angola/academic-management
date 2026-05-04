@@ -75,7 +75,7 @@ function truncate(text: string, max = 10) {
 }
 
 export default function ListarNotasPagamento() {
-const { hasPermission } = usePermission();
+  const { hasPermission } = usePermission();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<number | null>(null);
@@ -380,8 +380,8 @@ const { hasPermission } = usePermission();
                     </TableCell>
 
                     <TableCell>{nota.nome_aluno}</TableCell>
-                    <TableCell className="font-mono">{nota.codigo_matricula}</TableCell>
-                    <TableCell>{nota.curso}</TableCell>
+                    <TableCell className="font-mono">{nota.codigo_matricula || 'N/A'}</TableCell>
+                    <TableCell>{nota.curso || 'N/A'}</TableCell>
                     <TableCell className="font-medium">{formatCurrency(nota.valor_pagar)}</TableCell>
                     <TableCell>{formatDate(nota.data_factura)}</TableCell>
 
@@ -402,10 +402,10 @@ const { hasPermission } = usePermission();
                             <Button
                               size="icon"
                               variant="outline"
-                                className="h-8 w-8 text-red-600 hover:bg-red-50"
+                              className="h-8 w-8 text-red-600 hover:bg-red-50"
                               onClick={() => abrirConfirmacao("anular", nota)}
                             >
-                                 <CircleX className="h-4 w-4" />
+                              <CircleX className="h-4 w-4" />
                             </Button>
                           )}
 
