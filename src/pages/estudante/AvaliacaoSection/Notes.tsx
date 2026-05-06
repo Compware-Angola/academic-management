@@ -45,6 +45,13 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
         </Badge>
       );
     }
+    if (resultado === "Sem Avaliações") {
+      return (
+        <Badge className="bg-amber-500/20 text-amber-500 border-amber-500/30">
+          Aguardando Resuldado
+        </Badge>
+      );
+    }
     return (
       <Badge className="bg-red-500/20 text-red-600 border-red-500/30">
         Reprovado
