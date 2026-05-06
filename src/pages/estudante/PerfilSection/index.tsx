@@ -11,6 +11,7 @@ import { DefinirEspecialidade } from "./definir-especialidade";
 
 import { Diplomar } from "./Diplomar";
 import { MudarCurso } from "./mudar-curso";
+import { AtivarConfirmacao } from "./ativar-confirmacao";
 
 
 const TABS_CONFIG = [
@@ -37,6 +38,12 @@ const TABS_CONFIG = [
     label: "Ativar Matricula Cancelada",
     icon: Key,
     component: AtivarMatricula,
+  },
+  {
+    value: "ativar-confirmacao",
+    label: "Ativar Confirmação",
+    icon: Key,
+    component: AtivarConfirmacao,
   },
   {
     value: "ver-inscricoes",
