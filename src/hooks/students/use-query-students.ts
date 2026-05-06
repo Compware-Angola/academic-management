@@ -1,5 +1,6 @@
 // hooks/useStudents.ts
 import { GetAcademicHistoryEquivalencyParams, GetAcademicHistoryMigrationParams, GetAcademicHistoryParams, studentAcademicHistoryEquivalencyService, studentAcademicHistoryMigrationService, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
+import { activeConfirmation, ActiveConfirmationPayload } from "@/services/students/active-confirmation.service";
 import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
 import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
 import {
@@ -62,7 +63,7 @@ export const useStudentDetail = (codigoMatricula?: number | string) => {
 export const useStudentDisciplinas = (
   params: FetchDisciplinasMatriculadasParams,
 ) => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25,classes } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes } = params;
 
 
   const queryKey = [
@@ -73,7 +74,7 @@ export const useStudentDisciplinas = (
     classes ? String(classes) : null,
     page,
     limit,
-  ].filter(Boolean); 
+  ].filter(Boolean);
 
   return useQuery<DisciplinasResponse, Error>({
     queryKey,
@@ -82,7 +83,7 @@ export const useStudentDisciplinas = (
     staleTime: 5 * 60 * 1000, // 5 minutos (disciplinas mudam pouco)
     gcTime: 30 * 60 * 1000,
     retry: 1,
-   
+
   });
 };
 
@@ -164,6 +165,19 @@ export function useActiveRegistration() {
     mutationFn: (payload) => activeRegistration(payload),
     onSuccess: () => {
       toast.success("Matrícula ativada com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["student-detail"],
+      });
+    },
+  });
+}
+
+export function useActiveConfirmacao() {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, ActiveConfirmationPayload>({
+    mutationFn: (payload) => activeConfirmation(payload),
+    onSuccess: () => {
+      toast.success("Confirmação ativada com sucesso!");
       queryClient.invalidateQueries({
         queryKey: ["student-detail"],
       });

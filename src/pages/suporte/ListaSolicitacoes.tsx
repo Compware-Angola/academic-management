@@ -57,7 +57,7 @@ import {
 import { useAllTiposSuporte } from "@/hooks/suporte/use-query-tipo-suporte";
 import { useUploadSingle } from "@/hooks/upload/use-upload-single";
 
-import { FilterSolicitacoesParams, ResponderSolicitacaoPayload, SolicitacaoSuporte } from "@/services/suporte/solicitacao-suporte.service";
+import { ResponderSolicitacaoPayload, SolicitacaoSuporte } from "@/services/suporte/solicitacao-suporte.service";
 import { ApiError } from "@/error";
 import { viewFile } from "@/services/upload/upload-single.service";
 
@@ -151,7 +151,7 @@ export default function ListaSolicitacoes() {
 
     try {
       const result = await uploadMutation.mutateAsync(selectedFile);
-      const uploadedName = result.file?.filename 
+      const uploadedName = result.file?.filename
 
       const nameKey = `fileName${slot}` as keyof typeof fileNames;
       setFileNames((prev) => ({ ...prev, [nameKey]: uploadedName }));
@@ -286,88 +286,140 @@ export default function ListaSolicitacoes() {
       {/* Filtros */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Pesquisa</label>
-              <div className="relative">
-                <Input
-                  placeholder="Estudante, assunto, mensagem..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pr-10"
-                />
-                {searchTerm && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchTerm("");
+          <div className="flex flex-col gap-4">
+
+            {/* Linha 1: Pesquisa ocupa mais espaço */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1.5 md:col-span-1">
+                <label className="text-sm font-medium text-muted-foreground">Pesquisa</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    placeholder="Estudante, BI, assunto, mensagem..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+                    className="pl-9 pr-9"
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchTerm("");
+                        setCurrentPage(1);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">Tipo de Serviço</label>
+                <Select
+                  value={tipoSuporte?.toString() ?? "all"}
+                  onValueChange={(v) => {
+                    setTipoSuporte(v === "all" ? undefined : Number(v));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos os tipos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os tipos</SelectItem>
+                    {tiposSuporte.map((t) => (
+                      <SelectItem key={t.id} value={t.id.toString()}>
+                        {t.descricao}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-muted-foreground">Estado</label>
+                <Select
+                  value={status ?? "all"}
+                  onValueChange={(v) => {
+                    setStatus(v === "all" ? undefined : v);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos os estados" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="a responder">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-yellow-500 inline-block" />
+                        A Responder
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="aguarda resposta">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-blue-500 inline-block" />
+                        Aguarda Resposta
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="respondido">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
+                        Respondido
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Tipo de Serviço</label>
-              <Select
-                value={tipoSuporte?.toString() ?? "all"}
-                onValueChange={(v) => {
-                  setTipoSuporte(v === "all" ? undefined : Number(v));
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os tipos</SelectItem>
-                  {tiposSuporte.map((t) => (
-                    <SelectItem key={t.id} value={t.id.toString()}>
-                      {t.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Linha 2: Acções + resumo de filtros activos */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Badges dos filtros activos */}
+                {searchTerm && (
+                  <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium">
+                    Pesquisa: "{searchTerm}"
+                    <button onClick={() => { setSearchTerm(""); setCurrentPage(1); }}>
+                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </span>
+                )}
+                {tipoSuporte !== undefined && (
+                  <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium">
+                    Tipo: {tiposSuporte.find(t => t.id === tipoSuporte)?.descricao}
+                    <button onClick={() => { setTipoSuporte(undefined); setCurrentPage(1); }}>
+                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </span>
+                )}
+                {status && (
+                  <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium">
+                    Estado: {status}
+                    <button onClick={() => { setStatus(undefined); setCurrentPage(1); }}>
+                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <Button variant="outline" onClick={handleLimpar} size="sm">
+                  <X className="mr-2 h-4 w-4" />
+                  Limpar
+                </Button>
+                <Button onClick={handleFiltrar} size="sm">
+                  <Search className="mr-2 h-4 w-4" />
+                  Filtrar
+                </Button>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Estado</label>
-              <Select
-                value={status ?? "all"}
-                onValueChange={(v) => {
-                  setStatus(v === "all" ? undefined : v);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos os estados" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="a responder">A Responder</SelectItem>
-                  <SelectItem value="aguarda resposta">Aguarda Resposta</SelectItem>
-                  <SelectItem value="respondido">Respondido</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end gap-2 md:col-span-2">
-              <Button onClick={handleFiltrar} className="flex-1">
-                <Search className="mr-2 h-4 w-4" />
-                Filtrar
-              </Button>
-              <Button variant="outline" onClick={handleLimpar} className="flex-1">
-                <X className="mr-2 h-4 w-4" />
-                Limpar
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -379,6 +431,8 @@ export default function ListaSolicitacoes() {
             <TableRow>
               <TableHead>ID</TableHead>
               <TableHead>Estudante</TableHead>
+              <TableHead>Bilhete de Identidade</TableHead>
+              <TableHead>Matricula</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Assunto</TableHead>
               <TableHead>Estado</TableHead>
@@ -399,6 +453,8 @@ export default function ListaSolicitacoes() {
                 <TableRow key={sol.contactos_id} className="hover:bg-muted/50">
                   <TableCell className="font-medium">{sol.contactos_id}</TableCell>
                   <TableCell>{sol.estudante}</TableCell>
+                  <TableCell>{sol.bilhete_identidade}</TableCell>
+                  <TableCell>{sol.codigo_matricula}</TableCell>
                   <TableCell className="max-w-[180px] truncate">{sol.descricao_tipo_suporte}</TableCell>
                   <TableCell className="max-w-[220px] truncate">{sol.assunto}</TableCell>
                   <TableCell>{getEstadoBadge(sol.status_mensagem)}</TableCell>
@@ -519,16 +575,16 @@ export default function ListaSolicitacoes() {
                     Respostas ({solicitacaoDetail.respostas.length})
                   </p>
 
-                  <div 
+                  <div
                     className={`
                       space-y-3 
-                      ${solicitacaoDetail.respostas.length > 4 
-                        ? 'max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/50' 
+                      ${solicitacaoDetail.respostas.length > 4
+                        ? 'max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted-foreground/50'
                         : ''}
                     `}
                   >
                     {solicitacaoDetail.respostas.map((resposta) => (
-                      <div 
+                      <div
                         key={resposta.resposta_id}
                         className="p-3 bg-muted rounded-md border border-border/50"
                       >
@@ -674,8 +730,8 @@ export default function ListaSolicitacoes() {
                                   {fileNames[nameKey]
                                     ? fileNames[nameKey]
                                     : files[fileKey]
-                                    ? files[fileKey]!.name
-                                    : `Escolher arquivo ${n}`}
+                                      ? files[fileKey]!.name
+                                      : `Escolher arquivo ${n}`}
                                 </span>
                                 <input
                                   type="file"
@@ -729,8 +785,8 @@ export default function ListaSolicitacoes() {
                         onClick={handleEnviarResposta}
                         disabled={
                           responderMutation.isPending ||
-                          (!respostaTexto.trim() && 
-                           !fileNames.fileName1 && !fileNames.fileName2 && !fileNames.fileName3)
+                          (!respostaTexto.trim() &&
+                            !fileNames.fileName1 && !fileNames.fileName2 && !fileNames.fileName3)
                         }
                       >
                         {responderMutation.isPending ? "Enviando..." : "Enviar Resposta"}

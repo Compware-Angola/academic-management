@@ -36,6 +36,8 @@ export interface RespostaSuporte {
 export type SolicitacaoSuporte = {
   contactos_id: number;
   estudante: string;
+  bilhete_identidade: string;
+  codigo_matricula: string;
   mensagem: string;
   assunto: string;
   descricao_tipo_suporte: string;

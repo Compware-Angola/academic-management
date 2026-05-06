@@ -3,7 +3,7 @@ import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
-import { useState , useMemo} from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,7 @@ import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 import { useToast } from "@/hooks/use-toast";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function ListaCandidatos() {
   const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
@@ -68,7 +69,16 @@ export default function ListaCandidatos() {
     codigoTipoCandidatura: 0,
   });
 
-  const { data, isLoading, refetch } = useCandidatos(filters);
+  const { data, isLoading, refetch } = useCandidatos({
+    search: filters.search || undefined,
+    page: filters.page,
+    limit: filters.limit,
+    codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
+    codigoCurso: parseFilter(filters.codigoCurso),
+    codigoTurno: parseFilter(filters.codigoTurno),
+
+
+  });
   const { mutate: updateCandidato, isPending: isSaving } = useUpdateCandidato();
 
   const candidatos = data?.data ?? [];
@@ -77,22 +87,22 @@ export default function ListaCandidatos() {
   const offset = ((filters.page ?? 1) - 1) * (filters.limit ?? 10);
 
   const exportRows = useMemo(
-  () =>
-    candidatos.map((candidato) => ({
-      numeroInscricao: candidato.numero_inscricao,
-      nome: candidato.nome,
-      numeroBilhete: candidato.numero_bilhete,
-      curso: candidato.curso,
-      periodo: candidato.periodo,
-      mediaFinal: candidato.media_final ?? "N/A",
-      anoLectivo: candidato.ano_lectivo,
-      tipoCandidatura: candidato.tipo_candidatura,
-    })),
-  [candidatos]
-);
+    () =>
+      candidatos.map((candidato) => ({
+        numeroInscricao: candidato.numero_inscricao,
+        nome: candidato.nome,
+        numeroBilhete: candidato.numero_bilhete,
+        curso: candidato.curso,
+        periodo: candidato.periodo,
+        mediaFinal: candidato.media_final ?? "N/A",
+        anoLectivo: candidato.ano_lectivo,
+        tipoCandidatura: candidato.tipo_candidatura,
+      })),
+    [candidatos]
+  );
 
-const pdfData = exportRows.length
-  ? {
+  const pdfData = exportRows.length
+    ? {
       filtros: [
         filters.search ? `Pesquisa: ${filters.search}` : null,
         filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
@@ -104,35 +114,35 @@ const pdfData = exportRows.length
       total: exportRows.length,
       rows: exportRows,
     }
-  : null;
+    : null;
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Lista de Candidatos"
-    subtitle="Gestão de candidatos ao exame de acesso"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
-     // { title: "Resumo", content: [`Total de registos: ${total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
-        { key: "nome", label: "Nome", width: "24%" },
-        { key: "numeroBilhete", label: "BI", width: "14%" },
-        { key: "curso", label: "Curso", width: "16%" },
-        { key: "periodo", label: "Período", width: "10%" },
-        { key: "mediaFinal", label: "Média Final", width: "10%" },
-        { key: "anoLectivo", label: "Ano Letivo", width: "14%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lista de Candidatos"
+      subtitle="Gestão de candidatos ao exame de acesso"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        // { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+          { key: "nome", label: "Nome", width: "24%" },
+          { key: "numeroBilhete", label: "BI", width: "14%" },
+          { key: "curso", label: "Curso", width: "16%" },
+          { key: "periodo", label: "Período", width: "10%" },
+          { key: "mediaFinal", label: "Média Final", width: "10%" },
+          { key: "anoLectivo", label: "Ano Letivo", width: "14%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const excelProps = pdfData
-  ? {
+  const excelProps = pdfData
+    ? {
       documentTitle: "Lista de Candidatos",
       subtitle: "Gestão de candidatos ao exame de acesso",
       infoSections: [
@@ -155,9 +165,9 @@ const excelProps = pdfData
       footerNotice: "Documento gerado automaticamente pelo sistema.",
       primaryColor: "#0D1B48",
     }
-  : null;
+    : null;
 
-const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`;
+  const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`;
 
   function handleSearchChange(value: string) {
     setFilters((prev) => ({ ...prev, search: value || undefined, page: 1 }));
@@ -238,29 +248,29 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
           <p className="text-muted-foreground mt-1">Gestão de candidatos ao exame de acesso</p>
         </div>
 
-          <div className="flex flex-wrap gap-2">
-  <Button variant="outline" size="sm" onClick={() => refetch()}>
-    <RefreshCw className="h-4 w-4 mr-2" />
-    Atualizar lista
-  </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar lista
+          </Button>
 
-  {pdfContent && (
-    <PDFActions
-      document={pdfContent}
-      fileName={`${baseFileName}.pdf`}
-      showDownload
-      showPrint
-    />
-  )}
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
 
-  {excelProps && (
-    <ExcelActions
-      excelProps={excelProps}
-      fileName={`${baseFileName}.xlsx`}
-      showDownload
-    />
-  )}
-</div>
+          {excelProps && (
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          )}
+        </div>
 
       </div>
 
@@ -311,12 +321,12 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
           </div>
           <div className="space-y-2">
             <FacultySelect
-            allOption
-            value={filters.codigoFaculdade}
-            onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
-          />
+              allOption
+              value={filters.codigoFaculdade}
+              onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
+            />
           </div>
-            <div className="space-y-2">
+          <div className="space-y-2">
             <CourseSelect
               value={filters.codigoCurso}
               onChangeValue={(v) => setFilters({ ...filters, codigoCurso: v })}
@@ -333,7 +343,7 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
               map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
             />
           </div>
-        
+
         </div>
       </div>
 
@@ -460,44 +470,44 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
         <DialogContent className="max-w-4xl! p-0! gap-0! overflow-hidden flex flex-col max-h-[90vh]!">
 
           {/* Topo fixo — resumo */}
-        <div className="shrink-0 bg-muted/40 border-b px-6 py-5">
-  <DialogHeader className="mb-6">
-    <DialogTitle className="text-xl">{modal.candidato?.nome}</DialogTitle>
-  </DialogHeader>
+          <div className="shrink-0 bg-muted/40 border-b px-6 py-5">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-xl">{modal.candidato?.nome}</DialogTitle>
+            </DialogHeader>
 
-  <div className="flex gap-8 items-start">
-    {/* Ícone Animado do Estudante - Versão Otimizada */}
-    <div className="relative shrink-0">
-      {/* Ondas de fundo (ping) - mais suaves */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <span 
-          className="absolute h-40 w-40 rounded-full border-2 border-primary/10 animate-ping" 
-          style={{ animationDuration: "2.2s" }} 
-        />
-        <span 
-          className="absolute h-56 w-56 rounded-full border border-primary/5 animate-ping" 
-          style={{ animationDuration: "2.8s", animationDelay: "0.4s" }} 
-        />
-        <span 
-          className="absolute h-72 w-72 rounded-full border border-primary/5 animate-ping" 
-          style={{ animationDuration: "3.5s", animationDelay: "0.8s" }} 
-        />
-      </div>
+            <div className="flex gap-8 items-start">
+              {/* Ícone Animado do Estudante - Versão Otimizada */}
+              <div className="relative shrink-0">
+                {/* Ondas de fundo (ping) - mais suaves */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span
+                    className="absolute h-40 w-40 rounded-full border-2 border-primary/10 animate-ping"
+                    style={{ animationDuration: "2.2s" }}
+                  />
+                  <span
+                    className="absolute h-56 w-56 rounded-full border border-primary/5 animate-ping"
+                    style={{ animationDuration: "2.8s", animationDelay: "0.4s" }}
+                  />
+                  <span
+                    className="absolute h-72 w-72 rounded-full border border-primary/5 animate-ping"
+                    style={{ animationDuration: "3.5s", animationDelay: "0.8s" }}
+                  />
+                </div>
 
-      {/* SVG do estudante */}
-      <svg
-        width="160"
-        height="200"
-        viewBox="0 0 160 200"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="relative z-10 drop-shadow-md will-change-transform"
-        style={{
-          animation: "float 3s ease-in-out infinite",
-          transform: "translateZ(0)", 
-        }}
-      >
-        <style>{`
+                {/* SVG do estudante */}
+                <svg
+                  width="160"
+                  height="200"
+                  viewBox="0 0 160 200"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="relative z-10 drop-shadow-md will-change-transform"
+                  style={{
+                    animation: "float 3s ease-in-out infinite",
+                    transform: "translateZ(0)",
+                  }}
+                >
+                  <style>{`
           @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-12px); }
@@ -509,120 +519,120 @@ const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`
           }
         `}</style>
 
-        {/* Corpo */}
-        <rect x="52" y="95" width="56" height="70" rx="10" fill="hsl(var(--primary))" opacity="0.9" />
+                  {/* Corpo */}
+                  <rect x="52" y="95" width="56" height="70" rx="10" fill="hsl(var(--primary))" opacity="0.9" />
 
-        {/* Cabeça */}
-        <circle cx="80" cy="72" r="26" fill="#FBBF8A" />
+                  {/* Cabeça */}
+                  <circle cx="80" cy="72" r="26" fill="#FBBF8A" />
 
-        {/* Cabelo */}
-        <ellipse cx="80" cy="50" rx="26" ry="12" fill="#3B1A08" />
-        <rect x="54" y="48" width="8" height="20" rx="4" fill="#3B1A08" />
-        <rect x="98" y="48" width="8" height="20" rx="4" fill="#3B1A08" />
+                  {/* Cabelo */}
+                  <ellipse cx="80" cy="50" rx="26" ry="12" fill="#3B1A08" />
+                  <rect x="54" y="48" width="8" height="20" rx="4" fill="#3B1A08" />
+                  <rect x="98" y="48" width="8" height="20" rx="4" fill="#3B1A08" />
 
-        {/* Olhos */}
-        <circle cx="72" cy="72" r="3.5" fill="#1e293b" />
-        <circle cx="88" cy="72" r="3.5" fill="#1e293b" />
-        <circle cx="73" cy="71" r="1" fill="white" />
-        <circle cx="89" cy="71" r="1" fill="white" />
+                  {/* Olhos */}
+                  <circle cx="72" cy="72" r="3.5" fill="#1e293b" />
+                  <circle cx="88" cy="72" r="3.5" fill="#1e293b" />
+                  <circle cx="73" cy="71" r="1" fill="white" />
+                  <circle cx="89" cy="71" r="1" fill="white" />
 
-        {/* Sorriso */}
-        <path d="M73 80 Q80 87 87 80" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" fill="none" />
+                  {/* Sorriso */}
+                  <path d="M73 80 Q80 87 87 80" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" fill="none" />
 
-        {/* Braço esquerdo */}
-        <rect x="30" y="98" width="24" height="12" rx="6" fill="hsl(var(--primary))" opacity="0.9" />
+                  {/* Braço esquerdo */}
+                  <rect x="30" y="98" width="24" height="12" rx="6" fill="hsl(var(--primary))" opacity="0.9" />
 
-        {/* Braço direito — acenando */}
-        <g style={{ 
-          transformOrigin: "108px 104px", 
-          animation: "wave 1.6s ease-in-out infinite" 
-        }}>
-          <rect x="108" y="98" width="24" height="12" rx="6" fill="hsl(var(--primary))" opacity="0.9" />
-          <circle cx="134" cy="104" r="7" fill="#FBBF8A" />
-        </g>
+                  {/* Braço direito — acenando */}
+                  <g style={{
+                    transformOrigin: "108px 104px",
+                    animation: "wave 1.6s ease-in-out infinite"
+                  }}>
+                    <rect x="108" y="98" width="24" height="12" rx="6" fill="hsl(var(--primary))" opacity="0.9" />
+                    <circle cx="134" cy="104" r="7" fill="#FBBF8A" />
+                  </g>
 
-        {/* Mão esquerda */}
-        <circle cx="28" cy="104" r="7" fill="#FBBF8A" />
+                  {/* Mão esquerda */}
+                  <circle cx="28" cy="104" r="7" fill="#FBBF8A" />
 
-        {/* Pernas */}
-        <rect x="58" y="158" width="18" height="36" rx="8" fill="hsl(var(--primary))" opacity="0.7" />
-        <rect x="84" y="158" width="18" height="36" rx="8" fill="hsl(var(--primary))" opacity="0.7" />
+                  {/* Pernas */}
+                  <rect x="58" y="158" width="18" height="36" rx="8" fill="hsl(var(--primary))" opacity="0.7" />
+                  <rect x="84" y="158" width="18" height="36" rx="8" fill="hsl(var(--primary))" opacity="0.7" />
 
-        {/* Sapatos */}
-        <ellipse cx="67" cy="193" rx="13" ry="6" fill="#1e293b" />
-        <ellipse cx="93" cy="193" rx="13" ry="6" fill="#1e293b" />
+                  {/* Sapatos */}
+                  <ellipse cx="67" cy="193" rx="13" ry="6" fill="#1e293b" />
+                  <ellipse cx="93" cy="193" rx="13" ry="6" fill="#1e293b" />
 
-        {/* Livro */}
-        <rect x="10" y="96" width="20" height="26" rx="3" fill="#f8fafc" stroke="hsl(var(--primary))" strokeWidth="1.5" />
-        <line x1="20" y1="96" x2="20" y2="122" stroke="hsl(var(--primary))" strokeWidth="1.5" />
-        <line x1="13" y1="104" x2="18" y2="104" stroke="#94a3b8" strokeWidth="1" />
-        <line x1="13" y1="108" x2="18" y2="108" stroke="#94a3b8" strokeWidth="1" />
-        <line x1="13" y1="112" x2="18" y2="112" stroke="#94a3b8" strokeWidth="1" />
+                  {/* Livro */}
+                  <rect x="10" y="96" width="20" height="26" rx="3" fill="#f8fafc" stroke="hsl(var(--primary))" strokeWidth="1.5" />
+                  <line x1="20" y1="96" x2="20" y2="122" stroke="hsl(var(--primary))" strokeWidth="1.5" />
+                  <line x1="13" y1="104" x2="18" y2="104" stroke="#94a3b8" strokeWidth="1" />
+                  <line x1="13" y1="108" x2="18" y2="108" stroke="#94a3b8" strokeWidth="1" />
+                  <line x1="13" y1="112" x2="18" y2="112" stroke="#94a3b8" strokeWidth="1" />
 
-        {/* Chapéu de formatura */}
-        <rect x="58" y="42" width="44" height="8" rx="2" fill="#1e293b" />
-        <polygon points="80,20 58,42 102,42" fill="#1e293b" />
-        <line x1="102" y1="42" x2="110" y2="56" stroke="#FCD34D" strokeWidth="2" />
-        <circle cx="110" cy="58" r="4" fill="#FCD34D" />
-      </svg>
-    </div>
+                  {/* Chapéu de formatura */}
+                  <rect x="58" y="42" width="44" height="8" rx="2" fill="#1e293b" />
+                  <polygon points="80,20 58,42 102,42" fill="#1e293b" />
+                  <line x1="102" y1="42" x2="110" y2="56" stroke="#FCD34D" strokeWidth="2" />
+                  <circle cx="110" cy="58" r="4" fill="#FCD34D" />
+                </svg>
+              </div>
 
-    {/* Dados do Candidato (mesmo de antes) */}
-    <div className="flex-1 space-y-3 text-sm pt-3 overflow-y-auto max-h-[60vh] pr-1">
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Nome</span>
-    <span className="font-semibold font-mono">{modal.candidato?.nome ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Nº Inscrição</span>
-    <span className="font-semibold font-mono">{modal.candidato?.numero_inscricao ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Bilhete de Identidade</span>
-    <span className="font-semibold font-mono">{modal.candidato?.numero_bilhete ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Sexo</span>
-    <span className="font-semibold font-mono">{modal.candidato?.sexo ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Nacionalidade</span>
-    <span className="font-semibold font-mono">{modal.candidato?.nacionalidade ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Curso</span>
-    <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.curso ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Média Final</span>
-    <span className="font-semibold">
-      <span className={
-        (modal.candidato?.media_final ?? 0) >= 14 ? "text-green-600" :
-        (modal.candidato?.media_final ?? 0) >= 10 ? "text-yellow-600" : "text-red-600"
-      }>
-        {modal.candidato?.media_final ?? "N/A"}
-      </span>
-    </span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Período</span>
-    <span className="font-semibold">{modal.candidato?.periodo ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Ano Lectivo</span>
-    <span className="font-semibold">{modal.candidato?.ano_lectivo ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Tipo Candidatura</span>
-    <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.tipo_candidatura ?? "—"}</span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">Data Pre-Inscrição</span>
-    <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.data_preescrincao ?? "—"}</span>
-  </div>
-</div>
-  </div>
-</div>
+              {/* Dados do Candidato (mesmo de antes) */}
+              <div className="flex-1 space-y-3 text-sm pt-3 overflow-y-auto max-h-[60vh] pr-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Nome</span>
+                  <span className="font-semibold font-mono">{modal.candidato?.nome ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Nº Inscrição</span>
+                  <span className="font-semibold font-mono">{modal.candidato?.numero_inscricao ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Bilhete de Identidade</span>
+                  <span className="font-semibold font-mono">{modal.candidato?.numero_bilhete ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Sexo</span>
+                  <span className="font-semibold font-mono">{modal.candidato?.sexo ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Nacionalidade</span>
+                  <span className="font-semibold font-mono">{modal.candidato?.nacionalidade ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Curso</span>
+                  <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.curso ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Média Final</span>
+                  <span className="font-semibold">
+                    <span className={
+                      (modal.candidato?.media_final ?? 0) >= 14 ? "text-green-600" :
+                        (modal.candidato?.media_final ?? 0) >= 10 ? "text-yellow-600" : "text-red-600"
+                    }>
+                      {modal.candidato?.media_final ?? "N/A"}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Período</span>
+                  <span className="font-semibold">{modal.candidato?.periodo ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Ano Lectivo</span>
+                  <span className="font-semibold">{modal.candidato?.ano_lectivo ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tipo Candidatura</span>
+                  <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.tipo_candidatura ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Data Pre-Inscrição</span>
+                  <span className="font-semibold truncate max-w-[260px] text-right">{modal.candidato?.data_preescrincao ?? "—"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Tabs + conteúdo scrollável */}
           <Tabs defaultValue="pais" className="flex flex-col flex-1 overflow-hidden">
             <div className="shrink-0 px-6 pt-4 border-b">
