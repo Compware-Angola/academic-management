@@ -79,6 +79,7 @@ import { Input } from "@/components/ui/input";
 
 import { buildImageAssets } from "@/util/build-image-assets";
 import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 
 // Mock data for a complete student profile
 const mockEstudante = {
@@ -422,19 +423,11 @@ export function Resumo({
           {/* Filtros mantidos (sem pesquisa por matrícula/referência/código) */}
           <div className="flex flex-wrap gap-4 items-end">
             <div className="min-w-[200px]">
-              <FormSelect
-                label="Ano Letivo"
-                disabled={isLoadingAcademicYear}
-                loading={isLoadingAcademicYear}
-                value={filters.anoLetivo ?? ""}
-                onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-                options={anosAcademicos}
-                map={(a) => ({
-                  key: a.codigo,
-                  label: a.designacao,
-                  value: a.codigo,
-                })}
-              />
+              <AcademicYearSelect
+                enableDefaultActiveYear
+                value={filters.anoLetivo}
+                onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })} />
+
             </div>
 
             <div className="min-w-[180px]">
