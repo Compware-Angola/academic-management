@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-
-import { Badge } from "@/components/ui/badge";
-
+import { useParams, Link } from "react-router-dom"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
@@ -13,17 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Home, User, CreditCard, FileText, Pencil, Book } from "lucide-react";
-import { useStudentDisciplinas } from "@/hooks/students/use-query-students";
-
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-
-import {
-  useQueryFacturaItens,
-  useQueryFacturas,
-} from "@/hooks/horario/use-query-invoice";
-
-import { buildImageAssets } from "@/util/build-image-assets";
+import { Home, User, CreditCard, FileText, Pencil } from "lucide-react";
 
 import { AreaFinanceira } from "./AreaFinanceira";
 import { DocumentsSection } from "./DocumentsSection";
@@ -33,53 +20,6 @@ import { PerfilSection } from "./PerfilSection";
 import { DisciplinasSection } from "./disciplina";
 
 // Mock data for a complete student profile
-const mockEstudante = {
-  // Dados Pessoais
-  matricula: "20210001",
-  nome: "João Manuel Silva Costa",
-  nomePai: "Manuel António Costa",
-  nomeMae: "Maria Fernanda Silva",
-  dataNascimento: "1998-05-15",
-  nacionalidade: "Angolana",
-  naturalidade: "Luanda",
-  genero: "Masculino",
-  estadoCivil: "Solteiro",
-  bi: "005123456LA042",
-  nif: "123456789",
-  foto: "/placeholder.svg",
-
-  // Contactos
-  telefone: "+244 923 456 789",
-  email: "joao.costa@email.com",
-  emailInstitucional: "joao.costa@universidade.ao",
-  endereco: "Rua da Liberdade, Nº 45, Maianga",
-  cidade: "Luanda",
-  provincia: "Luanda",
-
-  // Dados Académicos
-  curso: "Engenharia Informática",
-  faculdade: "Faculdade de Engenharia",
-  departamento: "Ciências da Computação",
-  grau: "Licenciatura",
-  regime: "Diurno",
-  turma: "EI-2021-A",
-  anoIngresso: 2021,
-  anoCurricular: 4,
-  semestre: "1º Semestre",
-  mediaGeral: 14.5,
-  creditosObtidos: 180,
-  creditosTotais: 240,
-  estado: "Activo",
-
-  // Dados Financeiros
-  saldoDevedor: 45000,
-  mensalidadesEmDia: false,
-  ultimoPagamento: "2025-12-15",
-  valorMensalidade: 25000,
-  desconto: 10,
-  tipoPagamento: "Mensal",
-  bolseiro: false,
-};
 
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
@@ -148,10 +88,10 @@ export default function PerfilEstudante() {
         </TabsList>
 
         <PerfilSection value="perfil" codigoMatricula={Number(matricula)} />
-        <DocumentsSection 
-            value="documentacao"
-            codigoMatricula={Number(matricula)} 
-          />
+        <DocumentsSection
+          value="documentacao"
+          codigoMatricula={Number(matricula)}
+        />
         <DisciplinasSection
           value="disciplinas"
           codigoMatricula={Number(matricula)}

@@ -7,33 +7,26 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { TypeServiceSelectList } from "@/components/common/global-selects/TypeServiceSelectList";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryTiposServico } from "@/hooks/financas/use-query-tipo-service";
+import { useCreateInvoice } from "@/hooks/financas/invoice/use-create-mutation";
+import { useToast } from "@/hooks/use-toast";
 
 type Props = {
     codigoMatricula: number;
+    poloId?: number;
 };
-
-const TIPOS_SERVICO_ESTUDANTE = [
-    { id: "decl-freq", nome: "Declaração de Frequência", valor: 5000 },
-    { id: "decl-notas", nome: "Declaração com Notas", valor: 7500 },
-    { id: "cert-conclusao", nome: "Certificado de Conclusão", valor: 25000 },
-    { id: "carta-curso", nome: "Carta do Curso", valor: 15000 },
-    { id: "2via-cartao", nome: "2ª Via do Cartão de Estudante", valor: 3500 },
-    { id: "transf-curso", nome: "Pedido de Transferência de Curso", valor: 12000 },
-    { id: "reingresso", nome: "Reingresso", valor: 18000 },
-];
-
 type ServicoItem = {
-
     nome: string;
     valor: number;
     quantidade: number;
     codigo: number;
 };
 
-export function OutrosServicosSection({ codigoMatricula }: Props) {
+export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
     const [servicoSel, setServicoSel] = useState<string>("");
     const [servicosItens, setServicosItens] = useState<ServicoItem[]>([]);
     const [anoLetivo, setAnoLetivo] = useState<string | null>(null);
+    const { mutate: criarFactura, isPending } = useCreateInvoice();
+    const { toast } = useToast();
     const { data: services = [], isLoading } = useQueryTiposServico(
         {
             estado: "Ativo",
@@ -72,6 +65,60 @@ export function OutrosServicosSection({ codigoMatricula }: Props) {
         (soma, item) => soma + item.valor * item.quantidade,
         0
     );
+
+    const handleGerarFactura = () => {
+        if (servicosItens.length === 0 || !anoLetivo) {
+            toast({
+                title: "Atenção",
+                description: "Selecione pelo menos um serviço e um ano letivo.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const payload = {
+            DataFactura: new Date().toISOString(),
+            polo_id: poloId,
+            TotalPreco: totalServicos,
+
+            ValorAPagar: totalServicos,
+            total_incidencia: totalServicos,
+            total_retencao: 0,
+            CodigoMatricula: codigoMatricula,
+            Desconto: 0,
+            totalIVA: 0,
+            TotalMulta: 0,
+            Descricao: "Pagamento de outros serviços",
+            tipo_documento_factura_id: 1,
+            canal: 3,
+            codigo_anoLectivo: parseInt(anoLetivo),
+            itens: servicosItens.map((item) => ({
+                CodigoProduto: item.codigo,
+                Quantidade: item.quantidade,
+                preco: item.valor,
+                Total: item.valor * item.quantidade,
+                valor_pago: item.valor * item.quantidade,
+                obs: item.nome,
+                taxaIva: 0,
+                valorIva: 0,
+                retencao: 0,
+                incidencia: item.valor * item.quantidade,
+                valorDesconto: 0,
+                descontoProduto: 0,
+                estado: 0,
+                valorPago: item.valor * item.quantidade,
+                valorATransportar: 0,
+                codigo_anoLectivo: parseInt(anoLetivo),
+            })),
+        };
+
+        criarFactura(payload, {
+            onSuccess: () => {
+                setServicosItens([]);
+                toast({ title: "Sucesso", description: "Nota de Pagamento gerada com sucesso!" });
+            },
+        });
+    };
 
     return (
         <div className="space-y-8">
@@ -190,9 +237,9 @@ export function OutrosServicosSection({ codigoMatricula }: Props) {
                     </span>
                 </div>
 
-                <Button className="gap-2" size="lg" disabled={servicosItens.length === 0}>
+                <Button className="gap-2" size="lg" disabled={servicosItens.length === 0 || isPending || isLoading} onClick={handleGerarFactura}>
                     <Receipt className="h-5 w-5" />
-                    Gerar Factura
+                    Gerar Nota de Pagamento
 
                 </Button>
             </div>

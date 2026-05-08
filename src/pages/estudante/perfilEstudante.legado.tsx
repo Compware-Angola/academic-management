@@ -376,11 +376,11 @@ export function PerfilEstudanteLegado() {
                 <AvatarFallback className="text-3xl font-medium bg-linear-to-br from-gray-100 to-gray-200 text-gray-600">
                   {student?.nome_completo
                     ? student.nome_completo
-                        .trim()
-                        .split(/\s+/)
-                        .map((n) => n[0]?.toUpperCase() ?? "")
-                        .join("")
-                        .slice(0, 2)
+                      .trim()
+                      .split(/\s+/)
+                      .map((n) => n[0]?.toUpperCase() ?? "")
+                      .join("")
+                      .slice(0, 2)
                     : "??"}
                 </AvatarFallback>
               </Avatar>
@@ -807,13 +807,12 @@ export function PerfilEstudanteLegado() {
               </CardHeader>
               <CardContent>
                 <p
-                  className={`text-3xl font-bold ${
-                    student?.saldo_atual > 0
+                  className={`text-3xl font-bold ${student?.saldo_atual > 0
                       ? "text-green-600"
                       : student?.saldo_atual < 0
                         ? "text-destructive"
                         : "text-muted-foreground"
-                  }`}
+                    }`}
                 >
                   {student?.saldo_atual >= 0 ? "+" : ""}
                   {formatCurrency(student?.saldo_atual || 0)}
@@ -901,7 +900,10 @@ export function PerfilEstudanteLegado() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Filtros mantidos (sem pesquisa por matrícula/referência/código) */}
-              <div className="flex flex-wrap gap-4 items-end">
+              {/* ==================== FILTROS ==================== */}
+              <div className="flex flex-wrap items-end gap-4 pb-6">
+
+                {/* Ano Letivo */}
                 <div className="min-w-[200px]">
                   <FormSelect
                     label="Ano Letivo"
@@ -918,6 +920,7 @@ export function PerfilEstudanteLegado() {
                   />
                 </div>
 
+                {/* Estado */}
                 <div className="min-w-[180px]">
                   <FormSelect
                     label="Estado"
@@ -951,8 +954,8 @@ export function PerfilEstudanteLegado() {
                   />
                 </div>
 
-                {/* Input Pesquisa */}
-                <div className="flex-1 min-w-[260px] relative">
+                {/* Campo de Pesquisa */}
+                <div className="flex-1 min-w-[280px] relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     className="pl-10"
@@ -965,10 +968,11 @@ export function PerfilEstudanteLegado() {
                   />
                 </div>
 
+                {/* Botão Atualizar */}
                 <Button
                   variant="outline"
                   onClick={() => refetch()}
-                  className="gap-2"
+                  className="gap-2 whitespace-nowrap h-10"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Actualizar

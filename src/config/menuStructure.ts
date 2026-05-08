@@ -200,9 +200,21 @@ export const ingressoStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_CANDIDATOS_SEM_PROVAS_MARCADAS.sigla,
           ],
         },
-        { title: "Listar Tópicos", url: "/exame/topicos", permission: [PermissionTypeDetails.TOPICO_PROVA.sigla] },
-        { title: "Listar Perguntas", url: "/exame/perguntas", permission: [PermissionTypeDetails.PERGUNTA_PROVA.sigla] },
-        { title: "Listagem Provas", url: "/exame/provas", permission: [PermissionTypeDetails.PROVA.sigla] },
+        {
+          title: "Listar Tópicos",
+          url: "/exame/topicos",
+          permission: [PermissionTypeDetails.TOPICO_PROVA.sigla],
+        },
+        {
+          title: "Listar Perguntas",
+          url: "/exame/perguntas",
+          permission: [PermissionTypeDetails.PERGUNTA_PROVA.sigla],
+        },
+        {
+          title: "Listagem Provas",
+          url: "/exame/provas",
+          permission: [PermissionTypeDetails.PROVA.sigla],
+        },
       ],
 
       permission: [],
@@ -252,13 +264,12 @@ export const ingressoStructure: MenuStructure = {
         {
           title: "Lista inscritos por UC",
           url: "/inscricoes/inscritos-uc",
-          permission: [PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla]
-
+          permission: [PermissionTypeDetails.LISTAR_INSCRITOS_UC.sigla],
         },
         {
           title: "Listagem Geral Estudantes",
           url: "/inscricoes/estudantes/listagem/geral",
-          permission: [PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!]
+          permission: [PermissionTypeDetails.LISTAGEM_GERAL_ESTUDANTES.sigla!],
         },
         {
           title: "Estado da matrícula",
@@ -268,7 +279,8 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Insentar colisão", url: "/inscricoes/colisao",
+          title: "Insentar colisão",
+          url: "/inscricoes/colisao",
           permission: [
             PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla,
           ],
@@ -285,7 +297,6 @@ export const ingressoStructure: MenuStructure = {
 
       permission: [],
     },
-
   ],
 };
 export const academicStructure: MenuStructure = {
@@ -592,8 +603,6 @@ export const academicStructure: MenuStructure = {
     // ----------------------------------------------------
     // DOCUMENTOS MINISTÉRIO
     // ----------------------------------------------------
-
-
 
     {
       title: "Marcação de Provas",
@@ -982,6 +991,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/isencao-servico",
           permission: [PermissionTypeDetails.ISENCAO_SERVICO.sigla],
         },
+        {
+          title: "Forma de Pagamentos",
+          url: "/financas/forma-pagamento",
+          permission: [PermissionTypeDetails.FORMA_PAGAMENTO.sigla],
+        },
         // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
         // /* Serviços Tributários */
@@ -1062,8 +1076,8 @@ export const documentStructure: MenuStructure = {
       items: [
         {
           title: "Validar Documentos",
-          url: "/documentos/validar"
-        }
+          url: "/documentos/validar",
+        },
       ],
       permission: [],
     },
