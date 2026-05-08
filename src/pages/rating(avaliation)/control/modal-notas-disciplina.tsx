@@ -63,7 +63,7 @@ export function ModalNotasDisciplina({
     );
   }, [search, data]);
 
-    const exportRows = useMemo(
+  const exportRows = useMemo(
     () =>
       alunosFiltrados.map((aluno) => ({
         matricula: aluno.matricula,
@@ -76,9 +76,9 @@ export function ModalNotasDisciplina({
 
   const pdfData = exportRows.length
     ? {
-        total: exportRows.length,
-        rows: exportRows,
-      }
+      total: exportRows.length,
+      rows: exportRows,
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -99,7 +99,7 @@ export function ModalNotasDisciplina({
           { key: "dataLancamento", label: "Data Lançamento", width: "26%" },
         ],
         rows: pdfData.rows,
-        headerBackground: "#1e40af",
+        headerBackground: "#0D1B48",
       }}
       footerNotice="Documento gerado automaticamente pelo sistema."
     />
@@ -107,26 +107,26 @@ export function ModalNotasDisciplina({
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Notas lançadas",
-        subtitle: `Lista de alunos — ${pdfData.total} aluno(s)`,
-        infoSections: [
-          {
-            title: "Resumo",
-            content: [`Total de alunos: ${pdfData.total}`],
-          },
-        ],
-        mainTable: {
-          headers: [
-            { key: "matricula", label: "Nº Matrícula", width: 18 },
-            { key: "aluno", label: "Aluno", width: 35 },
-            { key: "nota", label: "Nota", width: 12 },
-            { key: "dataLancamento", label: "Data Lançamento", width: 20 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Notas lançadas",
+      subtitle: `Lista de alunos — ${pdfData.total} aluno(s)`,
+      infoSections: [
+        {
+          title: "Resumo",
+          content: [`Total de alunos: ${pdfData.total}`],
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#1e40af",
-      }
+      ],
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: 18 },
+          { key: "aluno", label: "Aluno", width: 35 },
+          { key: "nota", label: "Nota", width: 12 },
+          { key: "dataLancamento", label: "Data Lançamento", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Notas_Lancadas_${new Date().toISOString().slice(0, 10)}`;
@@ -134,8 +134,8 @@ export function ModalNotasDisciplina({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl!">
-        
-                <DialogHeader>
+
+        <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <DialogTitle>
               Notas lançadas — {alunosFiltrados.length} aluno(s)

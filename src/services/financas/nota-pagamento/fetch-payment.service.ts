@@ -17,6 +17,7 @@ export type PaymentItem = {
   data_registro: string;
   canal?: string;
   operacao_bancaria: string;
+  nome_operador: string;
   seg_operacao_bancaria: string | null;
   anolectivo: number;
   totalgeral: number | null;
