@@ -169,10 +169,11 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
             <p className="text-muted-foreground mt-1">
               Histórico de pagamentos, mensalidades pendentes e recibos
             </p>
-            {!isMonthValueLoading}{" "}
+            {!isMonthValueLoading}
             {
-              <p className="text-muted-foreground text-base mt-1">
-                {monthFee?.descricao ?? "-"} {monthFee?.preco ?? "-"}
+              <p className="text-base mt-1 text-destructive font-medium">
+                {monthFee?.descricao ?? "-"}{" "}
+                <span className="font-bold">{monthFee?.preco ?? "-"} kz</span>
               </p>
             }
           </div>
