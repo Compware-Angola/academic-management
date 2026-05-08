@@ -1,22 +1,42 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { ChartAreaInteractivePagamentos } from "./chart-area-interactive-pagamentos";
 
 export function NotasPagamentoEstatisticas() {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Estatísticas de Pagamentos</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                    Visão geral e indicadores financeiros
-                </p>
-            </CardHeader>
-            <CardContent>
-                <div className="py-12 text-center">
-                    <h3 className="text-lg font-medium">Em desenvolvimento</h3>
-                    <p className="text-muted-foreground mt-2">
-                        As estatísticas serão implementadas aqui.
-                    </p>
-                </div>
-            </CardContent>
-        </Card>
+        <div>
+
+            <ChartAreaInteractivePagamentos
+                chartConfig={{
+                    qt_diurno: {
+                        label: "Laboral",
+                        color: "var(--chart-1)",
+                    },
+                    qt_noturno: {
+                        label: "Pós-Laboral",
+                        color: "var(--chart-2)",
+                    },
+                }}
+                data={[
+                    {
+                        data: "02/09/2025",
+                        qt_diurno: 16,
+                        qt_noturno: 2,
+                    },
+                    {
+                        data: "02/10/2025",
+                        qt_diurno: 21,
+                        qt_noturno: 2,
+                    },
+                    {
+                        data: "03/09/2025",
+                        qt_diurno: 126,
+                        qt_noturno: 17,
+                    },
+                ]}
+                isLoading={false}
+                title="Estatísticas de Pagamentos"
+                description="Pagamentos por data"
+            />
+        </div>
     );
 }
