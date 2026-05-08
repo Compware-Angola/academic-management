@@ -163,6 +163,7 @@ import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
 import ListarTopicos from "./pages/access_exam/ListarTopicos";
 import ListagemProvas from "./pages/access_exam/ListagemProvas";
 import { ListaEstudantesDiplomados } from "./pages/registrations/ListarEstudantesDiplomados";
+import { FormaPagamentoPage } from "./pages/financas/forma-pagamento";
 
 const App = () => {
   return (
@@ -1170,6 +1171,18 @@ const App = () => {
                         ]}
                       >
                         <PagamentosReferencia />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/forma-pagamento"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.FORMA_PAGAMENTO.sigla!,
+                        ]}
+                      >
+                        <FormaPagamentoPage />
                       </ProtectedRoute>
                     }
                   />
