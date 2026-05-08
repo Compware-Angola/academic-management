@@ -10,6 +10,8 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { useState } from "react";
 import { parseFilter } from "@/util/parse-filter";
 import { toast } from "sonner";
+import Lottie from "lottie-react";
+import UnlockedLock from "@/assets/unlock.json";
 
 export function AtivarMatricula({
   codigoMatricula,
@@ -42,23 +44,38 @@ export function AtivarMatricula({
       <CardDescription>
         Define o ano lectivo para ativar a matrícula do estudante.
       </CardDescription>
-      <div className="flex gap-2 flex-col">
-        <AcademicYearSelect
-          value={anoLectivoId}
-          enableDefaultActiveYear
-          onChangeValue={(value) => setAnoLectivoId(value)}
+
+      <div className="flex justify-center items-center">
+        <Lottie
+          animationData={UnlockedLock}
+          loop={true}
+          style={{ width: 200, height: 200 }}
         />
+      </div>
+
+      <div className="flex gap-2 items-end">
+        <div className="flex-1">
+          <AcademicYearSelect
+            value={anoLectivoId}
+            enableDefaultActiveYear
+            onChangeValue={(value) => setAnoLectivoId(value)}
+          />
+        </div>
         <Button
-          className="cursor-pointer"
+          className="cursor-pointer gap-2 transition-all duration-200 shrink-0 mb-0"
           disabled={activeRegistration.isPending}
           onClick={onSubmit}
         >
           {activeRegistration.isPending ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />A ativar...
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>A ativar...</span>
             </>
           ) : (
-            "Ativar Matrícula"
+            <>
+              <CheckCircle className="h-4 w-4" />
+              <span>Ativar Matrícula</span>
+            </>
           )}
         </Button>
       </div>

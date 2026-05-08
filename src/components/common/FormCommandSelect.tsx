@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Popover,
   PopoverTrigger,
@@ -73,7 +73,34 @@ export function FormCommandSelect<T>({
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
+  // Cache do item selecionado — persiste mesmo quando `options` muda por nova busca
+  const [cachedSelectedItem, setCachedSelectedItem] = useState<MapResult | undefined>();
+
   const widthClass = resolveWidthClass(width);
+
+  const allItems = [...defaultSelectItem, ...options.map(map)];
+
+  // Tenta encontrar o item nas options atuais
+  const itemFromOptions = allItems.find(
+    (item) => String(item.value) === value
+  );
+
+  // Sincroniza o cache sempre que o item for encontrado nas options
+  useEffect(() => {
+    if (itemFromOptions) {
+      setCachedSelectedItem(itemFromOptions);
+    }
+  }, [itemFromOptions?.value]);
+
+  // Se o value foi limpo externamente, limpa o cache também
+  useEffect(() => {
+    if (!value) {
+      setCachedSelectedItem(undefined);
+    }
+  }, [value]);
+
+  // O item exibido: prioriza o encontrado nas options atuais, depois o cache
+  const selectedItem = itemFromOptions ?? cachedSelectedItem;
 
   function handleOpenChange(isOpen: boolean) {
     setOpen(isOpen);
@@ -84,13 +111,16 @@ export function FormCommandSelect<T>({
   }
 
   function handleSelect(selectedValue: string) {
+    const item = allItems.find((i) => String(i.value) === selectedValue);
+    if (item) {
+      setCachedSelectedItem(item); // persiste o item mesmo após options mudar
+    }
     onChange(selectedValue);
     setOpen(false);
     setSearchValue("");
     onSearchChange?.("");
   }
-  const allItems = [...defaultSelectItem, ...options.map(map)];
-  const selectedItem = allItems.find((item) => String(item.value) === value);
+
   return (
     <div className="flex flex-col gap-2">
       {label && labelMode === "outside" && <Label>{label}</Label>}
@@ -104,17 +134,15 @@ export function FormCommandSelect<T>({
               "flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              widthClass,
+              widthClass
             )}
           >
             <span className="truncate">
-              {/* Se existe item selecionado, mostra o label dele */}
               {selectedItem
                 ? selectedItem.label
-                : // Se não existe, decide entre mostrar o label interno ou placeholder
-                  labelMode === "inside"
-                  ? label
-                  : placeholder}
+                : labelMode === "inside"
+                ? label
+                : placeholder}
             </span>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </button>
@@ -125,8 +153,6 @@ export function FormCommandSelect<T>({
           sideOffset={4}
           className={cn("p-0", widthClass)}
           onCloseAutoFocus={(e) => {
-            // Se estiver dentro de um Dialog, não queremos que ele force o foco de volta
-            // de forma agressiva se o usuário clicou em outro input (como o Tema)
             if (labelMode === "outside") e.preventDefault();
           }}
         >
@@ -147,29 +173,27 @@ export function FormCommandSelect<T>({
                   <Loader2 className="h-4 w-4 animate-spin mr-2" /> A
                   pesquisar...
                 </div>
-              ) : options.length === 0 ? (
+              ) : options.length === 0 && defaultSelectItem.length === 0 ? (
                 <CommandEmpty>Nenhum item encontrado.</CommandEmpty>
               ) : (
                 <CommandGroup>
-                  {defaultSelectItem.map((item) => {
-                    return (
-                      <CommandItem
-                        key={item.key}
-                        value={`${item.label} ${item.value}`}
-                        onSelect={() => handleSelect(String(item.value))}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            value === String(item.value)
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                        {item.label}
-                      </CommandItem>
-                    );
-                  })}
+                  {defaultSelectItem.map((item) => (
+                    <CommandItem
+                      key={item.key}
+                      value={`${item.label} ${item.value}`}
+                      onSelect={() => handleSelect(String(item.value))}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === String(item.value)
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      {item.label}
+                    </CommandItem>
+                  ))}
                   {options.map((item) => {
                     const mapped = map(item);
                     return (
@@ -183,7 +207,7 @@ export function FormCommandSelect<T>({
                             "mr-2 h-4 w-4",
                             value === String(mapped.value)
                               ? "opacity-100"
-                              : "opacity-0",
+                              : "opacity-0"
                           )}
                         />
                         {mapped.label}

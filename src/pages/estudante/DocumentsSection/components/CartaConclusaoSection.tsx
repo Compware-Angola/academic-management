@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { CalendarDays, Loader2 } from "lucide-react";
-import { FormSelect } from "@/components/common/FormSelect";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-
+import { Loader2 } from "lucide-react";
 import { useStudentClassInfo } from "@/hooks/students/use-query-students-class-info";
 import { useGenerateDocumentCode } from "@/hooks/documents/use-generate-code";
 import GerarCartaConclusao from "@/components/views/docs-students/GerarCartaConclusao";
@@ -13,21 +10,21 @@ type Props = {
 };
 
 export function CartaConclusaoSection({ codigoMatricula }: Props) {
-   
+
     const [codigoValidacao, setCodigoValidacao] = useState<string | null>(null);
 
-   
 
-  const { data: studentClassInfo, isLoading: isLoadingClassInfo } =
-  useStudentClassInfo(
-    {
-      numeroDeMatricula: codigoMatricula,
-    },
-    !!codigoMatricula
-  );
-const podeGerarCarta =
-  studentClassInfo?.data_conclusao &&
-  studentClassInfo?.nota_obtida;
+
+    const { data: studentClassInfo, isLoading: isLoadingClassInfo } =
+        useStudentClassInfo(
+            {
+                numeroDeMatricula: codigoMatricula,
+            },
+            !!codigoMatricula
+        );
+    const podeGerarCarta =
+        studentClassInfo?.data_conclusao &&
+        studentClassInfo?.nota_obtida;
     const { mutate: gerarCodigo, isPending: isGeneratingCode } = useGenerateDocumentCode();
 
     const dadosProntos = !isLoadingClassInfo && !!studentClassInfo;
