@@ -190,7 +190,9 @@ export function CreateIsencaoDialog({
 
           </div> */}
           <TypeServiceSelectList
+            enabled={!!parseFilter(filters.anoLectivo)}
             type="EXCEPTION"
+            anoLectivo={parseFilter(filters.anoLectivo)}
             value={filters.codigoServico}
             onChangeValue={(v) => setFilters({ ...filters, codigoServico: v })}
           />

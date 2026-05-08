@@ -10,15 +10,19 @@ interface TypeServiceSelectListProps {
   placeholder?: string;
   disabled?: boolean;
   type?: "EXCEPTION";
+  anoLectivo?: number;
+  enabled?: boolean;
 }
 
 const TypeServiceSelectList = ({
   onChangeValue,
   value,
+  anoLectivo,
   label = "Tipo de Serviço",
   placeholder = "Selecione um serviço...",
   type,
   disabled,
+  enabled,
 }: TypeServiceSelectListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -27,8 +31,9 @@ const TypeServiceSelectList = ({
     {
       descricao: debouncedSearch || undefined,
       estado: "Ativo",
+      codigoAnoLectivo: anoLectivo,
     },
-    { enabled: true },
+    { enabled: enabled ?? true },
   );
   const EXCEPTION_SIGLA = ["IpuC", "IpuCricular(Anual)", "TdM", "PROP"];
 
@@ -52,6 +57,7 @@ const TypeServiceSelectList = ({
         key: service.codigo.toString(),
         value: service.codigo.toString(),
         label: service.descricao,
+        price: service.preco,
       })}
     />
   );
