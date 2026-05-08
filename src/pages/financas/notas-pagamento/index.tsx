@@ -123,7 +123,7 @@ export default function ListarPagamentos() {
                 <TabsList>
                     <TabsTrigger value="pagamentos">Pagamentos</TabsTrigger>
                     <TabsTrigger value="servicos">Serviços pagos do aluno</TabsTrigger>
-                    <TabsTrigger value="estatistica">Estatísticas</TabsTrigger>
+                    {/* <TabsTrigger value="estatistica">Estatísticas</TabsTrigger> */}
                 </TabsList>
 
                 <TabsContent value="pagamentos" className="space-y-6">
@@ -151,9 +151,9 @@ export default function ListarPagamentos() {
                     <ServicosPagosTab />
                 </TabsContent>
 
-                <TabsContent value="estatistica" className="space-y-6">
+                {/* <TabsContent value="estatistica" className="space-y-6">
                     <NotasPagamentoEstatisticas />
-                </TabsContent>
+                </TabsContent> */}
             </Tabs>
 
             <ListaPagamentoModal
