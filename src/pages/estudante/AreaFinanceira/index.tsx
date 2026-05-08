@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Contact, FileText, Key, DollarSign, Package } from "lucide-react";
+import { Contact, FileText, Key, DollarSign, Package, BanknoteIcon } from "lucide-react";
 
 import { Resumo } from "./components/resumo";
 import { MensalidadesSection } from "./components/mensalidade";
@@ -24,8 +24,8 @@ export function AreaFinanceira({
       >
         <TabsList className="flex justify-start flex-col h-auto w-52">
           <TabsTrigger className="w-full justify-start gap-2" value="resumo">
-            <Key className="h-4 w-4" />
-            <span className="hidden md:inline">Resumo</span>
+            <BanknoteIcon className="h-4 w-4" />
+            <span className="hidden md:inline">Notas de Pagamento</span>
           </TabsTrigger>
 
           <TabsTrigger

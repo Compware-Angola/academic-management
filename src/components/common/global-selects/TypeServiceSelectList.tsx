@@ -57,6 +57,7 @@ const TypeServiceSelectList = ({
         key: service.codigo.toString(),
         value: service.codigo.toString(),
         label: service.descricao,
+        price: service.preco,
       })}
     />
   );
