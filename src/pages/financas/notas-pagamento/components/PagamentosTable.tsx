@@ -66,38 +66,45 @@ export function PagamentosTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Código</TableHead>
-                            <TableHead>Factura</TableHead>
-                            <TableHead>Curso</TableHead>
-                            <TableHead>Código Matricula</TableHead>
-                            <TableHead>Estudante</TableHead>
-                            <TableHead>Nº da Operação bancaria</TableHead>
-                            <TableHead>Nº da 2º Operação bancaria</TableHead>
-                            <TableHead>Forma de Pagamento</TableHead>
-                            <TableHead>Nome Operador</TableHead>
-                            <TableHead>Caixa</TableHead>
-                            <TableHead>Canal</TableHead>
-                            <TableHead>Valor Total</TableHead>
-                            <TableHead>Valor Depositado</TableHead>
-                            <TableHead>Data Banco</TableHead>
-                            <TableHead>Data Registro</TableHead>
-                            <TableHead>Status Pgto.</TableHead>
-                            <TableHead>Tipo de Pagamento</TableHead>
-                            <TableHead>Ações</TableHead>
+                            <TableHead className="text-left">Código</TableHead>
+                            <TableHead className="text-left">Factura</TableHead>
+                            <TableHead className="text-left">Curso</TableHead>
+                            <TableHead className="text-left">Código Matrícula</TableHead>
+                            <TableHead className="text-left">Estudante</TableHead>
+                            <TableHead className="text-left">Nº Operação Bancária</TableHead>
+                            <TableHead className="text-left">Nº 2ª Operação Bancária</TableHead>
+                            <TableHead className="text-left">Forma de Pagamento</TableHead>
+                            <TableHead className="text-left">Nome Operador</TableHead>
+                            <TableHead className="text-left">Caixa</TableHead>
+                            <TableHead className="text-left">Canal</TableHead>
+                            <TableHead className="text-right">Valor Total</TableHead>
+                            <TableHead className="text-right">Valor Depositado</TableHead>
+                            <TableHead className="text-center">Data Banco</TableHead>
+                            <TableHead className="text-center">Data Registo</TableHead>
+                            <TableHead className="text-center">Status Pgto.</TableHead>
+                            <TableHead className="text-left">Tipo de Pagamento</TableHead>
+                            <TableHead className="text-center">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
+
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={17} className="text-center py-8 text-muted-foreground">
-                                    <div className="flex justify-center items-center">
+                                <TableCell
+                                    colSpan={18}
+                                    className="py-8 text-center text-muted-foreground"
+                                >
+                                    <div className="flex items-center justify-center">
                                         <Loader2 className="animate-spin text-primary" />
                                     </div>
                                 </TableCell>
                             </TableRow>
                         ) : payments.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={17} className="text-center py-8 text-muted-foreground">
+                                <TableCell
+                                    colSpan={18}
+                                    className="py-8 text-center text-muted-foreground"
+                                >
                                     Nenhum pagamento encontrado com os filtros aplicados
                                 </TableCell>
                             </TableRow>
@@ -105,35 +112,81 @@ export function PagamentosTable({
                             payments.map((pag) => (
                                 <TableRow key={pag.codigo_pagamento}>
                                     <TableCell>{pag?.codigo_pagamento}</TableCell>
-                                    <TableCell>{pag?.codigo_factura || "---"}</TableCell>
-                                    <TableCell>{pag?.curso}</TableCell>
-                                    <TableCell>{pag?.codigo_matricula}</TableCell>
+
                                     <TableCell>
-                                        <p className="font-medium text-sm">{pag?.nome_completo || "---"}</p>
+                                        {pag?.codigo_factura || "---"}
                                     </TableCell>
-                                    <TableCell className="font-mono font-medium text-sm">
+
+                                    <TableCell>{pag?.curso || "---"}</TableCell>
+
+                                    <TableCell>
+                                        {pag?.codigo_matricula || "---"}
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <p className="text-sm font-medium whitespace-nowrap">
+                                            {pag?.nome_completo || "---"}
+                                        </p>
+                                    </TableCell>
+
+                                    <TableCell className="font-mono text-sm">
                                         {pag?.operacao_bancaria || "---"}
                                     </TableCell>
-                                    <TableCell className="font-mono font-medium text-sm">
+
+                                    <TableCell className="font-mono text-sm">
                                         {pag?.seg_operacao_bancaria || "---"}
                                     </TableCell>
-                                    <TableCell className="text-sm">{pag?.forma_pagamento || "---"}</TableCell>
-                                    <TableCell className="font-mono text-sm">{pag?.nome_operador || "---"}</TableCell>
-                                    <TableCell className="text-sm">{pag?.canal || "---"}</TableCell>
-                                    <TableCell className="text-sm">{formatNumber(pag?.totalgeral || 0)}</TableCell>
-                                    <TableCell className="font-medium font-mono text-sm">
+
+                                    <TableCell className="text-sm">
+                                        {pag?.forma_pagamento || "---"}
+                                    </TableCell>
+
+                                    <TableCell className="text-sm">
+                                        {pag?.nome_operador || "---"}
+                                    </TableCell>
+
+                                    <TableCell className="text-sm">
+                                        {pag?.caixa || "---"}
+                                    </TableCell>
+
+                                    <TableCell className="text-sm">
+                                        {pag?.canal || "---"}
+                                    </TableCell>
+
+                                    <TableCell className="text-right font-medium">
+                                        {formatNumber(pag?.totalgeral || 0)}
+                                    </TableCell>
+
+                                    <TableCell className="text-right font-medium font-mono">
                                         {formatNumber(pag?.valor_depositado || 0)}
                                     </TableCell>
-                                    <TableCell className="text-sm">{formatarData(pag?.databanco || "")}</TableCell>
-                                    <TableCell className="text-sm">{formatarData(pag?.data_registro || "")}</TableCell>
-                                    <TableCell>{getStatusPagamentoBadge(pag?.status_pagamento || "")}</TableCell>
-                                    <TableCell>{pag?.tipo_pagamento || "---"}</TableCell>
-                                    <TableCell>
+
+                                    <TableCell className="text-center text-sm whitespace-nowrap">
+                                        {formatarData(pag?.databanco || "")}
+                                    </TableCell>
+
+                                    <TableCell className="text-center text-sm whitespace-nowrap">
+                                        {formatarData(pag?.data_registro || "")}
+                                    </TableCell>
+
+                                    <TableCell className="text-center">
+                                        {getStatusPagamentoBadge(
+                                            pag?.status_pagamento || ""
+                                        )}
+                                    </TableCell>
+
+                                    <TableCell className="text-sm">
+                                        {pag?.tipo_pagamento || "---"}
+                                    </TableCell>
+
+                                    <TableCell className="text-center">
                                         <Button
                                             size="sm"
                                             variant="outline"
                                             title="Ver Detalhes"
-                                            onClick={() => onVerDetalhes(pag?.codigo_factura)}
+                                            onClick={() =>
+                                                onVerDetalhes(pag?.codigo_factura)
+                                            }
                                         >
                                             <Eye className="h-3 w-3" />
                                         </Button>
