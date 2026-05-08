@@ -258,7 +258,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right space-y-2">
-                      <p className="font-bold">{payment.valorBase}</p>
+                      <p className="font-bold">{payment.valorBase} Kz</p>
                       {getStatusBadge(payment.status)}
                     </div>
                     {expandedPayment === payment.id ? (
