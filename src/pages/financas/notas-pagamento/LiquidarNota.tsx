@@ -33,6 +33,9 @@ import { validarPagamento } from "./validator";
 import { useCreatePayment } from "@/hooks/financas/nota-pagamento/use-mutation-pagamento";
 import { formatDisplay } from "@/util/date-formate";
 import { formatNumber } from "@/util/format-number";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { parseDateFilter, parseFilter } from "@/util/parse-filter";
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("pt-AO");
@@ -48,6 +51,25 @@ const tipoPagamentoOptions = [
     value: "Normal",
   },
 ];
+
+const FORMA_PAGAMENTO = {
+  CASH: "2",
+  TPA: "1",
+  MB: "5",
+} as const;
+
+function isTipoBancario(formaPagamento?: string) {
+  if (!formaPagamento) return false;
+
+  const valor = String(formaPagamento).trim();
+
+  console.log("FORMA PAGAMENTO:", valor);
+
+  return (
+    valor === FORMA_PAGAMENTO.TPA ||
+    valor === FORMA_PAGAMENTO.MB
+  );
+}
 
 export default function LiquidarNota() {
   const { codigo } = useParams<{ codigo: string }>();
@@ -86,9 +108,9 @@ export default function LiquidarNota() {
   const handleSubmit = () => {
     const pagamento = {
       data: formatDisplay(new Date()),
-      nOperacaoBancaria: formData.n_operacao_bancaria,
+      nOperacaoBancaria: parseFilter(formData.n_operacao_bancaria),
       observacao: "Pagamento via Mutue Finanças",
-      dataBanco: formData.data_banco,
+      dataBanco: parseDateFilter(formData.data_banco),
       codigoPreInscricao: 123,
       formaPagamento: formData.forma_pagamento,
       valorDepositado: Number(formData.valor_depositado),
@@ -100,7 +122,7 @@ export default function LiquidarNota() {
       codigoFactura: Number(factura.codigo),
       instituicaoId: 1,
       caixaId: Number(formData.caixa_id),
-      dataOperacao: formData.data_operacao,
+      dataOperacao: parseDateFilter(formData.data_operacao),
       statusMovimento: 0,
       infoAdicional: formData.observacao,
       corrente: 1,
@@ -177,7 +199,8 @@ export default function LiquidarNota() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    
+         <div className="p-6 space-y-6">
       {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -271,130 +294,10 @@ export default function LiquidarNota() {
       </Card>
 
       {/* Formulário de Liquidação */}
-      <form>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Dados da Operação Bancária
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="n_operacao_bancaria">
-                  Nº Operação Bancária
-                </Label>
-                <Input
-                  id="n_operacao_bancaria"
-                  placeholder="Ex: OPB-001234"
-                  value={formData.n_operacao_bancaria}
-                  onChange={(e) =>
-                    handleChange("n_operacao_bancaria", e.target.value)
-                  }
-                />
-              </div>
+      <form >
+        <div className="space-y-4">
 
-              <div className="space-y-2">
-                <Label htmlFor="data_banco">Data Banco *</Label>
-                <Input
-                  id="data_banco"
-                  type="date"
-                  value={formData.data_banco}
-                  onChange={(e) => handleChange("data_banco", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="data_operacao">Data da Operação</Label>
-                <Input
-                  id="data_operacao"
-                  type="date"
-                  value={formData.data_operacao}
-                  onChange={(e) =>
-                    handleChange("data_operacao", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="data_registo">Data de Registo</Label>
-                <Input
-                  id="data_registo"
-                  type="date"
-                  value={formData.data_registo}
-                  disabled
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="conta_movimentada">Conta Movimentada</Label>
-                <Input
-                  id="conta_movimentada"
-                  placeholder="Ex: AO06.0000.0000.0000.0000"
-                  value={formData.conta_movimentada}
-                  onChange={(e) =>
-                    handleChange("conta_movimentada", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mt-4">
-          <CardHeader className="flex! space-x-2 flex-row! items-center">
-            <CardTitle className="text-lg">Fórmula</CardTitle>
-            <p>(Composição do valor a pagar)</p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-7 gap-4 items-center">
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Valor Total
-                </p>
-                <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                  {formatNumber(factura.total_preco)}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
-                  -
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Desconto
-                </p>
-                <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
-                  {formatNumber(factura?.desconto)}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-primary"> + </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Multa
-                </p>
-                <p className="text-2xl font-bold  text-primary dark:text-gray-100">
-                  {formatNumber(factura.total_multa)}
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-primary"> = </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Valor a Pagar
-                </p>
-                <p className="text-2xl font-bold text-primary">
-                  {formatNumber(factura.valor_pagar)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mt-4">
+            <Card>
           <CardHeader>
             <CardTitle className="text-lg">Dados do Pagamento</CardTitle>
           </CardHeader>
@@ -478,11 +381,138 @@ export default function LiquidarNota() {
                   value={formData.ano_lectivo}
                 />
               </div>
+                <div>
+                <Label htmlFor="data_registo">Data de Registo</Label>
+                <Input
+                  id="data_registo"
+                  type="date"
+                  value={formData.data_registo}
+                  disabled
+                />
+              </div>
+            </div>
+            
+          </CardContent>
+        </Card>
+
+        {isTipoBancario(formData.forma_pagamento) &&(    <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              Dados da Operação Bancária
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="n_operacao_bancaria">
+                  Nº Operação Bancária
+                </Label>
+                <Input
+                  id="n_operacao_bancaria"
+                  placeholder="Ex: OPB-001234"
+                  value={formData.n_operacao_bancaria}
+                  onChange={(e) =>
+                    handleChange("n_operacao_bancaria", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="data_banco">Data Banco *</Label>
+                <Input
+                  id="data_banco"
+                  type="date"
+                  value={formData.data_banco}
+                  onChange={(e) => handleChange("data_banco", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="data_operacao">Data da Operação</Label>
+                <Input
+                  id="data_operacao"
+                  type="date"
+                  value={formData.data_operacao}
+                  onChange={(e) =>
+                    handleChange("data_operacao", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              <div className="space-y-2">
+                <Label htmlFor="conta_movimentada">Conta Movimentada</Label>
+                <Input
+                  id="conta_movimentada"
+                  placeholder="Ex: AO06.0000.0000.0000.0000"
+                  value={formData.conta_movimentada}
+                  onChange={(e) =>
+                    handleChange("conta_movimentada", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>)}
+    
+
+        <Card>
+          <CardHeader className="flex! space-x-2 flex-row! items-center">
+            <CardTitle className="text-lg">Fórmula</CardTitle>
+            <p>(Composição do valor a pagar)</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-7 gap-4 items-center">
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Valor Total
+                </p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                  {formatNumber(factura.total_preco)}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
+                  -
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Desconto
+                </p>
+                <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
+                  {formatNumber(factura?.desconto)}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary"> + </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Multa
+                </p>
+                <p className="text-2xl font-bold  text-primary dark:text-gray-100">
+                  {formatNumber(factura.total_multa)}
+                </p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary"> = </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Valor a Pagar
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {formatNumber(factura.valor_pagar)}
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="mt-4">
+      
+
+        <Card>
           <CardHeader>
             <CardTitle className="text-lg">Estado e Controlo</CardTitle>
           </CardHeader>
@@ -516,7 +546,7 @@ export default function LiquidarNota() {
           </CardContent>
         </Card>
 
-        <Card className="mt-4">
+        <Card>
           <CardHeader>
             <CardTitle className="text-lg">Observações</CardTitle>
           </CardHeader>
@@ -534,6 +564,7 @@ export default function LiquidarNota() {
             </div>
           </CardContent>
         </Card>
+        </div>
 
         {/* Actions */}
         <Separator className="my-6" />
@@ -563,5 +594,6 @@ export default function LiquidarNota() {
         </div>
       </form>
     </div>
+    
   );
 }
