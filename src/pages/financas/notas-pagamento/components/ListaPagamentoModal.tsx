@@ -76,17 +76,17 @@ export const ListaPagamentoModal = ({
     () =>
       factura
         ? [
-            `Referência: ${factura.referencia || "---"}`,
-            `Código da Matrícula: ${factura.codigo_matricula || "---"}`,
-            `Estudante: ${factura.nome_aluno || "---"}`,
-            `Curso: ${factura.curso || "---"}`,
-            `Campus: ${factura.polo || "---"}`,
-            `Valor Total: ${formatNumber(factura.total_preco || 0)}`,
-            `Valor da Multa: ${formatNumber(factura.total_multa || 0)}`,
-            `Valor de Desconto: ${formatNumber(factura.desconto || 0)}`,
-            `Valor a Pagar: ${formatNumber(factura.valor_pagar || 0)}`,
-            `Data de Factura: ${formatarData(factura.data_factura || "")}`,
-          ]
+          `Referência: ${factura.referencia || "---"}`,
+          `Código da Matrícula: ${factura.codigo_matricula || "---"}`,
+          `Estudante: ${factura.nome_aluno || "---"}`,
+          `Curso: ${factura.curso || "---"}`,
+          `Campus: ${factura.polo || "---"}`,
+          `Valor Total: ${formatNumber(factura.total_preco || 0)}`,
+          `Valor da Multa: ${formatNumber(factura.total_multa || 0)}`,
+          `Valor de Desconto: ${formatNumber(factura.desconto || 0)}`,
+          `Valor a Pagar: ${formatNumber(factura.valor_pagar || 0)}`,
+          `Data de Factura: ${formatarData(factura.data_factura || "")}`,
+        ]
         : [],
     [factura],
   );
@@ -105,22 +105,22 @@ export const ListaPagamentoModal = ({
       ],
       mainTable: exportRows.length
         ? {
-            headers: [
-              { key: "descricao", label: "Descrição", width: 36 },
-              { key: "codigofactura", label: "Factura Referente", width: 20 },
-              { key: "preco", label: "Valor", width: 18, align: "right" },
-              {
-                key: "quantidade",
-                label: "Quantidade",
-                width: 16,
-                align: "center",
-              },
-            ],
-            rows: exportRows,
-          }
+          headers: [
+            { key: "descricao", label: "Descrição", width: 36 },
+            { key: "codigofactura", label: "Factura Referente", width: 20 },
+            { key: "preco", label: "Valor", width: 18, align: "right" },
+            {
+              key: "quantidade",
+              label: "Quantidade",
+              width: 16,
+              align: "center",
+            },
+          ],
+          rows: exportRows,
+        }
         : undefined,
       footerNotice: "Documento gerado automaticamente.",
-      primaryColor: "#1e40af",
+      primaryColor: "#0D1B48",
     };
   }, [exportInfo, exportRows, factura, factureId]);
 
@@ -139,28 +139,28 @@ export const ListaPagamentoModal = ({
         mainTable={
           exportRows.length
             ? {
-                headers: [
-                  { key: "descricao", label: "Descrição", width: "45%" },
-                  {
-                    key: "codigofactura",
-                    label: "Factura Referente",
-                    width: "22%",
-                  },
-                  { key: "preco", label: "Valor", width: "18%", align: "right" },
-                  {
-                    key: "quantidade",
-                    label: "Qtd.",
-                    width: "15%",
-                    align: "center",
-                  },
-                ],
-                rows: exportRows,
-                headerBackground: "#1e40af",
-              }
+              headers: [
+                { key: "descricao", label: "Descrição", width: "45%" },
+                {
+                  key: "codigofactura",
+                  label: "Factura Referente",
+                  width: "22%",
+                },
+                { key: "preco", label: "Valor", width: "18%", align: "right" },
+                {
+                  key: "quantidade",
+                  label: "Qtd.",
+                  width: "15%",
+                  align: "center",
+                },
+              ],
+              rows: exportRows,
+              headerBackground: "#0D1B48",
+            }
             : undefined
         }
         footerNotice="Documento gerado automaticamente."
-        primaryColor="#1e40af"
+        primaryColor="#0D1B48"
       />
     ) : null;
 
@@ -168,10 +168,10 @@ export const ListaPagamentoModal = ({
     .toISOString()
     .slice(0, 10)}`;
 
-    console.log("facturaResponse:", facturaResponse);
-console.log("factura:", factura);
-console.log("excelProps:", excelProps);
-console.log("pdfDocument:", pdfDocument);
+  console.log("facturaResponse:", facturaResponse);
+  console.log("factura:", factura);
+  console.log("excelProps:", excelProps);
+  console.log("pdfDocument:", pdfDocument);
 
   return (
     <>

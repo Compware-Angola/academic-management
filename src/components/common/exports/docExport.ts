@@ -41,7 +41,7 @@ export function buildExport({
           width: h.pdfWidth ? `${h.pdfWidth}%` : undefined,
         })),
         rows,
-        headerBackground: "#1e40af",
+        headerBackground: "#0D1B48",
       },
       footerNotice: "Documento gerado automaticamente.",
     },
@@ -63,7 +63,7 @@ export function buildExport({
         rows,
       },
       footerNotice: "Documento gerado automaticamente.",
-      primaryColor: "#1e40af",
+      primaryColor: "#0D1B48",
     },
 
     fileName: `${title.replace(/\s+/g, "_")}_${new Date()

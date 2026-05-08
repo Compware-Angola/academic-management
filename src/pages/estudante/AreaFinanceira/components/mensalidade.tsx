@@ -108,7 +108,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   const { data: monthValueResponse, isLoading: isMonthValueLoading } =
     useQueryMonthlyFeesValue({
       anoLectivoId: parseFilter(anoLetivo),
-      cursoId: student.curso_codigo,
+      cursoId: student?.curso_codigo,
       poloId: 1,
     });
 

@@ -64,12 +64,12 @@ export default function Regentes() {
   const [estado, setEstado] = useState("0");
 
   const { user: userData } = useAuth();
-const { mutateAsync: definirRegente, isPending: isSavingRegente } =
-  useDefinirRegente();
+  const { mutateAsync: definirRegente, isPending: isSavingRegente } =
+    useDefinirRegente();
 
-const [openModalRegente, setOpenModalRegente] = useState(false);
-const [linhaSelecionada, setLinhaSelecionada] = useState<DocenteRegente | null>(null);
-const [docenteSelecionado, setDocenteSelecionado] = useState("");
+  const [openModalRegente, setOpenModalRegente] = useState(false);
+  const [linhaSelecionada, setLinhaSelecionada] = useState<DocenteRegente | null>(null);
+  const [docenteSelecionado, setDocenteSelecionado] = useState("");
 
   const { data: teachersData = [] } = useQueryTeacther();
 
@@ -83,10 +83,10 @@ const [docenteSelecionado, setDocenteSelecionado] = useState("");
 
   const { data: anosLectivos } = useQueryAnoAcademico();
   const { data: cursos } = useCursos();
-  
+
   const { data: semestres } = useQuerySemestres();
   const { data: classes = [], isLoading: isLoadingClasses } =
-      useQueryClassFilterByCurso({ curso });
+    useQueryClassFilterByCurso({ curso });
 
 
   const { data, isLoading, isFetching } = useQueryListDocentesRegentes({
@@ -148,7 +148,7 @@ const [docenteSelecionado, setDocenteSelecionado] = useState("");
             { key: "docente", label: "Docente", width: "25%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
         footerNotice="Documento gerado automaticamente pelo sistema."
       />
@@ -157,95 +157,95 @@ const [docenteSelecionado, setDocenteSelecionado] = useState("");
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Lista de Docentes Regentes",
-          subtitle: "Listagem de docentes regentes por unidade curricular",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${data?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "ano_curricular", label: "Ano Curricular", width: 20 },
-              { key: "semestre", label: "Semestre", width: 20 },
-              {
-                key: "unidade_curricular",
-                label: "Unidade Curricular",
-                width: 40,
-              },
-              { key: "docente", label: "Docente", width: 35 },
-            ],
-            rows: exportRows,
+        documentTitle: "Lista de Docentes Regentes",
+        subtitle: "Listagem de docentes regentes por unidade curricular",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${data?.total ?? exportRows.length}`,
           },
-          footerNotice: "Documento gerado automaticamente pelo sistema.",
-          primaryColor: "#1e40af",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "ano_curricular", label: "Ano Curricular", width: 20 },
+            { key: "semestre", label: "Semestre", width: 20 },
+            {
+              key: "unidade_curricular",
+              label: "Unidade Curricular",
+              width: 40,
+            },
+            { key: "docente", label: "Docente", width: 35 },
+          ],
+          rows: exportRows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
-  { header: "Ano Curricular", accessor: "ano_curricular" },
-  { header: "Semestre", accessor: "semestre" },
-  { header: "Unidade Curricular", accessor: "unidade_curricular" },
-  { header: "Docente", accessor: "docente" },
-  {
-    header: "Ação",
-    accessor: "acao",
-    cell: (row: DocenteRegente) => (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleOpenDefinirRegente(row)}
-      >
-        <Pencil className="h-4 w-4" />
-      </Button>
-    ),
-  },
-];
+    { header: "Ano Curricular", accessor: "ano_curricular" },
+    { header: "Semestre", accessor: "semestre" },
+    { header: "Unidade Curricular", accessor: "unidade_curricular" },
+    { header: "Docente", accessor: "docente" },
+    {
+      header: "Ação",
+      accessor: "acao",
+      cell: (row: DocenteRegente) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleOpenDefinirRegente(row)}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
 
   function handleOpenDefinirRegente(row: DocenteRegente) {
-  setLinhaSelecionada(row);
-  setDocenteSelecionado("");
-  setOpenModalRegente(true);
-}
-
-async function handleSalvarRegente() {
-  if (!linhaSelecionada) return;
-
-  if (!anoLectivo && !filtrosAplicados.anoLectivo) {
-    toast?.error?.("Selecione o ano lectivo");
-    return;
-  }
-
-  if (!semestre && !filtrosAplicados.semestre) {
-    toast?.error?.("Selecione o semestre");
-    return;
-  }
-
-  if (!docenteSelecionado) {
-    toast?.error?.("Selecione o docente");
-    return;
-  }
-
-  try {
-    await definirRegente({
-      anoLectivo: Number(filtrosAplicados.anoLectivo || anoLectivo),
-      gradeCurricular: Number(linhaSelecionada.codigo_grade),
-      docente: Number(docenteSelecionado),
-      semestre: Number(filtrosAplicados.semestre || semestre),
-      createdBy: Number(userData?.user?.codigo_importado ?? 1),
-    });
-
-    toast?.success?.("Regente definido com sucesso");
-    setOpenModalRegente(false);
-    setLinhaSelecionada(null);
+    setLinhaSelecionada(row);
     setDocenteSelecionado("");
-  } catch (error: any) {
-    toast?.error?.(
-      error?.response?.data?.message ?? "Erro ao definir regente"
-    );
+    setOpenModalRegente(true);
   }
-}
+
+  async function handleSalvarRegente() {
+    if (!linhaSelecionada) return;
+
+    if (!anoLectivo && !filtrosAplicados.anoLectivo) {
+      toast?.error?.("Selecione o ano lectivo");
+      return;
+    }
+
+    if (!semestre && !filtrosAplicados.semestre) {
+      toast?.error?.("Selecione o semestre");
+      return;
+    }
+
+    if (!docenteSelecionado) {
+      toast?.error?.("Selecione o docente");
+      return;
+    }
+
+    try {
+      await definirRegente({
+        anoLectivo: Number(filtrosAplicados.anoLectivo || anoLectivo),
+        gradeCurricular: Number(linhaSelecionada.codigo_grade),
+        docente: Number(docenteSelecionado),
+        semestre: Number(filtrosAplicados.semestre || semestre),
+        createdBy: Number(userData?.user?.codigo_importado ?? 1),
+      });
+
+      toast?.success?.("Regente definido com sucesso");
+      setOpenModalRegente(false);
+      setLinhaSelecionada(null);
+      setDocenteSelecionado("");
+    } catch (error: any) {
+      toast?.error?.(
+        error?.response?.data?.message ?? "Erro ao definir regente"
+      );
+    }
+  }
 
   function handleListar() {
     setCurrentPage(1);
@@ -311,7 +311,7 @@ async function handleSalvarRegente() {
             </div>
 
             <div className="space-y-2">
-              
+
               <CourseSelect
                 value={curso}
                 onChangeValue={(v) => {
@@ -323,41 +323,41 @@ async function handleSalvarRegente() {
 
             <div className="space-y-2">
               <FormSelect
-  label="Ano Curricular"
-  value={classe}
-  disabled={isLoadingClasses || !curso}
-  onChange={(v) => setClasse(String(v))}
-  options={[{ codigo: "0", designacao: "Todos" }, ...classes]}
-  map={(c: any) => ({
-    key: c.codigo,
-    label: c.designacao,
-    value: String(c.codigo),
-  })}
-  loading={isLoadingClasses}
-/>
+                label="Ano Curricular"
+                value={classe}
+                disabled={isLoadingClasses || !curso}
+                onChange={(v) => setClasse(String(v))}
+                options={[{ codigo: "0", designacao: "Todos" }, ...classes]}
+                map={(c: any) => ({
+                  key: c.codigo,
+                  label: c.designacao,
+                  value: String(c.codigo),
+                })}
+                loading={isLoadingClasses}
+              />
             </div>
 
-              <div className="space-y-2">
-  <label className="text-sm font-medium">Semestre</label>
-  <Select value={semestre} onValueChange={setSemestre}>
-    <SelectTrigger>
-      <SelectValue placeholder="Todos" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="0">Todos</SelectItem>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Semestre</label>
+              <Select value={semestre} onValueChange={setSemestre}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Todos</SelectItem>
 
-      {semestres?.map((item: any) => (
-        <SelectItem
-          key={item.codigo ?? item.CODIGO}
-          value={String(item.codigo ?? item.CODIGO)}
-        >
-          {item.designacao ?? item.DESIGNACAO}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-            
+                  {semestres?.map((item: any) => (
+                    <SelectItem
+                      key={item.codigo ?? item.CODIGO}
+                      value={String(item.codigo ?? item.CODIGO)}
+                    >
+                      {item.designacao ?? item.DESIGNACAO}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -401,46 +401,46 @@ async function handleSalvarRegente() {
       />
 
       <Dialog open={openModalRegente} onOpenChange={setOpenModalRegente}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Definir Regente</DialogTitle>
-    </DialogHeader>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Definir Regente</DialogTitle>
+          </DialogHeader>
 
-    <div className="space-y-4">
-      <div className="space-y-2">
-  <label className="text-sm font-medium">Docente</label>
-  <FormCommandSelect
-    width="full"
-    value={docenteSelecionado}
-    options={teachersData}
-    map={(t: any) => ({
-      key: t.codigo ?? t.CODIGO,
-      value: String(t.codigo ?? t.CODIGO),
-      label: t.nome ?? t.NOME,
-    })}
-    onChange={(codigo) => setDocenteSelecionado(String(codigo))}
-  />
-</div>
-    </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Docente</label>
+              <FormCommandSelect
+                width="full"
+                value={docenteSelecionado}
+                options={teachersData}
+                map={(t: any) => ({
+                  key: t.codigo ?? t.CODIGO,
+                  value: String(t.codigo ?? t.CODIGO),
+                  label: t.nome ?? t.NOME,
+                })}
+                onChange={(codigo) => setDocenteSelecionado(String(codigo))}
+              />
+            </div>
+          </div>
 
-    <DialogFooter>
-      <Button
-        variant="outline"
-        onClick={() => {
-          setOpenModalRegente(false);
-          setLinhaSelecionada(null);
-          setDocenteSelecionado("");
-        }}
-      >
-        Cancelar
-      </Button>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpenModalRegente(false);
+                setLinhaSelecionada(null);
+                setDocenteSelecionado("");
+              }}
+            >
+              Cancelar
+            </Button>
 
-      <Button onClick={handleSalvarRegente} disabled={isSavingRegente}>
-        {isSavingRegente ? "Salvando..." : "Salvar"}
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+            <Button onClick={handleSalvarRegente} disabled={isSavingRegente}>
+              {isSavingRegente ? "Salvando..." : "Salvar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

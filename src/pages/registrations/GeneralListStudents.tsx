@@ -51,10 +51,10 @@ const SEXOS = [
 
 // placeholders temporários
 const GRAUS_ACADEMICOS = [
-  {value: "0",           label: "Todos" },
-  {value: "1", label: "Licenciatura"},
-  {value: "2", label: "Doutoramento"},
-  {value: "3",     label: "Mestrado"}
+  { value: "0", label: "Todos" },
+  { value: "1", label: "Licenciatura" },
+  { value: "2", label: "Doutoramento" },
+  { value: "3", label: "Mestrado" }
 ];
 
 const NECESSIDADES = [
@@ -100,7 +100,7 @@ export default function ListaGeralEstudantes() {
   const { data: cursos = [] } = useCursos();
   const { data: estadosNacionalidade = [], isLoading: isLoadingNacionalidade } =
     useQueryNacionalidade();
-const { data: periodos = [] } = useQueryPeriod();
+  const { data: periodos = [] } = useQueryPeriod();
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
@@ -178,7 +178,7 @@ const { data: periodos = [] } = useQueryPeriod();
             { key: "periodo", label: "Período", width: "10%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -186,32 +186,32 @@ const { data: periodos = [] } = useQueryPeriod();
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Listagem Geral de Estudantes",
-          subtitle: "Listagem completa de estudantes",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${data?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "numero_matricula", label: "Nº Matrícula", width: 18 },
-              { key: "nome", label: "Nome", width: 35 },
-              { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
-              { key: "ano_lectivo", label: "Ano Lectivo", width: 15 },
-              { key: "sexo", label: "Sexo", width: 12 },
-              { key: "naturalidade", label: "Naturalidade", width: 20 },
-              { key: "necessidade", label: "Necessidade", width: 20 },
-              { key: "faculdade", label: "Faculdade", width: 20 },
-              { key: "curso", label: "Curso", width: 25 },
-              { key: "ano_curricular", label: "Ano Curricular", width: 15 },
-              { key: "periodo", label: "Período", width: 15 },
-            ],
-            rows: exportRows,
+        documentTitle: "Listagem Geral de Estudantes",
+        subtitle: "Listagem completa de estudantes",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${data?.total ?? exportRows.length}`,
           },
-          primaryColor: "#1e40af",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "numero_matricula", label: "Nº Matrícula", width: 18 },
+            { key: "nome", label: "Nome", width: 35 },
+            { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
+            { key: "ano_lectivo", label: "Ano Lectivo", width: 15 },
+            { key: "sexo", label: "Sexo", width: 12 },
+            { key: "naturalidade", label: "Naturalidade", width: 20 },
+            { key: "necessidade", label: "Necessidade", width: 20 },
+            { key: "faculdade", label: "Faculdade", width: 20 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "ano_curricular", label: "Ano Curricular", width: 15 },
+            { key: "periodo", label: "Período", width: 15 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
@@ -405,16 +405,16 @@ const { data: periodos = [] } = useQueryPeriod();
                   <SelectValue placeholder="Selecione o período" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="0">Todos</SelectItem>
-                    {periodos?.map((item: any) => (
-                        <SelectItem
-                        key={item.codigo ?? item.CODIGO}
-                        value={String(item.codigo ?? item.CODIGO)}
-                        >
-                        {item.designacao ?? item.DESIGNACAO}
-                        </SelectItem>
-                    ))}
-                    </SelectContent>
+                  <SelectItem value="0">Todos</SelectItem>
+                  {periodos?.map((item: any) => (
+                    <SelectItem
+                      key={item.codigo ?? item.CODIGO}
+                      value={String(item.codigo ?? item.CODIGO)}
+                    >
+                      {item.designacao ?? item.DESIGNACAO}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
 

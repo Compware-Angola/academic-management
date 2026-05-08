@@ -118,7 +118,7 @@ export function PagamentosTab({
                 rows: exportRows,
             },
             footerNotice: "Documento gerado automaticamente.",
-            primaryColor: "#1e40af",
+            primaryColor: "#0D1B48",
         };
     }, [exportRows, total]);
 
@@ -149,10 +149,10 @@ export function PagamentosTab({
                     { key: "tipo_pagamento", label: "Tipo", width: "5%" },
                 ],
                 rows: exportRows,
-                headerBackground: "#1e40af",
+                headerBackground: "#0D1B48",
             }}
             footerNotice="Documento gerado automaticamente."
-            primaryColor="#1e40af"
+            primaryColor="#0D1B48"
         />
     ) : null;
 

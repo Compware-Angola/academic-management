@@ -202,7 +202,7 @@ export default function EstadoMatriculaPorHorario() {
             { key: "ano_curricular", label: "Ano Curricular", width: "10%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -210,28 +210,28 @@ export default function EstadoMatriculaPorHorario() {
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Estado da Matrícula por Horário",
-          subtitle: "Listagem de estudantes por estado da matrícula e horário",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${listaResponse?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "matricula", label: "Matrícula", width: 16 },
-              { key: "nome", label: "Nome", width: 35 },
-              { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
-              { key: "horario", label: "Horário", width: 22 },
-              { key: "curso", label: "Curso", width: 25 },
-              { key: "estado", label: "Estado", width: 22 },
-              { key: "ano_curricular", label: "Ano Curricular", width: 16 },
-            ],
-            rows: exportRows,
+        documentTitle: "Estado da Matrícula por Horário",
+        subtitle: "Listagem de estudantes por estado da matrícula e horário",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${listaResponse?.total ?? exportRows.length}`,
           },
-          primaryColor: "#1e40af",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Matrícula", width: 16 },
+            { key: "nome", label: "Nome", width: 35 },
+            { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
+            { key: "horario", label: "Horário", width: 22 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "estado", label: "Estado", width: 22 },
+            { key: "ano_curricular", label: "Ano Curricular", width: 16 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
@@ -375,7 +375,7 @@ export default function EstadoMatriculaPorHorario() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Semestre</label>
               <Select
