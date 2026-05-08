@@ -32,6 +32,11 @@ import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
 import { useCreateInvoice } from "@/hooks/financas/invoice/use-create-mutation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type SelectedPayment = {
   mesTempId: number;
@@ -229,7 +234,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                   <div className="space-y-1 flex items-center">
                     <div className="w-[50px]">
                       <Checkbox
-                        disabled={payment.status != 0}
+                        disabled={payment.status != 0 || payment.id_item != 0}
                         checked={selectedPayments.has(payment.id)}
                         onCheckedChange={() =>
                           toggleSelectPayment(
@@ -237,6 +242,11 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             Number(payment.valorBase),
                             payment.month,
                           )
+                        }
+                        title={
+                          payment.id_item != 0
+                            ? "Já foi gerada a factura mensalidade"
+                            : null
                         }
                       />
                     </div>

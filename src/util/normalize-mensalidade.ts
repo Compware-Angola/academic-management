@@ -20,6 +20,7 @@ interface NormalizedMensalidade {
   observacoes: string | null;
   bolseiro: number;
   mesId: number;
+  id_item: number | undefined;
 }
 const normalizeMensalidade = (
   monthlys: Mensalidade[],
@@ -59,6 +60,7 @@ const normalizeMensalidade = (
       observacoes: descricaoDesconto,
       bolseiro: 1,
       mesId: monthly.mes_temp_id,
+      id_item: monthly.id_item,
     };
   });
 };
