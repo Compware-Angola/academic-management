@@ -155,10 +155,8 @@ export function Resumo({
   value = "resumo",
   codigoMatricula: matricula,
 }: ResumoProps) {
-  const [activeTab, setActiveTab] = useState("geral");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
-  const [anoLetivo, setAnoLetivo] = useState<string | undefined>("23");
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<
@@ -180,9 +178,6 @@ export function Resumo({
     anoLetivo: "",
     estado: undefined as string | undefined,
   });
-
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
 
   const {
     data,
@@ -283,20 +278,9 @@ export function Resumo({
     error,
   } = useStudentDetail(matricula);
 
-  const {
-    data: response,
-    isLoading: isDisciplinasLoading,
-    isError,
-  } = useStudentDisciplinas({
-    matriculaId: matricula ?? "",
-    anoLectivo: Number(anoLetivo),
-    page,
-    limit,
-  });
 
-  const disciplinas = response?.data ?? [];
-  const total = response?.total ?? 0;
-  const totalPages = response?.totalPages ?? 1;
+
+
 
   if (!matricula) {
     return <div>Matrícula inválida</div>;
@@ -304,12 +288,7 @@ export function Resumo({
 
   const estudante = mockEstudante;
 
-  const getEstadoLabel = (estado: string | undefined) => {
-    if (!estado) return "—";
-    if (estado === "Fez com Sucesso") return "Aprovado";
-    if (estado === "Pendente") return "Pendente";
-    return estado;
-  };
+
 
   return (
     <TabsContent value={value} className="space-y-4">
@@ -327,13 +306,12 @@ export function Resumo({
           </CardHeader>
           <CardContent>
             <p
-              className={`text-3xl font-bold ${
-                student?.saldo_atual > 0
-                  ? "text-green-600"
-                  : student?.saldo_atual < 0
-                    ? "text-destructive"
-                    : "text-muted-foreground"
-              }`}
+              className={`text-3xl font-bold ${student?.saldo_atual > 0
+                ? "text-green-600"
+                : student?.saldo_atual < 0
+                  ? "text-destructive"
+                  : "text-muted-foreground"
+                }`}
             >
               {student?.saldo_atual >= 0 ? "+" : ""}
               {formatCurrency(student?.saldo_atual || 0)}
