@@ -5,7 +5,7 @@ import { axiosNestFinance } from "@/lib/axios-nest-finance";
  */
 export interface CreatePaymentPayload {
   data: string;
-  nOperacaoBancaria: string;
+  nOperacaoBancaria: number;
   observacao?: string;
   dataBanco: string;
   formaPagamento: string;
