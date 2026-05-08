@@ -108,30 +108,30 @@ export default function InscritosPorUc() {
           : undefined,
     });
 
-  
+
   const { data: horarios = [], isLoading: isLoadingHorarios } =
-  useQueryHorariosDisponiveisInscritosPorUc({
-    anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
-    curso: filters.curso ? Number(filters.curso) : 0,
-    anoCurricular:
-      filters.anoCurricular && filters.anoCurricular !== "all"
-        ? Number(filters.anoCurricular)
+    useQueryHorariosDisponiveisInscritosPorUc({
+      anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
+      curso: filters.curso ? Number(filters.curso) : 0,
+      anoCurricular:
+        filters.anoCurricular && filters.anoCurricular !== "all"
+          ? Number(filters.anoCurricular)
+          : 0,
+      semestre: filters.semestre ? Number(filters.semestre) : 0,
+      periodo: 0,
+      cadeira: filters.unidadeCurricular
+        ? Number(filters.unidadeCurricular)
         : 0,
-    semestre: filters.semestre ? Number(filters.semestre) : 0,
-    periodo: 0,
-    cadeira: filters.unidadeCurricular
-      ? Number(filters.unidadeCurricular)
-      : 0,
-  });
+    });
 
   const horariosOptions = Array.isArray(horarios)
-  ? horarios
+    ? horarios
       .map((item: any) => ({
         codigo: item.codigo ?? item.CODIGO,
         designacao: item.designacao ?? item.DESIGNACAO,
       }))
       .filter((item) => item.codigo)
-  : [];
+    : [];
 
   const canLoadHorarios =
     !!filters.anoLectivo &&
@@ -161,7 +161,7 @@ export default function InscritosPorUc() {
     curso: appliedFilters.curso ? Number(appliedFilters.curso) : 0,
     anoCurricular:
       appliedFilters.anoCurricular &&
-      appliedFilters.anoCurricular !== "all"
+        appliedFilters.anoCurricular !== "all"
         ? Number(appliedFilters.anoCurricular)
         : 0,
     semestre: appliedFilters.semestre ? Number(appliedFilters.semestre) : 0,
@@ -208,7 +208,7 @@ export default function InscritosPorUc() {
             { key: "estado", label: "Estado", width: "10%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -216,26 +216,26 @@ export default function InscritosPorUc() {
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Lista de Inscritos por UC",
-          subtitle: "Listagem de estudantes inscritos por unidade curricular",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${inscritosResponse?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "matricula", label: "Matrícula", width: 20 },
-              { key: "nome", label: "Nome", width: 40 },
-              { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
-              { key: "curso", label: "Curso", width: 25 },
-              { key: "estado", label: "Estado", width: 18 },
-            ],
-            rows: exportRows,
+        documentTitle: "Lista de Inscritos por UC",
+        subtitle: "Listagem de estudantes inscritos por unidade curricular",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${inscritosResponse?.total ?? exportRows.length}`,
           },
-          primaryColor: "#1e40af",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Matrícula", width: 20 },
+            { key: "nome", label: "Nome", width: 40 },
+            { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "estado", label: "Estado", width: 18 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
@@ -252,19 +252,19 @@ export default function InscritosPorUc() {
   }
 
   console.log("PARAMS HORARIO:", {
-  anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
-  curso: filters.curso ? Number(filters.curso) : 0,
-  anoCurricular:
-    filters.anoCurricular && filters.anoCurricular !== "all"
-      ? Number(filters.anoCurricular)
-      : 0,
-  semestre: filters.semestre ? Number(filters.semestre) : 0,
-  periodo: filters.periodo ? Number(filters.periodo) : 0,
-  cadeira: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : 0,
-});
+    anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
+    curso: filters.curso ? Number(filters.curso) : 0,
+    anoCurricular:
+      filters.anoCurricular && filters.anoCurricular !== "all"
+        ? Number(filters.anoCurricular)
+        : 0,
+    semestre: filters.semestre ? Number(filters.semestre) : 0,
+    periodo: filters.periodo ? Number(filters.periodo) : 0,
+    cadeira: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : 0,
+  });
 
-console.log("HORARIOS RAW:", horarios);
-console.log("HORARIOS NORMALIZED:", horariosOptions);
+  console.log("HORARIOS RAW:", horarios);
+  console.log("HORARIOS NORMALIZED:", horariosOptions);
 
   return (
     <div className="p-6 space-y-8">

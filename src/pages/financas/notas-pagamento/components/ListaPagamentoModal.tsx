@@ -23,6 +23,7 @@ import {
   ArrowLeft,
   Loader2,
 } from "lucide-react";
+import { useMemo } from "react";
 
 import { formatarData } from "@/util/date-formate";
 import {
@@ -31,6 +32,12 @@ import {
 } from "@/hooks/horario/use-query-invoice";
 import { formatNumber } from "@/util/format-number";
 import { Button } from "@/components/ui/button";
+import ExcelActions, {
+  GenericExcelProps,
+} from "@/components/views/excel/GenericExcelExport";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 
 interface ListaPagamentoModalProps {
   factureId: number;
@@ -53,6 +60,119 @@ export const ListaPagamentoModal = ({
     );
   const factura = facturaResponse?.data?.[0];
   const isLoading = isLoadingFacturaItens || isLoadingFactura;
+
+  const exportRows = useMemo(
+    () =>
+      facturaItens?.data?.map((item) => ({
+        descricao: `${item?.descricaoservico || "---"} ${item?.mesdescricao || ""}`.trim(),
+        codigofactura: item?.codigofactura || "---",
+        preco: formatNumber(item?.preco || 0),
+        quantidade: item?.quantidade || "---",
+      })) || [],
+    [facturaItens?.data],
+  );
+
+  const exportInfo = useMemo(
+    () =>
+      factura
+        ? [
+          `Referência: ${factura.referencia || "---"}`,
+          `Código da Matrícula: ${factura.codigo_matricula || "---"}`,
+          `Estudante: ${factura.nome_aluno || "---"}`,
+          `Curso: ${factura.curso || "---"}`,
+          `Campus: ${factura.polo || "---"}`,
+          `Valor Total: ${formatNumber(factura.total_preco || 0)}`,
+          `Valor da Multa: ${formatNumber(factura.total_multa || 0)}`,
+          `Valor de Desconto: ${formatNumber(factura.desconto || 0)}`,
+          `Valor a Pagar: ${formatNumber(factura.valor_pagar || 0)}`,
+          `Data de Factura: ${formatarData(factura.data_factura || "")}`,
+        ]
+        : [],
+    [factura],
+  );
+
+  const excelProps = useMemo<GenericExcelProps | null>(() => {
+    if (!factura) return null;
+
+    return {
+      documentTitle: "Detalhes do Pagamento",
+      subtitle: `Factura ${factura.referencia || factureId}`,
+      infoSections: [
+        {
+          title: "Dados do Pagamento",
+          content: exportInfo,
+        },
+      ],
+      mainTable: exportRows.length
+        ? {
+          headers: [
+            { key: "descricao", label: "Descrição", width: 36 },
+            { key: "codigofactura", label: "Factura Referente", width: 20 },
+            { key: "preco", label: "Valor", width: 18, align: "right" },
+            {
+              key: "quantidade",
+              label: "Quantidade",
+              width: 16,
+              align: "center",
+            },
+          ],
+          rows: exportRows,
+        }
+        : undefined,
+      footerNotice: "Documento gerado automaticamente.",
+      primaryColor: "#0D1B48",
+    };
+  }, [exportInfo, exportRows, factura, factureId]);
+
+  const pdfDocument =
+    factura ? (
+      <GenericPDFDocument
+        documentTitle="Detalhes do Pagamento"
+        subtitle={`Factura ${factura.referencia || factureId}`}
+        orientation="vertical"
+        infoSections={[
+          {
+            title: "Dados do Pagamento",
+            content: exportInfo,
+          },
+        ]}
+        mainTable={
+          exportRows.length
+            ? {
+              headers: [
+                { key: "descricao", label: "Descrição", width: "45%" },
+                {
+                  key: "codigofactura",
+                  label: "Factura Referente",
+                  width: "22%",
+                },
+                { key: "preco", label: "Valor", width: "18%", align: "right" },
+                {
+                  key: "quantidade",
+                  label: "Qtd.",
+                  width: "15%",
+                  align: "center",
+                },
+              ],
+              rows: exportRows,
+              headerBackground: "#0D1B48",
+            }
+            : undefined
+        }
+        footerNotice="Documento gerado automaticamente."
+        primaryColor="#0D1B48"
+      />
+    ) : null;
+
+  const baseFileName = `Detalhes_Pagamento_${factura?.referencia || factureId}_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
+
+  console.log("facturaResponse:", facturaResponse);
+  console.log("factura:", factura);
+  console.log("excelProps:", excelProps);
+  console.log("pdfDocument:", pdfDocument);
+
   return (
     <>
       {/* Modal de Detalhes */}
@@ -63,6 +183,24 @@ export const ListaPagamentoModal = ({
               <FileText className="h-5 w-5" />
               Detalhes do Pagamento - {factura?.referencia}
             </DialogTitle>
+            {factura && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {pdfDocument && (
+                  <PDFActions
+                    document={pdfDocument}
+                    fileName={`${baseFileName}.pdf`}
+                    showDownload
+                    showPrint
+                  />
+                )}
+                {excelProps && (
+                  <ExcelActions
+                    excelProps={excelProps}
+                    fileName={`${baseFileName}.xlsx`}
+                  />
+                )}
+              </div>
+            )}
           </DialogHeader>
           {isLoading ? (
             <div className="space-y-6 h-24 flex justify-center">

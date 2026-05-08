@@ -150,7 +150,7 @@ export default function ListarEstudantesPorEstadoMatricula() {
             { key: "estado", label: "Estado", width: "16%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -158,29 +158,29 @@ export default function ListarEstudantesPorEstadoMatricula() {
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Estudantes por Estado da Matrícula",
-          subtitle: "Listagem de estudantes por estado da matrícula",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${listaResponse?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "matricula", label: "Matrícula", width: 16 },
-              { key: "nome", label: "Nome", width: 35 },
-              { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
-              { key: "telefone", label: "Telefone", width: 18 },
-              { key: "email", label: "Email", width: 28 },
-              { key: "curso", label: "Curso", width: 25 },
-              { key: "ano_curricular", label: "Ano Curricular", width: 16 },
-              { key: "estado", label: "Estado", width: 22 },
-            ],
-            rows: exportRows,
+        documentTitle: "Estudantes por Estado da Matrícula",
+        subtitle: "Listagem de estudantes por estado da matrícula",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${listaResponse?.total ?? exportRows.length}`,
           },
-          primaryColor: "#1e40af",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Matrícula", width: 16 },
+            { key: "nome", label: "Nome", width: 35 },
+            { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
+            { key: "telefone", label: "Telefone", width: 18 },
+            { key: "email", label: "Email", width: 28 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "ano_curricular", label: "Ano Curricular", width: 16 },
+            { key: "estado", label: "Estado", width: 22 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
