@@ -14,8 +14,7 @@ import {
   Tag,
   Wallet,
 } from "lucide-react";
-import { useStudentClassInfo } from "@/hooks/students/use-query-students-class-info";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Separator } from "@radix-ui/react-select";
 import { useMemo, useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -30,10 +29,14 @@ import { Button } from "@/components/ui/button";
 import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
 import { parseFilter } from "@/util/parse-filter";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { createInvoice, createItem } from "@/util/create-item";
+import { toast } from "sonner";
+import { useCreateInvoice } from "@/hooks/financas/invoice/use-create-mutation";
 
 type SelectedPayment = {
   mesTempId: number;
   valorBase: number;
+  mesTempDesc: string;
 };
 
 type Props = {
@@ -78,7 +81,11 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       0,
     );
   }, [selectedPayments]);
-  const toggleSelectPayment = (mesTempId: number, valorBase: number) => {
+  const toggleSelectPayment = (
+    mesTempId: number,
+    valorBase: number,
+    mesTempDesc: string,
+  ) => {
     setSelectedPayments((prev) => {
       const next = new Map(prev);
 
@@ -88,6 +95,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
         next.set(mesTempId, {
           mesTempId,
           valorBase,
+          mesTempDesc,
         });
       }
 
@@ -104,7 +112,9 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       page: 1,
     });
 
-  const { data: student, isLoading } = useStudentDetail(codigoMatricula);
+  const { data: student } = useStudentDetail(codigoMatricula);
+  const { mutate: criarFactura, isPending } = useCreateInvoice();
+
   const { data: monthValueResponse, isLoading: isMonthValueLoading } =
     useQueryMonthlyFeesValue({
       anoLectivoId: parseFilter(anoLetivo),
@@ -115,6 +125,33 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   const data = monthResponse?.data ?? [];
   const payments = normalizeMensalidade(data);
   const monthFee = monthValueResponse?.[0];
+
+  const handleCreateInvoice = () => {
+    if (!monthFee?.codigo) {
+      toast.error("Erro ao gerar factura");
+      return;
+    }
+    const items = Array.from(selectedPayments.values()).map((payment) =>
+      createItem({
+        codigo: monthFee.codigo,
+        descricao: `Mensalidade ${payment.mesTempDesc}`,
+        preco: payment.valorBase,
+        mesTempId: payment.mesTempId,
+      }),
+    );
+    const invoice = createInvoice({
+      codigoMatricula: codigoMatricula,
+      poloid: 1,
+      totalApagar: totalSelecionado,
+      itens: items,
+    });
+    criarFactura(invoice, {
+      onSuccess: () => {
+        setSelectedPayments(new Map());
+        toast.success("Nota de Pagamento gerada com sucesso!");
+      },
+    });
+  };
 
   return (
     <div className="space-y-8">
@@ -129,9 +166,12 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
             <p className="text-muted-foreground mt-1">
               Histórico de pagamentos, mensalidades pendentes e recibos
             </p>
-            <p className="text-muted-foreground text-base mt-1">
-              {monthFee?.descricao ?? "-"} {monthFee?.preco ?? "-"}
-            </p>
+            {!isMonthValueLoading}{" "}
+            {
+              <p className="text-muted-foreground text-base mt-1">
+                {monthFee?.descricao ?? "-"} {monthFee?.preco ?? "-"}
+              </p>
+            }
           </div>
 
           {/* Seletor de Ano Letivo */}
@@ -195,6 +235,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           toggleSelectPayment(
                             payment.mesId,
                             Number(payment.valorBase),
+                            payment.month,
                           )
                         }
                       />
@@ -376,8 +417,17 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
           </span>
         </div>
 
-        <Button className="gap-2" size="lg" disabled={false}>
-          <Receipt className="h-5 w-5" />
+        <Button
+          className="gap-2"
+          size="lg"
+          onClick={() => handleCreateInvoice()}
+          disabled={selectedPayments.size == 0}
+        >
+          {isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Receipt className="h-5 w-5" />
+          )}
           Gerar Factura
         </Button>
       </div>
