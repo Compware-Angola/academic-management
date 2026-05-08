@@ -26,14 +26,11 @@ const normalizeMensalidade = (
   monthlys: Mensalidade[],
 ): NormalizedMensalidade[] => {
   return monthlys.map((monthly) => {
-    const valorBase =
-      monthly.status_pagamento === 1 ? monthly.valor_pago : monthly.total;
+    const status = Number(monthly.estado_fatura);
+    const valorBase = status === 1 ? monthly.valor_pago : monthly.total;
     const desconto = Number(monthly.desconto);
     const mensalidade = Number(monthly.mensalidade);
-    const status =
-      typeof monthly.status_pagamento === "string"
-        ? Number(monthly.status_pagamento)
-        : monthly.status_pagamento;
+
     const percentualDesconto =
       mensalidade > 0 ? (desconto / mensalidade) * 100 : 0;
 

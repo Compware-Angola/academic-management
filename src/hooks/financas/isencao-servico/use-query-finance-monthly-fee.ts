@@ -34,24 +34,26 @@ export function useQueryFinanceMonthlyFee({
 
   const queryKey = ["finance-monthly-fee", params];
 
-  const { data, isLoading, error, isError } = useQuery<MonthlyFeeDataResponse>({
-    queryKey: queryKey,
-    queryFn: async () => {
-      if (!isEnabled) {
-        throw new Error(
-          "Parâmetros de Ano Lectivo ou Matrícula estão faltando.",
-        );
-      }
+  const { data, isLoading, error, isError, isFetching } =
+    useQuery<MonthlyFeeDataResponse>({
+      queryKey: queryKey,
+      queryFn: async () => {
+        if (!isEnabled) {
+          throw new Error(
+            "Parâmetros de Ano Lectivo ou Matrícula estão faltando.",
+          );
+        }
 
-      return getmonthlyFee(params);
-    },
-    enabled: isEnabled,
-    staleTime: 1000 * 60 * 5,
-    retry: 0,
-  });
+        return getmonthlyFee(params);
+      },
+      enabled: isEnabled,
+      staleTime: 1000 * 60 * 5,
+      retry: 0,
+    });
 
   return {
     data,
+    isFetching,
     isLoading,
     error,
     isError,
