@@ -95,7 +95,7 @@ import IsencaoServico from "@/pages/financas/isencao-servico";
 import ListarDescontos from "./pages/financas/descontos/ListarDescontos";
 import UploadImagem from "./pages/controle-acesso/solicitacao/CreateImagePortal";
 import ControleAssiduidade from "./pages/assiduidade/ControleAssiduidade";
-import ListarPagamentos from "./pages/financas/notas-pagamento/ListarPagamentos";
+import ListarPagamentos from "./pages/financas/notas-pagamento/index";
 import AtribuirDescontos from "./pages/financas/descontos/AtribuirDescontos";
 import ValidacaoPrograma from "./pages/docente/ValidacaoPrograma";
 import AulasAgendadas from "./pages/sumario/AulasAgendadas";
