@@ -69,7 +69,7 @@ export type InvoiceResponse = {
 export async function createInvoiceService(
     payload: InvoicePayload
 ): Promise<InvoiceResponse> {
-    const { data } = await axiosNestFinance.post("/api/invoices", payload);
+    const { data } = await axiosNestFinance.post("/invoices", payload);
     return data;
 }
 
