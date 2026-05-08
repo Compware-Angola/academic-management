@@ -29,7 +29,7 @@ export type InvoicePayload = {
     DataFactura: string;
     polo_id: number;
     TotalPreco: number;
-    codigo_descricao: number;
+    codigo_descricao?: number;
     ValorAPagar: number;
     total_incidencia: number;
     total_retencao: number;

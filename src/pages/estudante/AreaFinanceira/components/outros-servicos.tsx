@@ -80,7 +80,7 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
             DataFactura: new Date().toISOString(),
             polo_id: poloId,
             TotalPreco: totalServicos,
-            codigo_descricao: 101,
+
             ValorAPagar: totalServicos,
             total_incidencia: totalServicos,
             total_retencao: 0,
