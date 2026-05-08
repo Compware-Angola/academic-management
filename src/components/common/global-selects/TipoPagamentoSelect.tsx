@@ -1,4 +1,5 @@
-import { useQueryFormasPagamento } from "@/hooks/formas-pagamento/use-query-formas-pagamento";
+
+import { useQueryFormaPagamento } from "@/hooks/financa/use-forma-pagamento";
 import { FormSelect } from "../FormSelect";
 
 interface FormasPagamentoSelectProps {
@@ -12,7 +13,7 @@ const FormaPagamentoSelect = ({
   disabled,
 }: FormasPagamentoSelectProps) => {
   const { data: formas, isLoading: isLoadingFormas } =
-    useQueryFormasPagamento();
+    useQueryFormaPagamento({status: 1});
   return (
     <>
       <FormSelect
