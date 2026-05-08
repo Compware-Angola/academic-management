@@ -7,35 +7,51 @@ export function NotasPagamentoEstatisticas() {
 
             <ChartAreaInteractivePagamentos
                 chartConfig={{
-                    qt_diurno: {
-                        label: "Laboral",
+                    deposito: {
+                        label: "Depósito",
                         color: "var(--chart-1)",
                     },
-                    qt_noturno: {
-                        label: "Pós-Laboral",
+                    transferencia: {
+                        label: "Transferência",
                         color: "var(--chart-2)",
+                    },
+                    multicaixa: {
+                        label: "Multicaixa",
+                        color: "var(--chart-3)",
+                    },
+                    numerario: {
+                        label: "Numerário",
+                        color: "var(--chart-4)",
                     },
                 }}
                 data={[
                     {
-                        data: "02/09/2025",
-                        qt_diurno: 16,
-                        qt_noturno: 2,
+                        data: "27/01/2020",
+                        deposito: 8,
+                        transferencia: 0,
+                        multicaixa: 0,
+                        numerario: 0,
                     },
+
                     {
-                        data: "02/10/2025",
-                        qt_diurno: 21,
-                        qt_noturno: 2,
+                        data: "28/01/2020",
+                        deposito: 8,
+                        transferencia: 0,
+                        multicaixa: 0,
+                        numerario: 0,
                     },
+
                     {
-                        data: "03/09/2025",
-                        qt_diurno: 126,
-                        qt_noturno: 17,
+                        data: "29/01/2020",
+                        deposito: 8,
+                        transferencia: 1,
+                        multicaixa: 2,
+                        numerario: 5,
                     },
                 ]}
                 isLoading={false}
                 title="Estatísticas de Pagamentos"
-                description="Pagamentos por data"
+                description="Pagamentos agrupados por forma de pagamento"
             />
         </div>
     );
