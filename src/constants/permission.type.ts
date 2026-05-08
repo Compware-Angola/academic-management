@@ -246,13 +246,18 @@ export enum PermissionType {
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
   LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL",
   LIQUIDAR_PAGAMENTO = "LIQUIDAR_FACTURA",
-  INSENCAO_COLISAO_CURSO_ESTUDANTE = "INSENCAO_COLISAO_CURSO_ESTUDANTE"
+  INSENCAO_COLISAO_CURSO_ESTUDANTE = "INSENCAO_COLISAO_CURSO_ESTUDANTE",
+  FORMA_PAGAMENTO = "FORMA_PAGAMENTO",
 }
 
 export const PermissionTypeDetails = {
+  FORMA_PAGAMENTO: {
+    designacao: "Forma de Pagamento",
+    sigla: "frm_pag_mfe",
+  },
   INSENCAO_COLISAO_CURSO_ESTUDANTE: {
     designacao: "Insencao de Colisão por Curso e Estudante",
-    sigla: "cls_scl"
+    sigla: "cls_scl",
   },
   PROVA: {
     designacao: "Lista de Provas",
@@ -290,7 +295,10 @@ export const PermissionTypeDetails = {
   DELETAR_FACTURA: { designacao: "Deletar Factura", sigla: "maf_del_factura" },
   AULAS_AGENDADAS: { designacao: "Aulas Agendadas", sigla: "mgh_aa" },
 
-  REACTIVAR_FACTURA: { designacao: "Reactivar Factura", sigla: "maf_react_factura" },
+  REACTIVAR_FACTURA: {
+    designacao: "Reactivar Factura",
+    sigla: "maf_react_factura",
+  },
   VALIDACAO_LANCAMENTO_PAUTA: {
     designacao: "Validação de lançamento de pauta",
     sigla: "valid_lanc_pauta",
@@ -613,7 +621,6 @@ export const PermissionTypeDetails = {
   },
   ALTERAR_PROVA: { designacao: "Alterar Prova", sigla: "mgea_a_ap" },
 
-
   LANCAMENTO_NOTAS_MPGS: {
     designacao: "Lançamento de Notas",
     sigla: "mpgs_ln",
@@ -831,7 +838,7 @@ export const PermissionTypeDetails = {
   PARAMETROS_MGD: { designacao: "parametros", sigla: "mgd_p" },
   DESEMPENHO_DOCENTE: {
     designacao: "desempenho docente",
-    sigla: "desempenho_docente"
+    sigla: "desempenho_docente",
   },
   LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO: {
     designacao: "Listar Estudantes Sem Inscrições No Curso",
@@ -1089,7 +1096,6 @@ export const PermissionTypeDetails = {
     sigla: "controle_lancamento",
   },
 
-
   SUMARIO_PARAMETROS: {
     designacao: "Parâmetros do sumário",
     sigla: "sumario_parametros",
@@ -1098,9 +1104,7 @@ export const PermissionTypeDetails = {
   LISTAR_SUMARIO: {
     designacao: "Listar sumários",
     sigla: "listar_sumario",
-  }
-
-
+  },
 } as const;
 
 export type PermissionDetail = {
