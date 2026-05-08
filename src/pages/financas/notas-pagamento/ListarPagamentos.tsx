@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -30,9 +30,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Home,
   Search,
-  RefreshCw,
-  FileDown,
-  Printer,
   Eye,
   Loader2,
 } from "lucide-react";
@@ -46,6 +43,10 @@ import { Label } from "@/components/ui/label";
 import { parseFilter } from "@/util/parse-filter";
 import { ListaPagamentoModal } from "./components/ListaPagamentoModal";
 import { useQueryServicosPagosAluno } from "@/hooks/financas/pagamentos-mensais/use-query-servicos-pagos-aluno";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 const getStatusPagamentoBadge = (status: string) => {
   switch (status) {
@@ -67,6 +68,13 @@ type SearchByType =
   | "nome"
   | "n_operacao_bancaria"
   | "n_operacao_bancaria2";
+
+const searchOptions = [
+  { id: "codigoMatricula", label: "Código da Matrícula" },
+  { id: "n_operacao_bancaria", label: "Número de Operacão bancária" },
+  { id: "n_operacao_bancaria2", label: "Número de Operacão bancária 2" },
+  { id: "nome", label: "Nome do Aluno" },
+];
 
 export default function ListarPagamentos() {
 
@@ -104,12 +112,6 @@ const [servicosParams, setServicosParams] = useState({
     n_operacao_bancaria: "n_operacao_bancaria",
     n_operacao_bancaria2: "n_operacao_bancaria2",
   };
-  const searchOptions = [
-    { id: "codigoMatricula", label: "Código da Matrícula" },
-    { id: "n_operacao_bancaria", label: "Número de Operacão bancária" },
-    { id: "n_operacao_bancaria2", label: "Número de Operacão bancária 2" },
-    { id: "nome", label: "Nome do Aluno" },
-  ];
   const searchParams = searchApplied
     ? {
         [searchFieldMap[searchByApplied]]:
@@ -173,6 +175,129 @@ const {
   const payments = paymentResponse?.data || [];
   const total = paymentResponse?.total;
   const totalPages = paymentResponse?.totalPages;
+
+  const pdfData = useMemo(() => {
+    if (!payments.length) return null;
+
+    const searchLabel =
+      searchOptions.find((option) => option.id === searchByApplied)?.label ??
+      searchByApplied;
+
+    return {
+      filtros:
+        [
+          filtersApplied.anoLectivo &&
+            `Ano letivo: ${filtersApplied.anoLectivo}`,
+          filtersApplied.factura && `Factura: ${filtersApplied.factura}`,
+          filtersApplied.estado &&
+            `Estado: ${
+              filtersApplied.estado === "all"
+                ? "Todos"
+                : filtersApplied.estado === "1"
+                  ? "Concluido"
+                  : "Pendente"
+            }`,
+          searchApplied && `${searchLabel}: ${searchApplied}`,
+        ]
+          .filter(Boolean)
+          .join(" | ") || "Sem filtros",
+      total: total ?? payments.length,
+      rows: payments.map((pag) => ({
+        codigo: pag?.codigo_pagamento,
+        factura: pag?.codigo_factura,
+        curso: pag?.curso,
+        matricula: pag?.codigo_matricula,
+        estudante: pag?.nome_completo,
+        operacao: pag?.operacao_bancaria || "-",
+        segundaOperacao: pag?.seg_operacao_bancaria || "-",
+        formaPagamento: pag?.forma_pagamento || "-",
+        caixa: pag?.caixa || "-",
+        canal: pag?.canal || "-",
+        valorTotal: formatNumber(pag?.totalgeral ?? 0),
+        valorDepositado: formatNumber(pag?.valor_depositado ?? 0),
+        dataBanco: formatarData(pag?.databanco),
+        dataRegistro: formatarData(pag?.data_registro),
+        estado: pag?.status_pagamento,
+        tipoPagamento: pag?.tipo_pagamento,
+      })),
+    };
+  }, [
+    filtersApplied,
+    payments,
+    searchApplied,
+    searchByApplied,
+    searchOptions,
+    total,
+  ]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Listagem de Pagamentos"
+      subtitle="Pagamentos registados no sistema"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "codigo", label: "Código", width: "6%" },
+          { key: "factura", label: "Factura", width: "7%" },
+          { key: "matricula", label: "Matrícula", width: "8%" },
+          { key: "estudante", label: "Estudante", width: "16%" },
+          { key: "operacao", label: "Operação", width: "10%" },
+          { key: "formaPagamento", label: "Forma", width: "9%" },
+          { key: "caixa", label: "Caixa", width: "7%" },
+          { key: "valorTotal", label: "Total", width: "8%" },
+          { key: "valorDepositado", label: "Depositado", width: "8%" },
+          { key: "dataBanco", label: "Data Banco", width: "8%" },
+          { key: "estado", label: "Estado", width: "7%" },
+          { key: "tipoPagamento", label: "Tipo", width: "6%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Listagem de Pagamentos",
+        subtitle: "Pagamentos registados no sistema",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "codigo", label: "Código", width: 12 },
+            { key: "factura", label: "Factura", width: 12 },
+            { key: "curso", label: "Curso", width: 28 },
+            { key: "matricula", label: "Código Matrícula", width: 18 },
+            { key: "estudante", label: "Estudante", width: 35 },
+            { key: "operacao", label: "Nº Operação Bancária", width: 26 },
+            { key: "segundaOperacao", label: "Nº 2ª Operação Bancária", width: 28 },
+            { key: "formaPagamento", label: "Forma de Pagamento", width: 24 },
+            { key: "caixa", label: "Caixa", width: 15 },
+            { key: "canal", label: "Canal", width: 15 },
+            { key: "valorTotal", label: "Valor Total", width: 18 },
+            { key: "valorDepositado", label: "Valor Depositado", width: 20 },
+            { key: "dataBanco", label: "Data Banco", width: 22 },
+            { key: "dataRegistro", label: "Data Registro", width: 22 },
+            { key: "estado", label: "Status Pgto.", width: 18 },
+            { key: "tipoPagamento", label: "Tipo de Pagamento", width: 22 },
+          ],
+          rows: pdfData.rows,
+          headerBackground: "#0D1B48",
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
+
+  const baseFileName = `Listagem_Pagamentos_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
 
   return (
     <div className="p-6 space-y-6">
@@ -305,16 +430,21 @@ const {
       </Card>
 
       {/* Actions */}
-      <div className="flex gap-2">
-        <Button variant="outline" className="gap-2">
-          <FileDown className="h-4 w-4" />
-          Exportar Excel
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Printer className="h-4 w-4" />
-          Imprimir
-        </Button>
-      </div>
+      {pdfContent && excelProps && (
+        <div className="flex flex-wrap gap-2">
+          <PDFActions
+            document={pdfContent}
+            fileName={`${baseFileName}.pdf`}
+            showDownload
+            showPrint
+          />
+          <ExcelActions
+            excelProps={excelProps}
+            fileName={`${baseFileName}.xlsx`}
+            showDownload
+          />
+        </div>
+      )}
 
       {/* Table */}
       <Card>

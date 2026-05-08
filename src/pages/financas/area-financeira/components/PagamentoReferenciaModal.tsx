@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { useMemo } from "react";
 import {
   User,
   GraduationCap,
@@ -27,6 +28,10 @@ import { ReferenciasPagamentoItem } from "@/services/financas/area-financeira/fe
 import { PagamentoReferenciaStatus } from "./PagamentoReferenciaStastus";
 import { formatarData } from "@/util/date-formate";
 import { useQueryFacturaItens } from "@/hooks/horario/use-query-invoice";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 interface PagamentoReferenciaModalProps {
   selectedPagamento: ReferenciasPagamentoItem;
@@ -40,16 +45,123 @@ export const PagamentoReferenciaModal = ({
 }: PagamentoReferenciaModalProps) => {
   const { data: facturaItens, isLoading: isLoadingFacturaItens } =
     useQueryFacturaItens(selectedPagamento?.codigo_factura);
+
+  const exportData = useMemo(() => {
+    if (!selectedPagamento) return null;
+
+    const serviceRows =
+      facturaItens?.data?.map((item) => ({
+        descricao: [item?.descricaoservico, item?.mesdescricao]
+          .filter(Boolean)
+          .join(" "),
+        factura: selectedPagamento.codigo_factura,
+        valor: item?.preco ?? "-",
+        quantidade: item?.quantidade ?? "-",
+      })) ?? [];
+
+    return {
+      infoSections: [
+        {
+          title: "Dados do Estudante",
+          content: [
+            `Código da Matrícula: ${selectedPagamento.codigo_matricula}`,
+            `Nome do Estudante: ${selectedPagamento.nome}`,
+            `Curso: ${selectedPagamento.curso}`,
+            `Campus: ${selectedPagamento.polo}`,
+            `Contacto: ${selectedPagamento.contacto || "-"}`,
+          ],
+        },
+        {
+          title: "Detalhes do Pagamento",
+          content: [
+            `Referência: ${selectedPagamento.referencia}`,
+            `Factura: ${selectedPagamento.codigo_factura}`,
+            `Entidade: ${selectedPagamento.entidade}`,
+            `Valor Total: ${selectedPagamento.preco}`,
+            `Estado: ${selectedPagamento.estado}`,
+            `Data de Pagamento: ${formatarData(selectedPagamento.data_pagamento)}`,
+            `Data de Registo: ${formatarData(selectedPagamento.data_inicio)}`,
+            `Data de Validação: ${formatarData(selectedPagamento.data_final)}`,
+          ],
+        },
+      ],
+      rows: serviceRows,
+    };
+  }, [facturaItens?.data, selectedPagamento]);
+
+  const pdfContent = exportData ? (
+    <GenericPDFDocument
+      documentTitle="Detalhes do Pagamento por Referência"
+      subtitle={`Referência ${selectedPagamento?.referencia}`}
+      infoSections={exportData.infoSections}
+      mainTable={{
+        headers: [
+          { key: "descricao", label: "Descrição", width: "40%" },
+          { key: "factura", label: "Factura Referente", width: "20%" },
+          { key: "valor", label: "Valor", width: "20%" },
+          { key: "quantidade", label: "Quantidade", width: "20%" },
+        ],
+        rows: exportData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = exportData
+    ? {
+        documentTitle: "Detalhes do Pagamento por Referência",
+        subtitle: `Referência ${selectedPagamento?.referencia}`,
+        infoSections: exportData.infoSections,
+        mainTable: {
+          headers: [
+            { key: "descricao", label: "Descrição", width: 40 },
+            { key: "factura", label: "Factura Referente", width: 20 },
+            { key: "valor", label: "Valor", width: 18 },
+            { key: "quantidade", label: "Quantidade", width: 15 },
+          ],
+          rows: exportData.rows,
+          headerBackground: "#0D1B48",
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
+
+  const baseFileName = selectedPagamento
+    ? `Pagamento_Referencia_${selectedPagamento.referencia}_${new Date()
+        .toISOString()
+        .slice(0, 10)}`
+    : "Pagamento_Referencia";
+
   return (
     <>
       {/* Modal de Detalhes */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-5xl! max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <FileText className="h-5 w-5" />
-              Detalhes do Pagamento - {selectedPagamento?.referencia}
-            </DialogTitle>
+          <DialogHeader className="gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <FileText className="h-5 w-5" />
+                Detalhes do Pagamento - {selectedPagamento?.referencia}
+              </DialogTitle>
+
+              {pdfContent && excelProps && !isLoadingFacturaItens && (
+                <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
+                  <PDFActions
+                    document={pdfContent}
+                    fileName={`${baseFileName}.pdf`}
+                    showDownload
+                    showPrint
+                  />
+                  <ExcelActions
+                    excelProps={excelProps}
+                    fileName={`${baseFileName}.xlsx`}
+                    showDownload
+                  />
+                </div>
+              )}
+            </div>
           </DialogHeader>
 
           {selectedPagamento && (
@@ -169,7 +281,7 @@ export const PagamentoReferenciaModal = ({
                   </TableHeader>
                   <TableBody>
                     {facturaItens?.data?.map((item) => (
-                      <TableRow>
+                      <TableRow key={item.codigoitem}>
                         <TableCell className="font-medium">
                           {item?.descricaoservico} {item?.mesdescricao}
                         </TableCell>
