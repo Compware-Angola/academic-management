@@ -104,29 +104,29 @@ export function PagamentosTable({
                             payments.map((pag) => (
                                 <TableRow key={pag.codigo_pagamento}>
                                     <TableCell>{pag?.codigo_pagamento}</TableCell>
-                                    <TableCell>{pag?.codigo_factura}</TableCell>
+                                    <TableCell>{pag?.codigo_factura || "---"}</TableCell>
                                     <TableCell>{pag?.curso}</TableCell>
                                     <TableCell>{pag?.codigo_matricula}</TableCell>
                                     <TableCell>
-                                        <p className="font-medium text-sm">{pag?.nome_completo}</p>
+                                        <p className="font-medium text-sm">{pag?.nome_completo || "---"}</p>
                                     </TableCell>
                                     <TableCell className="font-mono font-medium text-sm">
-                                        {pag?.operacao_bancaria}
+                                        {pag?.operacao_bancaria || "---"}
                                     </TableCell>
                                     <TableCell className="font-mono font-medium text-sm">
-                                        {pag?.seg_operacao_bancaria}
+                                        {pag?.seg_operacao_bancaria || "---"}
                                     </TableCell>
-                                    <TableCell className="text-sm">{pag?.forma_pagamento}</TableCell>
-                                    <TableCell className="font-mono text-sm">{pag?.caixa}</TableCell>
-                                    <TableCell className="text-sm">{pag?.canal}</TableCell>
-                                    <TableCell className="text-sm">{formatNumber(pag?.totalgeral)}</TableCell>
+                                    <TableCell className="text-sm">{pag?.forma_pagamento || "---"}</TableCell>
+                                    <TableCell className="font-mono text-sm">{pag?.caixa || "---"}</TableCell>
+                                    <TableCell className="text-sm">{pag?.canal || "---"}</TableCell>
+                                    <TableCell className="text-sm">{formatNumber(pag?.totalgeral || 0)}</TableCell>
                                     <TableCell className="font-medium font-mono text-sm">
-                                        {formatNumber(pag?.valor_depositado)}
+                                        {formatNumber(pag?.valor_depositado || 0)}
                                     </TableCell>
-                                    <TableCell className="text-sm">{formatarData(pag?.databanco)}</TableCell>
-                                    <TableCell className="text-sm">{formatarData(pag?.data_registro)}</TableCell>
-                                    <TableCell>{getStatusPagamentoBadge(pag?.status_pagamento)}</TableCell>
-                                    <TableCell>{pag?.tipo_pagamento}</TableCell>
+                                    <TableCell className="text-sm">{formatarData(pag?.databanco || "")}</TableCell>
+                                    <TableCell className="text-sm">{formatarData(pag?.data_registro || "")}</TableCell>
+                                    <TableCell>{getStatusPagamentoBadge(pag?.status_pagamento || "")}</TableCell>
+                                    <TableCell>{pag?.tipo_pagamento || "---"}</TableCell>
                                     <TableCell>
                                         <Button
                                             size="sm"
