@@ -74,6 +74,7 @@ export function PagamentosTable({
                             <TableHead>Nº da Operação bancaria</TableHead>
                             <TableHead>Nº da 2º Operação bancaria</TableHead>
                             <TableHead>Forma de Pagamento</TableHead>
+                            <TableHead>Nome Operador</TableHead>
                             <TableHead>Caixa</TableHead>
                             <TableHead>Canal</TableHead>
                             <TableHead>Valor Total</TableHead>
@@ -117,7 +118,7 @@ export function PagamentosTable({
                                         {pag?.seg_operacao_bancaria || "---"}
                                     </TableCell>
                                     <TableCell className="text-sm">{pag?.forma_pagamento || "---"}</TableCell>
-                                    <TableCell className="font-mono text-sm">{pag?.caixa || "---"}</TableCell>
+                                    <TableCell className="font-mono text-sm">{pag?.nome_operador || "---"}</TableCell>
                                     <TableCell className="text-sm">{pag?.canal || "---"}</TableCell>
                                     <TableCell className="text-sm">{formatNumber(pag?.totalgeral || 0)}</TableCell>
                                     <TableCell className="font-medium font-mono text-sm">
