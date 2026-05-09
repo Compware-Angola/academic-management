@@ -66,24 +66,24 @@ export function PagamentosTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="text-left">Código</TableHead>
-                            <TableHead className="text-left">Factura</TableHead>
-                            <TableHead className="text-left">Curso</TableHead>
-                            <TableHead className="text-left">Código Matrícula</TableHead>
-                            <TableHead className="text-left">Estudante</TableHead>
-                            <TableHead className="text-left">Nº Operação Bancária</TableHead>
-                            <TableHead className="text-left">Nº 2ª Operação Bancária</TableHead>
-                            <TableHead className="text-left">Forma de Pagamento</TableHead>
-                            <TableHead className="text-left">Nome Operador</TableHead>
-                            <TableHead className="text-left">Caixa</TableHead>
-                            <TableHead className="text-left">Canal</TableHead>
-                            <TableHead className="text-right">Valor Total</TableHead>
-                            <TableHead className="text-right">Valor Depositado</TableHead>
-                            <TableHead className="text-center">Data Banco</TableHead>
-                            <TableHead className="text-center">Data Registo</TableHead>
-                            <TableHead className="text-center">Status Pgto.</TableHead>
-                            <TableHead className="text-left">Tipo de Pagamento</TableHead>
-                            <TableHead className="text-center">Ações</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Código</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Factura</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Curso</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Código Matrícula</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Estudante</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Nº Operação Bancária</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Nº 2ª Operação Bancária</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Forma de Pagamento</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Nome Operador</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Caixa</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Canal</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">Valor Total</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">Valor Depositado</TableHead>
+                            <TableHead className="text-center whitespace-nowrap">Data Banco</TableHead>
+                            <TableHead className="text-center whitespace-nowrap">Data Registo</TableHead>
+                            <TableHead className="text-center whitespace-nowrap">Status Pgto.</TableHead>
+                            <TableHead className="text-left whitespace-nowrap">Tipo de Pagamento</TableHead>
+                            <TableHead className="text-center whitespace-nowrap">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
 
@@ -111,53 +111,53 @@ export function PagamentosTable({
                         ) : (
                             payments.map((pag) => (
                                 <TableRow key={pag.codigo_pagamento}>
-                                    <TableCell>{pag?.codigo_pagamento}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{pag?.codigo_pagamento}</TableCell>
 
-                                    <TableCell>
+                                    <TableCell className="whitespace-nowrap">
                                         {pag?.codigo_factura || "---"}
                                     </TableCell>
 
-                                    <TableCell>{pag?.curso || "---"}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{pag?.curso || "---"}</TableCell>
 
-                                    <TableCell>
+                                    <TableCell className="whitespace-nowrap">
                                         {pag?.codigo_matricula || "---"}
                                     </TableCell>
 
-                                    <TableCell>
+                                    <TableCell className="whitespace-nowrap">
                                         <p className="text-sm font-medium whitespace-nowrap">
                                             {pag?.nome_completo || "---"}
                                         </p>
                                     </TableCell>
 
-                                    <TableCell className="font-mono text-sm">
+                                    <TableCell className="font-mono text-sm whitespace-nowrap">
                                         {pag?.operacao_bancaria || "---"}
                                     </TableCell>
 
-                                    <TableCell className="font-mono text-sm">
+                                    <TableCell className="font-mono text-sm whitespace-nowrap">
                                         {pag?.seg_operacao_bancaria || "---"}
                                     </TableCell>
 
-                                    <TableCell className="text-sm">
+                                    <TableCell className="text-sm whitespace-nowrap">
                                         {pag?.forma_pagamento || "---"}
                                     </TableCell>
 
-                                    <TableCell className="text-sm">
+                                    <TableCell className="text-sm whitespace-nowrap">
                                         {pag?.nome_operador || "---"}
                                     </TableCell>
 
-                                    <TableCell className="text-sm">
+                                    <TableCell className="text-sm whitespace-nowrap">
                                         {pag?.caixa || "---"}
                                     </TableCell>
 
-                                    <TableCell className="text-sm">
+                                    <TableCell className="text-sm whitespace-nowrap">
                                         {pag?.canal || "---"}
                                     </TableCell>
 
-                                    <TableCell className="text-right font-medium">
+                                    <TableCell className="text-right font-medium whitespace-nowrap">
                                         {formatNumber(pag?.totalgeral || 0)}
                                     </TableCell>
 
-                                    <TableCell className="text-right font-medium font-mono">
+                                    <TableCell className="text-right font-medium whitespace-nowrap">
                                         {formatNumber(pag?.valor_depositado || 0)}
                                     </TableCell>
 
@@ -175,11 +175,11 @@ export function PagamentosTable({
                                         )}
                                     </TableCell>
 
-                                    <TableCell className="text-sm">
+                                    <TableCell className="text-sm whitespace-nowrap">
                                         {pag?.tipo_pagamento || "---"}
                                     </TableCell>
 
-                                    <TableCell className="text-center">
+                                    <TableCell className="text-center whitespace-nowrap">
                                         <Button
                                             size="sm"
                                             variant="outline"

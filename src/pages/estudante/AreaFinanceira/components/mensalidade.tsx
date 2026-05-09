@@ -31,12 +31,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
-import { useCreateInvoice } from "@/hooks/financas/invoice/use-create-mutation";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
 
 type SelectedPayment = {
   mesTempId: number;
@@ -108,17 +103,20 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     });
   };
 
-  const { data: monthResponse, isLoading: isMonthLoading } =
-    useQueryFinanceMonthlyFee({
-      academicYear: anoLetivo,
-      enrollmentCode: codigoMatricula.toString(),
-      status: "all",
-      limit: 100,
-      page: 1,
-    });
+  const {
+    data: monthResponse,
+    isLoading: isMonthLoading,
+    isFetching: isMonthFetching,
+  } = useQueryFinanceMonthlyFee({
+    academicYear: anoLetivo,
+    enrollmentCode: codigoMatricula.toString(),
+    status: "all",
+    limit: 100,
+    page: 1,
+  });
 
   const { data: student } = useStudentDetail(codigoMatricula);
-  const { mutate: criarFactura, isPending } = useCreateInvoice();
+  const { mutate: criarFactura, isPending } = useCreateInvoiceNoJob();
 
   const { data: monthValueResponse, isLoading: isMonthValueLoading } =
     useQueryMonthlyFeesValue({
@@ -171,10 +169,11 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
             <p className="text-muted-foreground mt-1">
               Histórico de pagamentos, mensalidades pendentes e recibos
             </p>
-            {!isMonthValueLoading}{" "}
+            {!isMonthValueLoading}
             {
-              <p className="text-muted-foreground text-base mt-1">
-                {monthFee?.descricao ?? "-"} {monthFee?.preco ?? "-"}
+              <p className="text-base mt-1 text-destructive font-medium">
+                {monthFee?.descricao ?? "-"}{" "}
+                <span className="font-bold">{monthFee?.preco ?? "-"} kz</span>
               </p>
             }
           </div>
@@ -433,7 +432,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
           onClick={() => handleCreateInvoice()}
           disabled={selectedPayments.size == 0}
         >
-          {isPending ? (
+          {isPending || isMonthFetching ? (
             <Loader2 className="animate-spin" />
           ) : (
             <Receipt className="h-5 w-5" />
