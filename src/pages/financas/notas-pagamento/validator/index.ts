@@ -48,12 +48,6 @@ export function validarPagamento(
       .refine((val) => val >= valorAPagar, {
         message: `O valor depositado não pode ser menor que o valor a pagar (${valorAPagar})`,
       }),
-    contaMovimentada: z
-      .number({
-        required_error: "Conta movimentada é obrigatória",
-        invalid_type_error: "Conta movimentada deve ser um número",
-      })
-      .int("Conta movimentada deve ser um número inteiro"),
 
     dataRegisto: z
       .string({
