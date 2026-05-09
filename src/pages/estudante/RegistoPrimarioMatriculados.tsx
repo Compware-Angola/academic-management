@@ -186,7 +186,7 @@ export default function RegistoPrimarioMatriculados() {
             },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -194,47 +194,47 @@ export default function RegistoPrimarioMatriculados() {
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Registo Primário de Matriculados",
-          subtitle: "Listagem de estudantes matriculados",
-          infoSections: [
+        documentTitle: "Registo Primário de Matriculados",
+        subtitle: "Listagem de estudantes matriculados",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${data?.total ?? exportRows.length}`,
+          },
+        ],
+        mainTable: {
+          headers: [
+            { key: "nome", label: "Nome", width: 35 },
+            { key: "numero_bilhete", label: "Nº Bilhete", width: 18 },
+            { key: "sexo", label: "Sexo", width: 10 },
+            { key: "idade", label: "Idade", width: 10 },
+            { key: "data_nascimento", label: "Nascimento", width: 16 },
+            { key: "provincia", label: "Província", width: 18 },
+            { key: "municipio", label: "Município", width: 18 },
+            { key: "pais_origem", label: "País", width: 18 },
+            { key: "periodo_estudo", label: "Período", width: 15 },
+            { key: "unidade_organica", label: "Unidade Orgânica", width: 25 },
             {
-              title: "Resumo",
-              content: `Total de registos: ${data?.total ?? exportRows.length}`,
+              key: "nome_curso_inscrito_ensino_superior",
+              label: "Curso",
+              width: 28,
+            },
+            { key: "ano_frequencia", label: "Ano Frequência", width: 14 },
+            {
+              key: "situacao_academica",
+              label: "Situação Académica",
+              width: 20,
+            },
+            {
+              key: "aproveitamento_anual",
+              label: "Aproveitamento",
+              width: 16,
             },
           ],
-          mainTable: {
-            headers: [
-              { key: "nome", label: "Nome", width: 35 },
-              { key: "numero_bilhete", label: "Nº Bilhete", width: 18 },
-              { key: "sexo", label: "Sexo", width: 10 },
-              { key: "idade", label: "Idade", width: 10 },
-              { key: "data_nascimento", label: "Nascimento", width: 16 },
-              { key: "provincia", label: "Província", width: 18 },
-              { key: "municipio", label: "Município", width: 18 },
-              { key: "pais_origem", label: "País", width: 18 },
-              { key: "periodo_estudo", label: "Período", width: 15 },
-              { key: "unidade_organica", label: "Unidade Orgânica", width: 25 },
-              {
-                key: "nome_curso_inscrito_ensino_superior",
-                label: "Curso",
-                width: 28,
-              },
-              { key: "ano_frequencia", label: "Ano Frequência", width: 14 },
-              {
-                key: "situacao_academica",
-                label: "Situação Académica",
-                width: 20,
-              },
-              {
-                key: "aproveitamento_anual",
-                label: "Aproveitamento",
-                width: 16,
-              },
-            ],
-            rows: exportRows,
-          },
-          primaryColor: "#1e40af",
-        }
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [

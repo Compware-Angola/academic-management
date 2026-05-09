@@ -150,7 +150,7 @@ export default function RegistoPrimarioExamesAcesso() {
             { key: "trabalhador", label: "Trabalhador", width: "10%" },
             { key: "unidade_organica", label: "Unidade Orgânica", width: "14%" },
             { key: "necessidade_especial", label: "Necessidade", width: "12%" },
-        
+
             {
               key: "estudante_matriculado_primeira_vez",
               label: "1ª Vez",
@@ -159,7 +159,7 @@ export default function RegistoPrimarioExamesAcesso() {
             { key: "admissao", label: "Admissão", width: "10%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -167,40 +167,40 @@ export default function RegistoPrimarioExamesAcesso() {
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Registo Primário de Exames de Acesso",
-          subtitle: "Listagem de candidatos dos exames de acesso",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${data?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "nome", label: "Nome", width: 35 },
-              { key: "numero_bilhete", label: "Nº Bilhete", width: 20 },
-              { key: "sexo", label: "Sexo", width: 10 },
-              { key: "idade", label: "Idade", width: 10 },
-              { key: "data_nascimento", label: "Nascimento", width: 16 },
-              { key: "provincia_residencia", label: "Província", width: 20 },
-              { key: "pais_origem", label: "País", width: 20 },
-              { key: "municipio", label: "Município", width: 20 },
-              { key: "periodo_estudo", label: "Período", width: 15 },
-              { key: "curso", label: "Curso", width: 25 },
-              { key: "nota_exame_acesso", label: "Nota Exame", width: 15 },
-              { key: "escola_ensino_medio", label: "Escola", width: 25 },
-              { key: "trabalhador", label: "Trabalhador", width: 15 },
-              { key: "unidade_organica", label: "Unidade Orgânica", width: 25 },
-              { key: "necessidade_especial", label: "Necessidade", width: 20 },
-              { key: "proveniencia", label: "Proveniência", width: 20 },
-              { key: "curso_ensino_medio", label: "Curso Ensino Médio", width: 25 },
-              { key: "estudante_matriculado_primeira_vez", label: "1ª Vez", width: 15 },
-              { key: "admissao", label: "Admissão", width: 12 },
-            ],
-            rows: exportRows,
+        documentTitle: "Registo Primário de Exames de Acesso",
+        subtitle: "Listagem de candidatos dos exames de acesso",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${data?.total ?? exportRows.length}`,
           },
-          primaryColor: "#1e40af",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "nome", label: "Nome", width: 35 },
+            { key: "numero_bilhete", label: "Nº Bilhete", width: 20 },
+            { key: "sexo", label: "Sexo", width: 10 },
+            { key: "idade", label: "Idade", width: 10 },
+            { key: "data_nascimento", label: "Nascimento", width: 16 },
+            { key: "provincia_residencia", label: "Província", width: 20 },
+            { key: "pais_origem", label: "País", width: 20 },
+            { key: "municipio", label: "Município", width: 20 },
+            { key: "periodo_estudo", label: "Período", width: 15 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "nota_exame_acesso", label: "Nota Exame", width: 15 },
+            { key: "escola_ensino_medio", label: "Escola", width: 25 },
+            { key: "trabalhador", label: "Trabalhador", width: 15 },
+            { key: "unidade_organica", label: "Unidade Orgânica", width: 25 },
+            { key: "necessidade_especial", label: "Necessidade", width: 20 },
+            { key: "proveniencia", label: "Proveniência", width: 20 },
+            { key: "curso_ensino_medio", label: "Curso Ensino Médio", width: 25 },
+            { key: "estudante_matriculado_primeira_vez", label: "1ª Vez", width: 15 },
+            { key: "admissao", label: "Admissão", width: 12 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
@@ -228,25 +228,25 @@ export default function RegistoPrimarioExamesAcesso() {
 
     { header: "Unidade Orgânica", accessor: "unidade_organica" },
     { header: "Turno de Estudo", accessor: "periodo_estudo" },
-    
-    
+
+
     {
       header: "Estudantes Matriculados pela 1ª Vez",
       accessor: "estudante_matriculado_primeira_vez",
     },
     { header: "Admissão", accessor: "admissao" },
     {
-      header: "Necessidade Especial", accessor: "necessidade_especial" ,
+      header: "Necessidade Especial", accessor: "necessidade_especial",
     }
 
   ];
 
   function handleListar() {
-  if (!filters.anoLectivo || !filters.grau || filters.grau === "0") return;
+    if (!filters.anoLectivo || !filters.grau || filters.grau === "0") return;
 
-  setCurrentPage(1);
-  setFiltrosAplicados(filters);
-}
+    setCurrentPage(1);
+    setFiltrosAplicados(filters);
+  }
 
   return (
     <div className="space-y-6">

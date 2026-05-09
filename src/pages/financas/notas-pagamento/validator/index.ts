@@ -1,28 +1,30 @@
 import { z } from "zod";
-
+export const optionalStringSchema = (fieldName: string) =>
+  z.preprocess(
+    (value) => {
+      if (value === "") return undefined;
+      if (value === null) return undefined;
+      return value;
+    },
+    z
+      .string({
+        invalid_type_error: `${fieldName} deve ser texto`,
+      })
+      .optional(),
+  );
 export function validarPagamento(
   formData: any,
   valorAPagar: number,
   valorTotal: number,
 ) {
   const pagamentoSchema = z.object({
-    nOperacaoBancaria: z
-      .string({
-        required_error: "Número de operação bancária é obrigatório",
-        invalid_type_error: "Número de operação deve ser texto",
-      })
-      .nonempty("Número de operação bancária não pode estar vazio"),
+    nOperacaoBancaria: optionalStringSchema("Número de operação bancária"),
 
     observacao: z
       .string({ invalid_type_error: "Observação deve ser texto" })
       .default("Pagamento via Mutue Finanças"),
 
-    dataBanco: z
-      .string({
-        required_error: "Data do banco é obrigatória",
-        invalid_type_error: "Data do banco deve ser texto",
-      })
-      .nonempty("Data do banco não pode estar vazia"),
+    dataBanco: optionalStringSchema("Data do banco"),
 
     codigoPreInscricao: z
       .number({
@@ -102,12 +104,7 @@ export function validarPagamento(
       })
       .int("Caixa deve ser um número inteiro"),
 
-    dataOperacao: z
-      .string({
-        required_error: "Data da operação é obrigatória",
-        invalid_type_error: "Data da operação deve ser texto",
-      })
-      .nonempty("Data da operação não pode estar vazia"),
+    dataOperacao: optionalStringSchema("Data da operação"),
 
     statusMovimento: z
       .number({

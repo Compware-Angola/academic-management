@@ -68,50 +68,50 @@ export default function DiaContent({
   const rows = (data && data.modo !== "MES" ? data.data : []) as EventoRow[];
 
   const exportRows = useMemo(
-  () =>
-    rows.map((r) => ({
-      codigo: r.codigo,
-      hora: `${r.hora_inicio} → ${r.hora_fim}`,
-      ordem: r.ordem_tempo ?? "—",
-      estado:
-        r.estado === 1
-          ? "Pendente"
-          : r.estado === 2
-          ? "Falta"
-          : r.estado === 3
-          ? "Presença"
-          : "—",
-    })),
-  [rows]
-);
+    () =>
+      rows.map((r) => ({
+        codigo: r.codigo,
+        hora: `${r.hora_inicio} → ${r.hora_fim}`,
+        ordem: r.ordem_tempo ?? "—",
+        estado:
+          r.estado === 1
+            ? "Pendente"
+            : r.estado === 2
+              ? "Falta"
+              : r.estado === 3
+                ? "Presença"
+                : "—",
+      })),
+    [rows]
+  );
 
-const pdfContentLocal =
-  exportRows.length > 0 ? (
-    <GenericPDFDocument
-      documentTitle="Controle Geral de Assiduidade por Docente"
-      subtitle="Visão Diária"
-      infoSections={[
-        { title: "Docente", content: docenteLabel || "—" },
-        { title: "Data de Referência", content: dataReferencia || "—" },
-        { title: "Resumo", content: [`Total de aulas: ${exportRows.length}`] },
-      ]}
-      mainTable={{
-        headers: [
-          { key: "codigo", label: "Código", width: "20%" },
-          { key: "hora", label: "Hora", width: "35%" },
-          { key: "ordem", label: "Ordem", width: "20%" },
-          { key: "estado", label: "Estado", width: "25%" },
-        ],
-        rows: exportRows,
-        headerBackground: "#1e40af",
-      }}
-      footerNotice="Documento gerado automaticamente pelo sistema."
-    />
-  ) : null;
+  const pdfContentLocal =
+    exportRows.length > 0 ? (
+      <GenericPDFDocument
+        documentTitle="Controle Geral de Assiduidade por Docente"
+        subtitle="Visão Diária"
+        infoSections={[
+          { title: "Docente", content: docenteLabel || "—" },
+          { title: "Data de Referência", content: dataReferencia || "—" },
+          { title: "Resumo", content: [`Total de aulas: ${exportRows.length}`] },
+        ]}
+        mainTable={{
+          headers: [
+            { key: "codigo", label: "Código", width: "20%" },
+            { key: "hora", label: "Hora", width: "35%" },
+            { key: "ordem", label: "Ordem", width: "20%" },
+            { key: "estado", label: "Estado", width: "25%" },
+          ],
+          rows: exportRows,
+          headerBackground: "#0D1B48",
+        }}
+        footerNotice="Documento gerado automaticamente pelo sistema."
+      />
+    ) : null;
 
-const excelPropsLocal =
-  exportRows.length > 0
-    ? {
+  const excelPropsLocal =
+    exportRows.length > 0
+      ? {
         documentTitle: "Controle Geral de Assiduidade por Docente",
         subtitle: "Visão Diária",
         infoSections: [
@@ -129,30 +129,30 @@ const excelPropsLocal =
           rows: exportRows,
         },
         footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#1e40af",
+        primaryColor: "#0D1B48",
       }
-    : null;
+      : null;
 
-    useEffect(() => {
-  setPdfContent(pdfContentLocal);
-  setExcelProps(excelPropsLocal);
-  setBaseFileName(
-    `controle_docente_dia_${dataReferencia}_${docenteId || "sem_docente"}`
-  );
+  useEffect(() => {
+    setPdfContent(pdfContentLocal);
+    setExcelProps(excelPropsLocal);
+    setBaseFileName(
+      `controle_docente_dia_${dataReferencia}_${docenteId || "sem_docente"}`
+    );
 
-  return () => {
-    setPdfContent(null);
-    setExcelProps(null);
-  };
-}, [
-  pdfContentLocal,
-  excelPropsLocal,
-  dataReferencia,
-  docenteId,
-  setPdfContent,
-  setExcelProps,
-  setBaseFileName,
-]);
+    return () => {
+      setPdfContent(null);
+      setExcelProps(null);
+    };
+  }, [
+    pdfContentLocal,
+    excelPropsLocal,
+    dataReferencia,
+    docenteId,
+    setPdfContent,
+    setExcelProps,
+    setBaseFileName,
+  ]);
 
   if (!canFetch) {
     return (

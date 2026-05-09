@@ -143,7 +143,7 @@ export default function MapaAnualEstudantesFinalistas() {
             { key: "media_final", label: "Média Final", width: "8%" },
           ],
           rows: exportRows,
-          headerBackground: "#1e40af",
+          headerBackground: "#0D1B48",
         }}
       />
     ) : null;
@@ -151,36 +151,36 @@ export default function MapaAnualEstudantesFinalistas() {
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Mapa Anual de Estudantes Finalistas",
-          subtitle: "Listagem de estudantes finalistas",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${data?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "nome", label: "Nome", width: 35 },
-              { key: "numero_bilhete", label: "Nº Bilhete", width: 18 },
-              { key: "genero", label: "Género", width: 12 },
-              { key: "idade", label: "Idade", width: 10 },
-              { key: "data_nascimento", label: "Nascimento", width: 16 },
-              { key: "provincia", label: "Província", width: 18 },
-              { key: "municipio", label: "Município", width: 18 },
-              { key: "pais_origem", label: "País", width: 18 },
-              { key: "periodo_estudo", label: "Período", width: 16 },
-              { key: "unidade_organica", label: "Unidade Orgânica", width: 25 },
-              { key: "curso", label: "Curso", width: 25 },
-              { key: "ano_primeira_matricula", label: "1ª Matrícula", width: 14 },
-              { key: "trabalhador", label: "Trabalhador", width: 14 },
-              { key: "duracao_curso", label: "Duração", width: 12 },
-              { key: "media_final", label: "Média Final", width: 12 },
-            ],
-            rows: exportRows,
+        documentTitle: "Mapa Anual de Estudantes Finalistas",
+        subtitle: "Listagem de estudantes finalistas",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${data?.total ?? exportRows.length}`,
           },
-          primaryColor: "#1e40af",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "nome", label: "Nome", width: 35 },
+            { key: "numero_bilhete", label: "Nº Bilhete", width: 18 },
+            { key: "genero", label: "Género", width: 12 },
+            { key: "idade", label: "Idade", width: 10 },
+            { key: "data_nascimento", label: "Nascimento", width: 16 },
+            { key: "provincia", label: "Província", width: 18 },
+            { key: "municipio", label: "Município", width: 18 },
+            { key: "pais_origem", label: "País", width: 18 },
+            { key: "periodo_estudo", label: "Período", width: 16 },
+            { key: "unidade_organica", label: "Unidade Orgânica", width: 25 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "ano_primeira_matricula", label: "1ª Matrícula", width: 14 },
+            { key: "trabalhador", label: "Trabalhador", width: 14 },
+            { key: "duracao_curso", label: "Duração", width: 12 },
+            { key: "media_final", label: "Média Final", width: 12 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
@@ -303,27 +303,27 @@ export default function MapaAnualEstudantesFinalistas() {
               Listar
             </Button>
 
-            
+
           </div>
         </CardContent>
       </Card>
 
       <div className="space-y">
-              <label className="text-sm font-medium">Pesquisar</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Pesquisar por nome ou nº bilhete"
-                  value={filters.search}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      search: e.target.value,
-                    }))
-                  }
-                  className="pl-9"
-                />
-              </div>
+        <label className="text-sm font-medium">Pesquisar</label>
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Pesquisar por nome ou nº bilhete"
+            value={filters.search}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                search: e.target.value,
+              }))
+            }
+            className="pl-9"
+          />
+        </div>
       </div>
 
       <div className="text-primary font-semibold">

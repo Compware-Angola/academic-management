@@ -35,8 +35,8 @@ function EstadoCard({
     estado === 2
       ? "bg-red-500/10 border-red-500/30 text-red-700"
       : estado === 1
-      ? "bg-amber-500/10 border-amber-500/30 text-amber-700"
-      : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700";
+        ? "bg-amber-500/10 border-amber-500/30 text-amber-700"
+        : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700";
 
   return (
     <div className={cn("rounded-md border px-2 py-1 text-[11px] shadow-sm", cls)}>
@@ -141,52 +141,52 @@ export default function SemanaContent({
   }, [eventos]);
 
   const exportRows = useMemo(
-  () =>
-    eventos.map((ev) => ({
-      dia: ev.dia,
-      horaInicio: ev.hora_inicio,
-      horaFim: ev.hora_fim,
-      ordemTempo: ev.ordem_tempo ?? "—",
-      estado:
-        ev.estado === 1
-          ? "Pendente"
-          : ev.estado === 2
-          ? "Falta"
-          : ev.estado === 3
-          ? "Presença"
-          : "—",
-    })),
-  [eventos]
-);
+    () =>
+      eventos.map((ev) => ({
+        dia: ev.dia,
+        horaInicio: ev.hora_inicio,
+        horaFim: ev.hora_fim,
+        ordemTempo: ev.ordem_tempo ?? "—",
+        estado:
+          ev.estado === 1
+            ? "Pendente"
+            : ev.estado === 2
+              ? "Falta"
+              : ev.estado === 3
+                ? "Presença"
+                : "—",
+      })),
+    [eventos]
+  );
 
-const pdfContentLocal =
-  exportRows.length > 0 ? (
-    <GenericPDFDocument
-      documentTitle="Controle Geral de Assiduidade por Docente"
-      subtitle="Visão Semanal"
-      infoSections={[
-        { title: "Docente", content: docenteLabel || "—" },
-        { title: "Data de Referência", content: dataReferencia || "—" },
-        { title: "Resumo", content: [`Total de eventos: ${exportRows.length}`] },
-      ]}
-      mainTable={{
-        headers: [
-          { key: "dia", label: "Dia", width: "20%" },
-          { key: "horaInicio", label: "Hora Início", width: "15%" },
-          { key: "horaFim", label: "Hora Fim", width: "15%" },
-          { key: "ordemTempo", label: "Ordem", width: "15%" },
-          { key: "estado", label: "Estado", width: "20%" },
-        ],
-        rows: exportRows,
-        headerBackground: "#1e40af",
-      }}
-      footerNotice="Documento gerado automaticamente pelo sistema."
-    />
-  ) : null;
+  const pdfContentLocal =
+    exportRows.length > 0 ? (
+      <GenericPDFDocument
+        documentTitle="Controle Geral de Assiduidade por Docente"
+        subtitle="Visão Semanal"
+        infoSections={[
+          { title: "Docente", content: docenteLabel || "—" },
+          { title: "Data de Referência", content: dataReferencia || "—" },
+          { title: "Resumo", content: [`Total de eventos: ${exportRows.length}`] },
+        ]}
+        mainTable={{
+          headers: [
+            { key: "dia", label: "Dia", width: "20%" },
+            { key: "horaInicio", label: "Hora Início", width: "15%" },
+            { key: "horaFim", label: "Hora Fim", width: "15%" },
+            { key: "ordemTempo", label: "Ordem", width: "15%" },
+            { key: "estado", label: "Estado", width: "20%" },
+          ],
+          rows: exportRows,
+          headerBackground: "#0D1B48",
+        }}
+        footerNotice="Documento gerado automaticamente pelo sistema."
+      />
+    ) : null;
 
-const excelPropsLocal =
-  exportRows.length > 0
-    ? {
+  const excelPropsLocal =
+    exportRows.length > 0
+      ? {
         documentTitle: "Controle Geral de Assiduidade por Docente",
         subtitle: "Visão Semanal",
         infoSections: [
@@ -205,31 +205,31 @@ const excelPropsLocal =
           rows: exportRows,
         },
         footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#1e40af",
+        primaryColor: "#0D1B48",
       }
-    : null;
+      : null;
 
-useEffect(() => {
-  setPdfContent(pdfContentLocal);
-  setExcelProps(excelPropsLocal);
-  setBaseFileName(
-    `controle_docente_semana_${dataReferencia}_${docenteId || "sem_docente"}`
-  );
+  useEffect(() => {
+    setPdfContent(pdfContentLocal);
+    setExcelProps(excelPropsLocal);
+    setBaseFileName(
+      `controle_docente_semana_${dataReferencia}_${docenteId || "sem_docente"}`
+    );
 
-  return () => {
-    setPdfContent(null);
-    setExcelProps(null);
-  };
-}, [
-  pdfContentLocal,
-  excelPropsLocal,
-  dataReferencia,
-  docenteId,
-  setPdfContent,
-  setExcelProps,
-  setBaseFileName,
-]);
-    
+    return () => {
+      setPdfContent(null);
+      setExcelProps(null);
+    };
+  }, [
+    pdfContentLocal,
+    excelPropsLocal,
+    dataReferencia,
+    docenteId,
+    setPdfContent,
+    setExcelProps,
+    setBaseFileName,
+  ]);
+
 
   if (!canFetch) {
     return (
