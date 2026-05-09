@@ -1077,6 +1077,7 @@ export const documentStructure: MenuStructure = {
         {
           title: "Validar Documentos",
           url: "/documentos/validar",
+          permission: [PermissionTypeDetails.VALIDAR_DOCUMENTO.sigla],
         },
       ],
       permission: [],
