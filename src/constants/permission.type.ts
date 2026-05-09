@@ -248,9 +248,14 @@ export enum PermissionType {
   LIQUIDAR_PAGAMENTO = "LIQUIDAR_FACTURA",
   INSENCAO_COLISAO_CURSO_ESTUDANTE = "INSENCAO_COLISAO_CURSO_ESTUDANTE",
   FORMA_PAGAMENTO = "FORMA_PAGAMENTO",
+  VALIDAR_DOCUMENTO = "VALIDAR_DOCUMENTO",
 }
 
 export const PermissionTypeDetails = {
+  VALIDAR_DOCUMENTO: {
+    designacao: "Validar Documento",
+    sigla: "mfe_vd",
+  },
   FORMA_PAGAMENTO: {
     designacao: "Forma de Pagamento",
     sigla: "frm_pag_mfe",
