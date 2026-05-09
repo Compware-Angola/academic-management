@@ -44,7 +44,7 @@ export function AtivarConfirmacao({
       <div className="flex gap-2 flex-col">
         <Button
           onClick={onSubmit}
-          disabled={activeConfirmation.isPending}
+          disabled={activeConfirmation.isPending || !codigoMatricula}
           className="w-full cursor-pointer gap-2 transition-all duration-200"
         >
           {activeConfirmation.isPending ? (
