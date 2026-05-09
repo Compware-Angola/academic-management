@@ -36,6 +36,8 @@ import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-jo
 type SelectedPayment = {
   mesTempId: number;
   valorBase: number;
+  multa: number;
+  desconto: number;
   mesTempDesc: string;
 };
 
@@ -81,11 +83,13 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       0,
     );
   }, [selectedPayments]);
-  const toggleSelectPayment = (
-    mesTempId: number,
-    valorBase: number,
-    mesTempDesc: string,
-  ) => {
+  const toggleSelectPayment = ({
+    mesTempDesc,
+    mesTempId,
+    multa,
+    valorBase,
+    desconto,
+  }: SelectedPayment) => {
     setSelectedPayments((prev) => {
       const next = new Map(prev);
 
@@ -96,6 +100,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
           mesTempId,
           valorBase,
           mesTempDesc,
+          multa,
+          desconto,
         });
       }
 
@@ -134,8 +140,18 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       toast.error("Erro ao gerar factura");
       return;
     }
+    const totalMulta = Array.from(selectedPayments.values()).reduce(
+      (total, payment) => total + payment.multa,
+      0,
+    );
+    const totalDesconto = Array.from(selectedPayments.values()).reduce(
+      (total, payment) => total + payment.desconto,
+      0,
+    );
     const items = Array.from(selectedPayments.values()).map((payment) =>
       createItem({
+        multa: payment.multa,
+        valorDesconto: payment.desconto,
         codigo: monthFee.codigo,
         descricao: `Mensalidade ${payment.mesTempDesc}`,
         preco: payment.valorBase,
@@ -146,6 +162,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       codigoMatricula: codigoMatricula,
       poloid: 1,
       totalApagar: totalSelecionado,
+      totalDesconto: totalDesconto,
+      totalMulta: totalMulta,
       itens: items,
     });
     criarFactura(invoice, {
@@ -236,11 +254,13 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                         disabled={payment.status != 0 || payment.id_item != 0}
                         checked={selectedPayments.has(payment.id)}
                         onCheckedChange={() =>
-                          toggleSelectPayment(
-                            payment.mesId,
-                            Number(payment.valorBase),
-                            payment.month,
-                          )
+                          toggleSelectPayment({
+                            mesTempId: payment.mesId,
+                            mesTempDesc: payment.month,
+                            multa: payment.multa,
+                            valorBase: payment.valorBase,
+                            desconto: payment.desconto,
+                          })
                         }
                         title={
                           payment.id_item != 0
@@ -258,7 +278,9 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right space-y-2">
-                      <p className="font-bold">{payment.valorBase} Kz</p>
+                      <p className="font-bold">
+                        {formatNumber(payment.valorBase)} Kz
+                      </p>
                       {getStatusBadge(payment.status)}
                     </div>
                     {expandedPayment === payment.id ? (
@@ -290,7 +312,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             Desconto
                           </p>
                           <p className="text-sm font-medium text-success">
-                            {payment.desconto}
+                            {formatNumber(payment.desconto)}
                           </p>
                           {payment.tipoDesconto && (
                             <p className="text-xs text-muted-foreground">
@@ -307,7 +329,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                               Multa
                             </p>
                             <p className="text-sm font-medium text-destructive">
-                              {payment.multa}
+                              {formatNumber(payment.multa)}
                             </p>
                           </div>
                         </div>
