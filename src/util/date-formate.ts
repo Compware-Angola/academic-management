@@ -16,3 +16,11 @@ export const formatarData = (dataString: string): string => {
 export const formatDisplay = (data: Date): string => {
   return data.toLocaleDateString("en-CA");
 };
+
+export const formatDisplayPt = (dateString: string): string => {
+  return new Date(dateString).toLocaleDateString("pt-PT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};

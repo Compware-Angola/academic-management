@@ -3,6 +3,8 @@ interface TypeServiceResponse {
   preco: number;
   descricao: string;
   mesTempId: number;
+  multa: number;
+  valorDesconto: number;
 }
 export const createItem = (serviceType: TypeServiceResponse | null) => {
   if (!serviceType) return null;
@@ -18,10 +20,10 @@ export const createItem = (serviceType: TypeServiceResponse | null) => {
     valorIva: 0,
     retencao: 0,
     incidencia: 0,
-    valorDesconto: 0,
+    valorDesconto: serviceType.valorDesconto,
     descontoProduto: 0,
     mes: "",
-    multa: 0,
+    multa: serviceType.multa,
     mesTempId: serviceType.mesTempId,
     estado: 0,
     valorPago: 0,
@@ -38,6 +40,8 @@ interface CreateInvoiceParams {
   codigoDescricao?: number;
   tipoDocumentoFacturaId?: number;
   canal?: number;
+  totalMulta: number;
+  totalDesconto: number;
 }
 
 export interface CreateInvoiceBody {
@@ -68,6 +72,8 @@ export const createInvoice = ({
   codigoDescricao = 1111,
   tipoDocumentoFacturaId = 1,
   canal = 3,
+  totalDesconto,
+  totalMulta,
 }: CreateInvoiceParams): CreateInvoiceBody => {
   return {
     polo_id: poloid,
@@ -78,9 +84,9 @@ export const createInvoice = ({
     total_retencao: 0,
     CodigoMatricula: codigoMatricula,
     codigo_preinscricao: null,
-    Desconto: 0,
+    Desconto: totalDesconto,
     totalIVA: 0,
-    TotalMulta: 0,
+    TotalMulta: totalMulta,
     Descricao: descricao.substring(0, 44),
     tipo_documento_factura_id: tipoDocumentoFacturaId,
     canal,

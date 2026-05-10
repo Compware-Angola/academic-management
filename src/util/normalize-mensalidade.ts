@@ -5,13 +5,13 @@ interface NormalizedMensalidade {
   id: number;
   month: string;
   description: string;
-  valorBase: string;
+  valorBase: number;
   mensalidade: string;
-  desconto: string;
+  desconto: number;
   tipoDesconto: string;
   valorPago: string;
   valorAPagar: string;
-  multa: string | null;
+  multa: number;
   formaPagamento: string | null;
   dataPagamento: string | null;
   dueDate: string | null;
@@ -46,10 +46,10 @@ const normalizeMensalidade = (
         valorPago: String(monthly.valor_pago),
         tipoDesconto: "Percentual",
         mensalidade: formatNumber(monthly.mensalidade ?? 0),
-        valorBase: String(valorBase),
+        valorBase: valorBase,
         valorAPagar: String(monthly.total),
-        multa: formatNumber(monthly.multa ?? 0),
-        desconto: formatNumber(monthly.desconto ?? 0),
+        multa: monthly.multa,
+        desconto: monthly.desconto ?? 0,
         formaPagamento: null,
         dataPagamento: null,
         dueDate: monthly.data_vencimento,
