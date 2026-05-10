@@ -4,6 +4,8 @@ import { Contact, Key, FileText } from "lucide-react";
 import { StudentAcademicHistory } from "./student-academic-history";
 import { Notes } from "./Notes";
 import { StudentResultPlan } from "./student-result-plan";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 type AvaliacaoSectionProps = {
   value?: string;
@@ -14,6 +16,7 @@ export function AvaliacaoSection({
   value = "avaliacao",
   codigoMatricula,
 }: AvaliacaoSectionProps) {
+  const { hasPermission } = usePermission();
   return (
     <TabsContent value={value}>
       <Tabs
@@ -22,36 +25,62 @@ export function AvaliacaoSection({
         className="flex flex-row gap-6"
       >
         <TabsList className="flex justify-start flex-col h-auto w-52 shrink-0">
-          <TabsTrigger className="w-full justify-start gap-2" value="avaliacao">
-            <Key className="h-4 w-4" />
-            <span>Notas e Avaliações</span>
-          </TabsTrigger>
-          <TabsTrigger
-            className="w-full justify-start gap-2"
-            value="historico-academico"
-          >
-            <Contact className="h-4 w-4" />
-            <span>Historico Academico</span>
-          </TabsTrigger>
-          <TabsTrigger
-            className="w-full justify-start gap-2"
-            value="plano-estudo"
-          >
-            <Contact className="h-4 w-4" />
-            <span>Plano de Estudo</span>
-          </TabsTrigger>
+          {hasPermission(
+            PermissionTypeDetails.LISTAR_AVALICOES_ESTUDANTE.sigla,
+          ) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="avaliacao"
+            >
+              <Key className="h-4 w-4" />
+              <span>Notas e Avaliações</span>
+            </TabsTrigger>
+          )}
+          {hasPermission(
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla,
+          ) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="historico-academico"
+            >
+              <Contact className="h-4 w-4" />
+              <span>Historico Academico</span>
+            </TabsTrigger>
+          )}
+          {hasPermission(
+            PermissionTypeDetails.RESULTADO_PLANO_ESTUDO.sigla,
+          ) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="plano-estudo"
+            >
+              <Contact className="h-4 w-4" />
+              <span>Plano de Estudo</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <Card className="flex-1 min-w-0 overflow-hidden p-6">
-          <Notes codigoMatricula={codigoMatricula} value="avaliacao" />
-          <StudentAcademicHistory
-            value="historico-academico"
-            codigoMatricula={codigoMatricula}
-          />
-          <StudentResultPlan
-            value="plano-estudo"
-            codigoMatricula={codigoMatricula}
-          />
+          {hasPermission(
+            PermissionTypeDetails.LISTAR_AVALICOES_ESTUDANTE.sigla,
+          ) && <Notes codigoMatricula={codigoMatricula} value="avaliacao" />}
+
+          {hasPermission(
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla,
+          ) && (
+            <StudentAcademicHistory
+              value="historico-academico"
+              codigoMatricula={codigoMatricula}
+            />
+          )}
+          {hasPermission(
+            PermissionTypeDetails.RESULTADO_PLANO_ESTUDO.sigla,
+          ) && (
+            <StudentResultPlan
+              value="plano-estudo"
+              codigoMatricula={codigoMatricula}
+            />
+          )}
         </Card>
       </Tabs>
     </TabsContent>
