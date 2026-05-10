@@ -199,7 +199,7 @@ export function Resumo({
       codigoFatura:
         searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
     },
-    hasPermission(PermissionTypeDetails.FACTURAS.sigla),
+    hasPermission(PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla),
   );
   const {
     data: itens,
