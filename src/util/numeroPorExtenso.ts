@@ -55,11 +55,36 @@ export const numeroPorExtenso = (n: number): string => {
   return `${n} (NÃO SUPORTADO)`;
 };
 
-export const numeroPorExtensoMoeda = (n: number | undefined): string => {
-  if (!n) return "-";
-  const valor = extenso(n?.toString(), {
-    mode: "number",
-    locale: "pt",
-  });
-  return `${valor.charAt(0).toUpperCase() + valor.slice(1)} Kwanzas`;
+export const numeroPorExtensoMoeda = (n: number | undefined | null): string => {
+  if (n === undefined || n === null) return "-";
+  if (n === 0) return "Zero Kwanzas";
+
+  const negativo = n < 0;
+  const absoluto = Math.abs(n);
+  const inteiro = Math.floor(absoluto);
+  const centavos = Math.round((absoluto - inteiro) * 100);
+
+  try {
+    const valorInteiro = extenso(inteiro.toString(), {
+      mode: "number",
+      locale: "pt",
+    });
+
+    const parteInteira = `${valorInteiro.charAt(0).toUpperCase() + valorInteiro.slice(1)} Kwanza${inteiro !== 1 ? "s" : ""}`;
+
+    let parteCentavos = "";
+    if (centavos > 0) {
+      const valorCentavos = extenso(centavos.toString(), {
+        mode: "number",
+        locale: "pt",
+      });
+      parteCentavos = ` e ${valorCentavos} Cêntimo${centavos !== 1 ? "s" : ""}`;
+    }
+
+    const prefixo = negativo ? "Menos " : "";
+    return `${prefixo}${parteInteira}${parteCentavos}`;
+  } catch (e) {
+    console.error("numeroPorExtensoMoeda: erro ao converter valor:", n, e);
+    return `${n} Kwanzas`;
+  }
 };
