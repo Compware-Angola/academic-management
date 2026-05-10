@@ -245,13 +245,37 @@ export enum PermissionType {
 
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
   LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL",
-  LIQUIDAR_PAGAMENTO = "LIQUIDAR_FACTURA",
+  LIQUIDAR_PAGAMENTO = "LIQUIDAR_PAGAMENTO",
   INSENCAO_COLISAO_CURSO_ESTUDANTE = "INSENCAO_COLISAO_CURSO_ESTUDANTE",
   FORMA_PAGAMENTO = "FORMA_PAGAMENTO",
   VALIDAR_DOCUMENTO = "VALIDAR_DOCUMENTO",
 }
 
 export const PermissionTypeDetails = {
+  LISTAR_AVALICOES_ESTUDANTE: {
+    designacao: "Listar Avaliações do Estudante",
+    sigla: "list_av",
+  },
+  ACTIVAR_CONFIRMACAO: {
+    designacao: "Activar Confirmação",
+    sigla: "act_conf",
+  },
+  ACTUALIZAR_DADOS_ESTUDANTE: {
+    designacao: "Actualizar Dados do Estudante",
+    sigla: "act_dados",
+  },
+  ACTUALIZAR_CONTACTOS_ESTUDANTE: {
+    designacao: "Actualizar Contactos do Estudante",
+    sigla: "act_cont",
+  },
+  INSCRICOES_UC: {
+    designacao: "Fazer Inscrições em UC",
+    sigla: "ins_uc",
+  },
+  MUDAR_CURSO: {
+    designacao: "Mudar Curso",
+    sigla: "alt_curso",
+  },
   VALIDAR_DOCUMENTO: {
     designacao: "Validar Documento",
     sigla: "mfe_vd",
@@ -1109,6 +1133,14 @@ export const PermissionTypeDetails = {
   LISTAR_SUMARIO: {
     designacao: "Listar sumários",
     sigla: "listar_sumario",
+  },
+  GERAR_OUTROS_SERVICOS: {
+    designacao: "Gerar outros serviços",
+    sigla: "g_outros_servicos",
+  },
+  GERAR_MENSALIDADES: {
+    designacao: "Gerar mensalidades",
+    sigla: "g_mensalidades",
   },
 } as const;
 

@@ -6,12 +6,7 @@ import {
   listarFacturasService,
 } from "@/services/finance/listar-facturas.service";
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // =============================
 // 🔎 LISTAR FACTURAS
@@ -31,7 +26,6 @@ export const useQueryFacturas = (
   });
 };
 
-
 // =============================
 // 📄 LISTAR ITENS DA FACTURA
 // =============================
@@ -47,7 +41,6 @@ export const useQueryFacturaItens = (facturaId?: number | string) => {
   });
 };
 
-
 // =============================
 // ❌ ANULAR FACTURA
 // =============================
@@ -55,8 +48,7 @@ export const useAnnulInvoice = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (facturaId: number) =>
-      annulInvoiceService(facturaId),
+    mutationFn: (facturaId: number) => annulInvoiceService(facturaId),
 
     onSuccess: () => {
       // 🔥 Atualiza automaticamente a listagem geral
@@ -65,7 +57,6 @@ export const useAnnulInvoice = () => {
   });
 };
 
-
 // =============================
 // ♻️ REACTIVAR FACTURA
 // =============================
@@ -73,8 +64,7 @@ export const useReactivateInvoice = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (facturaId: number) =>
-      reactivateInvoiceService(facturaId),
+    mutationFn: (facturaId: number) => reactivateInvoiceService(facturaId),
 
     onSuccess: () => {
       // 🔥 Atualiza automaticamente a listagem geral

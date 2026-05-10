@@ -19,8 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useIsPublicRoute } from "./helpers/verify-public.routes";
 
-const INACTIVITY_TIMEOUT = 20 * 60 * 1000;
-const WARNING_TIME = 10 * 1000;
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000;   // 5 min
+const WARNING_TIME = 10 * 1000;     // 10 s
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();

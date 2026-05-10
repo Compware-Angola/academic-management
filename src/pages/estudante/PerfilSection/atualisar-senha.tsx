@@ -16,6 +16,8 @@ import {
 } from "@/hooks/students/use-query-students";
 import { TabsContent } from "@/components/ui/tabs";
 import { PasswordFormField } from "@/components/PasswordFormField";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 const schema = z.object({
   novaSenha: z
@@ -37,6 +39,7 @@ export function AtualizarSenha({
   codigoMatricula: number;
   value?: string;
 }) {
+  const { hasPermission } = usePermission();
   const { data: student, isLoading } = useStudentDetail(codigoMatricula);
   const resetPassword = useResetPassword();
 
@@ -117,7 +120,13 @@ export function AtualizarSenha({
             <Button
               type="submit"
               className="w-full md:w-auto"
-              disabled={resetPassword.isPending || isLoading}
+              disabled={
+                resetPassword.isPending ||
+                isLoading ||
+                !hasPermission(
+                  PermissionTypeDetails.ACTUALIZAR_SENHA_ESTUDANTE.sigla,
+                )
+              }
             >
               {resetPassword.isPending ? (
                 <>

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,10 +8,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -22,49 +19,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
-  Home,
-  User,
-  GraduationCap,
-  CreditCard,
   FileText,
-  Calendar,
-  Phone,
-  Mail,
-  MapPin,
-  Download,
-  Printer,
-  ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Clock,
   AlertTriangle,
   Eye,
   RefreshCw,
   Search,
+  Loader2,
+  Wallet,
+  Clock,
+  CalendarDays,
+  Receipt,
 } from "lucide-react";
 import {
   useStudentDetail,
-  useStudentDisciplinas,
 } from "@/hooks/students/use-query-students";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
-
 import {
   useQueryFacturaItens,
   useQueryFacturas,
@@ -77,59 +47,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-
 import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FacturaItem } from "@/services/finance/listar-facturas.service";
-
-// Mock data for a complete student profile
-const mockEstudante = {
-  // Dados Pessoais
-  matricula: "20210001",
-  nome: "João Manuel Silva Costa",
-  nomePai: "Manuel António Costa",
-  nomeMae: "Maria Fernanda Silva",
-  dataNascimento: "1998-05-15",
-  nacionalidade: "Angolana",
-  naturalidade: "Luanda",
-  genero: "Masculino",
-  estadoCivil: "Solteiro",
-  bi: "005123456LA042",
-  nif: "123456789",
-  foto: "/placeholder.svg",
-
-  // Contactos
-  telefone: "+244 923 456 789",
-  email: "joao.costa@email.com",
-  emailInstitucional: "joao.costa@universidade.ao",
-  endereco: "Rua da Liberdade, Nº 45, Maianga",
-  cidade: "Luanda",
-  provincia: "Luanda",
-
-  // Dados Académicos
-  curso: "Engenharia Informática",
-  faculdade: "Faculdade de Engenharia",
-  departamento: "Ciências da Computação",
-  grau: "Licenciatura",
-  regime: "Diurno",
-  turma: "EI-2021-A",
-  anoIngresso: 2021,
-  anoCurricular: 4,
-  semestre: "1º Semestre",
-  mediaGeral: 14.5,
-  creditosObtidos: 180,
-  creditosTotais: 240,
-  estado: "Activo",
-
-  // Dados Financeiros
-  saldoDevedor: 45000,
-  mensalidadesEmDia: false,
-  ultimoPagamento: "2025-12-15",
-  valorMensalidade: 25000,
-  desconto: 10,
-  tipoPagamento: "Mensal",
-  bolseiro: false,
-};
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
+import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
+import { parseFilter } from "@/util/parse-filter";
+import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -159,14 +84,36 @@ export function Resumo({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const { hasPermission } = usePermission();
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<
     number | null
   >(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openServicesModal, setOpenServicesModal] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string | null>(null);
-
+  const { data: student } = useStudentDetail(matricula);
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const activeAcademicYear = academicYear?.find(
+    (year) => year.estado.toLowerCase() === "activo",
+  );
+  const {
+    data: monthlyFeeData,
+    isLoading: isFeesLoading,
+    isError: isFeesError,
+  } = useQueryFinanceMonthlyFee({
+    academicYear: activeAcademicYear?.codigo?.toString(),
+    enrollmentCode: matricula.toString(),
+    status: "pending",
+    page: 1,
+    limit: 100,
+  });
+  const { data: monthValueResponse, isLoading: isMonthValueLoading } =
+    useQueryMonthlyFeesValue({
+      anoLectivoId: parseFilter(activeAcademicYear?.codigo?.toString()),
+      cursoId: student?.curso_codigo,
+      poloId: 1,
+    });
   function handleOpenServices(services: string) {
     setSelectedServices(services);
     setOpenServicesModal(true);
@@ -186,23 +133,33 @@ export function Resumo({
     isError: isErrorFacturas,
     error: errorFacturas,
     refetch,
-  } = useQueryFacturas({
-    anoLectivo: filters.anoLetivo,
-    status: filters.estado,
-    page,
-    limit,
-    codigoMatricula: matricula,
-    reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
-    codigoFatura:
-      searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
-  });
-
+  } = useQueryFacturas(
+    {
+      anoLectivo: filters.anoLetivo,
+      status: filters.estado,
+      page,
+      limit,
+      codigoMatricula: matricula,
+      reference:
+        searchBy === "reference" && searchTerm ? searchTerm : undefined,
+      codigoFatura:
+        searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
+    },
+    hasPermission(PermissionTypeDetails.FACTURAS.sigla),
+  );
   const {
     data: itens,
     isLoading: isLoadingItens,
     isFetching: isFetchingItens,
   } = useQueryFacturaItens(selectedFacturaCodigo ?? undefined);
-
+  const monthFee = monthValueResponse?.[0];
+  const pendingPayments = monthlyFeeData?.data ?? [];
+  const totalPending = useMemo(() => {
+    return pendingPayments.reduce((sum, item) => sum + (item.total ?? 0), 0);
+  }, [pendingPayments]);
+  const hasError = isFeesError;
+  const hasNoData = !isFeesLoading && pendingPayments.length === 0;
+  const yearLabel = activeAcademicYear?.designacao ?? "Ano letivo";
   const getStatusBadge = (status: number) => {
     switch (status) {
       case 0:
@@ -269,122 +226,118 @@ export function Resumo({
     reference: "Pesquisar por referência da factura...",
     codigoFatura: "Pesquisar por Codigo da factura...",
   };
-
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
-
-  const {
-    data: student,
-    isLoading,
-    isFetching,
-    error,
-  } = useStudentDetail(matricula);
-
-
-
-
 
   if (!matricula) {
     return <div>Matrícula inválida</div>;
   }
 
-  const estudante = mockEstudante;
-
-
+  const cardBase =
+    "rounded-xl border-l-[3px] border-t-0 border-r-0 border-b-0 shadow-none";
 
   return (
     <TabsContent value={value} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Novo Card - Saldo do Estudante */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        {/* Saldo Atual */}
         <Card
-          className={
-            student?.saldo_atual >= 0 ? "border-green-500" : "border-amber-500"
-          }
+          className={`${cardBase} ${student?.saldo_atual >= 0 ? "border-l-green-500" : "border-l-destructive"}`}
         >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Saldo Atual
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <Wallet className="h-3.5 w-3.5" /> Saldo atual
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p
-              className={`text-3xl font-bold ${student?.saldo_atual > 0
-                ? "text-green-600"
-                : student?.saldo_atual < 0
-                  ? "text-destructive"
-                  : "text-muted-foreground"
-                }`}
+              className={`text-2xl font-medium ${student?.saldo_atual > 0 ? "text-green-600" : student?.saldo_atual < 0 ? "text-destructive" : "text-muted-foreground"}`}
             >
               {student?.saldo_atual >= 0 ? "+" : ""}
               {formatCurrency(student?.saldo_atual || 0)}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <span
+              className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
+  ${student?.saldo_atual > 0
+                  ? "bg-green-100 text-green-700"
+                  : student?.saldo_atual < 0
+                    ? "bg-red-100 text-destructive"
+                    : "bg-muted text-muted-foreground"
+                }`}
+            >
               {student?.saldo_atual > 0
                 ? "Crédito disponível"
                 : student?.saldo_atual < 0
-                  ? "Saldo negativo (ver detalhes)"
+                  ? "Saldo negativo"
                   : "Sem saldo"}
-            </p>
+            </span>
           </CardContent>
         </Card>
 
-        {/* Saldo Devedor */}
+        {/* Mensalidades Pendentes */}
         <Card
-          className={
-            estudante.saldoDevedor > 0
-              ? "border-destructive"
-              : "border-green-500"
-          }
+          className={`${cardBase} ${totalPending > 0 ? "border-l-destructive" : "border-l-green-500"}`}
         >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Saldo Devedor
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" /> Pendentes · {yearLabel}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p
-              className={`text-3xl font-bold ${estudante.saldoDevedor > 0 ? "text-destructive" : "text-green-500"}`}
-            >
-              ---
-            </p>
-            {estudante.saldoDevedor > 0 && (
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3 text-destructive" />
-                Pagamento pendente
-              </p>
+            {isFeesLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : hasError ? (
+              <p className="text-2xl font-medium text-destructive">---</p>
+            ) : hasNoData ? (
+              <p className="text-2xl font-medium text-muted-foreground">---</p>
+            ) : (
+              <>
+                <p className="text-2xl font-medium text-destructive">
+                  {formatCurrency(totalPending)}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3 text-destructive" />
+                  {pendingPayments.length} pagamento(s) em atraso
+                </p>
+              </>
             )}
           </CardContent>
         </Card>
 
         {/* Mensalidade */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Mensalidade
+        <Card className={`${cardBase} border-l-muted`}>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <CalendarDays className="h-3.5 w-3.5" /> Mensalidade
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-primary">---</p>
-            {estudante.desconto > 0 && (
-              <p className="text-xs text-green-500 mt-1">
-                Desconto de 0 % aplicado
-              </p>
+            {isMonthValueLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <p className="text-2xl font-medium text-primary">
+                  {formatCurrency(monthFee?.preco || 0)}
+                </p>
+                {monthFee?.descricao && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {monthFee.descricao}
+                  </p>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
 
         {/* Último Pagamento */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Último Pagamento
+        <Card className={`${cardBase} border-l-muted`}>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <Receipt className="h-3.5 w-3.5" /> Último pagamento
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {formatDate(estudante.ultimoPagamento)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {estudante.tipoPagamento || "—"}
+            <p className="text-2xl font-medium text-muted-foreground">---</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Nenhum registo encontrado
             </p>
           </CardContent>
         </Card>
@@ -405,8 +358,8 @@ export function Resumo({
               <AcademicYearSelect
                 enableDefaultActiveYear
                 value={filters.anoLetivo}
-                onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })} />
-
+                onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
+              />
             </div>
 
             <div className="min-w-[180px]">
@@ -608,7 +561,9 @@ export function Resumo({
                 Detalhes da Nota de Pagamento
                 {selectedFactura && (
                   <span className="inline-flex px-3 py-1 text-sm font-mono bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md font-medium">
-                    {selectedFactura.referencia || selectedFactura.codigo || "—"}
+                    {selectedFactura.referencia ||
+                      selectedFactura.codigo ||
+                      "—"}
                   </span>
                 )}
               </div>
@@ -621,7 +576,6 @@ export function Resumo({
               {/* Valor total destacado, mas sem gradiente */}
               <div className="bg-gray-50 dark:bg-gray-900 px-4 py-4 rounded-xl border border-gray-200 dark:border-gray-800">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Valor Total
@@ -648,7 +602,6 @@ export function Resumo({
                       {formatDate(selectedFactura.data_factura)}
                     </p>
                   </div>
-
                 </div>
               </div>
 
@@ -656,23 +609,37 @@ export function Resumo({
 
               {/* Dados do Estudante */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Dados do Estudante</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Dados do Estudante
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
-                    <p className="text-sm text-muted-foreground">Código da Matrícula</p>
-                    <p className="font-medium font-mono">{selectedFactura.codigo_matricula || "—"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Código da Matrícula
+                    </p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.codigo_matricula || "—"}
+                    </p>
                   </div>
                   <div className="col-span-2 lg:col-span-1">
-                    <p className="text-sm text-muted-foreground">Nome do Estudante</p>
-                    <p className="font-semibold text-lg">{selectedFactura.nome_aluno || "—"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nome do Estudante
+                    </p>
+                    <p className="font-semibold text-lg">
+                      {selectedFactura.nome_aluno || "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Curso</p>
-                    <p className="font-medium">{selectedFactura.curso || "—"}</p>
+                    <p className="font-medium">
+                      {selectedFactura.curso || "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Ano Lectivo</p>
-                    <p className="font-medium">{selectedFactura.ano_lectivo || "—"}</p>
+                    <p className="font-medium">
+                      {selectedFactura.ano_lectivo || "—"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -681,15 +648,25 @@ export function Resumo({
 
               {/* Informações da Nota */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Informações da Nota</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Informações da Nota
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Nº da Nota</p>
-                    <p className="font-medium font-mono">{selectedFactura.referencia || selectedFactura.codigo || "—"}</p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.referencia ||
+                        selectedFactura.codigo ||
+                        "—"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Data de Emissão</p>
-                    <p className="font-medium">{formatDate(selectedFactura.data_factura)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Data de Emissão
+                    </p>
+                    <p className="font-medium">
+                      {formatDate(selectedFactura.data_factura)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Multa</p>
@@ -708,7 +685,9 @@ export function Resumo({
 
               {/* Itens da Factura */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Itens da Nota de Pagamento</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Itens da Nota de Pagamento
+                </h3>
 
                 {isLoadingItens || isFetchingItens ? (
                   <div className="py-10 text-center text-muted-foreground bg-gray-50 dark:bg-gray-900/50 rounded-lg">
@@ -726,20 +705,31 @@ export function Resumo({
                           <TableHead>Descrição</TableHead>
                           <TableHead className="text-center">Qtd</TableHead>
                           <TableHead className="text-center">Multa</TableHead>
-                          <TableHead className="text-right">Valor Unit.</TableHead>
-                          <TableHead className="text-right pr-6">Valor Total</TableHead>
+                          <TableHead className="text-right">
+                            Valor Unit.
+                          </TableHead>
+                          <TableHead className="text-right pr-6">
+                            Valor Total
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {itens.data.map((item: FacturaItem, index: number) => (
-                          <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <TableRow
+                            key={index}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          >
                             <TableCell>
                               {(item.descricaoservico || "—") +
-                                (Number(item.mesid) !== 3 && item.mesid && item.mesdescricao
+                                (Number(item.mesid) !== 3 &&
+                                  item.mesid &&
+                                  item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
-                            <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
+                            <TableCell className="text-center">
+                              {item.quantidade ?? 1}
+                            </TableCell>
                             <TableCell className="text-center text-orange-600 dark:text-orange-400">
                               {item.multa ? formatCurrency(item.multa) : "—"}
                             </TableCell>
@@ -759,8 +749,8 @@ export function Resumo({
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return total + (item.preco * quantidade);
-                              }, 0)
+                                return total + item.preco * quantidade;
+                              }, 0),
                             )}
                           </TableCell>
                         </TableRow>
@@ -772,8 +762,12 @@ export function Resumo({
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return total + (item.preco * quantidade) + (item.multa ?? 0);
-                              }, 0)
+                                return (
+                                  total +
+                                  item.preco * quantidade +
+                                  (item.multa ?? 0)
+                                );
+                              }, 0),
                             )}
                           </TableCell>
                         </TableRow>
@@ -792,7 +786,9 @@ export function Resumo({
                   itens={itens?.data || []}
                   showDownload={true}
                   showPrint={true}
-                  showliquidarNota={true}
+                  showliquidarNota={hasPermission(
+                    PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla,
+                  )}
                 />
               </div>
             </div>

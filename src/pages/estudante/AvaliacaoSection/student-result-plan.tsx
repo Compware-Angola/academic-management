@@ -47,9 +47,6 @@ export function StudentResultPlan({
     isError,
   } = useQueryResultPlan(codigoMatricula);
 
-  if (!codigoMatricula) {
-    return <div>Matrícula inválida</div>;
-  }
   const [search, setSearch] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const plans = planResponse?.grades ?? [];
@@ -125,7 +122,9 @@ export function StudentResultPlan({
   );
   const enabledExportPdf =
     exportData?.excelProps && exportData?.excelProps && exportData?.fileName;
-
+  if (!codigoMatricula) {
+    return <div>Matrícula inválida</div>;
+  }
   return (
     <TabsContent value={value} className="space-y-4">
       <>
