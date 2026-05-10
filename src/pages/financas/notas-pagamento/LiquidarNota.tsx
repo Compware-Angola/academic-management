@@ -63,8 +63,6 @@ function isTipoBancario(formaPagamento?: string) {
 
   const valor = String(formaPagamento).trim();
 
-  console.log("FORMA PAGAMENTO:", valor);
-
   return (
     valor === FORMA_PAGAMENTO.TPA ||
     valor === FORMA_PAGAMENTO.MB
@@ -76,12 +74,9 @@ export default function LiquidarNota() {
   const { mutate, isPending } = useCreatePayment();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  //const nota = mockNotasPagamento.find((n) => n.numero === "1222303");
 
   const [formData, setFormData] = useState({
-    n_operacao_bancaria: "",
+    n_operacao_bancaria: null,
     observacao: "",
     ano_lectivo: "",
     valorAPagar: "",
