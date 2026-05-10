@@ -19,9 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-
   FileText,
-
   AlertTriangle,
   Eye,
   RefreshCw,
@@ -34,7 +32,6 @@ import {
 } from "lucide-react";
 import {
   useStudentDetail,
-
 } from "@/hooks/students/use-query-students";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
@@ -58,7 +55,6 @@ import { PermissionTypeDetails } from "@/constants/permission.type";
 import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
-
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -105,15 +101,13 @@ export function Resumo({
     data: monthlyFeeData,
     isLoading: isFeesLoading,
     isError: isFeesError,
-  } = useQueryFinanceMonthlyFee(
-    {
-      academicYear: activeAcademicYear?.codigo?.toString(),
-      enrollmentCode: matricula.toString(),
-      status: 'pending',
-      page: 1,
-      limit: 100,
-    },
-  )
+  } = useQueryFinanceMonthlyFee({
+    academicYear: activeAcademicYear?.codigo?.toString(),
+    enrollmentCode: matricula.toString(),
+    status: "pending",
+    page: 1,
+    limit: 100,
+  });
   const { data: monthValueResponse, isLoading: isMonthValueLoading } =
     useQueryMonthlyFeesValue({
       anoLectivoId: parseFilter(activeAcademicYear?.codigo?.toString()),
@@ -159,13 +153,13 @@ export function Resumo({
     isFetching: isFetchingItens,
   } = useQueryFacturaItens(selectedFacturaCodigo ?? undefined);
   const monthFee = monthValueResponse?.[0];
-  const pendingPayments = monthlyFeeData?.data ?? []
+  const pendingPayments = monthlyFeeData?.data ?? [];
   const totalPending = useMemo(() => {
-    return pendingPayments.reduce((sum, item) => sum + (item.total ?? 0), 0)
-  }, [pendingPayments])
-  const hasError = isFeesError
-  const hasNoData = !isFeesLoading && pendingPayments.length === 0
-  const yearLabel = activeAcademicYear?.designacao ?? 'Ano letivo'
+    return pendingPayments.reduce((sum, item) => sum + (item.total ?? 0), 0);
+  }, [pendingPayments]);
+  const hasError = isFeesError;
+  const hasNoData = !isFeesLoading && pendingPayments.length === 0;
+  const yearLabel = activeAcademicYear?.designacao ?? "Ano letivo";
   const getStatusBadge = (status: number) => {
     switch (status) {
       case 0:
@@ -234,57 +228,71 @@ export function Resumo({
   };
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
-
-
   if (!matricula) {
     return <div>Matrícula inválida</div>;
   }
 
-  const cardBase = "rounded-xl border-l-[3px] border-t-0 border-r-0 border-b-0 shadow-none"
+  const cardBase =
+    "rounded-xl border-l-[3px] border-t-0 border-r-0 border-b-0 shadow-none";
 
   return (
     <TabsContent value={value} className="space-y-4">
-
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-
         {/* Saldo Atual */}
-        <Card className={`${cardBase} ${student?.saldo_atual >= 0 ? "border-l-green-500" : "border-l-destructive"}`}>
+        <Card
+          className={`${cardBase} ${student?.saldo_atual >= 0 ? "border-l-green-500" : "border-l-destructive"}`}
+        >
           <CardHeader className="pb-1">
             <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
               <Wallet className="h-3.5 w-3.5" /> Saldo atual
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`text-2xl font-medium ${student?.saldo_atual > 0 ? "text-green-600" : student?.saldo_atual < 0 ? "text-destructive" : "text-muted-foreground"}`}>
-              {student?.saldo_atual >= 0 ? "+" : ""}{formatCurrency(student?.saldo_atual || 0)}
+            <p
+              className={`text-2xl font-medium ${student?.saldo_atual > 0 ? "text-green-600" : student?.saldo_atual < 0 ? "text-destructive" : "text-muted-foreground"}`}
+            >
+              {student?.saldo_atual >= 0 ? "+" : ""}
+              {formatCurrency(student?.saldo_atual || 0)}
             </p>
-            <span className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
+            <span
+              className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
   ${student?.saldo_atual > 0
-                ? "bg-green-100 text-green-700"
+                  ? "bg-green-100 text-green-700"
+                  : student?.saldo_atual < 0
+                    ? "bg-red-100 text-destructive"
+                    : "bg-muted text-muted-foreground"
+                }`}
+            >
+              {student?.saldo_atual > 0
+                ? "Crédito disponível"
                 : student?.saldo_atual < 0
-                  ? "bg-red-100 text-destructive"
-                  : "bg-muted text-muted-foreground"
-              }`}>
-              {student?.saldo_atual > 0 ? "Crédito disponível" : student?.saldo_atual < 0 ? "Saldo negativo" : "Sem saldo"}
+                  ? "Saldo negativo"
+                  : "Sem saldo"}
             </span>
           </CardContent>
         </Card>
 
         {/* Mensalidades Pendentes */}
-        <Card className={`${cardBase} ${totalPending > 0 ? "border-l-destructive" : "border-l-green-500"}`}>
+        <Card
+          className={`${cardBase} ${totalPending > 0 ? "border-l-destructive" : "border-l-green-500"}`}
+        >
           <CardHeader className="pb-1">
             <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" /> Pendentes · {yearLabel}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isFeesLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : hasError ? (
+            {isFeesLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : hasError ? (
               <p className="text-2xl font-medium text-destructive">---</p>
             ) : hasNoData ? (
               <p className="text-2xl font-medium text-muted-foreground">---</p>
             ) : (
               <>
-                <p className="text-2xl font-medium text-destructive">{formatCurrency(totalPending)}</p>
+                <p className="text-2xl font-medium text-destructive">
+                  {formatCurrency(totalPending)}
+                </p>
                 <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3 text-destructive" />
                   {pendingPayments.length} pagamento(s) em atraso
@@ -302,10 +310,18 @@ export function Resumo({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {isMonthValueLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+            {isMonthValueLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
               <>
-                <p className="text-2xl font-medium text-primary">{formatCurrency(monthFee?.preco || 0)}</p>
-                {monthFee?.descricao && <p className="mt-2 text-xs text-muted-foreground">{monthFee.descricao}</p>}
+                <p className="text-2xl font-medium text-primary">
+                  {formatCurrency(monthFee?.preco || 0)}
+                </p>
+                {monthFee?.descricao && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {monthFee.descricao}
+                  </p>
+                )}
               </>
             )}
           </CardContent>
@@ -320,10 +336,11 @@ export function Resumo({
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-medium text-muted-foreground">---</p>
-            <p className="mt-2 text-xs text-muted-foreground">Nenhum registo encontrado</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Nenhum registo encontrado
+            </p>
           </CardContent>
         </Card>
-
       </div>
       <Card>
         <CardHeader>

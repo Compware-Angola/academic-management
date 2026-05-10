@@ -150,10 +150,6 @@ export default function PerfilEstudante() {
           value="documentacao"
           codigoMatricula={Number(matricula)}
         />
-        <DisciplinasSection
-          value="disciplinas"
-          codigoMatricula={Number(matricula)}
-        />
 
         <AreaFinanceira
           codigoMatricula={Number(matricula)}
