@@ -38,17 +38,25 @@ import ExcelActions, {
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
+import { PaymentItem } from "@/services/financas/nota-pagamento/fetch-payment.service";
 
-import { defaultHeaderComprovativoPagamentoV2, GenericComprovativoPagamentoPDF } from "@/components/views/pdf/genericComprovativoPagamento-v2";
+import {
+  defaultHeaderComprovativoPagamentoV2,
+  GenericComprovativoPagamentoPDF,
+} from "@/components/views/pdf/genericComprovativoPagamento-v2";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { createPaymentItem } from "@/util/export-payment";
 
 interface ListaPagamentoModalProps {
   factureId: number;
   isModalOpen: boolean;
+  pagamentoItem: PaymentItem;
   setIsModalOpen: () => void;
 }
 export const ListaPagamentoModal = ({
   isModalOpen,
   factureId,
+  pagamentoItem,
   setIsModalOpen,
 }: ListaPagamentoModalProps) => {
   const { data: facturaItens, isLoading: isLoadingFacturaItens } =
@@ -60,13 +68,17 @@ export const ListaPagamentoModal = ({
       },
       !!factureId,
     );
+
   const factura = facturaResponse?.data?.[0];
   const isLoading = isLoadingFacturaItens || isLoadingFactura;
+
+  const { data: student } = useStudentDetail(factura?.codigo_matricula);
 
   const exportRows = useMemo(
     () =>
       facturaItens?.data?.map((item) => ({
-        descricao: `${item?.descricaoservico || "---"} ${item?.mesdescricao || ""}`.trim(),
+        descricao:
+          `${item?.descricaoservico || "---"} ${item?.mesdescricao || ""}`.trim(),
         codigofactura: item?.codigofactura || "---",
         preco: formatNumber(item?.preco || 0),
         quantidade: item?.quantidade || "---",
@@ -78,17 +90,17 @@ export const ListaPagamentoModal = ({
     () =>
       factura
         ? [
-          `Referência: ${factura.referencia || "---"}`,
-          `Código da Matrícula: ${factura.codigo_matricula || "---"}`,
-          `Estudante: ${factura.nome_aluno || "---"}`,
-          `Curso: ${factura.curso || "---"}`,
-          `Campus: ${factura.polo || "---"}`,
-          `Valor Total: ${formatNumber(factura.total_preco || 0)}`,
-          `Valor da Multa: ${formatNumber(factura.total_multa || 0)}`,
-          `Valor de Desconto: ${formatNumber(factura.desconto || 0)}`,
-          `Valor a Pagar: ${formatNumber(factura.valor_pagar || 0)}`,
-          `Data de Factura: ${formatarData(factura.data_factura || "")}`,
-        ]
+            `Referência: ${factura.referencia || "---"}`,
+            `Código da Matrícula: ${factura.codigo_matricula || "---"}`,
+            `Estudante: ${factura.nome_aluno || "---"}`,
+            `Curso: ${factura.curso || "---"}`,
+            `Campus: ${factura.polo || "---"}`,
+            `Valor Total: ${formatNumber(factura.total_preco || 0)}`,
+            `Valor da Multa: ${formatNumber(factura.total_multa || 0)}`,
+            `Valor de Desconto: ${formatNumber(factura.desconto || 0)}`,
+            `Valor a Pagar: ${formatNumber(factura.valor_pagar || 0)}`,
+            `Data de Factura: ${formatarData(factura.data_factura || "")}`,
+          ]
         : [],
     [factura],
   );
@@ -107,40 +119,39 @@ export const ListaPagamentoModal = ({
       ],
       mainTable: exportRows.length
         ? {
-          headers: [
-            { key: "descricao", label: "Descrição", width: 36 },
-            { key: "codigofactura", label: "Factura Referente", width: 20 },
-            { key: "preco", label: "Valor", width: 18, align: "right" },
-            {
-              key: "quantidade",
-              label: "Quantidade",
-              width: 16,
-              align: "center",
-            },
-          ],
-          rows: exportRows,
-        }
+            headers: [
+              { key: "descricao", label: "Descrição", width: 36 },
+              { key: "codigofactura", label: "Factura Referente", width: 20 },
+              { key: "preco", label: "Valor", width: 18, align: "right" },
+              {
+                key: "quantidade",
+                label: "Quantidade",
+                width: 16,
+                align: "center",
+              },
+            ],
+            rows: exportRows,
+          }
         : undefined,
       footerNotice: "Documento gerado automaticamente.",
       primaryColor: "#0D1B48",
     };
   }, [exportInfo, exportRows, factura, factureId]);
 
-  const pdfDocument =
-    factura ? (
-      <GenericPDFDocument
-        documentTitle="Detalhes do Pagamento"
-        subtitle={`Factura ${factura.referencia || factureId}`}
-        orientation="vertical"
-        infoSections={[
-          {
-            title: "Dados do Pagamento",
-            content: exportInfo,
-          },
-        ]}
-        mainTable={
-          exportRows.length
-            ? {
+  const pdfDocument = factura ? (
+    <GenericPDFDocument
+      documentTitle="Detalhes do Pagamento"
+      subtitle={`Factura ${factura.referencia || factureId}`}
+      orientation="vertical"
+      infoSections={[
+        {
+          title: "Dados do Pagamento",
+          content: exportInfo,
+        },
+      ]}
+      mainTable={
+        exportRows.length
+          ? {
               headers: [
                 { key: "descricao", label: "Descrição", width: "45%" },
                 {
@@ -159,12 +170,12 @@ export const ListaPagamentoModal = ({
               rows: exportRows,
               headerBackground: "#0D1B48",
             }
-            : undefined
-        }
-        footerNotice="Documento gerado automaticamente."
-        primaryColor="#0D1B48"
-      />
-    ) : null;
+          : undefined
+      }
+      footerNotice="Documento gerado automaticamente."
+      primaryColor="#0D1B48"
+    />
+  ) : null;
 
   const baseFileName = `Detalhes_Pagamento_${factura?.referencia || factureId}_${new Date()
     .toISOString()
@@ -179,10 +190,30 @@ export const ListaPagamentoModal = ({
     totalInWords: "Quinhentos e setenta e cinco mil e duzentos Kwanzas",
     totalValue: "575.200,00",
     payments: [
-      { date: "21/04/2026", description: "3ª Prestação", paymentMode: "TPA", value: "143.800,00" },
-      { date: "21/04/2026", description: "4ª Prestação", paymentMode: "TPA", value: "143.800,00" },
-      { date: "21/04/2026", description: "5ª Prestação", paymentMode: "TPA", value: "143.800,00" },
-      { date: "21/04/2026", description: "6ª Prestação", paymentMode: "TPA", value: "143.800,00" },
+      {
+        date: "21/04/2026",
+        description: "3ª Prestação",
+        paymentMode: "TPA",
+        value: "143.800,00",
+      },
+      {
+        date: "21/04/2026",
+        description: "4ª Prestação",
+        paymentMode: "TPA",
+        value: "143.800,00",
+      },
+      {
+        date: "21/04/2026",
+        description: "5ª Prestação",
+        paymentMode: "TPA",
+        value: "143.800,00",
+      },
+      {
+        date: "21/04/2026",
+        description: "6ª Prestação",
+        paymentMode: "TPA",
+        value: "143.800,00",
+      },
     ],
     city: "Luanda",
     issueDate: "21 de abril de 2026",
@@ -193,7 +224,12 @@ export const ListaPagamentoModal = ({
   const doc = (
     <GenericComprovativoPagamentoPDF
       header={defaultHeaderComprovativoPagamentoV2}
-      data={receiptData}
+      data={createPaymentItem({
+        facturaItems: facturaItens?.data ?? [],
+        payment: pagamentoItem,
+        student: student,
+        factura: factura,
+      })}
     />
   );
   return (
@@ -214,7 +250,6 @@ export const ListaPagamentoModal = ({
                     fileName={`Recibo_${receiptData.receiptNumber.replace("/", "-")}.pdf`}
                   />
                 )}
-
               </div>
             )}
           </DialogHeader>

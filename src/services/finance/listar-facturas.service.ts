@@ -132,6 +132,7 @@ export type FacturaItem = {
   codigoservico: number;
   mesid: number | null;
   mesdescricao: string | null;
+  prestacao: number | null;
 };
 
 /* ---------- RESPONSE PADRÃO API ---------- */
@@ -165,12 +166,14 @@ export async function buscarFacturaService(
 export async function annulInvoiceService(
   facturaId: number | string,
 ): Promise<FacturaDetalhe> {
- return  await axiosNestFinance.delete(`/invoices/${facturaId}`);
+  return await axiosNestFinance.delete(`/invoices/${facturaId}`);
 }
 
 export async function reactivateInvoiceService(
   facturaId: number | string,
 ): Promise<FacturaDetalhe> {
-  const { data } = await axiosNestFinance.patch(`/invoices/reactivate/${facturaId}`);
+  const { data } = await axiosNestFinance.patch(
+    `/invoices/reactivate/${facturaId}`,
+  );
   return data;
 }
