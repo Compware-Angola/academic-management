@@ -1,4 +1,4 @@
-// src/components/pdf/GenericPDFDocument.tsx
+
 import {
   Page,
   Text,

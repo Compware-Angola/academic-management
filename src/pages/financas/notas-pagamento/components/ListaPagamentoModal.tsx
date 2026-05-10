@@ -39,6 +39,8 @@ import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 
+import { defaultHeaderComprovativoPagamentoV2, GenericComprovativoPagamentoPDF } from "@/components/views/pdf/genericComprovativoPagamento-v2";
+
 interface ListaPagamentoModalProps {
   factureId: number;
   isModalOpen: boolean;
@@ -168,11 +170,32 @@ export const ListaPagamentoModal = ({
     .toISOString()
     .slice(0, 10)}`;
 
-  console.log("facturaResponse:", facturaResponse);
-  console.log("factura:", factura);
-  console.log("excelProps:", excelProps);
-  console.log("pdfDocument:", pdfDocument);
-
+  const receiptData = {
+    receiptNumber: "0099/2026",
+    studentName: "Herculano Mussili Aldino",
+    studentId: "003422827ME038",
+    course: "Auditoria e Contabilidade",
+    program: "Mestrado",
+    totalInWords: "Quinhentos e setenta e cinco mil e duzentos Kwanzas",
+    totalValue: "575.200,00",
+    payments: [
+      { date: "21/04/2026", description: "3ª Prestação", paymentMode: "TPA", value: "143.800,00" },
+      { date: "21/04/2026", description: "4ª Prestação", paymentMode: "TPA", value: "143.800,00" },
+      { date: "21/04/2026", description: "5ª Prestação", paymentMode: "TPA", value: "143.800,00" },
+      { date: "21/04/2026", description: "6ª Prestação", paymentMode: "TPA", value: "143.800,00" },
+    ],
+    city: "Luanda",
+    issueDate: "21 de abril de 2026",
+    officer: "Marisa Kassopa",
+    department: "Central de Atendimento",
+    documentType: "Comprovativo de Pagamento",
+  };
+  const doc = (
+    <GenericComprovativoPagamentoPDF
+      header={defaultHeaderComprovativoPagamentoV2}
+      data={receiptData}
+    />
+  );
   return (
     <>
       {/* Modal de Detalhes */}
@@ -185,20 +208,13 @@ export const ListaPagamentoModal = ({
             </DialogTitle>
             {factura && (
               <div className="flex flex-wrap gap-2 pt-2">
-                {pdfDocument && (
+                {doc && (
                   <PDFActions
-                    document={pdfDocument}
-                    fileName={`${baseFileName}.pdf`}
-                    showDownload
-                    showPrint
+                    document={doc}
+                    fileName={`Recibo_${receiptData.receiptNumber.replace("/", "-")}.pdf`}
                   />
                 )}
-                {excelProps && (
-                  <ExcelActions
-                    excelProps={excelProps}
-                    fileName={`${baseFileName}.xlsx`}
-                  />
-                )}
+
               </div>
             )}
           </DialogHeader>
