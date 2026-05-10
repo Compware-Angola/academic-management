@@ -252,6 +252,10 @@ export enum PermissionType {
 }
 
 export const PermissionTypeDetails = {
+  LISTAR_AVALICOES_ESTUDANTE: {
+    designacao: "Listar Avaliações do Estudante",
+    sigla: "list_av",
+  },
   ACTIVAR_CONFIRMACAO: {
     designacao: "Activar Confirmação",
     sigla: "act_conf",
