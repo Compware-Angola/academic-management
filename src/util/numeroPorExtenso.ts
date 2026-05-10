@@ -1,3 +1,5 @@
+import extenso from "extenso";
+
 const unidades = [
   "ZERO",
   "UM",
@@ -51,4 +53,13 @@ export const numeroPorExtenso = (n: number): string => {
   }
 
   return `${n} (NÃO SUPORTADO)`;
+};
+
+export const numeroPorExtensoMoeda = (n: number | undefined): string => {
+  if (!n) return "-";
+  const valor = extenso(n?.toString(), {
+    mode: "number",
+    locale: "pt",
+  });
+  return `${valor.charAt(0).toUpperCase() + valor.slice(1)} Kwanzas`;
 };

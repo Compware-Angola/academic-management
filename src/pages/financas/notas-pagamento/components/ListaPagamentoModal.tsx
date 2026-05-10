@@ -21,10 +21,9 @@ import {
   MapPin,
   Calendar,
   ArrowLeft,
-  Loader2,
 } from "lucide-react";
-import { useMemo } from "react";
-
+import Lottie from "lottie-react";
+import TimeLoader from "@/assets/timeloader.json";
 import { formatarData } from "@/util/date-formate";
 import {
   useQueryFacturaItens,
@@ -32,9 +31,7 @@ import {
 } from "@/hooks/horario/use-query-invoice";
 import { formatNumber } from "@/util/format-number";
 import { Button } from "@/components/ui/button";
-import ExcelActions, {
-  GenericExcelProps,
-} from "@/components/views/excel/GenericExcelExport";
+
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
@@ -70,157 +67,17 @@ export const ListaPagamentoModal = ({
     );
 
   const factura = facturaResponse?.data?.[0];
-  const isLoading = isLoadingFacturaItens || isLoadingFactura;
 
-  const { data: student } = useStudentDetail(factura?.codigo_matricula);
-
-  const exportRows = useMemo(
-    () =>
-      facturaItens?.data?.map((item) => ({
-        descricao:
-          `${item?.descricaoservico || "---"} ${item?.mesdescricao || ""}`.trim(),
-        codigofactura: item?.codigofactura || "---",
-        preco: formatNumber(item?.preco || 0),
-        quantidade: item?.quantidade || "---",
-      })) || [],
-    [facturaItens?.data],
+  const { data: student, isLoading: isLoadingStudent } = useStudentDetail(
+    factura?.codigo_matricula,
   );
+  const isLoading =
+    isLoadingFacturaItens || isLoadingFactura || isLoadingStudent;
 
-  const exportInfo = useMemo(
-    () =>
-      factura
-        ? [
-            `Referência: ${factura.referencia || "---"}`,
-            `Código da Matrícula: ${factura.codigo_matricula || "---"}`,
-            `Estudante: ${factura.nome_aluno || "---"}`,
-            `Curso: ${factura.curso || "---"}`,
-            `Campus: ${factura.polo || "---"}`,
-            `Valor Total: ${formatNumber(factura.total_preco || 0)}`,
-            `Valor da Multa: ${formatNumber(factura.total_multa || 0)}`,
-            `Valor de Desconto: ${formatNumber(factura.desconto || 0)}`,
-            `Valor a Pagar: ${formatNumber(factura.valor_pagar || 0)}`,
-            `Data de Factura: ${formatarData(factura.data_factura || "")}`,
-          ]
-        : [],
-    [factura],
-  );
-
-  const excelProps = useMemo<GenericExcelProps | null>(() => {
-    if (!factura) return null;
-
-    return {
-      documentTitle: "Detalhes do Pagamento",
-      subtitle: `Factura ${factura.referencia || factureId}`,
-      infoSections: [
-        {
-          title: "Dados do Pagamento",
-          content: exportInfo,
-        },
-      ],
-      mainTable: exportRows.length
-        ? {
-            headers: [
-              { key: "descricao", label: "Descrição", width: 36 },
-              { key: "codigofactura", label: "Factura Referente", width: 20 },
-              { key: "preco", label: "Valor", width: 18, align: "right" },
-              {
-                key: "quantidade",
-                label: "Quantidade",
-                width: 16,
-                align: "center",
-              },
-            ],
-            rows: exportRows,
-          }
-        : undefined,
-      footerNotice: "Documento gerado automaticamente.",
-      primaryColor: "#0D1B48",
-    };
-  }, [exportInfo, exportRows, factura, factureId]);
-
-  const pdfDocument = factura ? (
-    <GenericPDFDocument
-      documentTitle="Detalhes do Pagamento"
-      subtitle={`Factura ${factura.referencia || factureId}`}
-      orientation="vertical"
-      infoSections={[
-        {
-          title: "Dados do Pagamento",
-          content: exportInfo,
-        },
-      ]}
-      mainTable={
-        exportRows.length
-          ? {
-              headers: [
-                { key: "descricao", label: "Descrição", width: "45%" },
-                {
-                  key: "codigofactura",
-                  label: "Factura Referente",
-                  width: "22%",
-                },
-                { key: "preco", label: "Valor", width: "18%", align: "right" },
-                {
-                  key: "quantidade",
-                  label: "Qtd.",
-                  width: "15%",
-                  align: "center",
-                },
-              ],
-              rows: exportRows,
-              headerBackground: "#0D1B48",
-            }
-          : undefined
-      }
-      footerNotice="Documento gerado automaticamente."
-      primaryColor="#0D1B48"
-    />
-  ) : null;
-
-  const baseFileName = `Detalhes_Pagamento_${factura?.referencia || factureId}_${new Date()
+  const baseFileName = `Detalhes_Pagamento_${factura?.codigo || factureId}_${new Date()
     .toISOString()
     .slice(0, 10)}`;
 
-  const receiptData = {
-    receiptNumber: "0099/2026",
-    studentName: "Herculano Mussili Aldino",
-    studentId: "003422827ME038",
-    course: "Auditoria e Contabilidade",
-    program: "Mestrado",
-    totalInWords: "Quinhentos e setenta e cinco mil e duzentos Kwanzas",
-    totalValue: "575.200,00",
-    payments: [
-      {
-        date: "21/04/2026",
-        description: "3ª Prestação",
-        paymentMode: "TPA",
-        value: "143.800,00",
-      },
-      {
-        date: "21/04/2026",
-        description: "4ª Prestação",
-        paymentMode: "TPA",
-        value: "143.800,00",
-      },
-      {
-        date: "21/04/2026",
-        description: "5ª Prestação",
-        paymentMode: "TPA",
-        value: "143.800,00",
-      },
-      {
-        date: "21/04/2026",
-        description: "6ª Prestação",
-        paymentMode: "TPA",
-        value: "143.800,00",
-      },
-    ],
-    city: "Luanda",
-    issueDate: "21 de abril de 2026",
-    officer: "Marisa Kassopa",
-    department: "Central de Atendimento",
-    documentType: "Comprovativo de Pagamento",
-  };
   const doc = (
     <GenericComprovativoPagamentoPDF
       header={defaultHeaderComprovativoPagamentoV2}
@@ -242,23 +99,22 @@ export const ListaPagamentoModal = ({
               <FileText className="h-5 w-5" />
               Detalhes do Pagamento - {factura?.referencia}
             </DialogTitle>
-            {factura && (
+            {factura && facturaItens?.data && student && (
               <div className="flex flex-wrap gap-2 pt-2">
-                {doc && (
-                  <PDFActions
-                    document={doc}
-                    fileName={`Recibo_${receiptData.receiptNumber.replace("/", "-")}.pdf`}
-                  />
-                )}
+                {doc && <PDFActions document={doc} fileName={baseFileName} />}
               </div>
             )}
           </DialogHeader>
           {isLoading ? (
-            <div className="space-y-6 h-24 flex justify-center">
-              <div className="flex flex-col items-center">
-                <Loader2 className="text-primary animate-in" />
-                <p className="mt-2">Carregando Pagamento...</p>
+            <div className="h-[300px]">
+              <div className="flex justify-center items-center">
+                <Lottie
+                  animationData={TimeLoader}
+                  loop={true}
+                  style={{ width: 200, height: 200 }}
+                />
               </div>
+              <p className="text-center">Carregamento Pagamento...</p>
             </div>
           ) : factura ? (
             <div className="space-y-6">

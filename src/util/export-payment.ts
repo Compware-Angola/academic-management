@@ -4,9 +4,9 @@ import {
   FacturaItem,
 } from "@/services/finance/listar-facturas.service";
 import { StudentDetail } from "@/services/students/students.service";
-import { numeroPorExtenso } from "./numeroPorExtenso";
+import { numeroPorExtensoMoeda } from "./numeroPorExtenso";
 import { formatarData, formatDisplayPt } from "./date-formate";
-import { formatNumber, formatNumberMilhares } from "./format-number";
+import { formatNumberMilhares } from "./format-number";
 
 interface CreatePaymentItemProps {
   student: StudentDetail;
@@ -17,12 +17,14 @@ interface CreatePaymentItemProps {
 const createFacturaItem = (
   facturaItems: FacturaItem[],
   payment: PaymentItem,
+  data: string,
 ) => {
   return facturaItems?.map((t) => {
     const description =
       t.prestacao == null ? t?.descricaoservico : `${t.prestacao} ªPrestação`;
+
     return {
-      date: formatDisplayPt(payment?.data_operacao),
+      date: formatDisplayPt(data),
       description: description,
       paymentMode: payment?.forma_pagamento,
       value: formatNumberMilhares(t?.total),
@@ -35,18 +37,23 @@ const createPaymentItem = ({
   payment,
   factura,
 }: CreatePaymentItemProps) => {
+  const year = new Date().getFullYear();
+  const receiptNumber = `${factura?.codigo}/${year}`;
+  const data = !payment?.data_registro
+    ? factura?.data_factura
+    : payment?.data_registro;
   const receiptData = {
-    receiptNumber: "0099/2026",
+    receiptNumber: receiptNumber,
     studentName: student?.nome_completo,
     studentId: student?.bi,
     course: student?.curso,
     program: student?.grau,
-    totalInWords: numeroPorExtenso(factura?.valor_pagar),
+    totalInWords: numeroPorExtensoMoeda(factura?.valor_pagar),
     totalValue: formatNumberMilhares(factura?.valor_pagar),
-    payments: createFacturaItem(facturaItems, payment),
+    payments: createFacturaItem(facturaItems, payment, data),
     city: "Luanda",
-    issueDate: formatarData(payment?.data_operacao),
-    officer: payment.nome_operador,
+    issueDate: formatarData(data),
+    officer: payment?.nome_operador,
     department: "Central de Atendimento",
     documentType: "Comprovativo de Pagamento",
   };
