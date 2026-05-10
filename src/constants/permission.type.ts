@@ -245,7 +245,7 @@ export enum PermissionType {
 
   LISTAR_NEGOCIACAO_DIVIDA = "LISTAR_NEGOCIACAO_DIVIDA",
   LISTAR_TIPO_CREDITO_EDUCACIONAL = "LISTAR_TIPO_CREDITO_EDUCACIONAL",
-  LIQUIDAR_PAGAMENTO = "LIQUIDAR_FACTURA",
+  LIQUIDAR_PAGAMENTO = "LIQUIDAR_PAGAMENTO",
   INSENCAO_COLISAO_CURSO_ESTUDANTE = "INSENCAO_COLISAO_CURSO_ESTUDANTE",
   FORMA_PAGAMENTO = "FORMA_PAGAMENTO",
   VALIDAR_DOCUMENTO = "VALIDAR_DOCUMENTO",
@@ -1109,6 +1109,14 @@ export const PermissionTypeDetails = {
   LISTAR_SUMARIO: {
     designacao: "Listar sumários",
     sigla: "listar_sumario",
+  },
+  GERAR_OUTROS_SERVICOS: {
+    designacao: "Gerar outros serviços",
+    sigla: "g_outros_servicos",
+  },
+  GERAR_MENSALIDADES: {
+    designacao: "Gerar mensalidades",
+    sigla: "g_mensalidades",
   },
 } as const;
 

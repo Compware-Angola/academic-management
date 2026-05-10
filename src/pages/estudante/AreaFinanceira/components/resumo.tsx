@@ -81,55 +81,57 @@ import { Input } from "@/components/ui/input";
 import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FacturaItem } from "@/services/finance/listar-facturas.service";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 // Mock data for a complete student profile
-const mockEstudante = {
-  // Dados Pessoais
-  matricula: "20210001",
-  nome: "João Manuel Silva Costa",
-  nomePai: "Manuel António Costa",
-  nomeMae: "Maria Fernanda Silva",
-  dataNascimento: "1998-05-15",
-  nacionalidade: "Angolana",
-  naturalidade: "Luanda",
-  genero: "Masculino",
-  estadoCivil: "Solteiro",
-  bi: "005123456LA042",
-  nif: "123456789",
-  foto: "/placeholder.svg",
+// const mockEstudante = {
+//   // Dados Pessoais
+//   matricula: "20210001",
+//   nome: "João Manuel Silva Costa",
+//   nomePai: "Manuel António Costa",
+//   nomeMae: "Maria Fernanda Silva",
+//   dataNascimento: "1998-05-15",
+//   nacionalidade: "Angolana",
+//   naturalidade: "Luanda",
+//   genero: "Masculino",
+//   estadoCivil: "Solteiro",
+//   bi: "005123456LA042",
+//   nif: "123456789",
+//   foto: "/placeholder.svg",
 
-  // Contactos
-  telefone: "+244 923 456 789",
-  email: "joao.costa@email.com",
-  emailInstitucional: "joao.costa@universidade.ao",
-  endereco: "Rua da Liberdade, Nº 45, Maianga",
-  cidade: "Luanda",
-  provincia: "Luanda",
+//   // Contactos
+//   telefone: "+244 923 456 789",
+//   email: "joao.costa@email.com",
+//   emailInstitucional: "joao.costa@universidade.ao",
+//   endereco: "Rua da Liberdade, Nº 45, Maianga",
+//   cidade: "Luanda",
+//   provincia: "Luanda",
 
-  // Dados Académicos
-  curso: "Engenharia Informática",
-  faculdade: "Faculdade de Engenharia",
-  departamento: "Ciências da Computação",
-  grau: "Licenciatura",
-  regime: "Diurno",
-  turma: "EI-2021-A",
-  anoIngresso: 2021,
-  anoCurricular: 4,
-  semestre: "1º Semestre",
-  mediaGeral: 14.5,
-  creditosObtidos: 180,
-  creditosTotais: 240,
-  estado: "Activo",
+//   // Dados Académicos
+//   curso: "Engenharia Informática",
+//   faculdade: "Faculdade de Engenharia",
+//   departamento: "Ciências da Computação",
+//   grau: "Licenciatura",
+//   regime: "Diurno",
+//   turma: "EI-2021-A",
+//   anoIngresso: 2021,
+//   anoCurricular: 4,
+//   semestre: "1º Semestre",
+//   mediaGeral: 14.5,
+//   creditosObtidos: 180,
+//   creditosTotais: 240,
+//   estado: "Activo",
 
-  // Dados Financeiros
-  saldoDevedor: 45000,
-  mensalidadesEmDia: false,
-  ultimoPagamento: "2025-12-15",
-  valorMensalidade: 25000,
-  desconto: 10,
-  tipoPagamento: "Mensal",
-  bolseiro: false,
-};
+//   // Dados Financeiros
+//   saldoDevedor: 45000,
+//   mensalidadesEmDia: false,
+//   ultimoPagamento: "2025-12-15",
+//   valorMensalidade: 25000,
+//   desconto: 10,
+//   tipoPagamento: "Mensal",
+//   bolseiro: false,
+// };
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -159,7 +161,7 @@ export function Resumo({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
-
+ const { hasPermission } = usePermission();
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<
     number | null
   >(null);
@@ -171,6 +173,7 @@ export function Resumo({
     setSelectedServices(services);
     setOpenServicesModal(true);
   }
+
 
   const [searchBy, setSearchBy] = useState<"reference" | "codigoFatura">(
     "codigoFatura",
@@ -195,8 +198,9 @@ export function Resumo({
     reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
     codigoFatura:
       searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
-  });
-
+  },
+hasPermission(PermissionTypeDetails.FACTURAS.sigla)
+);
   const {
     data: itens,
     isLoading: isLoadingItens,
@@ -287,7 +291,7 @@ export function Resumo({
     return <div>Matrícula inválida</div>;
   }
 
-  const estudante = mockEstudante;
+  // const estudante = mockEstudante;
 
 
 
@@ -295,7 +299,7 @@ export function Resumo({
     <TabsContent value={value} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Novo Card - Saldo do Estudante */}
-        <Card
+        {/* <Card
           className={
             student?.saldo_atual >= 0 ? "border-green-500" : "border-amber-500"
           }
@@ -325,10 +329,10 @@ export function Resumo({
                   : "Sem saldo"}
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Saldo Devedor */}
-        <Card
+        {/* <Card
           className={
             estudante.saldoDevedor > 0
               ? "border-destructive"
@@ -353,10 +357,10 @@ export function Resumo({
               </p>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Mensalidade */}
-        <Card>
+        {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Mensalidade
@@ -370,10 +374,10 @@ export function Resumo({
               </p>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Último Pagamento */}
-        <Card>
+        {/* <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Último Pagamento
@@ -387,7 +391,7 @@ export function Resumo({
               {estudante.tipoPagamento || "—"}
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
       <Card>
         <CardHeader>
@@ -792,7 +796,7 @@ export function Resumo({
                   itens={itens?.data || []}
                   showDownload={true}
                   showPrint={true}
-                  showliquidarNota={true}
+                  showliquidarNota={hasPermission(PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla)}
                 />
               </div>
             </div>

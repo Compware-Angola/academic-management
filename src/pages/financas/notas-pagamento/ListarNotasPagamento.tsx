@@ -640,7 +640,7 @@ export default function ListarNotasPagamento() {
                   itens={itens?.data || []}
                   showDownload={true}
                   showPrint={true}
-                  showliquidarNota={true}
+                  showliquidarNota={false}
                 />
               </div>
             </div>

@@ -18,12 +18,16 @@ import { AvaliacaoSection } from "./AvaliacaoSection";
 import { StudentProfileHeader } from "./StudentProfileHeader";
 import { PerfilSection } from "./PerfilSection";
 import { DisciplinasSection } from "./disciplina";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 // Mock data for a complete student profile
 
 export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
   const [activeTab, setActiveTab] = useState("perfil");
+  const { hasPermission } = usePermission();
+  const canViewFinanceiro = hasPermission(PermissionTypeDetails.FACTURAS.sigla) || hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) || hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla);
 
   if (!Number(matricula)) {
     return <div>Matrícula inválida</div>;
@@ -74,7 +78,8 @@ export default function PerfilEstudante() {
             <span className="md:hidden">Docs</span>
           </TabsTrigger>
 
-          <TabsTrigger value="area-financeira" className="gap-2">
+    
+          <TabsTrigger disabled={!canViewFinanceiro} value="area-financeira" className="gap-2">
             <CreditCard className="h-4 w-4" />
             <span className="hidden md:inline">Área Financeira</span>
             <span className="md:hidden">Área Financeira</span>
@@ -96,10 +101,12 @@ export default function PerfilEstudante() {
           value="disciplinas"
           codigoMatricula={Number(matricula)}
         />
-        <AreaFinanceira
-          codigoMatricula={Number(matricula)}
-          value="area-financeira"
-        />
+     
+          <AreaFinanceira
+            codigoMatricula={Number(matricula)}
+            value="area-financeira"
+          />
+       
 
         <AvaliacaoSection
           value="avaliacao"
