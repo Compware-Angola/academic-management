@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,10 +8,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
+
 import {
   Table,
   TableBody,
@@ -21,47 +19,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
-  Home,
-  User,
-  GraduationCap,
-  CreditCard,
+
   FileText,
-  Calendar,
-  Phone,
-  Mail,
-  MapPin,
-  Download,
-  Printer,
-  ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Clock,
+
   AlertTriangle,
   Eye,
   RefreshCw,
   Search,
+  Loader2,
+  Wallet,
+  Clock,
+  CalendarDays,
+  Receipt,
 } from "lucide-react";
 import {
   useStudentDetail,
-  useStudentDisciplinas,
+
 } from "@/hooks/students/use-query-students";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
 
@@ -82,55 +59,10 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { FacturaItem } from "@/services/finance/listar-facturas.service";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
+import { parseFilter } from "@/util/parse-filter";
+import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
 
-// Mock data for a complete student profile
-const mockEstudante = {
-  // Dados Pessoais
-  matricula: "20210001",
-  nome: "João Manuel Silva Costa",
-  nomePai: "Manuel António Costa",
-  nomeMae: "Maria Fernanda Silva",
-  dataNascimento: "1998-05-15",
-  nacionalidade: "Angolana",
-  naturalidade: "Luanda",
-  genero: "Masculino",
-  estadoCivil: "Solteiro",
-  bi: "005123456LA042",
-  nif: "123456789",
-  foto: "/placeholder.svg",
-
-  // Contactos
-  telefone: "+244 923 456 789",
-  email: "joao.costa@email.com",
-  emailInstitucional: "joao.costa@universidade.ao",
-  endereco: "Rua da Liberdade, Nº 45, Maianga",
-  cidade: "Luanda",
-  provincia: "Luanda",
-
-  // Dados Académicos
-  curso: "Engenharia Informática",
-  faculdade: "Faculdade de Engenharia",
-  departamento: "Ciências da Computação",
-  grau: "Licenciatura",
-  regime: "Diurno",
-  turma: "EI-2021-A",
-  anoIngresso: 2021,
-  anoCurricular: 4,
-  semestre: "1º Semestre",
-  mediaGeral: 14.5,
-  creditosObtidos: 180,
-  creditosTotais: 240,
-  estado: "Activo",
-
-  // Dados Financeiros
-  saldoDevedor: 45000,
-  mensalidadesEmDia: false,
-  ultimoPagamento: "2025-12-15",
-  valorMensalidade: 25000,
-  desconto: 10,
-  tipoPagamento: "Mensal",
-  bolseiro: false,
-};
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -167,7 +99,31 @@ export function Resumo({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openServicesModal, setOpenServicesModal] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string | null>(null);
-
+  const { data: student } = useStudentDetail(matricula);
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const activeAcademicYear = academicYear?.find(
+    (year) => year.estado.toLowerCase() === "activo",
+  );
+  const {
+    data: monthlyFeeData,
+    isLoading: isFeesLoading,
+    isError: isFeesError,
+  } = useQueryFinanceMonthlyFee(
+    {
+      academicYear: activeAcademicYear?.codigo?.toString(),
+      enrollmentCode: matricula.toString(),
+      status: 'pending',
+      page: 1,
+      limit: 100,
+    },
+  )
+  const { data: monthValueResponse, isLoading: isMonthValueLoading } =
+    useQueryMonthlyFeesValue({
+      anoLectivoId: parseFilter(activeAcademicYear?.codigo?.toString()),
+      cursoId: student?.curso_codigo,
+      poloId: 1,
+    });
   function handleOpenServices(services: string) {
     setSelectedServices(services);
     setOpenServicesModal(true);
@@ -206,7 +162,14 @@ export function Resumo({
     isLoading: isLoadingItens,
     isFetching: isFetchingItens,
   } = useQueryFacturaItens(selectedFacturaCodigo ?? undefined);
-
+  const monthFee = monthValueResponse?.[0];
+  const pendingPayments = monthlyFeeData?.data ?? []
+  const totalPending = useMemo(() => {
+    return pendingPayments.reduce((sum, item) => sum + (item.total ?? 0), 0)
+  }, [pendingPayments])
+  const hasError = isFeesError
+  const hasNoData = !isFeesLoading && pendingPayments.length === 0
+  const yearLabel = activeAcademicYear?.designacao ?? 'Ano letivo'
   const getStatusBadge = (status: number) => {
     switch (status) {
       case 0:
@@ -273,120 +236,98 @@ export function Resumo({
     reference: "Pesquisar por referência da factura...",
     codigoFatura: "Pesquisar por Codigo da factura...",
   };
-
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
-  const {
-    data: student,
-    isLoading,
-    isFetching,
-    error,
-  } = useStudentDetail(matricula);
+
 
   if (!matricula) {
     return <div>Matrícula inválida</div>;
   }
 
-  const estudante = mockEstudante;
+  const cardBase = "rounded-xl border-l-[3px] border-t-0 border-r-0 border-b-0 shadow-none"
 
   return (
     <TabsContent value={value} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Novo Card - Saldo do Estudante */}
-        <Card
-          className={
-            student?.saldo_atual >= 0 ? "border-green-500" : "border-amber-500"
-          }
-        >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Saldo Atual
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+        {/* Saldo Atual */}
+        <Card className={`${cardBase} ${student?.saldo_atual >= 0 ? "border-l-green-500" : "border-l-destructive"}`}>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <Wallet className="h-3.5 w-3.5" /> Saldo atual
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p
-              className={`text-3xl font-bold ${
-                student?.saldo_atual > 0
-                  ? "text-green-600"
-                  : student?.saldo_atual < 0
-                    ? "text-destructive"
-                    : "text-muted-foreground"
-              }`}
-            >
-              {student?.saldo_atual >= 0 ? "+" : ""}
-              {formatCurrency(student?.saldo_atual || 0)}
+            <p className={`text-2xl font-medium ${student?.saldo_atual > 0 ? "text-green-600" : student?.saldo_atual < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+              {student?.saldo_atual >= 0 ? "+" : ""}{formatCurrency(student?.saldo_atual || 0)}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {student?.saldo_atual > 0
-                ? "Crédito disponível"
+            <span className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
+  ${student?.saldo_atual > 0
+                ? "bg-green-100 text-green-700"
                 : student?.saldo_atual < 0
-                  ? "Saldo negativo (ver detalhes)"
-                  : "Sem saldo"}
-            </p>
+                  ? "bg-red-100 text-destructive"
+                  : "bg-muted text-muted-foreground"
+              }`}>
+              {student?.saldo_atual > 0 ? "Crédito disponível" : student?.saldo_atual < 0 ? "Saldo negativo" : "Sem saldo"}
+            </span>
           </CardContent>
         </Card>
 
-        {/* Saldo Devedor */}
-        <Card
-          className={
-            estudante.saldoDevedor > 0
-              ? "border-destructive"
-              : "border-green-500"
-          }
-        >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Saldo Devedor
+        {/* Mensalidades Pendentes */}
+        <Card className={`${cardBase} ${totalPending > 0 ? "border-l-destructive" : "border-l-green-500"}`}>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" /> Pendentes · {yearLabel}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p
-              className={`text-3xl font-bold ${estudante.saldoDevedor > 0 ? "text-destructive" : "text-green-500"}`}
-            >
-              ---
-            </p>
-            {estudante.saldoDevedor > 0 && (
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <AlertTriangle className="h-3 w-3 text-destructive" />
-                Pagamento pendente
-              </p>
+            {isFeesLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : hasError ? (
+              <p className="text-2xl font-medium text-destructive">---</p>
+            ) : hasNoData ? (
+              <p className="text-2xl font-medium text-muted-foreground">---</p>
+            ) : (
+              <>
+                <p className="text-2xl font-medium text-destructive">{formatCurrency(totalPending)}</p>
+                <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3 text-destructive" />
+                  {pendingPayments.length} pagamento(s) em atraso
+                </p>
+              </>
             )}
           </CardContent>
         </Card>
 
         {/* Mensalidade */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Mensalidade
+        <Card className={`${cardBase} border-l-muted`}>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <CalendarDays className="h-3.5 w-3.5" /> Mensalidade
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-primary">---</p>
-            {estudante.desconto > 0 && (
-              <p className="text-xs text-green-500 mt-1">
-                Desconto de 0 % aplicado
-              </p>
+            {isMonthValueLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+              <>
+                <p className="text-2xl font-medium text-primary">{formatCurrency(monthFee?.preco || 0)}</p>
+                {monthFee?.descricao && <p className="mt-2 text-xs text-muted-foreground">{monthFee.descricao}</p>}
+              </>
             )}
           </CardContent>
         </Card>
 
         {/* Último Pagamento */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Último Pagamento
+        <Card className={`${cardBase} border-l-muted`}>
+          <CardHeader className="pb-1">
+            <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+              <Receipt className="h-3.5 w-3.5" /> Último pagamento
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">
-              {formatDate(estudante.ultimoPagamento)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {estudante.tipoPagamento || "—"}
-            </p>
+            <p className="text-2xl font-medium text-muted-foreground">---</p>
+            <p className="mt-2 text-xs text-muted-foreground">Nenhum registo encontrado</p>
           </CardContent>
         </Card>
+
       </div>
       <Card>
         <CardHeader>
@@ -768,8 +709,8 @@ export function Resumo({
                             <TableCell>
                               {(item.descricaoservico || "—") +
                                 (Number(item.mesid) !== 3 &&
-                                item.mesid &&
-                                item.mesdescricao
+                                  item.mesid &&
+                                  item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
