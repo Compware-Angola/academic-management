@@ -252,6 +252,26 @@ export enum PermissionType {
 }
 
 export const PermissionTypeDetails = {
+  ACTIVAR_CONFIRMACAO: {
+    designacao: "Activar Confirmação",
+    sigla: "act_conf",
+  },
+  ACTUALIZAR_DADOS_ESTUDANTE: {
+    designacao: "Actualizar Dados do Estudante",
+    sigla: "act_dados",
+  },
+  ACTUALIZAR_CONTACTOS_ESTUDANTE: {
+    designacao: "Actualizar Contactos do Estudante",
+    sigla: "act_cont",
+  },
+  INSCRICOES_UC: {
+    designacao: "Fazer Inscrições em UC",
+    sigla: "ins_uc",
+  },
+  MUDAR_CURSO: {
+    designacao: "Mudar Curso",
+    sigla: "alt_curso",
+  },
   VALIDAR_DOCUMENTO: {
     designacao: "Validar Documento",
     sigla: "mfe_vd",

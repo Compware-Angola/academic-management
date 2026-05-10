@@ -6,8 +6,8 @@ import { GerarDiploma } from "./gerar-diploma";
 
 import { CartaConclusaoSection } from "./components/CartaConclusaoSection";
 import { CertificadoNotas } from "./components/certificado-notas";
-
-
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 interface DocumentsSectionProps {
   codigoMatricula: number;
@@ -18,6 +18,7 @@ export function DocumentsSection({
   codigoMatricula,
   value = "documentos",
 }: DocumentsSectionProps) {
+  const { hasPermission } = usePermission();
   return (
     <TabsContent value={value}>
       <Tabs
@@ -26,48 +27,68 @@ export function DocumentsSection({
         className="flex flex-row gap-6"
       >
         <TabsList className="flex justify-start flex-col h-auto w-52">
-          <TabsTrigger
-            className="w-full justify-start gap-2"
-            value="carta-de-conclusao"
-          >
-            <FileText className="h-4 w-4" />
-            <span>Carta de Conclusão</span>
-          </TabsTrigger>
-          <TabsTrigger className="w-full justify-start gap-2" value="certidoes">
-            <Contact className="h-4 w-4" />
-            <span>Certidões</span>
-          </TabsTrigger>
-          <TabsTrigger
-            className="w-full justify-start gap-2"
-            value="gerar-diploma"
-          >
-            <GraduationCap className="h-4 w-4" />
-            <span>Gerar Diploma</span>
-          </TabsTrigger>
-          <TabsTrigger
-            className="w-full justify-start gap-2"
-            value="certificado-notas"
-          >
-            <GraduationCap className="h-4 w-4" />
-            <span className="truncate">Certificado de Notas</span>
-          </TabsTrigger>
+          {hasPermission(PermissionTypeDetails.CARTA_CONCLUSAO.sigla) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="carta-de-conclusao"
+            >
+              <FileText className="h-4 w-4" />
+              <span>Carta de Conclusão</span>
+            </TabsTrigger>
+          )}
+          {hasPermission(PermissionTypeDetails.CERTIDOES.sigla) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="certidoes"
+            >
+              <Contact className="h-4 w-4" />
+              <span>Certidões</span>
+            </TabsTrigger>
+          )}
+          {hasPermission(PermissionTypeDetails.GERAR_DIPLOMA.sigla) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="gerar-diploma"
+            >
+              <GraduationCap className="h-4 w-4" />
+              <span>Gerar Diploma</span>
+            </TabsTrigger>
+          )}
+          {hasPermission(PermissionTypeDetails.CERTIFICADO_COM_NOTAS.sigla) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="certificado-notas"
+            >
+              <GraduationCap className="h-4 w-4" />
+              <span className="truncate">Certificado de Notas</span>
+            </TabsTrigger>
+          )}
         </TabsList>
         <Card className="flex-1 p-6">
-          <TabsContent value="carta-de-conclusao">
-             <CartaConclusaoSection codigoMatricula={codigoMatricula}/>
-          </TabsContent>
-          <TabsContent value="certidoes">
-            <CertidoesSection codigoMatricula={codigoMatricula} />
-          </TabsContent>
-          <TabsContent value="certificado-notas">
-            <CertificadoNotas codigoMatricula={codigoMatricula} />
-          </TabsContent>
-          <TabsContent value="gerar-diploma">
-            <GerarDiploma
-              codigoMatricula={codigoMatricula}
-              value="gerar-diploma"
-            />
-          </TabsContent>
+          {hasPermission(PermissionTypeDetails.CARTA_CONCLUSAO.sigla) && (
+            <TabsContent value="carta-de-conclusao">
+              <CartaConclusaoSection codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          )}
+          {hasPermission(PermissionTypeDetails.CERTIDOES.sigla) && (
+            <TabsContent value="certidoes">
+              <CertidoesSection codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          )}
+
+          {hasPermission(PermissionTypeDetails.CERTIFICADO_COM_NOTAS.sigla) && (
+            <TabsContent value="certificado-notas">
+              <CertificadoNotas codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          )}
+          {hasPermission(PermissionTypeDetails.GERAR_DIPLOMA.sigla) && (
+            <TabsContent value="gerar-diploma">
+              <GerarDiploma
+                codigoMatricula={codigoMatricula}
+                value="gerar-diploma"
+              />
+            </TabsContent>
+          )}
         </Card>
       </Tabs>
     </TabsContent>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
@@ -27,7 +27,15 @@ export default function PerfilEstudante() {
   const { matricula } = useParams<{ matricula: string }>();
   const [activeTab, setActiveTab] = useState("perfil");
   const { hasPermission } = usePermission();
-  const canViewFinanceiro = hasPermission(PermissionTypeDetails.FACTURAS.sigla) || hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) || hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla);
+  const canViewFinanceiro =
+    hasPermission(PermissionTypeDetails.FACTURAS.sigla) ||
+    hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) ||
+    hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla);
+  const canViewDocuments =
+    hasPermission(PermissionTypeDetails.CARTA_CONCLUSAO.sigla) ||
+    hasPermission(PermissionTypeDetails.CERTIDOES.sigla) ||
+    hasPermission(PermissionTypeDetails.GERAR_DIPLOMA.sigla) ||
+    hasPermission(PermissionTypeDetails.CERTIFICADO_COM_NOTAS.sigla);
 
   if (!Number(matricula)) {
     return <div>Matrícula inválida</div>;
@@ -72,14 +80,21 @@ export default function PerfilEstudante() {
             <span className="md:hidden">Perfil</span>
           </TabsTrigger>
 
-          <TabsTrigger value="documentacao" className="gap-2">
+          <TabsTrigger
+            disabled={!canViewDocuments}
+            value="documentacao"
+            className="gap-2"
+          >
             <FileText className="h-4 w-4" />
             <span className="hidden md:inline">Documentação</span>
             <span className="md:hidden">Docs</span>
           </TabsTrigger>
 
-    
-          <TabsTrigger disabled={!canViewFinanceiro} value="area-financeira" className="gap-2">
+          <TabsTrigger
+            disabled={!canViewFinanceiro}
+            value="area-financeira"
+            className="gap-2"
+          >
             <CreditCard className="h-4 w-4" />
             <span className="hidden md:inline">Área Financeira</span>
             <span className="md:hidden">Área Financeira</span>
@@ -101,12 +116,11 @@ export default function PerfilEstudante() {
           value="disciplinas"
           codigoMatricula={Number(matricula)}
         />
-     
-          <AreaFinanceira
-            codigoMatricula={Number(matricula)}
-            value="area-financeira"
-          />
-       
+
+        <AreaFinanceira
+          codigoMatricula={Number(matricula)}
+          value="area-financeira"
+        />
 
         <AvaliacaoSection
           value="avaliacao"
