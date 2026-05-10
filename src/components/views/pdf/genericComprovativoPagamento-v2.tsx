@@ -73,11 +73,12 @@ const S = StyleSheet.create({
     // Logo alinhada à direita
     topBlock: {
         alignItems: "flex-end",
-        marginBottom: 4,
+        marginBottom: 14,
     },
     logo: {
         width: 90,
         height: 52,
+        marginBottom: 4,
     },
 
     // Nome da universidade centrado
@@ -264,11 +265,9 @@ export function GenericComprovativoPagamentoPDF({
                 {/* ── TOPO: logo à direita ── */}
                 <View style={S.topBlock}>
                     <Image style={S.logo} src={header.logoSrc} />
+                    <Text style={S.orgName}>{header.name}</Text>
+                    {header.decree && <Text style={S.decree}>{header.decree}</Text>}
                 </View>
-
-                {/* ── NOME CENTRADO ── */}
-                <Text style={S.orgName}>{header.name}</Text>
-                {header.decree && <Text style={S.decree}>{header.decree}</Text>}
 
                 {/* ── INFO À ESQUERDA ── */}
                 <View style={S.leftInfoBlock}>
