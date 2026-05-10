@@ -77,7 +77,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-
 import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FacturaItem } from "@/services/finance/listar-facturas.service";
@@ -85,53 +84,53 @@ import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 
 // Mock data for a complete student profile
-// const mockEstudante = {
-//   // Dados Pessoais
-//   matricula: "20210001",
-//   nome: "João Manuel Silva Costa",
-//   nomePai: "Manuel António Costa",
-//   nomeMae: "Maria Fernanda Silva",
-//   dataNascimento: "1998-05-15",
-//   nacionalidade: "Angolana",
-//   naturalidade: "Luanda",
-//   genero: "Masculino",
-//   estadoCivil: "Solteiro",
-//   bi: "005123456LA042",
-//   nif: "123456789",
-//   foto: "/placeholder.svg",
+const mockEstudante = {
+  // Dados Pessoais
+  matricula: "20210001",
+  nome: "João Manuel Silva Costa",
+  nomePai: "Manuel António Costa",
+  nomeMae: "Maria Fernanda Silva",
+  dataNascimento: "1998-05-15",
+  nacionalidade: "Angolana",
+  naturalidade: "Luanda",
+  genero: "Masculino",
+  estadoCivil: "Solteiro",
+  bi: "005123456LA042",
+  nif: "123456789",
+  foto: "/placeholder.svg",
 
-//   // Contactos
-//   telefone: "+244 923 456 789",
-//   email: "joao.costa@email.com",
-//   emailInstitucional: "joao.costa@universidade.ao",
-//   endereco: "Rua da Liberdade, Nº 45, Maianga",
-//   cidade: "Luanda",
-//   provincia: "Luanda",
+  // Contactos
+  telefone: "+244 923 456 789",
+  email: "joao.costa@email.com",
+  emailInstitucional: "joao.costa@universidade.ao",
+  endereco: "Rua da Liberdade, Nº 45, Maianga",
+  cidade: "Luanda",
+  provincia: "Luanda",
 
-//   // Dados Académicos
-//   curso: "Engenharia Informática",
-//   faculdade: "Faculdade de Engenharia",
-//   departamento: "Ciências da Computação",
-//   grau: "Licenciatura",
-//   regime: "Diurno",
-//   turma: "EI-2021-A",
-//   anoIngresso: 2021,
-//   anoCurricular: 4,
-//   semestre: "1º Semestre",
-//   mediaGeral: 14.5,
-//   creditosObtidos: 180,
-//   creditosTotais: 240,
-//   estado: "Activo",
+  // Dados Académicos
+  curso: "Engenharia Informática",
+  faculdade: "Faculdade de Engenharia",
+  departamento: "Ciências da Computação",
+  grau: "Licenciatura",
+  regime: "Diurno",
+  turma: "EI-2021-A",
+  anoIngresso: 2021,
+  anoCurricular: 4,
+  semestre: "1º Semestre",
+  mediaGeral: 14.5,
+  creditosObtidos: 180,
+  creditosTotais: 240,
+  estado: "Activo",
 
-//   // Dados Financeiros
-//   saldoDevedor: 45000,
-//   mensalidadesEmDia: false,
-//   ultimoPagamento: "2025-12-15",
-//   valorMensalidade: 25000,
-//   desconto: 10,
-//   tipoPagamento: "Mensal",
-//   bolseiro: false,
-// };
+  // Dados Financeiros
+  saldoDevedor: 45000,
+  mensalidadesEmDia: false,
+  ultimoPagamento: "2025-12-15",
+  valorMensalidade: 25000,
+  desconto: 10,
+  tipoPagamento: "Mensal",
+  bolseiro: false,
+};
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -161,7 +160,7 @@ export function Resumo({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
- const { hasPermission } = usePermission();
+  const { hasPermission } = usePermission();
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<
     number | null
   >(null);
@@ -173,7 +172,6 @@ export function Resumo({
     setSelectedServices(services);
     setOpenServicesModal(true);
   }
-
 
   const [searchBy, setSearchBy] = useState<"reference" | "codigoFatura">(
     "codigoFatura",
@@ -189,18 +187,20 @@ export function Resumo({
     isError: isErrorFacturas,
     error: errorFacturas,
     refetch,
-  } = useQueryFacturas({
-    anoLectivo: filters.anoLetivo,
-    status: filters.estado,
-    page,
-    limit,
-    codigoMatricula: matricula,
-    reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
-    codigoFatura:
-      searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
-  },
-hasPermission(PermissionTypeDetails.FACTURAS.sigla)
-);
+  } = useQueryFacturas(
+    {
+      anoLectivo: filters.anoLetivo,
+      status: filters.estado,
+      page,
+      limit,
+      codigoMatricula: matricula,
+      reference:
+        searchBy === "reference" && searchTerm ? searchTerm : undefined,
+      codigoFatura:
+        searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
+    },
+    hasPermission(PermissionTypeDetails.FACTURAS.sigla),
+  );
   const {
     data: itens,
     isLoading: isLoadingItens,
@@ -283,23 +283,17 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
     error,
   } = useStudentDetail(matricula);
 
-
-
-
-
   if (!matricula) {
     return <div>Matrícula inválida</div>;
   }
 
-  // const estudante = mockEstudante;
-
-
+  const estudante = mockEstudante;
 
   return (
     <TabsContent value={value} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Novo Card - Saldo do Estudante */}
-        {/* <Card
+        <Card
           className={
             student?.saldo_atual >= 0 ? "border-green-500" : "border-amber-500"
           }
@@ -311,12 +305,13 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
           </CardHeader>
           <CardContent>
             <p
-              className={`text-3xl font-bold ${student?.saldo_atual > 0
-                ? "text-green-600"
-                : student?.saldo_atual < 0
-                  ? "text-destructive"
-                  : "text-muted-foreground"
-                }`}
+              className={`text-3xl font-bold ${
+                student?.saldo_atual > 0
+                  ? "text-green-600"
+                  : student?.saldo_atual < 0
+                    ? "text-destructive"
+                    : "text-muted-foreground"
+              }`}
             >
               {student?.saldo_atual >= 0 ? "+" : ""}
               {formatCurrency(student?.saldo_atual || 0)}
@@ -329,10 +324,10 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
                   : "Sem saldo"}
             </p>
           </CardContent>
-        </Card> */}
+        </Card>
 
         {/* Saldo Devedor */}
-        {/* <Card
+        <Card
           className={
             estudante.saldoDevedor > 0
               ? "border-destructive"
@@ -357,10 +352,10 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
               </p>
             )}
           </CardContent>
-        </Card> */}
+        </Card>
 
         {/* Mensalidade */}
-        {/* <Card>
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Mensalidade
@@ -374,10 +369,10 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
               </p>
             )}
           </CardContent>
-        </Card> */}
+        </Card>
 
         {/* Último Pagamento */}
-        {/* <Card>
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Último Pagamento
@@ -391,7 +386,7 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
               {estudante.tipoPagamento || "—"}
             </p>
           </CardContent>
-        </Card> */}
+        </Card>
       </div>
       <Card>
         <CardHeader>
@@ -409,8 +404,8 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
               <AcademicYearSelect
                 enableDefaultActiveYear
                 value={filters.anoLetivo}
-                onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })} />
-
+                onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
+              />
             </div>
 
             <div className="min-w-[180px]">
@@ -612,7 +607,9 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
                 Detalhes da Nota de Pagamento
                 {selectedFactura && (
                   <span className="inline-flex px-3 py-1 text-sm font-mono bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md font-medium">
-                    {selectedFactura.referencia || selectedFactura.codigo || "—"}
+                    {selectedFactura.referencia ||
+                      selectedFactura.codigo ||
+                      "—"}
                   </span>
                 )}
               </div>
@@ -625,7 +622,6 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
               {/* Valor total destacado, mas sem gradiente */}
               <div className="bg-gray-50 dark:bg-gray-900 px-4 py-4 rounded-xl border border-gray-200 dark:border-gray-800">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Valor Total
@@ -652,7 +648,6 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
                       {formatDate(selectedFactura.data_factura)}
                     </p>
                   </div>
-
                 </div>
               </div>
 
@@ -660,23 +655,37 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
 
               {/* Dados do Estudante */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Dados do Estudante</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Dados do Estudante
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
-                    <p className="text-sm text-muted-foreground">Código da Matrícula</p>
-                    <p className="font-medium font-mono">{selectedFactura.codigo_matricula || "—"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Código da Matrícula
+                    </p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.codigo_matricula || "—"}
+                    </p>
                   </div>
                   <div className="col-span-2 lg:col-span-1">
-                    <p className="text-sm text-muted-foreground">Nome do Estudante</p>
-                    <p className="font-semibold text-lg">{selectedFactura.nome_aluno || "—"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nome do Estudante
+                    </p>
+                    <p className="font-semibold text-lg">
+                      {selectedFactura.nome_aluno || "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Curso</p>
-                    <p className="font-medium">{selectedFactura.curso || "—"}</p>
+                    <p className="font-medium">
+                      {selectedFactura.curso || "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Ano Lectivo</p>
-                    <p className="font-medium">{selectedFactura.ano_lectivo || "—"}</p>
+                    <p className="font-medium">
+                      {selectedFactura.ano_lectivo || "—"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -685,15 +694,25 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
 
               {/* Informações da Nota */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Informações da Nota</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Informações da Nota
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Nº da Nota</p>
-                    <p className="font-medium font-mono">{selectedFactura.referencia || selectedFactura.codigo || "—"}</p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.referencia ||
+                        selectedFactura.codigo ||
+                        "—"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Data de Emissão</p>
-                    <p className="font-medium">{formatDate(selectedFactura.data_factura)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Data de Emissão
+                    </p>
+                    <p className="font-medium">
+                      {formatDate(selectedFactura.data_factura)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Multa</p>
@@ -712,7 +731,9 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
 
               {/* Itens da Factura */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Itens da Nota de Pagamento</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Itens da Nota de Pagamento
+                </h3>
 
                 {isLoadingItens || isFetchingItens ? (
                   <div className="py-10 text-center text-muted-foreground bg-gray-50 dark:bg-gray-900/50 rounded-lg">
@@ -730,20 +751,31 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
                           <TableHead>Descrição</TableHead>
                           <TableHead className="text-center">Qtd</TableHead>
                           <TableHead className="text-center">Multa</TableHead>
-                          <TableHead className="text-right">Valor Unit.</TableHead>
-                          <TableHead className="text-right pr-6">Valor Total</TableHead>
+                          <TableHead className="text-right">
+                            Valor Unit.
+                          </TableHead>
+                          <TableHead className="text-right pr-6">
+                            Valor Total
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {itens.data.map((item: FacturaItem, index: number) => (
-                          <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <TableRow
+                            key={index}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          >
                             <TableCell>
                               {(item.descricaoservico || "—") +
-                                (Number(item.mesid) !== 3 && item.mesid && item.mesdescricao
+                                (Number(item.mesid) !== 3 &&
+                                item.mesid &&
+                                item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
-                            <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
+                            <TableCell className="text-center">
+                              {item.quantidade ?? 1}
+                            </TableCell>
                             <TableCell className="text-center text-orange-600 dark:text-orange-400">
                               {item.multa ? formatCurrency(item.multa) : "—"}
                             </TableCell>
@@ -763,8 +795,8 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return total + (item.preco * quantidade);
-                              }, 0)
+                                return total + item.preco * quantidade;
+                              }, 0),
                             )}
                           </TableCell>
                         </TableRow>
@@ -776,8 +808,12 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return total + (item.preco * quantidade) + (item.multa ?? 0);
-                              }, 0)
+                                return (
+                                  total +
+                                  item.preco * quantidade +
+                                  (item.multa ?? 0)
+                                );
+                              }, 0),
                             )}
                           </TableCell>
                         </TableRow>
@@ -796,7 +832,9 @@ hasPermission(PermissionTypeDetails.FACTURAS.sigla)
                   itens={itens?.data || []}
                   showDownload={true}
                   showPrint={true}
-                  showliquidarNota={hasPermission(PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla)}
+                  showliquidarNota={hasPermission(
+                    PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla,
+                  )}
                 />
               </div>
             </div>
