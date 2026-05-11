@@ -252,6 +252,14 @@ export enum PermissionType {
 }
 
 export const PermissionTypeDetails = {
+  PAGAMENTO_EM_CASH: {
+    designacao: "Pagamento em Cash",
+    sigla: "pag_cash",
+  },
+  PAGAMENTOS_REFERENCIA: {
+    designacao: "Pagamentos por Referência",
+    sigla: "pag_ref",
+  },
   LISTAR_AVALICOES_ESTUDANTE: {
     designacao: "Listar Avaliações do Estudante",
     sigla: "list_av",
