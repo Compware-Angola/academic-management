@@ -640,7 +640,7 @@ export default function ListarNotasPagamento() {
                   itens={itens?.data || []}
                   showDownload={true}
                   showPrint={true}
-                  showliquidarNota={false}
+                  showliquidarNota={hasPermission(PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla)}
                 />
               </div>
             </div>
