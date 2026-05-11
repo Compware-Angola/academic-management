@@ -9,7 +9,6 @@ export interface StudentItem {
   semester: string;
 }
 
-// 2️⃣ Mapper: converte objeto original para StudentItem
 export function mapStudent(original: any): StudentItem {
   return {
     fullName: original.nome_completo,
@@ -19,7 +18,6 @@ export function mapStudent(original: any): StudentItem {
   };
 }
 
-// 3️⃣ Componente StudentCard
 interface StudentCardProps {
   item: StudentItem;
 }

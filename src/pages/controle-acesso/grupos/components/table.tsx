@@ -3,7 +3,6 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useQueryListarGrupo } from "@/hooks/controle-acesso/use-query-listar-grupo";
-import { Edit, Search, Trash2 } from "lucide-react";
+import { Edit, Eye, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   Select,
@@ -29,12 +28,14 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Grupo } from "@/services/controle-acesso/listar-grupos.service";
+import { useRemoveGruopFromUser } from "@/hooks/acess/use-remove-gruop-from-user";
 type GrupoTableProps = {
   handleEditGrupo: (grupo: Grupo) => void;
   handleDeleteGrupo: (grupo: Grupo) => void;
+  handleUserView: (grupo: Grupo) => void;
 };
 export function GrupoTable(props: GrupoTableProps) {
-  const { handleEditGrupo, handleDeleteGrupo } = props;
+  const { handleEditGrupo, handleDeleteGrupo, handleUserView } = props;
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [page, setPage] = useState(1);
@@ -48,7 +49,7 @@ export function GrupoTable(props: GrupoTableProps) {
       page,
       limit,
     }),
-    [typeGroup, debouncedSearch, page, limit]
+    [typeGroup, debouncedSearch, page, limit],
   );
 
   const { data: response, isLoading } = useQueryListarGrupo(queryParams);
@@ -58,138 +59,133 @@ export function GrupoTable(props: GrupoTableProps) {
   const totalPages = response?.totalPages ?? 1;
 
   const pdfData = useMemo(() => {
-  if (!tableData.length) return null;
+    if (!tableData.length) return null;
 
-  return {
-    filtros: [
-      debouncedSearch && `Pesquisa: ${debouncedSearch}`,
-      typeGroup &&
-        `Tipo Grupo: ${typeGroup === 1 ? "Multiutilizador" : "Unitário"}`,
-    ]
-      .filter(Boolean)
-      .join(" | ") || "Sem filtros",
+    return {
+      filtros:
+        [
+          debouncedSearch && `Pesquisa: ${debouncedSearch}`,
+          typeGroup &&
+            `Tipo Grupo: ${typeGroup === 1 ? "Multiutilizador" : "Unitário"}`,
+        ]
+          .filter(Boolean)
+          .join(" | ") || "Sem filtros",
 
-    total,
+      total,
 
-    rows: tableData.map((g) => ({
-      designacao: g.designacao,
-      sigla: g.sigla,
-      utilizadores: g.user_count,
-      estado: g.active_state === 1 ? "Ativo" : "Inativo",
-      criadoEm: new Date(g.created_at).toLocaleDateString(),
-    })),
-  };
-}, [tableData, total, debouncedSearch, typeGroup]);
+      rows: tableData.map((g) => ({
+        designacao: g.designacao,
+        sigla: g.sigla,
+        utilizadores: g.user_count,
+        estado: g.active_state === 1 ? "Ativo" : "Inativo",
+        criadoEm: new Date(g.created_at).toLocaleDateString(),
+      })),
+    };
+  }, [tableData, total, debouncedSearch, typeGroup]);
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Grupos de Acesso"
-    subtitle="Listagem de grupos do sistema"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros },
-      { title: "Resumo", content: [`Total de grupos: ${pdfData.total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "designacao", label: "Designação", width: "30%" },
-        { key: "sigla", label: "Sigla", width: "10%" },
-        { key: "utilizadores", label: "Utilizadores", width: "15%" },
-        { key: "estado", label: "Estado", width: "15%" },
-        { key: "criadoEm", label: "Criado em", width: "20%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
-
-const excelProps = pdfData
-  ? {
-      documentTitle: "Grupos de Acesso",
-      subtitle: "Listagem de grupos do sistema",
-      infoSections: [
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Grupos de Acesso"
+      subtitle="Listagem de grupos do sistema"
+      infoSections={[
         { title: "Filtros Aplicados", content: pdfData.filtros },
         { title: "Resumo", content: [`Total de grupos: ${pdfData.total}`] },
-      ],
-      mainTable: {
+      ]}
+      mainTable={{
         headers: [
-          { key: "designacao", label: "Designação", width: 30 },
-          { key: "sigla", label: "Sigla", width: 10 },
-          { key: "utilizadores", label: "Utilizadores", width: 15 },
-          { key: "estado", label: "Estado", width: 15 },
-          { key: "criadoEm", label: "Criado em", width: 20 },
+          { key: "designacao", label: "Designação", width: "30%" },
+          { key: "sigla", label: "Sigla", width: "10%" },
+          { key: "utilizadores", label: "Utilizadores", width: "15%" },
+          { key: "estado", label: "Estado", width: "15%" },
+          { key: "criadoEm", label: "Criado em", width: "20%" },
         ],
         rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
-  : null;
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const baseFileName = `Grupos_${new Date()
-  .toISOString()
-  .slice(0, 10)}`;
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Grupos de Acesso",
+        subtitle: "Listagem de grupos do sistema",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de grupos: ${pdfData.total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "designacao", label: "Designação", width: 30 },
+            { key: "sigla", label: "Sigla", width: 10 },
+            { key: "utilizadores", label: "Utilizadores", width: 15 },
+            { key: "estado", label: "Estado", width: 15 },
+            { key: "criadoEm", label: "Criado em", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
 
+  const baseFileName = `Grupos_${new Date().toISOString().slice(0, 10)}`;
 
   return (
     <Card>
-      
-        <CardHeader className="space-y-4">
-              {/* Título + Ações */}
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <CardTitle>Grupos de Acesso</CardTitle>
+      <CardHeader className="space-y-4">
+        {/* Título + Ações */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle>Grupos de Acesso</CardTitle>
 
-                {pdfData && excelProps && (
-                  <div className="flex flex-wrap gap-2">
-                    {pdfContent && (
-                      <PDFActions
-                        document={pdfContent}
-                        fileName={`${baseFileName}.pdf`}
-                        showDownload
-                        showPrint
-                      />
-                    )}
-
-                    <ExcelActions
-                      excelProps={excelProps}
-                      fileName={`${baseFileName}.xlsx`}
-                      showDownload
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Filtros */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Input
-                  placeholder="Pesquisar grupo..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
+          {pdfData && excelProps && (
+            <div className="flex flex-wrap gap-2">
+              {pdfContent && (
+                <PDFActions
+                  document={pdfContent}
+                  fileName={`${baseFileName}.pdf`}
+                  showDownload
+                  showPrint
                 />
+              )}
 
-                <Select
-                  value={String(typeGroup)}
-                  onValueChange={(value) => {
-                    setTypeGroup(Number(value));
-                    setPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-full sm:w-64">
-                    <SelectValue placeholder="Tipo de grupo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Multiutilizador</SelectItem>
-                    <SelectItem value="2">Unitário</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Filtros */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Input
+            placeholder="Pesquisar grupo..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
+
+          <Select
+            value={String(typeGroup)}
+            onValueChange={(value) => {
+              setTypeGroup(Number(value));
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="Tipo de grupo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Multiutilizador</SelectItem>
+              <SelectItem value="2">Unitário</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
-
-      
 
       <CardContent>
         {isLoading ? (
@@ -263,6 +259,14 @@ const baseFileName = `Grupos_${new Date()
                             onClick={() => handleDeleteGrupo(grupo)}
                           >
                             <Trash2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            title="Ver Utilizador"
+                            onClick={() => handleUserView(grupo)}
+                          >
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
