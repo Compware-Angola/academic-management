@@ -1,4 +1,4 @@
-// src/services/documents/validate-document.service.ts
+
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type ValidateDocumentResponse = {
@@ -36,7 +36,7 @@ export type ValidateDocumentResponse = {
  */
 export async function validateDocument(
   code: string
-  
+
 ): Promise<ValidateDocumentResponse> {
   const { data } = await axiosNestGa.get<ValidateDocumentResponse>(
     `/documents/validate-document`,
