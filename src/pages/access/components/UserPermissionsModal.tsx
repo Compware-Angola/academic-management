@@ -48,21 +48,29 @@ export function UserPermissionsModal({
   const queryClient = useQueryClient();
 
   const [selectedGroup, setSelectedGroup] = useState<UserGroup | null>(null);
-  const [selectedAccessToGrant, setSelectedAccessToGrant] = useState<number | null>(null);
-  const [selectedGroupToAdd, setSelectedGroupToAdd] = useState<number | null>(null);
+  const [selectedAccessToGrant, setSelectedAccessToGrant] = useState<
+    number | null
+  >(null);
+  const [selectedGroupToAdd, setSelectedGroupToAdd] = useState<number | null>(
+    null,
+  );
 
   /** Grupos do utilizador */
-  const { data: groups = [], isLoading: loadingGroups, refetch: refetchUserGroups } = useUserGroups({
+  const {
+    data: groups = [],
+    isLoading: loadingGroups,
+    refetch: refetchUserGroups,
+  } = useUserGroups({
     userId: user.codigo,
     enabled: open,
   });
 
   /** Acessos do grupo selecionado */
-  const { 
-    data: groupAccesses = [], 
-    isLoading: loadingGroupAccesses, 
-    error: errorAccesses, 
-    refetch: refetchGroupAccesses 
+  const {
+    data: groupAccesses = [],
+    isLoading: loadingGroupAccesses,
+    error: errorAccesses,
+    refetch: refetchGroupAccesses,
   } = useGroupAccesses({
     groupId: selectedGroup?.codigo || 0,
     enabled: !!selectedGroup && open,
@@ -88,10 +96,10 @@ export function UserPermissionsModal({
       refetchGroupAccesses().then(() => {
         // 3. Só atualiza o estado local após o fetch terminar
         setLocalGroupAccesses(
-          groupAccesses.map(a => ({
+          groupAccesses.map((a) => ({
             ...a,
             blocking: false,
-          }))
+          })),
         );
       });
     } else {
@@ -104,11 +112,15 @@ export function UserPermissionsModal({
   const { data: allAccesses = [], isLoading: loadingAllAccesses } =
     useQueryAcessos({ apenasAtivos: true });
 
-  const { mutateAsync: grantAccess, isPending: granting } = useGrantUserAccess();
-  const { data: todosGrupos = [], isPending: loadingTodosGrupos } = useQueryGrupos({ ativo: "true" });
-  const { mutateAsync: addGrupoUser, isPending: addGroupLoading } = useAddUserGruop();
+  const { mutateAsync: grantAccess, isPending: granting } =
+    useGrantUserAccess();
+  const { data: todosGrupos = [], isPending: loadingTodosGrupos } =
+    useQueryGrupos({ ativo: "true" });
+  const { mutateAsync: addGrupoUser, isPending: addGroupLoading } =
+    useAddUserGruop();
   const { mutateAsync: blockAccess } = useBlockUserAccess();
-  const { mutateAsync: removeGruop, isPending: removingGruop } = useRemoveGruopFromUser();
+  const { mutateAsync: removeGruop, isPending: removingGruop } =
+    useRemoveGruopFromUser();
 
   async function handleGrantAccess() {
     if (!selectedAccessToGrant) return;
@@ -124,9 +136,11 @@ export function UserPermissionsModal({
       });
       refetchGroupAccesses();
 
-      const acessoInfo = allAccesses.find(a => a.id === selectedAccessToGrant);
+      const acessoInfo = allAccesses.find(
+        (a) => a.id === selectedAccessToGrant,
+      );
       if (acessoInfo) {
-        setLocalGroupAccesses(prev => [
+        setLocalGroupAccesses((prev) => [
           ...prev,
           {
             codigo: acessoInfo.id,
@@ -145,10 +159,10 @@ export function UserPermissionsModal({
   }
 
   async function handleBlockAccess(accessCodigo: number) {
-    setLocalGroupAccesses(prev =>
-      prev.map(a =>
-        a.codigo === accessCodigo ? { ...a, blocking: true } : a
-      )
+    setLocalGroupAccesses((prev) =>
+      prev.map((a) =>
+        a.codigo === accessCodigo ? { ...a, blocking: true } : a,
+      ),
     );
 
     try {
@@ -163,14 +177,14 @@ export function UserPermissionsModal({
       refetchGroupAccesses();
 
       // Remove da lista visual
-      setLocalGroupAccesses(prev =>
-        prev.filter(a => a.codigo !== accessCodigo)
+      setLocalGroupAccesses((prev) =>
+        prev.filter((a) => a.codigo !== accessCodigo),
       );
     } catch (err) {
-      setLocalGroupAccesses(prev =>
-        prev.map(a =>
-          a.codigo === accessCodigo ? { ...a, blocking: false } : a
-        )
+      setLocalGroupAccesses((prev) =>
+        prev.map((a) =>
+          a.codigo === accessCodigo ? { ...a, blocking: false } : a,
+        ),
       );
       console.error("Erro ao bloquear acesso:", err);
     }
@@ -187,6 +201,10 @@ export function UserPermissionsModal({
 
       queryClient.invalidateQueries({
         queryKey: ["user-groups", user.codigo],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["users-by-group"],
       });
 
       queryClient.invalidateQueries({
@@ -217,9 +235,7 @@ export function UserPermissionsModal({
 
       await refetchUserGroups();
 
-      setSelectedGroup(prev =>
-        prev?.codigo === groupCodigo ? null : prev
-      );
+      setSelectedGroup((prev) => (prev?.codigo === groupCodigo ? null : prev));
     } catch (err) {
       console.error("Erro ao remover grupo:", err);
     }
@@ -251,7 +267,7 @@ export function UserPermissionsModal({
             {loadingGroups ? (
               <Skeleton className="h-32 w-full" />
             ) : (
-              groups.map(group => (
+              groups.map((group) => (
                 <div
                   key={group.codigo}
                   role="button"
@@ -261,9 +277,11 @@ export function UserPermissionsModal({
                     w-full flex items-center justify-between
                     px-4 py-2 rounded-md border
                     cursor-pointer transition-colors
-                    ${selectedGroup?.codigo === group.codigo
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-muted"}
+                    ${
+                      selectedGroup?.codigo === group.codigo
+                        ? "bg-primary text-primary-foreground"
+                        : "hover:bg-muted"
+                    }
                   `}
                 >
                   <span>{group.descricao}</span>
@@ -274,7 +292,7 @@ export function UserPermissionsModal({
                     {group.tipo_grupo !== 2 && (
                       <X
                         className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
-                        onClick={e => {
+                        onClick={(e) => {
                           e.stopPropagation();
                           handleRemoveGroup(group.codigo);
                         }}
@@ -298,16 +316,19 @@ export function UserPermissionsModal({
                 <>
                   <GroupSelect
                     value={selectedGroupToAdd?.toString() ?? ""}
-                    onChangeValue={v => setSelectedGroupToAdd(Number(v))}
+                    onChangeValue={(v) => setSelectedGroupToAdd(Number(v))}
                     excludeGroups={groups}
                     labelMode="inside"
                   />
 
-
                   <Button
                     className="w-full"
                     onClick={handleAddGroup}
-                    disabled={!selectedGroupToAdd || loadingTodosGrupos || addGroupLoading}
+                    disabled={
+                      !selectedGroupToAdd ||
+                      loadingTodosGrupos ||
+                      addGroupLoading
+                    }
                   >
                     {addGroupLoading ? "A conceder..." : "Conceder grupo"}
                   </Button>
@@ -321,7 +342,9 @@ export function UserPermissionsModal({
             <div className="flex items-center gap-2 text-lg font-semibold">
               <ShieldCheck className="h-5 w-5" />
               Permissões Ativas
-              {selectedGroup && <Badge className="ml-2">{selectedGroup.descricao}</Badge>}
+              {selectedGroup && (
+                <Badge className="ml-2">{selectedGroup.descricao}</Badge>
+              )}
             </div>
 
             {!selectedGroup ? (
@@ -343,7 +366,7 @@ export function UserPermissionsModal({
               </p>
             ) : (
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {localGroupAccesses.map(access => (
+                {localGroupAccesses.map((access) => (
                   <div
                     key={access.codigo}
                     className="flex flex-col p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
@@ -357,25 +380,36 @@ export function UserPermissionsModal({
 
                     {access["Update at"] && (
                       <p className="text-xs text-muted-foreground mt-1">
-                        Atualizado em: {format(new Date(access["Update at"]), "dd/MM/yyyy HH:mm")}
+                        Atualizado em:{" "}
+                        {format(
+                          new Date(access["Update at"]),
+                          "dd/MM/yyyy HH:mm",
+                        )}
                       </p>
                     )}
 
                     <div className="flex items-center justify-between mt-2">
-                      <Badge variant={access.disponibilidade === 1 ? "default" : "destructive"}>
+                      <Badge
+                        variant={
+                          access.disponibilidade === 1
+                            ? "default"
+                            : "destructive"
+                        }
+                      >
                         {access.disponibilidade === 1 ? "Ativo" : "Bloqueado"}
                       </Badge>
 
-                      {access.disponibilidade === 1 && isGrupoUnitario(selectedGroup) && (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleBlockAccess(access.codigo)}
-                          disabled={access.blocking}
-                        >
-                          {access.blocking ? "Removendo..." : "Remover"}
-                        </Button>
-                      )}
+                      {access.disponibilidade === 1 &&
+                        isGrupoUnitario(selectedGroup) && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleBlockAccess(access.codigo)}
+                            disabled={access.blocking}
+                          >
+                            {access.blocking ? "Removendo..." : "Remover"}
+                          </Button>
+                        )}
                     </div>
                   </div>
                 ))}
@@ -395,11 +429,10 @@ export function UserPermissionsModal({
             ) : (
               <>
                 <AccessSelect
-                    value={selectedAccessToGrant?.toString() ?? ""}
-                    onChangeValue={v => setSelectedAccessToGrant(Number(v))}
-                    labelMode="inside"
-                  />
-
+                  value={selectedAccessToGrant?.toString() ?? ""}
+                  onChangeValue={(v) => setSelectedAccessToGrant(Number(v))}
+                  labelMode="inside"
+                />
 
                 <Button
                   className="w-full"
