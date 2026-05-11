@@ -5,6 +5,7 @@ import {
   ListarFormaPagamentoPayload,
   removerFormaPagamentoService,
   toggleStatusFormaPagamentoService,
+  FormaPagamento,
 } from "@/services/finance/forma-pagamento.service";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -38,8 +39,13 @@ export const useUpdateFormaPagamento = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ codigo, payload }: { codigo: number; payload: any }) =>
-      atualizarFormaPagamentoService(codigo, payload),
+    mutationFn: ({
+      codigo,
+      payload,
+    }: {
+      codigo: number;
+      payload: Partial<FormaPagamento>;
+    }) => atualizarFormaPagamentoService(codigo, payload),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
