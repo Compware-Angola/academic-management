@@ -974,7 +974,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Pagamentos por referência",
           url: "/financas/pagamento-referencia",
-          permission: [PermissionTypeDetails.PAGAMENTOS.sigla],
+          permission: [PermissionTypeDetails.PAGAMENTOS_REFERENCIA.sigla],
         },
         {
           title: "Pagamentos",

@@ -1167,7 +1167,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PAGAMENTOS.sigla!,
+                          PermissionTypeDetails.PAGAMENTOS_REFERENCIA.sigla!,
                         ]}
                       >
                         <PagamentosReferencia />
@@ -1538,8 +1538,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails
-                            .LISTA_ESTUDANTES_DIPLOMANDOS.sigla!,
+                          PermissionTypeDetails.LISTA_ESTUDANTES_DIPLOMANDOS
+                            .sigla!,
                         ]}
                       >
                         <ListaEstudantesDiplomados />
