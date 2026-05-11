@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -63,7 +58,6 @@ import { usePoloDropdown } from "@/hooks/shared/use-query-fetch-polo";
 import { useTipoTaxaDropdown } from "@/hooks/shared/use-query-fetch-tipo-taxa";
 import { useMotivoIsencaoDropdown } from "@/hooks/shared/use-query-fetch-motivo-insencao";
 
-
 type ServicoFormData = {
   descricao: string;
   preco: number;
@@ -86,7 +80,6 @@ type ServicoFormData = {
   cursoDescricao?: string;
   grau?: string;
   categoria: "MENSALIDADE" | "OUTRO" | "";
-
 };
 
 const initialForm: ServicoFormData = {
@@ -118,46 +111,65 @@ export default function ServicosEmolumentos() {
     useQueryAnoAcademico();
 
   // Filtros SEPARADOS para cada aba
-  const [servicosFilters, setServicosFilters] = useState({ anoLetivo: "", descricao: "", polo: "" });
-  const [mensalidadesFilters, setMensalidadesFilters] = useState({ anoLetivo: "", descricao: "", polo: "" });
+  const [servicosFilters, setServicosFilters] = useState({
+    anoLetivo: "",
+    descricao: "",
+    polo: "",
+  });
+  const [mensalidadesFilters, setMensalidadesFilters] = useState({
+    anoLetivo: "",
+    descricao: "",
+    polo: "",
+  });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState<ServicoFormData>(initialForm);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingCodigo, setEditingCodigo] = useState<number | null>(null);
-  const [currentContext, setCurrentContext] = useState<"servico" | "mensalidade">("servico");
+  const [currentContext, setCurrentContext] = useState<
+    "servico" | "mensalidade"
+  >("servico");
 
   const [servicosPage, setServicosPage] = useState(1);
   const [mensalidadesPage, setMensalidadesPage] = useState(1);
   const pageLimit = 10;
 
   // Query para SERVIÇOS (usa servicosFilters)
-  const { data: tiposServico, isLoading: isLoadingServicos } = useQueryTiposServicoAll({
-    codigoAnoLectivo: servicosFilters.anoLetivo ? Number(servicosFilters.anoLetivo) : undefined,
-    polo: servicosFilters.polo ? Number(servicosFilters.polo) : undefined,
-    descricao: servicosFilters.descricao.trim() || undefined,
-    page: servicosPage,
-    limit: pageLimit,
-  });
+  const { data: tiposServico, isLoading: isLoadingServicos } =
+    useQueryTiposServicoAll({
+      codigoAnoLectivo: servicosFilters.anoLetivo
+        ? Number(servicosFilters.anoLetivo)
+        : undefined,
+      polo: servicosFilters.polo ? Number(servicosFilters.polo) : undefined,
+      descricao: servicosFilters.descricao.trim() || undefined,
+      page: servicosPage,
+      limit: pageLimit,
+    });
 
   // Query para MENSALIDADES (usa mensalidadesFilters)
-  const { data: mensalidades, isLoading: isLoadingMensalidades } = useQueryMonthlyFeeTipoServico({
-    codigoAnoLectivo: mensalidadesFilters.anoLetivo ? Number(mensalidadesFilters.anoLetivo) : undefined,
-    polo: mensalidadesFilters.polo ? Number(mensalidadesFilters.polo) : undefined,
-    descricao: mensalidadesFilters.descricao.trim() || undefined,
-    page: mensalidadesPage,
-    limit: pageLimit,
-  });
+  const { data: mensalidades, isLoading: isLoadingMensalidades } =
+    useQueryMonthlyFeeTipoServico({
+      codigoAnoLectivo: mensalidadesFilters.anoLetivo
+        ? Number(mensalidadesFilters.anoLetivo)
+        : undefined,
+      polo: mensalidadesFilters.polo
+        ? Number(mensalidadesFilters.polo)
+        : undefined,
+      descricao: mensalidadesFilters.descricao.trim() || undefined,
+      page: mensalidadesPage,
+      limit: pageLimit,
+    });
   //Query Polo
-  const { data: polos, isLoading: LoadingPolo } = usePoloDropdown()
+  const { data: polos, isLoading: LoadingPolo } = usePoloDropdown();
 
-  //Query Taxa 
-  const { data: taxa, isLoading: LoadingTaxa } = useTipoTaxaDropdown()
+  //Query Taxa
+  const { data: taxa, isLoading: LoadingTaxa } = useTipoTaxaDropdown();
 
   // Query Motivo insenção
 
-  const { data: motivos, isLoading: LoadingMotivos } = useMotivoIsencaoDropdown()
+  const { data: motivos, isLoading: LoadingMotivos } =
+    useMotivoIsencaoDropdown();
 
   const createMutation = useCreateTipoServico();
   const updateMutation = useUpdateTipoServico(editingCodigo ?? 0);
@@ -174,7 +186,9 @@ export default function ServicosEmolumentos() {
   const openCreateModal = () => {
     setFormData({
       ...initialForm,
-      codigoAnoLectivo: servicosFilters.anoLetivo ? Number(servicosFilters.anoLetivo) : 0,
+      codigoAnoLectivo: servicosFilters.anoLetivo
+        ? Number(servicosFilters.anoLetivo)
+        : 0,
       tipoServico: "MENSAL",
     });
     setIsEditing(false);
@@ -186,7 +200,9 @@ export default function ServicosEmolumentos() {
     setFormData({
       descricao: item.descricao || "",
       preco: Number(item.preco) || 0,
-      sigla: item.sigla || (item.descricao ? item.descricao.slice(0, 4).toUpperCase() : ""),
+      sigla:
+        item.sigla ||
+        (item.descricao ? item.descricao.slice(0, 4).toUpperCase() : ""),
       tipoServico: item.tiposervico,
       estado:
         item.estado === "Ativo" ||
@@ -206,9 +222,13 @@ export default function ServicosEmolumentos() {
       tipoCandidatura: item.tipoCandidatura || 1,
       codigoGradeCurricular: item.codigoGradeCurricular || null,
       cursoDescricao: context === "mensalidade" ? item.descricao : undefined,
-      grau: context === "mensalidade" ? (item.mestrado ? "Mestrado" : "Licenciatura") : undefined,
-      categoria: ""
-
+      grau:
+        context === "mensalidade"
+          ? item.mestrado
+            ? "Mestrado"
+            : "Licenciatura"
+          : undefined,
+      categoria: "",
     });
 
     setIsEditing(true);
@@ -252,7 +272,7 @@ export default function ServicosEmolumentos() {
         codigoAnoLectivo: formData.codigoAnoLectivo,
         taxaIvaId: formData.taxaIvaId,
         motivoIsencaoIvaCodigo: formData.motivoIsencaoIvaCodigo,
-        tipoServico: formData.tipoServico
+        tipoServico: formData.tipoServico,
       };
 
       updateMutation.mutate(payload, {
@@ -260,7 +280,9 @@ export default function ServicosEmolumentos() {
           toast({
             title: "Sucesso",
             description:
-              currentContext === "servico" ? "Serviço atualizado" : "Mensalidade atualizada",
+              currentContext === "servico"
+                ? "Serviço atualizado"
+                : "Mensalidade atualizada",
           });
           setModalOpen(false);
         },
@@ -287,7 +309,10 @@ export default function ServicosEmolumentos() {
 
       createMutation.mutate(payload, {
         onSuccess: () => {
-          toast({ title: "Sucesso", description: "Serviço criado com sucesso" });
+          toast({
+            title: "Sucesso",
+            description: "Serviço criado com sucesso",
+          });
           setModalOpen(false);
         },
         onError: () => {
@@ -400,7 +425,10 @@ export default function ServicosEmolumentos() {
                     placeholder="Filtrar por descrição do serviço..."
                     value={servicosFilters.descricao}
                     onChange={(e) => {
-                      setServicosFilters((prev) => ({ ...prev, descricao: e.target.value }));
+                      setServicosFilters((prev) => ({
+                        ...prev,
+                        descricao: e.target.value,
+                      }));
                       setServicosPage(1);
                     }}
                   />
@@ -439,16 +467,23 @@ export default function ServicosEmolumentos() {
                     </TableRow>
                   ) : !tiposServico?.data?.length ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         Nenhum serviço encontrado
                       </TableCell>
                     </TableRow>
                   ) : (
                     tiposServico.data.map((item) => (
                       <TableRow key={item.codigo}>
-                        <TableCell className="font-medium">{item.codigo}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.codigo}
+                        </TableCell>
                         <TableCell>{item.descricao}</TableCell>
-                        <TableCell>{Number(item.preco).toLocaleString()} kz</TableCell>
+                        <TableCell>
+                          {Number(item.preco).toLocaleString()} kz
+                        </TableCell>
                         <TableCell>{item.tiposervico || "—"}</TableCell>
                         <TableCell>{item.polo || "—"}</TableCell>
                         <TableCell className="text-right flex justify-end gap-2">
@@ -459,7 +494,7 @@ export default function ServicosEmolumentos() {
                           >
                             <Edit className="h-3.5 w-3.5" />
                           </Button>
-                          {/* 
+                          {/*
                           <Button size="sm" variant="destructive">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -509,7 +544,10 @@ export default function ServicosEmolumentos() {
                     label="Ano Letivo"
                     value={mensalidadesFilters.anoLetivo}
                     onChange={(v) => {
-                      setMensalidadesFilters((prev) => ({ ...prev, anoLetivo: v }));
+                      setMensalidadesFilters((prev) => ({
+                        ...prev,
+                        anoLetivo: v,
+                      }));
                       setMensalidadesPage(1);
                     }}
                     options={anosAcademicos ?? []}
@@ -546,7 +584,10 @@ export default function ServicosEmolumentos() {
                     placeholder="Filtrar pelo nome do curso..."
                     value={mensalidadesFilters.descricao}
                     onChange={(e) => {
-                      setMensalidadesFilters((prev) => ({ ...prev, descricao: e.target.value }));
+                      setMensalidadesFilters((prev) => ({
+                        ...prev,
+                        descricao: e.target.value,
+                      }));
                       setMensalidadesPage(1);
                     }}
                   />
@@ -580,17 +621,31 @@ export default function ServicosEmolumentos() {
                     </TableRow>
                   ) : !mensalidades?.data?.length ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         Nenhuma mensalidade encontrada
                       </TableCell>
                     </TableRow>
                   ) : (
                     mensalidades.data.map((item) => (
                       <TableRow key={item.codigo}>
-                     <TableCell>   {item.descricao.replace(/propina/gi, "Mensalidade")}</TableCell>
-                        <TableCell>{item.mestrado ? "Mestrado" : "Licenciatura"}</TableCell>
-                        <TableCell>{Number(item.preco).toLocaleString()} kz</TableCell>
-                        <TableCell>{Number(item.preco * 10).toLocaleString()} kz</TableCell>
+                        <TableCell>
+                          {" "}
+                          {item.descricao.replace(/propina/gi, "Mensalidade")}
+                        </TableCell>
+                        <TableCell>
+                          {item.mestrado.toUpperCase() == "NAO"
+                            ? "Licenciatura"
+                            : "Mestrado"}
+                        </TableCell>
+                        <TableCell>
+                          {Number(item.preco).toLocaleString()} kz
+                        </TableCell>
+                        <TableCell>
+                          {Number(item.preco * 10).toLocaleString()} kz
+                        </TableCell>
                         <TableCell>{item.polo || "—"}</TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -612,7 +667,9 @@ export default function ServicosEmolumentos() {
                   <Button
                     variant="outline"
                     disabled={mensalidadesPage === 1}
-                    onClick={() => setMensalidadesPage((p) => Math.max(1, p - 1))}
+                    onClick={() =>
+                      setMensalidadesPage((p) => Math.max(1, p - 1))
+                    }
                   >
                     Anterior
                   </Button>
@@ -646,7 +703,8 @@ export default function ServicosEmolumentos() {
             </DialogTitle>
             {isEditing && (
               <p className="text-sm text-muted-foreground mt-1">
-                {currentContext === "servico" ? "Serviço" : "Mensalidade"} – Código: {editingCodigo}
+                {currentContext === "servico" ? "Serviço" : "Mensalidade"} –
+                Código: {editingCodigo}
               </p>
             )}
           </DialogHeader>
@@ -661,7 +719,12 @@ export default function ServicosEmolumentos() {
                   <Input
                     id="descricao"
                     value={formData.descricao}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        descricao: e.target.value,
+                      }))
+                    }
                     placeholder={
                       currentContext === "mensalidade"
                         ? "Ex: Propina Mensal - Licenciatura em Engenharia Informática"
@@ -679,7 +742,12 @@ export default function ServicosEmolumentos() {
                     min={0}
                     step={100}
                     value={formData.preco}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, preco: Number(e.target.value) || 0 }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        preco: Number(e.target.value) || 0,
+                      }))
+                    }
                   />
                 </div>
 
@@ -697,7 +765,11 @@ export default function ServicosEmolumentos() {
                         }));
                       }}
                       options={[
-                        { codigo: 1, label: "Mensalidade", value: "MENSALIDADE" },
+                        {
+                          codigo: 1,
+                          label: "Mensalidade",
+                          value: "MENSALIDADE",
+                        },
                         { codigo: 2, label: "Outro Serviço", value: "OUTRO" },
                       ]}
                       map={(a) => ({
@@ -720,7 +792,10 @@ export default function ServicosEmolumentos() {
                       value={formData.sigla}
                       disabled={formData.categoria === "MENSALIDADE"}
                       onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, sigla: e.target.value.toUpperCase() }))
+                        setFormData((prev) => ({
+                          ...prev,
+                          sigla: e.target.value.toUpperCase(),
+                        }))
                       }
                       placeholder="Ex: PROP, MATR, EXAM"
                     />
@@ -732,7 +807,9 @@ export default function ServicosEmolumentos() {
                   <Label>Tipo de Serviço *</Label>
                   <FormSelect
                     value={String(formData.tipoServico || "")}
-                    onChange={(v) => setFormData((prev) => ({ ...prev, tipoServico: v || "" }))}
+                    onChange={(v) =>
+                      setFormData((prev) => ({ ...prev, tipoServico: v || "" }))
+                    }
                     options={[
                       { codigo: 1, label: "Mensal", value: "MENSAL" },
                       { codigo: 2, label: "Anual", value: "ANUAL" },
@@ -752,7 +829,12 @@ export default function ServicosEmolumentos() {
                   <Label>Ano Letivo *</Label>
                   <FormSelect
                     value={String(formData.codigoAnoLectivo || "")}
-                    onChange={(v) => setFormData((prev) => ({ ...prev, codigoAnoLectivo: Number(v) || 0 }))}
+                    onChange={(v) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        codigoAnoLectivo: Number(v) || 0,
+                      }))
+                    }
                     options={anosAcademicos ?? []}
                     map={(a) => ({
                       key: String(a.codigo),
@@ -768,7 +850,12 @@ export default function ServicosEmolumentos() {
                   <Label htmlFor="poloId">Polo / Campus</Label>
                   <FormSelect
                     value={String(formData.poloId || "")}
-                    onChange={(v) => setFormData((prev) => ({ ...prev, poloId: Number(v) || 0 }))}
+                    onChange={(v) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        poloId: Number(v) || 0,
+                      }))
+                    }
                     options={polos ?? []}
                     map={(a) => ({
                       key: String(a.id),
@@ -788,7 +875,9 @@ export default function ServicosEmolumentos() {
                   <Switch
                     id="estado"
                     checked={formData.estado}
-                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, estado: checked }))}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({ ...prev, estado: checked }))
+                    }
                   />
                 </div>
 
@@ -799,7 +888,12 @@ export default function ServicosEmolumentos() {
                       <Label htmlFor="taxaIva">Taxa IVA ID</Label>
                       <FormSelect
                         value={String(formData.taxaIvaId || "")}
-                        onChange={(v) => setFormData((prev) => ({ ...prev, taxaIvaId: Number(v) || 0 }))}
+                        onChange={(v) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            taxaIvaId: Number(v) || 0,
+                          }))
+                        }
                         options={taxa ?? []}
                         map={(a) => ({
                           key: String(a.id),
@@ -814,7 +908,12 @@ export default function ServicosEmolumentos() {
                       <Label htmlFor="motivoIsencao">Motivo Isenção IVA</Label>
                       <FormSelect
                         value={String(formData.motivoIsencaoIvaCodigo || "")}
-                        onChange={(v) => setFormData((prev) => ({ ...prev, motivoIsencaoIvaCodigo: Number(v) || 0 }))}
+                        onChange={(v) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            motivoIsencaoIvaCodigo: Number(v) || 0,
+                          }))
+                        }
                         options={motivos ?? []}
                         map={(a) => ({
                           key: String(a.codigo),
@@ -834,7 +933,9 @@ export default function ServicosEmolumentos() {
                       <Label>Disponibilizar ao Aluno</Label>
                       <Switch
                         checked={formData.disponibilizarAluno}
-                        onCheckedChange={(v) => setFormData((p) => ({ ...p, disponibilizarAluno: v }))}
+                        onCheckedChange={(v) =>
+                          setFormData((p) => ({ ...p, disponibilizarAluno: v }))
+                        }
                       />
                     </div>
 
@@ -842,7 +943,9 @@ export default function ServicosEmolumentos() {
                       <Label>Visualizar no Portal</Label>
                       <Switch
                         checked={formData.visualizarNoPortal}
-                        onCheckedChange={(v) => setFormData((p) => ({ ...p, visualizarNoPortal: v }))}
+                        onCheckedChange={(v) =>
+                          setFormData((p) => ({ ...p, visualizarNoPortal: v }))
+                        }
                       />
                     </div>
 
@@ -850,7 +953,9 @@ export default function ServicosEmolumentos() {
                       <Label>Mestrado</Label>
                       <Switch
                         checked={formData.mestrado}
-                        onCheckedChange={(v) => setFormData((p) => ({ ...p, mestrado: v }))}
+                        onCheckedChange={(v) =>
+                          setFormData((p) => ({ ...p, mestrado: v }))
+                        }
                       />
                     </div>
 
@@ -860,7 +965,12 @@ export default function ServicosEmolumentos() {
                         id="valorAnterior"
                         type="number"
                         value={formData.valorAnterior}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, valorAnterior: Number(e.target.value) || 0 }))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            valorAnterior: Number(e.target.value) || 0,
+                          }))
+                        }
                       />
                     </div>
                   </>
