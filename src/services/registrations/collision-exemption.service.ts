@@ -2,13 +2,11 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type IsentarColisaoMatriculaPayload = {
   matricula: number;
-  anoLectivo: number;
 };
 
 export type IsentarColisaoCursoPayload = {
   curso: number;
   turno: number;
-  anoLectivo: number;
 };
 
 export type IsentarColisaoResponse = {
@@ -19,7 +17,7 @@ export async function isentarColisaoMatriculaService(
   payload: IsentarColisaoMatriculaPayload
 ): Promise<IsentarColisaoResponse> {
   const { data } = await axiosNestGa.post<IsentarColisaoResponse>(
-    "/registration/colisoes/matricula",
+    "/registration/colisoes/matricula2",
     payload
   );
 
@@ -30,7 +28,7 @@ export async function isentarColisaoCursoService(
   payload: IsentarColisaoCursoPayload
 ): Promise<IsentarColisaoResponse> {
   const { data } = await axiosNestGa.post<IsentarColisaoResponse>(
-    "/registration/colisoes/curso",
+    "/registration/colisoes/curso2",
     payload
   );
 
