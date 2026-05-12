@@ -1002,6 +1002,11 @@ export const finaceStructure: MenuStructure = {
         // { title: "Nota de Crédito", url: "/financas/agt/nota-credito" },
         // { title: "Taxa do IVA", url: "/financas/agt/iva" },
         // { title: "Gerar SAFT", url: "/financas/agt/saft" },
+        {
+          title: "Caixas",
+          url: "/financas/caixas",
+          permission: [PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla],
+        },
       ],
 
       permission: [],

@@ -164,6 +164,7 @@ import ListarTopicos from "./pages/access_exam/ListarTopicos";
 import ListagemProvas from "./pages/access_exam/ListagemProvas";
 import { ListaEstudantesDiplomados } from "./pages/registrations/ListarEstudantesDiplomados";
 import { FormaPagamentoPage } from "./pages/financas/forma-pagamento";
+import { CaixaPage } from "./pages/financas/caixa";
 
 const App = () => {
   return (
@@ -1304,6 +1305,19 @@ const App = () => {
                         ]}
                       >
                         <AtribuirDescontos />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/caixas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla!,
+                        ]}
+                      >
+                        <CaixaPage />
                       </ProtectedRoute>
                     }
                   />
