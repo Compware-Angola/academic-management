@@ -1,5 +1,5 @@
+import { useQueryCashRegisters } from "@/hooks/financa/use-cash-register";
 import { FormSelect } from "../FormSelect";
-import { useQueryCaixas } from "@/hooks/caixa/use-query-caixa";
 
 interface CaixaSelectProps {
   value: string;
@@ -7,17 +7,21 @@ interface CaixaSelectProps {
   disabled?: boolean;
 }
 const CaixaSelect = ({ onChangeValue, value, disabled }: CaixaSelectProps) => {
-  const { data: caixas, isLoading: isLoadingCaixas } = useQueryCaixas();
+  const { data: caixas, isLoading: isLoadingCaixas } = useQueryCashRegisters({
+    status: "aberto",
+    blocked: "N",
+  });
+
   return (
     <>
       <FormSelect
         disabled={isLoadingCaixas || disabled}
         loading={isLoadingCaixas}
-        label="ID da Caixa"
+        label="Caixa"
         value={value}
         onChange={(v) => onChangeValue(v)}
         options={caixas}
-        map={(a) => ({ key: a.codigo, label: a.descricao, value: a.codigo })}
+        map={(a) => ({ key: a.id, label: a.name, value: a.id })}
       />
     </>
   );

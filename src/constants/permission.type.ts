@@ -252,6 +252,10 @@ export enum PermissionType {
 }
 
 export const PermissionTypeDetails = {
+  CONFIGURACAO_CAIXA: {
+    designacao: "Configuracao de Caixa",
+    sigla: "cfg_caixa",
+  },
   PAGAMENTO_EM_CASH: {
     designacao: "Pagamento em Cash",
     sigla: "pag_cash",
