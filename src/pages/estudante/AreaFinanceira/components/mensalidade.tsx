@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import { Separator } from "@radix-ui/react-select";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
 import { normalizeMensalidade } from "@/util/normalize-mensalidade";
@@ -130,6 +130,12 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       cursoId: student?.curso_codigo,
       poloId: 1,
     });
+
+  useEffect(() => {
+    setSelectedPayments(new Map());
+    setExpandedPayment(null);
+  }, [codigoMatricula]);
+
   const monthFee = monthValueResponse?.[0];
   const data = monthResponse?.data ?? [];
   const payments = normalizeMensalidade(data, monthFee?.preco ?? 0);
