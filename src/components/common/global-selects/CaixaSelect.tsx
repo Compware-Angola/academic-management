@@ -22,33 +22,33 @@ const CaixaSelect = ({
 }: CaixaSelectProps) => {
   const { data: caixas = [], isLoading: isLoadingCaixas } =
     useQueryCashRegisters({
-      status: "aberto",
+      //  status: "aberto",
       blocked: "N",
     });
 
-  const { data: myCashRegister, isLoading: isLoadingMyCashRegister } =
-    useQueryMyCashRegister();
+  // const { data: myCashRegister, isLoading: isLoadingMyCashRegister } =
+  //   useQueryMyCashRegister();
 
-  const options = useMemo(() => {
-    if (onlyMyCashRegister) {
-      return myCashRegister ? [myCashRegister] : [];
-    }
+  // const options = useMemo(() => {
+  //   if (onlyMyCashRegister) {
+  //     return myCashRegister ? [myCashRegister] : [];
+  //   }
 
-    return caixas;
-  }, [onlyMyCashRegister, myCashRegister, caixas]);
+  //   return caixas;
+  // }, [onlyMyCashRegister, myCashRegister, caixas]);
 
-  const isLoading = onlyMyCashRegister
-    ? isLoadingMyCashRegister
-    : isLoadingCaixas;
+  // const isLoading = onlyMyCashRegister
+  //   ? isLoadingMyCashRegister
+  //   : isLoadingCaixas;
 
   return (
     <FormSelect
       label="Caixa"
       value={value}
-      disabled={disabled || isLoading}
-      loading={isLoading}
+      disabled={disabled}
+      loading={isLoadingCaixas}
       onChange={(v) => onChangeValue(v)}
-      options={options}
+      options={caixas}
       map={(caixa) => ({
         key: caixa.id,
         label: caixa.name,
