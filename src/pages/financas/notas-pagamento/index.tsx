@@ -18,6 +18,7 @@ import { NotasPagamentoEstatisticas } from "./components/estatisticas";
 import { PagamentosTab } from "./components/PagamentosTab";
 import { ServicosPagosTab } from "./components/ServicosPagosTab";
 import { PaymentItem } from "@/services/financas/nota-pagamento/fetch-payment.service";
+import { Filters } from "./components/PagamentosFiltros";
 
 type SearchByType =
   | "codigoMatricula"
@@ -43,6 +44,8 @@ export default function ListarPagamentos() {
     anoLectivo: "23",
     estado: "",
     factura: "",
+    dataInicio: "",
+    dataFim: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
 
@@ -54,11 +57,11 @@ export default function ListarPagamentos() {
 
   const searchParams = searchApplied
     ? {
-        [searchFieldMap[searchByApplied]]:
-          searchByApplied === "codigoMatricula"
-            ? parseFilter(searchApplied)
-            : searchApplied,
-      }
+      [searchFieldMap[searchByApplied]]:
+        searchByApplied === "codigoMatricula"
+          ? parseFilter(searchApplied)
+          : searchApplied,
+    }
     : {};
 
   const {
@@ -69,6 +72,11 @@ export default function ListarPagamentos() {
     anoLectivo: parseFilter(filtersApplied.anoLectivo),
     codigoFactura: parseFilter(filtersApplied.factura),
     estado: parseFilter(filtersApplied.estado),
+
+    // Só envia as datas se elas existirem
+    ...(filtersApplied.dataInicio && { dataInicio: filtersApplied.dataInicio }),
+    ...(filtersApplied.dataFim && { dataFim: filtersApplied.dataFim }),
+
     ...searchParams,
     page,
     limit,
@@ -84,7 +92,13 @@ export default function ListarPagamentos() {
     setSearchByApplied(searchBy);
     refetch();
   };
-
+  const handleClear = (clearedFilters: Filters, clearedSearchBy: SearchByType, clearedSearchTerm: string) => {
+    setFiltersApplied(clearedFilters);
+    setSearchByApplied(clearedSearchBy);
+    setSearchApplied(clearedSearchTerm);
+    setPage(1);
+    refetch();
+  };
   const handleVerDetalhes = (pag: PaymentItem) => {
     setFacturaSelecionado(pag.codigo_factura);
     setPagamentoSelecionado(pag);
@@ -147,6 +161,7 @@ export default function ListarPagamentos() {
             total={total}
             totalPages={totalPages}
             onSearch={handleSearch}
+            onClear={handleClear}
             onVerDetalhes={handleVerDetalhes}
           />
         </TabsContent>

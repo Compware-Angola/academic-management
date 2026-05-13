@@ -21,6 +21,8 @@ type Filters = {
   anoLectivo: string;
   estado: string;
   factura: string;
+  dataInicio: string;
+  dataFim: string;
 };
 
 type PagamentosTabProps = {
@@ -40,8 +42,8 @@ type PagamentosTabProps = {
   totalPages: number | undefined;
   onSearch: () => void;
   onVerDetalhes: (pag: PaymentItem) => void;
+  onClear: (clearedFilters: Filters, clearedSearchBy: SearchByType, clearedSearchTerm: string) => void; // ← Novo
 };
-
 export function PagamentosTab({
   filters,
   setFilters,
@@ -59,6 +61,7 @@ export function PagamentosTab({
   totalPages,
   onSearch,
   onVerDetalhes,
+  onClear
 }: PagamentosTabProps) {
   const exportRows = useMemo(
     () =>
@@ -193,6 +196,7 @@ export function PagamentosTab({
         setSearchTerm={setSearchTerm}
         setPage={setPage}
         onSearch={onSearch}
+        onClear={onClear}
       />
 
       <div className="flex gap-2">
