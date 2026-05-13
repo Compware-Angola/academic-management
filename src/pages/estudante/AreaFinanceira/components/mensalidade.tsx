@@ -74,14 +74,14 @@ const getStatusBadge = (status: number) => {
 
 export function MensalidadesSection({ codigoMatricula }: Props) {
   const [expandedPayment, setExpandedPayment] = useState<number | null>(null);
-  const [anoLetivo, setAnoLetivo] = useState<string | null>(null);
+  const [anoLetivo, setAnoLetivo] = useState<string | null>("23");
   const [selectedPayments, setSelectedPayments] = useState<
     Map<number, SelectedPayment>
   >(new Map());
 
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
-      (total, payment) => total + (payment.valorAPagar ?? 0), // FIX: fallback para 0
+      (total, payment) => total + (payment.valorAPagar ?? 0),
       0,
     );
   }, [selectedPayments]);
@@ -125,19 +125,18 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   const { data: student } = useStudentDetail(codigoMatricula);
   const { mutate: criarFactura, isPending } = useCreateInvoiceNoJob();
 
-  const { data: monthValueResponse, isLoading: isMonthValueLoading } =
-    useQueryMonthlyFeesValue(
-      // FIX: só executa a query quando há ano letivo e curso válidos
-      anoLetivo && student?.curso_codigo
-        ? {
-          anoLectivoId: parseFilter(anoLetivo),
-          cursoId: student.curso_codigo,
-          poloId: 1,
-        }
-        : undefined,
-    );
+  const queryParams = useMemo(() => {
+    if (!anoLetivo || !student?.curso_codigo) return null;
 
-  // FIX: reset ao mudar de aluno OU ao mudar de ano letivo
+    return {
+      anoLectivoId: parseFilter(anoLetivo),
+      cursoId: student.curso_codigo,
+      poloId: 1,
+    };
+  }, [anoLetivo, student?.curso_codigo]);
+
+  const { data: monthValueResponse, isLoading: isMonthValueLoading } =
+    useQueryMonthlyFeesValue(queryParams);
   useEffect(() => {
     setSelectedPayments(new Map());
     setExpandedPayment(null);
