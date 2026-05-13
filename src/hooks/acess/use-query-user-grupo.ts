@@ -36,6 +36,5 @@ export const useQueryUsersByGroup = (
     gcTime: 1000 * 60 * 30, // 30 min
     retry: 2,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
   });
 };

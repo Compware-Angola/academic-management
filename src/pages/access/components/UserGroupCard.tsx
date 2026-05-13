@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRemoveGruopFromUser } from "@/hooks/acess/use-remove-gruop-from-user";
 import { queryClient } from "@/lib/react-query";
-import { GraduationCap, Trash } from "lucide-react";
+import { GraduationCap, Loader2, Trash } from "lucide-react";
 
 export interface UserItem {
   name: string;
@@ -27,22 +27,12 @@ interface UserGroupCardProps {
 }
 
 export function UserGroupCard({ item }: UserGroupCardProps) {
-  const { mutateAsync: removeGrupo } = useRemoveGruopFromUser();
+  const { mutateAsync: removeGrupo, isPending } = useRemoveGruopFromUser();
   async function handleRemoveGroup(userId: number, grupoId: number) {
     try {
       await removeGrupo({
         userId: userId,
         gruopId: grupoId,
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["user-groups", userId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["users-by-group"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["group-accesses", grupoId],
       });
     } catch (err) {
       console.error("Erro ao remover grupo:", err);
@@ -69,12 +59,17 @@ export function UserGroupCard({ item }: UserGroupCardProps) {
                 variant="outline"
                 className="rounded-full"
                 size="icon"
+                disabled={isPending}
                 title="Editar grupo"
                 onClick={() =>
                   handleRemoveGroup(item.codigo_utilizador, item.grupoId)
                 }
               >
-                <Trash className="h-4 w-4" />
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
