@@ -23,12 +23,12 @@ const AcademicYearSelect = ({
   const id = useId();
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-        {
-          label: "Todos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
   useEffect(() => {
     if (enableDefaultActiveYear) {
@@ -52,8 +52,8 @@ const AcademicYearSelect = ({
         options={
           onlyActive
             ? academicYear?.filter(
-                (a) => a.estado.toLocaleLowerCase() === "activo",
-              )
+              (a) => a.estado.toLocaleLowerCase() === "activo",
+            )
             : academicYear
         }
         map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}

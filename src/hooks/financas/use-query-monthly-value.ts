@@ -10,9 +10,9 @@ export function useQueryMonthlyFeesValue(params: MonthlyFeesValueParams) {
   return useQuery({
     queryKey: [
       "monthly-fees-value",
-      params.anoLectivoId,
-      params.cursoId,
-      params.poloId,
+      params?.anoLectivoId,
+      params?.cursoId,
+      params?.poloId,
     ],
     queryFn: () => getMonthlyFeesValue(params),
     enabled: !!params.anoLectivoId && !!params.cursoId && !!params.poloId,

@@ -8,10 +8,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { FormInput } from "@/components/common/FormInput";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search } from "lucide-react";
 import { UserGroupCard, mapStudent } from "./UserGroupCard";
 import { useQueryUsersByGroup } from "@/hooks/acess/use-query-user-grupo";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type GrupoSelecionado = {
   id: number;
@@ -32,18 +40,23 @@ export default function UserGroupModal({
   onClose,
 }: UserGroupModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
   const {
     data: userResponse,
     isLoading,
     isError,
   } = useQueryUsersByGroup({
-    limit: 25,
-    page: 1,
+    limit: limit,
+    page: page,
+    nome: searchTerm,
     pkGrupo: grupo?.id,
   });
 
   const tableData = userResponse?.data ?? [];
+  const totalPages = userResponse?.totalPages ?? 0;
+
   const total = userResponse?.total ?? 0;
   const closeModal = () => {
     onClose();
@@ -65,12 +78,9 @@ export default function UserGroupModal({
         <DialogDescription>
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Pesquisar por aluno"
-              className="pl-8 w-full bg-white"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+            <FormInput
+              placeholder="Entra com uma pesquisa"
+              onDebounce={(v) => setSearchTerm(v)}
             />
           </div>
         </DialogDescription>
@@ -94,13 +104,55 @@ export default function UserGroupModal({
           ) : (
             <div className="grid grid-cols-2 gap-5">
               {tableData.map((user) => (
-                <UserGroupCard
-                  key={user.codigo_utilizador}
-                  item={mapStudent(user)}
-                />
+                <UserGroupCard item={mapStudent(user)} />
               ))}
             </div>
           )}
+          <div className="flex items-center justify-between mt-6">
+            <p className="text-sm text-muted-foreground">
+              Mostrando {Math.min((page - 1) * limit + tableData.length, total)}{" "}
+              de {total} registros
+            </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm font-medium">
+                Página {page} de {totalPages || 1}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Próxima
+              </Button>
+
+              <Select
+                value={String(limit)}
+                onValueChange={(v) => {
+                  setLimit(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-20 h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         <DialogFooter className="border-t pt-4">

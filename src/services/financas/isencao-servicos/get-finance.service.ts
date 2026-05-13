@@ -14,11 +14,13 @@ export type Mensalidade = {
   mes_temp_id: number;
   mes: string;
   data_inicial: string;
+  data_operacao: string | null;
   data_final: string;
   data_limite: string;
   total_preco: number;
   semestre: number;
   data_final_desconto: string | null;
+  data_pagamento: string | null;
   id_item: number;
   id_tipo_servico: number;
   descricao_servico: string;

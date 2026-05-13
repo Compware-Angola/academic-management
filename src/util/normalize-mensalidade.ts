@@ -4,6 +4,7 @@ import { formatNumber } from "./format-number";
 interface NormalizedMensalidade {
   id: number;
   month: string;
+
   description: string;
   valorBase: number;
   mensalidade: string;
@@ -14,6 +15,8 @@ interface NormalizedMensalidade {
   multa: number;
   formaPagamento: string | null;
   dataPagamento: string | null;
+  data_operacao: string | null;
+
   dueDate: string | null;
   status: number;
   reference: string | null;
@@ -22,15 +25,19 @@ interface NormalizedMensalidade {
   mesId: number;
   id_item: number | undefined;
 }
+
 const normalizeMensalidade = (
   monthlys: Mensalidade[],
+  monthFeePrice: number
 ): NormalizedMensalidade[] => {
   return monthlys
     .map((monthly) => {
       const status = Number(monthly.estado_fatura);
-      const valorBase = status === 1 ? monthly.valor_pago : monthly.total;
+      const valorBase = monthFeePrice;
+      const valorPago = status === 1 ? String(monthly.valor_pago) : "0.00";
       const desconto = Number(monthly.desconto);
       const mensalidade = Number(monthly.mensalidade);
+      const valorAPagar = String(monthly.total);
 
       const percentualDesconto =
         mensalidade > 0 ? (desconto / mensalidade) * 100 : 0;
@@ -39,19 +46,21 @@ const normalizeMensalidade = (
         desconto > 0
           ? ` Pagamento aplicado desconto de ${percentualDesconto.toFixed(0)}%`
           : null;
+
       return {
         id: monthly.mes_temp_id,
         month: monthly.mes,
         description: `Mensalidade - ${monthly.semestre} º Semestre`,
-        valorPago: String(monthly.valor_pago),
+        valorPago: valorPago,
+        valorBase: valorBase,
         tipoDesconto: "Percentual",
         mensalidade: formatNumber(monthly.mensalidade ?? 0),
-        valorBase: valorBase,
-        valorAPagar: String(monthly.total),
+        valorAPagar: valorAPagar,
         multa: monthly.multa,
         desconto: monthly.desconto ?? 0,
         formaPagamento: null,
-        dataPagamento: null,
+        data_operacao: monthly.data_operacao,
+
         dueDate: monthly.data_vencimento,
         status: status,
         reference: monthly.reference,
@@ -59,9 +68,9 @@ const normalizeMensalidade = (
         bolseiro: 1,
         mesId: monthly.mes_temp_id,
         id_item: monthly.id_item,
+        dataPagamento: status === 1 ? (monthly.data_pagamento ?? null) : null
       };
     })
     .sort((a, b) => a.id - b.id);
 };
-
 export { normalizeMensalidade };

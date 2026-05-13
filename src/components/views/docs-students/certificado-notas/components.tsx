@@ -175,7 +175,7 @@ const Assinatura = ({
 }) => (
   <View
     style={{
-      width: "55%",
+      width: "50%",
       marginTop: 20,
       flexDirection: "column",
       alignItems: "center",
@@ -186,7 +186,7 @@ const Assinatura = ({
     <Text>Código de Validação: {codigoValidacao}</Text>
     <Text
       style={{
-        textAlign: "center",
+        textAlign: "justify",
       }}
     >
       Atesto a conformidade desta certidão, que vai por mim assinada e timbrada

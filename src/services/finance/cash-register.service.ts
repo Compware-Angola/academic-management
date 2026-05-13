@@ -65,3 +65,9 @@ export async function deleteCashRegisterService(id: number) {
 
   return data.data;
 }
+
+export async function myCashRegisterService(): Promise<CashRegister> {
+  const { data } = await axiosNestFinance.get(`/caixas/meu-caixa`);
+
+  return data.data;
+}
