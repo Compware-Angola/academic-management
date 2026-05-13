@@ -19,7 +19,7 @@ export function useCreatePayment() {
       queryClient.invalidateQueries({ queryKey: ["facturas"] });
     },
     onError: () => {
-      toast.error("Erro ao criar pagamento", { id: "create-payment-error" });
+      // toast.error("Erro ao criar pagamento", { id: "create-payment-error" });
     },
   });
 }
