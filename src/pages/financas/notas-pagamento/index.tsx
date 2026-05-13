@@ -57,17 +57,18 @@ export default function ListarPagamentos() {
 
   const searchParams = searchApplied
     ? {
-      [searchFieldMap[searchByApplied]]:
-        searchByApplied === "codigoMatricula"
-          ? parseFilter(searchApplied)
-          : searchApplied,
-    }
+        [searchFieldMap[searchByApplied]]:
+          searchByApplied === "codigoMatricula"
+            ? parseFilter(searchApplied)
+            : searchApplied,
+      }
     : {};
 
   const {
     data: paymentResponse,
     isLoading: loadingPayments,
     refetch,
+    isRefetching,
   } = useQueryListPayments({
     anoLectivo: parseFilter(filtersApplied.anoLectivo),
     codigoFactura: parseFilter(filtersApplied.factura),
@@ -92,7 +93,11 @@ export default function ListarPagamentos() {
     setSearchByApplied(searchBy);
     refetch();
   };
-  const handleClear = (clearedFilters: Filters, clearedSearchBy: SearchByType, clearedSearchTerm: string) => {
+  const handleClear = (
+    clearedFilters: Filters,
+    clearedSearchBy: SearchByType,
+    clearedSearchTerm: string,
+  ) => {
     setFiltersApplied(clearedFilters);
     setSearchByApplied(clearedSearchBy);
     setSearchApplied(clearedSearchTerm);
@@ -153,7 +158,7 @@ export default function ListarPagamentos() {
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             payments={payments}
-            loadingPayments={loadingPayments}
+            loadingPayments={loadingPayments || isRefetching}
             page={page}
             setPage={setPage}
             limit={limit}
