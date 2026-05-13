@@ -35,7 +35,7 @@ import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-jo
 
 type SelectedPayment = {
   mesTempId: number;
-  valorBase: number;
+  valorAPagar: number;
   multa: number;
   desconto: number;
   mesTempDesc: string;
@@ -79,7 +79,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   >(new Map());
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
-      (total, payment) => total + payment.valorBase,
+      (total, payment) => total + payment.valorAPagar,
       0,
     );
   }, [selectedPayments]);
@@ -87,7 +87,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     mesTempDesc,
     mesTempId,
     multa,
-    valorBase,
+    valorAPagar,
     desconto,
   }: SelectedPayment) => {
     setSelectedPayments((prev) => {
@@ -98,7 +98,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       } else {
         next.set(mesTempId, {
           mesTempId,
-          valorBase,
+          valorAPagar,
           mesTempDesc,
           multa,
           desconto,
@@ -159,7 +159,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
         valorDesconto: payment.desconto,
         codigo: monthFee.codigo,
         descricao: `Mensalidade ${payment.mesTempDesc}`,
-        preco: payment.valorBase,
+        preco: payment.valorAPagar,
         mesTempId: payment.mesTempId,
       }),
     );
@@ -263,7 +263,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             mesTempId: payment.mesId,
                             mesTempDesc: payment.month,
                             multa: payment.multa,
-                            valorBase: Number(payment.valorBase),
+                            valorAPagar: Number(payment.valorAPagar),
                             desconto: payment.desconto,
                           })
                         }
@@ -306,7 +306,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             Valor Base
                           </p>
                           <p className="text-sm font-medium">
-                            {payment.valorBase}
+                            {formatNumber(payment.valorBase)}
                           </p>
                         </div>
                       </div>
