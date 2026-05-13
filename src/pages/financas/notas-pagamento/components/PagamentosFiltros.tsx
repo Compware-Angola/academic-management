@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 
@@ -12,10 +12,12 @@ type SearchByType =
     | "n_operacao_bancaria"
     | "n_operacao_bancaria2";
 
-type Filters = {
+export type Filters = {
     anoLectivo: string;
     estado: string;
     factura: string;
+    dataInicio: string;
+    dataFim: string;
 };
 
 type PagamentosFiltrosProps = {
@@ -27,6 +29,7 @@ type PagamentosFiltrosProps = {
     setSearchTerm: (s: string) => void;
     setPage: (p: number) => void;
     onSearch: () => void;
+    onClear?: (clearedFilters: Filters, clearedSearchBy: SearchByType, clearedSearchTerm: string) => void;
 };
 
 const searchOptions = [
@@ -58,10 +61,31 @@ export function PagamentosFiltros({
     setSearchTerm,
     setPage,
     onSearch,
+    onClear,
 }: PagamentosFiltrosProps) {
+    const handleClear = () => {
+        const clearedFilters: Filters = {
+            anoLectivo: "23",
+            estado: "all",
+            factura: "",
+            dataInicio: "",
+            dataFim: "",
+        };
+
+        // Atualiza os filtros locais
+        setFilters(clearedFilters);
+        setSearchTerm("");
+        setSearchBy("codigoMatricula");
+        setPage(1);
+
+        // 🔥 Importante: Chama a função de callback com os valores limpos
+        onClear?.(clearedFilters, "codigoMatricula", "");
+    };
+
     return (
         <Card>
             <CardContent className="pt-6 space-y-4">
+                {/* Linha de pesquisa */}
                 <div className="flex w-full gap-4 items-center">
                     <div className="min-w-[220px]">
                         <FormSelect
@@ -90,6 +114,7 @@ export function PagamentosFiltros({
                     </div>
                 </div>
 
+                {/* Filtros principais */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <AcademicYearSelect
                         value={filters.anoLectivo}
@@ -101,6 +126,7 @@ export function PagamentosFiltros({
                         <Input
                             type="number"
                             placeholder="Factura"
+                            value={filters.factura}
                             onChange={({ target }) =>
                                 setFilters({ ...filters, factura: target.value })
                             }
@@ -116,10 +142,49 @@ export function PagamentosFiltros({
                     />
                 </div>
 
-                <div className="flex items-end">
+                {/* Intervalo de datas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <Label htmlFor="data-inicio">Data Início</Label>
+                        <Input
+                            id="data-inicio"
+                            type="date"
+                            value={filters.dataInicio}
+                            max={filters.dataFim || undefined}
+                            onChange={({ target }) =>
+                                setFilters({ ...filters, dataInicio: target.value })
+                            }
+                        />
+                    </div>
+
+                    <div>
+                        <Label htmlFor="data-fim">Data Fim</Label>
+                        <Input
+                            id="data-fim"
+                            type="date"
+                            value={filters.dataFim}
+                            min={filters.dataInicio || undefined}
+                            onChange={({ target }) =>
+                                setFilters({ ...filters, dataFim: target.value })
+                            }
+                        />
+                    </div>
+                </div>
+
+                {/* Botões */}
+                <div className="flex items-end gap-3">
                     <Button onClick={onSearch}>
                         <Search className="h-4 w-4 mr-2" />
                         Pesquisar
+                    </Button>
+
+                    <Button
+                        variant="outline"
+                        onClick={handleClear}
+                        type="button"
+                    >
+                        <X className="h-4 w-4 mr-2" />
+                        Limpar
                     </Button>
                 </div>
             </CardContent>
