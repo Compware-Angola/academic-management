@@ -7,6 +7,7 @@ import {
   openCashRegisterService,
   updateCashRegisterService,
   CashRegister,
+  myCashRegisterService,
 } from "@/services/finance/cash-register.service";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -94,5 +95,13 @@ export const useDeleteCashRegister = () => {
         queryKey: ["cash-registers"],
       });
     },
+  });
+};
+
+export const useQueryMyCashRegister = () => {
+  return useQuery({
+    queryKey: ["my-cash-register"],
+    queryFn: myCashRegisterService,
+    staleTime: 1000 * 60 * 5,
   });
 };
