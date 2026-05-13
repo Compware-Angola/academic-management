@@ -20,6 +20,8 @@ export const useQueryListPayments = (
     n_operacao_bancaria,
     n_operacao_bancaria2,
     estado,
+    dataInicio,
+    dataFim,
     nome,
     page = 1,
     limit = 25,
@@ -38,7 +40,8 @@ export const useQueryListPayments = (
         codigoMatricula,
         codigoFactura,
         estado,
-
+        dataInicio,
+        dataFim,
         nome,
         page,
         limit,
