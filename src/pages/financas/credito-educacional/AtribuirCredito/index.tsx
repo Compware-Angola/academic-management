@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -28,7 +28,6 @@ function validarPayload(payload: {
 }) {
   if (!payload.codigoAnoLectivo) return "Ano letivo é obrigatório";
   if (!payload.semestre) return "Semestre é obrigatório";
-
   if (!payload.codigoBolsa) return "Bolsa é obrigatório";
   return null;
 }
@@ -37,6 +36,8 @@ export default function AtribuirCredito() {
   const { toast } = useToast();
   const { user } = useAuth();
   const pk_utilizador = user?.user?.pk_utilizador;
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [matricula, setMatricula] = useState("");
   const [pesquisar, setPesquisar] = useState(false);
@@ -55,6 +56,7 @@ export default function AtribuirCredito() {
     isError,
     error,
   } = useQueryAlunoMatricula(matricula, pesquisar);
+
   const { mutateAsync: atribuirCredito, isPending: isAtribuindo } =
     useMutationAtribuirBolsa();
 
@@ -68,7 +70,13 @@ export default function AtribuirCredito() {
       semestre: "",
       codigoBolsa: "",
     });
+    inputRef.current?.focus(); // Foca novamente no input
   };
+
+  // Foco automático ao carregar
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (aluno) setModalAberto(true);
@@ -85,9 +93,19 @@ export default function AtribuirCredito() {
   }, [isError, error, toast]);
 
   const pesquisarAluno = () => {
-    if (!matricula) return;
+    if (!matricula?.trim()) {
+      toast({ title: "Digite o número de matrícula", variant: "destructive" });
+      return;
+    }
     setCanAtribuir(false);
     setPesquisar(true);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      pesquisarAluno();
+    }
   };
 
   const handleAtribuir = async () => {
@@ -113,7 +131,6 @@ export default function AtribuirCredito() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -134,7 +151,6 @@ export default function AtribuirCredito() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Card de Atribuição */}
       <Card>
         <CardHeader>
           <CardTitle>Pesquisar Estudante</CardTitle>
@@ -142,37 +158,38 @@ export default function AtribuirCredito() {
         <CardContent className="space-y-6">
           <div className="flex gap-2">
             <Input
+              ref={inputRef}
               type="number"
               placeholder="Número de matrícula"
               value={matricula}
               disabled={isLoading}
               onChange={(e) => setMatricula(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
-            <Button size="icon" disabled={isLoading} onClick={pesquisarAluno}>
+            <Button
+              size="icon"
+              disabled={isLoading || !matricula}
+              onClick={pesquisarAluno}
+            >
               {isLoading ? "..." : <Search className="h-4 w-4" />}
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3  gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <AcademicYearSelect
               disabled={!aluno}
               value={payload.codigoAnoLectivo}
-              onChangeValue={(v) =>
-                setPayload((p) => ({ ...p, codigoAnoLectivo: v }))
-              }
+              onChangeValue={(v) => setPayload((p) => ({ ...p, codigoAnoLectivo: v }))}
             />
             <SemestreSelect
               disabled={!aluno}
               value={payload.semestre}
               onChangeValue={(v) => setPayload((p) => ({ ...p, semestre: v }))}
             />
-
             <BolsaSelect
               disabled={!aluno}
               value={payload.codigoBolsa}
-              onChangeValue={(v) =>
-                setPayload((p) => ({ ...p, codigoBolsa: v }))
-              }
+              onChangeValue={(v) => setPayload((p) => ({ ...p, codigoBolsa: v }))}
             />
           </div>
 

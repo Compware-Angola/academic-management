@@ -130,10 +130,9 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       cursoId: student?.curso_codigo,
       poloId: 1,
     });
-
-  const data = monthResponse?.data ?? [];
-  const payments = normalizeMensalidade(data);
   const monthFee = monthValueResponse?.[0];
+  const data = monthResponse?.data ?? [];
+  const payments = normalizeMensalidade(data, monthFee?.preco ?? 0);
 
   const handleCreateInvoice = () => {
     if (!monthFee?.codigo) {
@@ -258,7 +257,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             mesTempId: payment.mesId,
                             mesTempDesc: payment.month,
                             multa: payment.multa,
-                            valorBase: payment.valorBase,
+                            valorBase: Number(payment.valorBase),
                             desconto: payment.desconto,
                           })
                         }
@@ -279,7 +278,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                   <div className="flex items-center gap-4">
                     <div className="text-right space-y-2">
                       <p className="font-bold">
-                        {formatNumber(payment.valorBase)} Kz
+                        {formatNumber(Number(payment.valorAPagar))}
                       </p>
                       {getStatusBadge(payment.status)}
                     </div>
@@ -352,23 +351,26 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             Valor a Pagar
                           </p>
                           <p className="text-sm font-bold">
-                            {payment.valorAPagar}
+                            {formatNumber(Number(payment.valorAPagar))}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-start gap-2">
-                        <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">
-                            Vencimento
-                          </p>
-                          <p className="text-sm font-medium">
-                            {new Date(payment.dueDate).toLocaleDateString(
-                              "pt-AO",
-                            )}
-                          </p>
+                      {payment.dueDate && (
+                        <div className="flex items-start gap-2">
+                          <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">
+                              Vencimento
+                            </p>
+                            <p className="text-sm font-medium">
+                              {new Date(payment.dueDate).toLocaleDateString(
+                                "pt-AO",
+                              )}
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      )}
+
                       {payment.formaPagamento && (
                         <div className="flex items-start gap-2">
                           <Receipt className="h-4 w-4 mt-0.5 text-muted-foreground" />
@@ -382,21 +384,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           </div>
                         </div>
                       )}
-                      {payment.dataPagamento && (
-                        <div className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 mt-0.5 text-success" />
-                          <div>
-                            <p className="text-xs text-muted-foreground">
-                              Data de Pagamento
-                            </p>
-                            <p className="text-sm font-medium">
-                              {new Date(
-                                payment.dataPagamento,
-                              ).toLocaleDateString("pt-AO")}
-                            </p>
-                          </div>
-                        </div>
-                      )}
+
                       {payment.reference && (
                         <div className="flex items-start gap-2">
                           <FileText className="h-4 w-4 mt-0.5 text-muted-foreground" />
@@ -411,6 +399,17 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                         </div>
                       )}
                     </div>
+                    {payment.data_operacao && (
+                      <div className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 mt-0.5 text-success" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Data de Pagamento</p>
+                          <p className="text-sm font-medium">
+                            {new Date(payment.data_operacao).toLocaleDateString("pt-AO")}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     {payment.observacoes && (
                       <>
                         <Separator />
