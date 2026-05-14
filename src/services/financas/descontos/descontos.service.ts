@@ -121,6 +121,7 @@ export type CreateDescontoAddBody = {
   codigoInstituicao?: number | null;
   codigoAno?: number | null;
   semestre?: number | null;
+  afectacao?: number;
 };
 
 export async function createDescontoAdd(body: CreateDescontoAddBody) {
