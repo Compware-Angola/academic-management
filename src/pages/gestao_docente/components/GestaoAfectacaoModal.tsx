@@ -28,6 +28,7 @@ import { useMutationCreateDocenteAfectacao } from "@/hooks/gestao_docente/use-mu
 import { Loader2 } from "lucide-react";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
+import { parseFilter } from "@/util/parse-filter";
 interface GestaoAfectacaoModalProps {
   isModalOpen: boolean;
   setIsModalOpen: () => void;
@@ -51,9 +52,32 @@ export const GestaoAfectacaoModal = ({
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
   const handleChangeInput = (key: string, v: any) => {
-    setParams({
-      ...params,
-      [key]: v,
+    setParams((prev) => {
+      if (key === "curso") {
+        return {
+          ...prev,
+          curso: v,
+          anoCurricular: undefined,
+          unidadeCurricular: undefined,
+        };
+      }
+
+      if (key === "anoCurricular") {
+        return {
+          ...prev,
+          anoCurricular: v,
+          unidadeCurricular: undefined,
+        };
+      }
+      if (key === "semestre") {
+        return {
+          ...prev,
+          semestre: v,
+          unidadeCurricular: undefined,
+        };
+      }
+
+      return { ...prev, [key]: v };
     });
   };
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -66,11 +90,11 @@ export const GestaoAfectacaoModal = ({
 
   const handleSubmit = async () => {
     const payload = {
-      anoLectivo: 23,
-      docente: params.docente,
-      unidadeCurricular: params.unidadeCurricular,
-      semestre: params.semestre,
-      categoria: params.categoria,
+      anoLectivo: activeAcademicYearId,
+      docente: parseFilter(params.docente),
+      unidadeCurricular: parseFilter(params.unidadeCurricular),
+      semestre: parseFilter(params.semestre),
+      categoria: parseFilter(params.categoria),
     };
     await mutateAsync(payload, {
       onSuccess: (response) => {
