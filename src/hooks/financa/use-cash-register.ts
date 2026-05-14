@@ -8,6 +8,8 @@ import {
   updateCashRegisterService,
   CashRegister,
   myCashRegisterService,
+  avaliableCashRegistersForOpeningService,
+  CreateCashRegisterPayload,
 } from "@/services/finance/cash-register.service";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -60,11 +62,18 @@ export const useOpenCashRegister = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => openCashRegisterService(id),
+    mutationFn: (payload: CreateCashRegisterPayload) =>
+      openCashRegisterService(payload),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-register"],
       });
     },
   });
@@ -102,6 +111,14 @@ export const useQueryMyCashRegister = () => {
   return useQuery({
     queryKey: ["my-cash-register"],
     queryFn: myCashRegisterService,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useQueryAvailableCashRegistersForOpening = (search?: string) => {
+  return useQuery({
+    queryKey: ["available-cash-registers", search],
+    queryFn: () => avaliableCashRegistersForOpeningService(search),
     staleTime: 1000 * 60 * 5,
   });
 };

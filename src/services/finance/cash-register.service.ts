@@ -44,10 +44,17 @@ export async function updateCashRegisterService(
   return data.data;
 }
 
+export type CreateCashRegisterPayload = {
+  id: number;
+  openingAmount: number;
+};
+
 export async function openCashRegisterService(
-  id: number,
+  payload: CreateCashRegisterPayload,
 ): Promise<CashRegister> {
-  const { data } = await axiosNestFinance.patch(`/caixas/${id}/open`);
+  const { data } = await axiosNestFinance.patch(`/caixas/${payload.id}/open`, {
+    openingAmount: payload.openingAmount,
+  });
 
   return data.data;
 }
@@ -70,4 +77,17 @@ export async function myCashRegisterService(): Promise<CashRegister> {
   const { data } = await axiosNestFinance.get(`/caixas/meu-caixa`);
 
   return data.data;
+}
+
+export async function avaliableCashRegistersForOpeningService(
+  search?: string,
+): Promise<{ data: CashRegister[] }> {
+  const { data } = await axiosNestFinance.get<{ data: CashRegister[] }>(
+    `/caixas/disponiveis`,
+    {
+      params: { search },
+    },
+  );
+
+  return data;
 }

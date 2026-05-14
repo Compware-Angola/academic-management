@@ -33,9 +33,9 @@ import { validarPagamento } from "./validator";
 import { useCreatePayment } from "@/hooks/financas/nota-pagamento/use-mutation-pagamento";
 import { formatDisplay } from "@/util/date-formate";
 import { formatNumber } from "@/util/format-number";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { parseDateFilter, parseFilter } from "@/util/parse-filter";
+import { parseDateFilter } from "@/util/parse-filter";
+import { useQueryMyCashRegister } from "@/hooks/financa/use-cash-register";
+import { OpenCashRegisterTrigger } from "./components/open-cashregister-form";
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("pt-AO");
@@ -63,10 +63,7 @@ function isTipoBancario(formaPagamento?: string) {
 
   const valor = String(formaPagamento).trim();
 
-  return (
-    valor === FORMA_PAGAMENTO.TPA ||
-    valor === FORMA_PAGAMENTO.MB
-  );
+  return valor === FORMA_PAGAMENTO.TPA || valor === FORMA_PAGAMENTO.MB;
 }
 
 export default function LiquidarNota() {
@@ -74,6 +71,8 @@ export default function LiquidarNota() {
   const { mutate, isPending } = useCreatePayment();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: myCashRegister, isLoading: isLoadingCashRegister } =
+    useQueryMyCashRegister();
 
   const [formData, setFormData] = useState({
     n_operacao_bancaria: null,
@@ -162,7 +161,16 @@ export default function LiquidarNota() {
     }
   }, [factura]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (myCashRegister) {
+      setFormData((prev) => ({
+        ...prev,
+        caixa_id: myCashRegister.id.toString(),
+      }));
+    }
+  }, [myCashRegister]);
+
+  if (isLoading || isLoadingCashRegister) {
     return (
       <Card className="p-20 flex flex-col items-center gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -194,7 +202,6 @@ export default function LiquidarNota() {
   }
 
   return (
-
     <div className="p-6 space-y-6">
       {/* Breadcrumb */}
       <Breadcrumb>
@@ -224,216 +231,240 @@ export default function LiquidarNota() {
       </Breadcrumb>
 
       {/* Title */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/financas/notas-pagamento")}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
+
+      {myCashRegister ? (
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/financas/notas-pagamento")}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <h1 className="text-2xl font-bold">Liquidar Nota de Pagamento</h1>
           <p className="text-muted-foreground">
             Preencha os dados para liquidar a nota{" "}
             <span className="font-mono font-semibold">{factura.codigo}</span>
           </p>
         </div>
-      </div>
+      ) : (
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/financas/notas-pagamento")}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
 
-      {/* Resumo da Nota */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Resumo da Nota</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Nº da Nota</p>
-              <p className="font-medium font-mono">{factura.codigo}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Estudante</p>
-              <p className="font-medium">{factura.nome_aluno}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Matrícula</p>
-              <p className="font-medium font-mono">
-                {factura.codigo_matricula}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Valor a Pagar</p>
-              <p className="font-bold text-primary text-lg">
-                {formatNumber(factura.valor_pagar)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Curso</p>
-              <p className="font-medium">{factura.curso}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Campus</p>
-              <p className="font-medium">{factura.polo}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Emissão</p>
-              <p className="font-medium">{formatDate(factura.data_factura)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Estado</p>
-              <PagamentoStatus status={factura.estado} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <OpenCashRegisterTrigger />
+        </>
+      )}
 
-      {/* Formulário de Liquidação */}
-      <form >
-        <div className="space-y-4">
-
+      {myCashRegister && (
+        <>
+          {/* Resumo da Nota */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Dados do Pagamento</CardTitle>
+              <CardTitle className="text-lg">Resumo da Nota</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <FormaPagamentoSelect
-                    value={formData.forma_pagamento}
-                    onChangeValue={(v) =>
-                      setFormData({ ...formData, forma_pagamento: v })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <FormSelect
-                    label="Tipo de Pagamento"
-                    value={formData.tipo_pagamento}
-                    onChange={(v) =>
-                      setFormData({ ...formData, tipo_pagamento: v })
-                    }
-                    options={tipoPagamentoOptions}
-                    map={(a) => ({ key: a.key, label: a.value, value: a.key })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="codigo_factura">Código Factura</Label>
-                  <Input
-                    id="codigo_factura"
-                    value={formData.codigo_factura}
-                    readOnly
-                    className="bg-muted"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="total_geral">Valor Total (KZ)</Label>
-                  <Input
-                    id="total_geral"
-                    type="number"
-                    disabled
-                    min="0"
-                    step="0.01"
-                    value={factura.total_preco}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="total_geral">Valor a Pagar (KZ)</Label>
-                  <Input
-                    id="total_geral"
-                    type="number"
-                    disabled
-                    min="0"
-                    step="0.01"
-                    value={factura.valor_pagar}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="valor_depositado">Valor Depositado *</Label>
-                  <Input
-                    id="valor_depositado"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="Ex: 1200"
-                    value={formData.valor_depositado}
-                    onChange={(e) =>
-                      handleChange("valor_depositado", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <AcademicYearSelect
-                    disabled
-                    onChangeValue={(v) =>
-                      setFormData({ ...formData, ano_lectivo: v })
-                    }
-                    value={formData.ano_lectivo}
-                  />
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Nº da Nota</p>
+                  <p className="font-medium font-mono">{factura.codigo}</p>
                 </div>
                 <div>
-                  <Label htmlFor="data_registo">Data de Registo</Label>
-                  <Input
-                    id="data_registo"
-                    type="date"
-                    value={formData.data_registo}
-                    disabled
-                  />
+                  <p className="text-sm text-muted-foreground">Estudante</p>
+                  <p className="font-medium">{factura.nome_aluno}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Matrícula</p>
+                  <p className="font-medium font-mono">
+                    {factura.codigo_matricula}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Valor a Pagar</p>
+                  <p className="font-bold text-primary text-lg">
+                    {formatNumber(factura.valor_pagar)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Curso</p>
+                  <p className="font-medium">{factura.curso}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Campus</p>
+                  <p className="font-medium">{factura.polo}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Emissão</p>
+                  <p className="font-medium">
+                    {formatDate(factura.data_factura)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Estado</p>
+                  <PagamentoStatus status={factura.estado} />
                 </div>
               </div>
-
             </CardContent>
           </Card>
 
-          {isTipoBancario(formData.forma_pagamento) && (<Card>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                Dados da Operação Bancária
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="n_operacao_bancaria">
-                    Nº Operação Bancária
-                  </Label>
-                  <Input
-                    id="n_operacao_bancaria"
-                    placeholder="Ex: OPB-001234"
-                    value={formData.n_operacao_bancaria}
-                    onChange={(e) =>
-                      handleChange("n_operacao_bancaria", e.target.value)
-                    }
-                  />
-                </div>
+          {/* Formulário de Liquidação */}
+          <form>
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Dados do Pagamento</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <FormaPagamentoSelect
+                        value={formData.forma_pagamento}
+                        onChangeValue={(v) =>
+                          setFormData({ ...formData, forma_pagamento: v })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <FormSelect
+                        label="Tipo de Pagamento"
+                        value={formData.tipo_pagamento}
+                        onChange={(v) =>
+                          setFormData({ ...formData, tipo_pagamento: v })
+                        }
+                        options={tipoPagamentoOptions}
+                        map={(a) => ({
+                          key: a.key,
+                          label: a.value,
+                          value: a.key,
+                        })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="codigo_factura">Código Factura</Label>
+                      <Input
+                        id="codigo_factura"
+                        value={formData.codigo_factura}
+                        readOnly
+                        className="bg-muted"
+                      />
+                    </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="data_banco">Data Banco *</Label>
-                  <Input
-                    id="data_banco"
-                    type="date"
-                    value={formData.data_banco}
-                    onChange={(e) => handleChange("data_banco", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="data_operacao">Data da Operação</Label>
-                  <Input
-                    id="data_operacao"
-                    type="date"
-                    value={formData.data_operacao}
-                    onChange={(e) =>
-                      handleChange("data_operacao", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-              {/* TODO: Implementar 
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="total_geral">Valor Total (KZ)</Label>
+                      <Input
+                        id="total_geral"
+                        type="number"
+                        disabled
+                        min="0"
+                        step="0.01"
+                        value={factura.total_preco}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="total_geral">Valor a Pagar (KZ)</Label>
+                      <Input
+                        id="total_geral"
+                        type="number"
+                        disabled
+                        min="0"
+                        step="0.01"
+                        value={factura.valor_pagar}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="valor_depositado">
+                        Valor Depositado *
+                      </Label>
+                      <Input
+                        id="valor_depositado"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Ex: 1200"
+                        value={formData.valor_depositado}
+                        onChange={(e) =>
+                          handleChange("valor_depositado", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <AcademicYearSelect
+                        disabled
+                        onChangeValue={(v) =>
+                          setFormData({ ...formData, ano_lectivo: v })
+                        }
+                        value={formData.ano_lectivo}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="data_registo">Data de Registo</Label>
+                      <Input
+                        id="data_registo"
+                        type="date"
+                        value={formData.data_registo}
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {isTipoBancario(formData.forma_pagamento) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">
+                      Dados da Operação Bancária
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="n_operacao_bancaria">
+                          Nº Operação Bancária
+                        </Label>
+                        <Input
+                          id="n_operacao_bancaria"
+                          placeholder="Ex: OPB-001234"
+                          value={formData.n_operacao_bancaria}
+                          onChange={(e) =>
+                            handleChange("n_operacao_bancaria", e.target.value)
+                          }
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="data_banco">Data Banco *</Label>
+                        <Input
+                          id="data_banco"
+                          type="date"
+                          value={formData.data_banco}
+                          onChange={(e) =>
+                            handleChange("data_banco", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="data_operacao">Data da Operação</Label>
+                        <Input
+                          id="data_operacao"
+                          type="date"
+                          value={formData.data_operacao}
+                          onChange={(e) =>
+                            handleChange("data_operacao", e.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+                    {/* TODO: Implementar 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
               <div className="space-y-2">
@@ -449,148 +480,150 @@ export default function LiquidarNota() {
               </div>
             </div>
             */}
-            </CardContent>
-          </Card>)}
+                  </CardContent>
+                </Card>
+              )}
 
+              <Card>
+                <CardHeader className="flex! space-x-2 flex-row! items-center">
+                  <CardTitle className="text-lg">Fórmula</CardTitle>
+                  <p>(Composição do valor a pagar)</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-7 gap-4 items-center">
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        Valor Total
+                      </p>
+                      <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                        {formatNumber(factura.total_preco)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
+                        -
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        Desconto
+                      </p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
+                        {formatNumber(factura?.desconto)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-primary"> + </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        Multa
+                      </p>
+                      <p className="text-2xl font-bold  text-primary dark:text-gray-100">
+                        {formatNumber(factura.total_multa)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-primary"> = </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                        Valor a Pagar
+                      </p>
+                      <p className="text-2xl font-bold text-primary">
+                        {formatNumber(factura.valor_pagar)}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="flex! space-x-2 flex-row! items-center">
-              <CardTitle className="text-lg">Fórmula</CardTitle>
-              <p>(Composição do valor a pagar)</p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-7 gap-4 items-center">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                    Valor Total
-                  </p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                    {formatNumber(factura.total_preco)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
-                    -
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                    Desconto
-                  </p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-gray-100">
-                    {formatNumber(factura?.desconto)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-primary"> + </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                    Multa
-                  </p>
-                  <p className="text-2xl font-bold  text-primary dark:text-gray-100">
-                    {formatNumber(factura.total_multa)}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-primary"> = </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                    Valor a Pagar
-                  </p>
-                  <p className="text-2xl font-bold text-primary">
-                    {formatNumber(factura.valor_pagar)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Estado e Controlo</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <CaixaSelect
+                        disabled={!!myCashRegister}
+                        value={formData.caixa_id}
+                        onChangeValue={(v) =>
+                          setFormData({ ...formData, caixa_id: v })
+                        }
+                      />
+                    </div>
 
+                    <div className="space-y-2">
+                      <Label htmlFor="corrente">Corrente</Label>
+                      <Select
+                        value={formData.corrente}
+                        onValueChange={(v) => handleChange("corrente", v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecionar" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">Sim</SelectItem>
+                          <SelectItem value="0">Não</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Observações</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                    <div className="space-y-2 w-full">
+                      <Textarea
+                        id="observacao"
+                        placeholder="Observações sobre a liquidação..."
+                        rows={3}
+                        value={formData.observacao}
+                        onChange={(e) =>
+                          handleChange("observacao", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Estado e Controlo</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <CaixaSelect
-                    value={formData.caixa_id}
-                    onChangeValue={(v) =>
-                      setFormData({ ...formData, caixa_id: v })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="corrente">Corrente</Label>
-                  <Select
-                    value={formData.corrente}
-                    onValueChange={(v) => handleChange("corrente", v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecionar" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Sim</SelectItem>
-                      <SelectItem value="0">Não</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Observações</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                <div className="space-y-2 w-full">
-                  <Textarea
-                    id="observacao"
-                    placeholder="Observações sobre a liquidação..."
-                    rows={3}
-                    value={formData.observacao}
-                    onChange={(e) => handleChange("observacao", e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Actions */}
-        <Separator className="my-6" />
-        <div className="flex justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            className="gap-2"
-            onClick={() => navigate("/financas/notas-pagamento")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Cancelar
-          </Button>
-          <Button
-            type="button"
-            onClick={() => handleSubmit()}
-            className="gap-2"
-            disabled={isPending || isFacturaPago}
-          >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            {isPending ? "A processar..." : "Liquidar Nota"}
-          </Button>
-        </div>
-      </form>
+            {/* Actions */}
+            <Separator className="my-6" />
+            <div className="flex justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                onClick={() => navigate("/financas/notas-pagamento")}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={() => handleSubmit()}
+                className="gap-2"
+                disabled={isPending || isFacturaPago}
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {isPending ? "A processar..." : "Liquidar Nota"}
+              </Button>
+            </div>
+          </form>
+        </>
+      )}
     </div>
-
   );
 }
