@@ -75,15 +75,15 @@ export const GestaoAfectacaoModal = ({
     await mutateAsync(payload, {
       onSuccess: (response) => {
         toast({
-          title: "Programa UC",
-          description: "Programa UC criado com sucesso.",
+          title: "Gestão de Afectação",
+          description: "Afectação de  UC criado com sucesso.",
           variant: "default",
         });
         setIsModalOpen();
       },
       onError(error) {
         toast({
-          title: "Programa UC",
+          title: "Gestão de Afectação",
           description: error.message,
           variant: "destructive",
         });
