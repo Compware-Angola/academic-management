@@ -15,6 +15,6 @@ export function useQueryMonthlyFeesValue(params: MonthlyFeesValueParams) {
       params?.poloId,
     ],
     queryFn: () => getMonthlyFeesValue(params),
-    enabled: !!params.anoLectivoId && !!params.cursoId && !!params.poloId,
+    enabled: !!params?.anoLectivoId && !!params?.cursoId && !!params?.poloId,
   });
 }
