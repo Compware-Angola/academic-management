@@ -162,6 +162,7 @@ import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
 import ListarTopicos from "./pages/access_exam/ListarTopicos";
 import ListagemProvas from "./pages/access_exam/ListagemProvas";
+import ConfigurarVaga from "./pages/access_exam/ConfigurarVaga";
 import { ListaEstudantesDiplomados } from "./pages/registrations/ListarEstudantesDiplomados";
 import { FormaPagamentoPage } from "./pages/financas/forma-pagamento";
 import { CaixaPage } from "./pages/financas/caixa";
@@ -706,6 +707,18 @@ const App = () => {
                         ]}
                       >
                         <ListagemProvas />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/exame/configurar-vaga"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFINIR_VAGAS_POR_CURSO.sigla!,
+                        ]}
+                      >
+                        <ConfigurarVaga />
                       </ProtectedRoute>
                     }
                   />
