@@ -88,7 +88,7 @@ export default function AtribuirDescontoModal({
       );
       setCodigoTaxa(initial?.codigoTaxa ? String(initial.codigoTaxa) : "");
       setCodigoInstituicao(
-        initial?.codigoInstituicao ? String(initial.codigoMatricula) : "",
+        initial?.codigoInstituicao ? String(initial.codigoInstituicao) : "",
       );
       setCodigoAnoStr(initial?.codigoAno ? String(initial.codigoAno) : "");
       setSemestre(initial?.semestre ? String(initial.semestre) : "");
@@ -137,7 +137,7 @@ export default function AtribuirDescontoModal({
       observacao: observacao || undefined,
       codigoMatricula: Number(codigoMatriculaStr),
       codigoTaxa: Number(codigoTaxa),
-      codigoInstituicao: Number(codigoMatriculaStr),
+      codigoInstituicao: Number(codigoInstituicao),
       codigoAno: codigoAnoStr ? Number(codigoAnoStr) : undefined,
       semestre: semestre ? Number(semestre) : undefined,
       afectacao: parseFilter(afectacao),
