@@ -263,7 +263,7 @@ function AssiduidadeTab({
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } =
     useQueryStatusAgendamento({ enabled: true });
- const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useAssiduidadeDocente({
     docenteId: parseFilter(docenteId),
     gradeId: parseFilter(filters.unidadeCurricular),
@@ -374,36 +374,36 @@ function AssiduidadeTab({
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Assiduidade do Docente",
-          subtitle: "Registo de assiduidade nas aulas lecionadas",
-          infoSections: [
-            { title: "Filtros Aplicados", content: filtrosLabel || "Sem filtros" },
-            {
-              title: "Resumo",
-              content: [
-                `Realizadas: ${contagem?.["Realizada"] ?? 0}`,
-                `Pendentes: ${contagem?.["Pendente"] ?? 0}`,
-                `Faltas: ${contagem?.["Falta"] ?? 0}`,
-              ],
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "codigo", label: "Código", width: 12 },
-              { key: "docente", label: "Docente", width: 25 },
-              { key: "curso", label: "Horário", width: 20 },
-              { key: "unidadeCurricular", label: "Unidade Curricular", width: 30 },
-              { key: "ordemTempo", label: "Tempo", width: 10 },
-              { key: "dataAula", label: "Data da Aula", width: 15 },
-              { key: "horaInicio", label: "Hora Início", width: 14 },
-              { key: "horaTermino", label: "Hora Término", width: 14 },
-              { key: "estado", label: "Assiduidade", width: 14 },
+        documentTitle: "Assiduidade do Docente",
+        subtitle: "Registo de assiduidade nas aulas lecionadas",
+        infoSections: [
+          { title: "Filtros Aplicados", content: filtrosLabel || "Sem filtros" },
+          {
+            title: "Resumo",
+            content: [
+              `Realizadas: ${contagem?.["Realizada"] ?? 0}`,
+              `Pendentes: ${contagem?.["Pendente"] ?? 0}`,
+              `Faltas: ${contagem?.["Falta"] ?? 0}`,
             ],
-            rows: exportRows,
           },
-          footerNotice: "Documento gerado automaticamente pelo sistema.",
-          primaryColor: "#0D1B48",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "codigo", label: "Código", width: 12 },
+            { key: "docente", label: "Docente", width: 25 },
+            { key: "curso", label: "Horário", width: 20 },
+            { key: "unidadeCurricular", label: "Unidade Curricular", width: 30 },
+            { key: "ordemTempo", label: "Tempo", width: 10 },
+            { key: "dataAula", label: "Data da Aula", width: 15 },
+            { key: "horaInicio", label: "Hora Início", width: 14 },
+            { key: "horaTermino", label: "Hora Término", width: 14 },
+            { key: "estado", label: "Assiduidade", width: 14 },
+          ],
+          rows: exportRows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const baseFileName = `Assiduidade_Docente_${new Date().toISOString().slice(0, 10)}`;
@@ -478,17 +478,17 @@ function AssiduidadeTab({
               placeholder="Selecione o estado..."
             />
           </div>
-            <div className="space-y-2">
-                                <FormSelect
-                                  disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLectivo === ""}
-                                  loading={isLoadingPeriodos}
-                                  label="Período"
-                                  value={filters.codigoTurno?.toString() ?? "all"}
-                                  onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? undefined : v, page: 1 }))}
-                                  options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
-                                  map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
-                                />
-                              </div>
+          <div className="space-y-2">
+            <FormSelect
+              disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLectivo === ""}
+              loading={isLoadingPeriodos}
+              label="Período"
+              value={filters.codigoTurno?.toString() ?? "all"}
+              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? undefined : v, page: 1 }))}
+              options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
+              map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+            />
+          </div>
 
           <SemestreSelect
             onChangeValue={(v) => setFilters((prev) => ({ ...prev, semestre: v, page: 1 }))}
@@ -653,7 +653,7 @@ function AssiduidadeTab({
                           <TableCell className="font-mono text-sm">{r.codigo}</TableCell>
                           <TableCell className="font-medium">{r.docente ?? "N/A"}</TableCell>
                           <TableCell>{r.horario}</TableCell>
-                        
+
                           <TableCell>{r.unidade_curricular}</TableCell>
                           <TableCell>{r.ordem_tempo}</TableCell>
                           <TableCell>{r.data_aula}</TableCell>
@@ -844,7 +844,7 @@ const TeacherProfile = () => {
     data: teacherInfoData,
     isLoading: teacherInfoDataLoading,
     isError: teacherInfoError,
-  } = useQueryTeacherProfile(user?.user?.pk_utilizador);
+  } = useQueryTeacherProfile();
 
   const activeYear = useMemo(
     () => academicYear?.find((ay) => ay.estado.toLowerCase() === "activo"),
@@ -871,10 +871,10 @@ const TeacherProfile = () => {
     () =>
       teacherInfo.name
         ? teacherInfo.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
         : "",
     [teacherInfo.name],
   );
@@ -1285,9 +1285,8 @@ const TeacherProfile = () => {
                   />
                   {passwords.confirm && (
                     <p
-                      className={`text-xs ${
-                        passwords.new === passwords.confirm ? "text-green-600" : "text-red-500"
-                      }`}
+                      className={`text-xs ${passwords.new === passwords.confirm ? "text-green-600" : "text-red-500"
+                        }`}
                     >
                       {passwords.new === passwords.confirm
                         ? "As senhas coincidem"

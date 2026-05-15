@@ -10,9 +10,9 @@ export interface TeacherProfile {
   data_nascimento: string | null;
   numero_documento: string | null;
   data_emissao: string | null;
-  contacto_1:string;
-  contacto_2:string;
-  data_inicio_docente:string;
+  contacto_1: string;
+  contacto_2: string;
+  data_inicio_docente: string;
   endereco: string | null;
   n_mecanografico: string | null;
   codigo_escalao: number | null;
@@ -28,19 +28,61 @@ export interface TeacherProfileApiResponse {
 }
 
 
-export async function fetchTeacherProfile(
-  teacherId: number
+export async function fetchUserProfile(
+
 ): Promise<TeacherProfile | null> {
   try {
     const response = await axiosNestGa.get<TeacherProfileApiResponse>(
-      `/teacher/profile/${teacherId}`
+      `/users-ga/profile`
     );
 
     const data = response.data?.data ?? [];
 
-  
+
 
     return data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error("Erro ao buscar perfil do docente:", error);
+    return null;
+  }
+}
+
+export interface AdditionalInformation {
+  codigo_docente: number;
+  ano_lectivo: number;
+  codigo_grade: number;
+  codigo_classe: number;
+  disciplina: string;
+  semestre: number;
+
+
+  cargo_designacao: string;
+  codigo_curso: number;
+  codigo_faculdade: number;
+  curso_designacao: string;
+  faculdade_designacao: string;
+
+
+
+}
+export interface AdditionalInformationApiResponse {
+  success: boolean;
+  data: AdditionalInformation[];
+}
+
+
+export async function fetchAdditionalInformation(anoLetivo?: number) {
+  try {
+    const params = new URLSearchParams();
+    if (anoLetivo) {
+      params.append('anoLetivo', String(anoLetivo));
+    }
+    const response = await axiosNestGa.get<AdditionalInformationApiResponse>(
+      `/users-ga/additional-information?${params.toString()}`
+    );
+
+    const data = response.data?.data ?? null;
+    return data;
   } catch (error) {
     console.error("Erro ao buscar perfil do docente:", error);
     return null;

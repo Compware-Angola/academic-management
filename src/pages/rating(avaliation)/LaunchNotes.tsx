@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,6 +53,8 @@ import { PaginationComponent } from "@/components/common/PaginationComponent";
 import { usePermission } from "@/auth/permission.helper";
 import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
+import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
+import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Roles {
@@ -73,17 +75,7 @@ export interface Roles {
  * Qualquer utilizador com pelo menos um destes roles em `true`
  * pode lançar notas sem verificar datas/prazos.
  */
-const ROLES_SEM_RESTRICAO_DE_PRAZO: (keyof Roles)[] = [
-  "direitor_curso",
-  "Reitor",
-  "Vice_Reitor",
-  "Director",
-  "Decano",
-  "Coordenador",
-  "Faculdades",
-  "Acessor_do_Reitor",
-  "Responsável_do_Gabinete_de_qualidade_e_Serviços_Pedagógicos",
-];
+
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
@@ -107,18 +99,75 @@ export default function LaunchNotes() {
     tipoProva: "",
     search: "",
   });
-
+  const { data: cursos, isLoading: loadingCursos } = useCursos();
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      classe: formData.classes,
+      curso: formData.curso,
+      semestre: formData.semestre,
+    });
   // ─── Auth & roles ─────────────────────────────────────────────────────────
   const { user: userData } = useAuth();
   const roles = userData?.roles as Roles | undefined;
-  const isDiretorDeCurso: boolean = roles?.direitor_curso === true;
+  const isDiretorDeCurso: boolean = roles?.Director === true;
   const isDocente: boolean = roles?.docente === true;
-  if (isDocente) {
-    //TODO:
-  }
+  let isLoadinAdditionalInformation = false;
+  const { data: rawInfo, isLoading } = useQueryAdditionalInformation(
+    isDocente || isDiretorDeCurso,
+    formData.anoLetivo
+  );
 
+  // Estabiliza a referência — só muda se o conteúdo mudar
+  const info = useMemo(() => rawInfo, [JSON.stringify(rawInfo)]);
+
+  // Só processa os dados se for docente/diretor E se já tiver info
+  const {
+    filteredClasses,
+    filteredUnidadesCurriculares,
+    allowedIds,
+  } = useMemo(() => {
+    if (!(isDocente || isDiretorDeCurso) || !info) {
+      return {
+        filteredClasses: classes,
+        filteredUnidadesCurriculares: unidadesCurriculares,
+        allowedIds: undefined,
+      };
+    }
+
+    const allowedCursoIds = Array.from(
+      new Set(info.map((item: any) => item.codigo_curso.toString()))
+    );
+
+    const allowedClassIds = Array.from(
+      new Set(info.map((item: any) => item.codigo_classe.toString()))
+    );
+
+    const allowedGradeIds = Array.from(
+      new Set(info.map((item: any) => item.codigo_grade.toString()))
+    );
+
+    const filteredClasses = allowedClassIds.length
+      ? classes.filter((c) => allowedClassIds.includes(c.codigo.toString()))
+      : classes;
+
+    const filteredUnidadesCurriculares = allowedGradeIds.length
+      ? unidadesCurriculares.filter((g) =>
+        allowedGradeIds.includes(g.pk.toString())
+      )
+      : unidadesCurriculares;
+
+    return {
+      filteredClasses,
+      filteredUnidadesCurriculares,
+      allowedIds: allowedCursoIds,  // string[] com ids reais
+    };
+  }, [isDocente, isDiretorDeCurso, info, classes, unidadesCurriculares]);
+  //                                                 ^^^^^^^^^^^^^^^^^^
+  //                               quando isto carregar, o memo recalcula
   /**
-   * True quando o utilizador tem full-access OU pelo menos um role
+   * True quando o utilizador tem full-access OU pelo menos um role 
    * que isenta de verificação de prazo de lançamento.
    */
   const isPrivilegedUser: boolean = haveFullAccess() || isDiretorDeCurso;
@@ -132,19 +181,13 @@ export default function LaunchNotes() {
     useQuerySemestres();
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
-  const { data: cursos } = useCursos();
-  const { data: classes = [], isLoading: isLoadingClasses } =
-    useQueryClassFilterByCurso({ curso: formData.curso });
+
+
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
     useQueryTipoProva();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: formData.classes,
-      curso: formData.curso,
-      semestre: formData.semestre,
-    });
+
 
   const canLoadTurmas =
     !!formData.anoLetivo &&
@@ -152,7 +195,6 @@ export default function LaunchNotes() {
     !!formData.periodo &&
     !!formData.curso &&
     !!formData.unidadeCurricular;
-
   const { data: scheduleResponse, isLoading: loadingschedule } =
     useQuerySchedulesByUc(
       {
@@ -161,10 +203,10 @@ export default function LaunchNotes() {
         periodo: Number(formData.periodo),
         curso: Number(formData.curso),
         unidadeCurricular: Number(formData.unidadeCurricular),
+        ...(isDocente && { docente: Number(info?.[0]?.codigo_docente) }),
       },
       { enabled: canLoadTurmas && canOperateInPage },
     );
-
   // ─── Queries de prazo / permissão ────────────────────────────────────────
   const { data: gradesPrompt, isLoading: isLoadingGradesPrompt } =
     useQueryGradesCreationPrompt({
@@ -437,7 +479,9 @@ export default function LaunchNotes() {
       ),
     );
   };
-
+  const handleCursoChange = useCallback((v: string) => {
+    setFormData((prev) => ({ ...prev, curso: v }));
+  }, []); // ← sem dependências, estável para sempre
   // ─── PDF ──────────────────────────────────────────────────────────────────
   const pdfData = useMemo(() => {
     if (!localStudents.length) return null;
@@ -577,7 +621,7 @@ export default function LaunchNotes() {
             loading={isLoadingAcademicYear}
             label="Ano Letivo"
             value={formData.anoLetivo}
-            onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+            onChange={(v) => setFormData({ ...formData, anoLetivo: v, classes: "", unidadeCurricular: "", periodo: "", curso: "", semestre: "" })}
             options={academicYear}
             map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
           />
@@ -602,17 +646,21 @@ export default function LaunchNotes() {
             map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
           />
 
-          <CourseSelect
+          <CourseSelectTestIsaac
             value={formData.curso}
-            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+            onChangeValue={handleCursoChange}
+            allowedIds={allowedIds}
+            cursos={cursos}
+            isLoading={loadingCursos}
           />
+
 
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
             disabled={isLoadingClasses || !formData.curso || !canOperateInPage}
             onChange={(v) => setFormData({ ...formData, classes: v })}
-            options={classes}
+            options={filteredClasses}
             map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
             loading={isLoadingClasses}
           />
@@ -622,7 +670,7 @@ export default function LaunchNotes() {
             value={formData.unidadeCurricular}
             disabled={isLoadingUC || !formData.semestre || !formData.curso || !formData.classes || !canOperateInPage}
             onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
-            options={unidadesCurriculares}
+            options={filteredUnidadesCurriculares}
             map={(u) => ({ key: u.codigo, label: u.descricao, value: u.pk })}
             loading={isLoadingUC}
           />
@@ -756,7 +804,7 @@ export default function LaunchNotes() {
               </div>
 
               <p className="text-sm text-muted-foreground mt-1">
-                O lançamento de notas está bloqueado.
+                {isLoadinAdditionalInformation ? "Carregando informações adicionais..." : "O lançamento de notas está bloqueado. Aplique as devidas correções para habilitar o lançamento de notas."}
               </p>
             </div>
           </div>
