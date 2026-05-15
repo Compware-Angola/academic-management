@@ -150,6 +150,11 @@ export const ingressoStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla],
         },
         {
+          title: "Lançar nota manual",
+          url: "/exame/lancar-nota-manual",
+          permission: [PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla],
+        },
+        {
           title: "Lista de candidatos",
           url: "/exame/lista-candidatos",
           permission: [PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla],

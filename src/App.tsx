@@ -135,6 +135,7 @@ import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividu
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
+import LancarNotaManual from "./pages/access_exam/LancarNotaManual";
 
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
@@ -800,6 +801,18 @@ const App = () => {
                         ]}
                       >
                         <LancarNotaArquitectura />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/exame/lancar-nota-manual"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla!,
+                        ]}
+                      >
+                        <LancarNotaManual />
                       </ProtectedRoute>
                     }
                   />
