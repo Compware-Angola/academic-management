@@ -1,4 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 /* ---------- PAYLOAD ---------- */
 export type ListSchedulesPayload = {
@@ -22,6 +22,19 @@ export type ListSchedulesResponse = {
   horarios: ScheduleItem[];
 };
 
+type ScheduleByDocenteResponse = {
+  data: {
+    codigo: number;
+    horario_nome: string;
+    docente_nome: string;
+    codigo_grade: number;
+    disciplina: string;
+    sala: string;
+    curso: string;
+    ano: string;
+  }[];
+};
+
 /* ---------- SERVICE ---------- */
 export async function listSchedulesService(
   payload: ListSchedulesPayload
@@ -29,14 +42,27 @@ export async function listSchedulesService(
   const { teacherId, anoLectivo, semestre } = payload;
 
 
-  const { data } = await axiosApexGa.get<ListSchedulesResponse>(
-    `/ga/tearcher/list-schedules/${teacherId}/${anoLectivo}`,
+  const { data } = await axiosNestGa.get<ScheduleByDocenteResponse>(
+    "/schedule/by-docente",
     {
       params: {
+        docenteId: teacherId,
+        anoLectivo,
         semestre,
+        limit: 100,
       },
     }
   );
 
-  return data;
+  return {
+    horarios: (data.data ?? []).map((item) => ({
+      codigo_horario: item.codigo,
+      horario: item.horario_nome,
+      codigo_sala: item.sala,
+      sala: item.sala,
+      docente: item.docente_nome,
+      codigo_grade: String(item.codigo_grade),
+      grade: [item.disciplina, item.curso, item.ano].filter(Boolean).join(" • "),
+    })),
+  };
 }
