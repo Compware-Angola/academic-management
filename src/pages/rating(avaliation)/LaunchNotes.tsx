@@ -114,7 +114,7 @@ export default function LaunchNotes() {
   const isDiretorDeCurso: boolean = roles?.Director === true;
   const isDocente: boolean = roles?.docente === true;
   let isLoadinAdditionalInformation = false;
-  const { data: rawInfo, isLoading } = useQueryAdditionalInformation(
+  const { data: rawInfo } = useQueryAdditionalInformation(
     isDocente || isDiretorDeCurso,
     formData.anoLetivo
   );

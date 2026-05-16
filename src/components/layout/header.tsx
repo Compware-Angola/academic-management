@@ -248,7 +248,7 @@ export function Header() {
 
             {/* ── Sino com efeito swing ─────────────────────────────────── */}
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                   <span className={"bell-animate"}>
                     <Bell className="h-5 w-5" />
