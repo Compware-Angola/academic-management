@@ -57,7 +57,7 @@ import { toast } from "sonner";
 
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useAuth } from "@/hooks/use-auth";
-import { useQueryListSchedules } from "@/hooks/horario/use-query-horarios-by-teacher";
+import { useQuerySchedulesByDocente } from "@/hooks/horario/use-query-schedules-by-docente-service";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { useAssiduidadeDocente } from "@/hooks/docentes/useAssiduidadeDocente";
@@ -74,6 +74,7 @@ import { useUpdatePersonUser } from "@/hooks/acess/useUpdatePersonUser";
 import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { formatReadableTimeInterval } from "@/util/format-readable-time-interval";
 
 // ===================== TYPES =====================
 
@@ -702,6 +703,229 @@ function AssiduidadeTab({
   );
 }
 
+function TeacherSchedulesTab({
+  docenteId,
+  isDocente,
+}: {
+  docenteId: number | undefined;
+  isDocente: boolean;
+}) {
+  const [filters, setFilters] = useState({
+    anoLectivo: "",
+    semestre: "",
+    periodo: "",
+  });
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
+
+  const activeYear = useMemo(
+    () => anosAcademicos?.find((ay) => ay.estado.toLowerCase() === "activo"),
+    [anosAcademicos],
+  );
+
+  useEffect(() => {
+    if (!filters.anoLectivo && activeYear?.codigo) {
+      setFilters((prev) => ({ ...prev, anoLectivo: String(activeYear.codigo) }));
+    }
+  }, [activeYear?.codigo, filters.anoLectivo]);
+
+  const canFetch =
+    isDocente &&
+    !!docenteId &&
+    !!filters.anoLectivo &&
+    !!filters.semestre &&
+    !!filters.periodo;
+
+  const { data: response, isLoading } = useQuerySchedulesByDocente(
+    {
+      docenteId: docenteId ?? 0,
+      anoLectivo: Number(filters.anoLectivo) || 0,
+      semestre: Number(filters.semestre) || 0,
+      periodo: Number(filters.periodo) || 0,
+      page,
+      limit,
+    },
+    { enabled: canFetch },
+  );
+
+  const aulas = response?.data ?? [];
+  const total = response?.total ?? 0;
+  const totalPages = response?.totalPages ?? (Math.ceil(total / limit) || 1);
+
+  const handleFilterChange = (field: keyof typeof filters, value: string) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+    setPage(1);
+  };
+
+  if (!isDocente) {
+    return <RestrictedAccessAlert section="os seus horários" />;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-lg border bg-muted/30 p-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label>Ano Letivo</Label>
+            <FormSelect
+              disabled={isLoadingAcademicYear}
+              value={filters.anoLectivo}
+              onChange={(value) => handleFilterChange("anoLectivo", value)}
+              options={anosAcademicos ?? []}
+              map={(ano) => ({
+                key: ano.codigo,
+                label: ano.designacao,
+                value: String(ano.codigo),
+              })}
+              placeholder="Selecione o ano..."
+            />
+          </div>
+
+          <SemestreSelect
+            value={filters.semestre}
+            onChangeValue={(value) => handleFilterChange("semestre", value)}
+          />
+
+          <FormSelect
+            disabled={isLoadingPeriodos || !filters.anoLectivo}
+            loading={isLoadingPeriodos}
+            label="Período"
+            value={filters.periodo}
+            onChange={(value) => handleFilterChange("periodo", value)}
+            options={periodos ?? []}
+            map={(periodo) => ({
+              key: periodo.codigo.toString(),
+              label: periodo.designacao,
+              value: periodo.codigo.toString(),
+            })}
+            placeholder="Selecione o período..."
+          />
+        </div>
+      </div>
+
+      {!canFetch ? (
+        <EmptyState
+          icon={GraduationCap}
+          title="Selecione os filtros"
+          description="Informe ano letivo, semestre e período para consultar os horários do docente."
+        />
+      ) : isLoading ? (
+        <div className="space-y-3">
+          {[...Array(3)].map((_, index) => (
+            <Skeleton key={index} className="h-12 w-full" />
+          ))}
+        </div>
+      ) : aulas.length === 0 ? (
+        <EmptyState
+          icon={GraduationCap}
+          title="Nenhum horário encontrado"
+          description="Não existem aulas atribuídas ao docente para os filtros selecionados."
+        />
+      ) : (
+        <div className="space-y-4">
+          <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[220px]">Disciplina</TableHead>
+                    <TableHead className="min-w-[130px]">Designação</TableHead>
+                    <TableHead className="min-w-[130px]">Curso / Ano</TableHead>
+                    <TableHead>Dia</TableHead>
+                    <TableHead className="min-w-[130px]">Horário</TableHead>
+                    <TableHead>Sala</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Modalidade</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {aulas.map((aula) => (
+                    <TableRow key={aula.codigo} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">{aula.disciplina}</TableCell>
+                      <TableCell className="font-mono text-sm">{aula.horario_nome}</TableCell>
+                      <TableCell>
+                        {aula.curso} • {aula.ano}
+                      </TableCell>
+                      <TableCell>{aula.dia_semana.replace("-Feira", "")}</TableCell>
+                      <TableCell className="font-mono">
+                        {formatReadableTimeInterval(aula.hora_inicio, aula.hora_termino)}
+                      </TableCell>
+                      <TableCell className="font-medium">{aula.sala}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
+                            aula.tipo_aula.includes("Teórica") ||
+                            aula.tipo_aula.includes("Teorica")
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                              : aula.tipo_aula.includes("Prática")
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                          }`}
+                        >
+                          {aula.tipo_aula.replace("Teorica", "Teórica")}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {aula.modalidade}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              A mostrar {aulas.length} de {total} registos
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((prev) => prev - 1)}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm">
+                Página {page} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages}
+                onClick={() => setPage((prev) => prev + 1)}
+              >
+                Próxima
+              </Button>
+              <Select
+                value={String(limit)}
+                onValueChange={(value) => {
+                  setLimit(Number(value));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ===================== SKELETON LOADING =====================
 
 function ProfileSkeleton() {
@@ -837,28 +1061,11 @@ const TeacherProfile = () => {
   const isDocente = userDate?.roles?.docente ?? false;
   const isSaving = isUpdatingPassword || isUpdatingUser;
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear, isError: isErrorAcademicYear } =
-    useQueryAnoAcademico();
-
   const {
     data: teacherInfoData,
     isLoading: teacherInfoDataLoading,
     isError: teacherInfoError,
   } = useQueryTeacherProfile();
-
-  const activeYear = useMemo(
-    () => academicYear?.find((ay) => ay.estado.toLowerCase() === "activo"),
-    [academicYear],
-  );
-
-  const {
-    data: turmData,
-    isLoading: isLoadingTurmaData,
-    isError: isErrorTurma,
-  } = useQueryListSchedules({
-    teacherId: teacherInfoData?.codigo_docente,
-    anoLectivo: activeYear?.codigo,
-  });
 
   // Sync server data → local state
   useEffect(() => {
@@ -964,8 +1171,8 @@ const TeacherProfile = () => {
 
   // ---- Loading / Error states ----
 
-  const isLoading = isLoadingAcademicYear || teacherInfoDataLoading || isLoadingTurmaData;
-  const hasError = isErrorAcademicYear || teacherInfoError || isErrorTurma;
+  const isLoading = teacherInfoDataLoading;
+  const hasError = teacherInfoError;
 
   if (isLoading) return <ProfileSkeleton />;
 
@@ -1200,42 +1407,10 @@ const TeacherProfile = () => {
 
               {/* HORÁRIOS */}
               <TabsContent value="classes" className="pt-4">
-                {!isDocente ? (
-                  <RestrictedAccessAlert section="os seus horários" />
-                ) : isLoadingTurmaData ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="h-28 w-full rounded-lg" />
-                    ))}
-                  </div>
-                ) : turmData?.horarios?.length ? (
-                  <div className="space-y-4">
-                    {turmData.horarios.map((cls) => (
-                      <div
-                        key={cls.codigo_horario}
-                        className="flex items-center gap-4 rounded-lg border bg-card p-5 transition-all hover:shadow-md"
-                      >
-                        <GraduationCap className="h-12 w-12 text-primary" />
-                        <div className="flex-1">
-                          <p className="font-semibold text-lg">
-                            {cls.codigo_grade} – {cls.grade}
-                          </p>
-                          <div className="mt-1 space-y-1 text-sm text-muted-foreground">
-                            <p>• Horário: {cls.horario}</p>
-                            <p>• Sala: {cls.sala}</p>
-                            {cls.docente && <p>• Docente: {cls.docente}</p>}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={GraduationCap}
-                    title="Nenhum horário encontrado"
-                    description="Não existem turmas ou horários atribuídos ao docente no ano lectivo ativo."
-                  />
-                )}
+                <TeacherSchedulesTab
+                  docenteId={teacherInfoData?.codigo_docente}
+                  isDocente={isDocente}
+                />
               </TabsContent>
 
               {/* SEGURANÇA */}
