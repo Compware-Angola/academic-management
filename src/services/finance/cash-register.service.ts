@@ -25,6 +25,7 @@ export type ListCashRegistersResponse = {
     operator_code: number;
     operator_name: string;
     status: "aberto" | "fechado";
+    opening_code: string;
   }[];
 
   meta: {

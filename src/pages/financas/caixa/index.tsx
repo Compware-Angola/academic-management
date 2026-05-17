@@ -46,17 +46,25 @@ import { useQueryCashRegisters } from "@/hooks/financa/use-cash-register";
 import { CashRegister } from "@/services/finance/cash-register.service";
 
 import { OpenCashRegisterForm } from "./components/open-cash-register-form";
+import { Badge } from "@/components/ui/badge";
 
 function CaixasDisponiveisTab() {
   const [search, setSearch] = useState("");
   const [selectedRegister, setSelectedRegister] = useState<CashRegister | null>(
     null,
   );
+  const [visibleCodes, setVisibleCodes] = useState<Record<number, boolean>>({});
 
   const debouncedSearch = search;
   const { data: dataCashRegisters, isLoading } = useQueryCashRegisters({
     search: debouncedSearch,
   });
+  const toggleOpeningCode = (id: number) => {
+    setVisibleCodes((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
   const cashRegisters = dataCashRegisters?.data ?? [];
 
   return (
@@ -84,6 +92,7 @@ function CaixasDisponiveisTab() {
                 <TableHead className="w-[60px]">ID</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Operador</TableHead>
+                <TableHead>Código de abertura</TableHead>
                 <TableHead className="text-center w-[140px]">Ação</TableHead>
               </TableRow>
             </TableHeader>
@@ -110,7 +119,28 @@ function CaixasDisponiveisTab() {
                     <TableCell className="font-medium">{item.name}</TableCell>
 
                     <TableCell className="text-sm text-muted-foreground">
-                      {item.operator_name ?? "—"}
+                      {item.operator_name}
+                    </TableCell>
+
+                    <TableCell>
+                      {item.opening_code && (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">
+                            {visibleCodes[item.code]
+                              ? item.opening_code
+                              : "••••••"}
+                          </Badge>
+
+                          <button
+                            className="text-xs text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                            onClick={() => toggleOpeningCode(item.code)}
+                          >
+                            {visibleCodes[item.code]
+                              ? "Ocultar código"
+                              : "Ver código"}
+                          </button>
+                        </div>
+                      )}
                     </TableCell>
 
                     <TableCell className="text-center">
@@ -126,8 +156,9 @@ function CaixasDisponiveisTab() {
                         </Link>
                       ) : (
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="outline"
+                          aria-label="Abrir caixa"
                           className="gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-950"
                           onClick={() =>
                             setSelectedRegister({
@@ -139,8 +170,7 @@ function CaixasDisponiveisTab() {
                             })
                           }
                         >
-                          <LockOpen className="h-3.5 w-3.5" />
-                          Abrir caixa
+                          <LockOpen className="h-4 w-4" />
                         </Button>
                       )}
                     </TableCell>
