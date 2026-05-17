@@ -269,7 +269,6 @@ export default function LiquidarNota() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-
           <OpenCashRegisterTrigger />
         </>
       )}
