@@ -29,7 +29,7 @@ import { FormaPagamentoSelect } from "@/components/common/global-selects/TipoPag
 import { FormSelect } from "@/components/common/FormSelect";
 import { CaixaSelect } from "@/components/common/global-selects/CaixaSelect";
 import { PagamentoStatus } from "@/components/common/PagamentoStatus";
-import { validarPagamento } from "./validator";
+import { FORMA_PAGAMENTO, validarPagamento } from "./validator";
 import { useCreatePayment } from "@/hooks/financas/nota-pagamento/use-mutation-pagamento";
 import { formatDisplay } from "@/util/date-formate";
 import { formatNumber } from "@/util/format-number";
@@ -56,18 +56,12 @@ const tipoPagamentoOptions = [
   },
 ];
 
-const FORMA_PAGAMENTO = {
-  CASH: "2",
-  TPA: "1",
-  MB: "5",
-} as const;
-
 function isTipoBancario(formaPagamento?: string) {
   if (!formaPagamento) return false;
 
   const valor = String(formaPagamento).trim();
 
-  return valor === FORMA_PAGAMENTO.TPA || valor === FORMA_PAGAMENTO.MB;
+  return valor === FORMA_PAGAMENTO.TPA;
 }
 
 export default function LiquidarNota() {
