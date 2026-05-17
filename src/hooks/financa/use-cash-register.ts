@@ -2,19 +2,19 @@ import {
   closeCashRegisterService,
   listCashRegistersService,
   openCashRegisterService,
-  CashRegister,
   myCashRegisterService,
   avaliableCashRegistersForOpeningService,
   ListCashRegisterFilters,
   getMyCashRegisterSummaryService,
-  ListAvailableOperatorsResponse,
   listAvailableOperatorsService,
   ListAvailableOperatorsFilters,
   OpenCashRegisterPayload,
   verifyMyCashRegisterOpeningCodeService,
 } from "@/services/finance/cash-register.service";
+import { AuthStorage } from "@/util/auth-storage";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 export const useQueryCashRegisters = (filters?: ListCashRegisterFilters) => {
   return useQuery({
@@ -112,3 +112,31 @@ export const useVerifyMyCashRegisterOpeningCode = () => {
       verifyMyCashRegisterOpeningCodeService(openingCode),
   });
 };
+
+export function useCashRegisterOpeningCodeVerification() {
+  const [isVerified, setIsVerified] = useState(
+    AuthStorage.isOpeningCodeVerified(),
+  );
+
+  const verify = () => {
+    AuthStorage.saveOpeningCodeVerified();
+
+    setIsVerified(true);
+  };
+
+  const reset = () => {
+    AuthStorage.removeOpeningCodeVerified();
+
+    setIsVerified(false);
+  };
+
+  useEffect(() => {
+    setIsVerified(AuthStorage.isOpeningCodeVerified());
+  }, []);
+
+  return {
+    isVerified,
+    verify,
+    reset,
+  };
+}

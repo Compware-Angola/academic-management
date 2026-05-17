@@ -46,18 +46,13 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import {
+  useCashRegisterOpeningCodeVerification,
   useCloseCashRegister,
   useQueryMyCashRegister,
   useQueryMyCashSummary,
 } from "@/hooks/financa/use-cash-register";
-
-function formatAOA(value: number) {
-  return new Intl.NumberFormat("pt-AO", {
-    style: "currency",
-    currency: "AOA",
-    minimumFractionDigits: 2,
-  }).format(value);
-}
+import { CashRegisterConfirmationAlert } from "../components/CashRegisterConfirmationAlert";
+import { formatCurrencyAOA } from "@/util/format-currency";
 
 function StatusBadge({ status }: { status: string }) {
   const isOpen = status === "aberto";
@@ -100,7 +95,6 @@ function CaixaCardSkeleton() {
   );
 }
 
-/** Skeleton shown while payment summary is loading */
 function SummarySkeleton() {
   return (
     <div className="space-y-2 px-1">
@@ -120,6 +114,8 @@ function SummarySkeleton() {
 }
 
 export function MeuCaixaPage() {
+  const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
+    useCashRegisterOpeningCodeVerification();
   const [confirmClose, setConfirmClose] = useState(false);
 
   const { data: myCaixa, isLoading: isLoadingCaixa } = useQueryMyCashRegister();
@@ -137,6 +133,9 @@ export function MeuCaixaPage() {
 
   const hasCaixaAberto = !!myCaixa;
 
+  const canAccessCashRegister =
+    hasCaixaAberto && isCashRegisterOpeningCodeVerified;
+
   return (
     <div className="p-6 space-y-6">
       {/* Breadcrumb */}
@@ -149,11 +148,15 @@ export function MeuCaixaPage() {
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
+
           <BreadcrumbSeparator />
+
           <BreadcrumbItem>
             <BreadcrumbLink>Financeiro</BreadcrumbLink>
           </BreadcrumbItem>
+
           <BreadcrumbSeparator />
+
           <BreadcrumbItem>
             <BreadcrumbPage>Caixas</BreadcrumbPage>
           </BreadcrumbItem>
@@ -164,7 +167,10 @@ export function MeuCaixaPage() {
         <h1 className="text-2xl font-bold">Meu Caixa</h1>
       </div>
 
-      {/* ── Loading state ── */}
+      {/* ───────────────────────────────────────────── */}
+      {/* Loading */}
+      {/* ───────────────────────────────────────────── */}
+
       {isLoadingCaixa && (
         <div className="space-y-4">
           <CaixaCardSkeleton />
@@ -175,12 +181,12 @@ export function MeuCaixaPage() {
                 Resumo por forma de pagamento
               </CardTitle>
             </CardHeader>
+
             <CardContent>
               <SummarySkeleton />
             </CardContent>
           </Card>
 
-          {/* Disabled close button placeholder */}
           <div className="flex justify-end">
             <Button variant="destructive" className="gap-2" disabled>
               <Lock className="h-4 w-4" />
@@ -190,10 +196,23 @@ export function MeuCaixaPage() {
         </div>
       )}
 
-      {/* ── Loaded & caixa aberto ── */}
-      {!isLoadingCaixa && hasCaixaAberto && (
+      {/* ───────────────────────────────────────────── */}
+      {/* Caixa aberto mas NÃO confirmado */}
+      {/* ───────────────────────────────────────────── */}
+
+      {!isLoadingCaixa &&
+        hasCaixaAberto &&
+        !isCashRegisterOpeningCodeVerified && (
+          <CashRegisterConfirmationAlert isOpen={true} onVerified={verify} />
+        )}
+
+      {/* ───────────────────────────────────────────── */}
+      {/* Caixa confirmado */}
+      {/* ───────────────────────────────────────────── */}
+
+      {!isLoadingCaixa && canAccessCashRegister && (
         <div className="space-y-4">
-          {/* Caixa info card */}
+          {/* Caixa info */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -201,15 +220,19 @@ export function MeuCaixaPage() {
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950">
                     <Wallet className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
+
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-semibold">{myCaixa.name}</h2>
+
                       <StatusBadge status={myCaixa.status} />
                     </div>
+
                     <div className="flex items-center gap-3 mt-0.5">
                       <span className="text-xs text-muted-foreground font-mono">
                         #{String(myCaixa.id).padStart(3, "0")}
                       </span>
+
                       {myCaixa.operatorId && (
                         <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                           <BadgeCheck className="h-3 w-3" />
@@ -223,13 +246,14 @@ export function MeuCaixaPage() {
             </CardContent>
           </Card>
 
-          {/* Payment summary */}
+          {/* Summary */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">
                 Resumo por forma de pagamento
               </CardTitle>
             </CardHeader>
+
             <CardContent>
               {isLoadingSummary ? (
                 <SummarySkeleton />
@@ -242,25 +266,29 @@ export function MeuCaixaPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Forma de Pagamento</TableHead>
+
                       <TableHead className="text-right">Total</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <TableBody>
                     {summary.map((item) => (
                       <TableRow key={item.forma_pagamento_codigo}>
                         <TableCell className="font-medium">
                           {item.forma_pagamento}
                         </TableCell>
+
                         <TableCell className="text-right tabular-nums font-mono text-sm">
-                          {formatAOA(item.total)}
+                          {formatCurrencyAOA(item.total)}
                         </TableCell>
                       </TableRow>
                     ))}
-                    {/* Total row */}
+
                     <TableRow className="border-t-2 font-semibold bg-muted/30">
                       <TableCell>Total geral</TableCell>
+
                       <TableCell className="text-right tabular-nums font-mono">
-                        {formatAOA(
+                        {formatCurrencyAOA(
                           summary.reduce((acc, i) => acc + i.total, 0),
                         )}
                       </TableCell>
@@ -271,7 +299,7 @@ export function MeuCaixaPage() {
             </CardContent>
           </Card>
 
-          {/* Close button */}
+          {/* Actions */}
           <div className="flex justify-end">
             <Button
               variant="destructive"
@@ -285,15 +313,16 @@ export function MeuCaixaPage() {
         </div>
       )}
 
-      {/* ── Loaded & sem caixa aberto ── */}
       {!isLoadingCaixa && !hasCaixaAberto && (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
               <Wallet className="h-8 w-8 text-muted-foreground" />
             </div>
+
             <div className="space-y-1">
               <h3 className="text-base font-semibold">Nenhum caixa aberto</h3>
+
               <p className="text-sm text-muted-foreground max-w-xs">
                 Não tem nenhum caixa atribuído ou aberto neste momento. Contacte
                 o administrador para lhe atribuir um caixa.
@@ -303,8 +332,7 @@ export function MeuCaixaPage() {
         </Card>
       )}
 
-      {/* ── Confirm close alert dialog ── */}
-      {hasCaixaAberto && (
+      {canAccessCashRegister && (
         <AlertDialog open={confirmClose} onOpenChange={setConfirmClose}>
           <AlertDialogContent className="sm:max-w-sm">
             <AlertDialogHeader>
@@ -312,6 +340,7 @@ export function MeuCaixaPage() {
                 <Lock className="h-5 w-5 text-destructive" />
                 Fechar caixa
               </AlertDialogTitle>
+
               <AlertDialogDescription>
                 Tem a certeza que deseja fechar o caixa{" "}
                 <span className="font-semibold text-foreground">
@@ -325,6 +354,7 @@ export function MeuCaixaPage() {
               <AlertDialogCancel disabled={closeMutation.isPending}>
                 Cancelar
               </AlertDialogCancel>
+
               <AlertDialogAction
                 onClick={handleClose}
                 disabled={closeMutation.isPending}

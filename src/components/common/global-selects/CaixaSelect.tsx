@@ -11,11 +11,10 @@ interface CaixaSelectProps {
 }
 
 const CaixaSelect = ({ onChangeValue, value, disabled }: CaixaSelectProps) => {
-  const { data: caixas = [], isLoading: isLoadingCaixas } =
-    useQueryCashRegisters({
-      blocked: "N",
-    });
-
+  const { data: response, isLoading: isLoadingCaixas } = useQueryCashRegisters({
+    blocked: "N",
+  });
+  const caixas = useMemo(() => response?.data || [], [response]);
   return (
     <FormSelect
       label="Caixa"
@@ -25,9 +24,9 @@ const CaixaSelect = ({ onChangeValue, value, disabled }: CaixaSelectProps) => {
       onChange={(v) => onChangeValue(v)}
       options={caixas}
       map={(caixa) => ({
-        key: caixa.id,
+        key: caixa.code,
         label: caixa.name,
-        value: String(caixa.id),
+        value: String(caixa.code),
       })}
     />
   );

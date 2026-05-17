@@ -46,7 +46,7 @@ export async function listCashRegistersService(
   filters?: ListCashRegisterFilters,
 ): Promise<ListCashRegistersResponse> {
   const { data } = await axiosNestFinance.get<ListCashRegistersResponse>(
-    "/caixas",
+    "/cash-registers",
     {
       params: filters,
     },

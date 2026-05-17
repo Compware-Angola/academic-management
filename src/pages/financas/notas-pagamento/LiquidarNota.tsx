@@ -34,8 +34,11 @@ import { useCreatePayment } from "@/hooks/financas/nota-pagamento/use-mutation-p
 import { formatDisplay } from "@/util/date-formate";
 import { formatNumber } from "@/util/format-number";
 import { parseDateFilter } from "@/util/parse-filter";
-import { useQueryMyCashRegister } from "@/hooks/financa/use-cash-register";
-import { OpenCashRegisterTrigger } from "./components/open-cashregister-form";
+import {
+  useCashRegisterOpeningCodeVerification,
+  useQueryMyCashRegister,
+} from "@/hooks/financa/use-cash-register";
+import { CashRegisterConfirmationAlert } from "../caixa/components/CashRegisterConfirmationAlert";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 const formatDate = (dateStr: string) => {
@@ -68,6 +71,8 @@ function isTipoBancario(formaPagamento?: string) {
 }
 
 export default function LiquidarNota() {
+  const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
+    useCashRegisterOpeningCodeVerification();
   const { codigo } = useParams<{ codigo: string }>();
   const { mutate, isPending } = useCreatePayment();
   const navigate = useNavigate();
@@ -245,7 +250,7 @@ export default function LiquidarNota() {
 
       {/* Title */}
 
-      {myCashRegister ? (
+      {myCashRegister && isCashRegisterOpeningCodeVerified ? (
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -269,11 +274,14 @@ export default function LiquidarNota() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <OpenCashRegisterTrigger />
+          <CashRegisterConfirmationAlert
+            isOpen={!!myCashRegister}
+            onVerified={verify}
+          />
         </>
       )}
 
-      {myCashRegister && (
+      {myCashRegister && isCashRegisterOpeningCodeVerified && (
         <>
           {/* Resumo da Nota */}
           <Card>
