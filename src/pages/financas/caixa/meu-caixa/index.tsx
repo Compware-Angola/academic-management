@@ -120,8 +120,7 @@ export function MeuCaixaPage() {
 
   const { data: myCaixa, isLoading: isLoadingCaixa } = useQueryMyCashRegister();
 
-  const { data: summary, isLoading: isLoadingSummary } =
-    useQueryMyCashSummary();
+  const { data, isLoading: isLoadingSummary } = useQueryMyCashSummary();
 
   const closeMutation = useCloseCashRegister();
 
@@ -239,6 +238,10 @@ export function MeuCaixaPage() {
                           Op. {myCaixa.operatorId}
                         </span>
                       )}
+                      <span className="text-xs text-muted-foreground font-mono">
+                        valor de abertura:{" "}
+                        {formatCurrencyAOA(data?.openingAmount || 0)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -257,7 +260,7 @@ export function MeuCaixaPage() {
             <CardContent>
               {isLoadingSummary ? (
                 <SummarySkeleton />
-              ) : !summary || summary.length === 0 ? (
+              ) : !data || data.summary.length === 0 ? (
                 <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
                   Sem movimentos registados neste caixa.
                 </div>
@@ -272,7 +275,7 @@ export function MeuCaixaPage() {
                   </TableHeader>
 
                   <TableBody>
-                    {summary.map((item) => (
+                    {data.summary.map((item) => (
                       <TableRow key={item.forma_pagamento_codigo}>
                         <TableCell className="font-medium">
                           {item.forma_pagamento}
@@ -289,7 +292,8 @@ export function MeuCaixaPage() {
 
                       <TableCell className="text-right tabular-nums font-mono">
                         {formatCurrencyAOA(
-                          summary.reduce((acc, i) => acc + i.total, 0),
+                          data.summary.reduce((acc, i) => acc + i.total, 0) +
+                            data.openingAmount,
                         )}
                       </TableCell>
                     </TableRow>

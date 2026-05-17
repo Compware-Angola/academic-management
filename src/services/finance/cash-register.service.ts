@@ -98,10 +98,12 @@ export type CashRegisterPaymentSummary = {
   forma_pagamento: string;
   total: number;
 };
+type GetMyCashRegisterSummaryServiceResponse = {
+  summary: CashRegisterPaymentSummary[];
+  openingAmount: number;
+};
 
-export async function getMyCashRegisterSummaryService(): Promise<
-  CashRegisterPaymentSummary[]
-> {
+export async function getMyCashRegisterSummaryService(): Promise<GetMyCashRegisterSummaryServiceResponse> {
   const { data } = await axiosNestFinance.get(`/cash-registers/me/summary`);
 
   return data.data;
