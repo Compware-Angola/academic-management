@@ -16,7 +16,14 @@ export class LogoutPayload {
 export interface roles {
   docente: boolean;
   direitor_curso: boolean;
-  
+  Reitor: boolean;
+  Faculdades: boolean;
+  Vice_Reitor: boolean;
+  Acessor_do_Reitor: boolean;
+  Responsável_do_Gabinete_de_qualidade_e_Serviços_Pedagógicos: boolean;
+  Director: boolean;
+  Coordenador: boolean;
+  Decano: boolean;
 }
 
 export interface User {
@@ -45,7 +52,7 @@ export interface AuthResponse {
   user: User;
   roles: roles;
   mensagem: string;
-  first_login:number
+  first_login: number
 }
 export interface logoutResponse {
 
@@ -64,10 +71,10 @@ export interface CurrentUserResponse {
   isAuthenticated: boolean;
   user: User;
   groups: Group[];
-  roles?: roles; 
-  permissions?: string[] 
+  roles?: roles;
+  permissions?: string[]
   message: string;
-  platform?: 'GA' | 'PORTAL'; 
+  platform?: 'GA' | 'PORTAL';
 }
 
 export async function loginService(
@@ -79,10 +86,10 @@ export async function loginService(
 
 
 export async function getCurrentUserService(
-  platform: 'GA', 
+  platform: 'GA',
 ): Promise<CurrentUserResponse> {
   const { data } = await axiosNestAuth.get<CurrentUserResponse>("/auth/current-user", {
-    params: { platform }, 
+    params: { platform },
   });
 
   return data;
@@ -91,7 +98,7 @@ export async function logout(variables: { platform: 'GA' }): Promise<logoutRespo
   const { platform } = variables;
 
   const { data } = await axiosNestAuth.post<logoutResponse>("/auth/logout", {
-    platform, 
+    platform,
   });
 
   return data;
@@ -110,11 +117,12 @@ export async function makLoggedOut(
 }
 export async function requestPasswordReset(email: string): Promise<void> {
   await axiosNestAuth
-    .post('auth/send-change-password', { email, platform: 'GA'})
+    .post('auth/send-change-password', { email, platform: 'GA' })
 }
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
   await axiosNestAuth
-    .post('auth/reset-password', { token, newPassword, platform: 'GA' 
+    .post('auth/reset-password', {
+      token, newPassword, platform: 'GA'
     })
 }
 export class UpdatePasswordPayload {

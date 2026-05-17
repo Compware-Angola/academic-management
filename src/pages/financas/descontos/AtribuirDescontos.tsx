@@ -453,9 +453,7 @@ export default function AtribuirDescontos() {
                       {item.codigo_matricula}
                     </TableCell>
                     <TableCell>{item.nome_completo}</TableCell>
-                    <TableCell>
-                      {item.instituicao ?? item.curso ?? "-"}
-                    </TableCell>
+                    <TableCell>{item.instituicao ?? "-"}</TableCell>
                     <TableCell>{item.descricao ?? "-"}</TableCell>
                     <TableCell>
                       {item.tipo_taxa_desconto_especial ?? item.codigo ?? "-"}
@@ -479,7 +477,10 @@ export default function AtribuirDescontos() {
                           title="Deletar desconto"
                           className="cursor-pointer"
                           size="icon"
-                          disabled={codigoDesconto === item.codigo || selectedItems.has(item.codigo!)}
+                          disabled={
+                            codigoDesconto === item.codigo ||
+                            selectedItems.has(item.codigo!)
+                          }
                           variant="destructive"
                           onClick={() => {
                             if (item.codigo) {
