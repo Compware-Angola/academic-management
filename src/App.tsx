@@ -165,6 +165,8 @@ import ListagemProvas from "./pages/access_exam/ListagemProvas";
 import { ListaEstudantesDiplomados } from "./pages/registrations/ListarEstudantesDiplomados";
 import { FormaPagamentoPage } from "./pages/financas/forma-pagamento";
 import { CaixaPage } from "./pages/financas/caixa";
+import { CloseCashRegisterPage } from "./pages/financas/fecho-caixa/FechoCaixaUtilizador";
+import { MeuCaixaPage } from "./pages/financas/caixa/meu-caixa";
 
 const App = () => {
   return (
@@ -1318,6 +1320,32 @@ const App = () => {
                         ]}
                       >
                         <CaixaPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/caixas/meu-caixa"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla!,
+                        ]}
+                      >
+                        <MeuCaixaPage />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/financas/caixa/fecho"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla!,
+                        ]}
+                      >
+                        <CloseCashRegisterPage />
                       </ProtectedRoute>
                     }
                   />

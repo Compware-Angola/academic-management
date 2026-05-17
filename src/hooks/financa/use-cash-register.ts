@@ -3,18 +3,22 @@ import {
   createCashRegisterService,
   deleteCashRegisterService,
   listCashRegistersService,
-  ListCashRegisterPayload,
   openCashRegisterService,
   updateCashRegisterService,
   CashRegister,
   myCashRegisterService,
   avaliableCashRegistersForOpeningService,
   CreateCashRegisterPayload,
+  ListCashRegisterFilters,
+  getMyCashRegisterSummaryService,
+  ListAvailableOperatorsResponse,
+  listAvailableOperatorsService,
+  ListAvailableOperatorsFilters,
 } from "@/services/finance/cash-register.service";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useQueryCashRegisters = (filters?: ListCashRegisterPayload) => {
+export const useQueryCashRegisters = (filters?: ListCashRegisterFilters) => {
   return useQuery({
     queryKey: ["cash-registers", filters],
 
@@ -75,6 +79,12 @@ export const useOpenCashRegister = () => {
       queryClient.invalidateQueries({
         queryKey: ["my-cash-register"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-summary"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-operators"],
+      });
     },
   });
 };
@@ -87,7 +97,13 @@ export const useCloseCashRegister = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["cash-registers"],
+        queryKey: ["my-cash-register"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-summary"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-cash-registers"],
       });
     },
   });
@@ -119,6 +135,24 @@ export const useQueryAvailableCashRegistersForOpening = (search?: string) => {
   return useQuery({
     queryKey: ["available-cash-registers", search],
     queryFn: () => avaliableCashRegistersForOpeningService(search),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useQueryMyCashSummary = () => {
+  return useQuery({
+    queryKey: ["my-cash-summary"],
+    queryFn: getMyCashRegisterSummaryService,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useQueryAvailableOperators = (
+  filters?: ListAvailableOperatorsFilters,
+) => {
+  return useQuery({
+    queryKey: ["available-operators", filters],
+    queryFn: () => listAvailableOperatorsService(filters),
     staleTime: 1000 * 60 * 5,
   });
 };

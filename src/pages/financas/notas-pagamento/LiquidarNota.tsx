@@ -36,6 +36,7 @@ import { formatNumber } from "@/util/format-number";
 import { parseDateFilter } from "@/util/parse-filter";
 import { useQueryMyCashRegister } from "@/hooks/financa/use-cash-register";
 import { OpenCashRegisterTrigger } from "./components/open-cashregister-form";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("pt-AO");
@@ -73,7 +74,8 @@ export default function LiquidarNota() {
   const { toast } = useToast();
   const { data: myCashRegister, isLoading: isLoadingCashRegister } =
     useQueryMyCashRegister();
-
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   const [formData, setFormData] = useState({
     n_operacao_bancaria: null,
     observacao: "",
@@ -169,6 +171,17 @@ export default function LiquidarNota() {
       }));
     }
   }, [myCashRegister]);
+
+  useEffect(() => {
+    if (academicYear) {
+      setFormData((prev) => ({
+        ...prev,
+        ano_lectivo: academicYear
+          .find((a) => a.estado.toLocaleLowerCase() === "activo")
+          ?.codigo.toString(),
+      }));
+    }
+  }, [academicYear]);
 
   if (isLoading || isLoadingCashRegister) {
     return (
@@ -399,6 +412,7 @@ export default function LiquidarNota() {
                     <div className="space-y-2">
                       <AcademicYearSelect
                         disabled
+                        onlyActive
                         onChangeValue={(v) =>
                           setFormData({ ...formData, ano_lectivo: v })
                         }

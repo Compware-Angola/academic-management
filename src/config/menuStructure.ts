@@ -1007,6 +1007,11 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/caixas",
           permission: [PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla],
         },
+        {
+          title: "Meu Caixa",
+          url: "/financas/caixas/meu-caixa",
+          permission: [PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla],
+        },
       ],
 
       permission: [],
