@@ -55,52 +55,27 @@ export async function listCashRegistersService(
   return data;
 }
 
-export async function createCashRegisterService(
-  payload: Pick<CashRegister, "name">,
-): Promise<CashRegister> {
-  const { data } = await axiosNestFinance.post("/caixas", payload);
-
-  return data.data;
-}
-
-export async function updateCashRegisterService(
-  id: number,
-  payload: Partial<CashRegister>,
-): Promise<CashRegister> {
-  const { data } = await axiosNestFinance.patch(`/caixas/${id}`, payload);
-
-  return data.data;
-}
-
-export type CreateCashRegisterPayload = {
-  id: number;
-  openingAmount: number;
-  operatorId: number;
-};
-
 export async function openCashRegisterService(
   payload: OpenCashRegisterPayload,
 ): Promise<CashRegister> {
-  const { data } = await axiosNestFinance.patch(`/caixas/${payload.id}/abrir`, {
-    openingAmount: payload.openingAmount,
-    operatorId: payload.operatorId,
-  });
+  const { data } = await axiosNestFinance.patch(
+    `/cash-registers/${payload.id}/open`,
+    {
+      openingAmount: payload.openingAmount,
+      operatorId: payload.operatorId,
+    },
+  );
 
   return data.data;
 }
 export async function closeCashRegisterService(id: number): Promise<void> {
-  const { data } = await axiosNestFinance.patch(`/caixas/${id}/close`);
-
-  return data.data;
-}
-export async function deleteCashRegisterService(id: number): Promise<void> {
-  const { data } = await axiosNestFinance.delete(`/caixas/${id}`);
+  const { data } = await axiosNestFinance.patch(`/cash-registers/${id}/close`);
 
   return data.data;
 }
 
 export async function myCashRegisterService(): Promise<CashRegister> {
-  const { data } = await axiosNestFinance.get(`/caixas/me`);
+  const { data } = await axiosNestFinance.get(`/cash-registers/me`);
 
   return data.data;
 }
@@ -109,7 +84,7 @@ export async function avaliableCashRegistersForOpeningService(
   search?: string,
 ): Promise<{ data: CashRegister[] }> {
   const { data } = await axiosNestFinance.get<{ data: CashRegister[] }>(
-    `/caixas/disponiveis`,
+    `/cash-registers/available`,
     {
       params: { search },
     },
@@ -127,7 +102,7 @@ export type CashRegisterPaymentSummary = {
 export async function getMyCashRegisterSummaryService(): Promise<
   CashRegisterPaymentSummary[]
 > {
-  const { data } = await axiosNestFinance.get(`/caixas/me/resumo`);
+  const { data } = await axiosNestFinance.get(`/cash-registers/me/summary`);
 
   return data.data;
 }
@@ -156,11 +131,19 @@ export async function listAvailableOperatorsService(
   filters?: ListAvailableOperatorsFilters,
 ): Promise<ListAvailableOperatorsResponse> {
   const { data } = await axiosNestFinance.get<ListAvailableOperatorsResponse>(
-    `/caixas/operators/available`,
+    `/cash-registers/operators/available`,
     {
       params: filters,
     },
   );
 
   return data;
+}
+
+export async function verifyMyCashRegisterOpeningCodeService(
+  openingCode: string,
+): Promise<void> {
+  await axiosNestFinance.post(`/cash-registers/me/verify-opening-code`, {
+    openingCode,
+  });
 }

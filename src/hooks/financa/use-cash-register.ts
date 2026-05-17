@@ -1,19 +1,17 @@
 import {
   closeCashRegisterService,
-  createCashRegisterService,
-  deleteCashRegisterService,
   listCashRegistersService,
   openCashRegisterService,
-  updateCashRegisterService,
   CashRegister,
   myCashRegisterService,
   avaliableCashRegistersForOpeningService,
-  CreateCashRegisterPayload,
   ListCashRegisterFilters,
   getMyCashRegisterSummaryService,
   ListAvailableOperatorsResponse,
   listAvailableOperatorsService,
   ListAvailableOperatorsFilters,
+  OpenCashRegisterPayload,
+  verifyMyCashRegisterOpeningCodeService,
 } from "@/services/finance/cash-register.service";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -28,47 +26,12 @@ export const useQueryCashRegisters = (filters?: ListCashRegisterFilters) => {
   });
 };
 
-export const useCreateCashRegister = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: createCashRegisterService,
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cash-registers"],
-      });
-    },
-  });
-};
-
-export const useUpdateCashRegister = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: number;
-      payload: Partial<CashRegister>;
-    }) => updateCashRegisterService(id, payload),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cash-registers"],
-      });
-    },
-  });
-};
-
 export const useOpenCashRegister = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateCashRegisterPayload) =>
+    mutationFn: (payload: OpenCashRegisterPayload) =>
       openCashRegisterService(payload),
-
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["cash-registers"],
@@ -109,20 +72,6 @@ export const useCloseCashRegister = () => {
   });
 };
 
-export const useDeleteCashRegister = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number) => deleteCashRegisterService(id),
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cash-registers"],
-      });
-    },
-  });
-};
-
 export const useQueryMyCashRegister = () => {
   return useQuery({
     queryKey: ["my-cash-register"],
@@ -154,5 +103,12 @@ export const useQueryAvailableOperators = (
     queryKey: ["available-operators", filters],
     queryFn: () => listAvailableOperatorsService(filters),
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useVerifyMyCashRegisterOpeningCode = () => {
+  return useMutation({
+    mutationFn: (openingCode: string) =>
+      verifyMyCashRegisterOpeningCodeService(openingCode),
   });
 };
