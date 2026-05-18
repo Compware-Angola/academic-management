@@ -17,6 +17,7 @@ export function useCreatePayment() {
       });
       // Invalida queries relacionadas a pagamentos para atualizar os dados
       queryClient.invalidateQueries({ queryKey: ["facturas"] });
+      queryClient.invalidateQueries({ queryKey: ["my-cash-register"] });
     },
     onError: () => {
       // toast.error("Erro ao criar pagamento", { id: "create-payment-error" });
