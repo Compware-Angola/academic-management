@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryFacturas } from "@/hooks/horario/use-query-invoice";
-import { FORMA_PAGAMENTO, validarPagamento } from "./validator";
+import { FORMA_PAGAMENTO, validarPagamento } from "../validator";
 import { useCreatePayment } from "@/hooks/financas/nota-pagamento/use-mutation-pagamento";
 import { formatDisplay } from "@/util/date-formate";
 import { formatNumber } from "@/util/format-number";
@@ -23,7 +23,7 @@ import { usePermission } from "@/auth/permission.helper";
 import { useQueryFormaPagamento } from "@/hooks/financa/use-forma-pagamento";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { useForm } from "react-hook-form";
-import { PaymentForm, paymentSchema } from "./payment-schema";
+import { PaymentForm, paymentSchema } from "../validator/payment-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { SelectFormField } from "@/components/selectFormField";
@@ -85,27 +85,6 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [formData, setFormData] = useState({
-    n_operacao_bancaria: null,
-    observacao: "",
-    ano_lectivo: "",
-    valorAPagar: "",
-    data_banco: "",
-    forma_pagamento: "",
-    valor_depositado: "",
-
-    data_registo: new Date().toISOString().split("T")[0],
-    tipo_pagamento: "",
-    codigo_factura: codigo,
-    instituicao_id: "",
-    caixa_id: "",
-    status_pagamento: "",
-    data_operacao: "",
-    status_movimento: "",
-    corrente: "1",
-    feito_com_reserva: "",
-  });
-
   const onSubmit = (data: PaymentForm) => {
     const pagamento = {
       data: formatDisplay(new Date()),
@@ -165,25 +144,6 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
   );
 
   const isFacturaPago = factura?.estado == 1;
-
-  useEffect(() => {
-    if (factura) {
-      setFormData({
-        ...formData,
-        ano_lectivo: factura?.codigo_ano_lectivo.toString(),
-        valor_depositado: factura?.valor_pagar.toString(),
-      });
-    }
-  }, [factura]);
-
-  useEffect(() => {
-    if (myCashRegister) {
-      setFormData((prev) => ({
-        ...prev,
-        caixa_id: myCashRegister.id.toString(),
-      }));
-    }
-  }, [myCashRegister]);
 
   useEffect(() => {
     if (academicYear) {

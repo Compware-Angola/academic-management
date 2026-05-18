@@ -19,7 +19,7 @@ import {
 } from "@/hooks/financa/use-cash-register";
 import { CashRegisterConfirmationAlert } from "../caixa/components/CashRegisterConfirmationAlert";
 
-import { formatDate, FormNotaPagamento } from "./form";
+import { formatDate, FormNotaPagamento } from "./components/form";
 
 export default function LiquidarNota() {
   const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
