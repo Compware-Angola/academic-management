@@ -185,10 +185,9 @@ export default function LiquidarNota() {
               </div>
             </CardContent>
           </Card>
+          <FormNotaPagamento factura={factura} />
         </>
       )}
-
-      <FormNotaPagamento factura={factura} />
     </div>
   );
 }

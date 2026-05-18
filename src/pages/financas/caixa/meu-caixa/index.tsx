@@ -1,14 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import {
-  Home,
-  Loader2,
-  Lock,
-  LockOpen,
-  Wallet,
-  BadgeCheck,
-} from "lucide-react";
+import { Home, Loader2, Lock, LockOpen, Wallet } from "lucide-react";
 
 import {
   Breadcrumb,
@@ -53,6 +46,10 @@ import {
 } from "@/hooks/financa/use-cash-register";
 import { CashRegisterConfirmationAlert } from "../components/CashRegisterConfirmationAlert";
 import { formatCurrencyAOA } from "@/util/format-currency";
+import { pdf } from "@react-pdf/renderer";
+import { CashClosingPDF } from "./CashClosingPDF";
+import { formatDate } from "../../notas-pagamento/components/form";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 
 function StatusBadge({ status }: { status: string }) {
   const isOpen = status === "aberto";
@@ -114,6 +111,7 @@ function SummarySkeleton() {
 }
 
 export function MeuCaixaPage() {
+  const { reset } = useCashRegisterOpeningCodeVerification();
   const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
     useCashRegisterOpeningCodeVerification();
   const [confirmClose, setConfirmClose] = useState(false);
@@ -126,7 +124,31 @@ export function MeuCaixaPage() {
 
   async function handleClose() {
     if (!myCaixa) return;
-    await closeMutation.mutateAsync(myCaixa.id);
+
+    const { data: response } = await closeMutation.mutateAsync(myCaixa.id);
+
+    const blob = await pdf(
+      <CashClosingPDF
+        data={{
+          cashRegisterName: myCaixa.name,
+          closedAt: formatDate(response.closingDate),
+          movementId: response.id,
+          openingAmount: response.openingAmount,
+          openedAt: formatDate(response.dateAt),
+          total: response.totalCollectedAmount,
+          operator: "",
+          summary: [
+            { paymentMethod: "TPA", total: response.collectedTpaAmount },
+            { paymentMethod: "Cash", total: response.collectedPaymentAmount },
+          ],
+        }}
+      />,
+    ).toBlob();
+
+    const url = URL.createObjectURL(blob);
+
+    window.open(url);
+    reset();
     setConfirmClose(false);
   }
 
@@ -228,14 +250,9 @@ export function MeuCaixaPage() {
                     </div>
 
                     <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-xs text-muted-foreground font-mono">
-                        #{String(myCaixa.id).padStart(3, "0")}
-                      </span>
-
-                      {myCaixa.operatorId && (
-                        <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                          <BadgeCheck className="h-3 w-3" />
-                          Op. {myCaixa.operatorId}
+                      {data && data.movementID && (
+                        <span className="text-xs text-muted-foreground font-mono">
+                          #{String(data.movementID)}
                         </span>
                       )}
                       <span className="text-xs text-muted-foreground font-mono">

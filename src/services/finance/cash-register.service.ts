@@ -68,10 +68,43 @@ export async function openCashRegisterService(
 
   return data.data;
 }
-export async function closeCashRegisterService(id: number): Promise<void> {
-  const { data } = await axiosNestFinance.patch(`/cash-registers/${id}/close`);
+type CloseCashRegisterServiceResponse = {
+  data: {
+    adminOperatorId: number;
+    adminStatus: string;
+    cashRegisterId: number;
+    closingDate: string;
+    collectedDepositAmount: number;
+    collectedPaymentAmount: number;
+    collectedTpaAmount: number;
+    createdAt: string;
+    createdBy: number;
+    dateAt: string;
+    deletedAt: string | null;
+    deletedBy: number | null;
+    finalStatus: string;
+    id: number;
+    invoicedPaymentAmount: number;
+    observation: string | null;
+    openingAmount: number;
+    operatorId: number;
+    rejectionReason: string | null;
+    status: string;
+    totalCollectedAmount: number;
+    updatedAt: string;
+    updatedBy: number | null;
+    validationDate: string | null;
+  };
+};
+export async function closeCashRegisterService(
+  id: number,
+): Promise<CloseCashRegisterServiceResponse> {
+  const { data } =
+    await axiosNestFinance.patch<CloseCashRegisterServiceResponse>(
+      `/cash-registers/${id}/close`,
+    );
 
-  return data.data;
+  return data;
 }
 
 export async function myCashRegisterService(): Promise<CashRegister> {
@@ -101,6 +134,7 @@ export type CashRegisterPaymentSummary = {
 type GetMyCashRegisterSummaryServiceResponse = {
   summary: CashRegisterPaymentSummary[];
   openingAmount: number;
+  movementID: number;
 };
 
 export async function getMyCashRegisterSummaryService(): Promise<GetMyCashRegisterSummaryServiceResponse> {
