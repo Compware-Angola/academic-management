@@ -12,6 +12,8 @@ export type CashRegister = {
 };
 
 export type ListCashRegisterFilters = {
+  page?: number;
+  limit?: number;
   search?: string;
   status?: string;
   blocked?: string;
@@ -182,4 +184,84 @@ export async function verifyMyCashRegisterOpeningCodeService(
   await axiosNestFinance.post(`/cash-registers/me/verify-opening-code`, {
     openingCode,
   });
+}
+
+// Adicione no arquivo: src/services/finance/cash-register.service.ts
+
+export type CashRegisterMovement = {
+  code: number;
+  cash_register_id: number;
+  cash_register_name: string;
+  operator_id: number;
+  operator_name: string;
+  opening_amount: number;
+  total_collected_amount: number;
+  collected_deposit_amount: number;
+  collected_tpa_amount: number;
+  collected_payment_amount: number;
+  invoiced_payment_amount: number;
+  status: string;
+  final_status: string;
+  admin_status: string;
+  observation: string;
+  date_at: string;
+  closing_date: string;
+  validation_date: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ListCashRegisterMovementsResponse = {
+  data: CashRegisterMovement[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+};
+
+export type ListCashRegisterMovementsFilters = {
+  search?: string;
+  page?: number;
+  limit?: number;
+  status?: string;
+  cashRegisterId?: number;
+  operatorId?: number;
+  startDate?: string;
+  endDate?: string;
+};
+
+export async function listCashRegisterMovementsService(
+  filters?: ListCashRegisterMovementsFilters,
+): Promise<ListCashRegisterMovementsResponse> {
+  const { data } =
+    await axiosNestFinance.get<ListCashRegisterMovementsResponse>(
+      "/cash-registers/movements",
+      {
+        params: filters,
+      },
+    );
+
+  return data;
+}
+
+// Adicione no arquivo: src/services/finance/cash-register.service.ts
+
+export type ValidateMovementPayload = {
+  movementId: number;
+  action: "approved" | "rejected";
+  rejectionReason?: string;
+};
+
+export async function validateMovementService(
+  payload: ValidateMovementPayload,
+): Promise<void> {
+  return axiosNestFinance.patch(
+    `/cash-registers/movements/${payload.movementId}/validate`,
+    {
+      action: payload.action,
+      rejectionReason: payload.rejectionReason,
+    },
+  );
 }

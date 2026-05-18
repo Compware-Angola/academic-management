@@ -10,11 +10,16 @@ import {
   ListAvailableOperatorsFilters,
   OpenCashRegisterPayload,
   verifyMyCashRegisterOpeningCodeService,
+  ListCashRegisterMovementsFilters,
+  listCashRegisterMovementsService,
+  ValidateMovementPayload,
+  validateMovementService,
 } from "@/services/finance/cash-register.service";
 import { AuthStorage } from "@/util/auth-storage";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export const useQueryCashRegisters = (filters?: ListCashRegisterFilters) => {
   return useQuery({
@@ -140,3 +145,31 @@ export function useCashRegisterOpeningCodeVerification() {
     reset,
   };
 }
+
+export const useQueryCashRegisterMovements = (
+  filters?: ListCashRegisterMovementsFilters,
+) => {
+  return useQuery({
+    queryKey: ["cash-register-movements", filters],
+    queryFn: () => listCashRegisterMovementsService(filters),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useValidateMovement = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: ValidateMovementPayload) =>
+      validateMovementService(payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["cash-register-movements"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-registers"],
+      });
+    },
+  });
+};
