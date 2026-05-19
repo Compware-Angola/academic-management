@@ -135,6 +135,7 @@ import ConsultarProvaIndividual from "./pages/access_exam/ConsultarProvaIndividu
 import AtribuirProva from "./pages/access_exam/AtribuirProva";
 import ResetarProva from "./pages/access_exam/ResetarProva";
 import LancarNotaArquitectura from "./pages/access_exam/LancarNotaArquitectura";
+import LancarNotaManual from "./pages/access_exam/LancarNotaManual";
 
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
@@ -162,6 +163,7 @@ import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
 import ListarTopicos from "./pages/access_exam/ListarTopicos";
 import ListagemProvas from "./pages/access_exam/ListagemProvas";
+import ConfigurarVaga from "./pages/access_exam/ConfigurarVaga";
 import { ListaEstudantesDiplomados } from "./pages/registrations/ListarEstudantesDiplomados";
 import { FormaPagamentoPage } from "./pages/financas/forma-pagamento";
 import { CaixaPage } from "./pages/financas/caixa";
@@ -712,6 +714,18 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/exame/configurar-vaga"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFINIR_VAGAS_POR_CURSO.sigla!,
+                        ]}
+                      >
+                        <ConfigurarVaga />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/exame/estatisticas-diaria"
                     element={<EstatisticasDiaria />}
                   />
@@ -802,6 +816,18 @@ const App = () => {
                         ]}
                       >
                         <LancarNotaArquitectura />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/exame/lancar-nota-manual"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla!,
+                        ]}
+                      >
+                        <LancarNotaManual />
                       </ProtectedRoute>
                     }
                   />
