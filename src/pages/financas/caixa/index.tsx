@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MovementsTable } from "./components/movements-table";
+
 import { CaixasDisponiveisTab } from "./components/CaixasDisponiveisTab";
+import { MovementsTable } from "./components/moviment/MovementsTable";
 
 export function CaixaPage() {
   return (
@@ -60,16 +61,7 @@ export function CaixaPage() {
         </TabsContent>
 
         <TabsContent value="movimentos">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Histórico de Movimentos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MovementsTable />
-            </CardContent>
-          </Card>
+          <MovementsTable />
         </TabsContent>
       </Tabs>
     </div>

@@ -24,3 +24,9 @@ export const formatDisplayPt = (dateString: string): string => {
     year: "numeric",
   });
 };
+
+export const formatTimeFromDate = (dateTime: string | null) => {
+  if (!dateTime) return "---";
+  const date = new Date(dateTime);
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};

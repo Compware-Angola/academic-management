@@ -96,6 +96,7 @@ type CloseCashRegisterServiceResponse = {
     updatedAt: string;
     updatedBy: number | null;
     validationDate: string | null;
+
   };
 };
 export async function closeCashRegisterService(
@@ -163,6 +164,7 @@ export type ListAvailableOperatorsFilters = {
   search?: string;
   page?: number;
   limit?: number;
+  availability?: "all" | "free" | "occupied"
 };
 
 export async function listAvailableOperatorsService(
@@ -209,6 +211,9 @@ export type CashRegisterMovement = {
   validation_date: string;
   created_at: string;
   updated_at: string;
+  opening_time: null | string,
+  closing_time: null | string,
+  validation_time: null | string
 };
 
 export type ListCashRegisterMovementsResponse = {
