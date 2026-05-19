@@ -1,11 +1,6 @@
 import { useState } from "react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -46,7 +41,12 @@ import {
   CircleX,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useQueryFacturas, useQueryFacturaItens, useReactivateInvoice, useAnnulInvoice } from "@/hooks/horario/use-query-invoice";
+import {
+  useQueryFacturas,
+  useQueryFacturaItens,
+  useReactivateInvoice,
+  useAnnulInvoice,
+} from "@/hooks/horario/use-query-invoice";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
 import { Separator } from "@/components/ui/separator";
@@ -78,7 +78,9 @@ export default function ListarNotasPagamento() {
   const { hasPermission } = usePermission();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<number | null>(null);
+  const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<
+    number | null
+  >(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [openServicesModal, setOpenServicesModal] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string | null>(null);
@@ -100,7 +102,8 @@ export default function ListarNotasPagamento() {
 
   const limit = 10;
 
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
 
   const { mutate: annulInvoice } = useAnnulInvoice();
   const { mutate: reactivateInvoice } = useReactivateInvoice();
@@ -129,18 +132,11 @@ export default function ListarNotasPagamento() {
     limit,
 
     codigoMatricula:
-      searchBy === "codigoMatricula" && searchTerm
-        ? searchTerm
-        : undefined,
+      searchBy === "codigoMatricula" && searchTerm ? searchTerm : undefined,
 
-    reference:
-      searchBy === "reference" && searchTerm
-        ? searchTerm
-        : undefined,
+    reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
     codigoFatura:
-      searchBy === "codigoFatura" && searchTerm
-        ? searchTerm
-        : undefined,
+      searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
   });
 
   const {
@@ -152,13 +148,29 @@ export default function ListarNotasPagamento() {
   const getStatusBadge = (status: number) => {
     switch (status) {
       case 0:
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pendente</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+            Pendente
+          </Badge>
+        );
       case 1:
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Pago</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            Pago
+          </Badge>
+        );
       case 2:
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Parcelado</Badge>;
+        return (
+          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+            Parcelado
+          </Badge>
+        );
       case 3:
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Anulado</Badge>;
+        return (
+          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+            Anulado
+          </Badge>
+        );
       default:
         return <Badge>Desconhecido</Badge>;
     }
@@ -191,15 +203,16 @@ export default function ListarNotasPagamento() {
     if (page > 1) setPage(page - 1);
   };
 
-  const selectedFactura = data?.data.find((f) => f.codigo === selectedFacturaCodigo);
+  const selectedFactura = data?.data.find(
+    (f) => f.codigo === selectedFacturaCodigo,
+  );
   const placeholders: Record<string, string> = {
     codigoMatricula: "Pesquisar por código da matrícula...",
     reference: "Pesquisar por referência da factura...",
     codigoFatura: "Pesquisar por Codigo da factura...",
   };
 
-  const placeholderText =
-    placeholders[searchBy] || "Pesquisar...";
+  const placeholderText = placeholders[searchBy] || "Pesquisar...";
 
   return (
     <div className="p-6 space-y-6">
@@ -227,9 +240,10 @@ export default function ListarNotasPagamento() {
       {/* Título */}
       <div>
         <h1 className="text-2xl font-bold">Notas de Pagamento</h1>
-        <p className="text-muted-foreground">Listagem de todas as notas de pagamento emitidas.</p>
+        <p className="text-muted-foreground">
+          Listagem de todas as notas de pagamento emitidas.
+        </p>
       </div>
-
 
       {/* Filtros */}
       <Card>
@@ -242,9 +256,7 @@ export default function ListarNotasPagamento() {
                 disabled={isLoadingAcademicYear}
                 loading={isLoadingAcademicYear}
                 value={filters.anoLetivo}
-                onChange={(v) =>
-                  setFilters({ ...filters, anoLetivo: v })
-                }
+                onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
                 options={anosAcademicos}
                 map={(a) => ({
                   key: a.codigo,
@@ -259,9 +271,7 @@ export default function ListarNotasPagamento() {
               <FormSelect
                 label="Estado"
                 value={filters.estado}
-                onChange={(v) =>
-                  setFilters({ ...filters, estado: v })
-                }
+                onChange={(v) => setFilters({ ...filters, estado: v })}
                 options={estados}
                 map={(e) => ({
                   key: e.id,
@@ -278,7 +288,7 @@ export default function ListarNotasPagamento() {
                 value={searchBy}
                 onChange={(v) => {
                   setSearchBy(
-                    v as "codigoMatricula" | "reference" | "codigoFatura"
+                    v as "codigoMatricula" | "reference" | "codigoFatura",
                   );
                   setSearchTerm("");
                   setPage(1);
@@ -318,7 +328,6 @@ export default function ListarNotasPagamento() {
         </CardContent>
       </Card>
 
-
       {/* Tabela principal */}
       <Card>
         <CardHeader>
@@ -344,21 +353,31 @@ export default function ListarNotasPagamento() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell
+                    colSpan={9}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : data?.data?.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell
+                    colSpan={9}
+                    className="text-center py-8 text-muted-foreground"
+                  >
                     Nenhuma nota de pagamento encontrada
                   </TableCell>
                 </TableRow>
               ) : (
                 data?.data.map((nota) => (
                   <TableRow key={nota.codigo}>
-                    <TableCell className="font-mono font-medium">{nota.codigo}</TableCell>
-                    <TableCell className="font-mono font-medium">{nota.referencia}</TableCell>
+                    <TableCell className="font-mono font-medium">
+                      {nota.codigo}
+                    </TableCell>
+                    <TableCell className="font-mono font-medium">
+                      {nota.referencia}
+                    </TableCell>
                     <TableCell className="font-mono">
                       {nota.servicos ? (
                         nota.servicos.length > 10 ? (
@@ -380,9 +399,13 @@ export default function ListarNotasPagamento() {
                     </TableCell>
 
                     <TableCell>{nota.nome_aluno}</TableCell>
-                    <TableCell className="font-mono">{nota.codigo_matricula || 'N/A'}</TableCell>
-                    <TableCell>{nota.curso || 'N/A'}</TableCell>
-                    <TableCell className="font-medium">{formatCurrency(nota.valor_pagar)}</TableCell>
+                    <TableCell className="font-mono">
+                      {nota.codigo_matricula || "N/A"}
+                    </TableCell>
+                    <TableCell>{nota.curso || "N/A"}</TableCell>
+                    <TableCell className="font-medium">
+                      {formatCurrency(nota.valor_pagar)}
+                    </TableCell>
                     <TableCell>{formatDate(nota.data_factura)}</TableCell>
 
                     <TableCell>{getStatusBadge(nota.estado)}</TableCell>
@@ -398,7 +421,9 @@ export default function ListarNotasPagamento() {
                         </Button>
 
                         {nota.estado === 0 &&
-                          hasPermission(PermissionTypeDetails.DELETAR_FACTURA.sigla) && (
+                          hasPermission(
+                            PermissionTypeDetails.DELETAR_FACTURA.sigla,
+                          ) && (
                             <Button
                               size="icon"
                               variant="outline"
@@ -408,8 +433,6 @@ export default function ListarNotasPagamento() {
                               <CircleX className="h-4 w-4" />
                             </Button>
                           )}
-
-
                       </div>
                     </TableCell>
                   </TableRow>
@@ -456,7 +479,9 @@ export default function ListarNotasPagamento() {
                 Detalhes da Nota de Pagamento
                 {selectedFactura && (
                   <span className="inline-flex px-3 py-1 text-sm font-mono bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md font-medium">
-                    {selectedFactura.referencia || selectedFactura.codigo || "—"}
+                    {selectedFactura.referencia ||
+                      selectedFactura.codigo ||
+                      "—"}
                   </span>
                 )}
               </div>
@@ -469,7 +494,6 @@ export default function ListarNotasPagamento() {
               {/* Valor total destacado, mas sem gradiente */}
               <div className="bg-gray-50 dark:bg-gray-900 px-4 py-4 rounded-xl border border-gray-200 dark:border-gray-800">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-
                   <div>
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Valor Total
@@ -496,7 +520,6 @@ export default function ListarNotasPagamento() {
                       {formatDate(selectedFactura.data_factura)}
                     </p>
                   </div>
-
                 </div>
               </div>
 
@@ -504,23 +527,37 @@ export default function ListarNotasPagamento() {
 
               {/* Dados do Estudante */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Dados do Estudante</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Dados do Estudante
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
-                    <p className="text-sm text-muted-foreground">Código da Matrícula</p>
-                    <p className="font-medium font-mono">{selectedFactura.codigo_matricula || "—"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Código da Matrícula
+                    </p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.codigo_matricula || "—"}
+                    </p>
                   </div>
                   <div className="col-span-2 lg:col-span-1">
-                    <p className="text-sm text-muted-foreground">Nome do Estudante</p>
-                    <p className="font-semibold text-lg">{selectedFactura.nome_aluno || "—"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Nome do Estudante
+                    </p>
+                    <p className="font-semibold text-lg">
+                      {selectedFactura.nome_aluno || "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Curso</p>
-                    <p className="font-medium">{selectedFactura.curso || "—"}</p>
+                    <p className="font-medium">
+                      {selectedFactura.curso || "—"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Ano Lectivo</p>
-                    <p className="font-medium">{selectedFactura.ano_lectivo || "—"}</p>
+                    <p className="font-medium">
+                      {selectedFactura.ano_lectivo || "—"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -529,15 +566,25 @@ export default function ListarNotasPagamento() {
 
               {/* Informações da Nota */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Informações da Nota</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Informações da Nota
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Nº da Nota</p>
-                    <p className="font-medium font-mono">{selectedFactura.referencia || selectedFactura.codigo || "—"}</p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.referencia ||
+                        selectedFactura.codigo ||
+                        "—"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Data de Emissão</p>
-                    <p className="font-medium">{formatDate(selectedFactura.data_factura)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Data de Emissão
+                    </p>
+                    <p className="font-medium">
+                      {formatDate(selectedFactura.data_factura)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Multa</p>
@@ -556,7 +603,9 @@ export default function ListarNotasPagamento() {
 
               {/* Itens da Factura */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Itens da Nota de Pagamento</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Itens da Nota de Pagamento
+                </h3>
 
                 {isLoadingItens || isFetchingItens ? (
                   <div className="py-10 text-center text-muted-foreground bg-gray-50 dark:bg-gray-900/50 rounded-lg">
@@ -574,20 +623,31 @@ export default function ListarNotasPagamento() {
                           <TableHead>Descrição</TableHead>
                           <TableHead className="text-center">Qtd</TableHead>
                           <TableHead className="text-center">Multa</TableHead>
-                          <TableHead className="text-right">Valor Unit.</TableHead>
-                          <TableHead className="text-right pr-6">Valor Total</TableHead>
+                          <TableHead className="text-right">
+                            Valor Unit.
+                          </TableHead>
+                          <TableHead className="text-right pr-6">
+                            Valor Total
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {itens.data.map((item: FacturaItem, index: number) => (
-                          <TableRow key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <TableRow
+                            key={index}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          >
                             <TableCell>
                               {(item.descricaoservico || "—") +
-                                (Number(item.mesid) !== 3 && item.mesid && item.mesdescricao
+                                (Number(item.mesid) !== 3 &&
+                                item.mesid &&
+                                item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
-                            <TableCell className="text-center">{item.quantidade ?? 1}</TableCell>
+                            <TableCell className="text-center">
+                              {item.quantidade ?? 1}
+                            </TableCell>
                             <TableCell className="text-center text-orange-600 dark:text-orange-400">
                               {item.multa ? formatCurrency(item.multa) : "—"}
                             </TableCell>
@@ -607,8 +667,8 @@ export default function ListarNotasPagamento() {
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return total + (item.preco * quantidade);
-                              }, 0)
+                                return total + item.preco * quantidade;
+                              }, 0),
                             )}
                           </TableCell>
                         </TableRow>
@@ -620,8 +680,12 @@ export default function ListarNotasPagamento() {
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return total + (item.preco * quantidade) + (item.multa ?? 0);
-                              }, 0)
+                                return (
+                                  total +
+                                  item.preco * quantidade +
+                                  (item.multa ?? 0)
+                                );
+                              }, 0),
                             )}
                           </TableCell>
                         </TableRow>
@@ -640,7 +704,9 @@ export default function ListarNotasPagamento() {
                   itens={itens?.data || []}
                   showDownload={true}
                   showPrint={true}
-                  showliquidarNota={hasPermission(PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla)}
+                  showliquidarNota={hasPermission(
+                    PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla,
+                  )}
                 />
               </div>
             </div>
@@ -660,12 +726,13 @@ export default function ListarNotasPagamento() {
             <DialogTitle>Serviços da Nota</DialogTitle>
           </DialogHeader>
 
-          <div className="text-sm whitespace-pre-wrap">
-            {selectedServices}
-          </div>
+          <div className="text-sm whitespace-pre-wrap">{selectedServices}</div>
 
           <div className="flex justify-end mt-4">
-            <Button variant="outline" onClick={() => setOpenServicesModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setOpenServicesModal(false)}
+            >
               Fechar
             </Button>
           </div>
@@ -680,12 +747,9 @@ export default function ListarNotasPagamento() {
 
             <DialogDescription>
               Tem certeza que deseja{" "}
-              <strong>
-                {acaoTipo === "anular" ? "anular" : "reactivar"}
-              </strong>{" "}
+              <strong>{acaoTipo === "anular" ? "anular" : "reactivar"}</strong>{" "}
               esta factura?
               <br />
-
               {facturaSelecionada && (
                 <>
                   <strong>Nº Factura:</strong> {facturaSelecionada.codigo}
@@ -695,7 +759,6 @@ export default function ListarNotasPagamento() {
                   <strong>Valor:</strong> {facturaSelecionada.valor_pagar} Kz
                 </>
               )}
-
               <br />
               Esta ação não pode ser desfeita.
             </DialogDescription>

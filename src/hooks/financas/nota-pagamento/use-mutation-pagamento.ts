@@ -15,8 +15,8 @@ export function useCreatePayment() {
       toast.success("Pagamento criado com sucesso!", {
         id: "create-payment-success",
       });
-      // Invalida queries relacionadas a pagamentos para atualizar os dados
       queryClient.invalidateQueries({ queryKey: ["facturas"] });
+      queryClient.invalidateQueries({ queryKey: ["my-cash-summary"] });
     },
     onError: () => {
       // toast.error("Erro ao criar pagamento", { id: "create-payment-error" });
