@@ -220,6 +220,11 @@ export const ingressoStructure: MenuStructure = {
           url: "/exame/provas",
           permission: [PermissionTypeDetails.PROVA.sigla],
         },
+        {
+          title: "Configurar vaga",
+          url: "/exame/configurar-vaga",
+          permission: [PermissionTypeDetails.DEFINIR_VAGAS_POR_CURSO.sigla],
+        },
       ],
 
       permission: [],
