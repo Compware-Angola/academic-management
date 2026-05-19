@@ -32,8 +32,15 @@ import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
 import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
+import { useQueryDiscountBySigla } from "@/hooks/financas/descontos/use-query-discount-by-sigla";
+import { DiscountSigla } from "@/enums/discount-sigla.enum";
+import {
+  calcAnnualDiscount,
+  canApplyAnnualDiscount,
+} from "../helpers/discount";
+import { MensalidadeSummary } from "./MensalidadeSummary";
 
-type SelectedPayment = {
+export type SelectedPayment = {
   mesTempId: number;
   valorAPagar: number;
   multa: number;
@@ -64,7 +71,8 @@ const getStatusBadge = (status: number) => {
     case InvoiceEnum.ISENTO:
       return (
         <Badge>
-          <CreditCard className="mr-1 h-3 w-3" />Isento
+          <CreditCard className="mr-1 h-3 w-3" />
+          Isento
         </Badge>
       );
     default:
@@ -124,6 +132,21 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
   const { data: student } = useStudentDetail(codigoMatricula);
   const { mutate: criarFactura, isPending } = useCreateInvoiceNoJob();
+  const { data: desc5Data } = useQueryDiscountBySigla(
+    DiscountSigla.DESC5_ANUID,
+  );
+
+  //============================= DESCONTOS ====================================
+  const deveAplicarDesc5 = useMemo(
+    () => canApplyAnnualDiscount(desc5Data, selectedPayments),
+    [desc5Data, selectedPayments],
+  );
+
+  const valorDesc5 = deveAplicarDesc5
+    ? calcAnnualDiscount(totalSelecionado, desc5Data![0].taxa)
+    : 0;
+  console.log(deveAplicarDesc5);
+  //============================= FIM DESCONTOS ====================================
 
   const queryParams = useMemo(() => {
     if (!anoLetivo || !student?.curso_codigo) return null;
@@ -159,30 +182,47 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
     const selectedList = Array.from(selectedPayments.values());
 
+    //Se tiver um desconto de anuidade
+    const descontoPorItem = deveAplicarDesc5
+      ? valorDesc5 / selectedList.length
+      : 0;
+
     const totalMulta = selectedList.reduce(
       (total, payment) => total + (payment.multa ?? 0), // FIX: fallback
       0,
     );
-    const totalDesconto = selectedList.reduce(
-      (total, payment) => total + (payment.desconto ?? 0), // FIX: fallback
-      0,
-    );
+    const totalDesconto = deveAplicarDesc5
+      ? valorDesc5
+      : selectedList.reduce(
+          (total, payment) => total + (payment.desconto ?? 0), // FIX: fallback
+          0,
+        );
 
-    const items = selectedList.map((payment) =>
-      createItem({
+    const items = selectedList.map((payment) => {
+      let desconto = payment.desconto ?? 0;
+      let valorApagar = payment.valorAPagar;
+      if (deveAplicarDesc5) {
+        desconto = descontoPorItem;
+        valorApagar = valorApagar - desconto;
+      }
+      return createItem({
         multa: payment.multa ?? 0,
-        valorDesconto: payment.desconto ?? 0,
+        valorDesconto: desconto,
         codigo: monthFee.codigo,
         descricao: `Mensalidade ${payment.mesTempDesc}`,
-        preco: payment.valorAPagar,
+        preco: valorApagar,
         mesTempId: payment.mesTempId,
-      }),
-    );
+      });
+    });
+
+    let totalApagar = deveAplicarDesc5
+      ? totalSelecionado - valorDesc5
+      : totalSelecionado;
 
     const invoice = createInvoice({
       codigoMatricula: codigoMatricula,
       poloid: 1,
-      totalApagar: totalSelecionado,
+      totalApagar: totalApagar,
       totalDesconto: totalDesconto,
       totalMulta: totalMulta,
       itens: items,
@@ -418,8 +458,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             {isNaN(new Date(payment.dueDate).getTime())
                               ? "—"
                               : new Date(payment.dueDate).toLocaleDateString(
-                                "pt-AO",
-                              )}
+                                  "pt-AO",
+                                )}
                           </p>
                         </div>
                       </div>
@@ -466,8 +506,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           {isNaN(new Date(payment.data_operacao).getTime())
                             ? "—"
                             : new Date(
-                              payment.data_operacao,
-                            ).toLocaleDateString("pt-AO")}
+                                payment.data_operacao,
+                              ).toLocaleDateString("pt-AO")}
                         </p>
                       </div>
                     </div>
@@ -495,13 +535,40 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       </div>
 
       {/* Rodapé com total e botão */}
+      {/*
       <div className="flex items-center justify-between border-t pt-6">
         <div>
-          <span className="text-lg">Total a pagar: </span>
-          <span className="text-2xl font-bold text-primary">
-            {formatNumber(totalSelecionado)} KZ
-          </span>
-          {/* FIX: feedback de quantos meses selecionados */}
+          {deveAplicarDesc5 && (
+            <div>
+              <p className="text-sm">
+                Subtotal:{" "}
+                <span className=" font-bold text-primary">
+                  {formatNumber(totalSelecionado)} Kz
+                </span>{" "}
+              </p>
+              <p className="text-sm">
+                Desconto:{" "}
+                <span className=" font-bold text-success">
+                  {formatNumber(valorDesc5)} Kz
+                </span>
+              </p>
+              <p className="text-lg">
+                Total a pagar:{" "}
+                <span className="text-2xl font-bold text-primary">
+                  {formatNumber(totalSelecionado - valorDesc5)} Kz
+                </span>
+              </p>
+            </div>
+          )}
+          {!deveAplicarDesc5 && (
+            <div>
+              <span className="text-lg">Total a pagar: </span>
+              <span className="text-2xl font-bold text-primary">
+                {formatNumber(totalSelecionado)} KZ
+              </span>
+            </div>
+          )}
+
           {selectedPayments.size > 0 && (
             <p className="text-xs text-muted-foreground mt-0.5">
               {selectedPayments.size}{" "}
@@ -520,8 +587,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
         >
           {isPending || isMonthFetching ? (
             <>
-              <Loader2 className="animate-spin h-5 w-5" />
-              A processar...
+              <Loader2 className="animate-spin h-5 w-5" />A processar...
             </>
           ) : (
             <>
@@ -531,6 +597,17 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
           )}
         </Button>
       </div>
+      */}
+      <MensalidadeSummary
+        selectedCount={selectedPayments.size}
+        totalSelecionado={totalSelecionado}
+        deveAplicarDesc5={deveAplicarDesc5}
+        valorDesc5={valorDesc5}
+        descTaxa={desc5Data?.[0]?.taxa ?? 5}
+        isPending={isPending}
+        isMonthFetching={isMonthFetching}
+        onCreateInvoice={handleCreateInvoice}
+      />
     </div>
   );
 }

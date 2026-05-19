@@ -21,7 +21,7 @@ export const createItem = (serviceType: TypeServiceResponse | null) => {
     retencao: 0,
     incidencia: 0,
     valorDesconto: serviceType.valorDesconto,
-    descontoProduto: 0,
+    descontoProduto: serviceType.valorDesconto,
     mes: "",
     multa: serviceType.multa,
     mesTempId: serviceType.mesTempId,
