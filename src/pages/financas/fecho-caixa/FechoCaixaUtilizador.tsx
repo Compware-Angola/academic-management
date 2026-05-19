@@ -1,78 +1,291 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Home, Search, Download } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function FechoCaixaUtilizador() {
-  const mockData = [
-    { id: 1, utilizador: "João Silva", data: "2024-01-15", totalOperacoes: 45, valorTotal: "1.250.000 Kz", status: "Fechado" },
-    { id: 2, utilizador: "Maria Santos", data: "2024-01-15", totalOperacoes: 32, valorTotal: "890.000 Kz", status: "Aberto" },
-  ];
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+
+import { Input } from "@/components/ui/input";
+
+import { Label } from "@/components/ui/label";
+
+import { Textarea } from "@/components/ui/textarea";
+
+import { ArrowLeft, CheckCircle, DollarSign } from "lucide-react";
+
+import { formatNumber } from "@/util/format-number";
+
+export function CloseCashRegisterPage() {
+  const navigate = useNavigate();
+
+  const { id } = useParams();
+
+  const [formData, setFormData] = useState({
+    totalCollectedAmount: "",
+
+    collectedDepositAmount: "",
+
+    collectedPaymentAmount: "",
+
+    invoicedPaymentAmount: "",
+
+    observation: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const totalCollected = Number(formData.totalCollectedAmount) || 0;
+
+  const totalDeposits = Number(formData.collectedDepositAmount) || 0;
+
+  const totalPayments = Number(formData.collectedPaymentAmount) || 0;
+
+  const totalInvoiced = Number(formData.invoicedPaymentAmount) || 0;
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        totalCollectedAmount: totalCollected,
+
+        collectedDepositAmount: totalDeposits,
+
+        collectedPaymentAmount: totalPayments,
+
+        invoicedPaymentAmount: totalInvoiced,
+
+        observation: formData.observation || undefined,
+      };
+
+      console.log(payload);
+
+      /*
+      await api.put(
+        `/cash-registers/${id}/close`,
+        payload,
+      );
+      */
+
+      alert("Caixa fechado e enviado para validação");
+
+      navigate("/financas/caixas");
+    } catch (error) {
+      console.error(error);
+
+      alert("Erro ao fechar caixa");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="p-6 space-y-6">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink asChild><Link to="/"><Home className="h-4 w-4" /></Link></BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Finanças</BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Fecho de Caixa</BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Fecho Caixa Utilizador</BreadcrumbPage></BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="p-6 max-w-3xl mx-auto space-y-6">
+      {/* HEADER */}
 
-      <h1 className="text-2xl font-bold">Fecho de Caixa por Utilizador</h1>
-      <p className="text-muted-foreground">Controlo de caixa por operador.</p>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/financas/caixas")}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+
+        <div>
+          <h1 className="text-3xl font-bold">Fechar Caixa</h1>
+
+          <p className="text-muted-foreground">
+            Informe os valores arrecadados para finalizar o expediente
+          </p>
+        </div>
+      </div>
+
+      {/* FORM */}
 
       <Card>
-        <CardHeader><CardTitle>Filtros</CardTitle></CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Select><SelectTrigger><SelectValue placeholder="Utilizador" /></SelectTrigger><SelectContent><SelectItem value="all">Todos</SelectItem></SelectContent></Select>
-            <Input type="date" />
-            <Select><SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value="all">Todos</SelectItem></SelectContent></Select>
-            <Button className="gap-2"><Search className="h-4 w-4" />Pesquisar</Button>
+        <CardHeader>
+          <CardTitle>Dados do Fechamento</CardTitle>
+
+          <CardDescription>
+            Valores finais informados pelo operador
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* TOTAL ARRECADADO */}
+
+          <div className="space-y-2">
+            <Label>Valor Total Arrecadado</Label>
+
+            <Input
+              type="number"
+              min={0}
+              placeholder="0.00"
+              value={formData.totalCollectedAmount}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  totalCollectedAmount: e.target.value,
+                })
+              }
+            />
+
+            <p className="text-xs text-muted-foreground">
+              Soma geral arrecadada no expediente
+            </p>
+          </div>
+
+          {/* DEPÓSITOS */}
+
+          <div className="space-y-2">
+            <Label>Valor de Depósitos</Label>
+
+            <Input
+              type="number"
+              min={0}
+              placeholder="0.00"
+              value={formData.collectedDepositAmount}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  collectedDepositAmount: e.target.value,
+                })
+              }
+            />
+
+            <p className="text-xs text-muted-foreground">
+              Total recebido via depósitos ou transferências
+            </p>
+          </div>
+
+          {/* PAGAMENTOS */}
+
+          <div className="space-y-2">
+            <Label>Valor de Pagamentos</Label>
+
+            <Input
+              type="number"
+              min={0}
+              placeholder="0.00"
+              value={formData.collectedPaymentAmount}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  collectedPaymentAmount: e.target.value,
+                })
+              }
+            />
+
+            <p className="text-xs text-muted-foreground">
+              Total recebido via TPA, dinheiro ou pagamentos
+            </p>
+          </div>
+
+          {/* FACTURADO */}
+
+          <div className="space-y-2">
+            <Label>Valor Facturado</Label>
+
+            <Input
+              type="number"
+              min={0}
+              placeholder="0.00"
+              value={formData.invoicedPaymentAmount}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  invoicedPaymentAmount: e.target.value,
+                })
+              }
+            />
+
+            <p className="text-xs text-muted-foreground">
+              Valor total facturado no sistema
+            </p>
+          </div>
+
+          {/* OBSERVAÇÃO */}
+
+          <div className="space-y-2">
+            <Label>Observação</Label>
+
+            <Textarea
+              rows={4}
+              placeholder="Digite alguma observação do fechamento..."
+              value={formData.observation}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  observation: e.target.value,
+                })
+              }
+            />
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex gap-2">
-        <Button variant="outline" className="gap-2"><Download className="h-4 w-4" />Exportar</Button>
-      </div>
+      {/* RESUMO */}
 
       <Card>
-        <CardHeader><CardTitle>Caixas por Utilizador</CardTitle></CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Utilizador</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Total Operações</TableHead>
-                <TableHead>Valor Total</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.utilizador}</TableCell>
-                  <TableCell>{item.data}</TableCell>
-                  <TableCell>{item.totalOperacoes}</TableCell>
-                  <TableCell className="font-semibold">{item.valorTotal}</TableCell>
-                  <TableCell>{item.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardHeader>
+          <CardTitle>Resumo Informado</CardTitle>
+        </CardHeader>
+
+        <CardContent className="space-y-3">
+          <div className="flex justify-between">
+            <span>Total Arrecadado</span>
+
+            <span className="font-bold">{formatNumber(totalCollected)} KZ</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>Depósitos</span>
+
+            <span className="font-bold">{formatNumber(totalDeposits)} KZ</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>Pagamentos</span>
+
+            <span className="font-bold">{formatNumber(totalPayments)} KZ</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>Facturado</span>
+
+            <span className="font-bold">{formatNumber(totalInvoiced)} KZ</span>
+          </div>
         </CardContent>
       </Card>
+
+      {/* FOOTER */}
+
+      <div className="flex justify-end gap-3">
+        <Button variant="outline" onClick={() => navigate("/financas/caixas")}>
+          Cancelar
+        </Button>
+
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <div className="mr-2 h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              Finalizando...
+            </>
+          ) : (
+            <>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Fechar Caixa
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

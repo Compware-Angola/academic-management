@@ -1,9 +1,6 @@
 import { useMemo } from "react";
 
-import {
-  useQueryCashRegisters,
-  useQueryMyCashRegister,
-} from "@/hooks/financa/use-cash-register";
+import { useQueryCashRegisters } from "@/hooks/financa/use-cash-register";
 
 import { FormSelect } from "../FormSelect";
 
@@ -11,36 +8,13 @@ interface CaixaSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
   disabled?: boolean;
-  onlyMyCashRegister?: boolean;
 }
 
-const CaixaSelect = ({
-  onlyMyCashRegister = true,
-  onChangeValue,
-  value,
-  disabled,
-}: CaixaSelectProps) => {
-  const { data: caixas = [], isLoading: isLoadingCaixas } =
-    useQueryCashRegisters({
-      //  status: "aberto",
-      blocked: "N",
-    });
-
-  // const { data: myCashRegister, isLoading: isLoadingMyCashRegister } =
-  //   useQueryMyCashRegister();
-
-  // const options = useMemo(() => {
-  //   if (onlyMyCashRegister) {
-  //     return myCashRegister ? [myCashRegister] : [];
-  //   }
-
-  //   return caixas;
-  // }, [onlyMyCashRegister, myCashRegister, caixas]);
-
-  // const isLoading = onlyMyCashRegister
-  //   ? isLoadingMyCashRegister
-  //   : isLoadingCaixas;
-
+const CaixaSelect = ({ onChangeValue, value, disabled }: CaixaSelectProps) => {
+  const { data: response, isLoading: isLoadingCaixas } = useQueryCashRegisters({
+    blocked: "N",
+  });
+  const caixas = useMemo(() => response?.data || [], [response]);
   return (
     <FormSelect
       label="Caixa"
@@ -50,9 +24,9 @@ const CaixaSelect = ({
       onChange={(v) => onChangeValue(v)}
       options={caixas}
       map={(caixa) => ({
-        key: caixa.id,
+        key: caixa.code,
         label: caixa.name,
-        value: String(caixa.id),
+        value: String(caixa.code),
       })}
     />
   );
