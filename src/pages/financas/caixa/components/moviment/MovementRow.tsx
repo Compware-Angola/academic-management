@@ -4,7 +4,6 @@ import { CashRegisterMovement } from "@/services/finance/cash-register.service";
 import { formatCurrencyAOA } from "@/util/format-currency";
 import { TableActions } from "./TableActions";
 
-// MovementRow.tsx
 export const MovementRow = ({
   movement,
   onViewDetails,
