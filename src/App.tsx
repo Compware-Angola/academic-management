@@ -1342,7 +1342,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla!,
+                          PermissionTypeDetails.FECHO_CAIXA_GERAL.sigla!,
                         ]}
                       >
                         <CaixaPage />
