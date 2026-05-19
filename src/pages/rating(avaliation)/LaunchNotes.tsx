@@ -1,14 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -22,8 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   RefreshCw,
   Save,
-  ChevronLeft,
-  ChevronRight,
   Unlock,
   Lock,
   Search,
@@ -60,11 +50,39 @@ import { TipoLancamentoPrazoMap } from "@/constants/tipo-avalicao";
 import { useQueryPromptGetPermissionLaunch } from "@/hooks/avaliacao/use-query-prompt-get-permission-launch";
 import { GetAssessmentNotasItem } from "@/services/avaliacao/prompt-get-permission-launch.service";
 import { PaginationComponent } from "@/components/common/PaginationComponent";
+import { usePermission } from "@/auth/permission.helper";
+import Lottie from "lottie-react";
+import BlockDocument from "@/assets/blockdocument.json";
+import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
+import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+
+export interface Roles {
+  docente: boolean;
+  direitor_curso: boolean;
+  Reitor: boolean;
+  Faculdades: boolean;
+  Vice_Reitor: boolean;
+  Acessor_do_Reitor: boolean;
+  Responsável_do_Gabinete_de_qualidade_e_Serviços_Pedagógicos: boolean;
+  Director: boolean;
+  Coordenador: boolean;
+  Decano: boolean;
+}
+
+// ─── Roles que ignoram restrição de prazo ────────────────────────────────────
+/**
+ * Qualquer utilizador com pelo menos um destes roles em `true`
+ * pode lançar notas sem verificar datas/prazos.
+ */
+
+
+// ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function LaunchNotes() {
   const { toast } = useToast();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const { haveFullAccess } = usePermission();
+
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -81,66 +99,95 @@ export default function LaunchNotes() {
     tipoProva: "",
     search: "",
   });
-
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
-
-  const {
-    data: studentsResponse,
-    isLoading: loadingNoteRelease,
-    isRefetching,
-    refetch,
-  } = useQueryNoteReleases({
-    anoLectivoId: Number(formData.anoLetivo),
-    horarioId: Number(formData.horarioId),
-    tipoProvaId: Number(formData.tipoProva),
-    tipoAvaliacao: Number(formData.tipoAvaliacao),
-    classe: Number(formData.classes),
-    turno: Number(formData.periodo),
-    search: formData.search,
-    page,
-    limit,
-  });
-
-  const { data: statisticResponse, isLoading: loadingStatistic } =
-    useQueryNoteSummary({
-      anoLectivoId: Number(formData.anoLetivo),
-      horarioId: Number(formData.horarioId),
-      tipoProvaId: Number(formData.tipoProva),
-      tipoAvaliacao: Number(formData.tipoAvaliacao),
-      classe: Number(formData.classes),
-      turno: Number(formData.periodo),
-      search: formData.search,
-    });
-
-  const students = studentsResponse?.data ?? [];
-
-  const [localStudents, setLocalStudents] = useState(students);
-  const [lockedStudents, setLockedStudents] = useState<{
-    [key: number]: boolean;
-  }>({});
-
-  const { data: semestres, isLoading: isLoadingSemestres } =
-    useQuerySemestres();
-  const { user: userData } = useAuth();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-  const { data: cursos } = useCursos();
+  const { data: cursos, isLoading: loadingCursos } = useCursos();
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
-  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
-    useQueryTipoProva();
-  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
-
-  // Rota única — recebe sempre NoteUpsertPayload[]
-  const upsertNoteMutation = useUpsertNote();
-
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       classe: formData.classes,
       curso: formData.curso,
       semestre: formData.semestre,
     });
+  // ─── Auth & roles ─────────────────────────────────────────────────────────
+  const { user: userData } = useAuth();
+  const roles = userData?.roles as Roles | undefined;
+  const isDiretorDeCurso: boolean = roles?.Director === true;
+  const isDocente: boolean = roles?.docente === true;
+  let isLoadinAdditionalInformation = false;
+  const { data: rawInfo } = useQueryAdditionalInformation(
+    isDocente || isDiretorDeCurso,
+    formData.anoLetivo
+  );
+
+  // Estabiliza a referência — só muda se o conteúdo mudar
+  const info = useMemo(() => rawInfo, [JSON.stringify(rawInfo)]);
+
+  // Só processa os dados se for docente/diretor E se já tiver info
+  const {
+    filteredClasses,
+    filteredUnidadesCurriculares,
+    allowedIds,
+  } = useMemo(() => {
+    if (!(isDocente || isDiretorDeCurso) || !info) {
+      return {
+        filteredClasses: classes,
+        filteredUnidadesCurriculares: unidadesCurriculares,
+        allowedIds: undefined,
+      };
+    }
+
+    const allowedCursoIds = Array.from(
+      new Set(info.map((item: any) => item.codigo_curso.toString()))
+    );
+
+    const allowedClassIds = Array.from(
+      new Set(info.map((item: any) => item.codigo_classe.toString()))
+    );
+
+    const allowedGradeIds = Array.from(
+      new Set(info.map((item: any) => item.codigo_grade.toString()))
+    );
+
+    const filteredClasses = allowedClassIds.length
+      ? classes.filter((c) => allowedClassIds.includes(c.codigo.toString()))
+      : classes;
+
+    const filteredUnidadesCurriculares = allowedGradeIds.length
+      ? unidadesCurriculares.filter((g) =>
+        allowedGradeIds.includes(g.pk.toString())
+      )
+      : unidadesCurriculares;
+
+    return {
+      filteredClasses,
+      filteredUnidadesCurriculares,
+      allowedIds: allowedCursoIds,  // string[] com ids reais
+    };
+  }, [isDocente, isDiretorDeCurso, info, classes, unidadesCurriculares]);
+  //                                                 ^^^^^^^^^^^^^^^^^^
+  //                               quando isto carregar, o memo recalcula
+  /**
+   * True quando o utilizador tem full-access OU pelo menos um role 
+   * que isenta de verificação de prazo de lançamento.
+   */
+  const isPrivilegedUser: boolean = haveFullAccess() || isDiretorDeCurso;
+  // ROLES_SEM_RESTRICAO_DE_PRAZO.some((role) => roles?.[role] === true);
+
+  // ─── Queries de lookup ────────────────────────────────────────────────────
+  const canOperateInPage = isPrivilegedUser || isDocente;
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+
+
+  const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
+    useQueryTipoProva();
+  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
+
+
 
   const canLoadTurmas =
     !!formData.anoLetivo &&
@@ -148,7 +195,6 @@ export default function LaunchNotes() {
     !!formData.periodo &&
     !!formData.curso &&
     !!formData.unidadeCurricular;
-
   const { data: scheduleResponse, isLoading: loadingschedule } =
     useQuerySchedulesByUc(
       {
@@ -157,10 +203,11 @@ export default function LaunchNotes() {
         periodo: Number(formData.periodo),
         curso: Number(formData.curso),
         unidadeCurricular: Number(formData.unidadeCurricular),
+        ...(isDocente && { docente: Number(info?.[0]?.codigo_docente) }),
       },
-      { enabled: canLoadTurmas },
+      { enabled: canLoadTurmas && canOperateInPage },
     );
-
+  // ─── Queries de prazo / permissão ────────────────────────────────────────
   const { data: gradesPrompt, isLoading: isLoadingGradesPrompt } =
     useQueryGradesCreationPrompt({
       anoLectivo: parseFilter(formData.anoLetivo),
@@ -179,14 +226,109 @@ export default function LaunchNotes() {
     utilizadorId: userData?.user?.pk_utilizador,
   });
 
+
+
+
+  // ─── Lógica de prazo / permissão ─────────────────────────────────────────
+  /**
+   * Utilizadores privilegiados (diretor_curso, Reitor, etc.) recebem
+   * sempre "ALLOWED" — sem verificar datas.
+   */
+  const gradesPeriodStatus = useMemo(() => {
+    if (isPrivilegedUser) return "ALLOWED";
+    if (!formData.anoLetivo) return "NO_YEAR_SELECTED";
+    if (isLoadingGradesPrompt || isLoadingPromptPermissionLaunch)
+      return "LOADING";
+    if (!gradesPrompt) return "NOT_DEFINED";
+
+    const now = new Date();
+    const start = new Date(gradesPrompt.data_inicio);
+    const end = new Date(gradesPrompt.data_fim);
+    return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
+  }, [
+    isPrivilegedUser,
+    formData.anoLetivo,
+    gradesPrompt,
+    isLoadingGradesPrompt,
+    isLoadingPromptPermissionLaunch,
+  ]);
+
+  /**
+   * Permissão especial do professor (janela individual).
+   * Utilizadores privilegiados sempre têm permissão.
+   */
+  const hasSpecialPermission: boolean =
+    isPrivilegedUser ||
+    teacherHasPermissionToLaunchNotes(promptPermissionLaunch?.data?.[0]);
+
+  const isGlobalPeriodActive = gradesPeriodStatus === "ALLOWED";
+
+  /**
+   * Bloqueia ações de lançamento quando:
+   *  - não é utilizador privilegiado, E
+   *  - não tem permissão especial de professor, E
+   *  - não está dentro do período global.
+   */
+  const shouldBlockGradesActions = !(hasSpecialPermission || isGlobalPeriodActive);
+
+  /**
+   * Mostra o banner de prazo apenas para utilizadores sem privilégio
+   * e apenas quando os filtros mínimos estão preenchidos.
+   */
+  const showDeadline =
+    !isPrivilegedUser &&
+    !!parseFilter(formData.anoLetivo) &&
+    !!parseFilter(formData.semestre) &&
+    !!parseFilter(formData.tipoAvaliacao) &&
+    !!parseFilter(formData.unidadeCurricular) &&
+    canOperateInPage;
+
+
+
+  // ─── Queries de alunos / notas ────────────────────────────────────────────
+  const {
+    data: studentsResponse,
+    isLoading: loadingNoteRelease,
+    isRefetching,
+    refetch,
+  } = useQueryNoteReleases({
+    anoLectivoId: Number(formData.anoLetivo),
+    horarioId: Number(formData.horarioId),
+    tipoProvaId: Number(formData.tipoProva),
+    tipoAvaliacao: Number(formData.tipoAvaliacao),
+    classe: Number(formData.classes),
+    turno: Number(formData.periodo),
+    search: formData.search,
+    page,
+    limit,
+  }, { enabled: !shouldBlockGradesActions && canOperateInPage });
+
+  const { data: statisticResponse } = useQueryNoteSummary({
+    anoLectivoId: Number(formData.anoLetivo),
+    horarioId: Number(formData.horarioId),
+    tipoProvaId: Number(formData.tipoProva),
+    tipoAvaliacao: Number(formData.tipoAvaliacao),
+    classe: Number(formData.classes),
+    turno: Number(formData.periodo),
+    search: formData.search,
+  }, { enabled: !shouldBlockGradesActions && canOperateInPage });
+  const students = studentsResponse?.data ?? [];
+
+  const [localStudents, setLocalStudents] = useState(students);
+  const [lockedStudents, setLockedStudents] = useState<Record<number, boolean>>({});
+
+  const upsertNoteMutation = useUpsertNote();
+
+  // ─── Efeitos ──────────────────────────────────────────────────────────────
   useEffect(() => {
     setLocalStudents(students);
-    const initialLocks: { [key: number]: boolean } = {};
+    const initialLocks: Record<number, boolean> = {};
     students.forEach((s) => {
       initialLocks[s.codigo_grade_aluno] = true;
     });
     setLockedStudents(initialLocks);
   }, [students]);
+
   useEffect(() => {
     setPage(1);
   }, [
@@ -204,7 +346,7 @@ export default function LaunchNotes() {
 
   // ─── Helpers de lock ──────────────────────────────────────────────────────
   const handleUnlockAll = () => {
-    const map: { [key: number]: boolean } = {};
+    const map: Record<number, boolean> = {};
     localStudents.forEach((s) => {
       map[s.codigo_grade_aluno] = false;
     });
@@ -212,7 +354,7 @@ export default function LaunchNotes() {
   };
 
   const handleLockAll = () => {
-    const map: { [key: number]: boolean } = {};
+    const map: Record<number, boolean> = {};
     localStudents.forEach((s) => {
       map[s.codigo_grade_aluno] = true;
     });
@@ -227,7 +369,7 @@ export default function LaunchNotes() {
     localStudents.length > 0 &&
     localStudents.every((s) => lockedStudents[s.codigo_grade_aluno] === false);
 
-  // ─── Monta um item do payload ─────────────────────────────────────────────
+  // ─── Payload builder ──────────────────────────────────────────────────────
   const buildPayloadItem = (student: any): NoteUpsertPayload => ({
     gradeCurricularAluno: student.codigo_grade_aluno,
     utilizador: userData?.user?.pk_utilizador || 0,
@@ -238,11 +380,10 @@ export default function LaunchNotes() {
     observacao: student.observacao || null,
     status: 2,
     notaAnterior: student.notaFinalAnterior || 0,
-    codigo_grade_avaliacao_aluno:
-      student.codigo_grade_avaliacao_aluno || undefined,
+    codigo_grade_avaliacao_aluno: student.codigo_grade_avaliacao_aluno || undefined,
   });
 
-  // ─── Lançar individual → array com 1 posição ─────────────────────────────
+  // ─── Lançamento individual ────────────────────────────────────────────────
   const handleSaveIndividual = (student: any) => {
     if (student.nota === null || student.nota === undefined) {
       toast({
@@ -261,10 +402,7 @@ export default function LaunchNotes() {
       return;
     }
 
-    // Array com 1 posição — mesma rota do lançamento em massa
-    const payloads: NoteUpsertPayload[] = [buildPayloadItem(student)];
-
-    upsertNoteMutation.mutate(payloads as any, {
+    upsertNoteMutation.mutate([buildPayloadItem(student)] as any, {
       onSuccess: () => {
         toggleLock(student.codigo_grade_aluno);
         toast({
@@ -282,7 +420,7 @@ export default function LaunchNotes() {
     });
   };
 
-  // ─── Lançar todos → array com N posições ─────────────────────────────────
+  // ─── Lançamento em massa ──────────────────────────────────────────────────
   const handleSaveAllStudents = () => {
     const studentsWithNota = localStudents.filter(
       (s) =>
@@ -301,10 +439,7 @@ export default function LaunchNotes() {
       return;
     }
 
-    // Array com N posições — mesma rota do lançamento individual
-    const payloads: NoteUpsertPayload[] =
-      studentsWithNota.map(buildPayloadItem);
-
+    const payloads: NoteUpsertPayload[] = studentsWithNota.map(buildPayloadItem);
     setIsSavingAll(true);
 
     upsertNoteMutation.mutate(payloads as any, {
@@ -327,39 +462,26 @@ export default function LaunchNotes() {
     });
   };
 
-  // ─── Period / permission logic ────────────────────────────────────────────
-  const gradesPeriodStatus = useMemo(() => {
-    if (!formData.anoLetivo) return "NO_YEAR_SELECTED";
-    if (isLoadingGradesPrompt || isLoadingPromptPermissionLaunch)
-      return "LOADING";
-    if (!gradesPrompt) return "NOT_DEFINED";
-
-    const now = new Date();
-    const start = new Date(gradesPrompt.data_inicio);
-    const end = new Date(gradesPrompt.data_fim);
-
-    return now >= start && now <= end ? "ALLOWED" : "OUT_OF_PERIOD";
-  }, [
-    formData.anoLetivo,
-    gradesPrompt,
-    isLoadingGradesPrompt,
-    isLoadingPromptPermissionLaunch,
-  ]);
-
-  const hasSpecialPermission = teacherHasPermissionToLaunchNotes(
-    promptPermissionLaunch?.data?.[0],
-  );
-  const isGlobalPeriodActive = gradesPeriodStatus === "ALLOWED";
-  const shouldBlockGradesActions = !(
-    hasSpecialPermission || isGlobalPeriodActive
-  );
-
-  const showDeadline =
-    parseFilter(formData.anoLetivo) &&
-    parseFilter(formData.semestre) &&
-    parseFilter(formData.tipoAvaliacao) &&
-    parseFilter(formData.unidadeCurricular);
-
+  // ─── Edição de nota / observação ─────────────────────────────────────────
+  const handleNotaChange = (
+    id: number,
+    field: "nota" | "observacao",
+    value: string,
+  ) => {
+    let newValue: number | string | null = value === "" ? null : value;
+    if (field === "nota") {
+      const num = Number(value);
+      newValue = !isNaN(num) ? Math.max(0, Math.min(20, num)) : null;
+    }
+    setLocalStudents((prev) =>
+      prev.map((s) =>
+        s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s,
+      ),
+    );
+  };
+  const handleCursoChange = useCallback((v: string) => {
+    setFormData((prev) => ({ ...prev, curso: v }));
+  }, []); // ← sem dependências, estável para sempre
   // ─── PDF ──────────────────────────────────────────────────────────────────
   const pdfData = useMemo(() => {
     if (!localStudents.length) return null;
@@ -429,12 +551,7 @@ export default function LaunchNotes() {
       ]}
       mainTable={{
         headers: [
-          {
-            key: "matricula",
-            label: "Nº Matrícula",
-            width: "15%",
-            align: "center",
-          },
+          { key: "matricula", label: "Nº Matrícula", width: "15%", align: "center" },
           { key: "nome", label: "Nome do Estudante", width: "50%" },
           { key: "nota", label: "Nota (0-20)", width: "15%", align: "center" },
           { key: "observacao", label: "Observação", width: "20%" },
@@ -448,26 +565,7 @@ export default function LaunchNotes() {
     />
   ) : null;
 
-  const handleNotaChange = (
-    id: number,
-    field: "nota" | "observacao",
-    value: string,
-  ) => {
-    let newValue: number | string | null = value === "" ? null : value;
-
-    if (field === "nota") {
-      const num = Number(value);
-      newValue = !isNaN(num) ? Math.max(0, Math.min(20, num)) : null;
-    }
-
-    setLocalStudents((prev) =>
-      prev.map((s) =>
-        s.codigo_grade_aluno === id ? { ...s, [field]: newValue } : s,
-      ),
-    );
-  };
-
-  const totalPages = Math.ceil(localStudents.length / itemsPerPage);
+  // ─── Derivados para render ────────────────────────────────────────────────
   const hasNext = studentsResponse?.hasNextPage ?? false;
   const studentsWithValidNota = localStudents.filter(
     (s) =>
@@ -523,31 +621,19 @@ export default function LaunchNotes() {
             loading={isLoadingAcademicYear}
             label="Ano Letivo"
             value={formData.anoLetivo}
-            onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+            onChange={(v) => setFormData({ ...formData, anoLetivo: v, classes: "", unidadeCurricular: "", periodo: "", curso: "", semestre: "" })}
             options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
           />
 
           <FormSelect
-            disabled={
-              isLoadingPeriodos ||
-              isLoadingAcademicYear ||
-              formData.anoLetivo === ""
-            }
+            disabled={isLoadingPeriodos || isLoadingAcademicYear || formData.anoLetivo === ""}
             loading={isLoadingPeriodos}
             label="Período"
             value={formData.periodo}
             onChange={(v) => setFormData({ ...formData, periodo: v })}
             options={periodos}
-            map={(p) => ({
-              key: p.codigo,
-              label: p.designacao,
-              value: p.codigo,
-            })}
+            map={(p) => ({ key: p.codigo, label: p.designacao, value: p.codigo })}
           />
 
           <FormSelect
@@ -557,43 +643,34 @@ export default function LaunchNotes() {
             value={formData.semestre}
             onChange={(v) => setFormData({ ...formData, semestre: v })}
             options={semestres}
-            map={(s) => ({
-              key: s.codigo,
-              label: s.designacao,
-              value: s.codigo,
-            })}
+            map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
           />
 
-          <CourseSelect
+          <CourseSelectTestIsaac
             value={formData.curso}
-            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+            onChangeValue={handleCursoChange}
+            allowedIds={allowedIds}
+            cursos={cursos}
+            isLoading={loadingCursos}
           />
+
 
           <FormSelect
             label="Ano Curricular"
             value={formData.classes}
-            disabled={isLoadingClasses || !formData.curso}
+            disabled={isLoadingClasses || !formData.curso || !canOperateInPage}
             onChange={(v) => setFormData({ ...formData, classes: v })}
-            options={classes}
-            map={(c) => ({
-              key: c.codigo,
-              label: c.designacao,
-              value: c.codigo,
-            })}
+            options={filteredClasses}
+            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
             loading={isLoadingClasses}
           />
 
           <FormSelect
             label="Unidade Curricular"
             value={formData.unidadeCurricular}
-            disabled={
-              isLoadingUC ||
-              !formData.semestre ||
-              !formData.curso ||
-              !formData.classes
-            }
+            disabled={isLoadingUC || !formData.semestre || !formData.curso || !formData.classes || !canOperateInPage}
             onChange={(v) => setFormData({ ...formData, unidadeCurricular: v })}
-            options={unidadesCurriculares}
+            options={filteredUnidadesCurriculares}
             map={(u) => ({ key: u.codigo, label: u.descricao, value: u.pk })}
             loading={isLoadingUC}
           />
@@ -601,59 +678,43 @@ export default function LaunchNotes() {
           <FormSelectIsaac
             label="Horário"
             value={formData.horarioId}
-            disabled={
-              loadingschedule || !formData.semestre || !formData.classes
-            }
+            disabled={loadingschedule || !formData.semestre || !formData.classes || !canOperateInPage}
             onChange={(v) => setFormData({ ...formData, horarioId: v })}
             options={scheduleResponse?.data}
-            map={(u, index) => ({
-              key: index,
-              value: u.codigo,
-              label: `${u.designacao}`,
-            })}
+            map={(u, index) => ({ key: index, value: u.codigo, label: u.designacao })}
             loading={loadingschedule}
           />
 
           <FormSelect
             label="Tipo de Prova"
             value={formData.tipoProva}
-            disabled={isLoadingTipoProva}
+            disabled={isLoadingTipoProva || !canOperateInPage}
             onChange={(v) => setFormData({ ...formData, tipoProva: v })}
             options={tipoProva}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
+            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
             loading={isLoadingTipoProva}
           />
 
           <FormSelect
             label="Tipo de Avaliação"
             value={formData.tipoAvaliacao}
-            disabled={isLoadingTipoAvaliacao}
+            disabled={isLoadingTipoAvaliacao || !canOperateInPage}
             onChange={(v) => setFormData({ ...formData, tipoAvaliacao: v })}
             options={tipoAvaliacao}
-            map={(u) => ({
-              key: u.codigo,
-              label: u.designacao,
-              value: u.codigo,
-            })}
+            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
             loading={isLoadingTipoAvaliacao}
           />
 
           <div className="relative flex flex-col gap-1">
             <label className="text-sm font-medium">
-              Pesquisar por nome Ou Nº Matrícula
+              Pesquisar por nome ou Nº Matrícula
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Pesquisar por nome ou número de matrícula..."
                 value={formData.search}
-                onChange={(e) =>
-                  setFormData({ ...formData, search: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, search: e.target.value })}
                 className="pl-9"
               />
             </div>
@@ -672,7 +733,8 @@ export default function LaunchNotes() {
                 !formData.horarioId ||
                 !formData.tipoProva ||
                 !formData.tipoAvaliacao ||
-                shouldBlockGradesActions
+                shouldBlockGradesActions ||
+                !canOperateInPage
               }
               onClick={() => refetch({ cancelRefetch: false })}
             >
@@ -683,12 +745,21 @@ export default function LaunchNotes() {
         </div>
       </div>
 
+      {/* Banner de prazo — apenas para utilizadores sem privilégio */}
       {showDeadline && (
         <StatusBanner
           gradesPeriodStatus={gradesPeriodStatus}
           gradesPrompt={gradesPrompt}
           hasSpecialPermission={hasSpecialPermission}
         />
+      )}
+
+      {/* Banner informativo para utilizadores privilegiados */}
+      {isPrivilegedUser && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-purple-800 text-sm flex items-center gap-2">
+          <span className="h-2 w-2 bg-purple-500 rounded-full" />
+          Acesso privilegiado — lançamento de notas sem restrição de prazo.
+        </div>
       )}
 
       {/* Tabela */}
@@ -698,71 +769,102 @@ export default function LaunchNotes() {
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
+      ) : !canOperateInPage ? (
+
+        <div className="text-center py-12 bg-card border rounded-lg">
+          <div className="flex flex-col items-center gap-3">
+
+            <div>
+              <div className="flex justify-center items-center">
+                <Lottie
+                  animationData={BlockDocument}
+                  loop={true}
+                  style={{ width: 300, height: 300 }}
+                />
+              </div>
+
+              <p className="text-sm text-muted-foreground mt-1">
+                Você não tem permissão para lançar notas.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      ) : shouldBlockGradesActions ? (
+        <div className="text-center py-12 bg-card border rounded-lg">
+          <div className="flex flex-col items-center gap-3">
+
+            <div>
+              <div className="flex justify-center items-center">
+                <Lottie
+                  animationData={BlockDocument}
+                  loop={true}
+                  style={{ width: 300, height: 300 }}
+                />
+              </div>
+
+              <p className="text-sm text-muted-foreground mt-1">
+                {isLoadinAdditionalInformation ? "Carregando informações adicionais..." : "O lançamento de notas está bloqueado. Aplique as devidas correções para habilitar o lançamento de notas."}
+              </p>
+            </div>
+          </div>
+        </div>
       ) : localStudents.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
-          <p className="text-muted-foreground mb-4">
-            Nenhum registo encontrado
-          </p>
+          <p className="text-muted-foreground mb-4">Nenhum registo encontrado</p>
           <p className="text-sm text-muted-foreground">
             Clique em "Listar" após selecionar os filtros
           </p>
         </div>
       ) : (
         <>
-          {/* ── Barra de ações em massa ──────────────────────────────────── */}
+          {/* Barra de ações em massa */}
           <div className="flex items-center justify-between flex-wrap gap-3 bg-muted/40 border rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                    👥
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">
-                      {statisticResponse?.total_estudantes ?? 0}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Total de alunos
-                    </p>
-                  </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                  👥
                 </div>
-
-                <div className="h-9 w-px bg-border" />
-
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                    ✓
-                  </div>
-                  <div>
-                    <p className="font-semibold text-emerald-600">
-                      {statisticResponse?.total_com_nota ?? 0}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Com nota</p>
-                  </div>
+                <div>
+                  <p className="font-semibold text-foreground">
+                    {statisticResponse?.total_estudantes ?? 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Total de alunos</p>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
-                    ⚠
-                  </div>
-                  <div>
-                    <p className="font-semibold text-amber-600">
-                      {statisticResponse?.total_sem_nota ?? 0}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Sem nota</p>
-                  </div>
+              <div className="h-9 w-px bg-border" />
+
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+                  ✓
+                </div>
+                <div>
+                  <p className="font-semibold text-emerald-600">
+                    {statisticResponse?.total_com_nota ?? 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Com nota</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
+                  ⚠
+                </div>
+                <div>
+                  <p className="font-semibold text-amber-600">
+                    {statisticResponse?.total_sem_nota ?? 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Sem nota</p>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Toggle abrir / fechar todos os cadeados */}
               <Button
                 variant="outline"
                 size="sm"
-                disabled={
-                  shouldBlockGradesActions || isRefetching || isSavingAll
-                }
+                disabled={shouldBlockGradesActions || isRefetching || isSavingAll}
                 onClick={allUnlocked ? handleLockAll : handleUnlockAll}
               >
                 {allUnlocked ? (
@@ -778,7 +880,6 @@ export default function LaunchNotes() {
                 )}
               </Button>
 
-              {/* Lançar todos em massa — array com N posições, rota única */}
               <Button
                 size="sm"
                 disabled={
@@ -791,8 +892,8 @@ export default function LaunchNotes() {
               >
                 {isSavingAll ? (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />A
-                    lançar...
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    A lançar...
                   </>
                 ) : (
                   <>
@@ -804,7 +905,7 @@ export default function LaunchNotes() {
             </div>
           </div>
 
-          {/* ── Tabela ──────────────────────────────────────────────────── */}
+
           <div className="bg-card border rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <Table>
@@ -812,18 +913,10 @@ export default function LaunchNotes() {
                   <TableRow>
                     <TableHead className="w-[120px]">Nº Matrícula</TableHead>
                     <TableHead>Nome do Estudante</TableHead>
-                    <TableHead className="w-[600px] text-center">
-                      Descrição
-                    </TableHead>
-                    <TableHead className="w-[140px] text-center">
-                      Nota (0-20)
-                    </TableHead>
-                    <TableHead className="w-[140px] text-center">
-                      Estado
-                    </TableHead>
-                    <TableHead className="w-[120px] text-center">
-                      Ação
-                    </TableHead>
+                    <TableHead className="w-[600px] text-center">Descrição</TableHead>
+                    <TableHead className="w-[140px] text-center">Nota (0-20)</TableHead>
+                    <TableHead className="w-[140px] text-center">Estado</TableHead>
+                    <TableHead className="w-[120px] text-center">Ação</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -834,8 +927,7 @@ export default function LaunchNotes() {
                       hasNota &&
                       Number(student.nota) >= 0 &&
                       Number(student.nota) <= 20;
-                    const isLocked =
-                      lockedStudents[student.codigo_grade_aluno] ?? true;
+                    const isLocked = lockedStudents[student.codigo_grade_aluno] ?? true;
 
                     return (
                       <TableRow key={student.codigo_grade_aluno}>
@@ -897,18 +989,13 @@ export default function LaunchNotes() {
                         </TableCell>
 
                         <TableCell className="text-center flex justify-center gap-2">
-                          {/* Cadeado individual */}
                           <Button
                             size="sm"
                             variant="ghost"
                             disabled={
-                              shouldBlockGradesActions ||
-                              isRefetching ||
-                              isSavingAll
+                              shouldBlockGradesActions || isRefetching || isSavingAll
                             }
-                            onClick={() =>
-                              toggleLock(student.codigo_grade_aluno)
-                            }
+                            onClick={() => toggleLock(student.codigo_grade_aluno)}
                           >
                             {isLocked ? (
                               <Lock className="w-4 h-4" />
@@ -917,14 +1004,11 @@ export default function LaunchNotes() {
                             )}
                           </Button>
 
-                          {/* Lançar individual → array[1], mesma rota */}
                           <Button
                             size="sm"
                             variant={hasNota ? "default" : "outline"}
                             disabled={
-                              shouldBlockGradesActions ||
-                              isRefetching ||
-                              isSavingAll
+                              shouldBlockGradesActions || isRefetching || isSavingAll
                             }
                             onClick={() => handleSaveIndividual(student)}
                           >
@@ -940,7 +1024,7 @@ export default function LaunchNotes() {
             </div>
           </div>
 
-          {/* ── Paginação ────────────────────────────────────────────────── */}
+          {/* Paginação */}
           <PaginationComponent
             hasNext={hasNext}
             limit={limit}
@@ -958,13 +1042,15 @@ export default function LaunchNotes() {
 
 function teacherHasPermissionToLaunchNotes(
   promptPermissionLaunch: GetAssessmentNotasItem | null | undefined,
-) {
+): boolean {
   if (!promptPermissionLaunch) return false;
   const now = new Date();
   const start = new Date(promptPermissionLaunch.DATAINICIAL);
   const end = new Date(promptPermissionLaunch.DATAFIM);
   return now >= start && now <= end;
 }
+
+// ─── StatusBanner ─────────────────────────────────────────────────────────────
 
 interface StatusBannerProps {
   gradesPeriodStatus: string;
@@ -1005,9 +1091,8 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${
-        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
-      }. Contacte a administração.`,
+      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+        }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",
@@ -1036,13 +1121,9 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
   if (!config) return null;
 
   return (
-    <div
-      className={`${config.className} rounded-lg p-4 transition-all duration-300`}
-    >
+    <div className={`${config.className} rounded-lg p-4 transition-all duration-300`}>
       {config.title && <p className="font-semibold mb-1">{config.title}</p>}
-      <div className={config.title ? "text-sm opacity-90" : ""}>
-        {config.content}
-      </div>
+      <div className={config.title ? "text-sm opacity-90" : ""}>{config.content}</div>
     </div>
   );
 };

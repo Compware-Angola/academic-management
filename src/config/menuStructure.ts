@@ -150,6 +150,11 @@ export const ingressoStructure: MenuStructure = {
           permission: [PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla],
         },
         {
+          title: "Lançar nota manual",
+          url: "/exame/lancar-nota-manual",
+          permission: [PermissionTypeDetails.LANCAR_NOTA_ARQUITECTURA.sigla],
+        },
+        {
           title: "Lista de candidatos",
           url: "/exame/lista-candidatos",
           permission: [PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla],
@@ -214,6 +219,11 @@ export const ingressoStructure: MenuStructure = {
           title: "Listagem Provas",
           url: "/exame/provas",
           permission: [PermissionTypeDetails.PROVA.sigla],
+        },
+        {
+          title: "Configurar vaga",
+          url: "/exame/configurar-vaga",
+          permission: [PermissionTypeDetails.DEFINIR_VAGAS_POR_CURSO.sigla],
         },
       ],
 
@@ -1005,7 +1015,12 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Caixas",
           url: "/financas/caixas",
-          permission: [PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla],
+          permission: [PermissionTypeDetails.FECHO_CAIXA_GERAL.sigla],
+        },
+        {
+          title: "Meu Caixa",
+          url: "/financas/caixas/meu-caixa",
+          permission: [PermissionTypeDetails.FECHO_CAIXA_POR_UTILIZADOR.sigla],
         },
       ],
 

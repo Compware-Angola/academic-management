@@ -24,3 +24,23 @@ export const formatDisplayPt = (dateString: string): string => {
     year: "numeric",
   });
 };
+
+
+export function formatDateTimePt(value?: string | null) {
+  if (!value) return "Sem data";
+
+  return new Date(value).toLocaleString("pt-PT", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export const formatTimeFromDate = (dateTime: string | null) => {
+  if (!dateTime) return "---";
+  const date = new Date(dateTime);
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};
+

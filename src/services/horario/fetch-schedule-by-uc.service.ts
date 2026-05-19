@@ -8,6 +8,7 @@ export type GetSchedulesByUcPayload = {
   periodo: number;         // ex: 5
   curso: number;           // ex: 18
   unidadeCurricular: number; // ex: 6
+  docente?: number;
   page?: number;
   limit?: number;
 };
@@ -52,6 +53,7 @@ export async function getSchedulesByUcService(
     periodo,
     curso,
     unidadeCurricular,
+    docente,
     page = 1,
     limit = 25,
   } = payload;
@@ -65,6 +67,7 @@ export async function getSchedulesByUcService(
         periodo,
         curso,
         unidadeCurricular: unidadeCurricular,
+        docente,
         page,
         limit,
       },

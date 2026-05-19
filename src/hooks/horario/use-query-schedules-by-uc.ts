@@ -14,6 +14,7 @@ export const useQuerySchedulesByUc = (
     periodo,
     curso,
     unidadeCurricular,
+    docente,
     page = 1,
     limit = 25,
   } = filters;
@@ -23,15 +24,15 @@ export const useQuerySchedulesByUc = (
     typeof options?.enabled === "boolean"
       ? options.enabled
       : !!anoLectivo &&
-        !!semestre &&
-        !!periodo &&
-        !!curso &&
-        !!unidadeCurricular;
+      !!semestre &&
+      !!periodo &&
+      !!curso &&
+      !!unidadeCurricular;
 
   return useQuery<GetSchedulesByUcResponse>({
     queryKey: [
       "schedules-by-uc",
-      { anoLectivo, semestre, periodo, curso, unidadeCurricular, page, limit },
+      { anoLectivo, semestre, periodo, curso, unidadeCurricular, docente, page, limit },
     ],
     queryFn: () => getSchedulesByUcService(filters),
     enabled,

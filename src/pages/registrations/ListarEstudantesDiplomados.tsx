@@ -30,10 +30,12 @@ import { useQuerySexo } from "@/hooks/acess/use-query-sexo";
 import { useQueryEstudantesDiplomados } from "@/hooks/students/use-query-estudantes-diplomados";
 import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { Input } from "@/components/ui/input";
 
 type GeneroDiplomado = "todos" | "Masculino" | "Feminino";
 
 export function ListaEstudantesDiplomados() {
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -73,7 +75,8 @@ export function ListaEstudantesDiplomados() {
       genero: appliedFilters?.genero ?? "todos",
       tipoCandidatura: Number(appliedFilters?.tipoCandidatura || 0),
       page,
-      limit
+      limit,
+      search
     },
     !!appliedFilters?.anoLectivo,
   );
@@ -263,6 +266,25 @@ export function ListaEstudantesDiplomados() {
               Listar
             </Button>
           </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                          <div className="space-y-2 md:col-span-2">
+                            <label className="text-sm font-medium">Pesquisar</label>
+                            <div className="relative">
+                              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                          placeholder="Pesquisar por nome, matrícula, BI ou curso..."
+                          value={search}
+                          onChange={(e) => {
+                            setPage(1);
+                            setSearch(e.target.value);
+                          }}
+                          className="max-w-sm"
+                        />
+                            </div>
+                          </div>
+                        </div>
+
         </CardContent>
       </Card>
 
@@ -285,6 +307,7 @@ export function ListaEstudantesDiplomados() {
             </div>
           ) : (
             <div className="rounded-md border overflow-hidden">
+              
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -294,6 +317,7 @@ export function ListaEstudantesDiplomados() {
                     <TableHead>Data nascimento</TableHead>
                     <TableHead>Curso</TableHead>
                     <TableHead>Tipo candidatura</TableHead>
+                    <TableHead>Tipo Aluno</TableHead>
                     <TableHead>Data matrícula</TableHead>
                     <TableHead>Data conclusão</TableHead>
                     <TableHead>Género</TableHead>
@@ -313,6 +337,7 @@ export function ListaEstudantesDiplomados() {
                       </TableCell>
                       <TableCell>{estudante.curso}</TableCell>
                       <TableCell>{estudante.tipo_candidatura}</TableCell>
+                      <TableCell>{estudante.tipo_aluno}</TableCell>
                       <TableCell>{formatDate(estudante.data_matricula)}</TableCell>
                       <TableCell>{formatDate(estudante.data_conclusao)}</TableCell>
                       <TableCell>{estudante.genero}</TableCell>

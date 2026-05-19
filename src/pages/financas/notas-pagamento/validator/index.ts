@@ -1,9 +1,12 @@
 import { z } from "zod";
+export const FORMA_PAGAMENTO = {
+  CASH: "6",
+  TPA: "1",
+} as const;
 export const optionalStringSchema = (fieldName: string) =>
   z.preprocess(
     (value) => {
-      if (value === "") return undefined;
-      if (value === null) return undefined;
+      if (value === "" || value === null) return undefined;
       return value;
     },
     z
@@ -12,133 +15,134 @@ export const optionalStringSchema = (fieldName: string) =>
       })
       .optional(),
   );
+
+function isTipoBancario(formaPagamento?: string) {
+  if (!formaPagamento) return false;
+
+  return formaPagamento === FORMA_PAGAMENTO.TPA;
+}
+
 export function validarPagamento(
   formData: any,
   valorAPagar: number,
   valorTotal: number,
 ) {
-  const pagamentoSchema = z.object({
-    nOperacaoBancaria: optionalStringSchema("Número de operação bancária"),
+  const pagamentoSchema = z
+    .object({
+      nOperacaoBancaria: optionalStringSchema("Número de operação bancária"),
 
-    observacao: z
-      .string({ invalid_type_error: "Observação deve ser texto" })
-      .default("Pagamento via Mutue Finanças"),
+      observacao: z
+        .string({
+          invalid_type_error: "Observação deve ser texto",
+        })
+        .default("Pagamento via Mutue Finanças"),
 
-    dataBanco: optionalStringSchema("Data do banco"),
+      dataBanco: optionalStringSchema("Data do banco"),
 
-    codigoPreInscricao: z
-      .number({
-        required_error: "Código da pré-inscrição é obrigatório",
-        invalid_type_error: "Código da pré-inscrição deve ser um número",
-      })
-      .int("Código da pré-inscrição deve ser um número inteiro"),
+      codigoPreInscricao: z
+        .number({
+          required_error: "Código da pré-inscrição é obrigatório",
+          invalid_type_error: "Código da pré-inscrição deve ser um número",
+        })
+        .int(),
 
-    formaPagamento: z
-      .string({
-        required_error: "Forma de pagamento é obrigatória",
-        invalid_type_error: "Forma de pagamento deve ser texto",
-      })
-      .nonempty("Forma de pagamento não pode estar vazia"),
+      formaPagamento: z
+        .string({
+          required_error: "Forma de pagamento é obrigatória",
+        })
+        .nonempty("Forma de pagamento é obrigatória"),
 
-    valorDepositado: z
-      .number({
-        required_error: "Valor depositado é obrigatório",
-        invalid_type_error: "Valor depositado deve ser numérico",
-      })
-      .refine((val) => val >= valorAPagar, {
-        message: `O valor depositado não pode ser menor que o valor a pagar (${valorAPagar})`,
-      }),
+      valorDepositado: z
+        .number({
+          required_error: "Valor depositado é obrigatório",
+          invalid_type_error: "Valor depositado deve ser numérico",
+        })
+        .refine((val) => val >= valorAPagar, {
+          message: `O valor depositado não pode ser menor que o valor a pagar (${valorAPagar})`,
+        }),
 
-    dataRegisto: z
-      .string({
-        required_error: "Data de registo é obrigatória",
-        invalid_type_error: "Data de registo deve ser texto",
-      })
-      .nonempty("Data de registo não pode estar vazia"),
+      dataRegisto: z
+        .string({
+          required_error: "Data de registo é obrigatória",
+        })
+        .nonempty("Data de registo é obrigatória"),
 
-    canal: z
-      .number({
-        required_error: "Canal é obrigatório",
-        invalid_type_error: "Canal deve ser um número",
-      })
-      .int("Canal deve ser um número inteiro"),
+      canal: z.number().int(),
 
-    estado: z
-      .number({
-        required_error: "Estado é obrigatório",
-        invalid_type_error: "Estado deve ser texto",
-      })
-      .int("Estado deve ser inteiro"),
+      estado: z.number().int(),
 
-    tipoPagamento: z
-      .string({
-        required_error: "Tipo de pagamento é obrigatório",
-        invalid_type_error: "Tipo de pagamento deve ser texto",
-      })
-      .nonempty("Tipo de pagamento não pode estar vazio"),
+      tipoPagamento: z
+        .string({
+          required_error: "Tipo de pagamento é obrigatório",
+        })
+        .nonempty("Tipo de pagamento é obrigatório"),
 
-    codigoFactura: z
-      .number({
-        required_error: "Código da fatura é obrigatório",
-        invalid_type_error: "Código da fatura deve ser numérico",
-      })
-      .int("Código da fatura deve ser um número inteiro"),
+      codigoFactura: z.number().int(),
 
-    instituicaoId: z
-      .number({
-        required_error: "Instituição é obrigatória",
-        invalid_type_error: "Instituição deve ser numérico",
-      })
-      .int("Instituição deve ser um número inteiro"),
+      instituicaoId: z.number().int(),
 
-    caixaId: z
-      .number({
-        required_error: "Caixa é obrigatório",
-        invalid_type_error: "Caixa deve ser numérico",
-      })
-      .int("Caixa deve ser um número inteiro"),
+      caixaId: z.number().int(),
 
-    dataOperacao: optionalStringSchema("Data da operação"),
+      dataOperacao: optionalStringSchema("Data da operação"),
 
-    statusMovimento: z
-      .number({
-        required_error: "Status do movimento é obrigatório",
-        invalid_type_error: "Status do movimento deve ser numérico",
-      })
-      .int("Status do movimento deve ser um número inteiro"),
+      statusMovimento: z.number().int(),
 
-    infoAdicional: z
-      .string({ invalid_type_error: "Informações adicionais devem ser texto" })
-      .optional(),
+      infoAdicional: z.string().optional(),
 
-    corrente: z
-      .number({
-        required_error: "Corrente é obrigatória",
-        invalid_type_error: "Corrente deve ser numérico",
-      })
-      .int("Corrente deve ser um número inteiro"),
+      corrente: z.number().int(),
 
-    anoLectivo: z
-      .number({
-        required_error: "Ano Lectivo é obrigatória",
-        invalid_type_error: "Ano Lectivo deve ser numérico",
-      })
-      .int("Corrente deve ser um número inteiro"),
+      anoLectivo: z.number().int(),
 
-    feitoComReserva: z.enum(["S", "N"], {
-      invalid_type_error: "Feito com reserva deve ser 'S' ou 'N'",
-    }),
-  });
-  console.log(formData);
+      feitoComReserva: z.enum(["S", "N"]),
+    })
+
+    // ✅ VALIDAÇÃO CONDICIONAL
+    .superRefine((data, ctx) => {
+      const pagamentoBancario = isTipoBancario(data.formaPagamento);
+
+      if (pagamentoBancario) {
+        if (!data.nOperacaoBancaria) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["nOperacaoBancaria"],
+            message: "Número da operação bancária é obrigatório",
+          });
+        }
+
+        if (!data.dataBanco) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["dataBanco"],
+            message: "Data do banco é obrigatória",
+          });
+        }
+
+        if (!data.dataOperacao) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["dataOperacao"],
+            message: "Data da operação é obrigatória",
+          });
+        }
+      }
+    });
+
   try {
     const validatedData = pagamentoSchema.parse(formData);
 
-    return { valid: true, data: validatedData };
+    return {
+      valid: true,
+      data: validatedData,
+    };
   } catch (err) {
     if (err instanceof z.ZodError) {
-      const mensagemErro = err.errors.map((e) => e.message).join(", ");
-      return { valid: false, errors: err.errors, message: mensagemErro };
+      return {
+        valid: false,
+        errors: err.errors,
+        message: err.errors.map((e) => e.message).join(", "),
+      };
     }
+
     return {
       valid: false,
       errors: [{ message: "Erro desconhecido" }],
