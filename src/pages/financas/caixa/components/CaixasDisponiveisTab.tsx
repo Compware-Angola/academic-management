@@ -8,6 +8,8 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
+  Check,
+  Copy,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -153,12 +155,15 @@ export function CaixasDisponiveisTab() {
                                 ? item.opening_code
                                 : "••••••"}
                             </Badge>
+
                             <button
                               className="text-xs text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                               onClick={() => toggleOpeningCode(item.code)}
                             >
                               {visibleCodes[item.code] ? "Ocultar" : "Ver"}
                             </button>
+
+                            <CopyButton text={item.opening_code} />
                           </div>
                         )}
                       </TableCell>
@@ -306,5 +311,47 @@ export function CaixasDisponiveisTab() {
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback para browsers antigos
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.style.position = "fixed";
+      el.style.opacity = "0";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleCopy}
+      title={copied ? "Copiado!" : "Copiar código"}
+      className={`transition-colors ${
+        copied
+          ? "text-emerald-600 dark:text-emerald-400"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {copied ? (
+        <Check className="h-3.5 w-3.5" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
+    </button>
   );
 }

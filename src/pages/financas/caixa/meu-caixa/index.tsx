@@ -69,10 +69,11 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <Badge
       variant="outline"
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${isOpen
-        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-        }`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${
+        isOpen
+          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+      }`}
     >
       {isOpen ? <LockOpen className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
       {isOpen ? "Aberto" : "Fechado"}
@@ -119,6 +120,7 @@ function SummarySkeleton() {
 }
 
 function MeuCaixaAtualTab() {
+  const { data: user } = useCurrentUser("GA");
   const { reset } = useCashRegisterOpeningCodeVerification();
   const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
     useCashRegisterOpeningCodeVerification();
@@ -142,7 +144,7 @@ function MeuCaixaAtualTab() {
           openingAmount: response.openingAmount,
           openedAt: formatDate(response.dateAt),
           total: response.totalCollectedAmount,
-          operator: "",
+          operator: user?.user.nome,
           summary: [
             { paymentMethod: "TPA", total: response.collectedTpaAmount },
             { paymentMethod: "Cash", total: response.collectedPaymentAmount },
@@ -153,6 +155,7 @@ function MeuCaixaAtualTab() {
 
     const url = URL.createObjectURL(blob);
     window.open(url);
+
     reset();
     setConfirmClose(false);
   }
@@ -258,7 +261,7 @@ function MeuCaixaAtualTab() {
                     <TableCell className="text-right tabular-nums font-mono">
                       {formatCurrencyAOA(
                         data.summary.reduce((acc, i) => acc + i.total, 0) +
-                        data.openingAmount,
+                          data.openingAmount,
                       )}
                     </TableCell>
                   </TableRow>
@@ -279,7 +282,13 @@ function MeuCaixaAtualTab() {
           </Button>
         </div>
 
-        <AlertDialog open={confirmClose} onOpenChange={setConfirmClose}>
+        <AlertDialog
+          open={confirmClose}
+          onOpenChange={(open) => {
+            if (closeMutation.isPending) return;
+            setConfirmClose(open);
+          }}
+        >
           <AlertDialogContent className="sm:max-w-sm">
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
@@ -299,7 +308,10 @@ function MeuCaixaAtualTab() {
                 Cancelar
               </AlertDialogCancel>
               <AlertDialogAction
-                onClick={handleClose}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleClose();
+                }}
                 disabled={closeMutation.isPending}
                 className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
@@ -344,7 +356,7 @@ function MeuCaixaAtualTab() {
 }
 
 function MeusMovimentosTab() {
-  const { data: currentUser } = useCurrentUser("GA")
+  const { data: currentUser } = useCurrentUser("GA");
   if (!currentUser) {
     return (
       <Card className="border-dashed">

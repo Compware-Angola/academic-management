@@ -7,12 +7,19 @@ import {
   View,
 } from "@react-pdf/renderer";
 
-import { format } from "date-fns";
-import { pt } from "date-fns/locale";
-
 import { formatCurrencyAOA } from "@/util/format-currency";
-
 import { CashClosingPDFData } from "./CashClosingPDFData";
+
+// ──────────────────────────────────────────────
+// Utilitário nativo
+function formatDateNative(date: Date): string {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm}/${yyyy} às ${hh}:${min}`;
+}
 
 // ──────────────────────────────────────────────
 // Header
@@ -39,246 +46,234 @@ export const defaultCashClosingHeader: CashClosingHeader = {
 };
 
 // ──────────────────────────────────────────────
-// Styles
 const S = StyleSheet.create({
   page: {
     fontFamily: "Helvetica",
     fontSize: 10,
     backgroundColor: "#fff",
     paddingTop: 36,
-    paddingBottom: 60,
+    paddingBottom: 72,
     paddingHorizontal: 45,
     color: "#111827",
   },
+
+  // ─── Topo ───
   topBlock: {
     alignItems: "flex-end",
-    marginBottom: 14,
+    marginBottom: 10,
   },
   logo: {
     width: 90,
     height: 52,
     marginBottom: 4,
   },
-
-  // ─────────────────────────────
-  // Header
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    borderBottomWidth: 2,
-    paddingBottom: 14,
-    marginBottom: 24,
-  },
-
-  headerRight: {
-    alignItems: "flex-end",
-    maxWidth: 320,
-  },
-
   orgName: {
     fontSize: 13,
     fontFamily: "Helvetica-Bold",
     textAlign: "right",
   },
-
   decree: {
-    fontSize: 8.5,
+    fontSize: 8,
     marginTop: 2,
-    color: "#4B5563",
+    color: "#6B7280",
     textAlign: "right",
   },
-
-  orgLine: {
-    fontSize: 8.5,
-    marginTop: 2,
-    color: "#374151",
-    textAlign: "right",
+  dividerLine: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#0D1B48",
+    marginBottom: 18,
   },
 
-  // ─────────────────────────────
-  // Title
+  // ─── Título ───
   titleBlock: {
     alignItems: "center",
     marginBottom: 22,
   },
-
   title: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Helvetica-Bold",
     textTransform: "uppercase",
-    letterSpacing: 1,
+    letterSpacing: 1.2,
   },
-
   subTitle: {
-    marginTop: 5,
-    fontSize: 10,
-    color: "#4B5563",
+    marginTop: 4,
+    fontSize: 9.5,
+    color: "#6B7280",
   },
 
-  // ─────────────────────────────
-  // Info card
+  // ─── Info Card ───
   infoCard: {
     borderWidth: 1,
     borderColor: "#D1D5DB",
     borderRadius: 4,
     overflow: "hidden",
-    marginBottom: 24,
+    marginBottom: 20,
   },
-
-  infoHeader: {
-    padding: 8,
-    backgroundColor: "#0D1B48",
+  infoCardHeader: {
+    padding: "7 12",
   },
-
-  infoHeaderText: {
+  infoCardHeaderText: {
     color: "#fff",
     fontFamily: "Helvetica-Bold",
-    fontSize: 10,
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-
-  infoBody: {
-    padding: 12,
+  infoCardBody: {
+    padding: "10 14",
   },
-
-  row: {
+  infoLine: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
   },
-
+  infoLineLast: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 5,
+  },
   label: {
     fontFamily: "Helvetica-Bold",
-    color: "#111827",
+    color: "#6B7280",
+    fontSize: 9,
   },
-
   value: {
-    color: "#374151",
+    color: "#111827",
+    fontSize: 9,
   },
 
-  // ─────────────────────────────
-  // Table
+  // ─── Tabela ───
   tableContainer: {
     borderWidth: 1,
     borderColor: "#CBD5E1",
-    marginBottom: 20,
+    borderRadius: 4,
+    overflow: "hidden",
+    marginBottom: 32,
   },
-
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#0D1B48",
   },
-
   tableHeaderCell: {
-    padding: 8,
+    padding: "8 10",
     color: "#fff",
     fontSize: 9.5,
     fontFamily: "Helvetica-Bold",
     borderRightWidth: 1,
-    borderRightColor: "#1E3A8A",
+    borderRightColor: "rgba(255,255,255,0.2)",
   },
-
   tableRow: {
     flexDirection: "row",
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
   },
-
   tableRowAlt: {
     flexDirection: "row",
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#F9FAFB",
   },
-
   cell: {
-    padding: 8,
+    padding: "8 10",
     fontSize: 9.5,
     borderRightWidth: 1,
     borderRightColor: "#E5E7EB",
   },
-
   cellRight: {
-    padding: 8,
+    padding: "8 10",
     fontSize: 9.5,
     textAlign: "right",
   },
-
   totalRow: {
     flexDirection: "row",
-    backgroundColor: "#E0E7FF",
     borderTopWidth: 1.5,
     borderTopColor: "#0D1B48",
+    backgroundColor: "#EEF2FF",
   },
-
   totalLabel: {
-    padding: 9,
+    padding: "9 10",
     fontSize: 10,
     fontFamily: "Helvetica-Bold",
     color: "#0D1B48",
   },
-
   totalValue: {
-    padding: 9,
+    padding: "9 10",
     fontSize: 10,
     fontFamily: "Helvetica-Bold",
     textAlign: "right",
     color: "#0D1B48",
   },
 
-  // ─────────────────────────────
-  // Signature
+  // ─── Assinatura ───
   signatureSection: {
-    marginTop: 28,
+    marginTop: 8,
     alignItems: "center",
   },
-
-  signatureText: {
-    marginBottom: 40,
-    fontSize: 10,
+  signatureLabel: {
+    fontSize: 8.5,
+    color: "#6B7280",
+    marginBottom: 36,
   },
-
   signatureLine: {
-    width: 180,
+    width: 200,
     borderTopWidth: 1,
-    borderTopColor: "#111827",
-    marginBottom: 4,
+    borderTopColor: "#374151",
+    marginBottom: 6,
   },
-
+  signatureRole: {
+    fontSize: 8,
+    color: "#6B7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+    marginBottom: 3,
+  },
   signatureName: {
     fontSize: 10,
+    fontFamily: "Helvetica-Bold",
+    textAlign: "center",
+    color: "#111827",
+  },
+
+  // ─── Nota ───
+  docNote: {
+    position: "absolute",
+    bottom: 44,
+    left: 45,
+    right: 45,
+    padding: "7 12",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 3,
+    borderLeftWidth: 3,
+    borderLeftColor: "#D1D5DB",
+  },
+  docNoteText: {
+    fontSize: 7.5,
+    color: "#9CA3AF",
     textAlign: "center",
   },
 
-  // ─────────────────────────────
-  // Footer
+  // ─── Footer ───
   footer: {
     position: "absolute",
-    bottom: 24,
+    bottom: 20,
     left: 45,
     right: 45,
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 0.5,
-    borderTopColor: "#D1D5DB",
-    paddingTop: 6,
+    borderTopColor: "#E5E7EB",
+    paddingTop: 5,
   },
-
   footerText: {
-    fontSize: 8,
-    color: "#6B7280",
+    fontSize: 7.5,
+    color: "#9CA3AF",
   },
 });
 
-// ──────────────────────────────────────────────
-// Widths
-const W = {
-  method: "70%",
-  total: "30%",
-};
+const W = { method: "70%", total: "30%" };
 
 // ──────────────────────────────────────────────
-// PDF
 export function CashClosingPDF({
   header = defaultCashClosingHeader,
   data,
@@ -291,167 +286,121 @@ export function CashClosingPDF({
   return (
     <Document>
       <Page size="A4" style={S.page}>
-        {/* ───────────────── HEADER ───────────────── */}
-        {/* ── TOPO: logo à direita ── */}
+        {/* ───── LOGO + NOME ───── */}
         <View style={S.topBlock}>
           <Image style={S.logo} src={header.logoSrc} />
           <Text style={S.orgName}>{header.name}</Text>
           {header.decree && <Text style={S.decree}>{header.decree}</Text>}
         </View>
 
-        {/* ───────────────── TITLE ───────────────── */}
+        <View style={S.dividerLine} />
+
+        {/* ───── TÍTULO ───── */}
         <View style={S.titleBlock}>
-          <Text
-            style={{
-              ...S.title,
-              color,
-            }}
-          >
+          <Text style={[S.title, { color }]}>
             Relatório de Fechamento de Caixa
           </Text>
-
           <Text style={S.subTitle}>Movimento #{data.movementId}</Text>
         </View>
 
-        {/* ───────────────── INFO ───────────────── */}
+        {/* ───── INFO DO OPERADOR ───── */}
         <View style={S.infoCard}>
-          <View
-            style={{
-              ...S.infoHeader,
-              backgroundColor: color,
-            }}
-          >
-            <Text style={S.infoHeaderText}>Informações do Caixa</Text>
+          <View style={[S.infoCardHeader, { backgroundColor: color }]}>
+            <Text style={S.infoCardHeaderText}>Informações do Movimento</Text>
           </View>
-
-          <View style={S.infoBody}>
-            <View style={S.row}>
-              <Text style={S.label}>Caixa</Text>
-              <Text style={S.value}>{data.cashRegisterName}</Text>
-            </View>
-
-            <View style={S.row}>
+          <View style={S.infoCardBody}>
+            <View style={S.infoLine}>
               <Text style={S.label}>Operador</Text>
               <Text style={S.value}>{data.operator}</Text>
             </View>
 
-            <View style={S.row}>
-              <Text style={S.label}>Abertura</Text>
+            <View style={S.infoLine}>
+              <Text style={S.label}>Caixa</Text>
+              <Text style={S.value}>{data.cashRegisterName}</Text>
+            </View>
+
+            <View style={S.infoLine}>
+              <Text style={S.label}>Data de Abertura</Text>
               <Text style={S.value}>{data.openedAt}</Text>
             </View>
 
-            <View style={S.row}>
-              <Text style={S.label}>Fechamento</Text>
+            <View style={S.infoLine}>
+              <Text style={S.label}>Data de Fechamento</Text>
               <Text style={S.value}>{data.closedAt}</Text>
             </View>
 
-            <View style={S.row}>
-              <Text style={S.label}>Valor abertura</Text>
-              <Text style={S.value}>
+            <View style={S.infoLineLast}>
+              <Text style={S.label}>Valor de Abertura</Text>
+              <Text style={[S.value, { fontFamily: "Helvetica-Bold" }]}>
                 {formatCurrencyAOA(data.openingAmount)}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* ───────────────── TABLE ───────────────── */}
+        {/* ───── TABELA ───── */}
         <View style={S.tableContainer}>
-          <View style={S.tableHeader}>
+          <View style={[S.tableHeader, { backgroundColor: color }]}>
             <Text style={[S.tableHeaderCell, { width: W.method }]}>
-              Forma de pagamento
+              Forma de Pagamento
             </Text>
-
             <Text
               style={[
                 S.tableHeaderCell,
-                {
-                  width: W.total,
-                  borderRightWidth: 0,
-                  textAlign: "right",
-                },
+                { width: W.total, borderRightWidth: 0, textAlign: "right" },
               ]}
             >
               Total
             </Text>
           </View>
 
-          {data.summary.map((item, index) => {
-            const rowStyle = index % 2 === 0 ? S.tableRow : S.tableRowAlt;
-
-            return (
-              <View key={index} style={rowStyle}>
-                <Text
-                  style={[
-                    S.cell,
-                    {
-                      width: W.method,
-                    },
-                  ]}
-                >
-                  {item.paymentMethod}
-                </Text>
-
-                <Text
-                  style={[
-                    S.cellRight,
-                    {
-                      width: W.total,
-                    },
-                  ]}
-                >
-                  {formatCurrencyAOA(item.total)}
-                </Text>
-              </View>
-            );
-          })}
+          {data.summary.map((item, index) => (
+            <View
+              key={index}
+              style={index % 2 === 0 ? S.tableRow : S.tableRowAlt}
+            >
+              <Text style={[S.cell, { width: W.method }]}>
+                {item.paymentMethod}
+              </Text>
+              <Text style={[S.cellRight, { width: W.total }]}>
+                {formatCurrencyAOA(item.total)}
+              </Text>
+            </View>
+          ))}
 
           <View style={S.totalRow}>
-            <Text
-              style={[
-                S.totalLabel,
-                {
-                  width: W.method,
-                },
-              ]}
-            >
-              TOTAL GERAL
-            </Text>
-
-            <Text
-              style={[
-                S.totalValue,
-                {
-                  width: W.total,
-                },
-              ]}
-            >
+            <Text style={[S.totalLabel, { width: W.method }]}>TOTAL GERAL</Text>
+            <Text style={[S.totalValue, { width: W.total }]}>
               {formatCurrencyAOA(data.total)}
             </Text>
           </View>
         </View>
 
-        {/* ───────────────── SIGNATURE ───────────────── */}
+        {/* ───── ASSINATURA DO OPERADOR ───── */}
         <View style={S.signatureSection}>
-          <Text style={S.signatureText}>
-            Documento emitido automaticamente pelo sistema
+          <Text style={S.signatureLabel}>
+            Declaro que os valores acima conferem com o movimento de caixa
+            efectuado.
           </Text>
-
           <View style={S.signatureLine} />
-
+          <Text style={S.signatureRole}>Assinatura do Operador</Text>
           <Text style={S.signatureName}>{data.operator}</Text>
         </View>
 
-        {/* ───────────────── FOOTER ───────────────── */}
+        {/* ───── NOTA ───── */}
+        <View style={S.docNote}>
+          <Text style={S.docNoteText}>
+            Documento gerado automaticamente pelo sistema · Pendente de
+            validação administrativa
+          </Text>
+        </View>
+
+        {/* ───── FOOTER ───── */}
         <View style={S.footer} fixed>
           <Text style={S.footerText}>Movimento #{data.movementId}</Text>
-
           <Text style={S.footerText}>
-            Emitido em{" "}
-            {format(new Date(), "dd/MM/yyyy 'às' HH:mm", {
-              locale: pt,
-            })}
+            Emitido em {formatDateNative(new Date())}
           </Text>
-
           <Text style={S.footerText}>Página 1 de 1</Text>
         </View>
       </Page>

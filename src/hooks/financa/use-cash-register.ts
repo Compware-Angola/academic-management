@@ -59,10 +59,8 @@ export const useOpenCashRegister = () => {
 
 export const useCloseCashRegister = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (id: number) => closeCashRegisterService(id),
-
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["my-cash-register"],
@@ -72,6 +70,15 @@ export const useCloseCashRegister = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ["available-cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-register-movements"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-operators"],
       });
     },
   });
