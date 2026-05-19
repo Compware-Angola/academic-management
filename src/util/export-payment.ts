@@ -44,6 +44,7 @@ const createPaymentItem = ({
     : payment?.data_registro;
   const receiptData = {
     receiptNumber: receiptNumber,
+    studentNumber: String(student?.codigo_matricula ?? ""),
     studentName: student?.nome_completo,
     studentId: student?.bi,
     course: student?.curso,
