@@ -163,46 +163,34 @@ export function CaixasDisponiveisTab() {
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        {item.status === "aberto" ? (
-                          <Link
-                            to={`/financas/caixa/${item.code}`}
-                            className={buttonVariants({
-                              variant: "outline",
-                              size: "icon",
-                              className:
-                                "hover:bg-blue-50 hover:border-blue-300",
-                            })}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        ) : (
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            disabled={item.blocked === "S"}
-                            className={
-                              item.blocked === "S"
-                                ? "opacity-50 cursor-not-allowed"
-                                : "text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-950"
-                            }
-                            onClick={() =>
-                              setSelectedRegister({
-                                blocked: item.blocked,
-                                id: item.code,
-                                name: item.name,
-                                operatorId: item.operator_code,
-                                status: item.status,
-                              })
-                            }
-                            title={
-                              item.blocked === "S"
-                                ? "Caixa bloqueado"
-                                : "Abrir caixa"
-                            }
-                          >
-                            <LockOpen className="h-4 w-4" />
-                          </Button>
-                        )}
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          disabled={
+                            item.blocked === "S" || item.status === "aberto"
+                          }
+                          className={
+                            item.blocked === "S"
+                              ? "opacity-50 cursor-not-allowed"
+                              : "text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-950"
+                          }
+                          onClick={() =>
+                            setSelectedRegister({
+                              blocked: item.blocked,
+                              id: item.code,
+                              name: item.name,
+                              operatorId: item.operator_code,
+                              status: item.status,
+                            })
+                          }
+                          title={
+                            item.blocked === "S"
+                              ? "Caixa bloqueado"
+                              : "Abrir caixa"
+                          }
+                        >
+                          <LockOpen className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

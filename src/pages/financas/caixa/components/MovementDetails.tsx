@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { CashRegisterMovement } from "@/services/finance/cash-register.service";
 import { formatCurrencyAOA } from "@/util/format-currency";
+import { formatDate } from "../../notas-pagamento/components/form";
 
 export function MovementDetails({
   movement,
@@ -19,14 +20,14 @@ export function MovementDetails({
         <div>
           <p className="text-sm text-muted-foreground">Data de Abertura</p>
           <p className="font-medium">
-            {new Date(movement.date_at).toLocaleString()}
+            {formatDate(movement.date_at)}
           </p>
         </div>
         <div>
           <p className="text-sm text-muted-foreground">Data de Fecho</p>
           <p className="font-medium">
             {movement.closing_date
-              ? new Date(movement.closing_date).toLocaleString()
+              ? formatDate(movement.closing_date)
               : "-"}
           </p>
         </div>

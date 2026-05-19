@@ -1,5 +1,3 @@
-// src/pages/financas/caixa/components/movements-table.tsx
-
 import { useState } from "react";
 import {
   Table,
@@ -52,6 +50,7 @@ import { MovementDetails } from "./MovementDetails";
 import { toast } from "sonner";
 
 export function MovementsTable() {
+  const [isValidating, setIsValidating] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedMovement, setSelectedMovement] =
@@ -138,6 +137,8 @@ export function MovementsTable() {
       return;
     }
 
+    setIsValidating(true);
+
     try {
       await validateMovement.mutateAsync({
         movementId: validationDialog.movement.code,
@@ -152,10 +153,14 @@ export function MovementsTable() {
           : "Movimento rejeitado com sucesso!",
       );
 
+
       setValidationDialog({ open: false, movement: null, action: null });
       setRejectionReason("");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Erro ao validar movimento");
+
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -315,7 +320,7 @@ export function MovementsTable() {
         )}
       </div>
 
-      {/* Dialog para detalhes do movimento */}
+
       <Dialog
         open={!!selectedMovement}
         onOpenChange={(open) => !open && setSelectedMovement(null)}
@@ -332,7 +337,7 @@ export function MovementsTable() {
         </DialogContent>
       </Dialog>
 
-      {/* Alert Dialog para confirmação de validação */}
+
       <AlertDialog
         open={validationDialog.open}
         onOpenChange={(open) =>
@@ -340,50 +345,67 @@ export function MovementsTable() {
           setValidationDialog({ open: false, movement: null, action: null })
         }
       >
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {validationDialog.action === "approved"
-                ? "Aprovar Movimento"
-                : "Rejeitar Movimento"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {validationDialog.action === "approved"
-                ? `Tem certeza que deseja aprovar o movimento #${String(validationDialog.movement?.code).padStart(3, "0")}?`
-                : `Tem certeza que deseja rejeitar o movimento #${String(validationDialog.movement?.code).padStart(3, "0")}?`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+        <AlertDialog
+          open={validationDialog.open}
+          onOpenChange={(open) => {
+            if (!isValidating && !open) {
+              setValidationDialog({ open: false, movement: null, action: null });
+              setRejectionReason("");
+            }
+          }}
+        >
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {validationDialog.action === "approved"
+                  ? "Aprovar Movimento"
+                  : "Rejeitar Movimento"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {validationDialog.action === "approved"
+                  ? `Tem certeza que deseja aprovar o movimento #${String(validationDialog.movement?.code).padStart(3, "0")}?`
+                  : `Tem certeza que deseja rejeitar o movimento #${String(validationDialog.movement?.code).padStart(3, "0")}?`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
 
-          {validationDialog.action === "rejected" && (
-            <div className="space-y-2 py-4">
-              <Label htmlFor="rejectionReason">Motivo da Rejeição</Label>
-              <Textarea
-                id="rejectionReason"
-                placeholder="Informe o motivo da rejeição..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows={4}
-              />
-            </div>
-          )}
+            {validationDialog.action === "rejected" && (
+              <div className="space-y-2 py-4">
+                <Label htmlFor="rejectionReason">Motivo da Rejeição</Label>
+                <Textarea
+                  id="rejectionReason"
+                  placeholder="Informe o motivo da rejeição..."
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  rows={4}
+                  disabled={isValidating}
+                />
+              </div>
+            )}
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmValidation}
-              className={
-                validationDialog.action === "approved"
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "bg-red-600 hover:bg-red-700"
-              }
-            >
-              {validateMovement.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              {validationDialog.action === "approved" ? "Aprovar" : "Rejeitar"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isValidating}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                disabled={isValidating}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleConfirmValidation();
+                }}
+                className={
+                  validationDialog.action === "approved"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-red-600 hover:bg-red-700"
+                }
+              >
+                {isValidating ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                {validationDialog.action === "approved" ? "Aprovar" : "Rejeitar"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </AlertDialog>
     </>
   );
