@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
@@ -69,7 +68,7 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
     defaultValues: {
       forma_pagamento: FORMA_PAGAMENTO.TPA,
       tipo_pagamento: tipoPagamentoOptions[0].value,
-      valor_depositado: factura?.valor_pagar,
+      valor_depositado: factura?.valor_pagar.toString() ?? "",
       codigo_factura: factura.codigo.toString(),
       data_registo: new Date().toISOString().split("T")[0],
       ano_lectivo:
