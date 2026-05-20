@@ -67,7 +67,7 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      forma_pagamento: FORMA_PAGAMENTO.CASH,
+      forma_pagamento: FORMA_PAGAMENTO.TPA,
       tipo_pagamento: tipoPagamentoOptions[0].value,
       valor_depositado: factura?.valor_pagar,
       codigo_factura: factura.codigo.toString(),
