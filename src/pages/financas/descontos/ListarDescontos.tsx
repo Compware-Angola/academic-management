@@ -58,6 +58,7 @@ export default function ListarDescontos() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<CreateDescontoFormData>({
     descricao: "",
+    sigla: "",
     taxa: "",
     data_inicio: "",
     data_fim: "",
@@ -83,6 +84,7 @@ export default function ListarDescontos() {
   const resetForm = () => {
     setFormData({
       descricao: "",
+      sigla: "",
       taxa: "",
       data_inicio: "",
       data_fim: "",
@@ -166,6 +168,7 @@ export default function ListarDescontos() {
   const handleCreateSubmit = async () => {
     await mutateAsync({
       descricao: formData.descricao,
+      sigla: formData.sigla,
       taxa: Number(formData.taxa),
       data_inicio: formData.data_inicio,
       data_fim: formData.data_fim,
@@ -183,6 +186,7 @@ export default function ListarDescontos() {
     try {
       const body = {
         descricao: formData.descricao,
+        sigla: formData.sigla,
         taxa: Number(formData.taxa),
         data_inicio: formData.data_inicio,
         data_fim: formData.data_fim,
@@ -331,6 +335,7 @@ export default function ListarDescontos() {
               <TableRow>
                 <TableHead className="w-[100px]">Código</TableHead>
                 <TableHead>Descrição</TableHead>
+                <TableHead>Sigla</TableHead>
                 <TableHead>Percentual (%)</TableHead>
                 <TableHead>Data Inicial</TableHead>
                 <TableHead>Data Final</TableHead>
@@ -341,13 +346,13 @@ export default function ListarDescontos() {
             <TableBody>
               {isFetching ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     Nenhum desconto encontrado.
                   </TableCell>
                 </TableRow>
@@ -356,6 +361,7 @@ export default function ListarDescontos() {
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.id}</TableCell>
                     <TableCell>{item.descricao}</TableCell>
+                    <TableCell>{item.sigla ?? "-"}</TableCell>
                     <TableCell>{item.taxa}%</TableCell>
                     <TableCell>{formatarData(item.data_inicio)}</TableCell>
                     <TableCell>{formatarData(item.data_fim)}</TableCell>
@@ -381,6 +387,7 @@ export default function ListarDescontos() {
                             setEditingId(item.id);
                             setFormData({
                               descricao: item.descricao ?? "",
+                              sigla: item.sigla ?? "",
                               taxa: String(item.taxa ?? ""),
                               data_inicio: toYYYYMMDD(item.data_inicio),
                               data_fim: toYYYYMMDD(item.data_fim),
