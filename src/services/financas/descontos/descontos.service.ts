@@ -3,6 +3,7 @@ import { axiosNestFinance } from "@/lib/axios-nest-finance.ts";
 export type Desconto = {
   id: number;
   descricao: string;
+  sigla?: string;
   taxa: number;
   data_inicio: string;
   data_fim: string;
@@ -44,6 +45,7 @@ export async function fetchDescontos(
 
 export type CreateDescontoBody = {
   descricao: string;
+  sigla: string;
   taxa: number;
   data_inicio: string;
   data_fim: string;

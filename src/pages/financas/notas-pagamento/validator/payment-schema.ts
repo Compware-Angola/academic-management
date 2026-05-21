@@ -13,9 +13,7 @@ export const paymentSchema = z.discriminatedUnion("forma_pagamento", [
     codigo_factura: z
       .string({ message: "Código da factura obrigatório" })
       .min(1, "Código da factura obrigatório"),
-    valor_depositado: z
-      .number({ message: "Valor obrigatório" })
-      .min(1, "Valor obrigatório"),
+    valor_depositado: z.string().min(1, "Valor obrigatório"),
     ano_lectivo: z
       .string({ message: "Ano lectivo obrigatório" })
       .min(1, "Ano lectivo obrigatório"),
@@ -37,9 +35,7 @@ export const paymentSchema = z.discriminatedUnion("forma_pagamento", [
     codigo_factura: z
       .string({ message: "Código da factura obrigatório" })
       .min(1, "Código da factura obrigatório"),
-    valor_depositado: z
-      .number({ message: "Valor obrigatório" })
-      .min(1, "Valor obrigatório"),
+    valor_depositado: z.string().min(1, "Valor obrigatório"),
     n_operacao_bancaria: z
       .string({ message: "Operação obrigatória" })
       .min(1, "Operação obrigatória"),

@@ -698,12 +698,6 @@ export const academicStructure: MenuStructure = {
           url: "/defesa-tfc/vinculos",
           permission: [PermissionTypeDetails.DEFESA.sigla],
         },
-
-        {
-          title: "Matriculados",
-          url: "/inscricoes/matriculados",
-          permission: [PermissionTypeDetails.ESTUDANTES_MATRICULADOS.sigla],
-        },
       ],
     },
   ],
