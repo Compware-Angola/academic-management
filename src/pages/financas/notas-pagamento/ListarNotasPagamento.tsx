@@ -21,11 +21,13 @@ import {
 } from "@/components/ui/table";
 import {
   Dialog,
+
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,6 +41,7 @@ import {
   FileDown,
   Trash2,
   CircleX,
+  Info,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -436,6 +439,43 @@ export default function ListarNotasPagamento() {
                               <CircleX className="h-4 w-4" />
                             </Button>
                           )}
+                        {/* Botão de info de anulação — aparece quando motivo/data são null */}
+                        {nota.motivo_anulacao === null && nota.data_anulacao === null && nota.estado !== 0 && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                className="h-8 w-8 text-amber-600 hover:bg-amber-50 border-amber-300"
+                                title="Informações de anulação"
+                              >
+                                <Info className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-sm">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <Info className="h-4 w-4 text-amber-600" />
+                                  Informações de Anulação
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-3">
+                                <div>
+                                  <p className="text-xs text-muted-foreground mb-1">Data de Anulação</p>
+                                  <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
+                                    {nota.data_anulacao ? formatDate(nota.data_anulacao) : "Não informada"}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground mb-1">Motivo de Anulação</p>
+                                  <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
+                                    {nota.motivo_anulacao ?? "Não informado"}
+                                  </p>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
