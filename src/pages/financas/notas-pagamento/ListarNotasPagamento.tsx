@@ -55,6 +55,7 @@ import { PaymentNoteActions } from "../components/views/uma-payment-invoice";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 
 import { usePermission } from "@/auth/permission.helper";
+import { Textarea } from "@/components/ui/textarea";
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -75,6 +76,7 @@ function truncate(text: string, max = 10) {
 }
 
 export default function ListarNotasPagamento() {
+  const [motivo, setMotivo] = useState("");
   const { hasPermission } = usePermission();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
@@ -112,11 +114,11 @@ export default function ListarNotasPagamento() {
     setFacturaSelecionada(factura);
     setIsConfirmModalOpen(true);
   };
-  const confirmarAcao = () => {
+  const confirmarAcao = (motivo: string) => {
     if (!facturaSelecionada) return;
 
     if (acaoTipo === "anular") {
-      annulInvoice(facturaSelecionada.codigo);
+      annulInvoice({ facturaId: Number(facturaSelecionada.codigo), motivo });
     }
 
     if (acaoTipo === "reactivar") {
@@ -124,6 +126,7 @@ export default function ListarNotasPagamento() {
     }
 
     setIsConfirmModalOpen(false);
+    setMotivo("");
   };
   const { data, isLoading, refetch } = useQueryFacturas({
     anoLectivo: filters.anoLetivo,
@@ -640,8 +643,8 @@ export default function ListarNotasPagamento() {
                             <TableCell>
                               {(item.descricaoservico || "—") +
                                 (Number(item.mesid) !== 3 &&
-                                item.mesid &&
-                                item.mesdescricao
+                                  item.mesid &&
+                                  item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
@@ -750,6 +753,7 @@ export default function ListarNotasPagamento() {
               <strong>{acaoTipo === "anular" ? "anular" : "reactivar"}</strong>{" "}
               esta factura?
               <br />
+
               {facturaSelecionada && (
                 <>
                   <strong>Nº Factura:</strong> {facturaSelecionada.codigo}
@@ -759,22 +763,47 @@ export default function ListarNotasPagamento() {
                   <strong>Valor:</strong> {facturaSelecionada.valor_pagar} Kz
                 </>
               )}
+
               <br />
               Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
 
+          {/* Campo motivo */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Motivo {acaoTipo === "anular" && <span className="text-red-500">*</span>}
+            </label>
+
+            <Textarea
+              placeholder={`Digite o motivo da ${acaoTipo === "anular" ? "anulação" : "reactivação"
+                }`}
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+            />
+
+            {acaoTipo === "anular" && !motivo.trim() && (
+              <p className="text-xs text-red-500">
+                O motivo é obrigatório para anular a factura.
+              </p>
+            )}
+          </div>
+
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setIsConfirmModalOpen(false)}
+              onClick={() => {
+                setIsConfirmModalOpen(false);
+                setMotivo("");
+              }}
             >
               Cancelar
             </Button>
 
             <Button
               variant={acaoTipo === "anular" ? "destructive" : "default"}
-              onClick={confirmarAcao}
+              disabled={acaoTipo === "anular" && !motivo.trim()}
+              onClick={() => confirmarAcao(motivo)}
             >
               Confirmar
             </Button>
