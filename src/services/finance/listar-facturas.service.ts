@@ -36,8 +36,9 @@ export type Factura = {
   curso: string;
   polo: string;
   rn: number;
-  motivo_anulacao?: string;
-  data_anulacao?: string;
+  motivo_anulacao: string | null;
+  data_anulacao: string | null;
+  utilizador_anulacao: string | null;
 };
 
 /* ---------- RESPONSE ITEM ---------- */
