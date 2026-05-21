@@ -104,7 +104,7 @@ export const NegociacaoDividaModal = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <FileText className="h-5 w-5" />
-              Detalhes do Factura - {selectedNegociacao?.codigo_factura}
+              Detalhes do Factura - {factura?.Codigo}
             </DialogTitle>
           </DialogHeader>
           <>
@@ -117,7 +117,7 @@ export const NegociacaoDividaModal = ({
               </div>
             ) : (
               <>
-                {selectedNegociacao && (
+                {factura && (
                   <div className="space-y-6">
                     {/* Dados do Estudante */}
                     <div>
