@@ -35,6 +35,7 @@ interface CreateInvoiceParams {
   poloid: number;
   codigoMatricula: number;
   totalApagar: number;
+  total: number;
   itens?: any[];
   descricao?: string;
   codigoDescricao?: number;
@@ -74,10 +75,11 @@ export const createInvoice = ({
   canal = 3,
   totalDesconto,
   totalMulta,
+  total,
 }: CreateInvoiceParams): CreateInvoiceBody => {
   return {
     polo_id: poloid,
-    TotalPreco: totalApagar,
+    TotalPreco: total,
     codigo_descricao: codigoDescricao,
     ValorAPagar: totalApagar,
     total_incidencia: 0,

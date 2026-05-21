@@ -182,11 +182,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
     const selectedList = Array.from(selectedPayments.values());
 
-    //Se tiver um desconto de anuidade
-    const descontoPorItem = deveAplicarDesc5
-      ? valorDesc5 / selectedList.length
-      : 0;
-
     const totalMulta = selectedList.reduce(
       (total, payment) => total + (payment.multa ?? 0), // FIX: fallback
       0,
@@ -199,18 +194,12 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
         );
 
     const items = selectedList.map((payment) => {
-      let desconto = payment.desconto ?? 0;
-      let valorApagar = payment.valorAPagar;
-      if (deveAplicarDesc5) {
-        desconto = descontoPorItem;
-        valorApagar = valorApagar - desconto;
-      }
       return createItem({
         multa: payment.multa ?? 0,
-        valorDesconto: desconto,
+        valorDesconto: payment.desconto,
         codigo: monthFee.codigo,
         descricao: `Mensalidade ${payment.mesTempDesc}`,
-        preco: valorApagar,
+        preco: payment.valorAPagar,
         mesTempId: payment.mesTempId,
       });
     });
@@ -223,6 +212,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       codigoMatricula: codigoMatricula,
       poloid: 1,
       totalApagar: totalApagar,
+      total: totalSelecionado,
       totalDesconto: totalDesconto,
       totalMulta: totalMulta,
       itens: items,
