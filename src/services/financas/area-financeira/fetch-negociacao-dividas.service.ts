@@ -16,6 +16,24 @@ export interface Estatisticas {
   totalPrimeiroValorApagar: number;
   totalRestante: number;
 }
+export interface NegociacaoItemFactura {
+  codigo: number;
+  data: string;
+  total_preco: number;
+  valor_apagar: number;
+  valor_entregue: number;
+  desconto: number;
+  total_iva: number;
+  total_multa: number;
+  total_incidencia: number;
+  total_retencao: number;
+  valor_apagar_extenso: string | null;
+  descricao: string;
+  referencia: string;
+  data_vencimento: string;
+  estado: number;
+  ano_lectivo: number;
+}
 export type NegociacaoItem = {
   codigo_matricula: number;
   codigo_factura: number;
@@ -32,6 +50,7 @@ export type NegociacaoItem = {
   tipo_negociacao_id: number;
   faculdade_id: number;
   faculdade: number;
+  facturas: NegociacaoItemFactura[];
   rn: number;
 };
 
