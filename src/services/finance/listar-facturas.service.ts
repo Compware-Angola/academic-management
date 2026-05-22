@@ -36,6 +36,9 @@ export type Factura = {
   curso: string;
   polo: string;
   rn: number;
+  motivo_anulacao: string | null;
+  data_anulacao: string | null;
+  utilizador_anulacao: string | null;
 };
 
 /* ---------- RESPONSE ITEM ---------- */
@@ -164,9 +167,14 @@ export async function buscarFacturaService(
 }
 
 export async function annulInvoiceService(
-  facturaId: number | string,
-): Promise<FacturaDetalhe> {
-  return await axiosNestFinance.delete(`/invoices/${facturaId}`);
+  params: { facturaId: number | string, motivo: string },
+): Promise<{ sucesso: boolean; mensagem: string }> {
+  const { facturaId, motivo } = params;
+  const { data } = await axiosNestFinance.delete(`/invoices/${facturaId}`, {
+    data: { motivo },
+  });
+
+  return data;
 }
 
 export async function reactivateInvoiceService(
