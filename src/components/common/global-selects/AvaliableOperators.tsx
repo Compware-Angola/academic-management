@@ -8,24 +8,22 @@ interface AvaliableOperatorsSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
   disabled?: boolean;
-  availability?: "all" | "free" | "occupied"
+  availability?: "all" | "free" | "occupied";
 }
 
 export function AvaliableOperatorsSelect({
   value,
   onChangeValue,
   disabled,
-  availability = "free"
+  availability = "free",
 }: AvaliableOperatorsSelectProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
   const { data, isLoading } = useQueryAvailableOperators({
     search: debouncedSearch,
-    availability
+    availability,
   });
-
-  console.log(data);
 
   return (
     <FormCommandSelect

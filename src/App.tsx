@@ -519,6 +519,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
                   <Route
                     path="/avaliacoes/pauta"
                     element={

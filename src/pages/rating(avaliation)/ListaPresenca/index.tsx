@@ -51,6 +51,11 @@ import { useQueryMesTemp } from "@/hooks/avaliacao/use-query-mes-temp";
 import { verificarPagamento } from "@/util/aparecer-lista-presenca";
 import { ListaPresencaPaginacao } from "./components/ListaPresencaPaginacao";
 import { Input } from "@/components/ui/input";
+import { PresenceListPDFDocument } from "@/components/views/pdf/presenceListPDFDocument";
+import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useCursos } from "@/hooks/use-cursos";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 
 type Filters = {
   anoLetivo: string;
@@ -64,6 +69,23 @@ type Filters = {
   situacaoFinanceira: string;
 };
 export default function PresenceList() {
+  const [formData, setFormData] = useState<Filters>({
+    anoLetivo: "",
+    horarioId: "",
+    tiposAvaliacao: "",
+    periodo: "",
+    semestre: "",
+    curso: "",
+    anoCurricular: "",
+    unidadeCurricular: "",
+    situacaoFinanceira: "2",
+  });
+  const { data: semestre = [] } = useQuerySemestres();
+  const { data: periodos = [] } = useQueryPeriod();
+  const { data: cursos = [] } = useCursos();
+  const { data: classes = [] } = useQueryClassFilterByCurso({
+    curso: formData.curso,
+  });
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
@@ -82,17 +104,6 @@ export default function PresenceList() {
     { id: "nome", label: "Nome do Aluno" },
   ];
 
-  const [formData, setFormData] = useState<Filters>({
-    anoLetivo: "",
-    horarioId: "",
-    tiposAvaliacao: "",
-    periodo: "",
-    semestre: "",
-    curso: "",
-    anoCurricular: "",
-    unidadeCurricular: "",
-    situacaoFinanceira: "2",
-  });
   const { data: parameterResponse, isLoading: isLoadingParameters } =
     useQueryAssessmentAttendanceParameters();
 
@@ -182,89 +193,104 @@ export default function PresenceList() {
 
   const mesDescricao = mesTemp[0]?.designacao;
   const students = presenceAttendanceList?.data || [];
-
   const pdfData = useMemo(() => {
-  if (!students.length || !appliedFilters) return null;
+    if (!students.length || !appliedFilters) return null;
 
-  return {
-    filtros: [
-      `Ano Letivo: ${appliedFilters.anoLetivo}`,
-      `Semestre: ${appliedFilters.semestre}`,
-      `Curso: ${appliedFilters.curso}`,
-      searchApplied.searchTerm &&
-        `Pesquisa: ${searchApplied.searchTerm}`,
-    ]
-      .filter(Boolean)
-      .join(" | "),
-    total: students.length,
-    rows: students.map((s) => ({
-      curso: s.curso,
-      classe: s.classe,
-      periodo: s.periodo,
-      numero_matricula: s.numero_matricula,
-      nome: s.nome,
-    })),
-  };
-}, [students, appliedFilters, searchApplied]);
+    return {
+      filtros: [
+        `Ano Letivo: ${appliedFilters.anoLetivo}`,
+        `Semestre: ${appliedFilters.semestre}`,
+        `Curso: ${appliedFilters.curso}`,
+        searchApplied.searchTerm && `Pesquisa: ${searchApplied.searchTerm}`,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: students.length,
+      rows: students.map((s) => ({
+        curso: s.curso,
+        classe: s.classe,
+        periodo: s.periodo,
+        numero_matricula: s.numero_matricula,
+        nome: s.nome,
+      })),
+    };
+  }, [students, appliedFilters, searchApplied]);
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Lista de Presença"
-    subtitle="Presenças em Avaliações Académicas"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros },
-      { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "curso", label: "Curso", width: "20%" },
-        { key: "classe", label: "Ano Curricular", width: "15%" },
-        { key: "periodo", label: "Período", width: "15%" },
-        { key: "numero_matricula", label: "Matrícula", width: "20%" },
-        { key: "nome", label: "Nome Completo", width: "30%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
+  const pdfContent = appliedFilters ? (
+    <PresenceListPDFDocument
+      anoLetivo={
+        academicYear.find(
+          (y) => y.codigo === parseFilter(appliedFilters.anoLetivo),
+        )?.designacao
+      }
+      semestre={
+        semestre.find((s) => s.codigo === parseFilter(appliedFilters.semestre))
+          ?.designacao
+      }
+      periodo={
+        periodos.find((p) => p.codigo === parseFilter(appliedFilters.periodo))
+          ?.designacao
+      }
+      curso={
+        cursos.find((c) => c.codigo === parseFilter(appliedFilters.curso))
+          ?.designacao
+      }
+      unidadeCurricular={
+        unidadesCurriculares.find(
+          (c) => c.pk === parseInt(appliedFilters.unidadeCurricular),
+        )?.descricao
+      }
+      horario={
+        schedules.find(
+          (h) => h.codigo === parseFilter(appliedFilters.horarioId),
+        )?.designacao
+      }
+      classes={
+        classes.find(
+          (c) => c.codigo === parseFilter(appliedFilters.anoCurricular),
+        )?.designacao
+      }
+      total={students.length}
+      rows={students.map((s, index) => ({
+        numero: index + 1,
+        matricula: s.numero_matricula,
+        nome: s.nome,
+      }))}
+    />
+  ) : null;
 
-const excelProps = pdfData
-  ? {
-      documentTitle: "Lista de Presença",
-      subtitle: "Presenças em Avaliações Académicas",
-      infoSections: [
-        { title: "Filtros Aplicados", content: pdfData.filtros },
-        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-      ],
-      mainTable: {
-        headers: [
-          { key: "curso", label: "Curso", width: 25 },
-          { key: "classe", label: "Ano Curricular", width: 20 },
-          { key: "periodo", label: "Período", width: 20 },
-          { key: "numero_matricula", label: "Matrícula", width: 25 },
-          { key: "nome", label: "Nome Completo", width: 40 },
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Lista de Presença",
+        subtitle: "Presenças em Avaliações Académicas",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
         ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
-  : null;
+        mainTable: {
+          headers: [
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "classe", label: "Ano Curricular", width: 20 },
+            { key: "periodo", label: "Período", width: 20 },
+            { key: "numero_matricula", label: "Matrícula", width: 25 },
+            { key: "nome", label: "Nome Completo", width: 40 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
 
   const baseFileName = `Lista_Presenca_${new Date()
-  .toISOString()
-  .slice(0, 10)}`;
-
-
+    .toISOString()
+    .slice(0, 10)}`;
 
   const hasNext = presenceAttendanceList?.hasNextPage || false;
   const loadingSearchButton =
     loadingPresenceAttendanceList || isLoadingParameters;
   return (
     <div className="p-6 space-y-6">
-      
       <div className="flex items-center justify-between flex-wrap gap-3">
         <Breadcrumb>
           <BreadcrumbList>
@@ -305,7 +331,6 @@ const excelProps = pdfData
           </div>
         )}
       </div>
-
 
       <h1 className="text-2xl font-bold">Lista de Presença</h1>
       <p className="text-muted-foreground">
