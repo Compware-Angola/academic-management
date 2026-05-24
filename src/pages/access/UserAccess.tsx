@@ -24,7 +24,7 @@ import {
   TableHead,
   TableHeader,
 } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch";   // ← Novo
+import { Switch } from "@/components/ui/switch"; // ← Novo
 import { Skeleton } from "@/components/ui/skeleton";
 
 import {
@@ -58,8 +58,7 @@ export default function UserAccess() {
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [ativo, setAtivo] = useState<boolean | undefined>(undefined);
-  console.log( hasPermission(PermissionTypeDetails.BLOQUEAR_ACESSOS.sigla));
-  
+
   const navigate = useNavigate();
   const [typeToEdit, setTypeToEdit] = useState<UserActionType>(null);
 
@@ -383,10 +382,16 @@ export default function UserAccess() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Switch
-
                             checked={user.activestate === 1}
-                            disabled={toggleMutation.isPending||  !hasPermission(PermissionTypeDetails.BLOQUEAR_ACESSOS.sigla)}
-                            onCheckedChange={() => handleToggleStatus(user.codigo)}
+                            disabled={
+                              toggleMutation.isPending ||
+                              !hasPermission(
+                                PermissionTypeDetails.BLOQUEAR_ACESSOS.sigla,
+                              )
+                            }
+                            onCheckedChange={() =>
+                              handleToggleStatus(user.codigo)
+                            }
                           />
                           <span className="text-sm font-medium">
                             {user.activestate === 1 ? "Ativo" : "Inativo"}

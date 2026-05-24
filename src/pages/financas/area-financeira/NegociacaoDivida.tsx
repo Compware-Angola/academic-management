@@ -54,6 +54,7 @@ import { StatCard } from "@/components/common/StatCard";
 import { NegociacaoDividaModal } from "./components/NegociacaoDividaModal";
 import { NegociacaoItem } from "@/services/financas/area-financeira/fetch-negociacao-dividas.service";
 import { Input } from "@/components/ui/input";
+import { NegociacaoFacturasModal } from "./components/NegociacaoFacturasModal";
 
 export default function NegociacaoDivida() {
   //Options
@@ -417,7 +418,7 @@ export default function NegociacaoDivida() {
 
                     <TableHead>Valor Prestação</TableHead>
                     <TableHead>Valor Restante</TableHead>
-                    <TableHead>Acções</TableHead>
+                    <TableHead>Facturas</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -511,9 +512,9 @@ export default function NegociacaoDivida() {
           </div>
         </CardContent>
       </Card>
-      <NegociacaoDividaModal
-        isModalOpen={openModal}
-        setIsModalOpen={() => closeModal()}
+      <NegociacaoFacturasModal
+        isOpen={openModal}
+        onClose={closeModal}
         selectedNegociacao={selectedNegociacao}
       />
     </div>

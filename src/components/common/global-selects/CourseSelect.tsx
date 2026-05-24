@@ -14,7 +14,7 @@ interface CourseSelectProps {
   width?: string;
   label?: string;
   enableDefaultSelectItem?: boolean;
-  allowedIds?: string[];  // ← novo
+  allowedIds?: string[]; // ← novo
 }
 
 const CourseSelect = ({
@@ -28,7 +28,7 @@ const CourseSelect = ({
   width = "full",
   labelMode = "outside",
   showLabel = true,
-  allowedIds,  // ← novo
+  allowedIds, // ← novo
 }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
   const id = useId();
@@ -37,9 +37,6 @@ const CourseSelect = ({
     if (!allowedIds || allowedIds.length === 0) return cursos;
     return cursos.filter((c) => allowedIds.includes(c.codigo.toString()));
   }, [cursos, allowedIds]);
-
-  console.log(filteredCursos, "filter", allowedIds);
-
 
   const defaultSelectItem = enableDefaultSelectItem
     ? [{ label: "Todos", value: "all", key: id }]

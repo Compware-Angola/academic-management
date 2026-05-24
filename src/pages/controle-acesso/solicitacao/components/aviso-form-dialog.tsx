@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-  import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -32,14 +32,14 @@ import { useGroups } from "@/hooks/acess/use-query-groups";
 type Props = {
   open: boolean;
   onClose: () => void;
-  mode?: "create" | "edit";     // ✅ agora aceita 'edit'
-  initialData?: any;            // ✅ dados do aviso a editar
+  mode?: "create" | "edit"; // ✅ agora aceita 'edit'
+  initialData?: any; // ✅ dados do aviso a editar
 };
 
 export function AvisoFormDialog({
   open,
   onClose,
-  mode = "create",           // ✅ define 'create' como valor padrão
+  mode = "create", // ✅ define 'create' como valor padrão
   initialData,
 }: Props) {
   const [matricula, setMatricula] = useState("");
@@ -47,7 +47,7 @@ export function AvisoFormDialog({
   const [estudanteId, setEstudanteId] = useState<number | null>(null);
 
   const criarAvisoMutation = useMutationCreateAviso();
-  const updateAvisoMutation = useMutationUpdateAviso();   // ✅ instância da mutação de edição
+  const updateAvisoMutation = useMutationUpdateAviso(); // ✅ instância da mutação de edição
 
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
@@ -55,52 +55,54 @@ export function AvisoFormDialog({
   const { data: aluno } = useQueryAlunoMatricula(matricula, pesquisar);
   const { data: groups = [], isLoading: loadingGroups } = useGroups();
 
-  console.log("GRUPOS: ", groups)
-  console.log("ROLES: ", roles)
+  const { user } = useAuth();
 
-  const {user} = useAuth()
-  //console.log("PK_UTILIZADOR", user.user.pk_utilizador)
-  console.log("USER: ", user);
   // ✅ Inicializa formData com initialData quando for editar
   const getFormData = (data?: any) => ({
-  codigo: data?.codigo ?? "",
-  assunto: data?.assunto ?? "",
-  descricao: data?.descricao ?? "",
-  curso:  "",
-  periodo: data?.periodo?.codigo?.toString() ?? data?.periodo?.toString() ?? "",
-  destino: data?.destino?.id?.toString() ?? data?.destino?.toString() ?? "",
-  date_expiracao: data?.date_expiracao
-    ? new Date(data.date_expiracao).toISOString().split("T")[0]
-    : "",
-  userId: data?.userId ?? "",
-});
+    codigo: data?.codigo ?? "",
+    assunto: data?.assunto ?? "",
+    descricao: data?.descricao ?? "",
+    curso: "",
+    periodo:
+      data?.periodo?.codigo?.toString() ?? data?.periodo?.toString() ?? "",
+    destino: data?.destino?.id?.toString() ?? data?.destino?.toString() ?? "",
+    date_expiracao: data?.date_expiracao
+      ? new Date(data.date_expiracao).toISOString().split("T")[0]
+      : "",
+    userId: data?.userId ?? "",
+  });
 
   const [formData, setFormData] = useState(getFormData(initialData));
-    // ✅ Atualiza os campos sempre que o modo ou os dados iniciais mudam
+  // ✅ Atualiza os campos sempre que o modo ou os dados iniciais mudam
   useEffect(() => {
-  if (mode === "edit" && initialData) {
-    const cursoEncontrado = cursos?.find(
-      (c: any) =>
-        c.nome === initialData.curso ||
-        c.designacao === initialData.curso
-    );
+    if (mode === "edit" && initialData) {
+      const cursoEncontrado = cursos?.find(
+        (c: any) =>
+          c.nome === initialData.curso || c.designacao === initialData.curso,
+      );
 
-    setFormData({
-      codigo:  initialData.codigo ?? "", 
-      assunto: initialData.assunto ?? "",
-      descricao: initialData.descricao ?? "",
-      curso: cursoEncontrado ? cursoEncontrado.codigo.toString() : "",
-      periodo: initialData?.periodo?.codigo?.toString() ?? initialData?.periodo?.toString() ?? "",
-      destino: initialData?.destino?.id?.toString() ?? initialData?.destino?.toString() ?? "",
-      date_expiracao: initialData?.date_expiracao
-        ? new Date(initialData.date_expiracao).toISOString().split("T")[0]
-        : "",
-      userId: initialData?.userId ?? "",
-    });
-  } else if (mode === "create") {
-    resetForm();
-  }
-}, [mode, initialData, cursos]);
+      setFormData({
+        codigo: initialData.codigo ?? "",
+        assunto: initialData.assunto ?? "",
+        descricao: initialData.descricao ?? "",
+        curso: cursoEncontrado ? cursoEncontrado.codigo.toString() : "",
+        periodo:
+          initialData?.periodo?.codigo?.toString() ??
+          initialData?.periodo?.toString() ??
+          "",
+        destino:
+          initialData?.destino?.id?.toString() ??
+          initialData?.destino?.toString() ??
+          "",
+        date_expiracao: initialData?.date_expiracao
+          ? new Date(initialData.date_expiracao).toISOString().split("T")[0]
+          : "",
+        userId: initialData?.userId ?? "",
+      });
+    } else if (mode === "create") {
+      resetForm();
+    }
+  }, [mode, initialData, cursos]);
   useEffect(() => {
     if (aluno) {
       setEstudanteId(null);
@@ -117,7 +119,7 @@ export function AvisoFormDialog({
       periodo: "",
       destino: "",
       date_expiracao: "",
-      userId: ""
+      userId: "",
     });
   };
 
@@ -127,7 +129,7 @@ export function AvisoFormDialog({
       toast.error("O assunto é obrigatório.");
       return;
     }
-    
+
     const payload = {
       assunto: formData.assunto,
       descricao: formData.descricao,
@@ -135,7 +137,7 @@ export function AvisoFormDialog({
       periodo: formData.periodo ? Number(formData.periodo) : null,
       destino: formData.destino ? Number(formData.destino) : null,
       date_expiracao: formData.date_expiracao || null,
-      userId: user.user.pk_utilizador
+      userId: user.user.pk_utilizador,
     };
 
     // Se estiver a editar e houver ID no initialData, chama update
@@ -150,10 +152,10 @@ export function AvisoFormDialog({
           },
           onError: (error: any) => {
             toast.error(
-              error?.response?.data?.message ?? "Erro ao atualizar aviso."
+              error?.response?.data?.message ?? "Erro ao atualizar aviso.",
             );
           },
-        }
+        },
       );
     } else {
       // caso contrário, cria novo
@@ -164,9 +166,7 @@ export function AvisoFormDialog({
           onClose();
         },
         onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.message ?? "Erro ao criar aviso."
-          );
+          toast.error(error?.response?.data?.message ?? "Erro ao criar aviso.");
         },
       });
     }
@@ -210,115 +210,101 @@ export function AvisoFormDialog({
               }
             />
           </div>
+        </div>
 
+        {/* DESTINO (Roles) */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Destino</label>
+
+          <Select
+            value={formData.destino}
+            onValueChange={(v) =>
+              setFormData({
+                ...formData,
+                destino: v,
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecionar destino" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {groups?.map((role: any) => (
+                <SelectItem
+                  key={role.codigo}
+                  value={role.codigo.toString()} // ✅ usa ID
+                >
+                  {role.descricao}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Curso */}
+        <div className="space-y-2">
+          <CourseSelect
+            value={formData.curso}
+            onChangeValue={(v) =>
+              setFormData({
+                ...formData,
+                curso: v,
+              })
+            }
+          />
+        </div>
+
+        {/* Período */}
+        <div className="space-y-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Período</label>
+
+            <Select
+              value={formData.periodo}
+              onValueChange={(v) =>
+                setFormData({
+                  ...formData,
+                  periodo: v,
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    isLoadingPeriodos
+                      ? "Carregando períodos..."
+                      : "Selecionar período"
+                  }
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+
+                {periodos?.map((p: any) => (
+                  <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                    {p.designacao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-                    {/* DESTINO (Roles) */}
-                              <div className="space-y-2">
-                                <label className="text-sm font-medium">
-                                  Destino
-                                </label>
-                    
-                                <Select
-                                  value={formData.destino}
-                                  onValueChange={(v) =>
-                                    setFormData({
-                                      ...formData,
-                                      destino: v,
-                                    })
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue
-                                      placeholder="Selecionar destino"
-                                    />
-                                  </SelectTrigger>
-                    
-                                  <SelectContent>
-                                    {groups?.map((role: any) => (
-                                      <SelectItem
-                                        key={role.codigo}
-                                        value={role.codigo.toString()} // ✅ usa ID
-                                      >
-                                        {role.descricao}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-          {/* Curso */}
-                    <div className="space-y-2">
-                      <CourseSelect
-                        value={formData.curso}
-                        onChangeValue={(v) =>
-                        setFormData({
-                          ...formData,
-                            curso: v,
-                            })
-                            }
-                        />
-                    </div>
-
-          {/* Período */}
-                    <div className="space-y-2">
-                      <div className="space-y-2">
-  <label className="text-sm font-medium">
-    Período
-  </label>
-
-  <Select
-    value={formData.periodo}
-    onValueChange={(v) =>
-      setFormData({
-        ...formData,
-        periodo: v,
-      })
-    }
-  >
-    <SelectTrigger>
-      <SelectValue
-        placeholder={
-          isLoadingPeriodos
-            ? "Carregando períodos..."
-            : "Selecionar período"
-        }
-      />
-    </SelectTrigger>
-
-    <SelectContent>
-      <SelectItem value="todos">Todos</SelectItem>
-
-      {periodos?.map((p: any) => (
-        <SelectItem
-          key={p.codigo}
-          value={p.codigo.toString()}
-        >
-          {p.designacao}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-                    
-                    
-                              {/* Data Expiração */}
-                              <div className="space-y-2">
-                                <label className="text-sm font-medium">
-                                  Data de Expiração
-                                </label>
-                                <Input
-                                  type="date"
-                                  value={formData.date_expiracao}
-                                  onChange={(e) =>
-                                    setFormData({
-                                      ...formData,
-                                      date_expiracao: e.target.value,
-                                    })
-                                  }
-                                />
-                              </div>
-
+          {/* Data Expiração */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Data de Expiração</label>
+            <Input
+              type="date"
+              value={formData.date_expiracao}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  date_expiracao: e.target.value,
+                })
+              }
+            />
+          </div>
         </div>
 
         <DialogFooter>

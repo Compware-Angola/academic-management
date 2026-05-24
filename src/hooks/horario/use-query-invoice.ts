@@ -7,6 +7,7 @@ import {
 } from "@/services/finance/listar-facturas.service";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 // =============================
 // 🔎 LISTAR FACTURAS
@@ -48,12 +49,16 @@ export const useAnnulInvoice = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (facturaId: number) => annulInvoiceService(facturaId),
+    mutationFn: ({ facturaId, motivo }: { facturaId: number, motivo: string }) => annulInvoiceService({ facturaId, motivo }),
 
-    onSuccess: () => {
-      // 🔥 Atualiza automaticamente a listagem geral
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["facturas"] });
+      toast.success(data.mensagem);
+
     },
+    onError: (error: any) => {
+      toast.error(error.response.data.message);
+    }
   });
 };
 

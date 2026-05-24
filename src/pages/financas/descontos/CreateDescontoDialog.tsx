@@ -20,6 +20,7 @@ import { Delete, Loader2 } from "lucide-react";
 
 export type CreateDescontoFormData = {
   descricao: string;
+  sigla: string;
   taxa: string;
   data_inicio: string;
   data_fim: string;
@@ -64,6 +65,18 @@ export function CreateDescontoDialog({
               value={formData.descricao}
               onChange={(e) =>
                 onChange({ ...formData, descricao: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="sigla">Sigla</Label>
+            <Input
+              id="sigla"
+              placeholder="Ex: DESC_FUNC"
+              value={formData.sigla}
+              onChange={(e) =>
+                onChange({ ...formData, sigla: e.target.value })
               }
             />
           </div>
@@ -151,6 +164,7 @@ export function CreateDescontoDialog({
             disabled={
               isSubmitting ||
               !formData.descricao ||
+              !formData.sigla ||
               !formData.taxa ||
               !formData.data_inicio ||
               !formData.data_fim
