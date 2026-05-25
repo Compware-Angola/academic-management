@@ -39,7 +39,7 @@ import { Pagination } from "./Pagination";
 import { MovementDetails } from "../MovementDetails";
 import { ValidationDialog } from "./ValidationDialog";
 import { FiltersBar } from "./FiltersBar";
-const LoadingRow = ({ colSpan }: { colSpan: number }) => (
+export const LoadingRow = ({ colSpan }: { colSpan: number }) => (
   <TableRow>
     <TableCell colSpan={colSpan} className="h-24 text-center">
       <div className="flex items-center justify-center gap-2 text-muted-foreground">
@@ -49,7 +49,7 @@ const LoadingRow = ({ colSpan }: { colSpan: number }) => (
     </TableCell>
   </TableRow>
 );
-const EmptyRow = ({ colSpan }: { colSpan: number }) => (
+export const EmptyRow = ({ colSpan }: { colSpan: number }) => (
   <TableRow>
     <TableCell colSpan={colSpan} className="h-32 text-center">
       <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -60,7 +60,6 @@ const EmptyRow = ({ colSpan }: { colSpan: number }) => (
   </TableRow>
 );
 export function MovementsTable() {
-  // Estados
   const [search, setSearch] = useState("");
   const [operatorId, setOperatorId] = useState("");
   const [caixa, setCaixa] = useState("");
@@ -208,7 +207,6 @@ export function MovementsTable() {
     .toISOString()
     .slice(0, 10)}`;
 
-  // Handlers (mantidos iguais)
   const handleCleanFilters = () => {
     setSearch("");
     setOperatorId("");

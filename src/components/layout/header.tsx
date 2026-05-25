@@ -37,6 +37,7 @@ import { useState, useEffect, useRef } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/students/use-query-students";
 import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
+import { useBlockMyCashRegister } from "@/hooks/financa/use-cash-register";
 
 export function Header() {
   const { data: user } = useCurrentUser("GA");

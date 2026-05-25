@@ -1,18 +1,6 @@
-// src/pages/financas/caixa/meu-caixa.page.tsx
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
-import {
-  Home,
-  Loader2,
-  Lock,
-  LockOpen,
-  Wallet,
-  History,
-  ListChecks,
-} from "lucide-react";
-
+import { Home, Loader2, Lock, LockOpen, Wallet, History } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,9 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import {
   Table,
   TableBody,
@@ -32,12 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import {
   AlertDialog,
   AlertDialogContent,
@@ -48,13 +32,10 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-
 import {
-  useCashRegisterOpeningCodeVerification,
   useCloseCashRegister,
   useQueryMyCashRegister,
   useQueryMyCashSummary,
-  useQueryCashRegisterMovements,
 } from "@/hooks/financa/use-cash-register";
 import { CashRegisterConfirmationAlert } from "../components/CashRegisterConfirmationAlert";
 import { formatCurrencyAOA } from "@/util/format-currency";
@@ -81,7 +62,6 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-/** Skeleton shown while myCaixa is loading */
 function CaixaCardSkeleton() {
   return (
     <Card>
@@ -121,9 +101,6 @@ function SummarySkeleton() {
 
 function MeuCaixaAtualTab() {
   const { data: user } = useCurrentUser("GA");
-  const { reset } = useCashRegisterOpeningCodeVerification();
-  const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
-    useCashRegisterOpeningCodeVerification();
   const [confirmClose, setConfirmClose] = useState(false);
 
   const { data: myCaixa, isLoading: isLoadingCaixa } = useQueryMyCashRegister();
@@ -156,13 +133,8 @@ function MeuCaixaAtualTab() {
     const url = URL.createObjectURL(blob);
     window.open(url);
 
-    reset();
     setConfirmClose(false);
   }
-
-  const hasCaixaAberto = !!myCaixa;
-  const canAccessCashRegister =
-    hasCaixaAberto && isCashRegisterOpeningCodeVerified;
 
   if (isLoadingCaixa) {
     return (
@@ -188,11 +160,11 @@ function MeuCaixaAtualTab() {
     );
   }
 
-  if (hasCaixaAberto && !isCashRegisterOpeningCodeVerified) {
-    return <CashRegisterConfirmationAlert isOpen={true} onVerified={verify} />;
+  if (myCaixa && (myCaixa.status === "fechado" || myCaixa.blocked === "S")) {
+    return <CashRegisterConfirmationAlert myCaixa={myCaixa} />;
   }
 
-  if (canAccessCashRegister) {
+  if (myCaixa && myCaixa.status === "aberto" && myCaixa.blocked === "N") {
     return (
       <div className="space-y-4">
         <Card>
@@ -333,7 +305,7 @@ function MeuCaixaAtualTab() {
     );
   }
 
-  if (!hasCaixaAberto) {
+  if (!myCaixa) {
     return (
       <Card className="border-dashed">
         <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">

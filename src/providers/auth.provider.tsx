@@ -18,18 +18,21 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useIsPublicRoute } from "./helpers/verify-public.routes";
+import { useBlockMyCashRegister } from "@/hooks/financa/use-cash-register";
 
-const INACTIVITY_TIMEOUT = 5 * 60 * 1000;   // 5 min
-const WARNING_TIME = 10 * 1000;     // 10 s
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 min
+const WARNING_TIME = 10 * 1000; // 10 s
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { mutate: lockMyCashRegister } = useBlockMyCashRegister();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isPublicRoute = useIsPublicRoute();
   const [token, setToken] = useState<string | null>(AuthStorage.getToken());
+
   const [openWarning, setOpenWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(
-    Math.ceil(WARNING_TIME / 1000)
+    Math.ceil(WARNING_TIME / 1000),
   );
 
   const logoutRef = useRef<() => void>(null!);
@@ -42,7 +45,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   localStorage.removeItem("auth.user");
 
   // ─── USER ─────────────────────────────────────────────
-  const { data: user, isLoading, isError } = useQuery({
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["current-user", "GA"],
     queryFn: () => getCurrentUserService("GA"),
     enabled: !!token && !isPublicRoute,
@@ -62,9 +69,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     (payload: AuthResponse) => {
       AuthStorage.saveLogin(payload);
       setToken(payload.access_token);
+      lockMyCashRegister();
       queryClient.invalidateQueries({ queryKey: ["current-user", "GA"] });
     },
-    [queryClient]
+    [queryClient],
   );
 
   // ─── LOGOUT ───────────────────────────────────────────
@@ -77,7 +85,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     countdownStarted.current = false;
     isCountingDown.current = false;
     prevShowWarningRef.current = false;
-
     setOpenWarning(false);
     AuthStorage.logout();
     setToken(null);
@@ -92,8 +99,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     timeout: INACTIVITY_TIMEOUT,
     warningTime: WARNING_TIME,
     enabled: !!token && isPublicRoute,
-    onIdle: useCallback(() => { }, []),
-    onContinue: useCallback(() => { }, []),
+    onIdle: useCallback(() => {}, []),
+    onContinue: useCallback(() => {}, []),
   });
 
   // ─── VISIBILITY CONTROL ───────────────────────────────
@@ -126,8 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!isVisibleRef.current) return;
 
-    const justBecameTrue =
-      showWarning && !prevShowWarningRef.current;
+    const justBecameTrue = showWarning && !prevShowWarningRef.current;
 
     prevShowWarningRef.current = showWarning;
 
@@ -183,7 +189,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     >
       {children}
 
-      <Dialog open={openWarning} onOpenChange={() => { }}>
+      <Dialog open={openWarning} onOpenChange={() => {}}>
         <DialogContent
           className="max-w-md"
           onPointerDownOutside={(e) => e.preventDefault()}
@@ -198,12 +204,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           <div className="flex flex-col items-center justify-center gap-2 py-6">
             <span
-              className={`text-7xl font-bold tabular-nums transition-colors duration-500 ${secondsLeft <= 2
-                ? "text-red-500 animate-pulse"
-                : secondsLeft <= 4
-                  ? "text-orange-400"
-                  : "text-yellow-500"
-                }`}
+              className={`text-7xl font-bold tabular-nums transition-colors duration-500 ${
+                secondsLeft <= 2
+                  ? "text-red-500 animate-pulse"
+                  : secondsLeft <= 4
+                    ? "text-orange-400"
+                    : "text-yellow-500"
+              }`}
             >
               {secondsLeft}
             </span>

@@ -14,16 +14,14 @@ import { useQueryFacturas } from "@/hooks/horario/use-query-invoice";
 import { PagamentoStatus } from "@/components/common/PagamentoStatus";
 import { formatNumber } from "@/util/format-number";
 import {
-  useCashRegisterOpeningCodeVerification,
   useQueryMyCashRegister,
+  useVerifyMyCashRegisterOpeningCode,
 } from "@/hooks/financa/use-cash-register";
-import { CashRegisterConfirmationAlert } from "../caixa/components/CashRegisterConfirmationAlert";
 
 import { formatDate, FormNotaPagamento } from "./components/form";
+import { CashRegisterConfirmationAlert } from "../caixa/components/CashRegisterConfirmationAlert";
 
 export default function LiquidarNota() {
-  const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
-    useCashRegisterOpeningCodeVerification();
   const { codigo } = useParams<{ codigo: string }>();
 
   const navigate = useNavigate();
@@ -104,7 +102,7 @@ export default function LiquidarNota() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {myCashRegister && isCashRegisterOpeningCodeVerified ? (
+      {myCashRegister && myCashRegister.blocked === "N" ? (
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -128,16 +126,12 @@ export default function LiquidarNota() {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <CashRegisterConfirmationAlert
-            isOpen={!!myCashRegister}
-            onVerified={verify}
-          />
+          <CashRegisterConfirmationAlert myCaixa={myCashRegister} />
         </>
       )}
 
-      {myCashRegister && isCashRegisterOpeningCodeVerified && (
+      {myCashRegister && myCashRegister.blocked === "N" && (
         <>
-          {/* Resumo da Nota */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Resumo da Nota</CardTitle>
