@@ -137,24 +137,24 @@ export default function LaunchNotes() {
     }
 
     const allowedCursoIds = Array.from(
-      new Set(info.map((item: any) => item.codigo_curso.toString()))
+      new Set(info.map((item: any) => item?.codigo_curso?.toString()))
     );
 
     const allowedClassIds = Array.from(
-      new Set(info.map((item: any) => item.codigo_classe.toString()))
+      new Set(info.map((item: any) => item?.codigo_classe?.toString()))
     );
 
     const allowedGradeIds = Array.from(
-      new Set(info.map((item: any) => item.codigo_grade.toString()))
+      new Set(info.map((item: any) => item?.codigo_grade?.toString()))
     );
 
-    const filteredClasses = allowedClassIds.length
-      ? classes.filter((c) => allowedClassIds.includes(c.codigo.toString()))
+    const filteredClasses = allowedClassIds?.length
+      ? classes.filter((c) => allowedClassIds?.includes(c?.codigo?.toString()))
       : classes;
 
-    const filteredUnidadesCurriculares = allowedGradeIds.length
+    const filteredUnidadesCurriculares = allowedGradeIds?.length
       ? unidadesCurriculares.filter((g) =>
-        allowedGradeIds.includes(g.pk.toString())
+        allowedGradeIds?.includes(g?.pk?.toString())
       )
       : unidadesCurriculares;
 
