@@ -11,7 +11,7 @@ export const MovementRow = ({
 }: {
   movement: CashRegisterMovement;
   onViewDetails: (movement: CashRegisterMovement) => void;
-  onValidate: (
+  onValidate?: (
     movement: CashRegisterMovement,
     action: "approved" | "rejected",
   ) => void;
