@@ -24,11 +24,12 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 min
 const WARNING_TIME = 10 * 1000; // 10 s
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { mutate: lockMyCashRegister } = useBlockMyCashRegister();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isPublicRoute = useIsPublicRoute();
   const [token, setToken] = useState<string | null>(AuthStorage.getToken());
-  const { mutate: lockMyCashRegister } = useBlockMyCashRegister();
+
   const [openWarning, setOpenWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(
     Math.ceil(WARNING_TIME / 1000),
@@ -68,6 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     (payload: AuthResponse) => {
       AuthStorage.saveLogin(payload);
       setToken(payload.access_token);
+      lockMyCashRegister();
       queryClient.invalidateQueries({ queryKey: ["current-user", "GA"] });
     },
     [queryClient],
@@ -83,9 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     countdownStarted.current = false;
     isCountingDown.current = false;
     prevShowWarningRef.current = false;
-
     setOpenWarning(false);
-    lockMyCashRegister();
     AuthStorage.logout();
     setToken(null);
     queryClient.clear();

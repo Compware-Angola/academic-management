@@ -42,7 +42,6 @@ import { useBlockMyCashRegister } from "@/hooks/financa/use-cash-register";
 export function Header() {
   const { data: user } = useCurrentUser("GA");
   const { mutate: logoutUser } = useMutationLogout();
-  const { mutateAsync: blockMyCashRegister } = useBlockMyCashRegister();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -345,9 +344,8 @@ export function Header() {
                   Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={async (e) => {
+                  onSelect={(e) => {
                     e.preventDefault();
-                    await blockMyCashRegister();
                     logoutUser({ platform: "GA" });
                   }}
                 >
