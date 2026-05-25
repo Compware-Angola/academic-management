@@ -264,43 +264,42 @@ export function MovementsTableReadOnly() {
             />
           )}
         </div>
-      </div>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[80px]">Código</TableHead>
+                <TableHead>Caixa</TableHead>
+                <TableHead>Operador</TableHead>
+                <TableHead>Valor Abertura</TableHead>
+                <TableHead>Total Arrecadado</TableHead>
+                <TableHead>Data Abertura</TableHead>
+                <TableHead>Hora da Abertura</TableHead>
+                <TableHead>Data do Fecho</TableHead>
+                <TableHead>Hora do Fecho</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-center w-[150px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">Código</TableHead>
-              <TableHead>Caixa</TableHead>
-              <TableHead>Operador</TableHead>
-              <TableHead>Valor Abertura</TableHead>
-              <TableHead>Total Arrecadado</TableHead>
-              <TableHead>Data Abertura</TableHead>
-              <TableHead>Hora da Abertura</TableHead>
-              <TableHead>Data do Fecho</TableHead>
-              <TableHead>Hora do Fecho</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-center w-[150px]">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
+            <TableBody>
+              {isLoading && <LoadingRow colSpan={colSpan} />}
 
-          <TableBody>
-            {isLoading && <LoadingRow colSpan={colSpan} />}
+              {!isLoading && movements.length === 0 && (
+                <EmptyRow colSpan={colSpan} />
+              )}
 
-            {!isLoading && movements.length === 0 && (
-              <EmptyRow colSpan={colSpan} />
-            )}
-
-            {!isLoading &&
-              movements.map((movement) => (
-                <MovementRow
-                  key={movement.code}
-                  movement={movement}
-                  onViewDetails={setSelectedMovement}
-                />
-              ))}
-          </TableBody>
-        </Table>
+              {!isLoading &&
+                movements.map((movement) => (
+                  <MovementRow
+                    key={movement.code}
+                    movement={movement}
+                    onViewDetails={setSelectedMovement}
+                  />
+                ))}
+            </TableBody>
+          </Table>
+        </div>
         {meta && meta.totalPages > 1 && (
           <Pagination
             currentPage={meta.page}
