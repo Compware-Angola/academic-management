@@ -37,10 +37,12 @@ import { useState, useEffect, useRef } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/students/use-query-students";
 import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
+import { useBlockMyCashRegister } from "@/hooks/financa/use-cash-register";
 
 export function Header() {
   const { data: user } = useCurrentUser("GA");
   const { mutate: logoutUser } = useMutationLogout();
+  const { mutate: blockMyCashRegister } = useBlockMyCashRegister();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
@@ -345,6 +347,7 @@ export function Header() {
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.preventDefault();
+                    blockMyCashRegister();
                     logoutUser({ platform: "GA" });
                   }}
                 >

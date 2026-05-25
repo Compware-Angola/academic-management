@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { LockOpen, Loader2 } from "lucide-react";
+import { LockOpen, Loader2, RefreshCw } from "lucide-react";
 
 import { AuthStorage } from "@/util/auth-storage";
 
@@ -17,29 +17,26 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 
-import { useVerifyMyCashRegisterOpeningCode } from "@/hooks/financa/use-cash-register";
+import {
+  useVerifyMyCashRegisterOpeningCode,
+  useRecoveryOpeningCode,
+} from "@/hooks/financa/use-cash-register";
+import { CashRegister } from "@/services/finance/cash-register.service";
 
 export function CashRegisterConfirmationAlert({
-  isOpen,
-  onVerified,
+  myCaixa,
 }: {
-  isOpen: boolean;
-  onVerified: () => void;
+  myCaixa: CashRegister;
 }) {
-  const isCashRegisterOpenningCodeVerified =
-    AuthStorage.isOpeningCodeVerified();
-
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const [openingCode, setOpeningCode] = useState("");
 
   const verifyOpeningCodeMutation = useVerifyMyCashRegisterOpeningCode();
+  const recoveryOpeningCodeMutation = useRecoveryOpeningCode();
 
   const handleVerifyOpeningCode = async () => {
     await verifyOpeningCodeMutation.mutateAsync(openingCode);
-
-    onVerified();
-
     setDialogOpen(false);
   };
 
@@ -51,28 +48,42 @@ export function CashRegisterConfirmationAlert({
 
           <div>
             <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-              {isOpen
+              {myCaixa && myCaixa.status === "aberto"
                 ? "Por favor confirme o caixa"
                 : "Nenhum caixa aberto para seu usuário"}
             </p>
 
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-0.5">
-              {isOpen
+              {myCaixa && myCaixa.status === "aberto"
                 ? "Informe o código de abertura do caixa para continuar."
                 : "Solicite ao administrador do sistema que abra um caixa para o seu usuário."}
             </p>
           </div>
         </div>
 
-        {!isCashRegisterOpenningCodeVerified && isOpen && (
-          <Button
-            size="sm"
-            className="shrink-0 gap-2"
-            onClick={() => setDialogOpen(true)}
-          >
-            <LockOpen className="h-4 w-4" />
-            Confirmar
-          </Button>
+        {myCaixa && myCaixa.status === "aberto" && (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={() => setDialogOpen(true)}
+            >
+              <LockOpen className="h-4 w-4" />
+              Confirmar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={() => recoveryOpeningCodeMutation.mutate()}
+              disabled={recoveryOpeningCodeMutation.isPending}
+            >
+              {recoveryOpeningCodeMutation.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              Recuperar Código
+            </Button>
+          </div>
         )}
       </div>
 
