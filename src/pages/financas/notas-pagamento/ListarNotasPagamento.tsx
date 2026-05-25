@@ -440,7 +440,7 @@ export default function ListarNotasPagamento() {
                             </Button>
                           )}
                         {/* Botão de info de anulação — aparece quando motivo/data são null */}
-                        {nota.motivo_anulacao === null && nota.data_anulacao === null && nota.estado !== 0 && (
+                        {nota.motivo_anulacao != null && nota.data_anulacao != null && nota.estado != 0 && (
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button
@@ -452,6 +452,7 @@ export default function ListarNotasPagamento() {
                                 <Info className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
+
                             <DialogContent className="max-w-sm">
                               <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
@@ -459,19 +460,41 @@ export default function ListarNotasPagamento() {
                                   Informações de Anulação
                                 </DialogTitle>
                               </DialogHeader>
+
                               <div className="space-y-3">
+
                                 <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Data de Anulação</p>
+                                  <p className="text-xs text-muted-foreground mb-1">
+                                    Anulado Por
+                                  </p>
+
                                   <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
-                                    {nota.data_anulacao ? formatDate(nota.data_anulacao) : "Não informada"}
+                                    {nota.utilizador_anulacao || "Não informado"}
                                   </p>
                                 </div>
+
                                 <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Motivo de Anulação</p>
+                                  <p className="text-xs text-muted-foreground mb-1">
+                                    Data de Anulação
+                                  </p>
+
+                                  <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
+                                    {nota.data_anulacao
+                                      ? formatDate(nota.data_anulacao)
+                                      : "Não informada"}
+                                  </p>
+                                </div>
+
+                                <div>
+                                  <p className="text-xs text-muted-foreground mb-1">
+                                    Motivo de Anulação
+                                  </p>
+
                                   <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
                                     {nota.motivo_anulacao ?? "Não informado"}
                                   </p>
                                 </div>
+
                               </div>
                             </DialogContent>
                           </Dialog>

@@ -146,7 +146,7 @@ export default function IsencaoServicoMultaItem() {
     if (!codigo) return;
 
     const body: UpdateIsencaoServicoBody = {};
-    console.log("edit form", editForm);
+
     if (originalEditForm) {
       if (
         String(editForm.codigoMatricula ?? "") !==
@@ -213,7 +213,6 @@ export default function IsencaoServicoMultaItem() {
       return;
     }
 
-    console.log(body);
     await mutateUpdate({ codigo, body });
     setIsEditOpen(false);
     setOriginalEditForm(null);

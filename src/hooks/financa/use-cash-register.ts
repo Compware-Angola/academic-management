@@ -1,3 +1,4 @@
+import { queryClient } from "@/lib/react-query";
 import {
   closeCashRegisterService,
   listCashRegistersService,
@@ -14,6 +15,8 @@ import {
   listCashRegisterMovementsService,
   ValidateMovementPayload,
   validateMovementService,
+  recoveryOpeningCodeService,
+  blockMyCashRegisterService,
 } from "@/services/finance/cash-register.service";
 import { AuthStorage } from "@/util/auth-storage";
 
@@ -122,36 +125,13 @@ export const useVerifyMyCashRegisterOpeningCode = () => {
   return useMutation({
     mutationFn: (openingCode: string) =>
       verifyMyCashRegisterOpeningCodeService(openingCode),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-register"],
+      });
+    },
   });
 };
-
-export function useCashRegisterOpeningCodeVerification() {
-  const [isVerified, setIsVerified] = useState(
-    AuthStorage.isOpeningCodeVerified(),
-  );
-
-  const verify = () => {
-    AuthStorage.saveOpeningCodeVerified();
-
-    setIsVerified(true);
-  };
-
-  const reset = () => {
-    AuthStorage.removeOpeningCodeVerified();
-
-    setIsVerified(false);
-  };
-
-  useEffect(() => {
-    setIsVerified(AuthStorage.isOpeningCodeVerified());
-  }, []);
-
-  return {
-    isVerified,
-    verify,
-    reset,
-  };
-}
 
 export const useQueryCashRegisterMovements = (
   filters?: ListCashRegisterMovementsFilters,
@@ -176,6 +156,42 @@ export const useValidateMovement = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ["cash-registers"],
+      });
+    },
+  });
+};
+
+export const useRecoveryOpeningCode = () => {
+  return useMutation({
+    mutationFn: () => recoveryOpeningCodeService(),
+    onSuccess: () => {
+      toast.success("Enviamos um novo codigo de abertura para o seu e-mail");
+    },
+  });
+};
+
+export const useBlockMyCashRegister = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => blockMyCashRegisterService(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-register"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-summary"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-register-movements"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-operators"],
       });
     },
   });

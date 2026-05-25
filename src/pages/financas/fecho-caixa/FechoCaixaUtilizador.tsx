@@ -64,8 +64,6 @@ export function CloseCashRegisterPage() {
         observation: formData.observation || undefined,
       };
 
-      console.log(payload);
-
       /*
       await api.put(
         `/cash-registers/${id}/close`,
