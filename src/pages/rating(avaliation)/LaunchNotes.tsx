@@ -136,7 +136,7 @@ export default function LaunchNotes() {
         new Set(
           info
             .filter((item: any) => item?.codigo_curso != null)
-            .map((item: any) => item.codigo_curso.toString()),
+            .map((item: any) => item?.codigo_curso?.toString()),
         ),
       );
 
@@ -144,7 +144,7 @@ export default function LaunchNotes() {
         new Set(
           info
             .filter((item: any) => item?.codigo_classe != null)
-            .map((item: any) => item.codigo_classe.toString()),
+            .map((item: any) => item?.codigo_classe?.toString()),
         ),
       );
 
@@ -152,7 +152,7 @@ export default function LaunchNotes() {
         new Set(
           info
             .filter((item: any) => item?.codigo_grade != null)
-            .map((item: any) => item.codigo_grade.toString()),
+            .map((item: any) => item?.codigo_grade?.toString()),
         ),
       );
 
