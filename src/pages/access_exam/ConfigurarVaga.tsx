@@ -3,6 +3,7 @@ import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 
 import { FormSelect } from "@/components/common/FormSelect";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateVaga } from "@/hooks/access_exam/use-create-vaga";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useCursos } from "@/hooks/use-cursos";
 import { ListaVagas } from "./ListaVagas";
 
 export default function ConfigurarVaga() {
@@ -24,7 +24,6 @@ export default function ConfigurarVaga() {
   const [numVagas, setNumVagas] = useState("");
   const [cursosOpcionais, setCursosOpcionais] = useState("");
 
-  const { data: cursos = [], isLoading: isLoadingCursos } = useCursos();
   const { data: periodos = [], isLoading: isLoadingPeriodos } =
     useQueryPeriod();
   const { data: anosLetivos = [], isLoading: isLoadingAnosLetivos } =
@@ -71,18 +70,11 @@ export default function ConfigurarVaga() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <FormSelect
+            <CourseSelect
               label="Curso"
               value={cursoId}
-              onChange={setCursoId}
-              options={cursos}
-              loading={isLoadingCursos}
+              onChangeValue={setCursoId}
               disabled={createVaga.isPending}
-              map={(curso) => ({
-                key: curso.codigo,
-                value: curso.codigo,
-                label: curso.designacao,
-              })}
             />
 
             <FormSelect
