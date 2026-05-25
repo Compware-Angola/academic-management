@@ -60,7 +60,6 @@ export const EmptyRow = ({ colSpan }: { colSpan: number }) => (
   </TableRow>
 );
 export function MovementsTable() {
-  // Estados
   const [search, setSearch] = useState("");
   const [operatorId, setOperatorId] = useState("");
   const [caixa, setCaixa] = useState("");
