@@ -2,13 +2,16 @@ import { Badge } from "@/components/ui/badge";
 import { CashRegisterMovement } from "@/services/finance/cash-register.service";
 import { formatCurrencyAOA } from "@/util/format-currency";
 import { formatDate } from "../../notas-pagamento/components/form";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { MovementDetailsPDF } from "@/components/views/pdf/MovementDetailsPDF";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export function MovementDetails({
   movement,
 }: {
   movement: CashRegisterMovement;
 }) {
-  // Função para formatar hora (HH:MM)
   const formatTime = (time: string | null) => {
     if (!time) return "-";
     if (time.includes(":")) {
@@ -173,6 +176,20 @@ export function MovementDetails({
           </p>
         </div>
       )}
+
+      <div className="border-t pt-4 flex justify-end">
+        <PDFDownloadLink
+          document={<MovementDetailsPDF movement={movement} />}
+          fileName={`movimento-${movement.code}.pdf`}
+        >
+          {({ loading }) => (
+            <Button disabled={loading}>
+              <Download className="w-4 h-4 mr-2" />
+              {loading ? "Gerando PDF..." : "Baixar PDF"}
+            </Button>
+          )}
+        </PDFDownloadLink>
+      </div>
     </div>
   );
 }
