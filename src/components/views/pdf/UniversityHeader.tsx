@@ -1,4 +1,23 @@
 import { Image, Text, View, StyleSheet } from "@react-pdf/renderer";
+export interface EntityHeader {
+  logoSrc: string;
+  name: string;
+  details: string[];
+  primaryColor?: string;
+}
+
+export const defaultHeader: EntityHeader = {
+  logoSrc: "/logo_uma.png",
+  name: "Universidade Metodista de Angola",
+  details: [
+    "Luanda - Angola",
+    "Rua Nossa Senhora da Muxima Nº 10, Bairro Kinaxixi",
+    "NIF: 5401150865",
+    "Tel: +244 912 131 138 | +244 947 716 133",
+    "Email: geral@uma.co.ao",
+  ],
+  primaryColor: "#0D1B48",
+};
 export interface UniversityHeaderProps {
   logoSrc: string;
   name: string;
@@ -9,58 +28,51 @@ export interface UniversityHeaderProps {
   nif: string;
   primaryColor?: string;
 }
-export const defaultCashClosingHeader: UniversityHeaderProps = {
-  logoSrc: "/logo_uma.png",
-  name: "UNIVERSIDADE METODISTA DE ANGOLA",
-  decree: "(Aprovado pelo Decreto nº 30/07 de 07/05)",
-  address: "Rua Nossa Senhora da Muxima",
-  addressLine2: "Nº10, C.P.-6739-Luanda",
-  phone: "947716113",
-  nif: "5401150865",
-  primaryColor: "#0D1B48",
-};
-const S = StyleSheet.create({
-  topBlock: {
-    alignItems: "flex-end",
-    marginBottom: 10,
+const baseStyles = StyleSheet.create({
+  page: {
+    fontFamily: "Helvetica",
+    fontSize: 9.5,
+    padding: 24,
+    backgroundColor: "#fff",
   },
-  logo: {
-    width: 90,
-    height: 52,
-    marginBottom: 4,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1.5,
+    paddingBottom: 8,
+    marginBottom: 14,
   },
-  orgName: {
-    fontSize: 13,
-    fontFamily: "Helvetica-Bold",
-    textAlign: "right",
-  },
-  decree: {
-    fontSize: 8,
-    marginTop: 2,
-    color: "#6B7280",
-    textAlign: "right",
-  },
-  dividerLine: {
-    borderBottomWidth: 2,
-    borderBottomColor: "#0D1B48",
-    marginBottom: 18,
+  logo: { width: 100, height: 50 },
+  entityInfo: { textAlign: "right" },
+  entityName: { fontSize: 13, fontWeight: "bold" },
+  entityDetail: { fontSize: 8, color: "#444", marginTop: 1 },
+  title: {
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginVertical: 8,
+    textTransform: "uppercase" as const,
   },
 });
 
-export function UniversityHeader({
-  header,
-}: {
-  header: UniversityHeaderProps;
-}) {
+export function UniversityHeader() {
+  const color = "#0D1B48";
   return (
     <>
-      <View style={S.topBlock}>
-        <Image style={S.logo} src={header.logoSrc} />
-        <Text style={S.orgName}>{header.name}</Text>
-        {header.decree && <Text style={S.decree}>{header.decree}</Text>}
+      <View style={[baseStyles.header, { borderColor: color }]}>
+        <Image style={baseStyles.logo} src={defaultHeader.logoSrc} />
+        <View style={baseStyles.entityInfo}>
+          <Text style={[baseStyles.entityName, { color }]}>
+            {defaultHeader.name}
+          </Text>
+          {defaultHeader.details.map((line, i) => (
+            <Text key={i} style={baseStyles.entityDetail}>
+              {line}
+            </Text>
+          ))}
+        </View>
       </View>
-
-      <View style={S.dividerLine} />
     </>
   );
 }
