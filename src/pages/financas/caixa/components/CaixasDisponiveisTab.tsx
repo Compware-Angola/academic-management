@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import {
   Loader2,
   LockOpen,
   Search,
   AlertCircle,
-  Eye,
   ChevronLeft,
   ChevronRight,
   Check,
