@@ -18,7 +18,14 @@ import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { useAuth } from "@/hooks/use-auth";
 import { AxiosError } from "axios";
 import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useMutationCreateMesTemp } from "@/hooks/academiccalendar/use-mutation-create-mes-temp";
 
 // Memoiza o item da vaga para evitar re-renders desnecessários
@@ -36,7 +43,9 @@ const VagaItem = React.memo(
       <div className="flex items-center justify-between p-4 border rounded-lg bg-card hover:bg-accent/30 transition-colors">
         <div className="flex-1 min-w-0">
           <p className="font-medium truncate">{vaga.cursoDescricao}</p>
-          <p className="text-sm text-muted-foreground truncate">{vaga.periodoDescricao}</p>
+          <p className="text-sm text-muted-foreground truncate">
+            {vaga.periodoDescricao}
+          </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <Button
@@ -66,7 +75,7 @@ const VagaItem = React.memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 type Step = "periodos" | "vagas" | "mensalidades";
@@ -79,9 +88,21 @@ interface ParametersEditModalProps {
 }
 
 const steps: { id: Step; title: string; icon: React.ReactNode }[] = [
-  { id: "periodos", title: "Períodos Letivos", icon: <Calendar className="h-5 w-5" /> },
-  { id: "vagas", title: "Vagas Disponíveis", icon: <Users className="h-5 w-5" /> },
-  { id: "mensalidades", title: "Mensalidades", icon: <CreditCard className="h-5 w-5" /> },
+  {
+    id: "periodos",
+    title: "Períodos Letivos",
+    icon: <Calendar className="h-5 w-5" />,
+  },
+  {
+    id: "vagas",
+    title: "Vagas Disponíveis",
+    icon: <Users className="h-5 w-5" />,
+  },
+  {
+    id: "mensalidades",
+    title: "Mensalidades",
+    icon: <CreditCard className="h-5 w-5" />,
+  },
 ];
 
 export function ParametersEditModal({
@@ -103,13 +124,18 @@ export function ParametersEditModal({
     dataFimSegundoSemestre: "",
   });
 
-  const [anoInicioDefinido, setAnoInicioDefinido] = useState<number | undefined>(undefined);
-  const [anoFimDefinido, setAnoFimDefinido] = useState<number | undefined>(undefined);
+  const [anoInicioDefinido, setAnoInicioDefinido] = useState<
+    number | undefined
+  >(undefined);
+  const [anoFimDefinido, setAnoFimDefinido] = useState<number | undefined>(
+    undefined,
+  );
 
   const [vagasEditadas, setVagasEditadas] = useState<any[]>([]);
   const [mensalidadesEditadas, setMensalidadesEditadas] = useState<any[]>([]);
 
-  const { data: vagasOriginais = [], isLoading: loadingVagas } = useQueryVacancies();
+  const { data: vagasOriginais = [], isLoading: loadingVagas } =
+    useQueryVacancies();
 
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
@@ -118,7 +144,12 @@ export function ParametersEditModal({
     const inicio1 = periodosForm.dataInicioPrimeiroSemestre;
     const fim2 = periodosForm.dataFimSegundoSemestre;
 
-    if (inicio1 && fim2 && anoInicioDefinido === undefined && anoFimDefinido === undefined) {
+    if (
+      inicio1 &&
+      fim2 &&
+      anoInicioDefinido === undefined &&
+      anoFimDefinido === undefined
+    ) {
       const startYear = new Date(inicio1).getFullYear();
       const endYear = new Date(fim2).getFullYear();
       const finalYear = endYear >= startYear ? endYear : startYear + 1;
@@ -131,23 +162,34 @@ export function ParametersEditModal({
       setAnoInicioDefinido(startYear);
       setAnoFimDefinido(finalYear);
     }
-  }, [periodosForm.dataInicioPrimeiroSemestre, periodosForm.dataFimSegundoSemestre]);
+  }, [
+    periodosForm.dataInicioPrimeiroSemestre,
+    periodosForm.dataFimSegundoSemestre,
+  ]);
 
   // Carrega vagas apenas quando necessário (evita loop)
   useEffect(() => {
     if (currentStep !== "vagas") return;
     if (vagasOriginais.length === 0 || vagasEditadas.length > 0) return;
 
-    console.log("Carregando vagas editadas:", vagasOriginais.length, "itens");
-    setVagasEditadas(vagasOriginais.map((v) => ({ ...v, numeroVagas: v.numeroVagas || 0 })));
+    setVagasEditadas(
+      vagasOriginais.map((v) => ({ ...v, numeroVagas: v.numeroVagas || 0 })),
+    );
   }, [currentStep, vagasOriginais]);
 
   // Geração de meses (só quando anos definidos)
-  const { data: mesesTemp, isLoading: loadingMeses, error: errorMeses } = useQueryGenerateMesTemp(
+  const {
+    data: mesesTemp,
+    isLoading: loadingMeses,
+    error: errorMeses,
+  } = useQueryGenerateMesTemp(
     { anoInicial: anoInicioDefinido, anoFinal: anoFimDefinido },
     {
-      enabled: !!anoInicioDefinido && !!anoFimDefinido && anoFimDefinido > anoInicioDefinido,
-    }
+      enabled:
+        !!anoInicioDefinido &&
+        !!anoFimDefinido &&
+        anoFimDefinido > anoInicioDefinido,
+    },
   );
 
   // Atualiza mensalidades quando chegamos ao passo
@@ -188,11 +230,12 @@ export function ParametersEditModal({
 
       const periodoRes = await axiosApexGa.post(
         "/ga/teaching-parameters/academic-year",
-        periodoPayload
+        periodoPayload,
       );
       const codigoAnoLectivo = periodoRes.data.codigo;
 
-      if (!codigoAnoLectivo) throw new Error("Código do ano letivo não retornado");
+      if (!codigoAnoLectivo)
+        throw new Error("Código do ano letivo não retornado");
 
       const vagasPayload = {
         codigo_ano_lectivo: codigoAnoLectivo,
@@ -230,7 +273,7 @@ export function ParametersEditModal({
                 semestre_posgraduacao: mes.semestre_posgraduacao,
               })),
             },
-            { onSuccess: resolve, onError: reject }
+            { onSuccess: resolve, onError: reject },
           );
         });
       }
@@ -364,7 +407,9 @@ export function ParametersEditModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl! w-full max-h-[90vh]! overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Configurar Parâmetros Acadêmicos</DialogTitle>
+          <DialogTitle className="text-2xl">
+            Configurar Parâmetros Acadêmicos
+          </DialogTitle>
           <DialogDescription>
             Configure períodos e vagas. Tudo será salvo ao final.
           </DialogDescription>
@@ -372,20 +417,34 @@ export function ParametersEditModal({
 
         {/* Progresso */}
         <div className="mt-6">
-          <Progress value={((currentIndex + 1) / steps.length) * 100} className="h-2 mb-6" />
+          <Progress
+            value={((currentIndex + 1) / steps.length) * 100}
+            className="h-2 mb-6"
+          />
           <div className="flex justify-between items-center mb-8">
             {steps.map((step, index) => (
-              <div key={step.id} className="flex flex-col items-center gap-2 flex-1 relative">
+              <div
+                key={step.id}
+                className="flex flex-col items-center gap-2 flex-1 relative"
+              >
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    index <= currentIndex ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                    index <= currentIndex
+                      ? "bg-primary text-white"
+                      : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  {index < currentIndex ? <CheckCircle className="h-6 w-6" /> : step.icon}
+                  {index < currentIndex ? (
+                    <CheckCircle className="h-6 w-6" />
+                  ) : (
+                    step.icon
+                  )}
                 </div>
                 <span
                   className={`text-xs font-medium text-center ${
-                    index <= currentIndex ? "text-primary" : "text-muted-foreground"
+                    index <= currentIndex
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {step.title}
@@ -411,7 +470,11 @@ export function ParametersEditModal({
               </h3>
               <div className="space-y-2">
                 <Label>Designação (automática)</Label>
-                <Input value={periodosForm.designacao} disabled className="bg-muted" />
+                <Input
+                  value={periodosForm.designacao}
+                  disabled
+                  className="bg-muted"
+                />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {[
@@ -460,7 +523,9 @@ export function ParametersEditModal({
               ) : vagasOriginais.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground border rounded-lg">
                   <p>Nenhuma vaga encontrada</p>
-                  <p className="text-sm mt-2">Verifique se há cursos/períodos cadastrados</p>
+                  <p className="text-sm mt-2">
+                    Verifique se há cursos/períodos cadastrados
+                  </p>
                 </div>
               ) : vagasEditadas.length === 0 ? (
                 <p className="text-center py-10 text-muted-foreground">
@@ -495,7 +560,9 @@ export function ParametersEditModal({
               ) : errorMeses ? (
                 <div className="text-center py-12 text-destructive">
                   <p>Erro ao gerar mensalidades</p>
-                  <p className="text-sm">{(errorMeses as Error)?.message || "Tente novamente"}</p>
+                  <p className="text-sm">
+                    {(errorMeses as Error)?.message || "Tente novamente"}
+                  </p>
                 </div>
               ) : mensalidadesEditadas.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground border rounded-lg">
@@ -524,12 +591,18 @@ export function ParametersEditModal({
                     <TableBody>
                       {mensalidadesEditadas.map((item, index) => (
                         <TableRow key={index}>
-                          <TableCell className="font-medium">{item.designacao}</TableCell>
+                          <TableCell className="font-medium">
+                            {item.designacao}
+                          </TableCell>
                           <TableCell>{item.ordem_mes}</TableCell>
                           <TableCell>{item.prestacao}ª</TableCell>
                           <TableCell>{item.semestre}º</TableCell>
-                          <TableCell>{item.data_inicial?.split("T")[0] || "-"}</TableCell>
-                          <TableCell>{item.data_final?.split("T")[0] || "-"}</TableCell>
+                          <TableCell>
+                            {item.data_inicial?.split("T")[0] || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {item.data_final?.split("T")[0] || "-"}
+                          </TableCell>
                           <TableCell>
                             <Input
                               type="date"
@@ -538,16 +611,24 @@ export function ParametersEditModal({
                                 const newValue = e.target.value;
                                 setMensalidadesEditadas((prev) =>
                                   prev.map((mes, i) =>
-                                    i === index ? { ...mes, data_limite: newValue } : mes
-                                  )
+                                    i === index
+                                      ? { ...mes, data_limite: newValue }
+                                      : mes,
+                                  ),
                                 );
                               }}
                               className="w-[150px]"
                             />
                           </TableCell>
-                          <TableCell>{item.isencao === 1 ? "Sim" : "Não"}</TableCell>
-                          <TableCell>{item.activo === 1 ? "Activo" : "Inactivo"}</TableCell>
-                          <TableCell>{item.activo_posgraduacao === 1 ? "Sim" : "Não"}</TableCell>
+                          <TableCell>
+                            {item.isencao === 1 ? "Sim" : "Não"}
+                          </TableCell>
+                          <TableCell>
+                            {item.activo === 1 ? "Activo" : "Inactivo"}
+                          </TableCell>
+                          <TableCell>
+                            {item.activo_posgraduacao === 1 ? "Sim" : "Não"}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -560,7 +641,11 @@ export function ParametersEditModal({
 
         {/* Botões */}
         <div className="flex justify-between mt-8 pt-6 border-t">
-          <Button variant="outline" onClick={handlePrev} disabled={currentIndex === 0}>
+          <Button
+            variant="outline"
+            onClick={handlePrev}
+            disabled={currentIndex === 0}
+          >
             Anterior
           </Button>
           <div className="flex gap-3">
@@ -569,7 +654,10 @@ export function ParametersEditModal({
             </Button>
             <Button
               onClick={handleNext}
-              disabled={mutationTudo.isPending || (currentStep === "periodos" && !isPeriodoValid())}
+              disabled={
+                mutationTudo.isPending ||
+                (currentStep === "periodos" && !isPeriodoValid())
+              }
             >
               {mutationTudo.isPending ? (
                 <>
@@ -579,7 +667,14 @@ export function ParametersEditModal({
                     fill="none"
                     viewBox="0 0 24 24"
                   >
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
                     <path
                       className="opacity-75"
                       fill="currentColor"

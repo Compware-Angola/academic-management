@@ -77,7 +77,7 @@ export function EstatisticaDeEstudantesAprovadosEReprovados() {
       }));
     }
   }, [filters.curso]);
-  console.log(appliedFilters);
+
   const students = [];
   const total = 0;
   const totalPages = 0;

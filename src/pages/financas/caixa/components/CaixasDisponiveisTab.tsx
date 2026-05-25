@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import {
   Loader2,
   LockOpen,
   Search,
   AlertCircle,
-  Eye,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -21,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -110,7 +108,7 @@ export function CaixasDisponiveisTab() {
                   <TableHead>Nome da Caixa</TableHead>
                   <TableHead>Operador Responsável</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Código de Abertura</TableHead>
+                  <TableHead>Bloqueado</TableHead>
                   <TableHead className="text-center w-[100px]">Ação</TableHead>
                 </TableRow>
               </TableHeader>
@@ -148,24 +146,7 @@ export function CaixasDisponiveisTab() {
                       </TableCell>
                       <TableCell>{getStatusBadge(item.status)}</TableCell>
                       <TableCell>
-                        {item.opening_code && (
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="font-mono">
-                              {visibleCodes[item.code]
-                                ? item.opening_code
-                                : "••••••"}
-                            </Badge>
-
-                            <button
-                              className="text-xs text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                              onClick={() => toggleOpeningCode(item.code)}
-                            >
-                              {visibleCodes[item.code] ? "Ocultar" : "Ver"}
-                            </button>
-
-                            <CopyButton text={item.opening_code} />
-                          </div>
-                        )}
+                        {item.blocked === "S" ? "Sim" : "Não"}
                       </TableCell>
                       <TableCell className="text-center">
                         <Button

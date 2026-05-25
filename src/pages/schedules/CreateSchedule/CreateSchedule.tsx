@@ -172,7 +172,7 @@ export default function CreateSchedule() {
     salaId: formData.sala,
     anoLectivo: formData.anoLetivo,
     periodo: formData.periodo,
-    semestre:formData.semestre,
+    semestre: formData.semestre,
   });
 
   const ocupadasSet = useMemo(
@@ -664,7 +664,7 @@ function gerarSiglaCurso(nome: string) {
  */
 export function mapOcupacaoPorChave(aulas: AulasOcupadasPorDia[]) {
   const ocupadas = new Set<string>();
-  console.log({ aulas });
+
   aulas.forEach((dia) => {
     dia.tempos.forEach((tempo) => {
       const key = `${dia.diaSemana.pkDiaDaSemana}-${tempo.ordem_tempo}`;

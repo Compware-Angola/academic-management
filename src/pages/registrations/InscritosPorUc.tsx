@@ -40,7 +40,6 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQueryInscritosPorUc } from "@/hooks/enrollment/use-query-inscritos-por-uc";
 import { useQueryHorariosDisponiveisInscritosPorUc } from "@/hooks/enrollment/use-query-horarios-disponiveis-por-uc";
 
-
 type InscritoPorUcRow = {
   numero: number;
   matricula: number | string;
@@ -89,7 +88,7 @@ export default function InscritosPorUc() {
   const { data: periodos = [] } = useQueryPeriod();
   const { data: cursos = [] } = useCursos();
 
-  console.log("PERIODOS: ", periodos)
+  console.log("PERIODOS: ", periodos);
 
   const { data: anosCurriculares = [], isLoading: isLoadingAnoCurricular } =
     useQueryClassFilterByCurso({
@@ -108,7 +107,6 @@ export default function InscritosPorUc() {
           : undefined,
     });
 
-
   const { data: horarios = [], isLoading: isLoadingHorarios } =
     useQueryHorariosDisponiveisInscritosPorUc({
       anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
@@ -126,11 +124,11 @@ export default function InscritosPorUc() {
 
   const horariosOptions = Array.isArray(horarios)
     ? horarios
-      .map((item: any) => ({
-        codigo: item.codigo ?? item.CODIGO,
-        designacao: item.designacao ?? item.DESIGNACAO,
-      }))
-      .filter((item) => item.codigo)
+        .map((item: any) => ({
+          codigo: item.codigo ?? item.CODIGO,
+          designacao: item.designacao ?? item.DESIGNACAO,
+        }))
+        .filter((item) => item.codigo)
     : [];
 
   const canLoadHorarios =
@@ -139,7 +137,6 @@ export default function InscritosPorUc() {
     !!filters.periodo &&
     !!filters.curso &&
     !!filters.unidadeCurricular;
-
 
   const canLoadInscritos =
     !!appliedFilters.anoLectivo &&
@@ -160,8 +157,7 @@ export default function InscritosPorUc() {
       : 0,
     curso: appliedFilters.curso ? Number(appliedFilters.curso) : 0,
     anoCurricular:
-      appliedFilters.anoCurricular &&
-        appliedFilters.anoCurricular !== "all"
+      appliedFilters.anoCurricular && appliedFilters.anoCurricular !== "all"
         ? Number(appliedFilters.anoCurricular)
         : 0,
     semestre: appliedFilters.semestre ? Number(appliedFilters.semestre) : 0,
@@ -174,7 +170,7 @@ export default function InscritosPorUc() {
     search: appliedFilters.search ?? "",
   });
 
-  const inscritos = canLoadInscritos ? inscritosResponse?.data ?? [] : [];
+  const inscritos = canLoadInscritos ? (inscritosResponse?.data ?? []) : [];
 
   const exportRows = useMemo(
     () =>
@@ -185,7 +181,7 @@ export default function InscritosPorUc() {
         curso: item.curso,
         estado: item.estado,
       })),
-    [inscritos]
+    [inscritos],
   );
 
   const pdfContent =
@@ -216,26 +212,26 @@ export default function InscritosPorUc() {
   const excelProps =
     exportRows.length > 0
       ? {
-        documentTitle: "Lista de Inscritos por UC",
-        subtitle: "Listagem de estudantes inscritos por unidade curricular",
-        infoSections: [
-          {
-            title: "Resumo",
-            content: `Total de registos: ${inscritosResponse?.total ?? exportRows.length}`,
-          },
-        ],
-        mainTable: {
-          headers: [
-            { key: "matricula", label: "Matrícula", width: 20 },
-            { key: "nome", label: "Nome", width: 40 },
-            { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
-            { key: "curso", label: "Curso", width: 25 },
-            { key: "estado", label: "Estado", width: 18 },
+          documentTitle: "Lista de Inscritos por UC",
+          subtitle: "Listagem de estudantes inscritos por unidade curricular",
+          infoSections: [
+            {
+              title: "Resumo",
+              content: `Total de registos: ${inscritosResponse?.total ?? exportRows.length}`,
+            },
           ],
-          rows: exportRows,
-        },
-        primaryColor: "#0D1B48",
-      }
+          mainTable: {
+            headers: [
+              { key: "matricula", label: "Matrícula", width: 20 },
+              { key: "nome", label: "Nome", width: 40 },
+              { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
+              { key: "curso", label: "Curso", width: 25 },
+              { key: "estado", label: "Estado", width: 18 },
+            ],
+            rows: exportRows,
+          },
+          primaryColor: "#0D1B48",
+        }
       : null;
 
   const columns = [
@@ -262,9 +258,6 @@ export default function InscritosPorUc() {
     periodo: filters.periodo ? Number(filters.periodo) : 0,
     cadeira: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : 0,
   });
-
-  console.log("HORARIOS RAW:", horarios);
-  console.log("HORARIOS NORMALIZED:", horariosOptions);
 
   return (
     <div className="p-6 space-y-8">
@@ -452,9 +445,7 @@ export default function InscritosPorUc() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Unidade Curricular
-              </label>
+              <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
                 value={filters.unidadeCurricular}
                 onValueChange={(v) =>

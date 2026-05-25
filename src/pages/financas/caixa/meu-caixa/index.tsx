@@ -50,7 +50,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import {
-  useCashRegisterOpeningCodeVerification,
   useCloseCashRegister,
   useQueryMyCashRegister,
   useQueryMyCashSummary,
@@ -121,9 +120,6 @@ function SummarySkeleton() {
 
 function MeuCaixaAtualTab() {
   const { data: user } = useCurrentUser("GA");
-  const { reset } = useCashRegisterOpeningCodeVerification();
-  const { isVerified: isCashRegisterOpeningCodeVerified, verify } =
-    useCashRegisterOpeningCodeVerification();
   const [confirmClose, setConfirmClose] = useState(false);
 
   const { data: myCaixa, isLoading: isLoadingCaixa } = useQueryMyCashRegister();
@@ -156,13 +152,10 @@ function MeuCaixaAtualTab() {
     const url = URL.createObjectURL(blob);
     window.open(url);
 
-    reset();
     setConfirmClose(false);
   }
 
   const hasCaixaAberto = !!myCaixa;
-  const canAccessCashRegister =
-    hasCaixaAberto && isCashRegisterOpeningCodeVerified;
 
   if (isLoadingCaixa) {
     return (
@@ -188,11 +181,11 @@ function MeuCaixaAtualTab() {
     );
   }
 
-  if (hasCaixaAberto && !isCashRegisterOpeningCodeVerified) {
-    return <CashRegisterConfirmationAlert isOpen={true} onVerified={verify} />;
+  if (myCaixa && (myCaixa.status === "fechado" || myCaixa.blocked === "S")) {
+    return <CashRegisterConfirmationAlert myCaixa={myCaixa} />;
   }
 
-  if (canAccessCashRegister) {
+  if (myCaixa && myCaixa.status === "aberto" && myCaixa.blocked === "N") {
     return (
       <div className="space-y-4">
         <Card>
@@ -333,7 +326,7 @@ function MeuCaixaAtualTab() {
     );
   }
 
-  if (!hasCaixaAberto) {
+  if (!myCaixa) {
     return (
       <Card className="border-dashed">
         <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">

@@ -60,7 +60,7 @@ export function NotasPagamentoEstatisticas() {
 
     return data.data.map((item) => {
       const filtered: Record<string, any> = { data: item.data };
-      
+
       chartLabels.forEach((label) => {
         if (item[label] !== undefined) {
           filtered[label] = item[label];
@@ -70,8 +70,6 @@ export function NotasPagamentoEstatisticas() {
       return filtered;
     });
   }, [data, chartLabels]);
-
-console.log(chartConfig)
 
   return (
     <div>

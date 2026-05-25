@@ -187,7 +187,7 @@ export default function ScheduleGrid({
           <CardContent className="p-3 space-y-2">
             {item.tempos.map((tempo) => {
               const filled = hasData(item.diaSemana.pkDiaDaSemana, tempo.ordem);
-              console.log({ filled });
+
               const ocupada = isOcupada(
                 item.diaSemana.pkDiaDaSemana,
                 tempo.ordem,
