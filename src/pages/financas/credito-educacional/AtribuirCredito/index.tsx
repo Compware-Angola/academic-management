@@ -181,6 +181,7 @@ export default function AtribuirCredito() {
             />
             <SemestreSelect
               disabled={!aluno}
+              yearly
               value={payload.semestre}
               onChangeValue={(v) => setPayload((p) => ({ ...p, semestre: v }))}
             />

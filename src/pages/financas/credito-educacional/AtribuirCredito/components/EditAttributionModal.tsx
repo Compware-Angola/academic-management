@@ -70,6 +70,7 @@ export function EditAttributionModal({
             }
           />
           <SemestreSelect
+            yearly
             value={payload.semestre}
             onChangeValue={(v) => setPayload((p) => ({ ...p, semestre: v }))}
           />
