@@ -1,9 +1,4 @@
-import PDFActions, {
-  GenericPDFDocument,
-} from "@/components/views/pdf/GenericPDFDocument";
-import ExcelActions from "@/components/views/excel/GenericExcelExport";
-
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -24,113 +19,119 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, FileText, Home } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronLeft, ChevronRight, FileText, Home, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryFetchBolsaEstudante } from "@/hooks/financas/bolsa/use-query-fetch-bolsa-estudante";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
-import { useCursos } from "@/hooks/use-cursos";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FetchBolsaEstudanteParams } from "@/services/financas/bolsa/fetch-bolsa-estudante.service";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 export default function ListarBolsaEstudante() {
-  const [resetKey, setResetKey] = useState(0);
-
-  // ================= INPUTS COM DEBOUNCE =================
-  const [nomeInput, setNomeInput] = useState("");
-  const [cursoInput, setCursoInput] = useState("");
-  const debouncedNome = useDebounce(nomeInput, 500);
-  const debouncedCurso = useDebounce(cursoInput, 500);
-
-  // ================= FILTROS DA API =================
-  const [filters, setFilters] = useState({
-    nome: undefined as string | undefined,
-    curso: undefined as string | undefined,
-    codigoAnoLectivo: undefined as number | undefined,
-    codigoMatricula: undefined as number | undefined,
-    codigoInstituicao: undefined as number | undefined,
-    codigoBolsa: undefined as number | undefined,
-    codigoTipoCredito: undefined as number | undefined,
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState("10");
+  const [filters, setFilters] = useState<FetchBolsaEstudanteParams>({
+    page: 1,
+    limit: 10,
+    codigoInstituicao: undefined,
+    codigoBolsa: undefined,
+    codigoTipoCredito: undefined,
+    nome: undefined,
+    codigoAnoLectivo: undefined,
+    codigoMatricula: undefined,
+    cursoId: undefined,
   });
 
-  const [pageUrl, setPageUrl] = useState<string | undefined>(undefined);
+  // Debounce para campos de texto
+  const debouncedNome = useDebounce(filters.nome, 500);
+  const debouncedMatricula = useDebounce(filters.codigoMatricula, 500);
 
-  const { data, isLoading } = useQueryFetchBolsaEstudante(filters, pageUrl);
-  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
-  const estudantes = data?.items ?? [];
+  // Atualiza os filtros com os valores debounced
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      nome: debouncedNome || undefined,
+      codigoMatricula: debouncedMatricula || undefined,
+      page,
+      limit: Number(limit),
+    }));
+  }, [debouncedNome, debouncedMatricula, page, limit]);
 
-  // ================= SEMESTRES =================
+  const { data, isLoading } = useQueryFetchBolsaEstudante(filters);
   const { data: semestres } = useQuerySemestres();
+  const estudantes = useMemo(() => data?.data ?? [], [data]);
+  const meta = useMemo(() => data?.meta, [data]);
+  const totalPages = meta?.totalPages ?? 1;
+  const currentPage = meta?.page ?? 1;
+  const totalItems = meta?.total ?? 0;
+
   const semestreMap = useMemo(
     () => new Map(semestres?.map((s) => [s.codigo, s.designacao]) ?? []),
     [semestres],
   );
 
-  // Atualiza filtros quando digitação para
-  useEffect(() => {
-    setFilters((f) => ({
-      ...f,
-      nome: debouncedNome || undefined,
-      curso: debouncedCurso || undefined,
-    }));
-    setPageUrl(undefined);
-  }, [debouncedNome, debouncedCurso]);
-
-  // ================= LIMPAR FILTROS =================
-  const handleClearFilters = () => {
-    setNomeInput("");
-    setCursoInput("");
+  // Limpar todos os filtros
+  const clearFilters = () => {
     setFilters({
-      nome: undefined,
-      curso: undefined,
-      codigoAnoLectivo: undefined,
-      codigoMatricula: undefined,
+      page: 1,
+      limit: Number(limit),
       codigoInstituicao: undefined,
       codigoBolsa: undefined,
       codigoTipoCredito: undefined,
+      nome: undefined,
+      codigoAnoLectivo: undefined,
+      codigoMatricula: undefined,
+      cursoId: undefined,
     });
-    setResetKey((k) => k + 1);
-    setPageUrl(undefined);
+    setPage(1);
   };
 
-  // ================= PAGINAÇÃO =================
-  const nextPage = () => data?.next?.$ref && setPageUrl(data.next.$ref);
-  const prevPage = () => data?.prev?.$ref && setPageUrl(data.prev.$ref);
-
-  // ================= FORMATADORES =================
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-AO", {
       style: "currency",
       currency: "AOA",
     }).format(value);
 
-  const formatDesconto = (valor: number, tipo: string) =>
-    tipo === "PERCENTUAL" ? `${valor}%` : formatCurrency(valor);
-
-  const cellStyle = "whitespace-nowrap truncate max-w-[220px] font-medium";
+  const formatDesconto = useCallback(
+    (valor: number, tipo: string) =>
+      tipo === "PERCENTUAL" ? `${valor}%` : formatCurrency(valor),
+    [],
+  );
 
   const pdfData = useMemo(() => {
     if (!estudantes.length) return null;
 
+    const filtrosAplicados =
+      [
+        filters.nome && `Nome: ${filters.nome}`,
+        filters.codigoMatricula && `Matrícula: ${filters.codigoMatricula}`,
+        filters.cursoId && `Curso ID: ${filters.cursoId}`,
+        filters.codigoAnoLectivo && `Ano Letivo: ${filters.codigoAnoLectivo}`,
+        filters.codigoInstituicao &&
+          `Instituição ID: ${filters.codigoInstituicao}`,
+        filters.codigoBolsa && `Bolsa ID: ${filters.codigoBolsa}`,
+      ]
+        .filter(Boolean)
+        .join(" | ") || "Sem filtros";
+
     return {
-      filtros:
-        [
-          filters.nome && `Nome: ${filters.nome}`,
-          filters.curso && `Curso: ${filters.curso}`,
-          filters.codigoAnoLectivo && `Ano Letivo: ${filters.codigoAnoLectivo}`,
-          filters.codigoInstituicao &&
-            `Instituição: ${filters.codigoInstituicao}`,
-          filters.codigoBolsa && `Bolsa: ${filters.codigoBolsa}`,
-        ]
-          .filter(Boolean)
-          .join(" | ") || "Sem filtros",
-
+      filtros: filtrosAplicados,
       total: estudantes.length,
-
       rows: estudantes.map((e) => ({
         matricula: e.codigo_matricula,
         nome: e.nome_completo,
@@ -144,7 +145,17 @@ export default function ListarBolsaEstudante() {
         bolsa: e.bolsa,
       })),
     };
-  }, [estudantes, filters, semestreMap]);
+  }, [
+    estudantes,
+    filters.codigoAnoLectivo,
+    filters.codigoBolsa,
+    filters.codigoInstituicao,
+    filters.codigoMatricula,
+    filters.cursoId,
+    filters.nome,
+    formatDesconto,
+    semestreMap,
+  ]);
 
   const pdfContent = pdfData ? (
     <GenericPDFDocument
@@ -205,13 +216,10 @@ export default function ListarBolsaEstudante() {
       }
     : null;
 
-  const baseFileName = `Estudantes_Bolsa_${new Date()
-    .toISOString()
-    .slice(0, 10)}`;
+  const baseFileName = `Estudantes_Bolsa_${new Date().toISOString().slice(0, 10)}`;
 
   return (
     <div className="p-6 space-y-6">
-      {/* BREADCRUMB */}
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -232,185 +240,263 @@ export default function ListarBolsaEstudante() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Estudantes com Bolsa</h1>
-          <p className="text-muted-foreground">
-            Lista completa de estudantes com créditos ou bolsas aplicadas.
-          </p>
-        </div>
-
-        {pdfData && excelProps && (
-          <div className="flex gap-2">
-            {pdfContent && (
-              <PDFActions
-                document={pdfContent}
-                fileName={`${baseFileName}.pdf`}
-                showDownload
-                showPrint
-              />
-            )}
-
-            <ExcelActions
-              excelProps={excelProps}
-              fileName={`${baseFileName}.xlsx`}
-              showDownload
-            />
-          </div>
-        )}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold">Estudantes com Bolsa</h1>
+        <p className="text-muted-foreground">
+          Lista completa de estudantes com créditos ou bolsas aplicadas.
+        </p>
       </div>
 
-      {/* ================= FILTROS ================= */}
+      {/* Filtros - mesmo padrão do ListarBolsa */}
       <Card>
-        <CardHeader>
-          <CardTitle>Filtros de Pesquisa</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Filtros</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearFilters}
+            className="gap-1"
+          >
+            <X className="h-4 w-4" />
+            Limpar Filtros
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="">
-                <Label>Nome do Estudante</Label>
-                <Input
-                  placeholder="Pesquisar por nome"
-                  value={nomeInput}
-                  onChange={(e) => setNomeInput(e.target.value)}
-                />
-              </div>
-
-              <div className="">
-                <CourseSelect
-                  value={filters.curso}
-                  onChangeValue={(v) => setFilters({ ...filters, curso: v })}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <AcademicYearSelect
-                value={filters.codigoAnoLectivo?.toString() ?? ""}
-                onChangeValue={(v) =>
-                  setFilters((f) => ({
-                    ...f,
-                    codigoAnoLectivo: v ? Number(v) : undefined,
-                  }))
-                }
-              />
-
-              <InstituicaoSelect
-                key={`instituicao-${resetKey}`}
-                value={filters.codigoInstituicao?.toString() ?? ""}
-                onChangeValue={(v) =>
-                  setFilters((f) => ({
-                    ...f,
-                    codigoInstituicao: v ? Number(v) : undefined,
-                  }))
-                }
-              />
-
-              <BolsaSelect
-                key={`bolsa-${resetKey}`}
-                value={filters.codigoBolsa?.toString() ?? ""}
-                onChangeValue={(v) =>
-                  setFilters((f) => ({
-                    ...f,
-                    codigoBolsa: v ? Number(v) : undefined,
-                  }))
-                }
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="nome">Nome do Estudante</Label>
+              <Input
+                id="nome"
+                placeholder="Digite o nome"
+                value={filters.nome || ""}
+                onChange={(e) => {
+                  setPage(1);
+                  setFilters((prev) => ({ ...prev, nome: e.target.value }));
+                }}
               />
             </div>
-            <div className="flex items-end justify-end">
-              <Button variant="outline" onClick={handleClearFilters}>
-                Limpar filtros
-              </Button>
+
+            <div className="space-y-2">
+              <Label htmlFor="matricula">Matrícula</Label>
+              <Input
+                id="matricula"
+                placeholder="Código da matrícula"
+                value={filters.codigoMatricula?.toString() || ""}
+                onChange={(e) => {
+                  setPage(1);
+                  setFilters((prev) => ({
+                    ...prev,
+                    codigoMatricula: Number(e.target.value),
+                  }));
+                }}
+              />
             </div>
+
+            <CourseSelect
+              value={filters.cursoId?.toString() || ""}
+              onChangeValue={(v) => {
+                setPage(1);
+                setFilters((prev) => ({
+                  ...prev,
+                  cursoId: v ? Number(v) : undefined,
+                }));
+              }}
+            />
+
+            <AcademicYearSelect
+              value={filters.codigoAnoLectivo?.toString() ?? ""}
+              onChangeValue={(v) => {
+                setPage(1);
+                setFilters((prev) => ({
+                  ...prev,
+                  codigoAnoLectivo: v ? Number(v) : undefined,
+                }));
+              }}
+            />
+
+            <InstituicaoSelect
+              value={filters.codigoInstituicao?.toString() ?? ""}
+              onChangeValue={(v) => {
+                setPage(1);
+                setFilters((prev) => ({
+                  ...prev,
+                  codigoInstituicao: v ? Number(v) : undefined,
+                }));
+              }}
+            />
+
+            <BolsaSelect
+              value={filters.codigoBolsa?.toString() ?? ""}
+              onChangeValue={(v) => {
+                setPage(1);
+                setFilters((prev) => ({
+                  ...prev,
+                  codigoBolsa: v ? Number(v) : undefined,
+                }));
+              }}
+            />
           </div>
         </CardContent>
       </Card>
 
-      {/* ================= TABELA ================= */}
+      {pdfData && excelProps && (
+        <div className="flex justify-end gap-2">
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
+          <ExcelActions
+            excelProps={excelProps}
+            fileName={`${baseFileName}.xlsx`}
+            showDownload
+          />
+        </div>
+      )}
+
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
 
         {isLoading ? (
           <div className="space-y-3">
-            {Array.from({ length: 10 }).map((_, i) => (
+            {Array.from({ length: Number(limit) }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
         ) : estudantes.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Nenhum estudante encontrado</p>
+            <p className="text-muted-foreground mb-2">
+              Nenhum registo encontrado
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Utilize os filtros acima para pesquisar
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Matrícula</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>BI</TableHead>
-                  <TableHead>Curso</TableHead>
-                  <TableHead>Instituição</TableHead>
-                  <TableHead>Ano Letivo</TableHead>
-                  <TableHead>Semestre</TableHead>
-                  <TableHead>Desconto</TableHead>
-                  <TableHead>Tipo Crédito</TableHead>
-                  <TableHead>Bolsa</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {estudantes.map((e) => (
-                  <TableRow key={e.codigo}>
-                    <TableCell className={cellStyle}>
-                      {e.codigo_matricula}
-                    </TableCell>
-                    <TableCell className={cellStyle} title={e.nome_completo}>
-                      {e.nome_completo}
-                    </TableCell>
-                    <TableCell className={cellStyle}>
-                      {e.bilhete_identidade}
-                    </TableCell>
-                    <TableCell className={cellStyle}>{e.curso}</TableCell>
-                    <TableCell className={cellStyle}>{e.instituicao}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {e.ano_lectivo}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {semestreMap.get(e.semestre) ?? "-"}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {formatDesconto(e.valor_desconto, e.tipo_desconto)}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {e.tipo_credito}
-                    </TableCell>
-                    <TableCell className={cellStyle}>{e.bolsa}</TableCell>
+          <>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Matrícula</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>BI</TableHead>
+                    <TableHead>Curso</TableHead>
+                    <TableHead>Instituição</TableHead>
+                    <TableHead>Ano Letivo</TableHead>
+                    <TableHead>Semestre</TableHead>
+                    <TableHead>Desconto</TableHead>
+                    <TableHead>Tipo Crédito</TableHead>
+                    <TableHead>Bolsa</TableHead>
+                    <TableHead>Estado</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-
-            {/* PAGINAÇÃO */}
-            <div className="flex items-center justify-end gap-2 p-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!data?.prev?.$ref}
-                onClick={prevPage}
-              >
-                <ChevronLeft className="h-4 w-4" /> Anterior
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!data?.next?.$ref}
-                onClick={nextPage}
-              >
-                Próxima <ChevronRight className="h-4 w-4" />
-              </Button>
+                </TableHeader>
+                <TableBody>
+                  {estudantes.map((e) => (
+                    <TableRow key={e.codigo}>
+                      <TableCell className="whitespace-nowrap">
+                        {e.codigo_matricula}
+                      </TableCell>
+                      <TableCell
+                        className="truncate max-w-[200px]"
+                        title={e.nome_completo}
+                      >
+                        {e.nome_completo}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {e.bilhete_identidade}
+                      </TableCell>
+                      <TableCell
+                        className="truncate max-w-[150px]"
+                        title={e.curso}
+                      >
+                        {e.curso}
+                      </TableCell>
+                      <TableCell
+                        className="truncate max-w-[150px]"
+                        title={e.instituicao}
+                      >
+                        {e.instituicao}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {e.ano_lectivo}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {semestreMap.get(e.semestre) ?? "-"}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {formatDesconto(e.valor_desconto, e.tipo_desconto)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {e.tipo_credito}
+                      </TableCell>
+                      <TableCell
+                        className="truncate max-w-[150px]"
+                        title={e.bolsa}
+                      >
+                        {e.bolsa}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {e.status_ === 1 ? "Ativo" : "Inativo"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          </div>
+
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+              <div className="text-sm text-muted-foreground">
+                Mostrando página <strong>{currentPage}</strong> de{" "}
+                <strong>{totalPages}</strong> • Total de{" "}
+                <strong>{totalItems}</strong> registos
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Label>Itens por página</Label>
+                  <Select
+                    value={limit}
+                    onValueChange={(value) => {
+                      setLimit(value);
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage((prev) => prev - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
+                <div className="text-sm font-medium px-4">{currentPage}</div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage((prev) => prev + 1)}
+                >
+                  Próxima
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>

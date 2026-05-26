@@ -57,13 +57,12 @@ import { InstituicaoSelect } from "@/components/common/global-selects/Instituica
 
 export default function ListarBolsa() {
   const { toast } = useToast();
-  const [filtros, setFiltros] = useState<FetchBolsaParams>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBolsa, setEditingBolsa] = useState<Bolsa | null>(null);
   const [selectedBolsa, setSelectedBolsa] = useState<Bolsa | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState("10");
-  const debouncedDesignacao = useDebounce(filtros.designacao, 500);
+
   const [filters, setFilters] = useState<FetchBolsaParams>({
     codigoInstituicao: undefined,
     codigoTipoCredito: undefined,
@@ -72,6 +71,7 @@ export default function ListarBolsa() {
     page: "1",
     limit: "10",
   });
+  const debouncedDesignacao = useDebounce(filters.designacao, 500);
 
   const [formData, setFormData] = useState<CreateBolsaFormData>({
     designacao: "",
@@ -95,17 +95,17 @@ export default function ListarBolsa() {
   useEffect(() => {
     setFilters({
       designacao: debouncedDesignacao || undefined,
-      codigoInstituicao: filtros.codigoInstituicao || undefined,
-      codigoTipoCredito: filtros.codigoTipoCredito || undefined,
-      codigoTipoDesconto: filtros.codigoTipoDesconto || undefined,
+      codigoInstituicao: filters.codigoInstituicao || undefined,
+      codigoTipoCredito: filters.codigoTipoCredito || undefined,
+      codigoTipoDesconto: filters.codigoTipoDesconto || undefined,
       page: String(page),
       limit,
     });
   }, [
     debouncedDesignacao,
-    filtros.codigoInstituicao,
-    filtros.codigoTipoCredito,
-    filtros.codigoTipoDesconto,
+    filters.codigoInstituicao,
+    filters.codigoTipoCredito,
+    filters.codigoTipoDesconto,
     page,
     limit,
   ]);
@@ -129,7 +129,7 @@ export default function ListarBolsa() {
   };
 
   const clearFilters = () => {
-    setFiltros({
+    setFilters({
       designacao: "",
       codigoInstituicao: undefined,
       codigoTipoCredito: undefined,
@@ -251,35 +251,35 @@ export default function ListarBolsa() {
               <Input
                 id="designacao"
                 placeholder="Digite a designação"
-                value={filtros.designacao || ""}
+                value={filters.designacao || ""}
                 onChange={(e) => {
                   setPage(1);
-                  setFiltros({ ...filtros, designacao: e.target.value });
+                  setFilters({ ...filters, designacao: e.target.value });
                 }}
               />
             </div>
 
             <InstituicaoSelect
-              value={filtros.codigoInstituicao?.toString() || ""}
+              value={filters.codigoInstituicao?.toString() || ""}
               onChangeValue={(v) => {
                 setPage(1);
-                setFiltros({ ...filtros, codigoInstituicao: v });
+                setFilters({ ...filters, codigoInstituicao: v });
               }}
             />
 
             <CreditoEducacionalTipoSelect
-              value={filtros.codigoTipoCredito?.toString() || ""}
+              value={filters.codigoTipoCredito?.toString() || ""}
               onChangeValue={(v) => {
                 setPage(1);
-                setFiltros({ ...filtros, codigoTipoCredito: v });
+                setFilters({ ...filters, codigoTipoCredito: v });
               }}
             />
 
             <CreditoEducacionalTipoDescontoSelect
-              value={filtros.codigoTipoDesconto?.toString() || ""}
+              value={filters.codigoTipoDesconto?.toString() || ""}
               onChangeValue={(v) => {
                 setPage(1);
-                setFiltros({ ...filtros, codigoTipoDesconto: v });
+                setFilters({ ...filters, codigoTipoDesconto: v });
               }}
             />
           </div>
