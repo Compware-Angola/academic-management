@@ -1,4 +1,3 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
 import { axiosNestFinance } from "@/lib/axios-nest-finance";
 
 export interface AtribuirBolsaPayload {
@@ -18,6 +17,19 @@ export async function atribuirBolsa(
   const { data } = await axiosNestFinance.post<AtribuirBolsaResponse>(
     "credito-educacional",
     payload,
+  );
+  return data;
+}
+type UpdateBolsaEstudantePayload = AtribuirBolsaPayload & {
+  codigoCreditoEducacional: number;
+};
+export async function updateBolsaEstudanteService(
+  payload: UpdateBolsaEstudantePayload,
+): Promise<AtribuirBolsaResponse> {
+  const { codigoCreditoEducacional, ...rest } = payload;
+  const { data } = await axiosNestFinance.put<AtribuirBolsaResponse>(
+    `credito-educacional/${codigoCreditoEducacional}`,
+    rest,
   );
   return data;
 }

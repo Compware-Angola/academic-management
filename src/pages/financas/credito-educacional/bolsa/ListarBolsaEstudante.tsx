@@ -32,6 +32,7 @@ import {
   FileText,
   Home,
   Loader2,
+  Pencil,
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -54,6 +55,7 @@ import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import useMutationEstadoCreditoEducacional from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
+import { EditAttributionModal } from "../AtribuirCredito/components/EditAttributionModal";
 
 export default function ListarBolsaEstudante() {
   const [page, setPage] = useState(1);
@@ -70,11 +72,14 @@ export default function ListarBolsaEstudante() {
     cursoId: undefined,
   });
 
-  // Debounce para campos de texto
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<BolsaEstudante | null>(
+    null,
+  );
+
   const debouncedNome = useDebounce(filters.nome, 500);
   const debouncedMatricula = useDebounce(filters.codigoMatricula, 500);
 
-  // Atualiza os filtros com os valores debounced
   useEffect(() => {
     setFilters((prev) => ({
       ...prev,
@@ -414,6 +419,7 @@ export default function ListarBolsaEstudante() {
                     <TableHead>Tipo Crédito</TableHead>
                     <TableHead>Bolsa</TableHead>
                     <TableHead>Estado</TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -479,6 +485,19 @@ export default function ListarBolsaEstudante() {
                           />
                         </span>
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          aria-label="Editar"
+                          onClick={() => {
+                            setSelectedStudent(e);
+                            setEditModalOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -535,6 +554,11 @@ export default function ListarBolsaEstudante() {
           </>
         )}
       </div>
+      <EditAttributionModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        initialValues={selectedStudent!}
+      />
     </div>
   );
 }
