@@ -32,8 +32,8 @@ type CreateBolsaDialogProps = {
   onChange: (data: CreateBolsaDialogProps["formData"]) => void;
   onSubmit: () => void;
   isSubmitting?: boolean;
+  mode?: "create" | "edit";
 };
-
 export function CreateBolsaDialog({
   open,
   onOpenChange,
@@ -41,13 +41,14 @@ export function CreateBolsaDialog({
   onChange,
   onSubmit,
   isSubmitting,
+  mode,
 }: CreateBolsaDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Criar Nova Bolsa</DialogTitle>
-        </DialogHeader>
+        <DialogTitle>
+          {mode === "edit" ? "Editar Bolsa" : "Criar Nova Bolsa"}
+        </DialogTitle>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -108,7 +109,7 @@ export function CreateBolsaDialog({
               !formData.valorDesconto
             }
           >
-            Criar Bolsa
+            {mode === "edit" ? "Editar Bolsa" : "Criar Bolsa"}
           </Button>
         </DialogFooter>
       </DialogContent>

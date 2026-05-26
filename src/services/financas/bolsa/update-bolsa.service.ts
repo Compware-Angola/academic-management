@@ -1,6 +1,7 @@
 import { axiosNestFinance } from "@/lib/axios-nest-finance";
 
-export type CreateBolsaBody = {
+export type UpdateBolsaRequest = {
+  codigo: number;
   designacao: string;
   codigoInstituicao: number;
   codigoTipoDesconto: number;
@@ -8,7 +9,11 @@ export type CreateBolsaBody = {
   codigoTipoCredito: number;
 };
 
-export async function createBolsa(body: CreateBolsaBody) {
-  const { data } = await axiosNestFinance.post("/bolsa", body);
+export async function updateBolsaService({
+  codigo,
+  ...body
+}: UpdateBolsaRequest) {
+  const { data } = await axiosNestFinance.put(`/bolsa/${codigo}`, body);
+
   return data;
 }
