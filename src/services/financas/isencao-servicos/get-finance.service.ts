@@ -11,6 +11,7 @@ export interface MonthlyFeeQueryParams {
   limit?: number;
 }
 export type Mensalidade = {
+  codigo_servico?: number;
   mes_temp_id: number;
   mes: string;
   data_inicial: string;
