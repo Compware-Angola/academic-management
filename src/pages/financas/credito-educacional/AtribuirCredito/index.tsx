@@ -19,7 +19,6 @@ import { ConfirmarAlunoModal } from "./components/ConfirmarAlunoModal";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
-import { useAuth } from "@/hooks/use-auth";
 
 function validarPayload(payload: {
   codigoAnoLectivo: string;
@@ -34,8 +33,6 @@ function validarPayload(payload: {
 
 export default function AtribuirCredito() {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const pk_utilizador = user?.user?.pk_utilizador;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -70,7 +67,7 @@ export default function AtribuirCredito() {
       semestre: "",
       codigoBolsa: "",
     });
-    inputRef.current?.focus(); // Foca novamente no input
+    inputRef.current?.focus();
   };
 
   // Foco automático ao carregar
@@ -120,7 +117,6 @@ export default function AtribuirCredito() {
         codigoMatricula: Number(matricula),
         codigoAnoLectivo: Number(payload.codigoAnoLectivo),
         semestre: Number(payload.semestre),
-        codigoUtilizador: pk_utilizador,
         codigoBolsa: Number(payload.codigoBolsa),
       });
       resetFormulario();
@@ -179,7 +175,9 @@ export default function AtribuirCredito() {
             <AcademicYearSelect
               disabled={!aluno}
               value={payload.codigoAnoLectivo}
-              onChangeValue={(v) => setPayload((p) => ({ ...p, codigoAnoLectivo: v }))}
+              onChangeValue={(v) =>
+                setPayload((p) => ({ ...p, codigoAnoLectivo: v }))
+              }
             />
             <SemestreSelect
               disabled={!aluno}
@@ -189,7 +187,9 @@ export default function AtribuirCredito() {
             <BolsaSelect
               disabled={!aluno}
               value={payload.codigoBolsa}
-              onChangeValue={(v) => setPayload((p) => ({ ...p, codigoBolsa: v }))}
+              onChangeValue={(v) =>
+                setPayload((p) => ({ ...p, codigoBolsa: v }))
+              }
             />
           </div>
 
