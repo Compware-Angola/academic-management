@@ -8,12 +8,14 @@ interface SemestreSelectProps {
   onChangeValue: (v: string) => void;
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
+  yearly?: boolean;
 }
 const SemestreSelect = ({
   onChangeValue,
   value,
   disabled,
   enableDefaultSelectItem,
+  yearly = false,
   label = "Semestre",
 }: SemestreSelectProps) => {
   const id = useId();
@@ -28,6 +30,7 @@ const SemestreSelect = ({
     : undefined;
 
   const { data: semestre, isLoading: isLoadingSemestre } = useQuerySemestres();
+
   return (
     <>
       <FormSelect
@@ -37,7 +40,11 @@ const SemestreSelect = ({
         label={label}
         value={value}
         onChange={(v) => onChangeValue(v)}
-        options={semestre ?? []}
+        options={
+          yearly
+            ? [...(semestre ?? []), { codigo: 3, designacao: "Anual" }]
+            : (semestre ?? [])
+        }
         map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
       />
     </>
