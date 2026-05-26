@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,11 +8,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
-
 import {
   Table,
   TableBody,
@@ -23,9 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Label } from "@/components/ui/label";
-
 import {
   Select,
   SelectContent,
@@ -33,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   ChevronLeft,
   ChevronRight,
@@ -56,10 +48,7 @@ import { useQueryFetchBolsa } from "@/hooks/financas/bolsa/use-query-fetch-bolsa
 import { CreateBolsaDialog, CreateBolsaFormData } from "./CreateBolsaDialog";
 import { useMutationCreateBolsa } from "@/hooks/financas/bolsa/use-mutation-create-bolsa";
 import { Switch } from "@/components/ui/switch";
-import {
-  useMutationActiveBolsa,
-  useMutationInactiveBolsa,
-} from "@/hooks/financas/bolsa/use-mutation-estado-bolas";
+import { useMutationEstadoBolsa } from "@/hooks/financas/bolsa/use-mutation-estado-bolas";
 import { cn } from "@/lib/utils";
 import { useMutationUpdateBolsa } from "../../../../hooks/financas/bolsa/use-mutation-update-bolsa";
 import { CreditoEducacionalTipoSelect } from "@/components/common/global-selects/CreditoEducacionalTipoSelect";
@@ -100,14 +89,8 @@ export default function ListarBolsa() {
     mutateAsync: mutateAsyncUpdateBolsa,
     isPending: isPendingUpdateBolsa,
   } = useMutationUpdateBolsa();
-  const {
-    mutateAsync: mutateAsyncActiveBolsa,
-    isPending: isPendingActiveBolsa,
-  } = useMutationActiveBolsa();
-  const {
-    mutateAsync: mutateAsyncInactiveBolsa,
-    isPending: isPendingInactiveBolsa,
-  } = useMutationInactiveBolsa();
+  const { mutateAsync: switchEstadoBolsa, isPending: isPendingActiveBolsa } =
+    useMutationEstadoBolsa();
 
   useEffect(() => {
     setFilters({
@@ -210,16 +193,8 @@ export default function ListarBolsa() {
 
   const handleChangeEstado = async (bolsa: Bolsa) => {
     setSelectedBolsa(bolsa);
-    try {
-      if (bolsa.estado === 1) {
-        await mutateAsyncInactiveBolsa(bolsa.codigo);
-      }
-      if (bolsa.estado === 0) {
-        await mutateAsyncActiveBolsa(bolsa.codigo);
-      }
-    } finally {
-      setSelectedBolsa(null);
-    }
+    await switchEstadoBolsa(bolsa.codigo);
+    setSelectedBolsa(null);
   };
 
   return (
@@ -370,15 +345,13 @@ export default function ListarBolsa() {
                           <Switch
                             checked={item.estado === 1}
                             onCheckedChange={() => handleChangeEstado(item)}
-                            disabled={
-                              isPendingActiveBolsa || isPendingInactiveBolsa
-                            }
+                            disabled={isPendingActiveBolsa}
                           />
                           <Loader2
                             className={cn(
                               "h-4 w-4 animate-spin",
                               selectedBolsa?.codigo === item.codigo &&
-                                (isPendingActiveBolsa || isPendingInactiveBolsa)
+                                isPendingActiveBolsa
                                 ? "block"
                                 : "hidden",
                             )}
