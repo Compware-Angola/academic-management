@@ -1,6 +1,5 @@
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { useQueryFetchBolsa } from "@/hooks/financas/bolsa/use-query-fetch-bolsa";
-import { useQueryFetchCreditoEducacional } from "@/hooks/financas/credito-educacional/use-query-fetch-credito-educacional";
+import { useDropDownBolsas } from "@/hooks/dropdown-filters";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useState } from "react";
 
@@ -18,7 +17,7 @@ export function BolsaSelect({
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data, isLoading } = useQueryFetchBolsa({
+  const { data, isLoading } = useDropDownBolsas({
     designacao: debouncedSearch,
   });
 
@@ -29,7 +28,7 @@ export function BolsaSelect({
       value={value}
       disabled={disabled || isLoading}
       isLoading={isLoading}
-      options={data?.items ?? []}
+      options={data ?? []}
       onSearchChange={setSearch}
       map={(item) => ({
         key: item.codigo.toString(),

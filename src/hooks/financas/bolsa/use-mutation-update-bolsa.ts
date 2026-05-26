@@ -15,6 +15,12 @@ export function useMutationUpdateBolsa() {
       queryClient.invalidateQueries({
         queryKey: ["bolsa"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["bolsa-estudante"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bolsas-dropdown"],
+      });
     },
   });
 }

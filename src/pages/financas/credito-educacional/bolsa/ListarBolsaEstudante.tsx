@@ -26,7 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, FileText, Home, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Home,
+  Loader2,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -36,11 +43,17 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { FetchBolsaEstudanteParams } from "@/services/financas/bolsa/fetch-bolsa-estudante.service";
+import {
+  BolsaEstudante,
+  FetchBolsaEstudanteParams,
+} from "@/services/financas/bolsa/fetch-bolsa-estudante.service";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
+import useMutationEstadoCreditoEducacional from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
 
 export default function ListarBolsaEstudante() {
   const [page, setPage] = useState(1);
@@ -74,12 +87,16 @@ export default function ListarBolsaEstudante() {
 
   const { data, isLoading } = useQueryFetchBolsaEstudante(filters);
   const { data: semestres } = useQuerySemestres();
+  const [selectedBolsa, setSelectedBolsa] = useState<BolsaEstudante | null>(
+    null,
+  );
   const estudantes = useMemo(() => data?.data ?? [], [data]);
   const meta = useMemo(() => data?.meta, [data]);
   const totalPages = meta?.totalPages ?? 1;
   const currentPage = meta?.page ?? 1;
   const totalItems = meta?.total ?? 0;
-
+  const { mutateAsync: switchEstadoBolsa, isPending: isPendingActiveBolsa } =
+    useMutationEstadoCreditoEducacional();
   const semestreMap = useMemo(
     () => new Map(semestres?.map((s) => [s.codigo, s.designacao]) ?? []),
     [semestres],
@@ -112,7 +129,11 @@ export default function ListarBolsaEstudante() {
       tipo === "PERCENTUAL" ? `${valor}%` : formatCurrency(valor),
     [],
   );
-
+  const handleChangeEstado = async (bolsa: BolsaEstudante) => {
+    setSelectedBolsa(bolsa);
+    await switchEstadoBolsa({ codigo: bolsa.codigo });
+    setSelectedBolsa(null);
+  };
   const pdfData = useMemo(() => {
     if (!estudantes.length) return null;
 
@@ -440,8 +461,23 @@ export default function ListarBolsaEstudante() {
                       >
                         {e.bolsa}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {e.status_ === 1 ? "Ativo" : "Inativo"}
+                      <TableCell>
+                        <span className="flex items-center gap-2">
+                          <Switch
+                            checked={e.status_ === 1}
+                            onCheckedChange={() => handleChangeEstado(e)}
+                            disabled={isPendingActiveBolsa}
+                          />
+                          <Loader2
+                            className={cn(
+                              "h-4 w-4 animate-spin",
+                              selectedBolsa?.codigo === e.codigo &&
+                                isPendingActiveBolsa
+                                ? "block"
+                                : "hidden",
+                            )}
+                          />
+                        </span>
                       </TableCell>
                     </TableRow>
                   ))}
