@@ -5,17 +5,11 @@ import {
   SaveHorarioPayload,
   saveHorarioService,
 } from "@/services/horario/save-horario.service";
-import { useAuth } from "../use-auth";
 
 export function useSaveHorario(onSuccessReset?: () => void) {
-  const {
-    user: {
-      user: { pk_utilizador },
-    },
-  } = useAuth();
   return useMutation({
     mutationFn: (payload: SaveHorarioPayload) =>
-      saveHorarioService(payload, pk_utilizador),
+      saveHorarioService(payload),
 
     onSuccess: (data) => {
       if (data.sucesso === 0) {

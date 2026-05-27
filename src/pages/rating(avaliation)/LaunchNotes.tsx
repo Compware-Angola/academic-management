@@ -158,14 +158,14 @@ export default function LaunchNotes() {
 
       const filteredClasses = allowedClassIds?.length
         ? classes.filter((c) =>
-            allowedClassIds?.includes(c?.codigo?.toString()),
-          )
+          allowedClassIds?.includes(c?.codigo?.toString()),
+        )
         : classes;
 
       const filteredUnidadesCurriculares = allowedGradeIds?.length
         ? unidadesCurriculares.filter((g) =>
-            allowedGradeIds?.includes(g?.pk?.toString()),
-          )
+          allowedGradeIds?.includes(g?.pk?.toString()),
+        )
         : unidadesCurriculares;
 
       return {
@@ -180,7 +180,18 @@ export default function LaunchNotes() {
    * True quando o utilizador tem full-access OU pelo menos um role
    * que isenta de verificação de prazo de lançamento.
    */
-  const isPrivilegedUser: boolean = haveFullAccess() || isDiretorDeCurso;
+  /**
+    * Utilizadores privilegiados: todos os roles excepto Director
+    * (Director tem acesso restrito apenas aos seus cursos).
+    * Admin / haveFullAccess tem acesso total sem restrições de prazo.
+    */
+  const isPrivilegedUser: boolean =
+    haveFullAccess() ||
+    roles?.Reitor === true ||
+    roles?.Vice_Reitor === true ||
+    roles?.Acessor_do_Reitor === true ||
+    roles?.Coordenador === true ||
+    roles?.Decano === true;
   // ROLES_SEM_RESTRICAO_DE_PRAZO.some((role) => roles?.[role] === true);
 
   // ─── Queries de lookup ────────────────────────────────────────────────────
@@ -1183,9 +1194,8 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${
-        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
-      }. Contacte a administração.`,
+      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+        }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",
