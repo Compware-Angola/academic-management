@@ -74,6 +74,7 @@ import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPD
 import { ExcelActions } from "@/components/views/excel/GenericExcelExport";
 import { useMutationCriarDocenteSubstituto } from "@/hooks/horario/use-mutation-criar-docente-substituto";
 import DocenteSubstitutoModal from "./components/DocenteSubstitutoModal";
+import { Roles } from "./EditSchedule";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -90,12 +91,22 @@ export default function ScheduleList() {
   const [isSubstitutoModalOpen, setIsSubstitutoModalOpen] = useState(false);
   const [selectedHorarioForSubstituto, setSelectedHorarioForSubstituto] = useState<number | null>(null);
 
+  const { haveFullAccess } = usePermission();
+  const roles = userData?.roles as Roles | undefined;
   const criarSubstitutoMutation = useMutationCriarDocenteSubstituto();
   const openSubstitutoModal = (horarioId?: number) => {
     setSelectedHorarioForSubstituto(horarioId || null);
     setIsSubstitutoModalOpen(true);
   };
 
+  const isPrivilegedUser: boolean =
+    haveFullAccess() ||
+    roles?.Reitor === true ||
+    roles?.Vice_Reitor === true ||
+    roles?.Acessor_do_Reitor === true ||
+    roles?.Coordenador === true ||
+    roles?.Decano === true ||
+    roles?.Director === true
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
@@ -655,6 +666,7 @@ export default function ScheduleList() {
                               size="icon"
                               title="Editar horário"
                               onClick={() => navigate(`/schedule/${item.codigo}/edit`)}
+                              disabled={!isPrivilegedUser}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -666,6 +678,7 @@ export default function ScheduleList() {
                               onClick={() => openSubstitutoModal(item.codigo)}
                               title="Nova Substituição de Docente"
                               className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200"
+                              disabled={!isPrivilegedUser}
                             >
                               <UserCheck className="h-4 w-4" />
                             </Button>
@@ -676,7 +689,8 @@ export default function ScheduleList() {
                               size="icon"
                               onClick={() => openDeleteDialog(item.codigo)}
                               disabled={
-                                deleteMutation.isPending && itemIdToConfirm === item.codigo
+                                deleteMutation.isPending && itemIdToConfirm === item.codigo ||
+                                !isPrivilegedUser
                               }
                             >
                               {deleteMutation.isPending && itemIdToConfirm === item.codigo ? (
@@ -693,7 +707,8 @@ export default function ScheduleList() {
                                 size="icon"
                                 onClick={() => openValidateDialog(item.codigo)}
                                 disabled={
-                                  validarMutation.isPending && itemIdToConfirm === item.codigo
+                                  validarMutation.isPending && itemIdToConfirm === item.codigo ||
+                                  !isPrivilegedUser
                                 }
                                 className="bg-green-500 hover:bg-green-600"
                               >

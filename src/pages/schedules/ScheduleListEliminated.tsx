@@ -47,9 +47,11 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { HorarioEliminado } from "@/services/horario/listar-horarios-existentes-eliminado.service";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { Roles } from "./EditSchedule";
+import { usePermission } from "@/auth/permission.helper";
+import { useAuth } from "@/hooks/use-auth";
 export default function ScheduleListEliminated() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     anoLectivo: "",
@@ -60,6 +62,7 @@ export default function ScheduleListEliminated() {
     search: "",
     periodo: "",
   });
+  const { user: userData } = useAuth();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
@@ -98,7 +101,17 @@ export default function ScheduleListEliminated() {
     page,
     limit,
   });
+  const { haveFullAccess } = usePermission();
+  const roles = userData?.roles as Roles | undefined;
 
+  const isPrivilegedUser: boolean =
+    haveFullAccess() ||
+    roles?.Reitor === true ||
+    roles?.Vice_Reitor === true ||
+    roles?.Acessor_do_Reitor === true ||
+    roles?.Coordenador === true ||
+    roles?.Decano === true ||
+    roles?.Director === true
   const { mutate: restoreHorario, isPending: isRestore } =
     useRestaurarHorario();
   const horarios = data?.data ?? [];
@@ -224,19 +237,19 @@ export default function ScheduleListEliminated() {
           />
 
           <CourseSelect
-                              labelMode="inside"
-                            
-                              value={filters.curso}
-                              onChangeValue={(v) => {
-                              setFilters({
-                              ...filters,
-                                curso: v,
-                                anoCurricular: "",
-                                unidadeCurricular: "",
-                                });
-                                                        
-                                }}
-                                  />
+            labelMode="inside"
+
+            value={filters.curso}
+            onChangeValue={(v) => {
+              setFilters({
+                ...filters,
+                curso: v,
+                anoCurricular: "",
+                unidadeCurricular: "",
+              });
+
+            }}
+          />
 
           <FormSelect
             label="Ano Curricular"
@@ -327,7 +340,7 @@ export default function ScheduleListEliminated() {
                           <Badge
                             variant={
                               item.estado.toLowerCase().includes("pendente") ||
-                              item.estado.toLowerCase().includes("distribuição")
+                                item.estado.toLowerCase().includes("distribuição")
                                 ? "secondary"
                                 : "default"
                             }
@@ -348,6 +361,7 @@ export default function ScheduleListEliminated() {
                             </Button>
                             <Button
                               className="cursor-pointer"
+                              disabled={!isPrivilegedUser}
                               title="Restaurar"
                               variant="outline"
                               size="icon"
