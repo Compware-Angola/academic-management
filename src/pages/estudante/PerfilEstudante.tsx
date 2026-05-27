@@ -17,7 +17,6 @@ import { DocumentsSection } from "./DocumentsSection";
 import { AvaliacaoSection } from "./AvaliacaoSection";
 import { StudentProfileHeader } from "./StudentProfileHeader";
 import { PerfilSection } from "./PerfilSection";
-import { DisciplinasSection } from "./disciplina";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 

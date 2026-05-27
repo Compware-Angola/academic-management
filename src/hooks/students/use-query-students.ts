@@ -15,6 +15,8 @@ import {
   updatePersonalData,
   definirEspecialidade,
   DefinirEspecialidadePayload,
+  InfoBolsaEstudante,
+  fetchInfoBolsaEstudante,
 } from "@/services/students/students.service";
 
 import {
@@ -52,6 +54,17 @@ export const useStudentDetail = (codigoMatricula?: number | string) => {
     queryFn: () => fetchStudentEstatisticas(codigoMatricula!),
     enabled: !!codigoMatricula && String(codigoMatricula).trim().length > 0,
     staleTime: 10 * 60 * 1000, // 10 minutos
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+export const useStudentInfoBolsa = (codigoMatricula?: number | string) => {
+  return useQuery<InfoBolsaEstudante, Error>({
+    queryKey: ["student-info-bolsa", String(codigoMatricula ?? "").trim()],
+    queryFn: () => fetchInfoBolsaEstudante(codigoMatricula!),
+    enabled: !!codigoMatricula && String(codigoMatricula).trim().length > 0,
+    staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     retry: 1,
   });
