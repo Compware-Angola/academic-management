@@ -6,13 +6,10 @@ import {
 
 import { useQuery } from "@tanstack/react-query";
 
-export function useQueryFetchBolsa(
-  params?: FetchBolsaParams,
-  pageUrl?: string,
-) {
+export function useQueryFetchBolsa(params?: FetchBolsaParams) {
   return useQuery<FetchBolsaResponse>({
-    queryKey: ["bolsa", params, pageUrl],
-    queryFn: () => fetchBolsaService(params, pageUrl),
+    queryKey: ["bolsa", params],
+    queryFn: () => fetchBolsaService(params),
 
     refetchOnWindowFocus: false,
   });

@@ -3,6 +3,8 @@ import {
   getOcupacoes,
   getProfissoes,
   getNacionalidades,
+  fetchDropDownBolsas,
+  ParamsBolsa,
 } from "@/services/dropdown-filters/dropdown-filters.service";
 import { fetchEpocas } from "@/services/fetch-epoca";
 
@@ -37,6 +39,15 @@ export function useEpocasDropdownFilter() {
   return useQuery({
     queryKey: ["epocas"],
     queryFn: fetchEpocas,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+}
+
+export function useDropDownBolsas(params?: ParamsBolsa) {
+  return useQuery({
+    queryKey: ["bolsas-dropdown", params],
+    queryFn: () => fetchDropDownBolsas(params),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });

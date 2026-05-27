@@ -1,40 +1,42 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestFinance } from "@/lib/axios-nest-finance";
 export type FetchBolsaParams = {
   designacao?: string;
-  instituicao?: string;
+  codigoInstituicao?: string;
+  codigoTipoCredito?: string;
+  codigoTipoDesconto?: string;
+  page?: string;
+  limit?: string;
 };
+
 export type Bolsa = {
   codigo: number;
-  designacao: string;
+  designacao?: string;
   codigo_instituicao: number;
-  instituicao: string;
+  instituicao?: string;
   valor_desconto: number;
   codigo_tipo_desconto: number;
   descricao_tipo_desconto: string;
   codigo_tipo_credito: number;
   descricao_tipo_credito: string;
+  estado: 0 | 1;
 };
-export type PaginationLink = {
-  $ref: string;
+
+export type MetaBolsa = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 };
 
 export type FetchBolsaResponse = {
-  items: Bolsa[];
-  first?: PaginationLink;
-  next?: PaginationLink;
-  prev?: PaginationLink;
+  data: Bolsa[];
+  meta: MetaBolsa;
 };
 
 export async function fetchBolsaService(
   params?: FetchBolsaParams,
-  url?: string,
 ): Promise<FetchBolsaResponse> {
-  if (url) {
-    const { data } = await axiosApexGa.get<FetchBolsaResponse>(url);
-    return data;
-  }
-
-  const { data } = await axiosApexGa.get<FetchBolsaResponse>("/financa/bolsa", {
+  const { data } = await axiosNestFinance.get<FetchBolsaResponse>("/bolsa", {
     params,
   });
 

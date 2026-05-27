@@ -1,17 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  createBolsa,
-  CreateBolsaBody,
-} from "@/services/financas/bolsa/create-bolsa.service";
-import { toast } from "sonner";
 
-export function useMutationCreateBolsa() {
+import {
+  updateBolsaService,
+  UpdateBolsaRequest,
+} from "@/services/financas/bolsa/update-bolsa.service";
+
+export function useMutationUpdateBolsa() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: CreateBolsaBody) => createBolsa(body),
+    mutationFn: (data: UpdateBolsaRequest) => updateBolsaService(data),
+
     onSuccess: () => {
-      toast.success("Bolsa criada com sucesso");
       queryClient.invalidateQueries({
         queryKey: ["bolsa"],
       });

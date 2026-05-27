@@ -7,12 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 
 export function useQueryFetchBolsaEstudante(
   params?: FetchBolsaEstudanteParams,
-  pageUrl?: string,
 ) {
-  console.log(params);
   return useQuery<FetchBolsaEstudanteResponse>({
-    queryKey: ["bolsa-estudante", params, pageUrl],
-    queryFn: () => fetchBolsaEstudanteService(params, pageUrl),
+    queryKey: ["bolsa-estudante", params],
+    queryFn: () => fetchBolsaEstudanteService(params),
     refetchOnWindowFocus: false,
   });
 }

@@ -96,7 +96,7 @@ export default function CreateIsencaoMultaDialog({
     useQueryFinanceMonthlyFee({
       academicYear: filters.anoLectivo,
       enrollmentCode: filters.matricula,
-      status: undefined,
+      status: "all",
       limit: 100,
       page: 1,
     });
@@ -131,7 +131,7 @@ export default function CreateIsencaoMultaDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-5xl!">
+      <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Calendar />
@@ -167,8 +167,8 @@ export default function CreateIsencaoMultaDialog({
             <Calendar className="h-5 w-5 text-primary" />
             Meses
           </h3>
-          <div className="h-[400px] overflow-y-auto border rounded-md">
-            <Table>
+          <div className="h-[400px] overflow-y-auto border rounded-md overflow-x-auto ">
+            <Table className="min-w-max w-max">
               <TableHeader className="sticky top-0 z-10">
                 <TableRow>
                   <TableHead></TableHead>
@@ -198,7 +198,7 @@ export default function CreateIsencaoMultaDialog({
                   </TableRow>
                 ) : (
                   months?.map((month) => {
-                    const invoiceStatus = parseFilter(month?.estado_fatura);
+                    const invoiceStatus = Number(month?.estado_fatura);
                     const isInvoicePending =
                       invoiceStatus == InvoiceEnum.PENDENTE;
                     return (
@@ -213,7 +213,7 @@ export default function CreateIsencaoMultaDialog({
                             onCheckedChange={() =>
                               toggleStudent({
                                 mesTempId: month.mes_temp_id,
-                                servicoId: month.id_tipo_servico,
+                                servicoId: month.codigo_servico,
                               })
                             }
                           />

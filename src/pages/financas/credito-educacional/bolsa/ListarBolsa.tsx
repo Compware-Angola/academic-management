@@ -18,43 +18,61 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, ChevronRight, FileText, Home, Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Home,
+  Loader2,
+  Pencil,
+  Plus,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-
 import { useDebounce } from "@/hooks/use-debounce";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateCreditoEducacional } from "@/hooks/financas/credito-educacional/use-create-tipo-credito-educacional";
-
 import { Skeleton } from "@/components/ui/skeleton";
-import { FetchBolsaParams } from "@/services/financas/bolsa/fetch-bolsa.service";
+import {
+  Bolsa,
+  FetchBolsaParams,
+} from "@/services/financas/bolsa/fetch-bolsa.service";
 import { useQueryFetchBolsa } from "@/hooks/financas/bolsa/use-query-fetch-bolsa";
-import { CreateCreditoEducacionalDialog } from "../tipo-credito/tipo-credito-dialog";
 import { CreateBolsaDialog, CreateBolsaFormData } from "./CreateBolsaDialog";
 import { useMutationCreateBolsa } from "@/hooks/financas/bolsa/use-mutation-create-bolsa";
-const setDefaultValue = (value: string) =>
-  value === "all" ? undefined : value;
+import { Switch } from "@/components/ui/switch";
+import { useMutationEstadoBolsa } from "@/hooks/financas/bolsa/use-mutation-estado-bolas";
+import { cn } from "@/lib/utils";
+import { useMutationUpdateBolsa } from "../../../../hooks/financas/bolsa/use-mutation-update-bolsa";
+import { CreditoEducacionalTipoSelect } from "@/components/common/global-selects/CreditoEducacionalTipoSelect";
+import { CreditoEducacionalTipoDescontoSelect } from "@/components/common/global-selects/CreditoEducacionalTipoDescontoSelect";
+import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 
 export default function ListarBolsa() {
   const { toast } = useToast();
-  const { mutateAsync, isPending } = useMutationCreateBolsa();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [filters, setFilters] = useState<FetchBolsaParams>({
-    designacao: undefined,
-    instituicao: undefined,
-  });
-  const [designacaoInput, setDesignacaoInput] = useState("");
-  const [instituicaoInput, setInstituicaoInput] = useState("");
-  const debouncedDesignacao = useDebounce(designacaoInput, 500);
-  const debouncedInstituicao = useDebounce(instituicaoInput, 500);
+  const [editingBolsa, setEditingBolsa] = useState<Bolsa | null>(null);
+  const [selectedBolsa, setSelectedBolsa] = useState<Bolsa | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState("10");
 
-  const [pageUrl, setPageUrl] = useState<string | undefined>(undefined);
-  const { data, isLoading: isLoadingBolsa } = useQueryFetchBolsa(
-    filters,
-    pageUrl,
-  );
-  const bolsas = data?.items ?? [];
+  const [filters, setFilters] = useState<FetchBolsaParams>({
+    codigoInstituicao: undefined,
+    codigoTipoCredito: undefined,
+    codigoTipoDesconto: undefined,
+    designacao: undefined,
+    page: "1",
+    limit: "10",
+  });
+  const debouncedDesignacao = useDebounce(filters.designacao, 500);
+
   const [formData, setFormData] = useState<CreateBolsaFormData>({
     designacao: "",
     codigoTipoDesconto: "",
@@ -62,48 +80,121 @@ export default function ListarBolsa() {
     codigoTipoCredito: "",
     codigoInstituicao: "",
   });
+
+  const {
+    mutateAsync: mutateAsyncCreateBolsa,
+    isPending: isPendingCreateBolsa,
+  } = useMutationCreateBolsa();
+  const {
+    mutateAsync: mutateAsyncUpdateBolsa,
+    isPending: isPendingUpdateBolsa,
+  } = useMutationUpdateBolsa();
+  const { mutateAsync: switchEstadoBolsa, isPending: isPendingActiveBolsa } =
+    useMutationEstadoBolsa();
+
   useEffect(() => {
     setFilters({
       designacao: debouncedDesignacao || undefined,
-      instituicao: debouncedInstituicao || undefined,
+      codigoInstituicao: filters.codigoInstituicao || undefined,
+      codigoTipoCredito: filters.codigoTipoCredito || undefined,
+      codigoTipoDesconto: filters.codigoTipoDesconto || undefined,
+      page: String(page),
+      limit,
     });
+  }, [
+    debouncedDesignacao,
+    filters.codigoInstituicao,
+    filters.codigoTipoCredito,
+    filters.codigoTipoDesconto,
+    page,
+    limit,
+  ]);
 
-    setPageUrl(undefined);
-  }, [debouncedDesignacao, debouncedInstituicao]);
+  const { data, isLoading: isLoadingBolsa } = useQueryFetchBolsa(filters);
+  const bolsas = data?.data ?? [];
+  const meta = data?.meta;
+  const totalPages = meta?.totalPages ?? 1;
+  const currentPage = meta?.page ?? 1;
+  const totalItems = meta?.total ?? 0;
 
-  const nextPage = () => {
-    if (data?.next?.$ref) {
-      setPageUrl(data?.next.$ref);
-    }
+  const resetForm = () => {
+    setFormData({
+      designacao: "",
+      codigoTipoDesconto: "",
+      valorDesconto: "",
+      codigoTipoCredito: "",
+      codigoInstituicao: "",
+    });
+    setEditingBolsa(null);
   };
 
-  const prevPage = () => {
-    if (data?.prev?.$ref) {
-      setPageUrl(data?.prev.$ref);
-    }
+  const clearFilters = () => {
+    setFilters({
+      designacao: "",
+      codigoInstituicao: undefined,
+      codigoTipoCredito: undefined,
+      codigoTipoDesconto: undefined,
+    });
+    setPage(1);
+  };
+
+  const handleOpenCreateModal = () => {
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const handleEditBolsa = (bolsa: Bolsa) => {
+    setEditingBolsa(bolsa);
+    setFormData({
+      designacao: bolsa.designacao || "",
+      codigoInstituicao: String(bolsa.codigo_instituicao),
+      codigoTipoCredito: String(bolsa.codigo_tipo_credito),
+      codigoTipoDesconto: String(bolsa.codigo_tipo_desconto),
+      valorDesconto: String(bolsa.valor_desconto),
+    });
+    setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
-    await mutateAsync({
-      designacao: formData.designacao,
-      codigoInstituicao: Number(formData.codigoInstituicao),
-      codigoTipoCredito: Number(formData.codigoTipoCredito),
-      codigoTipoDesconto: Number(formData.codigoTipoDesconto),
-      valorDesconto: Number(formData.valorDesconto),
-    });
+    try {
+      if (editingBolsa) {
+        await mutateAsyncUpdateBolsa({
+          codigo: editingBolsa.codigo,
+          designacao: formData.designacao,
+          codigoInstituicao: Number(formData.codigoInstituicao),
+          codigoTipoCredito: Number(formData.codigoTipoCredito),
+          codigoTipoDesconto: Number(formData.codigoTipoDesconto),
+          valorDesconto: Number(formData.valorDesconto),
+        });
+        toast({
+          title: "Bolsa atualizada com sucesso",
+        });
+      } else {
+        await mutateAsyncCreateBolsa({
+          designacao: formData.designacao,
+          codigoInstituicao: Number(formData.codigoInstituicao),
+          codigoTipoCredito: Number(formData.codigoTipoCredito),
+          codigoTipoDesconto: Number(formData.codigoTipoDesconto),
+          valorDesconto: Number(formData.valorDesconto),
+        });
+        toast({
+          title: "Bolsa criada com sucesso",
+        });
+      }
+      setIsModalOpen(false);
+      resetForm();
+    } catch {
+      toast({
+        title: "Erro ao salvar bolsa",
+        variant: "destructive",
+      });
+    }
+  };
 
-    toast({
-      title: "Crédito criado com sucesso",
-    });
-
-    setIsModalOpen(false);
-    setFormData({
-      designacao: "",
-      codigoTipoCredito: "",
-      codigoTipoDesconto: "",
-      valorDesconto: "",
-      codigoInstituicao: "",
-    });
+  const handleChangeEstado = async (bolsa: Bolsa) => {
+    setSelectedBolsa(bolsa);
+    await switchEstadoBolsa(bolsa.codigo);
+    setSelectedBolsa(null);
   };
 
   return (
@@ -132,40 +223,71 @@ export default function ListarBolsa() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <h1 className="text-2xl font-bold">Listar Bolsa</h1>
-      <p className="text-muted-foreground">Lista completa de Bolsa.</p>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold">Listar Bolsa</h1>
+        <p className="text-muted-foreground">
+          Lista completa de bolsas cadastradas.
+        </p>
+      </div>
 
+      {/* Filtros - Layout melhorado */}
       <Card>
-        <CardHeader>
-          <CardTitle>Filtros de Pesquisa</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Filtros</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={clearFilters}
+            className="gap-1"
+          >
+            <X className="h-4 w-4" />
+            Limpar Filtros
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="flex flex-col gap-2 col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-2">
               <Label htmlFor="designacao">Designação</Label>
               <Input
                 id="designacao"
-                placeholder="Pesquisar designação"
-                value={designacaoInput}
-                onChange={(e) => setDesignacaoInput(e.target.value)}
+                placeholder="Digite a designação"
+                value={filters.designacao || ""}
+                onChange={(e) => {
+                  setPage(1);
+                  setFilters({ ...filters, designacao: e.target.value });
+                }}
               />
             </div>
 
-            <div className="flex flex-col gap-2 col-span-2">
-              <Label htmlFor="instituicao">Instituição</Label>
-              <Input
-                id="instituicao"
-                placeholder="Pesquisar instituição"
-                value={instituicaoInput}
-                onChange={(e) => setInstituicaoInput(e.target.value)}
-              />
-            </div>
+            <InstituicaoSelect
+              value={filters.codigoInstituicao?.toString() || ""}
+              onChangeValue={(v) => {
+                setPage(1);
+                setFilters({ ...filters, codigoInstituicao: v });
+              }}
+            />
+
+            <CreditoEducacionalTipoSelect
+              value={filters.codigoTipoCredito?.toString() || ""}
+              onChangeValue={(v) => {
+                setPage(1);
+                setFilters({ ...filters, codigoTipoCredito: v });
+              }}
+            />
+
+            <CreditoEducacionalTipoDescontoSelect
+              value={filters.codigoTipoDesconto?.toString() || ""}
+              onChangeValue={(v) => {
+                setPage(1);
+                setFilters({ ...filters, codigoTipoDesconto: v });
+              }}
+            />
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex gap-2">
-        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+      <div className="flex items-center justify-between">
+        <Button className="gap-2" onClick={handleOpenCreateModal}>
           <Plus className="h-4 w-4" />
           Nova Bolsa
         </Button>
@@ -173,9 +295,10 @@ export default function ListarBolsa() {
 
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
+
         {isLoadingBolsa ? (
           <div className="space-y-3">
-            {Array.from({ length: 10 }).map((_, i) => (
+            {Array.from({ length: Number(limit) }).map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
@@ -190,68 +313,128 @@ export default function ListarBolsa() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Designação</TableHead>
-                  <TableHead>Instituição</TableHead>
-                  <TableHead>Tipo Desconto</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Tipo Crédito</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bolsas.map((item) => (
-                  <TableRow key={item.codigo}>
-                    <TableCell>{item.designacao}</TableCell>
-                    <TableCell>{item.instituicao}</TableCell>
-                    <TableCell>{item.descricao_tipo_desconto}</TableCell>
-                    <TableCell>
-                      {item.valor_desconto}
-                      {item.descricao_tipo_desconto === "PERCENTUAL" ? "%" : ""}
-                    </TableCell>
-                    <TableCell>{item.descricao_tipo_credito}</TableCell>
+          <>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Designação</TableHead>
+                    <TableHead>Instituição</TableHead>
+                    <TableHead>Tipo Desconto</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Tipo Crédito</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            {bolsas.length > 0 && (
-              <div className="flex items-center justify-between p-4">
-                <div className="text-sm text-muted-foreground"></div>
+                </TableHeader>
+                <TableBody>
+                  {bolsas.map((item) => (
+                    <TableRow key={item.codigo}>
+                      <TableCell>{item.designacao}</TableCell>
+                      <TableCell>{item.instituicao}</TableCell>
+                      <TableCell>{item.descricao_tipo_desconto}</TableCell>
+                      <TableCell>
+                        {item.valor_desconto}
+                        {item.descricao_tipo_desconto === "PERCENTUAL"
+                          ? "%"
+                          : ""}
+                      </TableCell>
+                      <TableCell>{item.descricao_tipo_credito}</TableCell>
+                      <TableCell>
+                        <span className="flex items-center gap-2">
+                          <Switch
+                            checked={item.estado === 1}
+                            onCheckedChange={() => handleChangeEstado(item)}
+                            disabled={isPendingActiveBolsa}
+                          />
+                          <Loader2
+                            className={cn(
+                              "h-4 w-4 animate-spin",
+                              selectedBolsa?.codigo === item.codigo &&
+                                isPendingActiveBolsa
+                                ? "block"
+                                : "hidden",
+                            )}
+                          />
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => handleEditBolsa(item)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!data?.prev?.$ref}
-                    onClick={prevPage}
-                  >
-                    <ChevronLeft className="h-4 w-4" /> Anterior
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!data?.next?.$ref}
-                    onClick={nextPage}
-                  >
-                    Próxima <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+              <div className="text-sm text-muted-foreground">
+                Mostrando página <strong>{currentPage}</strong> de{" "}
+                <strong>{totalPages}</strong> • Total de{" "}
+                <strong>{totalItems}</strong> registos
               </div>
-            )}
-          </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Label>Itens por página</Label>
+                  <Select
+                    value={limit}
+                    onValueChange={(value) => {
+                      setLimit(value);
+                      setPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage((prev) => prev - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
+                <div className="text-sm font-medium px-4">{currentPage}</div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage((prev) => prev + 1)}
+                >
+                  Próxima
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       <CreateBolsaDialog
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) resetForm();
+        }}
         formData={formData}
         onChange={setFormData}
         onSubmit={handleSubmit}
-        isSubmitting={isPending}
+        isSubmitting={isPendingCreateBolsa || isPendingUpdateBolsa}
+        mode={editingBolsa ? "edit" : "create"}
       />
     </div>
   );
