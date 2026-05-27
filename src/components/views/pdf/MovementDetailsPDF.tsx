@@ -114,7 +114,6 @@ export function MovementDetailsPDF({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* HEADER UNIVERSIDADE */}
         <UniversityHeader />
 
         {/* TÍTULO */}
@@ -140,6 +139,14 @@ export function MovementDetailsPDF({
               <Text style={[styles.badge, { backgroundColor: statusColor }]}>
                 {movement.status.toUpperCase()}
               </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Operador</Text>
+              <Text style={styles.value}>{movement.operator_name}</Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Caixa</Text>
+              <Text style={styles.value}>{movement.cash_register_name}</Text>
             </View>
 
             <View style={styles.row}>
