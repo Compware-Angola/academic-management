@@ -95,7 +95,7 @@ export function CreateIsencaoMesDialog({
     useQueryFinanceMonthlyFee({
       academicYear: filters.anoLectivo,
       enrollmentCode: filters.matricula,
-      status: undefined,
+      status: "all",
       limit: 100,
       page: 1,
     });
@@ -131,7 +131,7 @@ export function CreateIsencaoMesDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-5xl!">
+      <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Calendar />
@@ -198,7 +198,7 @@ export function CreateIsencaoMesDialog({
                   </TableRow>
                 ) : (
                   months?.map((month) => {
-                    const invoiceStatus = parseFilter(month?.estado_fatura);
+                    const invoiceStatus = Number(month?.estado_fatura);
                     const isInvoicePending =
                       invoiceStatus == InvoiceEnum.PENDENTE;
                     return (
@@ -213,7 +213,7 @@ export function CreateIsencaoMesDialog({
                             onCheckedChange={() =>
                               toggleStudent({
                                 mesTempId: month.mes_temp_id,
-                                servicoId: month.id_tipo_servico,
+                                servicoId: month.codigo_servico,
                               })
                             }
                           />
