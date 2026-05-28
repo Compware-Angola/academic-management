@@ -349,9 +349,6 @@ export default function LaunchNotes() {
   );
 
   const upsertNoteMutation = useUpsertNote();
-  const canResetNotes =
-    currentSemester?.semestre.toString() === formData.semestre &&
-    formData.anoLetivo === currentSemester?.anoId.toString();
 
   // ─── Efeitos ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1150,35 +1147,29 @@ export default function LaunchNotes() {
                               <p>{hasNota ? "Atualizar" : "Lançar"}</p>
                             </TooltipContent>
                           </Tooltip>
-                          {isLoadingCurrentSemester ? (
-                            <Skeleton className="h-12 w-12" />
-                          ) : (
-                            canResetNotes && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    title="Resetar"
-                                    disabled={
-                                      shouldBlockGradesActions ||
-                                      isRefetching ||
-                                      isSavingAll ||
-                                      !hasNota
-                                    }
-                                    onClick={() =>
-                                      handleSaveIndividual(student, "reset")
-                                    }
-                                  >
-                                    <RefreshCw className="h-4 w-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Resetar</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            )
-                          )}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                title="Resetar"
+                                disabled={
+                                  shouldBlockGradesActions ||
+                                  isRefetching ||
+                                  isSavingAll ||
+                                  !hasNota
+                                }
+                                onClick={() =>
+                                  handleSaveIndividual(student, "reset")
+                                }
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Resetar</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </TableCell>
                       </TableRow>
                     );
