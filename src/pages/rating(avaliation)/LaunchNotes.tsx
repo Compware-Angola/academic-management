@@ -39,7 +39,6 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useAuth } from "@/hooks/use-auth";
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
-import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
@@ -59,7 +58,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useQueryCurentSemester } from "@/hooks/academiccalendar/use-query-schedule-creation-prompt";
+
 import { toast } from "sonner";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -86,8 +85,7 @@ export interface Roles {
 
 export default function LaunchNotes() {
   const { haveFullAccess } = usePermission();
-  const { data: currentSemester, isLoading: isLoadingCurrentSemester } =
-    useQueryCurentSemester();
+
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);

@@ -23,16 +23,3 @@ export async function getScheduleCreationPrompt(
 
   return response.data ?? null;
 }
-type CurrentAcademicCalender = {
-  anoId: number;
-  semestre: number | null;
-  descricao: string;
-  dataFim: Date | null;
-};
-export async function getCurentSemester(): Promise<CurrentAcademicCalender | null> {
-  const response = await axiosNestGa.get<CurrentAcademicCalender>(
-    "/academic-activities/current-semester",
-  );
-
-  return response.data ?? null;
-}
