@@ -21,7 +21,6 @@ import {
   SendHorizonal,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import {
   useQueryNoteReleases,
   useQueryNoteSummary,
@@ -61,6 +60,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useQueryCurentSemester } from "@/hooks/academiccalendar/use-query-schedule-creation-prompt";
+import { toast } from "sonner";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Roles {
@@ -85,7 +85,6 @@ export interface Roles {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function LaunchNotes() {
-  const { toast } = useToast();
   const { haveFullAccess } = usePermission();
   const { data: currentSemester, isLoading: isLoadingCurrentSemester } =
     useQueryCurentSemester();
@@ -420,41 +419,67 @@ export default function LaunchNotes() {
     student: any,
     type: "save" | "reset" = "save",
   ) => {
-    if (student.nota === null || student.nota === undefined) {
-      toast({
-        title: "Erro",
-        description: "Insira uma nota primeiro",
-        variant: "destructive",
+    // RESET
+    if (type === "reset") {
+      const payload = buildPayloadItem({
+        ...student,
+        nota: null,
+        observacao: null,
       });
-      return;
-    }
-    if (Number(student.nota) < 0 || Number(student.nota) > 20) {
-      toast({
-        title: "Erro",
-        description: "A nota deve estar entre 0 e 20",
-        variant: "destructive",
+
+      upsertNoteMutation.mutate([payload] as any, {
+        onSuccess: () => {
+          toggleLock(student.codigo_grade_aluno);
+
+          toast.success("Nota resetada", {
+            description: `A nota de ${student.nome_completo} foi resetada com sucesso.`,
+          });
+        },
+
+        onError: () => {
+          toast.error("Erro ao resetar nota", {
+            description: "Não foi possível resetar a nota.",
+          });
+        },
       });
+
       return;
     }
 
-    if (type === "reset") {
-      student.nota = null;
-      student.observacao = null;
+    if (
+      student.nota === null ||
+      student.nota === undefined ||
+      student.nota === ""
+    ) {
+      toast.error("Erro ao salvar nota", {
+        description: "Insira uma nota primeiro.",
+      });
+
+      return;
+    }
+
+    const nota = Number(student.nota);
+
+    if (isNaN(nota) || nota < 0 || nota > 20) {
+      toast.error("Erro ao salvar nota", {
+        description: "A nota deve estar entre 0 e 20.",
+      });
+
+      return;
     }
 
     upsertNoteMutation.mutate([buildPayloadItem(student)] as any, {
       onSuccess: () => {
         toggleLock(student.codigo_grade_aluno);
-        toast({
-          title: student.nota !== null ? "Nota atualizada" : "Nota lançada",
-          description: `${student.nome_completo} → ${student.nota} valores`,
+
+        toast.success("Nota salva", {
+          description: `${student.nome_completo} → ${nota} valores`,
         });
       },
+
       onError: () => {
-        toast({
-          title: "Erro",
-          description: "Não foi possível lançar/atualizar a nota.",
-          variant: "destructive",
+        toast.error("Erro ao salvar nota", {
+          description: "Não foi possível salvar a nota.",
         });
       },
     });
@@ -471,10 +496,8 @@ export default function LaunchNotes() {
     );
 
     if (studentsWithNota.length === 0) {
-      toast({
-        title: "Nenhuma nota para lançar",
+      toast.error("Nenhuma nota para lançar", {
         description: "Insira notas válidas (0–20) antes de lançar em massa.",
-        variant: "destructive",
       });
       return;
     }
@@ -487,17 +510,14 @@ export default function LaunchNotes() {
       onSuccess: () => {
         setIsSavingAll(false);
         handleLockAll();
-        toast({
-          title: "Lançamento em massa concluído",
+        toast.success("Lançamento em massa concluído", {
           description: `${payloads.length} nota(s) lançada(s) com sucesso.`,
         });
       },
       onError: () => {
         setIsSavingAll(false);
-        toast({
-          title: "Erro no lançamento em massa",
+        toast.error("Erro no lançamento em massa", {
           description: "Não foi possível lançar as notas. Tente novamente.",
-          variant: "destructive",
         });
       },
     });
@@ -1130,7 +1150,6 @@ export default function LaunchNotes() {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
-                                title={hasNota ? "Atualizar" : "Lançar"}
                                 size="sm"
                                 variant={hasNota ? "default" : "outline"}
                                 disabled={
@@ -1152,7 +1171,6 @@ export default function LaunchNotes() {
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                title="Resetar"
                                 disabled={
                                   shouldBlockGradesActions ||
                                   isRefetching ||
