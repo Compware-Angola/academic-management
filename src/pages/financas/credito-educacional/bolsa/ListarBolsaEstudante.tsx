@@ -106,6 +106,7 @@ export default function ListarBolsaEstudante() {
     () => new Map(semestres?.map((s) => [s.codigo, s.designacao]) ?? []),
     [semestres],
   );
+  const [searchType, setSearchType] = useState<"nome" | "matricula">("nome");
 
   // Limpar todos os filtros
   const clearFilters = () => {
@@ -149,7 +150,7 @@ export default function ListarBolsaEstudante() {
         filters.cursoId && `Curso ID: ${filters.cursoId}`,
         filters.codigoAnoLectivo && `Ano Letivo: ${filters.codigoAnoLectivo}`,
         filters.codigoInstituicao &&
-          `Instituição ID: ${filters.codigoInstituicao}`,
+        `Instituição ID: ${filters.codigoInstituicao}`,
         filters.codigoBolsa && `Bolsa ID: ${filters.codigoBolsa}`,
       ]
         .filter(Boolean)
@@ -213,33 +214,33 @@ export default function ListarBolsaEstudante() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Estudantes com Bolsa",
-        subtitle: "Lista de estudantes com créditos ou bolsas aplicadas",
-        infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros },
-          {
-            title: "Resumo",
-            content: [`Total de estudantes: ${pdfData.total}`],
-          },
-        ],
-        mainTable: {
-          headers: [
-            { key: "matricula", label: "Matrícula", width: 18 },
-            { key: "nome", label: "Nome", width: 35 },
-            { key: "bi", label: "BI", width: 20 },
-            { key: "curso", label: "Curso", width: 25 },
-            { key: "instituicao", label: "Instituição", width: 25 },
-            { key: "anoLetivo", label: "Ano Letivo", width: 15 },
-            { key: "semestre", label: "Semestre", width: 18 },
-            { key: "desconto", label: "Desconto", width: 20 },
-            { key: "tipoCredito", label: "Tipo Crédito", width: 22 },
-            { key: "bolsa", label: "Bolsa", width: 25 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Estudantes com Bolsa",
+      subtitle: "Lista de estudantes com créditos ou bolsas aplicadas",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        {
+          title: "Resumo",
+          content: [`Total de estudantes: ${pdfData.total}`],
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+      ],
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Matrícula", width: 18 },
+          { key: "nome", label: "Nome", width: 35 },
+          { key: "bi", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "instituicao", label: "Instituição", width: 25 },
+          { key: "anoLetivo", label: "Ano Letivo", width: 15 },
+          { key: "semestre", label: "Semestre", width: 18 },
+          { key: "desconto", label: "Desconto", width: 20 },
+          { key: "tipoCredito", label: "Tipo Crédito", width: 22 },
+          { key: "bolsa", label: "Bolsa", width: 25 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Estudantes_Bolsa_${new Date().toISOString().slice(0, 10)}`;
@@ -289,33 +290,61 @@ export default function ListarBolsaEstudante() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="nome">Nome do Estudante</Label>
-              <Input
-                id="nome"
-                placeholder="Digite o nome"
-                value={filters.nome || ""}
-                onChange={(e) => {
-                  setPage(1);
-                  setFilters((prev) => ({ ...prev, nome: e.target.value }));
-                }}
-              />
-            </div>
+            {/* Select de tipo de pesquisa + campo dinâmico */}
+            <div className="space-y-2 md:col-span-2 lg:col-span-2 flex gap-2">
+              <div className="space-y-2 w-32 shrink-0">
+                <Label>Pesquisar por</Label>
+                <Select
+                  value={searchType}
+                  onValueChange={(v: "nome" | "matricula") => {
+                    setSearchType(v);
+                    setPage(1);
+                    setFilters((prev) => ({
+                      ...prev,
+                      nome: undefined,
+                      codigoMatricula: undefined,
+                    }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nome">Nome</SelectItem>
+                    <SelectItem value="matricula">Matrícula</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="matricula">Matrícula</Label>
-              <Input
-                id="matricula"
-                placeholder="Código da matrícula"
-                value={filters.codigoMatricula?.toString() || ""}
-                onChange={(e) => {
-                  setPage(1);
-                  setFilters((prev) => ({
-                    ...prev,
-                    codigoMatricula: Number(e.target.value),
-                  }));
-                }}
-              />
+              <div className="space-y-2 flex-1">
+                <Label htmlFor="search-input">
+                  {searchType === "nome" ? "Nome do Estudante" : "Matrícula"}
+                </Label>
+                {searchType === "nome" ? (
+                  <Input
+                    id="search-input"
+                    placeholder="Digite o nome"
+                    value={filters.nome || ""}
+                    onChange={(e) => {
+                      setPage(1);
+                      setFilters((prev) => ({ ...prev, nome: e.target.value }));
+                    }}
+                  />
+                ) : (
+                  <Input
+                    id="search-input"
+                    placeholder="Código da matrícula"
+                    value={filters.codigoMatricula?.toString() || ""}
+                    onChange={(e) => {
+                      setPage(1);
+                      setFilters((prev) => ({
+                        ...prev,
+                        codigoMatricula: Number(e.target.value),
+                      }));
+                    }}
+                  />
+                )}
+              </div>
             </div>
 
             <CourseSelect
