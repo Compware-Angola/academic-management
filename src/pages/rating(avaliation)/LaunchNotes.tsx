@@ -55,6 +55,12 @@ import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
 import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useQueryCurentSemester } from "@/hooks/academiccalendar/use-query-schedule-creation-prompt";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Roles {
@@ -81,7 +87,8 @@ export interface Roles {
 export default function LaunchNotes() {
   const { toast } = useToast();
   const { haveFullAccess } = usePermission();
-
+  const { data: currentSemester, isLoading: isLoadingCurrentSemester } =
+    useQueryCurentSemester();
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -158,14 +165,14 @@ export default function LaunchNotes() {
 
       const filteredClasses = allowedClassIds?.length
         ? classes.filter((c) =>
-          allowedClassIds?.includes(c?.codigo?.toString()),
-        )
+            allowedClassIds?.includes(c?.codigo?.toString()),
+          )
         : classes;
 
       const filteredUnidadesCurriculares = allowedGradeIds?.length
         ? unidadesCurriculares.filter((g) =>
-          allowedGradeIds?.includes(g?.pk?.toString()),
-        )
+            allowedGradeIds?.includes(g?.pk?.toString()),
+          )
         : unidadesCurriculares;
 
       return {
@@ -181,10 +188,10 @@ export default function LaunchNotes() {
    * que isenta de verificação de prazo de lançamento.
    */
   /**
-    * Utilizadores privilegiados: todos os roles excepto Director
-    * (Director tem acesso restrito apenas aos seus cursos).
-    * Admin / haveFullAccess tem acesso total sem restrições de prazo.
-    */
+   * Utilizadores privilegiados: todos os roles excepto Director
+   * (Director tem acesso restrito apenas aos seus cursos).
+   * Admin / haveFullAccess tem acesso total sem restrições de prazo.
+   */
   const isPrivilegedUser: boolean =
     haveFullAccess() ||
     roles?.Reitor === true ||
@@ -342,6 +349,9 @@ export default function LaunchNotes() {
   );
 
   const upsertNoteMutation = useUpsertNote();
+  const canResetNotes =
+    currentSemester?.semestre.toString() === formData.semestre &&
+    formData.anoLetivo === currentSemester?.anoId.toString();
 
   // ─── Efeitos ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -397,7 +407,7 @@ export default function LaunchNotes() {
   const buildPayloadItem = (student: any): NoteUpsertPayload => ({
     gradeCurricularAluno: student.codigo_grade_aluno,
     utilizador: userData?.user?.pk_utilizador || 0,
-    nota: Number(student.nota),
+    nota: student.nota,
     tipoDeProva: Number(formData.tipoProva),
     epoca: 2,
     tipoAvaliacao: Number(formData.tipoAvaliacao),
@@ -409,7 +419,10 @@ export default function LaunchNotes() {
   });
 
   // ─── Lançamento individual ────────────────────────────────────────────────
-  const handleSaveIndividual = (student: any) => {
+  const handleSaveIndividual = (
+    student: any,
+    type: "save" | "reset" = "save",
+  ) => {
     if (student.nota === null || student.nota === undefined) {
       toast({
         title: "Erro",
@@ -425,6 +438,11 @@ export default function LaunchNotes() {
         variant: "destructive",
       });
       return;
+    }
+
+    if (type === "reset") {
+      student.nota = null;
+      student.observacao = null;
     }
 
     upsertNoteMutation.mutate([buildPayloadItem(student)] as any, {
@@ -1086,38 +1104,81 @@ export default function LaunchNotes() {
                         </TableCell>
 
                         <TableCell className="text-center flex justify-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={
-                              shouldBlockGradesActions ||
-                              isRefetching ||
-                              isSavingAll
-                            }
-                            onClick={() =>
-                              toggleLock(student.codigo_grade_aluno)
-                            }
-                          >
-                            {isLocked ? (
-                              <Lock className="w-4 h-4" />
-                            ) : (
-                              <Unlock className="w-4 h-4" />
-                            )}
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={
+                                  shouldBlockGradesActions ||
+                                  isRefetching ||
+                                  isSavingAll
+                                }
+                                onClick={() =>
+                                  toggleLock(student.codigo_grade_aluno)
+                                }
+                              >
+                                {isLocked ? (
+                                  <Lock className="w-4 h-4" />
+                                ) : (
+                                  <Unlock className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{isLocked ? "Desbloquear" : "Bloquear"}</p>
+                            </TooltipContent>
+                          </Tooltip>
 
-                          <Button
-                            size="sm"
-                            variant={hasNota ? "default" : "outline"}
-                            disabled={
-                              shouldBlockGradesActions ||
-                              isRefetching ||
-                              isSavingAll
-                            }
-                            onClick={() => handleSaveIndividual(student)}
-                          >
-                            <Save className="h-4 w-4 mr-1" />
-                            {hasNota ? "Atualizar" : "Lançar"}
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                title={hasNota ? "Atualizar" : "Lançar"}
+                                size="sm"
+                                variant={hasNota ? "default" : "outline"}
+                                disabled={
+                                  shouldBlockGradesActions ||
+                                  isRefetching ||
+                                  isSavingAll
+                                }
+                                onClick={() => handleSaveIndividual(student)}
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{hasNota ? "Atualizar" : "Lançar"}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          {isLoadingCurrentSemester ? (
+                            <Skeleton className="h-12 w-12" />
+                          ) : (
+                            canResetNotes && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    title="Resetar"
+                                    disabled={
+                                      shouldBlockGradesActions ||
+                                      isRefetching ||
+                                      isSavingAll ||
+                                      !hasNota
+                                    }
+                                    onClick={() =>
+                                      handleSaveIndividual(student, "reset")
+                                    }
+                                  >
+                                    <RefreshCw className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Resetar</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -1194,8 +1255,9 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
-        }. Contacte a administração.`,
+      content: `Não existe período definido para ${
+        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+      }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",

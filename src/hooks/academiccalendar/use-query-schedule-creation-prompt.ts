@@ -1,4 +1,7 @@
-import { getScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
+import {
+  getCurentSemester,
+  getScheduleCreationPrompt,
+} from "@/services/academiccalendar/get-schedule-creation-prompt";
 import { useQuery } from "@tanstack/react-query";
 
 export function useQueryScheduleCreationPrompt(
@@ -12,5 +15,14 @@ export function useQueryScheduleCreationPrompt(
     enabled: options?.enabled ?? (!!anoLectivo && !!semestre),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
+  });
+}
+
+export function useQueryCurentSemester() {
+  return useQuery({
+    queryKey: ["current-semester"],
+    queryFn: () => getCurentSemester(),
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60,
   });
 }
