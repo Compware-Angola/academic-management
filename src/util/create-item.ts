@@ -1,6 +1,7 @@
 interface TypeServiceResponse {
   codigo: number;
   preco: number;
+  total: number;
   descricao: string;
   mesTempId: number;
   multa: number;
@@ -13,7 +14,7 @@ export const createItem = (serviceType: TypeServiceResponse | null) => {
     CodigoProduto: serviceType.codigo,
     Quantidade: 1,
     preco: serviceType.preco,
-    Total: serviceType.preco,
+    Total: serviceType.total,
     valor_pago: 0,
     obs: serviceType?.descricao?.substring(0, MAX_OBS_LENGTH) ?? "",
     taxaIva: 0,
@@ -21,7 +22,7 @@ export const createItem = (serviceType: TypeServiceResponse | null) => {
     retencao: 0,
     incidencia: 0,
     valorDesconto: serviceType.valorDesconto,
-    descontoProduto: 0,
+    descontoProduto: serviceType.valorDesconto,
     mes: "",
     multa: serviceType.multa,
     mesTempId: serviceType.mesTempId,
@@ -34,7 +35,8 @@ export const createItem = (serviceType: TypeServiceResponse | null) => {
 interface CreateInvoiceParams {
   poloid: number;
   codigoMatricula: number;
-  totalApagar: number;
+  totalPreco: number;
+  valorApagar: number;
   itens?: any[];
   descricao?: string;
   codigoDescricao?: number;
@@ -66,7 +68,8 @@ export interface CreateInvoiceBody {
 export const createInvoice = ({
   poloid,
   codigoMatricula,
-  totalApagar,
+  valorApagar,
+  totalPreco,
   itens = [],
   descricao = "Matrícula + Inscrição em Disciplinas",
   codigoDescricao = 1111,
@@ -77,9 +80,9 @@ export const createInvoice = ({
 }: CreateInvoiceParams): CreateInvoiceBody => {
   return {
     polo_id: poloid,
-    TotalPreco: totalApagar,
+    TotalPreco: totalPreco,
     codigo_descricao: codigoDescricao,
-    ValorAPagar: totalApagar,
+    ValorAPagar: valorApagar,
     total_incidencia: 0,
     total_retencao: 0,
     CodigoMatricula: codigoMatricula,

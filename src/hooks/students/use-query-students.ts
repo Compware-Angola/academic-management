@@ -194,6 +194,18 @@ export function useActiveConfirmacao() {
       queryClient.invalidateQueries({
         queryKey: ["student-detail"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["student-disciplinas"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["student-academic-history-equivalency"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["student-academic-history-migration"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["finance-monthly-fee"],
+      });
     },
   });
 }

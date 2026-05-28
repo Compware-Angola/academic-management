@@ -56,11 +56,19 @@ export function TabContentFaculdade() {
       "Director",
       "Coordenador",
       "Decano",
-    ].includes(c.descricao)
+    ].includes(c.descricao),
   );
+  const { mutate: definirFaculdade, isPending } = useDefineFaculdade();
+  const isDecanoCargo = form.cargo === "10";
+  const canSubmit = !isDecanoCargo
+    ? !form.cargo ||
+      !form.ocupante ||
+      !form.faculdade ||
+      !form.curso ||
+      isPending
+    : !form.cargo || !form.ocupante || !form.faculdade || isPending;
 
   // Mutation
-  const { mutate: definirFaculdade, isPending } = useDefineFaculdade();
 
   return (
     <TabsContent value="faculdade" className="mt-4">
@@ -123,21 +131,23 @@ export function TabContentFaculdade() {
               />
 
               {/* Curso */}
-              <FormCommandSelect
-                disabled={isLoadingCursos}
-                value={form.curso}
-                label="Curso"
-                width="full"
-                options={cursos}
-                map={(c) => ({
-                  key: c.codigo.toString(),
-                  value: c.codigo.toString(),
-                  label: c.designacao,
-                })}
-                onChange={(value) =>
-                  setForm((prev) => ({ ...prev, curso: value }))
-                }
-              />
+              {!isDecanoCargo && (
+                <FormCommandSelect
+                  disabled={isLoadingCursos}
+                  value={form.curso}
+                  label="Curso"
+                  width="full"
+                  options={cursos}
+                  map={(c) => ({
+                    key: c.codigo.toString(),
+                    value: c.codigo.toString(),
+                    label: c.designacao,
+                  })}
+                  onChange={(value) =>
+                    setForm((prev) => ({ ...prev, curso: value }))
+                  }
+                />
+              )}
             </div>
           </div>
 
@@ -146,13 +156,7 @@ export function TabContentFaculdade() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
               <Button
                 className="w-full sm:w-auto"
-                disabled={
-                  !form.cargo ||
-                  !form.ocupante ||
-                  !form.faculdade ||
-                  !form.curso ||
-                  isPending
-                }
+                disabled={canSubmit}
                 onClick={() => setConfirmOpen(true)}
               >
                 {isPending ? "A definir..." : "Definir"}
@@ -204,7 +208,7 @@ export function TabContentFaculdade() {
                       });
                       setSearch("");
                     },
-                  }
+                  },
                 );
               }}
             >

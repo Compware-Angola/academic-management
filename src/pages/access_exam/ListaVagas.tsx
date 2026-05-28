@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 
 import { FormSelect } from "@/components/common/FormSelect";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -245,18 +246,11 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
     <Card>
       <CardContent className="space-y-4 pt-6">
         <div className="grid gap-4 md:grid-cols-3">
-          <FormSelect
+          <CourseSelect
             label="Curso"
             value={cursoId}
-            onChange={(value) => handleFilterChange(setCursoId, value)}
-            options={cursos}
-            loading={isLoadingCursos}
-            defaultSelectItem={[{ value: "all", label: "Todos" }]}
-            map={(curso) => ({
-              key: curso.codigo,
-              value: curso.codigo,
-              label: curso.designacao,
-            })}
+            onChangeValue={(value) => handleFilterChange(setCursoId, value)}
+            enableDefaultSelectItem
           />
 
           <FormSelect

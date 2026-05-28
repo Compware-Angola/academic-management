@@ -12,7 +12,7 @@ import {
   MapPin,
   Award,
   Calendar as CalendarIcon,
-  TrendingUp,
+
 } from "lucide-react";
 import { buildImageAssets } from "@/util/build-image-assets";
 

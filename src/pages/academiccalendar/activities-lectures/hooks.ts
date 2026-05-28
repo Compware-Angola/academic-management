@@ -143,9 +143,12 @@ export function useActivitiesLectures() {
       if (editId) {
         await updateAtividadeMutation.mutateAsync({
           codigo: editId,
+          designacao: form.designacao.trim(),
+          codigo_ano_lectivo: Number(form.codigo_ano_lectivo),
+          codigo_tipo_candidatura: Number(form.codigo_tipo_candidatura),
+          codigo_tipo_calendario: Number(form.codigo_tipo_calendario),
           data_inicio: form.data_inicio,
-          data_termino: form.data_fim,
-          descricao: form.designacao,
+          data_fim: form.data_fim,
         });
 
         toast({

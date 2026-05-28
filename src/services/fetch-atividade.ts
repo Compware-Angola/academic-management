@@ -1,4 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type Atividade = {
   codigo: string;
   descricao: string;
@@ -16,7 +16,14 @@ export async function fetchAtividade({
   anoLetivoId: string;
   tipoCandidaturaId: string;
 }): Promise<Atividade[]> {
-  const url = `/ga/academic-calendar/academic-activities/${anoLetivoId}/${tipoCandidaturaId}`;
-  const { data } = await axiosApexGa.get(url);
+  const { data } = await axiosNestGa.get(
+    "/academic-activities/calendar-activities",
+    {
+      params: {
+        anolectivo: anoLetivoId,
+        tpcandidatura: tipoCandidaturaId,
+      },
+    }
+  );
   return data.actividades ?? [];
 }

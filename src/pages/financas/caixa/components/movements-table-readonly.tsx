@@ -13,7 +13,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQueryCashRegisterMovements } from "@/hooks/financa/use-cash-register";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { CashRegisterMovement } from "@/services/finance/cash-register.service";
@@ -58,20 +57,21 @@ export function MovementsTableReadOnly() {
 
   const { data: currentUser } = useCurrentUser("GA");
 
-  const { data, isLoading } = useQueryCashRegisterMovements({
-    page,
-    limit: 10,
+  const { data, isLoading, refetch, isFetching } =
+    useQueryCashRegisterMovements({
+      page,
+      limit: 10,
 
-    search: filters.search || undefined,
+      search: filters.search || undefined,
 
-    operatorId:
-      parseFilter(String(currentUser?.user?.pk_utilizador)) || undefined,
+      operatorId:
+        parseFilter(String(currentUser?.user?.pk_utilizador)) || undefined,
 
-    cashRegisterId: parseFilter(String(filters.caixa)) || undefined,
+      cashRegisterId: parseFilter(String(filters.caixa)) || undefined,
 
-    startDate: filters.startDate || undefined,
-    endDate: filters.endDate || undefined,
-  });
+      startDate: filters.startDate || undefined,
+      endDate: filters.endDate || undefined,
+    });
 
   const movements = data?.data ?? [];
   const meta = data?.meta;
@@ -230,6 +230,11 @@ export function MovementsTableReadOnly() {
     });
     setPage(1);
   };
+  const handleRefresh = () => {
+    setPage(1);
+    handleClearFilters();
+    refetch();
+  };
 
   return (
     <>
@@ -247,6 +252,8 @@ export function MovementsTableReadOnly() {
           endDate={filters.endDate}
           onEndDateChange={(v) => updateFilter("endDate", v)}
           onClearFilters={handleClearFilters}
+          onRefresh={handleRefresh}
+          isRefreshing={isFetching && isLoading === false}
         />
         <div className="flex gap-2">
           {pdfDocument && (
@@ -281,22 +288,20 @@ export function MovementsTableReadOnly() {
                 <TableHead className="text-center w-[150px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              {isLoading && <LoadingRow colSpan={colSpan} />}
-
-              {!isLoading && movements.length === 0 && (
+              {isLoading || isFetching ? (
+                <LoadingRow colSpan={colSpan} />
+              ) : movements.length === 0 ? (
                 <EmptyRow colSpan={colSpan} />
-              )}
-
-              {!isLoading &&
+              ) : (
                 movements.map((movement) => (
                   <MovementRow
                     key={movement.code}
                     movement={movement}
                     onViewDetails={setSelectedMovement}
                   />
-                ))}
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
