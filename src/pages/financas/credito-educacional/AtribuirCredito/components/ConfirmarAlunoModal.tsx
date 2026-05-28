@@ -12,6 +12,8 @@ type Aluno = {
   bi: string;
   curso: string;
   periodo: string;
+  ja_bolsista?: boolean;
+  bolsa?: string | null;
 };
 
 interface ConfirmarAlunoModalProps {
@@ -51,13 +53,25 @@ export function ConfirmarAlunoModal({
 
           <span className="font-medium">Período</span>
           <span>{aluno.periodo}</span>
+
+          <span className="font-medium">Bolseiro</span>
+          <span>{aluno.ja_bolsista ? "Sim" : "Não"}</span>
+
+          {aluno.ja_bolsista && aluno.bolsa && (
+            <>
+              <span className="font-medium">Bolsa</span>
+              <span>{aluno.bolsa}</span>
+            </>
+          )}
         </div>
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={onConfirm}>Confirmar</Button>
+          <Button disabled={aluno.ja_bolsista} onClick={onConfirm}>
+            Confirmar
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
