@@ -206,6 +206,10 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ texto: "", correta: false });
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const respostaCorreta = respostas.find(
+    (resposta) => resposta.tipo_resposta_id === TIPO_RESPOSTA_CORRETA_ID
+  );
+  const jaTemRespostaCorreta = Boolean(respostaCorreta);
 
   const startEdit = (r: Resposta) => {
     setPendingDeleteId(null);
@@ -220,6 +224,19 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
 
   const saveEdit = () => {
     if (editingId == null) return;
+
+    if (
+      editForm.correta &&
+      jaTemRespostaCorreta &&
+      respostaCorreta?.id !== editingId
+    ) {
+      toast({
+        title: "Esta pergunta já possui uma resposta correta",
+        variant: "destructive",
+      });
+      return;
+    }
+
     updateResposta.mutate(
       {
         id: editingId,
@@ -264,6 +281,15 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
 
   const addResposta = () => {
     if (!novaResposta.texto.trim()) return;
+
+    if (novaResposta.correta && jaTemRespostaCorreta) {
+      toast({
+        title: "Esta pergunta já possui uma resposta correta",
+        variant: "destructive",
+      });
+      return;
+    }
+
     createResposta.mutate(
       {
         descricao: novaResposta.texto,
@@ -330,6 +356,10 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={editForm.correta}
+                        disabled={
+                          jaTemRespostaCorreta &&
+                          respostaCorreta?.id !== editingId
+                        }
                         onCheckedChange={(v) =>
                           setEditForm((s) => ({ ...s, correta: v }))
                         }
@@ -468,6 +498,7 @@ function RespostasManager({ pergunta }: { pergunta: Pergunta }) {
           <Switch
             id="correta"
             checked={novaResposta.correta}
+            disabled={jaTemRespostaCorreta}
             onCheckedChange={(v) =>
               setNovaResposta((s) => ({ ...s, correta: v }))
             }
