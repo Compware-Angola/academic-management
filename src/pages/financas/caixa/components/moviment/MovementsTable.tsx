@@ -75,15 +75,16 @@ export function MovementsTable() {
   });
   const [rejectionReason, setRejectionReason] = useState("");
   const [isValidating, setIsValidating] = useState(false);
-  const { data, isLoading } = useQueryCashRegisterMovements({
-    search: search || undefined,
-    operatorId: parseFilter(operatorId),
-    cashRegisterId: parseFilter(caixa),
-    startDate: startDate || undefined,
-    endDate: endDate || undefined,
-    page,
-    limit: 10,
-  });
+  const { data, isLoading, isFetching, refetch } =
+    useQueryCashRegisterMovements({
+      search: search || undefined,
+      operatorId: parseFilter(operatorId),
+      cashRegisterId: parseFilter(caixa),
+      startDate: startDate || undefined,
+      endDate: endDate || undefined,
+      page,
+      limit: 10,
+    });
 
   const validateMovement = useValidateMovement();
   const exportRows = useMemo(
@@ -281,6 +282,15 @@ export function MovementsTable() {
       setIsValidating(false);
     }
   };
+  const handleRefresh = () => {
+    setSearch("");
+    setOperatorId("");
+    setCaixa("");
+    setStartDate("");
+    setEndDate("");
+    setPage(1);
+    refetch();
+  };
 
   const movements = data?.data ?? [];
   const meta = data?.meta;
@@ -301,6 +311,8 @@ export function MovementsTable() {
           endDate={endDate}
           onEndDateChange={handleEndDateChange}
           onClearFilters={handleCleanFilters}
+          isRefreshing={isFetching && isLoading === false}
+          onRefresh={handleRefresh}
         />
 
         {/* Botões de Exportação - Adicionados aqui */}
@@ -340,13 +352,11 @@ export function MovementsTable() {
             </TableHeader>
 
             <TableBody>
-              {isLoading && <LoadingRow colSpan={colSpan} />}
-
-              {!isLoading && movements.length === 0 && (
+              {isLoading || isFetching ? (
+                <LoadingRow colSpan={colSpan} />
+              ) : movements.length === 0 ? (
                 <EmptyRow colSpan={colSpan} />
-              )}
-
-              {!isLoading &&
+              ) : (
                 movements.map((movement) => (
                   <MovementRow
                     key={movement.code}
@@ -354,7 +364,8 @@ export function MovementsTable() {
                     onViewDetails={handleViewDetails}
                     onValidate={handleValidateClick}
                   />
-                ))}
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

@@ -1,8 +1,10 @@
+import { axiosNestFinance } from "@/lib/axios-nest-finance";
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 
+
 export type StudentSugestoesParams = {
-  search?: string; 
+  search?: string;
 };
 
 
@@ -47,13 +49,13 @@ export type StudentDetail = {
   curso_codigo: number;
   data_emissao_bi: string;
   data_validade_bi: string;
-  email: string | null; 
+  email: string | null;
   contacto: string | null;
   contacto_alternativo: string | null;
   sexo: string;
-  data_nascimento: string; 
+  data_nascimento: string;
   ocupacao_codigo: number;
-  classe:string;
+  classe: string;
   profissao_codigo: number;
   foto: string;
   saldo_atual: number;
@@ -63,7 +65,7 @@ export type StudentDetail = {
   naturalidade: string;
   nacionalidade: string;
   estado_civil: string;
-  periodo_codigo:number;
+  periodo_codigo: number;
 };
 
 
@@ -80,21 +82,68 @@ export const fetchStudentEstatisticas = async (
 };
 
 
+
+export type InfoBolsaEstudante = {
+  isBolseiro: boolean;
+  codigo: number;
+  codigo_matricula: number;
+  nome_completo: string;
+  bilhete_identidade: string;
+  curso: string;
+  codigo_utilizador: number;
+  canal: string | null;
+  created_at: string;
+  updated_at: string | null;
+  data_inicio_bolsa: string | null;
+  data_fim_bolsa: string | null;
+  codigo_instituicao: number | null;
+  instituicao: string | null;
+  codigo_anolectivo: number;
+  ano_lectivo: string;
+  observacao: string | null;
+  historico: string | null;
+  status_: string | null;
+  semestre: number;
+  estadobolsa: string | null;
+  tipo_aluno_id: number | null;
+  valor_desconto: number;
+  codigo_tipo_desconto: number;
+  tipo_desconto: string;
+  sigla: string;
+  codigo_tipo_credito: number;
+  tipo_credito: string;
+  codigo_bolsa: number;
+  bolsa: string;
+  isentar_multa: string | null;
+}
+
+export const fetchInfoBolsaEstudante = async (
+  codigoMatricula: number | string,
+): Promise<InfoBolsaEstudante> => {
+  const id = String(codigoMatricula).trim();
+
+  const response = await axiosNestFinance.get<InfoBolsaEstudante>(
+    `/credito-educacional/dados-info?codigoMatricula=${id}`,
+  );
+
+  return response.data;
+};
+
 export type DisciplinaMatricula = {
   disciplina: string;
   codigo_disciplina: string;
-  codigo_grade_curricular:number;
-  codigo:number;
-  semestre: string; 
-  duracao: string; 
-  classe: string; 
-  ano_lectivo: string; 
-  horario: string; 
+  codigo_grade_curricular: number;
+  codigo: number;
+  semestre: string;
+  duracao: string;
+  classe: string;
+  ano_lectivo: string;
+  horario: string;
   sala: string;
-  codigo_horario: number; 
-  estado: string; 
+  codigo_horario: number;
+  estado: string;
   codigo_classe: number;
-  estado_codigo:number;
+  estado_codigo: number;
 };
 
 export type DisciplinasResponse = {
@@ -108,9 +157,9 @@ export type DisciplinasResponse = {
 
 export type FetchDisciplinasMatriculadasParams = {
   matriculaId: number | string;
-  anoLectivo?: string | number; 
-  semestre?: string | number; 
-  classes?: string | number; 
+  anoLectivo?: string | number;
+  semestre?: string | number;
+  classes?: string | number;
   page?: number;
   limit?: number;
 };
@@ -216,35 +265,35 @@ export type UpdatePersonalDataPayload = {
   morada?: string;
 };
 
-export async function updatePersonalData(data: UpdatePersonalDataPayload) { 
+export async function updatePersonalData(data: UpdatePersonalDataPayload) {
   const response = await axiosNestGa.put(`/students/personal-data`, data);
   return response.data;
 }
 
 export type UpdateGradeCurricularHorarioAlunoPayload = {
-    codigoGradeCurricularAluno: number;
-    horarioID: number;
+  codigoGradeCurricularAluno: number;
+  horarioID: number;
 };
 
-export async function updateGradeCurricularHorarioAluno(params: UpdateGradeCurricularHorarioAlunoPayload): Promise<{message: string}> {
+export async function updateGradeCurricularHorarioAluno(params: UpdateGradeCurricularHorarioAlunoPayload): Promise<{ message: string }> {
   const { data } = await axiosNestGa.put(`/students/horario-grade-curricular`, params);
   return data;
 }
 
 export type RestoreGradeCurricularAlunoPayload = {
-    codigoGradeCurricularAluno: number;
+  codigoGradeCurricularAluno: number;
 };
 
-export async function restoreGradeCurricularAluno(params: RestoreGradeCurricularAlunoPayload): Promise<{message: string}> {
+export async function restoreGradeCurricularAluno(params: RestoreGradeCurricularAlunoPayload): Promise<{ message: string }> {
   const { data } = await axiosNestGa.put(`/students/restore-grade-curricular/${params.codigoGradeCurricularAluno}`);
   return data;
 }
 
 export type DeleteGradeCurricularAlunoPayload = {
-    codigoGradeCurricularAluno: number;
+  codigoGradeCurricularAluno: number;
 };
 
-export async function deleteGradeCurricularAluno(params: DeleteGradeCurricularAlunoPayload): Promise<{message: string}> {
+export async function deleteGradeCurricularAluno(params: DeleteGradeCurricularAlunoPayload): Promise<{ message: string }> {
   const { data } = await axiosNestGa.delete(`/students/grade-curricular/${params.codigoGradeCurricularAluno}`);
   return data;
 }
@@ -254,7 +303,7 @@ export type DefinirEspecialidadePayload = {
   codigoCursoEspecialidade: number;
 };
 
-export async function definirEspecialidade(params: DefinirEspecialidadePayload): Promise<{message: string}> {
+export async function definirEspecialidade(params: DefinirEspecialidadePayload): Promise<{ message: string }> {
   const { data } = await axiosNestGa.put(`/students/definir-especialidade`, params);
   return data;
 }

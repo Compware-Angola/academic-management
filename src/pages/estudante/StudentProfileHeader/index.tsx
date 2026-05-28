@@ -1,4 +1,4 @@
-import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { useStudentDetail, useStudentInfoBolsa } from "@/hooks/students/use-query-students";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,9 @@ import {
   Phone,
   Mail,
   MapPin,
+  Award,
+  Calendar as CalendarIcon,
+
 } from "lucide-react";
 import { buildImageAssets } from "@/util/build-image-assets";
 
@@ -24,9 +27,7 @@ function getEstadoBadge(estado: string) {
     case "Inactivo":
       return <Badge variant="destructive">Inactivo</Badge>;
     case "Suspenso":
-      return (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600">Suspenso</Badge>
-      );
+      return <Badge className="bg-yellow-500 hover:bg-yellow-600">Suspenso</Badge>;
     default:
       return <Badge variant="secondary">{estado}</Badge>;
   }
@@ -34,8 +35,9 @@ function getEstadoBadge(estado: string) {
 
 export function StudentProfileHeader({ matricula }: Props) {
   const { data: student, isLoading } = useStudentDetail(matricula);
+  const { data: bolsaInfo, isLoading: isLoadingInfoBolsa } = useStudentInfoBolsa(matricula);
 
-  if (isLoading || !student) {
+  if (isLoading || !student || isLoadingInfoBolsa) {
     return (
       <Card className="flex-1">
         <CardContent className="p-6">
@@ -61,45 +63,51 @@ export function StudentProfileHeader({ matricula }: Props) {
       .join("")
       .slice(0, 2) ?? "??";
 
+  const isBolseiro = bolsaInfo?.isBolseiro === true;
+
   return (
     <Card className="flex-1">
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row gap-6">
-          <Avatar className="h-32 w-32">
+          <Avatar className="h-32 w-32 ring-4 ring-[oklch(0.86_0.055_25)] dark:ring-[oklch(0.32_0.055_25)]">
             <AvatarImage
               src={photoUrl}
               alt={student.nome_completo || "Foto do estudante"}
               key={photoUrl}
             />
-            <AvatarFallback className="text-3xl font-medium bg-linear-to-br from-gray-100 to-gray-200 text-gray-600">
+            <AvatarFallback className="text-3xl font-medium bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600">
               {initials}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-wrap">
               <h1 className="text-2xl font-bold">{student.nome_completo}</h1>
               {getEstadoBadge(student.estado)}
+
+              {isBolseiro && (
+                <Badge
+                  className="text-white flex items-center gap-1.5 px-3 py-1"
+                  style={{ background: "linear-gradient(to right, oklch(0.68 0.13 25), oklch(0.60 0.13 25))" }}
+                >
+                  <Award className="h-4 w-4" />
+                  Bolseiro
+                </Badge>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <GraduationCap className="h-4 w-4" />
-                <span>
-                  <strong>Matrícula:</strong> {student.codigo_matricula}
-                </span>
+                <span><strong>Matrícula:</strong> {student.codigo_matricula}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <FileText className="h-4 w-4" />
-                <span>
-                  <strong>Curso:</strong> {student.curso}
-                </span>
+                <span><strong>Curso:</strong> {student.curso}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>
-                  <strong>Ano:</strong> {student.classe}
-                </span>
+                <span><strong>Ano:</strong> {student.classe}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
@@ -111,9 +119,82 @@ export function StudentProfileHeader({ matricula }: Props) {
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>{student.morada}, Luanda</span>
+                <span>{student.morada || "Luanda"}</span>
               </div>
             </div>
+
+            {/* === Seção da Bolsa com Dados Reais === */}
+
+
+
+            {isBolseiro && bolsaInfo && (
+              <div
+                className="mt-5 p-5 rounded-xl border
+       bg-[oklch(0.97_0.015_25)] dark:bg-[oklch(0.22_0.025_25)] border-[oklch(0.88_0.045_25)] dark:border-[oklch(0.32_0.045_25)]"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="p-3 rounded-xl text-white"
+                    style={{
+                      background: "linear-gradient(135deg, oklch(0.62 0.118 25), oklch(0.54 0.120 25))",
+                    }}
+                  >
+                    <Award className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg
+          text-[oklch(0.38_0.090_25)] dark:text-[oklch(0.88_0.055_25)]">
+                      Bolsa de Estudo
+                    </h3>
+                    <p className="text-sm
+          text-[oklch(0.54_0.120_25)] dark:text-[oklch(0.72_0.090_25)]">
+                      {bolsaInfo.bolsa || "Bolsa Ativa"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground text-xs">Tipo de Desconto</p>
+                    <p className="font-medium text-emerald-700 dark:text-emerald-400">
+                      {bolsaInfo.tipo_desconto?.toLocaleLowerCase()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Valor do Desconto</p>
+                    <p className="font-semibold text-lg">
+                      {bolsaInfo?.valor_desconto}
+                      {bolsaInfo?.sigla === "DESC_PERC" ? "%" : " Kz"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Nome da Bolsa</p>
+                    <p className="font-medium">{bolsaInfo.bolsa}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Instituição</p>
+                    <p className="font-medium">{bolsaInfo.instituicao || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 flex items-center justify-between text-xs text-muted-foreground border-t
+      border-[oklch(0.86_0.055_25)] dark:border-[oklch(0.28_0.055_25)]">
+                  <div className="flex items-center gap-2">
+                    <span>Período de Validade</span>
+                    <span>{bolsaInfo.semestre === 3 ? 'Anual' : bolsaInfo.semestre + " semestre"}</span>
+                    <span>{bolsaInfo.ano_lectivo}</span>
+                    <CalendarIcon className="h-4 w-4" />
+                    <span className="font-medium">
+                      {new Date(bolsaInfo.data_inicio_bolsa).toLocaleDateString("pt-AO")} —{" "}
+                      {new Date(bolsaInfo.data_fim_bolsa).toLocaleDateString("pt-AO")}
+                    </span>
+                  </div>
+                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                    Ativa
+                  </Badge>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

@@ -1,4 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type Root = {
   prazos: Prazo[];
 };
@@ -19,8 +19,12 @@ type PrazosParams = {
 };
 export async function fetchPrazos(params: PrazosParams) {
   const { anoLetivoId, tipoCandidaturaId, tipoPrazoId } = params;
-  const res = await axiosApexGa.get<Root>(
-    `ga/academic-calendar/deadlines/${anoLetivoId}/${tipoPrazoId}/${tipoCandidaturaId}`
-  );
+  const res = await axiosNestGa.get<Root>("/academic-activities/terms", {
+    params: {
+      anolectivo: anoLetivoId,
+      tpprazo: tipoPrazoId,
+      tpcandidatura: tipoCandidaturaId,
+    },
+  });
   return res.data.prazos || [];
 }

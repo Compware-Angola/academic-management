@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, CalendarDays, X } from "lucide-react";
+import { Search, X, RefreshCw } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 import { AvaliableOperatorsSelect } from "@/components/common/global-selects/AvaliableOperators";
 import { CaixaSelect } from "@/components/common/global-selects/CaixaSelect";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 type Props = {
   search: string;
@@ -25,8 +26,10 @@ type Props = {
   onEndDateChange: (v: string) => void;
 
   onClearFilters: () => void;
+  onRefresh: () => void;
 
   singleOperator?: boolean;
+  isRefreshing?: boolean;
 };
 
 export const FiltersBar = ({
@@ -46,8 +49,10 @@ export const FiltersBar = ({
   onEndDateChange,
 
   onClearFilters,
+  onRefresh,
 
   singleOperator = false,
+  isRefreshing = false,
 }: Props) => {
   return (
     <Card>
@@ -107,10 +112,21 @@ export const FiltersBar = ({
         </div>
 
         <div className="flex justify-end">
-          <Button variant="outline" onClick={onClearFilters}>
-            <X className="w-4 h-4 mr-2" />
-            Limpar
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClearFilters}>
+              <X className="w-4 h-4 mr-2" />
+              Limpar
+            </Button>
+            <Button variant="default" onClick={onRefresh}>
+              <RefreshCw
+                className={cn(
+                  "w-4 h-4 mr-2",
+                  isRefreshing ? "animate-spin" : "",
+                )}
+              />
+              Atualizar
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

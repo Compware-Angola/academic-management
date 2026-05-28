@@ -1,4 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export interface CriarAtividadePayload {
   designacao: string;
@@ -17,23 +17,27 @@ export interface CriarAtividadePayload {
 export async function fetchCreateActivity(
   payload: CriarAtividadePayload
 ): Promise<any> {
-  const { data } = await axiosApexGa.post(
-    "/ga/academic-calendar/academic-activities",
+  const { data } = await axiosNestGa.post(
+    "/academic-activities/calendar-activities",
     payload
   );
   return data;
 }
 export type updateActivity = {
   codigo: number;
-  descricao: string;
+  designacao: string;
+  codigo_ano_lectivo: number;
+  codigo_tipo_candidatura: number;
+  codigo_tipo_calendario: number;
   data_inicio: string;
-  data_termino: string;
+  data_fim: string;
 };
 
 export async function updateActivity(params: updateActivity) {
-  const { data } = await axiosApexGa.put(
-    "auto/fk2_tb_calendario_actividade_lectivas",
-    params
+  const { codigo, ...payload } = params;
+  const { data } = await axiosNestGa.put(
+    `/academic-activities/calendar-activities/${codigo}`,
+    payload
   );
   return data;
 }

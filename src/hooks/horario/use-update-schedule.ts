@@ -5,14 +5,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../use-toast";
 
-import { useAuth } from "../use-auth";
 
 export const useUpdateSchedule = () => {
-  const {
-    user: {
-      user: { pk_utilizador },
-    },
-  } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   return useMutation({
@@ -22,7 +16,7 @@ export const useUpdateSchedule = () => {
     }: {
       id: number;
       payload: UpdateSchedulePayload;
-    }) => updateSchedule(pk_utilizador, { id, payload }),
+    }) => updateSchedule({ id, payload }),
 
     onSuccess: (data) => {
       if (data.sucesso === 0) {

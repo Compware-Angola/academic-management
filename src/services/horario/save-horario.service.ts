@@ -38,9 +38,8 @@ export type SaveHorarioResponse = {
 
 export async function saveHorarioService(
   payload: SaveHorarioPayload,
-  userId: number
 ): Promise<SaveHorarioResponse> {
-  const { data } = await axiosNestGa.post(`/schedule/${userId}`, payload);
+  const { data } = await axiosNestGa.post(`/schedule`, payload);
 
   return data;
 }

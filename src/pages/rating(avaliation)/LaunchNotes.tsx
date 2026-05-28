@@ -21,7 +21,6 @@ import {
   SendHorizonal,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import {
   useQueryNoteReleases,
   useQueryNoteSummary,
@@ -40,7 +39,6 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useAuth } from "@/hooks/use-auth";
 import { FormSelectIsaac } from "@/components/common/FormSelectIsaac";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
-import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
@@ -55,6 +53,13 @@ import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
 import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import { toast } from "sonner";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Roles {
@@ -79,7 +84,6 @@ export interface Roles {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function LaunchNotes() {
-  const { toast } = useToast();
   const { haveFullAccess } = usePermission();
 
   const [isSavingAll, setIsSavingAll] = useState(false);
@@ -180,7 +184,18 @@ export default function LaunchNotes() {
    * True quando o utilizador tem full-access OU pelo menos um role
    * que isenta de verificação de prazo de lançamento.
    */
-  const isPrivilegedUser: boolean = haveFullAccess() || isDiretorDeCurso;
+  /**
+   * Utilizadores privilegiados: todos os roles excepto Director
+   * (Director tem acesso restrito apenas aos seus cursos).
+   * Admin / haveFullAccess tem acesso total sem restrições de prazo.
+   */
+  const isPrivilegedUser: boolean =
+    haveFullAccess() ||
+    roles?.Reitor === true ||
+    roles?.Vice_Reitor === true ||
+    roles?.Acessor_do_Reitor === true ||
+    roles?.Coordenador === true ||
+    roles?.Decano === true;
   // ROLES_SEM_RESTRICAO_DE_PRAZO.some((role) => roles?.[role] === true);
 
   // ─── Queries de lookup ────────────────────────────────────────────────────
@@ -386,7 +401,7 @@ export default function LaunchNotes() {
   const buildPayloadItem = (student: any): NoteUpsertPayload => ({
     gradeCurricularAluno: student.codigo_grade_aluno,
     utilizador: userData?.user?.pk_utilizador || 0,
-    nota: Number(student.nota),
+    nota: student.nota,
     tipoDeProva: Number(formData.tipoProva),
     epoca: 2,
     tipoAvaliacao: Number(formData.tipoAvaliacao),
@@ -398,37 +413,71 @@ export default function LaunchNotes() {
   });
 
   // ─── Lançamento individual ────────────────────────────────────────────────
-  const handleSaveIndividual = (student: any) => {
-    if (student.nota === null || student.nota === undefined) {
-      toast({
-        title: "Erro",
-        description: "Insira uma nota primeiro",
-        variant: "destructive",
+  const handleSaveIndividual = (
+    student: any,
+    type: "save" | "reset" = "save",
+  ) => {
+    // RESET
+    if (type === "reset") {
+      const payload = buildPayloadItem({
+        ...student,
+        nota: null,
+        observacao: null,
       });
+
+      upsertNoteMutation.mutate([payload] as any, {
+        onSuccess: () => {
+          toggleLock(student.codigo_grade_aluno);
+
+          toast.success("Nota resetada", {
+            description: `A nota de ${student.nome_completo} foi resetada com sucesso.`,
+          });
+        },
+
+        onError: () => {
+          toast.error("Erro ao resetar nota", {
+            description: "Não foi possível resetar a nota.",
+          });
+        },
+      });
+
       return;
     }
-    if (Number(student.nota) < 0 || Number(student.nota) > 20) {
-      toast({
-        title: "Erro",
-        description: "A nota deve estar entre 0 e 20",
-        variant: "destructive",
+
+    if (
+      student.nota === null ||
+      student.nota === undefined ||
+      student.nota === ""
+    ) {
+      toast.error("Erro ao salvar nota", {
+        description: "Insira uma nota primeiro.",
       });
+
+      return;
+    }
+
+    const nota = Number(student.nota);
+
+    if (isNaN(nota) || nota < 0 || nota > 20) {
+      toast.error("Erro ao salvar nota", {
+        description: "A nota deve estar entre 0 e 20.",
+      });
+
       return;
     }
 
     upsertNoteMutation.mutate([buildPayloadItem(student)] as any, {
       onSuccess: () => {
         toggleLock(student.codigo_grade_aluno);
-        toast({
-          title: student.nota !== null ? "Nota atualizada" : "Nota lançada",
-          description: `${student.nome_completo} → ${student.nota} valores`,
+
+        toast.success("Nota salva", {
+          description: `${student.nome_completo} → ${nota} valores`,
         });
       },
+
       onError: () => {
-        toast({
-          title: "Erro",
-          description: "Não foi possível lançar/atualizar a nota.",
-          variant: "destructive",
+        toast.error("Erro ao salvar nota", {
+          description: "Não foi possível salvar a nota.",
         });
       },
     });
@@ -445,10 +494,8 @@ export default function LaunchNotes() {
     );
 
     if (studentsWithNota.length === 0) {
-      toast({
-        title: "Nenhuma nota para lançar",
+      toast.error("Nenhuma nota para lançar", {
         description: "Insira notas válidas (0–20) antes de lançar em massa.",
-        variant: "destructive",
       });
       return;
     }
@@ -461,17 +508,14 @@ export default function LaunchNotes() {
       onSuccess: () => {
         setIsSavingAll(false);
         handleLockAll();
-        toast({
-          title: "Lançamento em massa concluído",
+        toast.success("Lançamento em massa concluído", {
           description: `${payloads.length} nota(s) lançada(s) com sucesso.`,
         });
       },
       onError: () => {
         setIsSavingAll(false);
-        toast({
-          title: "Erro no lançamento em massa",
+        toast.error("Erro no lançamento em massa", {
           description: "Não foi possível lançar as notas. Tente novamente.",
-          variant: "destructive",
         });
       },
     });
@@ -1075,38 +1119,73 @@ export default function LaunchNotes() {
                         </TableCell>
 
                         <TableCell className="text-center flex justify-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={
-                              shouldBlockGradesActions ||
-                              isRefetching ||
-                              isSavingAll
-                            }
-                            onClick={() =>
-                              toggleLock(student.codigo_grade_aluno)
-                            }
-                          >
-                            {isLocked ? (
-                              <Lock className="w-4 h-4" />
-                            ) : (
-                              <Unlock className="w-4 h-4" />
-                            )}
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={
+                                  shouldBlockGradesActions ||
+                                  isRefetching ||
+                                  isSavingAll
+                                }
+                                onClick={() =>
+                                  toggleLock(student.codigo_grade_aluno)
+                                }
+                              >
+                                {isLocked ? (
+                                  <Lock className="w-4 h-4" />
+                                ) : (
+                                  <Unlock className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{isLocked ? "Desbloquear" : "Bloquear"}</p>
+                            </TooltipContent>
+                          </Tooltip>
 
-                          <Button
-                            size="sm"
-                            variant={hasNota ? "default" : "outline"}
-                            disabled={
-                              shouldBlockGradesActions ||
-                              isRefetching ||
-                              isSavingAll
-                            }
-                            onClick={() => handleSaveIndividual(student)}
-                          >
-                            <Save className="h-4 w-4 mr-1" />
-                            {hasNota ? "Atualizar" : "Lançar"}
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant={hasNota ? "default" : "outline"}
+                                disabled={
+                                  shouldBlockGradesActions ||
+                                  isRefetching ||
+                                  isSavingAll
+                                }
+                                onClick={() => handleSaveIndividual(student)}
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{hasNota ? "Atualizar" : "Lançar"}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                disabled={
+                                  shouldBlockGradesActions ||
+                                  isRefetching ||
+                                  isSavingAll ||
+                                  !hasNota
+                                }
+                                onClick={() =>
+                                  handleSaveIndividual(student, "reset")
+                                }
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Resetar</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </TableCell>
                       </TableRow>
                     );
