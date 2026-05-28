@@ -1,8 +1,5 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
+
 export async function deletePrazo(prazoId: number) {
-  await axiosApexGa.delete("/auto/fk2_mcal_tb_prazo", {
-    data: {
-      pk_prazo: prazoId,
-    },
-  });
+  await axiosNestGa.delete(`/academic-activities/terms/${prazoId}`);
 }

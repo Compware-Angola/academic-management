@@ -13,12 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Search, Check, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryAlunoMatricula } from "@/hooks/financas/alunos/use-query-fecth-aluno";
 import { useMutationAtribuirBolsa } from "@/hooks/financas/bolsa/use-mutation-atribuir-bolsa";
 import { ConfirmarAlunoModal } from "./components/ConfirmarAlunoModal";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
+import { useQueryValidarEstudanteCredito } from "@/hooks/financas/credito-educacional/use-query-validar-estudante-credito";
 
 function validarPayload(payload: {
   codigoAnoLectivo: string;
@@ -52,7 +52,14 @@ export default function AtribuirCredito() {
     isLoading,
     isError,
     error,
-  } = useQueryAlunoMatricula(matricula, pesquisar);
+  } = useQueryValidarEstudanteCredito(
+    {
+      codigoMatricula: Number(matricula),
+      codigoAnoLectivo: Number(payload.codigoAnoLectivo),
+      semestre: Number(payload.semestre),
+    },
+    pesquisar,
+  );
 
   const { mutateAsync: atribuirCredito, isPending: isAtribuindo } =
     useMutationAtribuirBolsa();
@@ -90,6 +97,14 @@ export default function AtribuirCredito() {
   }, [isError, error, toast]);
 
   const pesquisarAluno = () => {
+    if (!payload.codigoAnoLectivo) {
+      toast({ title: "Ano letivo é obrigatório", variant: "destructive" });
+      return;
+    }
+    if (!payload.semestre) {
+      toast({ title: "Semestre é obrigatório", variant: "destructive" });
+      return;
+    }
     if (!matricula?.trim()) {
       toast({ title: "Digite o número de matrícula", variant: "destructive" });
       return;
@@ -152,6 +167,30 @@ export default function AtribuirCredito() {
           <CardTitle>Pesquisar Estudante</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AcademicYearSelect
+              disabled={isLoading}
+              value={payload.codigoAnoLectivo}
+              onChangeValue={(v) => {
+                setPayload((p) => ({ ...p, codigoAnoLectivo: v }));
+                setPesquisar(false);
+                setCanAtribuir(false);
+                setModalAberto(false);
+              }}
+            />
+            <SemestreSelect
+              disabled={isLoading}
+              yearly
+              value={payload.semestre}
+              onChangeValue={(v) => {
+                setPayload((p) => ({ ...p, semestre: v }));
+                setPesquisar(false);
+                setCanAtribuir(false);
+                setModalAberto(false);
+              }}
+            />
+          </div>
+
           <div className="flex gap-2">
             <Input
               ref={inputRef}
@@ -159,12 +198,22 @@ export default function AtribuirCredito() {
               placeholder="Número de matrícula"
               value={matricula}
               disabled={isLoading}
-              onChange={(e) => setMatricula(e.target.value)}
+              onChange={(e) => {
+                setMatricula(e.target.value);
+                setPesquisar(false);
+                setCanAtribuir(false);
+                setModalAberto(false);
+              }}
               onKeyDown={handleKeyDown}
             />
             <Button
               size="icon"
-              disabled={isLoading || !matricula}
+              disabled={
+                isLoading ||
+                !matricula ||
+                !payload.codigoAnoLectivo ||
+                !payload.semestre
+              }
               onClick={pesquisarAluno}
             >
               {isLoading ? "..." : <Search className="h-4 w-4" />}
@@ -172,21 +221,8 @@ export default function AtribuirCredito() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <AcademicYearSelect
-              disabled={!aluno}
-              value={payload.codigoAnoLectivo}
-              onChangeValue={(v) =>
-                setPayload((p) => ({ ...p, codigoAnoLectivo: v }))
-              }
-            />
-            <SemestreSelect
-              disabled={!aluno}
-              yearly
-              value={payload.semestre}
-              onChangeValue={(v) => setPayload((p) => ({ ...p, semestre: v }))}
-            />
             <BolsaSelect
-              disabled={!aluno}
+              disabled={!aluno || aluno.ja_bolsista}
               value={payload.codigoBolsa}
               onChangeValue={(v) =>
                 setPayload((p) => ({ ...p, codigoBolsa: v }))
