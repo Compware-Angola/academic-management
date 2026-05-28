@@ -234,7 +234,7 @@ export const ListaPagamentoModal = ({
                         <TableCell className="font-mono">
                           {item?.codigofactura}
                         </TableCell>
-                        <TableCell>{item?.preco}</TableCell>
+                        <TableCell>{item?.total}</TableCell>
                         <TableCell>{item?.quantidade}</TableCell>
                       </TableRow>
                     ))}
