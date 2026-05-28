@@ -56,6 +56,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import useMutationEstadoCreditoEducacional from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
 import { EditAttributionModal } from "../AtribuirCredito/components/EditAttributionModal";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function ListarBolsaEstudante() {
   const [page, setPage] = useState(1);
@@ -498,11 +499,23 @@ export default function ListarBolsaEstudante() {
                       </TableCell>
                       <TableCell>
                         <span className="flex items-center gap-2">
-                          <Switch
-                            checked={e.status_ === 1}
-                            onCheckedChange={() => handleChangeEstado(e)}
-                            disabled={isPendingActiveBolsa}
-                          />
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>
+                                  <Switch
+                                    checked={e.status_ === 1}
+                                    onCheckedChange={() => handleChangeEstado(e)}
+                                    disabled={true}
+                                    className="cursor-not-allowed"
+                                  />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Temporariamente indisponível</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                           <Loader2
                             className={cn(
                               "h-4 w-4 animate-spin",
