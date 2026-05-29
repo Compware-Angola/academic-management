@@ -19,6 +19,7 @@ import { APP_ENV, isDevelop, isPrePrd } from "@/config/env";
 
 import logo from "@/assets/logo_uma.png";
 import studentsBg from "@/assets/students-bg.jpg";
+import { LogoBackground } from "./components/logo-background";
 
 const loginSchema = z.object({
   username: z
@@ -125,6 +126,8 @@ const Login = () => {
 
       {/* RIGHT — Formulário */}
       <main className="relative flex items-center justify-center p-6 sm:p-10 bg-white">
+        <LogoBackground top="2.5rem" right="2.5rem" />
+        <LogoBackground bottom="2.5rem" left="2.5rem" />
         <div className="w-full max-w-md space-y-8">
           {/* Logo Mobile */}
           <div className="flex justify-center lg:hidden">
