@@ -51,7 +51,7 @@ import { useQueryAulasOcupadas } from "@/hooks/horario/use-query-aulas-ocupadas"
 import { AulasOcupadasPorDia } from "@/services/horario/fetch-aulas-ocupadas.service";
 import { useQueryScheduleCreationPrompt } from "@/hooks/academiccalendar/use-query-schedule-creation-prompt";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ScheduleCreationPrompt } from "@/services/academiccalendar/get-schedule-creation-prompt";
+
 import { parseFilter } from "@/util/parse-filter";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useAuth } from "@/hooks/use-auth";

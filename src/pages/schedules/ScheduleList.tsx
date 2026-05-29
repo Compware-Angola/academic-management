@@ -75,6 +75,8 @@ import { ExcelActions } from "@/components/views/excel/GenericExcelExport";
 import { useMutationCriarDocenteSubstituto } from "@/hooks/horario/use-mutation-criar-docente-substituto";
 import DocenteSubstitutoModal from "./components/DocenteSubstitutoModal";
 import { Roles } from "./EditSchedule";
+import Lottie from "lottie-react";
+import Notallowed from "@/assets/Notallowed.json";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -100,13 +102,7 @@ export default function ScheduleList() {
   };
 
   const isPrivilegedUser: boolean =
-    haveFullAccess() ||
-    roles?.Reitor === true ||
-    roles?.Vice_Reitor === true ||
-    roles?.Acessor_do_Reitor === true ||
-    roles?.Coordenador === true ||
-    roles?.Decano === true ||
-    roles?.Director === true
+    haveFullAccess()
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
@@ -169,12 +165,13 @@ export default function ScheduleList() {
       estado: Number(filters.estado),
     }),
   };
+  const canLoadSchedules = isPrivilegedUser && !!filters.anoLetivo || (!!filters.anoLetivo && !!filters.curso && !!filters.semestre && !!filters.periodo)
 
   const {
     data: ScheduleResponse,
     isLoading: isLoadingSchedule,
     refetch: refetchHorarios,
-  } = useQueryHorariosExistentes(queryParams);
+  } = useQueryHorariosExistentes(queryParams, { enabled: canLoadSchedules });
 
   const deleteMutation = useMutationDeletarHorario();
   const mutation = useMutationDisponibilidadeHorario();
@@ -564,7 +561,7 @@ export default function ScheduleList() {
       {/* Tabela */}
       <Card>
         <CardHeader>
-          <CardTitle>Horários Encontrados</CardTitle>
+
         </CardHeader>
         <CardContent>
           {isLoadingSchedule ? (
@@ -573,20 +570,30 @@ export default function ScheduleList() {
               <p className="text-muted-foreground">Carregando Horários...</p>
             </div>
           ) : tableData.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <div className="rounded-full bg-muted p-4 mb-4">
-                <Search className="h-8 w-8 text-muted-foreground" />
+            <div className="text-center py-12 bg-card border rounded-lg">
+              <div className="flex flex-col items-center gap-3">
+
+                <Lottie
+                  animationData={Notallowed}
+                  loop={true}
+                  style={{ width: 200, height: 200 }}
+                />
+
+                <h3 className="text-lg font-semibold text-foreground">
+                  Nenhum registo encontrado
+                </h3>
+
+                <p className="text-muted-foreground mb-4">
+                  Não foram encontrados horários com os filtros aplicados.
+                </p>
+
+                {!canLoadSchedules && (
+                  <p className="text-muted-foreground">
+                    Selecione o Ano Letivo, Curso, Semestre, Período e Turma para carregar os horários.
+                  </p>
+                )}
+
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                Nenhum registo encontrado
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Não foram encontrados horários com os filtros aplicados.
-              </p>
-              <Button onClick={() => navigate("/horarios/criar")}>
-                <Plus className="mr-2 h-4 w-4" />
-                Criar Primeiro Horário
-              </Button>
             </div>
           ) : (
             <>

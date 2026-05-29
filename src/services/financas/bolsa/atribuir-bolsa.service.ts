@@ -5,6 +5,7 @@ export interface AtribuirBolsaPayload {
   codigoAnoLectivo: number;
   semestre: number;
   codigoBolsa: number;
+  isentaMulta: "NAO" | "SIM";
 }
 
 export interface AtribuirBolsaResponse {

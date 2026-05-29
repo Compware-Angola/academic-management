@@ -13,6 +13,7 @@ import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { BolsaEstudante } from "@/services/financas/bolsa/fetch-bolsa-estudante.service";
 import { useMutationUpdateBolsaEstudante } from "@/hooks/financas/bolsa/use-mutation-atribuir-bolsa";
 import { Loader2 } from "lucide-react";
+import { InsentarMultaSelect } from "@/components/common/global-selects/insentar-multa-select";
 
 type EditAttributionModalProps = {
   open: boolean;
@@ -30,6 +31,7 @@ export function EditAttributionModal({
     codigoAnoLectivo: "",
     semestre: "",
     codigoBolsa: "",
+    isentaMulta: "",
   });
   const { mutateAsync: updateBolsaEstudante, isPending: isUpdatingBolsa } =
     useMutationUpdateBolsaEstudante();
@@ -40,6 +42,7 @@ export function EditAttributionModal({
         codigoAnoLectivo: initialValues.codigo_anolectivo.toString(),
         semestre: initialValues.semestre.toString(),
         codigoBolsa: initialValues.codigo_bolsa?.toString() ?? "",
+        isentaMulta: initialValues?.isentar_multa,
       });
     }
   }, [open, initialValues]);
@@ -51,6 +54,7 @@ export function EditAttributionModal({
         codigoCreditoEducacional: Number(initialValues.codigo),
         codigoMatricula: Number(payload.codigoMatricula),
         semestre: Number(payload.semestre),
+        isentaMulta: payload.isentaMulta as "SIM" | "NAO",
       });
       onClose();
     }
@@ -77,6 +81,13 @@ export function EditAttributionModal({
           <BolsaSelect
             value={payload.codigoBolsa}
             onChangeValue={(v) => setPayload((p) => ({ ...p, codigoBolsa: v }))}
+          />
+          <InsentarMultaSelect
+            label="Incentar Multa"
+            value={payload.isentaMulta}
+            onChangeValue={(value) =>
+              setPayload((prev) => ({ ...prev, isentaMulta: value }))
+            }
           />
         </div>
         <DialogFooter>

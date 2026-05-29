@@ -24,7 +24,6 @@ const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 min
 const WARNING_TIME = 10 * 1000; // 10 s
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { mutate: lockMyCashRegister } = useBlockMyCashRegister();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isPublicRoute = useIsPublicRoute();
@@ -69,7 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     (payload: AuthResponse) => {
       AuthStorage.saveLogin(payload);
       setToken(payload.access_token);
-      lockMyCashRegister();
       queryClient.invalidateQueries({ queryKey: ["current-user", "GA"] });
     },
     [queryClient],
