@@ -25,6 +25,15 @@ export async function getNacionalidades(): Promise<DropdownFilter[]> {
   );
   return response.data;
 }
+export async function getAnoLectivoConfirmados(
+  codigoMatricula: number,
+): Promise<DropdownFilter[]> {
+  const response = await axiosNestGa.get<DropdownFilter[]>(
+    `/dropdown-filters/anolectivo-confirmado/${codigoMatricula}`,
+  );
+  return response.data;
+}
+
 type DropdownBolsa = {
   codigo: number;
   designacao: string;

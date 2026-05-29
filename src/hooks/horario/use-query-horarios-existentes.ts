@@ -5,16 +5,18 @@ import {
 } from "@/services/horario/listar-horarios-existentes.service";
 
 export const useQueryHorariosExistentes = (
-  filters: ListarHorariosExistentesPayload
+  filters: ListarHorariosExistentesPayload,
+  options?: { enabled?: boolean }
 ) => {
-  const enabled = !!filters.anoLectivo;
+
+  const enabled = options?.enabled ?? true;
 
   return useQuery({
     queryKey: ["horarios-existentes", filters],
     queryFn: () => listarHorariosExistentesService(filters),
     enabled,
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
     retry: 2,
   });
-  
+
 };

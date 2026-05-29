@@ -19,15 +19,19 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { useQueryValidarEstudanteCredito } from "@/hooks/financas/credito-educacional/use-query-validar-estudante-credito";
+import { FormSelect } from "@/components/common/FormSelect";
+import { InsentarMultaSelect } from "@/components/common/global-selects/insentar-multa-select";
 
 function validarPayload(payload: {
   codigoAnoLectivo: string;
   semestre: string;
   codigoBolsa: string;
+  isentaMulta: string;
 }) {
   if (!payload.codigoAnoLectivo) return "Ano letivo é obrigatório";
   if (!payload.semestre) return "Semestre é obrigatório";
   if (!payload.codigoBolsa) return "Bolsa é obrigatório";
+  if (!payload.isentaMulta) return "Incentar multa é obrigatório";
   return null;
 }
 
@@ -45,6 +49,7 @@ export default function AtribuirCredito() {
     codigoAnoLectivo: "",
     semestre: "",
     codigoBolsa: "",
+    isentaMulta: "",
   });
 
   const {
@@ -73,6 +78,7 @@ export default function AtribuirCredito() {
       codigoAnoLectivo: "",
       semestre: "",
       codigoBolsa: "",
+      isentaMulta: "",
     });
     inputRef.current?.focus();
   };
@@ -133,6 +139,7 @@ export default function AtribuirCredito() {
         codigoAnoLectivo: Number(payload.codigoAnoLectivo),
         semestre: Number(payload.semestre),
         codigoBolsa: Number(payload.codigoBolsa),
+        isentaMulta: payload.isentaMulta as "NAO" | "SIM",
       });
       resetFormulario();
     } catch (error) {
@@ -166,8 +173,9 @@ export default function AtribuirCredito() {
         <CardHeader>
           <CardTitle>Pesquisar Estudante</CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
             <AcademicYearSelect
               disabled={isLoading}
               value={payload.codigoAnoLectivo}
@@ -178,6 +186,7 @@ export default function AtribuirCredito() {
                 setModalAberto(false);
               }}
             />
+
             <SemestreSelect
               disabled={isLoading}
               yearly
@@ -191,36 +200,48 @@ export default function AtribuirCredito() {
             />
           </div>
 
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              type="number"
-              placeholder="Número de matrícula"
-              value={matricula}
-              disabled={isLoading}
-              onChange={(e) => {
-                setMatricula(e.target.value);
-                setPesquisar(false);
-                setCanAtribuir(false);
-                setModalAberto(false);
-              }}
-              onKeyDown={handleKeyDown}
-            />
-            <Button
-              size="icon"
-              disabled={
-                isLoading ||
-                !matricula ||
-                !payload.codigoAnoLectivo ||
-                !payload.semestre
-              }
-              onClick={pesquisarAluno}
-            >
-              {isLoading ? "..." : <Search className="h-4 w-4" />}
-            </Button>
-          </div>
+          {/* SEGUNDO GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-3 items-end gap-4">
+            <div className="flex gap-2">
+              <Input
+                ref={inputRef}
+                type="number"
+                placeholder="Número de matrícula"
+                value={matricula}
+                disabled={isLoading}
+                onChange={(e) => {
+                  setMatricula(e.target.value);
+                  setPesquisar(false);
+                  setCanAtribuir(false);
+                  setModalAberto(false);
+                }}
+                onKeyDown={handleKeyDown}
+              />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button
+                size="icon"
+                disabled={
+                  isLoading ||
+                  !matricula ||
+                  !payload.codigoAnoLectivo ||
+                  !payload.semestre
+                }
+                onClick={pesquisarAluno}
+              >
+                {isLoading ? "..." : <Search className="h-4 w-4" />}
+              </Button>
+            </div>
+            <InsentarMultaSelect
+              label="Incentar Multa"
+              value={payload.isentaMulta}
+              disabled={!aluno || aluno.ja_bolsista}
+              onChangeValue={(value) => {
+                setPayload((prev) => ({
+                  ...prev,
+                  isentaMulta: value,
+                }));
+              }}
+            />
             <BolsaSelect
               disabled={!aluno || aluno.ja_bolsista}
               value={payload.codigoBolsa}
@@ -230,12 +251,14 @@ export default function AtribuirCredito() {
             />
           </div>
 
-          <div className="flex justify-end gap-3 items-center">
+          {/* AÇÕES */}
+          <div className="flex flex-col md:flex-row justify-end gap-3 items-center">
             {!canAtribuir && (
               <span className="text-xs text-muted-foreground">
                 Confirme o estudante para habilitar a atribuição
               </span>
             )}
+
             <Button
               disabled={!canAtribuir || isAtribuindo}
               onClick={handleAtribuir}
@@ -243,6 +266,7 @@ export default function AtribuirCredito() {
               <Check className="h-4 w-4 mr-1" />
               {isAtribuindo ? "Atribuindo..." : "Atribuir"}
             </Button>
+
             <Button onClick={resetFormulario} variant="outline">
               Cancelar
             </Button>
@@ -262,3 +286,14 @@ export default function AtribuirCredito() {
     </div>
   );
 }
+
+const INSENTAR_MULTA = [
+  {
+    label: "Sim",
+    value: "SIM",
+  },
+  {
+    label: "Não",
+    value: "NAO",
+  },
+];

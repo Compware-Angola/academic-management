@@ -3,7 +3,11 @@ export type CursoEspecialidade = {
   codigo: number;
   designacao: string;
 };
-export async function getCursoEspecialidade(cursoId: number) {
-  const response = await axiosNestGa.get<CursoEspecialidade[]>(`/cursos/especialidades/${cursoId}`);
+export async function getCursoEspecialidadePorCodigoMatricula(
+  codigoMatricula: number,
+) {
+  const response = await axiosNestGa.get<CursoEspecialidade[]>(
+    `/cursos/especialidades/${codigoMatricula}`,
+  );
   return response.data;
 }

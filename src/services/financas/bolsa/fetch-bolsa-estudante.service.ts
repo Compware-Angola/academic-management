@@ -17,6 +17,7 @@ export type FetchBolsaEstudanteParams = {
 export type BolsaEstudante = {
   codigo: number;
   codigo_matricula: number;
+  isentar_multa: "SIM" | "NAO";
   nome_completo: string;
   bilhete_identidade: string;
   curso: string;

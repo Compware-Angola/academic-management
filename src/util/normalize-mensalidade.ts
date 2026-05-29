@@ -44,7 +44,7 @@ const normalizeMensalidade = (
 
       const descricaoDesconto =
         desconto > 0
-          ? ` Pagamento aplicado desconto de ${percentualDesconto.toFixed(0)}%`
+          ? ` Pagamento aplicado desconto de ${percentualDesconto.toFixed(2)}%`
           : null;
 
       return {

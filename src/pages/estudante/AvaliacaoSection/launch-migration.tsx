@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useQueryLaunchMigration } from "@/hooks/students/use-query-launch-migration";
 import { useMutationCreateEquivalenceMigrationTFC } from "@/hooks/students/use-mutation-launch-migration";
+import { AnoLectivoConfirmadoSelect } from "@/components/common/global-selects/AnoLectivoConfirmadoSelect";
 
 type Props = {
   codigoMatricula: number;
@@ -43,6 +44,7 @@ type EditState = {
   [codigo: number]: {
     value: string;
     codigoGradeAluno: number;
+    anoLectivo: string;
     isDirty: boolean;
   };
 };
@@ -66,6 +68,33 @@ export function LaunchMigration({
   const [isEquivalence, setIsEquivalence] = useState<boolean>(false);
 
   const plans = planResponse?.grades ?? [];
+  const getAnoLectivo = (plan: (typeof plans)[number]) => {
+    return (
+      editState[plan.codigo]?.anoLectivo ??
+      String(plan?.codigo_ano_lectivo ?? "")
+    );
+  };
+  const handleAnoLectivoChange = useCallback(
+    (
+      codigo: number,
+      novoAno: string,
+      codigoGradeAluno: number,
+      originalNota: number | null,
+    ) => {
+      setEditState((prev) => ({
+        ...prev,
+        [codigo]: {
+          value:
+            prev[codigo]?.value ??
+            (originalNota != null ? String(originalNota) : "0"),
+          isDirty: true,
+          codigoGradeAluno,
+          anoLectivo: novoAno,
+        },
+      }));
+    },
+    [],
+  );
 
   const filteredPlans = useMemo(() => {
     const term = search.toLowerCase().trim();
@@ -115,6 +144,7 @@ export function LaunchMigration({
           value: newValue,
           isDirty: newValue !== original,
           codigoGradeAluno: codigoGradeAluno,
+          anoLectivo: prev[codigo]?.anoLectivo,
         },
       }));
     },
@@ -154,10 +184,11 @@ export function LaunchMigration({
         .map(([codigo, value]) => {
           const plan = plans.find((p) => p.codigo === Number(codigo));
           return {
-            anoLectivo: Number(23),
+            anoLectivo: Number(value.anoLectivo),
             nota: Number(value.value || 0),
             codigoGrade: Number(codigo),
             codigoGradeAluno: Number(value.codigoGradeAluno),
+            semestreId: Number(plan.semestreid),
           };
         });
 
@@ -311,6 +342,9 @@ export function LaunchMigration({
                   <TableHead className="w-28">Semestre</TableHead>
                   <TableHead>Disciplina</TableHead>
                   <TableHead className="w-24 text-center">Duração</TableHead>
+                  <TableHead className="w-44 text-center">
+                    Ano Lectivo
+                  </TableHead>
                   <TableHead className="w-36 text-center">Nota</TableHead>
                   <TableHead className="w-24 text-center">Nome</TableHead>
                   <TableHead className="w-28 text-center">Estado</TableHead>
@@ -345,6 +379,20 @@ export function LaunchMigration({
                       <TableCell className="text-center text-sm text-muted-foreground">
                         {plan.duracao}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <AnoLectivoConfirmadoSelect
+                          value={getAnoLectivo(plan)}
+                          codigoMatricula={codigoMatricula}
+                          onChangeValue={(v) =>
+                            handleAnoLectivoChange(
+                              plan.codigo,
+                              v,
+                              plan.codigo_grade_aluno,
+                              plan.nota,
+                            )
+                          }
+                        />
+                      </TableCell>
 
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-1.5">
@@ -355,7 +403,7 @@ export function LaunchMigration({
                                 plan.codigo,
                                 plan.nota,
                                 e.target.value,
-                                plan.codigo_aluno,
+                                plan.codigo_grade_aluno,
                               )
                             }
                             className={cn(

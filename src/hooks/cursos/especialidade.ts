@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { getCursoEspecialidade } from "@/services/cursos/curso-especialidade.service";
+import { getCursoEspecialidadePorCodigoMatricula } from "@/services/cursos/curso-especialidade.service";
 
-export function useCursoEspecialidade(cursoId: number) {
+export function useCursoEspecialidadePorCodigoMatricula(
+  codigoMatricula: number,
+) {
   return useQuery({
-    queryKey: ["curso-especialidade", cursoId],
-    queryFn: () => getCursoEspecialidade(cursoId),
+    queryKey: ["curso-especialidade", codigoMatricula],
+    queryFn: () => getCursoEspecialidadePorCodigoMatricula(codigoMatricula),
     staleTime: 5 * 60 * 1000,
-    enabled: !!cursoId,
+    enabled: !!codigoMatricula,
   });
 }
