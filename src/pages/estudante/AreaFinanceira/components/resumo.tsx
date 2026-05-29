@@ -30,9 +30,7 @@ import {
   CalendarDays,
   Receipt,
 } from "lucide-react";
-import {
-  useStudentDetail,
-} from "@/hooks/students/use-query-students";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
 import {
@@ -256,12 +254,13 @@ export function Resumo({
             </p>
             <span
               className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
-  ${student?.saldo_atual > 0
-                  ? "bg-green-100 text-green-700"
-                  : student?.saldo_atual < 0
-                    ? "bg-red-100 text-destructive"
-                    : "bg-muted text-muted-foreground"
-                }`}
+  ${
+    student?.saldo_atual > 0
+      ? "bg-green-100 text-green-700"
+      : student?.saldo_atual < 0
+        ? "bg-red-100 text-destructive"
+        : "bg-muted text-muted-foreground"
+  }`}
             >
               {student?.saldo_atual > 0
                 ? "Crédito disponível"
@@ -498,7 +497,7 @@ export function Resumo({
                           )}
                         </TableCell>
                         <TableCell className="text-right font-medium">
-                          {formatCurrency(nota.total_preco)}
+                          {formatCurrency(nota.valor_pagar)}
                         </TableCell>
                         <TableCell className="text-center">
                           {formatDate(nota.data_factura)}
@@ -722,8 +721,8 @@ export function Resumo({
                             <TableCell>
                               {(item.descricaoservico || "—") +
                                 (Number(item.mesid) !== 3 &&
-                                  item.mesid &&
-                                  item.mesdescricao
+                                item.mesid &&
+                                item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
@@ -737,7 +736,7 @@ export function Resumo({
                               {formatCurrency(item.preco)}
                             </TableCell>
                             <TableCell className="text-right font-mono font-semibold pr-6">
-                              {formatCurrency(item.preco + item.multa)}
+                              {formatCurrency(item.total)}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -762,11 +761,7 @@ export function Resumo({
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return (
-                                  total +
-                                  item.preco * quantidade +
-                                  (item.multa ?? 0)
-                                );
+                                return total + item.total * quantidade;
                               }, 0),
                             )}
                           </TableCell>

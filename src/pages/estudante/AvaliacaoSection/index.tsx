@@ -6,6 +6,7 @@ import { Notes } from "./Notes";
 import { StudentResultPlan } from "./student-result-plan";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { LaunchMigration } from "./launch-migration";
 
 type AvaliacaoSectionProps = {
   value?: string;
@@ -58,6 +59,20 @@ export function AvaliacaoSection({
               <span>Plano de Estudo</span>
             </TabsTrigger>
           )}
+          {/* {hasPermission(
+            PermissionTypeDetails.LANCAMENTO_NOTAS_EQUIVALENCIA_TFC_MIGRACAO
+              .sigla,
+          ) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="migration"
+            >
+              <Contact className="h-4 w-4" />
+              <span className="whitespace-normal break-words text-left leading-tight">
+                Equivalência, TFC e Migração
+              </span>
+            </TabsTrigger>
+          )} */}
         </TabsList>
 
         <Card className="flex-1 min-w-0 overflow-hidden p-6">
@@ -81,6 +96,15 @@ export function AvaliacaoSection({
               codigoMatricula={codigoMatricula}
             />
           )}
+          {/* {hasPermission(
+            PermissionTypeDetails.LANCAMENTO_NOTAS_EQUIVALENCIA_TFC_MIGRACAO
+              .sigla,
+          ) && (
+            <LaunchMigration
+              value="migration"
+              codigoMatricula={codigoMatricula}
+            />
+          )} */}
         </Card>
       </Tabs>
     </TabsContent>
