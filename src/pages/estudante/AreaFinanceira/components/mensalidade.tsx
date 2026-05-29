@@ -64,7 +64,8 @@ const getStatusBadge = (status: number) => {
     case InvoiceEnum.ISENTO:
       return (
         <Badge>
-          <CreditCard className="mr-1 h-3 w-3" />Isento
+          <CreditCard className="mr-1 h-3 w-3" />
+          Isento
         </Badge>
       );
     default:
@@ -93,11 +94,37 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     valorAPagar,
     desconto,
   }: SelectedPayment) => {
+    // Mensalidades pendentes e sem factura gerada, ordenadas por mesId
+    const pendentes = payments
+      .filter((p) => p.status === 0 && p.id_item === 0)
+      .sort((a, b) => a.mesId - b.mesId);
+
     setSelectedPayments((prev) => {
       const next = new Map(prev);
+
       if (next.has(mesTempId)) {
+        // Ao desmarcar: bloquear se há meses posteriores já selecionados
+        const temPosterioresSelecionados = Array.from(next.keys()).some(
+          (id) => id > mesTempId,
+        );
+        if (temPosterioresSelecionados) {
+          toast.warning(
+            "Desmarque primeiro as mensalidades posteriores a esta.",
+          );
+          return prev;
+        }
         next.delete(mesTempId);
       } else {
+        // Ao marcar: bloquear se há pendentes anteriores ainda não selecionados
+        const anteriorNaoSelecionado = pendentes.find(
+          (p) => p.mesId < mesTempId && !next.has(p.mesId),
+        );
+        if (anteriorNaoSelecionado) {
+          toast.warning(
+            `Seleccione primeiro a mensalidade de ${anteriorNaoSelecionado.month}.`,
+          );
+          return prev;
+        }
         next.set(mesTempId, {
           mesTempId,
           valorAPagar,
@@ -106,6 +133,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
           desconto,
         });
       }
+
       return next;
     });
   };
@@ -167,6 +195,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
       (total, payment) => total + (payment.desconto ?? 0), // FIX: fallback
       0,
     );
+    const totalPreco = monthFee.preco * selectedList.length;
 
     const items = selectedList.map((payment) =>
       createItem({
@@ -174,16 +203,17 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
         valorDesconto: payment.desconto ?? 0,
         codigo: monthFee.codigo,
         descricao: `Mensalidade ${payment.mesTempDesc}`,
-        preco: payment.valorAPagar,
+        total: payment.valorAPagar,
+        preco: monthFee.preco,
         mesTempId: payment.mesTempId,
       }),
     );
-
     const invoice = createInvoice({
       codigoMatricula: codigoMatricula,
       poloid: 1,
-      totalApagar: totalSelecionado,
+      totalPreco: totalPreco,
       totalDesconto: totalDesconto,
+      valorApagar: totalSelecionado,
       totalMulta: totalMulta,
       itens: items,
     });
@@ -234,7 +264,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
               </p>
             ) : null}
           </div>
-
           {/* Seletor de Ano Letivo */}
           <div className="min-w-[220px] sm:w-auto sm:flex-shrink-0">
             <AcademicYearSelect
@@ -418,8 +447,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             {isNaN(new Date(payment.dueDate).getTime())
                               ? "—"
                               : new Date(payment.dueDate).toLocaleDateString(
-                                "pt-AO",
-                              )}
+                                  "pt-AO",
+                                )}
                           </p>
                         </div>
                       </div>
@@ -466,8 +495,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           {isNaN(new Date(payment.data_operacao).getTime())
                             ? "—"
                             : new Date(
-                              payment.data_operacao,
-                            ).toLocaleDateString("pt-AO")}
+                                payment.data_operacao,
+                              ).toLocaleDateString("pt-AO")}
                         </p>
                       </div>
                     </div>
@@ -520,8 +549,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
         >
           {isPending || isMonthFetching ? (
             <>
-              <Loader2 className="animate-spin h-5 w-5" />
-              A processar...
+              <Loader2 className="animate-spin h-5 w-5" />A processar...
             </>
           ) : (
             <>

@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/table";
 import {
   Dialog,
-
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -440,65 +439,66 @@ export default function ListarNotasPagamento() {
                             </Button>
                           )}
                         {/* Botão de info de anulação — aparece quando motivo/data são null */}
-                        {nota.motivo_anulacao != null && nota.data_anulacao != null && nota.estado != 0 && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="h-8 w-8 text-amber-600 hover:bg-amber-50 border-amber-300"
-                                title="Informações de anulação"
-                              >
-                                <Info className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
+                        {nota.motivo_anulacao != null &&
+                          nota.data_anulacao != null &&
+                          nota.estado != 0 && (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="h-8 w-8 text-amber-600 hover:bg-amber-50 border-amber-300"
+                                  title="Informações de anulação"
+                                >
+                                  <Info className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
 
-                            <DialogContent className="max-w-sm">
-                              <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                  <Info className="h-4 w-4 text-amber-600" />
-                                  Informações de Anulação
-                                </DialogTitle>
-                              </DialogHeader>
+                              <DialogContent className="max-w-sm">
+                                <DialogHeader>
+                                  <DialogTitle className="flex items-center gap-2">
+                                    <Info className="h-4 w-4 text-amber-600" />
+                                    Informações de Anulação
+                                  </DialogTitle>
+                                </DialogHeader>
 
-                              <div className="space-y-3">
+                                <div className="space-y-3">
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-1">
+                                      Anulado Por
+                                    </p>
 
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">
-                                    Anulado Por
-                                  </p>
+                                    <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
+                                      {nota.utilizador_anulacao ||
+                                        "Não informado"}
+                                    </p>
+                                  </div>
 
-                                  <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
-                                    {nota.utilizador_anulacao || "Não informado"}
-                                  </p>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-1">
+                                      Data de Anulação
+                                    </p>
+
+                                    <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
+                                      {nota.data_anulacao
+                                        ? formatDate(nota.data_anulacao)
+                                        : "Não informada"}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <p className="text-xs text-muted-foreground mb-1">
+                                      Motivo de Anulação
+                                    </p>
+
+                                    <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
+                                      {nota.motivo_anulacao ?? "Não informado"}
+                                    </p>
+                                  </div>
                                 </div>
-
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">
-                                    Data de Anulação
-                                  </p>
-
-                                  <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
-                                    {nota.data_anulacao
-                                      ? formatDate(nota.data_anulacao)
-                                      : "Não informada"}
-                                  </p>
-                                </div>
-
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">
-                                    Motivo de Anulação
-                                  </p>
-
-                                  <p className="text-sm bg-muted/50 rounded-md px-3 py-2">
-                                    {nota.motivo_anulacao ?? "Não informado"}
-                                  </p>
-                                </div>
-
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        )}
+                              </DialogContent>
+                            </Dialog>
+                          )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -706,8 +706,8 @@ export default function ListarNotasPagamento() {
                             <TableCell>
                               {(item.descricaoservico || "—") +
                                 (Number(item.mesid) !== 3 &&
-                                  item.mesid &&
-                                  item.mesdescricao
+                                item.mesid &&
+                                item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
@@ -721,7 +721,7 @@ export default function ListarNotasPagamento() {
                               {formatCurrency(item.preco)}
                             </TableCell>
                             <TableCell className="text-right font-mono font-semibold pr-6">
-                              {formatCurrency(item.preco + item.multa)}
+                              {formatCurrency(item.total)}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -746,11 +746,7 @@ export default function ListarNotasPagamento() {
                             {formatCurrency(
                               itens.data.reduce((total, item) => {
                                 const quantidade = item.quantidade ?? 1;
-                                return (
-                                  total +
-                                  item.preco * quantidade +
-                                  (item.multa ?? 0)
-                                );
+                                return total + item.total * quantidade;
                               }, 0),
                             )}
                           </TableCell>
@@ -816,7 +812,6 @@ export default function ListarNotasPagamento() {
               <strong>{acaoTipo === "anular" ? "anular" : "reactivar"}</strong>{" "}
               esta factura?
               <br />
-
               {facturaSelecionada && (
                 <>
                   <strong>Nº Factura:</strong> {facturaSelecionada.codigo}
@@ -826,7 +821,6 @@ export default function ListarNotasPagamento() {
                   <strong>Valor:</strong> {facturaSelecionada.valor_pagar} Kz
                 </>
               )}
-
               <br />
               Esta ação não pode ser desfeita.
             </DialogDescription>
@@ -835,12 +829,14 @@ export default function ListarNotasPagamento() {
           {/* Campo motivo */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Motivo {acaoTipo === "anular" && <span className="text-red-500">*</span>}
+              Motivo{" "}
+              {acaoTipo === "anular" && <span className="text-red-500">*</span>}
             </label>
 
             <Textarea
-              placeholder={`Digite o motivo da ${acaoTipo === "anular" ? "anulação" : "reactivação"
-                }`}
+              placeholder={`Digite o motivo da ${
+                acaoTipo === "anular" ? "anulação" : "reactivação"
+              }`}
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
             />
