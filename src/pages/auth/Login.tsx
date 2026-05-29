@@ -188,12 +188,7 @@ const Login = () => {
           <div className="angola-stripe" />
 
           <div style={{ padding: "1.75rem 1.75rem 2rem" }}>
-            <h2
-              className="text-xl font-semibold text-foreground mb-1"
-              style={{ marginBottom: "4px" }}
-            >
-              Iniciar Sessão
-            </h2>
+
             <p className="text-sm text-muted-foreground mb-6">
               Digite suas credenciais para acessar o sistema
             </p>
