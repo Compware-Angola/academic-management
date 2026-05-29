@@ -318,6 +318,7 @@ export default function ListarBolsa() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Código</TableHead>
                     <TableHead>Designação</TableHead>
                     <TableHead>Instituição</TableHead>
                     <TableHead>Tipo Desconto</TableHead>
@@ -330,6 +331,7 @@ export default function ListarBolsa() {
                 <TableBody>
                   {bolsas.map((item) => (
                     <TableRow key={item.codigo}>
+                      <TableCell>{item.codigo}</TableCell>
                       <TableCell>{item.designacao}</TableCell>
                       <TableCell>{item.instituicao}</TableCell>
                       <TableCell>{item.descricao_tipo_desconto}</TableCell>

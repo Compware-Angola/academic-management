@@ -9,8 +9,10 @@ export type LaunchMigrationItem = {
   classe: string;
   duracao: string;
   semestre: string;
-  codigo_aluno: number;
+  semestreid: number;
+  codigo_grade_aluno: number;
   nome_utilizador: string | null;
+  codigo_ano_lectivo: number;
 };
 
 export type LaunchMigrationResponse = {
