@@ -94,11 +94,37 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     valorAPagar,
     desconto,
   }: SelectedPayment) => {
+    // Mensalidades pendentes e sem factura gerada, ordenadas por mesId
+    const pendentes = payments
+      .filter((p) => p.status === 0 && p.id_item === 0)
+      .sort((a, b) => a.mesId - b.mesId);
+
     setSelectedPayments((prev) => {
       const next = new Map(prev);
+
       if (next.has(mesTempId)) {
+        // Ao desmarcar: bloquear se há meses posteriores já selecionados
+        const temPosterioresSelecionados = Array.from(next.keys()).some(
+          (id) => id > mesTempId,
+        );
+        if (temPosterioresSelecionados) {
+          toast.warning(
+            "Desmarque primeiro as mensalidades posteriores a esta.",
+          );
+          return prev;
+        }
         next.delete(mesTempId);
       } else {
+        // Ao marcar: bloquear se há pendentes anteriores ainda não selecionados
+        const anteriorNaoSelecionado = pendentes.find(
+          (p) => p.mesId < mesTempId && !next.has(p.mesId),
+        );
+        if (anteriorNaoSelecionado) {
+          toast.warning(
+            `Seleccione primeiro a mensalidade de ${anteriorNaoSelecionado.month}.`,
+          );
+          return prev;
+        }
         next.set(mesTempId, {
           mesTempId,
           valorAPagar,
@@ -107,6 +133,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
           desconto,
         });
       }
+
       return next;
     });
   };
