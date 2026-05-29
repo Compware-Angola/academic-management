@@ -63,10 +63,10 @@ const Login = () => {
   const showEnvLabel = isDevelop || isPrePrd;
 
   // Texto amigável para a label
-  const envDisplay = isDevelop 
-    ? "Ambiente: Desenvolvimento" 
-    : isPrePrd 
-      ? "Ambiente: Pré-produção" 
+  const envDisplay = isDevelop
+    ? "Ambiente: Desenvolvimento"
+    : isPrePrd
+      ? "Ambiente: Pré-produção"
       : "";
 
   return (
