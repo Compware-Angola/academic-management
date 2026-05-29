@@ -1,11 +1,10 @@
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-import { Eye, EyeOff, User, Lock, LogIn } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, User, Lock, LogIn, BookOpen, Users, GraduationCap, BarChart2, FileCheck, CalendarDays, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -14,14 +13,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useState } from "react";
+
 import { useMutationLogin } from "@/hooks/mutations/use-mutation-login";
 import { APP_ENV, isDevelop, isPrePrd } from "@/config/env";
+
+import logo from "@/assets/logo_uma.png";
+import studentsBg from "@/assets/students-bg.jpg";
 
 const loginSchema = z.object({
   username: z
     .string()
-    .min(3, "O username deve ter pelo menos 3 caracteres")
+    .min(2, "O username deve ter pelo menos 2 caracteres")
     .max(60, "Username muito longo"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
@@ -32,19 +34,6 @@ const Login = () => {
   const loginMutation = useMutationLogin();
   const [showPassword, setShowPassword] = useState(false);
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
-
-  const onSubmit = (values: LoginFormData) => {
-    const { username, password } = values;
-    loginMutation.mutate({ username, password, platform: "GA" });
-  };
-
   const showEnvLabel = isDevelop || isPrePrd;
   const envDisplay = isDevelop
     ? "Ambiente: Desenvolvimento"
@@ -52,231 +41,180 @@ const Login = () => {
       ? "Ambiente: Pré-produção"
       : "";
 
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { username: "", password: "" },
+  });
+
+  const onSubmit = (values: LoginFormData) => {
+    const { username, password } = values;
+    loginMutation.mutate({ username, password, platform: "GA" });
+  };
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4" style={{ background: "var(--bg-page)" }}>
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+      {/* LEFT — Imagem + Conteúdo */}
+      <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden text-white p-12">
+        <div
+          className="pointer-events-none absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${studentsBg})` }}
+          aria-hidden
+        />
+        <div className="pointer-events-none absolute inset-0 bg-animated-red opacity-70 mix-blend-multiply" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/20" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-40 -right-20 h-[28rem] w-[28rem] rounded-full bg-brand-yellow/15 blur-3xl animate-float-slow [animation-delay:-6s]" />
 
-      {/* Inline styles scoped to this page */}
-      <style>{`
-        :root {
-          --angola-red:    #b91c1c;
-          --angola-yellow: #d97706;
-          --angola-green:  #15803d;
-          --bg-page:       #f5f4f1;
-        }
+        <div className="relative z-10 h-12" />
 
-        .login-input-wrapper {
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
+        <div className="relative z-10 space-y-6">
 
-        .login-input-wrapper .input-icon {
-          position: absolute;
-          left: 12px;
-          color: #9ca3af;
-          pointer-events: none;
-          width: 16px;
-          height: 16px;
-        }
 
-        .login-input-wrapper input {
-          padding-left: 2.25rem !important;
-        }
-
-        .login-input-wrapper input.has-toggle {
-          padding-right: 2.5rem !important;
-        }
-
-        .toggle-password {
-          position: absolute;
-          right: 10px;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 4px;
-          color: #9ca3af;
-          display: flex;
-          align-items: center;
-          transition: color 0.15s;
-        }
-
-        .toggle-password:hover {
-          color: #6b7280;
-        }
-
-        .angola-stripe {
-          height: 4px;
-          background: linear-gradient(
-            90deg,
-            var(--angola-red)    0%,
-            var(--angola-red)    60%,
-            var(--angola-yellow) 60%,
-            var(--angola-yellow) 80%,
-            var(--angola-green)  80%,
-            var(--angola-green)  100%
-          );
-          border-radius: 4px 4px 0 0;
-        }
-
-        .btn-entrar {
-          width: 100%;
-          height: 42px;
-          background: var(--angola-red);
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          cursor: pointer;
-          transition: background 0.15s, opacity 0.15s;
-        }
-
-        .btn-entrar:hover:not(:disabled) {
-          background: #991b1b;
-        }
-
-        .btn-entrar:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-      `}</style>
-
-      <div className="w-full max-w-md">
-
-        {/* Header — logo + título */}
-        <div className="text-center mb-8">
-          <div className="inline-block mb-5">
-            <img
-              src="/logo_uma.png"
-              alt="Logotipo da Universidade Metodista de Angola"
-              className="h-28 w-auto drop-shadow-lg"
-            />
-          </div>
-
-          <h1
-            className="text-3xl font-bold text-foreground mb-1"
-            style={{ letterSpacing: "-0.3px" }}
-          >
-            Portal Académico
+          <h1 className="text-5xl font-bold leading-[1.05] tracking-tight">
+            Bem-vindo ao
+            <br />
+            <span className="bg-gradient-to-r from-white via-brand-yellow to-white bg-clip-text text-transparent">
+              Portal Académico
+            </span>
           </h1>
-          <p className="text-muted-foreground text-sm">
-            Sistema de Gestão Académica
+
+          <p className="max-w-md text-base text-white/85">
+            Gerencie turmas, docentes, pautas e actividades académicas numa plataforma centralizada.
+          </p>
+
+          <ul className="mt-8 space-y-3 text-sm text-white/90">
+            <li className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/25 backdrop-blur">
+                <BarChart2 className="h-4 w-4 text-brand-yellow" />
+              </span>
+              Relatórios de desempenho académico por turma e curso
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/25 backdrop-blur">
+                <FileCheck className="h-4 w-4 text-brand-yellow" />
+              </span>
+              Gestão e aprovação de pautas e avaliações
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/25 backdrop-blur">
+                <Users className="h-4 w-4 text-brand-yellow" />
+              </span>
+              Visão geral de docentes, turmas e cargas horárias
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/25 backdrop-blur">
+                <CalendarDays className="h-4 w-4 text-brand-yellow" />
+              </span>
+              Calendário académico e controlo de actividades
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/25 backdrop-blur">
+                <MessageSquare className="h-4 w-4 text-brand-yellow" />
+              </span>
+              Comunicação interna entre docentes e direcção
+            </li>
+          </ul>
+        </div>
+
+        <div className="relative z-10 space-y-4">
+
+          <p className="text-xs text-white/70">
+            © {new Date().getFullYear()} Universidade Metodista de Angola
           </p>
         </div>
+      </aside>
 
-        {/* Card */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "14px",
-            border: "0.5px solid #e5e7eb",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Faixa das cores de Angola */}
-          <div className="angola-stripe" />
-
-          <div style={{ padding: "1.75rem 1.75rem 2rem" }}>
-
-            <p className="text-sm text-muted-foreground mb-6">
-              Digite suas credenciais para acessar o sistema
-            </p>
-
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                {/* Username */}
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">
-                        Username
-                      </FormLabel>
-                      <FormControl>
-                        <div className="login-input-wrapper">
-                          <User className="input-icon" aria-hidden="true" />
-                          <Input placeholder="seu.usuario" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Senha */}
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">
-                        Senha
-                      </FormLabel>
-                      <FormControl>
-                        <div className="login-input-wrapper">
-                          <Lock className="input-icon" aria-hidden="true" />
-                          <Input
-                            type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            className="has-toggle"
-                            {...field}
-                          />
-                          <button
-                            type="button"
-                            className="toggle-password"
-                            onClick={() => setShowPassword((v) => !v)}
-                            aria-label={
-                              showPassword ? "Ocultar senha" : "Mostrar senha"
-                            }
-                          >
-                            {showPassword ? (
-                              <EyeOff size={16} />
-                            ) : (
-                              <Eye size={16} />
-                            )}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={
-                    form.formState.isSubmitting || loginMutation.isPending
-                  }
-                >
-                  <LogIn size={16} />
-                  {form.formState.isSubmitting || loginMutation.isPending
-                    ? "Entrando..."
-                    : "Entrar"}
-                </Button>
-              </form>
-            </Form>
+      {/* RIGHT — Formulário */}
+      <main className="relative flex items-center justify-center p-6 sm:p-10 bg-white">
+        <div className="w-full max-w-md space-y-8">
+          {/* Logo Mobile */}
+          <div className="flex justify-center lg:hidden">
+            <div className="rounded-2xl bg-white p-3 shadow-md ring-1 ring-border">
+              <img src={logo} alt="Metodista de Angola" className="h-12 w-auto" />
+            </div>
           </div>
-        </div>
 
-        {/* Rodapé */}
-        <div className="mt-6 text-center text-xs text-muted-foreground/60">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">Entrar na conta</h2>
+            <p className="text-sm text-muted-foreground">
+              Digite suas credenciais para acessar o sistema.
+            </p>
+          </div>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          autoComplete="username"
+                          placeholder="seu.usuario"
+                          className="h-11 pl-10 bg-white"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Senha</FormLabel>
+
+                    </div>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          type={showPassword ? "text" : "password"}
+                          autoComplete="current-password"
+                          placeholder="••••••••"
+                          className="h-11 pl-10 pr-10 bg-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting || loginMutation.isPending}
+                className="h-11 w-full bg-brand-red text-white hover:bg-brand-red/90 shadow-lg shadow-brand-red/30 transition-all hover:shadow-xl hover:shadow-brand-red/40 hover:-translate-y-0.5"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                {form.formState.isSubmitting || loginMutation.isPending ? "Entrando..." : "Entrar"}
+              </Button>
+            </form>
+          </Form>
+
           {showEnvLabel && (
-            <p>
+            <p className="text-center text-xs text-muted-foreground">
               {envDisplay} • v{APP_ENV}
             </p>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };
