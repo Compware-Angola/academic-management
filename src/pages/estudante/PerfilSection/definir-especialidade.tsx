@@ -1,4 +1,4 @@
-import { useCursoEspecialidade } from "@/hooks/cursos/especialidade";
+import { useCursoEspecialidadePorCodigoMatricula } from "@/hooks/cursos/especialidade";
 import {
   useDefinirEspecialidade,
   useStudentDetail,
@@ -28,7 +28,7 @@ export function DefinirEspecialidade({
     data: especialidades,
     isLoading,
     isError,
-  } = useCursoEspecialidade(student?.curso_codigo ?? 0);
+  } = useCursoEspecialidadePorCodigoMatricula(student?.codigo_matricula ?? 0);
 
   const [especialidade, setEspecialidade] = useState<string>("");
 
