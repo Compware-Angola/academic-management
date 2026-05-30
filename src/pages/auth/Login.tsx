@@ -79,7 +79,7 @@ const Login = () => {
             Bem-vindo ao
             <br />
             <span className="bg-gradient-to-r from-white via-brand-yellow to-white bg-clip-text text-transparent">
-              Portal Académico
+              Gestão Académica
             </span>
           </h1>
 
