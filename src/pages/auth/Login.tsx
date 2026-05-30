@@ -54,7 +54,23 @@ const Login = () => {
 
   return (
     // Wrapper que força modo light — cancela qualquer .dark do elemento pai
-    <div className="light" style={{ colorScheme: "light" }}>
+    <div
+      className="light"
+      style={{
+        colorScheme: "light",
+        ["--background" as string]: "255 255 255",
+        ["--foreground" as string]: "9 9 11",
+        ["--muted-foreground" as string]: "113 113 122",
+        ["--border" as string]: "228 228 231",
+        ["--input" as string]: "228 228 231",
+        ["--ring" as string]: "239 68 68",
+        ["--card" as string]: "255 255 255",
+        ["--card-foreground" as string]: "9 9 11",
+        ["--muted" as string]: "244 244 245",
+        ["--accent" as string]: "244 244 245",
+        ["--accent-foreground" as string]: "9 9 11",
+      }}
+    >
       <div className="min-h-screen grid lg:grid-cols-2 bg-background">
         {/* LEFT — Imagem + Conteúdo */}
         <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden text-white p-12">
@@ -74,7 +90,7 @@ const Login = () => {
               Bem-vindo ao
               <br />
               <span className="bg-gradient-to-r from-white via-brand-yellow to-white bg-clip-text text-transparent">
-                Gestão Académica
+                Portal Académico
               </span>
             </h1>
 
