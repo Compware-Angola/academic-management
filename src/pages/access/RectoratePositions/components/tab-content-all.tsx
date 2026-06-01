@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -68,12 +68,17 @@ export function TabContentAll() {
   const { data: usersResponse, isFetching: isFetchingUsers } = useUsers({
     search: debouncedSearch,
   });
-  const { mutate: updateOcupante, isPending: isUpdating } =
+  const { mutateAsync: updateOcupante, isPending: isUpdating } =
     useUpdateOcupanteCargo();
-  const { mutate: deleteOcupante, isPending: isDeleting } =
+  const { mutateAsync: deleteOcupante, isPending: isDeleting } =
     useDeleteOcupanteCargo();
 
   const users = usersResponse?.data ?? [];
+  const handleDeleteOcupante = async () => {
+    if (!cargoParaExcluir) return;
+    await deleteOcupante(cargoParaExcluir);
+    setDeleteOpen(false)
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pt-PT", {
@@ -82,12 +87,16 @@ export function TabContentAll() {
       year: "numeric",
     });
   };
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!selectedCargo) return;
-    updateOcupante({
+    await updateOcupante({
       cargoId: selectedCargo.pkCargo,
       novoUtilizadorId: Number(novoOcupante),
     });
+    setEditDialogOpen(false)
+
+
+
   };
   const handleEdit = (cargo: Cargo) => {
     setSelectedCargo(cargo);
@@ -222,6 +231,7 @@ export function TabContentAll() {
               />
             </div>
             <FormCommandSelect
+              width="full"
               disabled={isLoadingCargos}
               value={novoOcupante}
               label="Novo Ocupante"
@@ -236,14 +246,21 @@ export function TabContentAll() {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+            <Button disabled={isUpdating} variant="outline" onClick={() => setEditDialogOpen(false)}>
               Cancelar
             </Button>
             <Button
               onClick={handleSaveEdit}
               disabled={!novoOcupante || isUpdating}
             >
-              {isUpdating ? "A guardar..." : "Salvar"}
+              {isUpdating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Atualizando...
+                </>
+              ) : (
+                "Atualizar"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -263,21 +280,19 @@ export function TabContentAll() {
               Cancelar
             </AlertDialogCancel>
 
-            <AlertDialogAction
+            <Button
               disabled={isDeleting}
-              onClick={() => {
-                if (!cargoParaExcluir) return;
-
-                deleteOcupante(cargoParaExcluir, {
-                  onSuccess: () => {
-                    setDeleteOpen(false);
-                    setCargoParaExcluir(null);
-                  },
-                });
-              }}
+              onClick={handleDeleteOcupante}
             >
-              {isDeleting ? "A eliminar..." : "Confirmar"}
-            </AlertDialogAction>
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  A eliminar...
+                </>
+              ) : (
+                "Confirmar"
+              )}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

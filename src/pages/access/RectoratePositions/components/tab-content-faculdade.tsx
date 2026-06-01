@@ -8,7 +8,6 @@ import { useUsers } from "@/hooks/acess/use-query-users";
 import { useQueryFetchFaculdades } from "@/hooks/faculdade/use-query-fetch-faculdades";
 import { useCursos } from "@/hooks/use-cursos";
 import { useDefineFaculdade } from "@/hooks/acess/use-mutation-define-faculdade";
-
 import {
   AlertDialog,
   AlertDialogContent,
@@ -19,6 +18,9 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 export function TabContentFaculdade() {
   // Único estado para todo o formulário
@@ -62,10 +64,10 @@ export function TabContentFaculdade() {
   const isDecanoCargo = form.cargo === "10";
   const canSubmit = !isDecanoCargo
     ? !form.cargo ||
-      !form.ocupante ||
-      !form.faculdade ||
-      !form.curso ||
-      isPending
+    !form.ocupante ||
+    !form.faculdade ||
+    !form.curso ||
+    isPending
     : !form.cargo || !form.ocupante || !form.faculdade || isPending;
 
   // Mutation
@@ -132,20 +134,15 @@ export function TabContentFaculdade() {
 
               {/* Curso */}
               {!isDecanoCargo && (
-                <FormCommandSelect
+                <CourseSelect
                   disabled={isLoadingCursos}
                   value={form.curso}
                   label="Curso"
                   width="full"
-                  options={cursos}
-                  map={(c) => ({
-                    key: c.codigo.toString(),
-                    value: c.codigo.toString(),
-                    label: c.designacao,
-                  })}
-                  onChange={(value) =>
+                  onChangeValue={(value) =>
                     setForm((prev) => ({ ...prev, curso: value }))
                   }
+                  params={{ faculdadeId: parseFilter(form.faculdade) }}
                 />
               )}
             </div>
@@ -187,7 +184,7 @@ export function TabContentFaculdade() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
 
-            <AlertDialogAction
+            <Button
               disabled={isPending}
               onClick={() => {
                 definirFaculdade(
@@ -201,7 +198,7 @@ export function TabContentFaculdade() {
                     onSuccess: () => {
                       setConfirmOpen(false);
                       setForm({
-                        cargo: "0",
+                        cargo: "",
                         ocupante: "",
                         faculdade: "",
                         curso: "",
@@ -212,8 +209,11 @@ export function TabContentFaculdade() {
                 );
               }}
             >
-              {isPending ? "A definir..." : "Confirmar"}
-            </AlertDialogAction>
+              {isPending ? <>
+                <Loader2 className="animate-spin mr-2" />
+                A definir...
+              </> : "Confirmar"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
