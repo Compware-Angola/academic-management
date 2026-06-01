@@ -9,6 +9,7 @@ export type ResultPlanItem = {
   classe: string;
   duracao: string;
   semestre: string;
+  codigo_grade_aluno: number | null;
 };
 
 export type ResultPlanResponse = {

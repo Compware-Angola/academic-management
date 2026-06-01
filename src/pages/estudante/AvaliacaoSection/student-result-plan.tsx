@@ -151,9 +151,9 @@ export function StudentResultPlan({
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {enabledExportPdf && (
-            <div className="flex justify-between gap-2 mb-2">
-              <div className="flex">
+          <div className="flex gap-2 mb-2">
+            {enabledExportPdf && (
+              <div className="flex gap-2">
                 <PDFActions
                   document={<GenericPDFDocument {...exportData?.pdfProps} />}
                   fileName={`${exportData.fileName}.pdf`}
@@ -166,6 +166,9 @@ export function StudentResultPlan({
                   showDownload
                 />
               </div>
+            )}
+
+            <div className="ml-auto flex">
               <FormInput
                 placeholder="Entra com uma pesquisa"
                 value={searchValue}
@@ -173,7 +176,8 @@ export function StudentResultPlan({
                 onDebounce={(v) => setSearch(v)}
               />
             </div>
-          )}
+          </div>
+
           {isLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 6 }).map((_, i) => (

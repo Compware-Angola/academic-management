@@ -18,14 +18,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { useStudentDisciplinas } from "@/hooks/students/use-query-students";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
-
-import { PaginationComponent } from "@/components/common/PaginationComponent";
-import { useQueryStudentListPendentUC } from "@/hooks/students/use-query-pendent-uc";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EpocaSelect } from "@/components/common/global-selects/EpocaSelect";
 import { Button } from "@/components/ui/button";
@@ -33,6 +29,7 @@ import { Eye, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useMutationCreateEnrollmentUC } from "@/hooks/students/use-mutate-enrollment-uc";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryResultPlan } from "@/hooks/students/use-query-result-plan";
 
 type Props = {
   codigoMatricula: number;
@@ -46,8 +43,6 @@ export function InscricoesUC({
   codigoMatricula,
   value = "inscricoes-uc",
 }: Props) {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [anoLetivo, setAnoLetivo] = useState<string | undefined>("23");
   const [epoca, setEpoca] = useState<number>(1);
   const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
@@ -82,15 +77,12 @@ export function InscricoesUC({
 
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
+
   const {
     data: pendentUcResponse,
     isLoading,
     isError,
-  } = useQueryStudentListPendentUC({
-    codigoMatricula,
-    limit,
-    page,
-  });
+  } = useQueryResultPlan(codigoMatricula);
 
   if (!codigoMatricula) {
     return <div>Matrícula inválida</div>;
@@ -126,8 +118,8 @@ export function InscricoesUC({
     );
   };
   const isSelectedGrade = (grade: number) => selectedGrades.includes(grade);
-  const pendentUcs = pendentUcResponse?.data ?? [];
-  const hasNextPage = pendentUcResponse?.hasNextPage ?? false;
+  const pendentUcs =
+    pendentUcResponse?.grades.filter((t) => t.codigo_grade_aluno == null) ?? [];
   const hasError = errorInscription.length > 0;
   const canSubmit = epoca && parseFilter(anoLetivo);
   return (
@@ -190,7 +182,6 @@ export function InscricoesUC({
                     <TableRow>
                       <TableHead></TableHead>
                       <TableHead>Disciplina</TableHead>
-                      <TableHead className="text-center">Tipo</TableHead>
                       <TableHead className="text-center">Código</TableHead>
                       <TableHead className="text-center">Duração</TableHead>
                       <TableHead className="text-center">Classe</TableHead>
@@ -203,25 +194,23 @@ export function InscricoesUC({
                   <TableBody>
                     {pendentUcs.map((pendent) => (
                       <TableRow
-                        className={getRowStyle(pendent.codigo_grade)}
-                        key={pendent.codigo_grade}
+                        className={getRowStyle(pendent.codigo)}
+                        key={pendent.codigo}
                       >
                         <TableCell>
                           <Checkbox
-                            checked={isSelectedGrade(pendent.codigo_grade)}
+                            checked={isSelectedGrade(pendent.codigo)}
                             onCheckedChange={() =>
-                              handleSelectGrade(pendent.codigo_grade)
+                              handleSelectGrade(pendent.codigo)
                             }
                           />
                         </TableCell>
                         <TableCell className="font-mono text-sm">
                           {pendent.disciplina}
                         </TableCell>
-                        <TableCell className="font-medium">
-                          {pendent.tipo}
-                        </TableCell>
+
                         <TableCell className="text-center">
-                          {pendent.codigo_grade}
+                          {pendent.codigo}
                         </TableCell>
                         <TableCell className="text-center">
                           {pendent.duracao}
@@ -235,7 +224,7 @@ export function InscricoesUC({
                         {hasError && (
                           <TableCell>
                             <Button
-                              onClick={() => getError(pendent.codigo_grade)}
+                              onClick={() => getError(pendent.codigo)}
                               variant="outline"
                               size="icon"
                             >
@@ -248,13 +237,6 @@ export function InscricoesUC({
                   </TableBody>
                 </Table>
               </div>
-              <PaginationComponent
-                hasNext={hasNextPage}
-                limit={limit}
-                page={page}
-                setLimit={setLimit}
-                setPage={setPage}
-              />
             </>
           )}
         </CardContent>

@@ -1,6 +1,6 @@
 import { FormSelect } from "../FormSelect";
 
-export const INSENTAR_MULTA = [
+export const ISENTAR_MULTA = [
   {
     value: "SIM",
     label: "Sim",
@@ -11,7 +11,7 @@ export const INSENTAR_MULTA = [
   },
 ];
 export function IsentarMultaSelect({
-  label,
+  label = "Isentar Multa",
   value,
   onChangeValue,
   disabled,
@@ -29,7 +29,7 @@ export function IsentarMultaSelect({
         label: item.label,
       })}
       label={label}
-      options={INSENTAR_MULTA}
+      options={ISENTAR_MULTA}
       value={value}
       disabled={disabled}
       onChange={(value) => {
