@@ -12,7 +12,7 @@ interface AnoLectivoConfirmadoSelectProps {
 }
 
 const AnoLectivoConfirmadoSelect = ({
-  label = "Ano Lectivo",
+  label,
   value,
   codigoMatricula,
   onChangeValue,
@@ -33,7 +33,7 @@ const AnoLectivoConfirmadoSelect = ({
 
   const { data: anosLectivos, isLoading } =
     useDropDownAnoLectivoConfirmados(codigoMatricula);
-
+  console.log("&&", anosLectivos);
   return (
     <FormSelect
       disabled={isLoading || disabled || !codigoMatricula}
@@ -44,9 +44,9 @@ const AnoLectivoConfirmadoSelect = ({
       defaultSelectItem={defaultSelectItem}
       options={anosLectivos ?? []}
       map={(a: any) => ({
-        key: a.codigo,
-        label: a.designacao,
-        value: a.codigo,
+        key: a.value,
+        label: a.label,
+        value: a.value,
       })}
     />
   );
