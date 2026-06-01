@@ -32,9 +32,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQueryLaunchMigration } from "@/hooks/students/use-query-launch-migration";
-import { useMutationCreateEquivalenceMigrationTFC } from "@/hooks/students/use-mutation-launch-migration";
+import {
+  useDeleteEquivalenceMigrationTFC,
+  useMutationCreateEquivalenceMigrationTFC,
+} from "@/hooks/students/use-mutation-launch-migration";
 import { AnoLectivoConfirmadoSelect } from "@/components/common/global-selects/AnoLectivoConfirmadoSelect";
-
+import { LaunchMigrationItem } from "@/services/students/fetch-launch-migration.service";
 type Props = {
   codigoMatricula: number;
   value?: string;
@@ -66,7 +69,7 @@ export function LaunchMigration({
   const [deletedIds, setDeletedIds] = useState<Set<number>>(new Set());
   const [isSaving, setIsSaving] = useState(false);
   const [isEquivalence, setIsEquivalence] = useState<boolean>(false);
-
+  const { mutateAsync: deleteGradeAluno } = useDeleteEquivalenceMigrationTFC();
   const plans = planResponse?.grades ?? [];
   const getAnoLectivo = (plan: (typeof plans)[number]) => {
     return (
@@ -95,7 +98,21 @@ export function LaunchMigration({
     },
     [],
   );
+  const handleDelete = async (plan: LaunchMigrationItem) => {
+    try {
+      await deleteGradeAluno(plan.codigo_grade_aluno);
 
+      setDeletedIds((prev) => new Set([...prev, plan.codigo]));
+
+      setEditState((prev) => {
+        const next = { ...prev };
+        delete next[plan.codigo];
+        return next;
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const filteredPlans = useMemo(() => {
     const term = search.toLowerCase().trim();
     const visible = plans.filter((p) => !deletedIds.has(p.codigo));
@@ -164,15 +181,6 @@ export function LaunchMigration({
 
   const handleResetAll = () => {
     setEditState({});
-  };
-
-  const handleDelete = (codigo: number) => {
-    setDeletedIds((prev) => new Set([...prev, codigo]));
-    setEditState((prev) => {
-      const next = { ...prev };
-      delete next[codigo];
-      return next;
-    });
   };
 
   const handleSaveAll = async () => {
@@ -462,7 +470,7 @@ export function LaunchMigration({
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             aria-label="Eliminar"
-                            onClick={() => handleDelete(plan.codigo)}
+                            onClick={() => handleDelete(plan)}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>

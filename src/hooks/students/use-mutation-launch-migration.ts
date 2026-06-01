@@ -5,6 +5,7 @@ import {
   CreateEquivalenceMigrationTFCBody,
   createEquivalenceMigrationTFC,
 } from "@/services/students/create-launch-migration.service";
+import { deleteEquivalenceMigrationTFC } from "@/services/students/delete-launch-migration.service";
 
 export function useMutationCreateEquivalenceMigrationTFC() {
   const { toast } = useToast();
@@ -26,6 +27,25 @@ export function useMutationCreateEquivalenceMigrationTFC() {
           "Erro ao cadastrar Equivalência, Migração e TFC",
         variant: "destructive",
       });
+    },
+  });
+}
+
+export function useDeleteEquivalenceMigrationTFC() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (codigoGradeAluno: number) =>
+      deleteEquivalenceMigrationTFC(codigoGradeAluno),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["equivalence-migration-tfc"],
+      });
+    },
+
+    onError: (error) => {
+      console.error(error);
     },
   });
 }
