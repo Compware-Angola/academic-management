@@ -151,9 +151,10 @@ export function LaunchMigration({
       originalNota: number | null,
       newValue: string,
       codigoGradeAluno: number,
+      codigoAnoLectivo: number,
     ) => {
       // Allow only numbers, dot, and empty string
-      if (!/^[\d.]*$/.test(newValue)) return;
+      if (!/^[\d.]*$/.test(newValue) || Number(newValue) > 20) return;
       const original = originalNota != null ? String(originalNota) : "0";
       setEditState((prev) => ({
         ...prev,
@@ -161,7 +162,7 @@ export function LaunchMigration({
           value: newValue,
           isDirty: newValue !== original,
           codigoGradeAluno: codigoGradeAluno,
-          anoLectivo: prev[codigo]?.anoLectivo,
+          anoLectivo: prev[codigo]?.anoLectivo ?? String(codigoAnoLectivo),
         },
       }));
     },
@@ -201,7 +202,7 @@ export function LaunchMigration({
         });
 
       if (itens.length === 0) return;
-
+      console.log("Itens: ", itens);
       await mutateAsync({
         matriculaId: codigoMatricula,
         equivalencia: 1,
@@ -412,6 +413,7 @@ export function LaunchMigration({
                                 plan.nota,
                                 e.target.value,
                                 plan.codigo_grade_aluno,
+                                plan.codigo_ano_lectivo,
                               )
                             }
                             className={cn(
