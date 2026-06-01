@@ -169,10 +169,12 @@ export function InscricoesSection({
             />
             <SemestreSelect
               label="Semestre"
+              enableDefaultSelectItem
               value={filter.semestre}
               onChangeValue={(v) => setFilter({ ...filter, semestre: v })}
             />
             <AnoCurricularSelect
+              enableDefaultSelectItem
               value={filter.classes}
               curso={student?.curso_codigo.toString()}
               onChangeValue={(v) => setFilter({ ...filter, classes: v })}
