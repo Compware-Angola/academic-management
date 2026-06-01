@@ -20,7 +20,7 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { useQueryValidarEstudanteCredito } from "@/hooks/financas/credito-educacional/use-query-validar-estudante-credito";
 import { FormSelect } from "@/components/common/FormSelect";
-import { InsentarMultaSelect } from "@/components/common/global-selects/insentar-multa-select";
+import { IsentarMultaSelect } from "@/components/common/global-selects/insentar-multa-select";
 
 function validarPayload(payload: {
   codigoAnoLectivo: string;
@@ -31,7 +31,7 @@ function validarPayload(payload: {
   if (!payload.codigoAnoLectivo) return "Ano letivo é obrigatório";
   if (!payload.semestre) return "Semestre é obrigatório";
   if (!payload.codigoBolsa) return "Bolsa é obrigatório";
-  if (!payload.isentaMulta) return "Incentar multa é obrigatório";
+  if (!payload.isentaMulta) return "Isentar multa é obrigatório";
   return null;
 }
 
@@ -231,8 +231,8 @@ export default function AtribuirCredito() {
                 {isLoading ? "..." : <Search className="h-4 w-4" />}
               </Button>
             </div>
-            <InsentarMultaSelect
-              label="Incentar Multa"
+            <IsentarMultaSelect
+              label="Isentar Multa"
               value={payload.isentaMulta}
               disabled={!aluno || aluno.ja_bolsista}
               onChangeValue={(value) => {

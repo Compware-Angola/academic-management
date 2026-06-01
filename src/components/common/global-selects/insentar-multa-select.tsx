@@ -10,7 +10,7 @@ export const INSENTAR_MULTA = [
     label: "Não",
   },
 ];
-export function InsentarMultaSelect({
+export function IsentarMultaSelect({
   label,
   value,
   onChangeValue,
