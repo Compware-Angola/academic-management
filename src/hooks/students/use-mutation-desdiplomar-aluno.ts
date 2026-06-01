@@ -1,12 +1,15 @@
-import { diplomarAluno, DiplomarAlunoPayload } from "@/services/students/diplomar-estudante.service";
+import {
+  desdiplomarAluno,
+  DesdiplomarAlunoPayload,
+} from "@/services/students/desdiplomar-estudante.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export function useMutationDiplomarAluno() {
+export function useMutationDesdiplomarAluno() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: DiplomarAlunoPayload) => diplomarAluno(body),
+    mutationFn: (body: DesdiplomarAlunoPayload) => desdiplomarAluno(body),
 
     onSuccess: (data) => {
       queryClient.invalidateQueries({
