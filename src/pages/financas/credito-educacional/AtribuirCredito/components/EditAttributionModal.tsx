@@ -13,7 +13,7 @@ import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { BolsaEstudante } from "@/services/financas/bolsa/fetch-bolsa-estudante.service";
 import { useMutationUpdateBolsaEstudante } from "@/hooks/financas/bolsa/use-mutation-atribuir-bolsa";
 import { Loader2 } from "lucide-react";
-import { InsentarMultaSelect } from "@/components/common/global-selects/insentar-multa-select";
+import { IsentarMultaSelect } from "@/components/common/global-selects/insentar-multa-select";
 
 type EditAttributionModalProps = {
   open: boolean;
@@ -82,8 +82,8 @@ export function EditAttributionModal({
             value={payload.codigoBolsa}
             onChangeValue={(v) => setPayload((p) => ({ ...p, codigoBolsa: v }))}
           />
-          <InsentarMultaSelect
-            label="Incentar Multa"
+          <IsentarMultaSelect
+            label="Isentar Multa"
             value={payload.isentaMulta}
             onChangeValue={(value) =>
               setPayload((prev) => ({ ...prev, isentaMulta: value }))

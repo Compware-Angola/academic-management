@@ -249,12 +249,17 @@ export enum PermissionType {
   INSENCAO_COLISAO_CURSO_ESTUDANTE = "INSENCAO_COLISAO_CURSO_ESTUDANTE",
   FORMA_PAGAMENTO = "FORMA_PAGAMENTO",
   VALIDAR_DOCUMENTO = "VALIDAR_DOCUMENTO",
+  MUDAR_TURNO = "MUDAR_TURNO",
 }
 
 export const PermissionTypeDetails = {
   CONFIGURACAO_CAIXA: {
     designacao: "Configuracao de Caixa",
     sigla: "cfg_caixa",
+  },
+  MUDAR_TURNO: {
+    designacao: "Mudar Turno",
+    sigla: "mt_mfe",
   },
   PAGAMENTO_EM_CASH: {
     designacao: "Pagamento em Cash",

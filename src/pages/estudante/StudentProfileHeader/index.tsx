@@ -12,6 +12,7 @@ import {
   MapPin,
   Award,
   Calendar as CalendarIcon,
+  Clock,
 
 } from "lucide-react";
 import { buildImageAssets } from "@/util/build-image-assets";
@@ -82,8 +83,17 @@ export function StudentProfileHeader({ matricula }: Props) {
 
           <div className="flex-1 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-wrap">
+
               <h1 className="text-2xl font-bold">{student.nome_completo}</h1>
               {getEstadoBadge(student.estado)}
+              {student.regime && (
+                <Badge
+                  variant="outline"
+                  className="capitalize font-medium border-blue-200 text-blue-700 dark:border-blue-800 dark:text-blue-400"
+                >
+                  {student.regime}
+                </Badge>
+              )}
 
               {isBolseiro && (
                 <Badge
@@ -94,7 +104,11 @@ export function StudentProfileHeader({ matricula }: Props) {
                   Bolseiro
                 </Badge>
               )}
+
             </div>
+
+
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -109,6 +123,7 @@ export function StudentProfileHeader({ matricula }: Props) {
                 <Calendar className="h-4 w-4" />
                 <span><strong>Ano:</strong> {student.classe}</span>
               </div>
+
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
                 <span>{student.contacto || "N/A"}</span>

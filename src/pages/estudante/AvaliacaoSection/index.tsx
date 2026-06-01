@@ -59,7 +59,7 @@ export function AvaliacaoSection({
               <span>Plano de Estudo</span>
             </TabsTrigger>
           )}
-          {/* {hasPermission(
+          {hasPermission(
             PermissionTypeDetails.LANCAMENTO_NOTAS_EQUIVALENCIA_TFC_MIGRACAO
               .sigla,
           ) && (
@@ -72,7 +72,7 @@ export function AvaliacaoSection({
                 Equivalência, TFC e Migração
               </span>
             </TabsTrigger>
-          )} */}
+          )}
         </TabsList>
 
         <Card className="flex-1 min-w-0 overflow-hidden p-6">
@@ -96,7 +96,7 @@ export function AvaliacaoSection({
               codigoMatricula={codigoMatricula}
             />
           )}
-          {/* {hasPermission(
+          {hasPermission(
             PermissionTypeDetails.LANCAMENTO_NOTAS_EQUIVALENCIA_TFC_MIGRACAO
               .sigla,
           ) && (
@@ -104,7 +104,7 @@ export function AvaliacaoSection({
               value="migration"
               codigoMatricula={codigoMatricula}
             />
-          )} */}
+          )}
         </Card>
       </Tabs>
     </TabsContent>

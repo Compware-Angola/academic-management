@@ -17,6 +17,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { useDefineReitoria } from "@/hooks/acess/use-mutation-define-reitoria";
+import { Loader2 } from "lucide-react";
 
 export function TabContentReitoria() {
   const [filtroCargo, setFiltroCargo] = useState("0");
@@ -106,10 +107,9 @@ export function TabContentReitoria() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
 
-            <AlertDialogAction
+            <Button
               disabled={isPending}
               onClick={() => {
-                // Só aqui chama a mutation
                 definirReitoria(
                   {
                     tipoCargoId: Number(filtroCargo),
@@ -125,8 +125,9 @@ export function TabContentReitoria() {
                 );
               }}
             >
-              {isPending ? "A definir..." : "Confirmar"}
-            </AlertDialogAction>
+              {isPending ? <>
+                <Loader2 className="animate-spin mr-2" />A definir...</> : "Confirmar"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
