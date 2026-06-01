@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
-import { Book, Contact, GraduationCap, Key } from "lucide-react";
+import { Book, Clock, Contact, GraduationCap, Key } from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
@@ -14,6 +14,7 @@ import { MudarCurso } from "./mudar-curso";
 import { AtivarConfirmacao } from "./ativar-confirmacao";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { ChangeShiftStudentPage } from "./change-shift";
 
 type PerfilSectionProps = {
   value?: string;
@@ -109,6 +110,14 @@ export function PerfilSection({
       permission: hasPermission(PermissionTypeDetails.MUDAR_CURSO.sigla),
       component: MudarCurso,
     },
+
+    {
+      value: "mudar-turno",
+      label: "Mudar Turno",
+      icon: Clock,
+      permission: hasPermission(PermissionTypeDetails.MUDAR_TURNO.sigla),
+      component: ChangeShiftStudentPage,
+    }
   ] as const;
   return (
     <TabsContent value={value}>
