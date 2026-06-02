@@ -26,65 +26,64 @@ import { formatNumber } from "@/util/format-number";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { useState } from "react";
-import { Dialog} from "@/components/ui/dialog";
+import { Dialog } from "@/components/ui/dialog";
+import { useQueryConfigurationGeral } from "@/hooks/academiccalendar/use-query-configuration";
 
 
 const Index = () => {
   const [openAvisoModal, setOpenAvisoModal] = useState(false);
-  const { user:userData} = useAuth();
+  const { user: userData } = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
-      const { data: academicYear, isLoading: isLoadingAcademicYear } =
-        useQueryAnoAcademico();
+  const { data: configurationGeral, isLoading: isLoadingConfigurationGeral } =
+    useQueryConfigurationGeral();
 
-    
-      // encontra o ano activo
-      const activeAcademicYear = academicYear?.find(
-        (year) => year.estado.toLowerCase() === "activo",
-      );
+
+  // encontra o ano activo
+
   const quickLinks = [
-  {
-    name: "Avaliações",
-    icon: FileCheck,
-    path: "/avaliacoes/controle",
-    permission: [],
-  },
-  {
-    name: "Assiduidade",
-    icon: BookOpen,
-    path: "/assiduidade/controle",
-    permission: [],
-  },
-  {
-    name: "Horários",
-    icon: Calendar,
-    path: "/horarios/listar",
-    permission: [],
-  },
-  {
-    name: "Estudantes",
-    icon: Users,
-    path: "/inscricoes/lista-geral",
-    permission: [],
-  },
-];
+    {
+      name: "Avaliações",
+      icon: FileCheck,
+      path: "/avaliacoes/controle",
+      permission: [],
+    },
+    {
+      name: "Assiduidade",
+      icon: BookOpen,
+      path: "/assiduidade/controle",
+      permission: [],
+    },
+    {
+      name: "Horários",
+      icon: Calendar,
+      path: "/horarios/listar",
+      permission: [],
+    },
+    {
+      name: "Estudantes",
+      icon: Users,
+      path: "/inscricoes/lista-geral",
+      permission: [],
+    },
+  ];
   const { user } = userData || {};
 
 
-const allowedQuickLinks =  useFilterMenuByPermission(quickLinks);
+  const allowedQuickLinks = useFilterMenuByPermission(quickLinks);
   return (
     <div className="space-y-6">
-  <PageHeader
-  title={"Olá, " + (user?.nome ?? "N/A")}
-  subtitle={
-    "Sistema de Gestão Académica da Universidade • Ano letivo " +
-    (activeAcademicYear?.designacao ?? "N/A")
-  }
-/>
+      <PageHeader
+        title={"Olá, " + (user?.nome ?? "N/A")}
+        subtitle={
+          "Sistema de Gestão Académica da Universidade • Ano letivo " +
+          (configurationGeral?.anoLectivo?.designacao ?? "N/A")
+        }
+      />
 
-  <Dialog open={openAvisoModal} onOpenChange={setOpenAvisoModal}>
-      
-    </Dialog>
+      <Dialog open={openAvisoModal} onOpenChange={setOpenAvisoModal}>
+
+      </Dialog>
 
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -116,16 +115,18 @@ const allowedQuickLinks =  useFilterMenuByPermission(quickLinks);
         <UpcomingEventsCard />
 
         <SemesterStatsCard
-         title={"Desempenho Académico  " + (activeAcademicYear?.designacao ?? "N/A")}
-         
-          description="Licenciatura em Engenharia Informática"
-       
+          title={"Desempenho Académico do  " + (configurationGeral?.semestreAtual?.semestre === 1 ? "1º" : "2º") + " Semestre"}
+
+          description={""}
+
         />
 
         <QuickActionsCard
-          title="Tarefas Urgentes"
-          description="Ações que requerem atenção"
-        
+          title="Configuração Académica Atual"
+          description=""
+          configuration={configurationGeral}
+          isLoading={isLoadingConfigurationGeral}
+
         />
       </div>
 
@@ -136,22 +137,22 @@ const allowedQuickLinks =  useFilterMenuByPermission(quickLinks);
           <CardDescription>Módulos mais utilizados</CardDescription>
         </CardHeader>
         <CardContent>
-  <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
-  {allowedQuickLinks.map((module) => {
-    const Icon = module.icon;
+          <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+            {allowedQuickLinks.map((module) => {
+              const Icon = module.icon;
 
-    return (
-      <Link
-        key={module.name}
-        to={module.path}
-        className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-      >
-        <Icon className="h-8 w-8 text-primary" />
-        <span className="text-sm font-medium">{module.name}</span>
-      </Link>
-    );
-  })}
-</div>
+              return (
+                <Link
+                  key={module.name}
+                  to={module.path}
+                  className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-card hover:bg-accent hover:text-accent-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                >
+                  <Icon className="h-8 w-8 text-primary" />
+                  <span className="text-sm font-medium">{module.name}</span>
+                </Link>
+              );
+            })}
+          </div>
 
 
         </CardContent>
