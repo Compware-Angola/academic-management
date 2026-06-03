@@ -36,7 +36,10 @@ export function HorarioSelect({
     unidadeCurricular: parseFilter(unidadeCurricular),
     estado: parseFilter(estado),
     anoCurricular: parseFilter(classes),
-  });
+  }
+,{
+  enabled: !!anoLectivo && !!curso && !!semestre && !!classes,
+});
 
   return (
     <FormCommandSelect
