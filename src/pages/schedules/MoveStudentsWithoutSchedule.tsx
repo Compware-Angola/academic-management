@@ -24,7 +24,7 @@ export function MoveStudentsWithoutSchedule() {
     setCourse(course)
 
   }
-  const handleRepairSchedule = () => {
+  const handleRepairSchedule = async () => {
     if (!selectedSchedule) {
       toast.error("Selecione o horario")
       return
@@ -33,17 +33,13 @@ export function MoveStudentsWithoutSchedule() {
       toast.error("Selecione os estudantes")
       return
     }
-    repairSchedule({ toScheduleId: selectedSchedule, studentsCurriculumIds: selectedGradeAlunoIds })
+    await repairSchedule({ toScheduleId: selectedSchedule, studentsCurriculumIds: selectedGradeAlunoIds })
+    handleResetShedule()
+    setSelectedGradeAlunoIds([])
   }
   const handleResetShedule = () => {
     setSelectedSchedule(null)
   }
-
-
-
-
-
-
 
   return (
     <div className="p-4 space-y-4">
