@@ -25,6 +25,8 @@ import TimeLoader from "@/assets/timeloader.json";
 import { useState } from "react";
 import { AnularPagamentoModal } from "./AnularPagamentoModal";
 import { AnularMultaModal } from "./AnularMultaModal";
+import { HasPermission } from "@/components/common/HasPermission";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 type PagamentosTableProps = {
   payments: PaymentItem[];
@@ -248,25 +250,35 @@ export function PagamentosTable({
                       </TableCell>
 
                       <TableCell className="text-center space-x-1 whitespace-nowrap">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          title="Anular Multa"
-                          onClick={() => openMultaModal(pag.codigo_pagamento)}
+                        <HasPermission
+                          permission={PermissionTypeDetails.ANULAR_MULTA.sigla!}
                         >
-                          <BadgeX className="h-3 w-3" />
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          title="Anular Pagamento"
-                          onClick={() =>
-                            openPagamentoModal(pag.codigo_pagamento)
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            title="Anular Multa"
+                            onClick={() => openMultaModal(pag.codigo_pagamento)}
+                          >
+                            <BadgeX className="h-3 w-3" />
+                          </Button>
+                        </HasPermission>
+                        <HasPermission
+                          permission={
+                            PermissionTypeDetails.ANULAR_PAGAMENTO.sigla!
                           }
                         >
-                          <X className="h-3 w-3" />
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            title="Anular Pagamento"
+                            onClick={() =>
+                              openPagamentoModal(pag.codigo_pagamento)
+                            }
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </HasPermission>
+
                         <Button
                           size="sm"
                           variant="outline"
