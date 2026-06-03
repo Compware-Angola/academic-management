@@ -25,54 +25,54 @@ export function AvaliacaoSection({
         orientation="vertical"
         className="flex flex-row gap-6"
       >
-        <TabsList className="flex justify-start flex-col h-auto w-52 shrink-0">
+        <TabsList className="flex justify-start flex-col h-fit w-52 shrink-0">
           {hasPermission(
             PermissionTypeDetails.LISTAR_AVALICOES_ESTUDANTE.sigla,
           ) && (
-            <TabsTrigger
-              className="w-full justify-start gap-2"
-              value="avaliacao"
-            >
-              <Key className="h-4 w-4" />
-              <span>Notas e Avaliações</span>
-            </TabsTrigger>
-          )}
+              <TabsTrigger
+                className="w-full justify-start gap-2"
+                value="avaliacao"
+              >
+                <Key className="h-4 w-4" />
+                <span>Notas e Avaliações</span>
+              </TabsTrigger>
+            )}
           {hasPermission(
             PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla,
           ) && (
-            <TabsTrigger
-              className="w-full justify-start gap-2"
-              value="historico-academico"
-            >
-              <Contact className="h-4 w-4" />
-              <span>Historico Academico</span>
-            </TabsTrigger>
-          )}
+              <TabsTrigger
+                className="w-full justify-start gap-2"
+                value="historico-academico"
+              >
+                <Contact className="h-4 w-4" />
+                <span>Historico Academico</span>
+              </TabsTrigger>
+            )}
           {hasPermission(
             PermissionTypeDetails.RESULTADO_PLANO_ESTUDO.sigla,
           ) && (
-            <TabsTrigger
-              className="w-full justify-start gap-2"
-              value="plano-estudo"
-            >
-              <Contact className="h-4 w-4" />
-              <span>Plano de Estudo</span>
-            </TabsTrigger>
-          )}
+              <TabsTrigger
+                className="w-full justify-start gap-2"
+                value="plano-estudo"
+              >
+                <Contact className="h-4 w-4" />
+                <span>Plano de Estudo</span>
+              </TabsTrigger>
+            )}
           {hasPermission(
             PermissionTypeDetails.LANCAMENTO_NOTAS_EQUIVALENCIA_TFC_MIGRACAO
               .sigla,
           ) && (
-            <TabsTrigger
-              className="w-full justify-start gap-2"
-              value="migration"
-            >
-              <Contact className="h-4 w-4" />
-              <span className="whitespace-normal break-words text-left leading-tight">
-                Equivalência, TFC e Migração
-              </span>
-            </TabsTrigger>
-          )}
+              <TabsTrigger
+                className="w-full justify-start gap-2"
+                value="migration"
+              >
+                <Contact className="h-4 w-4" />
+                <span className="whitespace-normal break-words text-left leading-tight">
+                  Equivalência, TFC e Migração
+                </span>
+              </TabsTrigger>
+            )}
         </TabsList>
 
         <Card className="flex-1 min-w-0 overflow-hidden p-6">
@@ -83,28 +83,28 @@ export function AvaliacaoSection({
           {hasPermission(
             PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla,
           ) && (
-            <StudentAcademicHistory
-              value="historico-academico"
-              codigoMatricula={codigoMatricula}
-            />
-          )}
+              <StudentAcademicHistory
+                value="historico-academico"
+                codigoMatricula={codigoMatricula}
+              />
+            )}
           {hasPermission(
             PermissionTypeDetails.RESULTADO_PLANO_ESTUDO.sigla,
           ) && (
-            <StudentResultPlan
-              value="plano-estudo"
-              codigoMatricula={codigoMatricula}
-            />
-          )}
+              <StudentResultPlan
+                value="plano-estudo"
+                codigoMatricula={codigoMatricula}
+              />
+            )}
           {hasPermission(
             PermissionTypeDetails.LANCAMENTO_NOTAS_EQUIVALENCIA_TFC_MIGRACAO
               .sigla,
           ) && (
-            <LaunchMigration
-              value="migration"
-              codigoMatricula={codigoMatricula}
-            />
-          )}
+              <LaunchMigration
+                value="migration"
+                codigoMatricula={codigoMatricula}
+              />
+            )}
         </Card>
       </Tabs>
     </TabsContent>
