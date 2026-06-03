@@ -1,5 +1,6 @@
-import { useQueryRegistrationBySchedule } from "@/hooks/horario/use-query-schedule-inscription";
-import { RegistrationScheduleItem } from "@/services/horario/fetch-schedule-inscription.service";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Users, Loader2, BookOpen, Check, CheckSquare, Square } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -8,181 +9,281 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Users, Eye } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import ScheduleDetailsModal from "./ScheduleDetailsModal";
+
+import { useQueryStudentsWithoutSchedule } from "@/hooks/horario/useQueryStudentsWithoutSchedule";
+import { parseFilter } from "@/util/parse-filter";
+import { useEffect, useRef, useState } from "react";
+
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Loader2, BookOpen } from "lucide-react";
 
-interface StudentWithoutScheduleCardProps {
-  onChangeSchedule(scheduleId: number): void;
-  originScheduleId?: number;
+interface Props {
   title: string;
-  filters: {
-    anoLetivo: string;
-    semestre: string;
-    curso: string;
-    anoCurricular: string;
-    unidadeCurricular: string;
-  };
+  selectedGradeAlunoIds: number[];
+  onChangeGradeAluno(ids: number[]): void;
+  onChangeCourse(course: string): void;
 }
+
 export const StudentWithoutScheduleCard = ({
-  onChangeSchedule,
-  filters,
   title,
-  originScheduleId,
-}: StudentWithoutScheduleCardProps) => {
-  const { data: periodos } = useQueryPeriod();
+  selectedGradeAlunoIds,
+  onChangeCourse,
+  onChangeGradeAluno,
+}: Props) => {
+  const [filters, setFilters] = useState({
+    anoLetivo: "",
+    semestre: "",
+    curso: "",
+    anoCurricular: "",
+    searchTerm: "",
+  });
 
-  const [horarioOrigemId, setHorarioOrigemId] = useState<number | null>(null);
-  [] > [];
-  const [periodo, setPeriodo] = useState<string>("");
-  const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
 
-  const openDetails = (turmaId: number) => {
-    setSelectedTurmaId(turmaId);
-    setIsModalOpen(true);
-  };
+  const { data, isLoading } = useQueryStudentsWithoutSchedule({
+    anoLectivo: parseFilter(filters.anoLetivo),
+    semestre: parseFilter(filters.semestre),
+    curso: parseFilter(filters.curso),
+    classe: parseFilter(filters.anoCurricular),
+    searchTerm: filters.searchTerm,
+  });
 
-  const handleSelecionarHorarioOrigem = (id: number) => {
-    if (originScheduleId) {
-      if (originScheduleId == id) {
-        toast.error(
-          "Não é permitido selecionar o mesmo horário de origem e destino."
-        );
-        return;
-      }
-    }
-    setHorarioOrigemId(id);
-    onChangeSchedule(id);
-  };
-  // === Consulta API ===
-  const canLoadTurmas =
-    !!filters.curso &&
+  const students = data?.data || [];
+
+  const canLoad =
+    !!filters.anoLetivo &&
     !!filters.semestre &&
-    !!filters.anoCurricular &&
-    !!filters.unidadeCurricular &&
-    !!periodo;
-  !!filters.anoLetivo;
-  const { data: turmasResponse, isLoading: loadingTurmas } =
-    useQueryRegistrationBySchedule(
-      {
-        anoLectivo: Number(filters.anoLetivo),
-        semestre: Number(filters.semestre),
-        periodo: Number(periodo),
-        curso: Number(filters.curso),
-        anoCurricular: Number(filters.anoCurricular),
-        unidadeCurricular: Number(filters.unidadeCurricular),
-      },
-      { enabled: canLoadTurmas }
+    !!filters.curso &&
+    !!filters.anoCurricular;
+  const allSelected =
+    students.length > 0 &&
+    students.every((s) =>
+      selectedGradeAlunoIds.includes(s.codigo_grade_aluno)
     );
 
-  const tableData: RegistrationScheduleItem[] = turmasResponse?.data || [];
+  const someSelected =
+    students.some((s) =>
+      selectedGradeAlunoIds.includes(s.codigo_grade_aluno)
+    );
+
+  useEffect(() => {
+    if (!selectAllRef.current) return;
+
+    selectAllRef.current.indeterminate =
+      someSelected && !allSelected;
+  }, [someSelected, allSelected]);
+
+  useEffect(() => {
+    onChangeGradeAluno([]);
+  }, [filters.anoLetivo, filters.semestre, filters.curso, filters.anoCurricular]);
+
+
+  const toggle = (id: number) => {
+    const exists = selectedGradeAlunoIds.includes(id);
+
+    const updated = exists
+      ? selectedGradeAlunoIds.filter((x) => x !== id)
+      : [...selectedGradeAlunoIds, id];
+
+    onChangeGradeAluno(updated);
+  };
+
+  const isSelected = (id: number) =>
+    selectedGradeAlunoIds.includes(id);
+
+
+  const toggleAll = () => {
+    const allIds = students.map((s) => s.codigo_grade_aluno);
+
+    if (allSelected) {
+      const filtered = selectedGradeAlunoIds.filter(
+        (id) => !allIds.includes(id)
+      );
+      onChangeGradeAluno(filtered);
+    } else {
+      const merged = Array.from(
+        new Set([...selectedGradeAlunoIds, ...allIds])
+      );
+      onChangeGradeAluno(merged);
+    }
+  };
+
+
+  const handleResetFilters = () => {
+    setFilters((prev) => ({
+      ...prev,
+      semestre: "",
+      curso: "",
+      anoCurricular: "",
+      searchTerm: "",
+    }));
+    onChangeCourse("")
+  };
+
   return (
-    <>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-            <Users className="h-5 w-5" /> {title}
-          </CardTitle>
-        
+    <div className="p-4 space-y-6">
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          {title}
+        </CardTitle>
+
+        <Badge variant="secondary">
+          {selectedGradeAlunoIds.length} selecionado(s)
+        </Badge>
+      </div>
+
+      {/* FILTROS */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <AcademicYearSelect
+            enableDefaultActiveYear
+            onlyActive
+            value={filters.anoLetivo}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, anoLetivo: v })
+            }
+          />
+
+          <SemestreSelect
+            value={filters.semestre}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, semestre: v })
+            }
+          />
+
+          <CourseSelect
+            value={filters.curso}
+            onChangeValue={(v) => {
+              onChangeCourse(v)
+              setFilters({
+                ...filters,
+                curso: v,
+                anoCurricular: "",
+              })
+            }
+
+            }
+          />
+
+          <AnoCurricularSelect
+            value={filters.anoCurricular}
+            disabled={!filters.curso}
+            curso={filters.curso}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, anoCurricular: v })
+            }
+          />
+
+          <div className="col-span-1 md:col-span-2 space-y-1">
+            <Label>Pesquisar</Label>
+            <Input
+              placeholder="Pesquisar aluno ou disciplina..."
+              value={filters.searchTerm}
+              onChange={(e) =>
+                setFilters({
+                  ...filters,
+                  searchTerm: e.target.value,
+                })
+              }
+            />
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {loadingTurmas ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">Carregando horários...</p>
-          </div>
-        ) : tableData.length === 0 ? (
-          <>
-            <div className="text-center py-16 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p className="text-lg">
-                {canLoadTurmas
-                  ? "Nenhum horário disponível para os filtros selecionados."
-                  : "Selecione todos os filtros para visualizar os horários disponíveis."}
-              </p>
-            </div>
-          </>
-        ) : (
-          <div className="max-h-[320px] overflow-y-auto rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead>Curso</TableHead>
-                  <TableHead>Capacidade</TableHead>
-                  <TableHead>Estudantes</TableHead>
-                  <TableHead>Ações </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tableData.map((horario) => (
-                  <TableRow
-                    key={horario.codigo}
-                    className={`cursor-pointer transition-colors ${
-                      horarioOrigemId === horario.codigo ? "bg-primary/10" : ""
-                    } ${
-                      originScheduleId === horario.codigo
-                        ? "line-through opacity-50 cursor-not-allowed"
-                        : ""
+
+        <div className="flex justify-end gap-2">
+          <Button variant={allSelected ? "default" : "ghost"} size="icon" aria-label={allSelected ? "Desmarcar todos" : "Selecionar todos"} onClick={toggleAll}  >
+            {allSelected ? (
+              <CheckSquare className="h-4 w-4" />
+            ) : (
+              <Square className="h-4 w-4" />
+            )}
+
+          </Button>
+          <Button
+            className="bg-red-500 hover:bg-red-600"
+            onClick={handleResetFilters}
+          >
+            Limpar Filtros
+          </Button>
+        </div>
+      </div>
+
+      {/* LISTA */}
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <Loader2 className="animate-spin" />
+        </div>
+      ) : students.length === 0 ? (
+        <div className="text-center py-10 text-muted-foreground">
+          <BookOpen className="mx-auto mb-3 opacity-30" />
+          {canLoad
+            ? "Nenhum aluno encontrado"
+            : "Selecione os filtros"}
+        </div>
+      ) : (
+        <div className="max-h-[320px] overflow-auto border rounded-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {/* HEADER CHECKBOX (GMAIL STYLE) */}
+                <TableHead className="w-12">
+                  <Button variant={allSelected ? "default" : "ghost"} size="icon" aria-label={allSelected ? "Desmarcar todos" : "Selecionar todos"} onClick={toggleAll}  >
+                    {allSelected ? (
+                      <CheckSquare className="h-4 w-4" />
+                    ) : (
+                      <Square className="h-4 w-4" />
+                    )}
+
+                  </Button>
+
+                </TableHead>
+
+                <TableHead>Aluno</TableHead>
+                <TableHead>Disciplina</TableHead>
+                <TableHead>Curso</TableHead>
+                <TableHead>Classe</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {students.map((s) => (
+                <TableRow
+                  key={s.codigo_grade_aluno}
+                  className={`cursor-pointer transition-colors ${isSelected(s.codigo_grade_aluno)
+                    ? "bg-primary/10"
+                    : ""
                     }`}
-                    onClick={() =>
-                      handleSelecionarHorarioOrigem(horario.codigo)
-                    }
-                  >
-                    <TableCell>
-                      <input
-                        type="radio"
-                        checked={horarioOrigemId === horario.codigo}
-                        onChange={() =>
-                          handleSelecionarHorarioOrigem(horario.codigo)
-                        }
-                        className="h-4 w-4"
-                      />
-                    </TableCell>
-                    <TableCell>{horario.curso}</TableCell>
-                    <TableCell>{horario.capacidade}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{horario.total_alunos}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openDetails(horario.codigo)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" /> Ver Horário
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </CardContent>
-      <ScheduleDetailsModal
-        horarioId={selectedTurmaId}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedTurmaId(null);
-        }}
-      />
-    </>
+                  onClick={() => toggle(s.codigo_grade_aluno)}
+                >
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Button variant={isSelected(s.codigo_grade_aluno) ? "default" : "ghost"} size="icon" aria-label={isSelected(s.codigo_grade_aluno) ? "Desmarcar" : "Selecionar"} onClick={() => toggle(s.codigo_grade_aluno)}  >
+                      {isSelected(s.codigo_grade_aluno) ? (
+                        <CheckSquare className="h-4 w-4" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+
+                    </Button>
+
+
+                  </TableCell>
+
+                  <TableCell>{s.nome}</TableCell>
+                  <TableCell>{s.disciplina}</TableCell>
+                  <TableCell>{s.curso}</TableCell>
+                  <TableCell>{s.classe}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
   );
 };

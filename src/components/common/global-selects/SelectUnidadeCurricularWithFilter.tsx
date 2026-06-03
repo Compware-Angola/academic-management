@@ -1,7 +1,7 @@
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { FormCommandSelect } from "../FormCommandSelect";
 
-export function SelectUnidadeCurricular({
+export function SelectUnidadeCurricularWithFilter({
   value,
   onChangeValue,
  filter,
@@ -14,9 +14,9 @@ export function SelectUnidadeCurricular({
   isLoading?: boolean;
   onChangeValue: (value: string) => void;
   filter?: {
-    curso: string;
-    semestre: string;
-    classe: string;
+    curso?: string;
+    semestre?: string;
+    classe?: string;
   };
   label?: string;
   labelMode?: "inside" | "outside";
