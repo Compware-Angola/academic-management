@@ -53,3 +53,27 @@ export async function getListPagamentosMensaisService(
 
   return data;
 }
+
+
+export type RecalculatePaymentsResponse = {
+  success: boolean;
+  totais: {
+    totalpreco: number;
+    desconto: number;
+    totalmulta: number;
+    valorapagar: number;
+    valorentregue: number;
+  };
+  message: string;
+};
+export async function recalculatePaymentsService(
+  codFactura: number,
+): Promise<RecalculatePaymentsResponse> {
+  const { data } = await axiosNestFinance.patch(
+    `financial/monthly-fees/recalculate-payments/${codFactura}`,
+  );
+
+  return data;
+}
+
+

@@ -250,6 +250,9 @@ export enum PermissionType {
   FORMA_PAGAMENTO = "FORMA_PAGAMENTO",
   VALIDAR_DOCUMENTO = "VALIDAR_DOCUMENTO",
   MUDAR_TURNO = "MUDAR_TURNO",
+
+  ANULAR_PAGAMENTO = "ANULAR_PAGAMENTO",
+  ANULAR_MULTA = "ANULAR_MULTA",
 }
 
 export const PermissionTypeDetails = {
@@ -1158,6 +1161,14 @@ export const PermissionTypeDetails = {
   GERAR_MENSALIDADES: {
     designacao: "Gerar mensalidades",
     sigla: "g_mensalidades",
+  },
+  ANULAR_PAGAMENTO: {
+    designacao: "Anular Pagamento",
+    sigla: "mg_a_pag",
+  },
+  ANULAR_MULTA: {
+    designacao: "Anular Multa",
+    sigla: "mg_a_mult",
   },
 } as const;
 

@@ -10,12 +10,13 @@ import {
   Info,
   Loader2,
   Receipt,
+  RefreshCw,
   Tag,
   Wallet,
 } from "lucide-react";
 
-import { Separator } from "@radix-ui/react-separator"; // FIX: estava a importar de @radix-ui/react-select
-import { Badge } from "@/components/ui/badge"; // FIX: Badge não existe em lucide-react
+import { Separator } from "@radix-ui/react-separator";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useMemo, useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
@@ -32,6 +33,7 @@ import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
 import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
+import { useMutationRecalculatePayments } from "@/hooks/financas/pagamentos-mensais/use-mutation-recalculate";
 
 type SelectedPayment = {
   mesTempId: number;
@@ -80,6 +82,14 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     Map<number, SelectedPayment>
   >(new Map());
 
+  const { mutate: recalculatePayments, isPending: isPendingRecalculatePayments } = useMutationRecalculatePayments();
+
+
+  const handleRecalculate = (invoiceId: number) => {
+    recalculatePayments(invoiceId, {
+
+    });
+  };
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
       (total, payment) => total + (payment.valorAPagar ?? 0),
@@ -330,6 +340,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           desconto: payment.desconto ?? 0,
                         })
                       }
+
                       // FIX: title só quando há motivo real, sem passar null
                       title={
                         payment.id_item !== 0
@@ -339,6 +350,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             : undefined
                       }
                     />
+
                   </div>
                   <div>
                     <p className="font-medium">{payment.month}</p>
@@ -349,17 +361,43 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="text-right space-y-2">
+
+                  <div className="text-right">
                     <p className="font-bold">
                       {formatNumber(Number(payment.valorAPagar))}
                     </p>
-                    {getStatusBadge(payment.status)}
+
+                    <div className="flex items-center justify-end gap-2 mt-2">
+                      {getStatusBadge(payment.status)}
+                      {payment.id_item !== 0 && payment.status == 0 && payment.codigo_factura && (
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-warning border-warning/40 hover:bg-warning/10 hover:text-warning"
+                            onClick={() =>
+                              handleRecalculate(payment.codigo_factura)
+                            }
+                          >
+                            {isPendingRecalculatePayments ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <RefreshCw className="h-3.5 w-3.5" />
+                            )}
+                            Recalcular
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+
                   {expandedPayment === payment.id ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
                   )}
+
+
                 </div>
               </div>
 
@@ -447,8 +485,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             {isNaN(new Date(payment.dueDate).getTime())
                               ? "—"
                               : new Date(payment.dueDate).toLocaleDateString(
-                                  "pt-AO",
-                                )}
+                                "pt-AO",
+                              )}
                           </p>
                         </div>
                       </div>
@@ -495,8 +533,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           {isNaN(new Date(payment.data_operacao).getTime())
                             ? "—"
                             : new Date(
-                                payment.data_operacao,
-                              ).toLocaleDateString("pt-AO")}
+                              payment.data_operacao,
+                            ).toLocaleDateString("pt-AO")}
                         </p>
                       </div>
                     </div>
