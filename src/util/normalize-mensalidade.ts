@@ -24,6 +24,7 @@ interface NormalizedMensalidade {
   bolseiro: number;
   mesId: number;
   id_item: number | undefined;
+  codigo_factura: number;
 }
 
 const normalizeMensalidade = (
@@ -68,7 +69,8 @@ const normalizeMensalidade = (
         bolseiro: 1,
         mesId: monthly.mes_temp_id,
         id_item: monthly.id_item,
-        dataPagamento: status === 1 ? (monthly.data_pagamento ?? null) : null
+        dataPagamento: status === 1 ? (monthly.data_pagamento ?? null) : null,
+        codigo_factura: monthly.codigo_factura,
       };
     })
     .sort((a, b) => a.id - b.id);

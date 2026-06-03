@@ -70,8 +70,10 @@ export async function recalculatePaymentsService(
   codFactura: number,
 ): Promise<RecalculatePaymentsResponse> {
   const { data } = await axiosNestFinance.patch(
-    `/payment/monthly/recalculate-payments/${codFactura}`,
+    `financial/monthly-fees/recalculate-payments/${codFactura}`,
   );
 
   return data;
 }
+
+

@@ -10,6 +10,7 @@ import {
   Info,
   Loader2,
   Receipt,
+  RefreshCw,
   Tag,
   Wallet,
 } from "lucide-react";
@@ -80,21 +81,13 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   const [selectedPayments, setSelectedPayments] = useState<
     Map<number, SelectedPayment>
   >(new Map());
-  const [recalculatingId, setRecalculatingId] = useState<number | null>(null);
+
   const { mutate: recalculatePayments, isPending: isPendingRecalculatePayments } = useMutationRecalculatePayments();
 
 
-  const handleRecalculate = (invoiceId: number, paymentId: number) => {
-    setRecalculatingId(paymentId);
+  const handleRecalculate = (invoiceId: number) => {
     recalculatePayments(invoiceId, {
-      onSuccess: () => {
-        toast.success("Mensalidade recalculada com sucesso!");
-        setRecalculatingId(null);
-      },
-      onError: () => {
-        toast.error("Erro ao recalcular. Tente novamente.");
-        setRecalculatingId(null);
-      },
+
     });
   };
   const totalSelecionado = useMemo(() => {
@@ -347,6 +340,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           desconto: payment.desconto ?? 0,
                         })
                       }
+
                       // FIX: title só quando há motivo real, sem passar null
                       title={
                         payment.id_item !== 0
@@ -356,6 +350,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             : undefined
                       }
                     />
+
                   </div>
                   <div>
                     <p className="font-medium">{payment.month}</p>
@@ -366,17 +361,43 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="text-right space-y-2">
+
+                  <div className="text-right">
                     <p className="font-bold">
                       {formatNumber(Number(payment.valorAPagar))}
                     </p>
-                    {getStatusBadge(payment.status)}
+
+                    <div className="flex items-center justify-end gap-2 mt-2">
+                      {getStatusBadge(payment.status)}
+                      {payment.id_item !== 0 && payment.status == 0 && payment.codigo_factura && (
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-warning border-warning/40 hover:bg-warning/10 hover:text-warning"
+                            onClick={() =>
+                              handleRecalculate(payment.codigo_factura)
+                            }
+                          >
+                            {isPendingRecalculatePayments ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <RefreshCw className="h-3.5 w-3.5" />
+                            )}
+                            Recalcular
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+
                   {expandedPayment === payment.id ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
                   )}
+
+
                 </div>
               </div>
 
