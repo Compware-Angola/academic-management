@@ -134,7 +134,7 @@ export function PerfilSection({
         orientation="vertical"
         className="flex flex-row gap-6"
       >
-        <TabsList className="flex justify-start flex-col h-auto w-52">
+        <TabsList className="flex justify-start flex-col h-fit w-52">
           {TABS_CONFIG.map((tab) => {
             const Icon = tab.icon;
             if (!tab.permission) return null;
