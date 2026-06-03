@@ -66,6 +66,7 @@ export type FilterSolicitacoesParams = {
   search?: string;
   tipo_suporte?: number;
   status?: string;
+  codigo_matricula?: number;
 };
 
 // Payload para responder uma solicitação

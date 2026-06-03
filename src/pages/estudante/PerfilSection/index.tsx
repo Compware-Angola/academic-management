@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
-import { Book, Clock, Contact, GraduationCap, Key } from "lucide-react";
+import { Book, Clock, Contact, GraduationCap, Key, Mail } from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
@@ -15,6 +15,7 @@ import { AtivarConfirmacao } from "./ativar-confirmacao";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { ChangeShiftStudentPage } from "./change-shift";
+import { StudentMessages } from "./StudentMessages";
 
 type PerfilSectionProps = {
   value?: string;
@@ -117,6 +118,13 @@ export function PerfilSection({
       icon: Clock,
       permission: hasPermission(PermissionTypeDetails.MUDAR_TURNO.sigla),
       component: ChangeShiftStudentPage,
+    },
+    {
+      value: "student-messages",
+      label: "Mensagens",
+      icon: Mail,
+      permission: hasPermission(PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla),
+      component: StudentMessages,
     }
   ] as const;
   return (
@@ -144,7 +152,7 @@ export function PerfilSection({
           })}
         </TabsList>
 
-        <Card className="flex-1 p-6">
+        <Card className="flex-1 p-6 flex-1 min-w-0 overflow-hidden">
           {TABS_CONFIG.map((tab) => {
             const Component = tab.component;
             if (!tab.permission || !Component) return null;

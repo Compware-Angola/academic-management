@@ -20,6 +20,7 @@ export const useSolicitacoesSuporte = (params: FilterSolicitacoesParams = {}) =>
     limit = 25, 
     search = '', 
     tipo_suporte, 
+    codigo_matricula,
     status 
   } = params;
 
@@ -30,6 +31,7 @@ export const useSolicitacoesSuporte = (params: FilterSolicitacoesParams = {}) =>
     search.trim().toLowerCase(),
     tipo_suporte ?? null,
     status ?? null,
+    codigo_matricula ?? null,
   ].filter(v => v !== undefined && v !== null); // limpa valores indefinidos
 
   return useQuery<PaginatedSolicitacoes, Error>({
