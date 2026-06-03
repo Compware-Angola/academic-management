@@ -14,8 +14,8 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { Separator } from "@radix-ui/react-separator"; // FIX: estava a importar de @radix-ui/react-select
-import { Badge } from "@/components/ui/badge"; // FIX: Badge não existe em lucide-react
+import { Separator } from "@radix-ui/react-separator";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useMemo, useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
@@ -32,6 +32,7 @@ import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
 import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
+import { useMutationRecalculatePayments } from "@/hooks/financas/pagamentos-mensais/use-mutation-recalculate";
 
 type SelectedPayment = {
   mesTempId: number;
@@ -79,7 +80,23 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   const [selectedPayments, setSelectedPayments] = useState<
     Map<number, SelectedPayment>
   >(new Map());
+  const [recalculatingId, setRecalculatingId] = useState<number | null>(null);
+  const { mutate: recalculatePayments, isPending: isPendingRecalculatePayments } = useMutationRecalculatePayments();
 
+
+  const handleRecalculate = (invoiceId: number, paymentId: number) => {
+    setRecalculatingId(paymentId);
+    recalculatePayments(invoiceId, {
+      onSuccess: () => {
+        toast.success("Mensalidade recalculada com sucesso!");
+        setRecalculatingId(null);
+      },
+      onError: () => {
+        toast.error("Erro ao recalcular. Tente novamente.");
+        setRecalculatingId(null);
+      },
+    });
+  };
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
       (total, payment) => total + (payment.valorAPagar ?? 0),
@@ -447,8 +464,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             {isNaN(new Date(payment.dueDate).getTime())
                               ? "—"
                               : new Date(payment.dueDate).toLocaleDateString(
-                                  "pt-AO",
-                                )}
+                                "pt-AO",
+                              )}
                           </p>
                         </div>
                       </div>
@@ -495,8 +512,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           {isNaN(new Date(payment.data_operacao).getTime())
                             ? "—"
                             : new Date(
-                                payment.data_operacao,
-                              ).toLocaleDateString("pt-AO")}
+                              payment.data_operacao,
+                            ).toLocaleDateString("pt-AO")}
                         </p>
                       </div>
                     </div>
