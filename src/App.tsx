@@ -143,12 +143,9 @@ import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatricula
 import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
-import { PerfilEstudanteLegado } from "./pages/estudante/perfilEstudante.legado";
 import PerfilEstudante from "./pages/estudante/PerfilEstudante";
-
 import EstadoMatriculaPorHorario from "./pages/registrations/EstadoDoEstudanteMatriculadoPorHorario";
 import ListarEstudantesPorEstadoMatricula from "./pages/registrations/ListarEstudantesPorEstadoMatricula";
-import IsentarColisao from "./pages/registrations/IsentarColisao";
 import ListagemColisoesIsentas from "./pages/registrations";
 
 import Admitidos from "./pages/access_exam/Admitidos";
