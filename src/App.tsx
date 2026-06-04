@@ -1026,7 +1026,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route
+                  <Route
                     path="/horarios/parametros"
                     element={
                       <ProtectedRoute
@@ -1037,7 +1037,7 @@ const App = () => {
                         <HorariosParametros />
                       </ProtectedRoute>
                     }
-                  /> */}
+                  />
 
                   <Route
                     path="/docente/calendario"
