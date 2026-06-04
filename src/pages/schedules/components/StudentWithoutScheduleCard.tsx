@@ -7,6 +7,8 @@ import {
   Check,
   CheckSquare,
   Square,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import {
   Table,
@@ -29,17 +31,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SelectUnidadeCurricularWithFilter } from "@/components/common/global-selects/SelectUnidadeCurricularWithFilter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
   title: string;
   selectedGradeAlunoIds: number[];
   onChangeGradeAluno(ids: number[]): void;
   onChangeCourse(course: string): void;
+  onFilterChange?: (filter: {
+    anoLetivo: string;
+    semestre: string;
+    curso: string;
+    anoCurricular: string;
+    searchTerm: string;
+    unidadeCurricular: string;
+  }) => void;
 }
 
 export const StudentWithoutScheduleCard = ({
   title,
   selectedGradeAlunoIds,
+  onFilterChange,
   onChangeCourse,
   onChangeGradeAluno,
 }: Props) => {
@@ -53,16 +71,21 @@ export const StudentWithoutScheduleCard = ({
   });
 
   const selectAllRef = useRef<HTMLInputElement>(null);
-
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(25);
   const { data, isLoading } = useQueryStudentsWithoutSchedule({
     anoLectivo: parseFilter(filters.anoLetivo),
     semestre: parseFilter(filters.semestre),
     curso: parseFilter(filters.curso),
     classe: parseFilter(filters.anoCurricular),
     searchTerm: filters.searchTerm,
+    page: page,
+    limit: limit,
   });
 
   const students = data?.data || [];
+  const total = data?.total || 0;
+  const totalPages = Math.ceil(total / limit);
 
   const canLoad =
     !!filters.anoLetivo &&
@@ -85,12 +108,9 @@ export const StudentWithoutScheduleCard = ({
 
   useEffect(() => {
     onChangeGradeAluno([]);
-  }, [
-    filters.anoLetivo,
-    filters.semestre,
-    filters.curso,
-    filters.anoCurricular,
-  ]);
+    onFilterChange?.(filters);
+    setPage(1);
+  }, [filters]);
 
   const toggle = (id: number) => {
     const exists = selectedGradeAlunoIds.includes(id);
@@ -177,12 +197,11 @@ export const StudentWithoutScheduleCard = ({
             onChangeValue={(v) => setFilters({ ...filters, anoCurricular: v })}
           />
           <SelectUnidadeCurricularWithFilter
-            onChangeValue={(v) =>
-              setFilters({ ...filters, unidadeCurricular: v })
-            }
+            onChangeValue={(v) => {}}
             onSelectItem={(it) =>
               setFilters({
                 ...filters,
+                unidadeCurricular: it.pk.toString(),
                 searchTerm: it.descricao,
               })
             }
@@ -298,6 +317,70 @@ export const StudentWithoutScheduleCard = ({
               ))}
             </TableBody>
           </Table>
+          <div className="flex items-center justify-between px-4 py-3 border-t">
+            {/* Info */}
+            <span className="text-xs text-muted-foreground">
+              {total === 0
+                ? "Nenhum registo"
+                : `${(page - 1) * limit + 1}–${Math.min(page * limit, total)} de ${total}`}
+            </span>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="destructive"
+                size="icon"
+                className="rounded-full h-9 w-9"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex flex-col items-center leading-tight">
+                <span className="text-sm font-medium text-foreground">
+                  {page} de {totalPages}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  páginas
+                </span>
+              </div>
+
+              <Button
+                variant="destructive"
+                size="icon"
+                className="rounded-full h-9 w-9"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                aria-label="Próxima página"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Limite por página */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Por página</span>
+              <Select
+                value={String(limit)}
+                onValueChange={(v) => {
+                  setLimit(Number(v));
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-7 w-16 text-xs rounded-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 25, 50, 100].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       )}
     </div>

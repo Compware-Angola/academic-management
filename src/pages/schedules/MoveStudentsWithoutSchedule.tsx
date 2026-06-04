@@ -19,6 +19,13 @@ export function MoveStudentsWithoutSchedule() {
   );
   const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
   const [course, setCourse] = useState<string>("");
+  const [filters, setFilters] = useState({
+    anoLetivo: "",
+    semestre: "",
+    curso: "",
+    anoCurricular: "",
+    unidadeCurricular: "",
+  });
 
   const handeleChangeCourse = (course: string) => {
     setCourse(course);
@@ -36,7 +43,7 @@ export function MoveStudentsWithoutSchedule() {
       toScheduleId: selectedSchedule,
       studentsCurriculumIds: selectedGradeAlunoIds,
     });
-    handleResetShedule();
+    //handleResetShedule();
     setSelectedGradeAlunoIds([]);
   };
   const handleResetShedule = () => {
@@ -53,11 +60,13 @@ export function MoveStudentsWithoutSchedule() {
             selectedGradeAlunoIds={selectedGradeAlunoIds}
             onChangeGradeAluno={setSelectedGradeAlunoIds}
             onChangeCourse={handeleChangeCourse}
+            onFilterChange={(v) => setFilters(v)}
           />
         </Card>
         <Card>
           <ScheduleMoveTableWithFilters
             originScheduleId={selectedSchedule}
+            filters={filters}
             title="Horário de Destino"
             onChangeSchedule={(scheduleId) => {
               setSelectedSchedule(scheduleId);
