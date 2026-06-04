@@ -326,7 +326,7 @@ export default function AddMarkingAssessment() {
                 </SelectTrigger>
 
                 <SelectContent>
-                  {unidadesCurriculares.map((uc) => (
+                  {unidadesCurriculares?.map((uc) => (
                     <SelectItem key={uc.pk} value={uc.pk.toString()}>
                       {uc.descricao}
                     </SelectItem>

@@ -25,8 +25,8 @@ import TimeLoader from "@/assets/timeloader.json";
 import { useState } from "react";
 import { AnularPagamentoModal } from "./AnularPagamentoModal";
 import { AnularMultaModal } from "./AnularMultaModal";
-import { HasPermission } from "@/components/common/HasPermission";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { HasPermission } from "@/components/common/HasPermission";
 
 type PagamentosTableProps = {
   payments: PaymentItem[];
