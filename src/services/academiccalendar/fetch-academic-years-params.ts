@@ -1,6 +1,6 @@
 // src/services/academiccalendar/fetch-academic-years-params.ts
 
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type AcademicYear = {
   codigo: number;
@@ -18,8 +18,8 @@ export type AcademicYearParamsResponse = {
 
 // MUDANÇA AQUI: devolve o response completo, não o array
 export async function fetchAcademicYearParams(codigo: number = 23): Promise<AcademicYearParamsResponse> {
-  const { data } = await axiosApexGa.get<AcademicYearParamsResponse>(
-    `/ga/teaching-parameters/academic-year/${codigo}`
+  const { data } = await axiosNestGa.get<AcademicYearParamsResponse>(
+    `/academic-calendar/academic-year/${codigo}`
   );
   return data; // ← agora devolves o objeto inteiro { ano_lectivo: [...] }
 }
