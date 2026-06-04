@@ -140,6 +140,13 @@ const Login = () => {
             </div>
           </div>
 
+          { /* barra branca em cima do logo */}
+          <div className="flex justify-center">
+            <div className="">
+              <img src={logo} alt="Metodista de Angola" className="h-20 w-auto" />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tight text-foreground">Entrar na conta</h2>
             <p className="text-sm text-muted-foreground">

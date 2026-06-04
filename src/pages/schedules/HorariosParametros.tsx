@@ -762,6 +762,7 @@ export default function HorariosParametros() {
                 <div className="space-y-2">
                   <Label>Sigla</Label>
                   <Input
+                    disabled
                     value={editing.sigla}
                     onChange={(e) => setEditing({ ...editing, sigla: e.target.value })}
                   />
