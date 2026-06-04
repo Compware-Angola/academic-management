@@ -31,28 +31,33 @@ import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurri
 import { SelectUnidadeCurricularWithFilter } from "@/components/common/global-selects/SelectUnidadeCurricularWithFilter";
 import { Label } from "@/components/ui/label";
 
+interface IFilter {
+  anoLetivo: string;
+  semestre: string;
+  curso: string;
+  anoCurricular: string;
+
+  unidadeCurricular: string;
+}
 interface ScheduleMoveTableProps {
   onChangeSchedule(scheduleId: number): void;
   originScheduleId?: number;
   title: string;
+  filters: IFilter;
   course: string;
-  onResetSchedule: () => void
+  onResetSchedule: () => void;
 }
+
 export const ScheduleMoveTableWithFilters = ({
   onChangeSchedule,
   title,
   originScheduleId,
   course,
-  onResetSchedule
+  filters,
+  onResetSchedule,
 }: ScheduleMoveTableProps) => {
   const { data: periodos } = useQueryPeriod();
-  const [filters, setFilters] = useState({
-    anoLetivo: "",
-    semestre: "",
-    anoCurricular: "",
-    unidadeCurricular: "",
-  });
-  console.log({ filters }, "curso");
+
   const [horarioOrigemId, setHorarioOrigemId] = useState<number | null>(null);
   [] > [];
   const [periodo, setPeriodo] = useState<string>("");
@@ -68,7 +73,7 @@ export const ScheduleMoveTableWithFilters = ({
     if (originScheduleId) {
       if (originScheduleId == id) {
         toast.error(
-          "Não é permitido selecionar o mesmo horário de origem e destino."
+          "Não é permitido selecionar o mesmo horário de origem e destino.",
         );
         return;
       }
@@ -80,9 +85,9 @@ export const ScheduleMoveTableWithFilters = ({
   useEffect(() => {
     onResetSchedule();
   }, [filters, periodo, course]);
+  console.log("@", filters);
 
   const canLoadTurmas =
-
     !!filters.semestre &&
     !!filters.anoCurricular &&
     !!filters.unidadeCurricular &&
@@ -98,20 +103,11 @@ export const ScheduleMoveTableWithFilters = ({
         anoCurricular: Number(filters.anoCurricular),
         unidadeCurricular: Number(filters.unidadeCurricular),
       },
-      { enabled: canLoadTurmas }
+      { enabled: canLoadTurmas },
     );
 
   const tableData: RegistrationScheduleItem[] = turmasResponse?.data || [];
-  const handleResetFilters = () => {
-    setFilters((prev) => ({
-      ...prev,
-      semestre: "",
-      curso: "",
-      anoCurricular: "",
-      unidadeCurricular: "",
 
-    }));
-  };
   return (
     <div className="p-4 space-y-6">
       <div className="flex justify-between items-center">
@@ -125,44 +121,39 @@ export const ScheduleMoveTableWithFilters = ({
           <AcademicYearSelect
             enableDefaultActiveYear
             onlyActive
+            disabled
             value={filters.anoLetivo}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, anoLetivo: v })
-            }
+            onChangeValue={() => {}}
           />
 
           <SemestreSelect
             value={filters.semestre}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, semestre: v })
-            }
+            disabled
+            onChangeValue={() => {}}
           />
 
           <CourseSelect
             disabled
-            value={course}
-            onChangeValue={(v) =>
-              setFilters({
-                ...filters,
-
-              })
-            }
+            value={filters.curso}
+            onChangeValue={() => {}}
           />
 
           <AnoCurricularSelect
             value={filters.anoCurricular}
             disabled={!!course === false}
             curso={course}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, anoCurricular: v })
-            }
+            onChangeValue={() => {}}
           />
 
           <SelectUnidadeCurricularWithFilter
-            onChangeValue={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+            onChangeValue={() => {}}
             value={filters.unidadeCurricular}
-            filter={{ classe: filters.anoCurricular, curso: course, semestre: filters.semestre }}
-            disabled={!!course === false || !filters.semestre || !filters.anoCurricular}
+            filter={{
+              classe: filters.anoCurricular,
+              curso: filters.curso,
+              semestre: filters.semestre,
+            }}
+            disabled
           />
           <div className="space-y-2">
             <Label>Período</Label>
@@ -179,20 +170,8 @@ export const ScheduleMoveTableWithFilters = ({
               </SelectContent>
             </Select>
           </div>
-
         </div>
-        <div className="flex justify-end gap-2">
-          <Button
-            className="bg-red-500 hover:bg-red-600"
-            onClick={handleResetFilters}
-          >
-            Limpar Filtros
-          </Button>
-        </div>
-
-
       </div>
-
 
       {loadingTurmas ? (
         <div className="flex flex-col items-center justify-center py-16">
@@ -227,14 +206,14 @@ export const ScheduleMoveTableWithFilters = ({
               {tableData.map((horario) => (
                 <TableRow
                   key={horario.codigo}
-                  className={`cursor-pointer transition-colors ${horarioOrigemId === horario.codigo ? "bg-primary/10" : ""
-                    } ${originScheduleId === horario.codigo
+                  className={`cursor-pointer transition-colors ${
+                    horarioOrigemId === horario.codigo ? "bg-primary/10" : ""
+                  } ${
+                    originScheduleId === horario.codigo
                       ? "line-through opacity-50 cursor-not-allowed"
                       : ""
-                    }`}
-                  onClick={() =>
-                    handleSelecionarHorarioOrigem(horario.codigo)
-                  }
+                  }`}
+                  onClick={() => handleSelecionarHorarioOrigem(horario.codigo)}
                 >
                   <TableCell>
                     <input
@@ -276,6 +255,6 @@ export const ScheduleMoveTableWithFilters = ({
           setSelectedTurmaId(null);
         }}
       />
-    </div >
+    </div>
   );
 };
