@@ -29,7 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Search, Save, RotateCcw, Loader2 } from "lucide-react";
+import { Pencil, Search, Save, RotateCcw, Loader2, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryScheduleParams } from "@/hooks/horario/use-schedule-params";
 import { ScheduleParamItem } from "@/services/horario/schedule-params.service";
@@ -37,12 +37,30 @@ import { parseFilter } from "@/util/parse-filter";
 import { useUpdateScheduleParam } from "@/hooks/horario/update-params-schedule";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 
-// ─── Tipos dos args por sigla ────────────────────────────────────────────────
+// ─── Tipos dos args por sigla ─────────────────────────────────────────────────
 
-type ArgsBase = Record<string, unknown>;
+/** IPP: cada entrada corresponde a um período */
+type IppEntry = {
+  periodo: number;
+  hora_inicio: string;
+  qtd_de_tempo: number;
+};
 
-/** epndh: Curso, Período, Grade + campo livre */
-type ArgsEpndh = ArgsBase & {
+/** DTL: duração do tempo lectivo por curso */
+type DtlEntry = {
+  curso: number;
+  duracao: string;
+};
+
+/** IETL: intervalo entre tempos por curso */
+type IetlSeqEntry = { duracao: string };
+type IetlEntry = {
+  curso: number;
+  seq: IetlSeqEntry[];
+};
+
+/** epndh: flags de campos obrigatórios */
+type ArgsEpndh = {
   curso: boolean;
   periodo: boolean;
   grade: boolean;
@@ -50,75 +68,320 @@ type ArgsEpndh = ArgsBase & {
 };
 
 /** nbph: quantidade de backups */
-type ArgsNbph = ArgsBase & {
+type ArgsNbph = {
   quantidadeBackups: number;
 };
 
-/** dtl: hora no formato HH:mm */
-type ArgsDtl = ArgsBase & {
-  hora: string;
-};
-
-/** ipp: período selecionado (id) */
-type ArgsIpp = ArgsBase & {
-  periodoId: string;
-};
-
-/** ietl: duração no formato HH:mm */
-type ArgsIetl = ArgsBase & {
-  duracao: string;
-};
-
-type ArgsMap = {
-  epndh: ArgsEpndh;
-  nbph: ArgsNbph;
-  dtl: ArgsDtl;
-  ipp: ArgsIpp;
-  ietl: ArgsIetl;
-};
-
-type SiglaComArgs = keyof ArgsMap;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
+type SiglaComArgs = "epndh" | "nbph" | "dtl" | "ipp" | "ietl";
 const SIGLAS_COM_ARGS: SiglaComArgs[] = ["epndh", "nbph", "dtl", "ipp", "ietl"];
 
 function isSiglaComArgs(sigla: string): sigla is SiglaComArgs {
   return SIGLAS_COM_ARGS.includes(sigla as SiglaComArgs);
 }
 
-/** Parseia o campo `args` (string JSON ou objeto) de forma segura */
-function parseArgs(args: unknown): Record<string, unknown> {
-  if (!args) return {};
-  if (typeof args === "object") return args as Record<string, unknown>;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function parseArgs(args: unknown): unknown {
+  if (!args) return null;
+  if (typeof args === "object") return args;
   try {
     return JSON.parse(args as string);
   } catch {
-    return {};
+    return null;
   }
 }
 
-/** Retorna args padrão para cada sigla quando não há dados anteriores */
-function defaultArgs(sigla: SiglaComArgs): ArgsMap[SiglaComArgs] {
+/** Devolve args padrão para cada sigla */
+function defaultArgs(sigla: SiglaComArgs): unknown {
   switch (sigla) {
+    case "ipp":
+      return [{ periodo: 1, hora_inicio: "07:00", qtd_de_tempo: 6 }] satisfies IppEntry[];
+    case "dtl":
+      return [{ curso: 0, duracao: "01:30" }] satisfies DtlEntry[];
+    case "ietl":
+      return [{ curso: 0, seq: [{ duracao: "00:10" }] }] satisfies IetlEntry[];
     case "epndh":
       return { curso: false, periodo: false, grade: false, others: "" } satisfies ArgsEpndh;
     case "nbph":
       return { quantidadeBackups: 1 } satisfies ArgsNbph;
-    case "dtl":
-      return { hora: "00:00" } satisfies ArgsDtl;
-    case "ipp":
-      return { periodoId: "" } satisfies ArgsIpp;
-    case "ietl":
-      return { duracao: "00:00" } satisfies ArgsIetl;
   }
 }
 
-// ─── Períodos fictícios para o select de ipp ─────────────────────────────────
-// Substitua com os dados reais da sua API
+// ─── Componentes de args ──────────────────────────────────────────────────────
 
-// ─── Componentes de args por sigla ───────────────────────────────────────────
+// ── IPP ───────────────────────────────────────────────────────────────────────
+function ArgsIppForm({
+  args,
+  onChange,
+}: {
+  args: IppEntry[];
+  onChange: (next: IppEntry[]) => void;
+}) {
+  const update = (i: number, field: keyof IppEntry, value: unknown) => {
+    const next = args.map((entry, idx) =>
+      idx === i ? { ...entry, [field]: value } : entry
+    );
+    onChange(next);
+  };
 
+  const addRow = () =>
+    onChange([...args, { periodo: 0, hora_inicio: "07:00", qtd_de_tempo: 6 }]);
+
+  const removeRow = (i: number) =>
+    onChange(args.filter((_, idx) => idx !== i));
+
+  return (
+    <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          IPP — Início por Período
+        </p>
+        <Button type="button" variant="outline" size="sm" onClick={addRow}>
+          <Plus className="h-3 w-3 mr-1" /> Adicionar
+        </Button>
+      </div>
+
+      {args.map((entry, i) => (
+        <div key={i} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+          <div className="space-y-1">
+            <Label className="text-xs">Período</Label>
+            <Input
+              type="number"
+              min={0}
+              value={entry.periodo}
+              onChange={(e) => update(i, "periodo", Number(e.target.value))}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Hora início</Label>
+            <Input
+              type="time"
+              value={entry.hora_inicio}
+              onChange={(e) => update(i, "hora_inicio", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Qtd. tempos</Label>
+            <Input
+              type="number"
+              min={1}
+              value={entry.qtd_de_tempo}
+              onChange={(e) => update(i, "qtd_de_tempo", Number(e.target.value))}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:text-destructive"
+            onClick={() => removeRow(i)}
+            disabled={args.length === 1}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+
+      <p className="text-xs text-muted-foreground">
+        Período <strong>0</strong> = configuração especial para o sábado.
+      </p>
+    </div>
+  );
+}
+
+// ── DTL ───────────────────────────────────────────────────────────────────────
+function ArgsDtlForm({
+  args,
+  onChange,
+}: {
+  args: DtlEntry[];
+  onChange: (next: DtlEntry[]) => void;
+}) {
+  const update = (i: number, field: keyof DtlEntry, value: unknown) => {
+    onChange(args.map((e, idx) => (idx === i ? { ...e, [field]: value } : e)));
+  };
+
+  const addRow = () => onChange([...args, { curso: 0, duracao: "01:00" }]);
+  const removeRow = (i: number) => onChange(args.filter((_, idx) => idx !== i));
+
+  return (
+    <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          DTL — Duração do Tempo Lectivo
+        </p>
+        <Button type="button" variant="outline" size="sm" onClick={addRow}>
+          <Plus className="h-3 w-3 mr-1" /> Adicionar
+        </Button>
+      </div>
+
+      {args.map((entry, i) => (
+        <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
+          <div className="space-y-1">
+            <Label className="text-xs">Curso</Label>
+            <Input
+              type="number"
+              min={0}
+              value={entry.curso}
+              onChange={(e) => update(i, "curso", Number(e.target.value))}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">Duração (HH:mm)</Label>
+            <Input
+              type="time"
+              value={entry.duracao}
+              onChange={(e) => update(i, "duracao", e.target.value)}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="text-destructive hover:text-destructive"
+            onClick={() => removeRow(i)}
+            disabled={args.length === 1}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+
+      <p className="text-xs text-muted-foreground">
+        Curso <strong>0</strong> = configuração global (todos os cursos).
+      </p>
+    </div>
+  );
+}
+
+// ── IETL ──────────────────────────────────────────────────────────────────────
+function ArgsIetlForm({
+  args,
+  onChange,
+}: {
+  args: IetlEntry[];
+  onChange: (next: IetlEntry[]) => void;
+}) {
+  const updateCurso = (i: number, value: number) => {
+    onChange(args.map((e, idx) => (idx === i ? { ...e, curso: value } : e)));
+  };
+
+  const updateSeq = (i: number, si: number, value: string) => {
+    onChange(
+      args.map((e, idx) =>
+        idx === i
+          ? {
+            ...e,
+            seq: e.seq.map((s, sidx) =>
+              sidx === si ? { duracao: value } : s
+            ),
+          }
+          : e
+      )
+    );
+  };
+
+  const addSeq = (i: number) => {
+    onChange(
+      args.map((e, idx) =>
+        idx === i ? { ...e, seq: [...e.seq, { duracao: "00:10" }] } : e
+      )
+    );
+  };
+
+  const removeSeq = (i: number, si: number) => {
+    onChange(
+      args.map((e, idx) =>
+        idx === i
+          ? { ...e, seq: e.seq.filter((_, sidx) => sidx !== si) }
+          : e
+      )
+    );
+  };
+
+  const addRow = () =>
+    onChange([...args, { curso: 0, seq: [{ duracao: "00:10" }] }]);
+
+  const removeRow = (i: number) =>
+    onChange(args.filter((_, idx) => idx !== i));
+
+  return (
+    <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          IETL — Intervalo Entre Tempos
+        </p>
+        <Button type="button" variant="outline" size="sm" onClick={addRow}>
+          <Plus className="h-3 w-3 mr-1" /> Adicionar
+        </Button>
+      </div>
+
+      {args.map((entry, i) => (
+        <div key={i} className="space-y-2 rounded border p-2 bg-background">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs">Curso</Label>
+              <Input
+                type="number"
+                min={0}
+                value={entry.curso}
+                onChange={(e) => updateCurso(i, Number(e.target.value))}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:text-destructive mt-5"
+              onClick={() => removeRow(i)}
+              disabled={args.length === 1}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="space-y-2 pl-2 border-l">
+            <p className="text-xs text-muted-foreground">Sequência de intervalos</p>
+            {entry.seq.map((s, si) => (
+              <div key={si} className="flex items-center gap-2">
+                <Input
+                  type="time"
+                  value={s.duracao}
+                  onChange={(e) => updateSeq(i, si, e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => removeSeq(i, si)}
+                  disabled={entry.seq.length === 1}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addSeq(i)}
+            >
+              <Plus className="h-3 w-3 mr-1" /> Intervalo
+            </Button>
+          </div>
+        </div>
+      ))}
+
+      <p className="text-xs text-muted-foreground">
+        Curso <strong>0</strong> = configuração global.
+      </p>
+    </div>
+  );
+}
+
+// ── EPNDH ─────────────────────────────────────────────────────────────────────
 function ArgsEpndhForm({
   args,
   onChange,
@@ -129,19 +392,19 @@ function ArgsEpndhForm({
   return (
     <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        Configuração de Args
+        EPNDH — Configuração
       </p>
-
       {(["curso", "periodo", "grade"] as const).map((field) => (
         <div key={field} className="flex items-center justify-between">
-          <Label className="capitalize">{field === "periodo" ? "Período" : field.charAt(0).toUpperCase() + field.slice(1)}</Label>
+          <Label className="capitalize">
+            {field === "periodo" ? "Período" : field.charAt(0).toUpperCase() + field.slice(1)}
+          </Label>
           <Switch
             checked={args[field]}
             onCheckedChange={(v) => onChange({ ...args, [field]: v })}
           />
         </div>
       ))}
-
       <div className="space-y-1">
         <Label>Others</Label>
         <Input
@@ -154,6 +417,7 @@ function ArgsEpndhForm({
   );
 }
 
+// ── NBPH ──────────────────────────────────────────────────────────────────────
 function ArgsNbphForm({
   args,
   onChange,
@@ -164,7 +428,7 @@ function ArgsNbphForm({
   return (
     <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        Configuração de Args
+        NBPH — Backups
       </p>
       <div className="space-y-1">
         <Label>Quantidade de Backups</Label>
@@ -181,151 +445,64 @@ function ArgsNbphForm({
   );
 }
 
-function ArgsDtlForm({
-  args,
-  onChange,
-}: {
-  args: ArgsDtl;
-  onChange: (next: ArgsDtl) => void;
-}) {
-  return (
-    <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        Configuração de Args
-      </p>
-      <div className="space-y-1">
-        <Label>Hora (HH:mm)</Label>
-        <Input
-          type="time"
-          value={args.hora}
-          onChange={(e) => onChange({ ...args, hora: e.target.value })}
-        />
-      </div>
-    </div>
-  );
-}
-
-function ArgsIppForm({
-  args,
-  onChange,
-}: {
-  args: ArgsIpp;
-  onChange: (next: ArgsIpp) => void;
-}) {
-  const { data: periodos } = useQueryPeriod();
-  return (
-    <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        Configuração de Args
-      </p>
-      <div className="space-y-1">
-        <Label>Período</Label>
-     
-
-         <Select
-                          value={args.periodoId}
-          onValueChange={(v) => onChange({ ...args, periodoId: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecionar" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {periodos?.map((p) => (
-                            <SelectItem key={p.codigo} value={p.codigo.toString()}>
-                              {p.designacao}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-      </div>
-      
-    </div>
-  );
-}
-
-function ArgsIetlForm({
-  args,
-  onChange,
-}: {
-  args: ArgsIetl;
-  onChange: (next: ArgsIetl) => void;
-}) {
-  return (
-    <div className="space-y-3 rounded-lg border p-3 bg-muted/30">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        Configuração de Args
-      </p>
-      <div className="space-y-1">
-        <Label>Duração (HH:mm)</Label>
-        <Input
-          type="time"
-          value={args.duracao}
-          onChange={(e) => onChange({ ...args, duracao: e.target.value })}
-        />
-      </div>
-    </div>
-  );
-}
-
-/** Renderiza o bloco de args correto com base na sigla */
+// ── Dispatcher ────────────────────────────────────────────────────────────────
 function ArgsField({
   sigla,
   args,
   onArgsChange,
 }: {
   sigla: string;
-  args: Record<string, unknown>;
-  onArgsChange: (next: Record<string, unknown>) => void;
+  args: unknown;
+  onArgsChange: (next: unknown) => void;
 }) {
   if (!isSiglaComArgs(sigla)) return null;
 
   switch (sigla) {
-    case "epndh":
+    case "ipp": {
+      const safe = Array.isArray(args)
+        ? (args as IppEntry[])
+        : (defaultArgs("ipp") as IppEntry[]);
+      return <ArgsIppForm args={safe} onChange={onArgsChange} />;
+    }
+    case "dtl": {
+      const safe = Array.isArray(args)
+        ? (args as DtlEntry[])
+        : (defaultArgs("dtl") as DtlEntry[]);
+      return <ArgsDtlForm args={safe} onChange={onArgsChange} />;
+    }
+    case "ietl": {
+      const safe = Array.isArray(args)
+        ? (args as IetlEntry[])
+        : (defaultArgs("ietl") as IetlEntry[]);
+      return <ArgsIetlForm args={safe} onChange={onArgsChange} />;
+    }
+    case "epndh": {
+      const raw = (args ?? {}) as Record<string, unknown>;
       return (
         <ArgsEpndhForm
           args={{
-            curso: Boolean(args.curso ?? false),
-            periodo: Boolean(args.periodo ?? false),
-            grade: Boolean(args.grade ?? false),
-            others: String(args.others ?? ""),
+            curso: Boolean(raw.curso ?? false),
+            periodo: Boolean(raw.periodo ?? false),
+            grade: Boolean(raw.grade ?? false),
+            others: String(raw.others ?? ""),
           }}
-          onChange={(next) => onArgsChange(next)}
+          onChange={onArgsChange}
         />
       );
-    case "nbph":
+    }
+    case "nbph": {
+      const raw = (args ?? {}) as Record<string, unknown>;
       return (
         <ArgsNbphForm
-          args={{
-            quantidadeBackups: Number(args.quantidadeBackups ?? 1),
-          }}
-          onChange={(next) => onArgsChange(next)}
+          args={{ quantidadeBackups: Number(raw.quantidadeBackups ?? 1) }}
+          onChange={onArgsChange}
         />
       );
-    case "dtl":
-      return (
-        <ArgsDtlForm
-          args={{ hora: String(args.hora ?? "00:00") }}
-          onChange={(next) => onArgsChange(next)}
-        />
-      );
-    case "ipp":
-      return (
-        <ArgsIppForm
-          args={{ periodoId: String(args.periodoId ?? "") }}
-          onChange={(next) => onArgsChange(next)}
-        />
-      );
-    case "ietl":
-      return (
-        <ArgsIetlForm
-          args={{ duracao: String(args.duracao ?? "00:00") }}
-          onChange={(next) => onArgsChange(next)}
-        />
-      );
+    }
   }
 }
 
-// ─── Tipos de filtro ─────────────────────────────────────────────────────────
+// ─── Tipos de filtro ──────────────────────────────────────────────────────────
 
 const TIPOS_OPCOES = [
   { id: null, label: "Todos" },
@@ -333,11 +510,8 @@ const TIPOS_OPCOES = [
   { id: 2, label: "Tempo/Duração" },
 ];
 
-// ─── Estado de edição estendido ───────────────────────────────────────────────
-
 interface EditingState extends ScheduleParamItem {
-  /** args parseado como objeto em memória */
-  argsParsed: Record<string, unknown>;
+  argsParsed: unknown;
 }
 
 // ─── Página principal ─────────────────────────────────────────────────────────
@@ -345,7 +519,6 @@ interface EditingState extends ScheduleParamItem {
 export default function HorariosParametros() {
   const { toast } = useToast();
 
-  // Filtros
   const [tipoFiltro, setTipoFiltro] = useState<string>("");
   const [cursoFiltro, setCursoFiltro] = useState<string>("");
   const [search, setSearch] = useState("");
@@ -353,7 +526,6 @@ export default function HorariosParametros() {
   const [page, setPage] = useState(1);
   const LIMIT = 25;
 
-  // Query
   const { data, isLoading, isError, isFetching } = useQueryScheduleParams({
     tipoParametro: parseFilter(tipoFiltro),
     search: search || undefined,
@@ -365,7 +537,6 @@ export default function HorariosParametros() {
   const parametros = data?.data ?? [];
   const hasNextPage = data?.hasNextPage ?? false;
 
-  // Modal
   const [editing, setEditing] = useState<EditingState | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -384,38 +555,35 @@ export default function HorariosParametros() {
 
   const abrirEdicao = (p: ScheduleParamItem) => {
     const siglaLower = p.sigla?.toLowerCase() ?? "";
+    const rawArgs = parseArgs((p as any).args);
+
     const argsParsed = isSiglaComArgs(siglaLower)
-      ? { ...defaultArgs(siglaLower), ...parseArgs((p as any).args) }
-      : parseArgs((p as any).args);
+      ? rawArgs ?? defaultArgs(siglaLower)
+      : rawArgs;
 
     setEditing({ ...p, argsParsed });
     setOpen(true);
   };
-const { mutate: atualizarParametro } =
-  useUpdateScheduleParam(editing?.pk_parametro as number, () => {
-    setOpen(false);
-  });
+
+  const { mutate: atualizarParametro } = useUpdateScheduleParam(
+    editing?.pk_parametro as number,
+    () => setOpen(false)
+  );
+
   const salvar = () => {
     if (!editing) return;
 
-    // Aqui você serializa argsParsed de volta para string antes de enviar à API:
-  const payload = {
-  pk_parametro: editing.pk_parametro,
-  designacao: editing.designacao,
-  descricao: editing.descricao,
-  sigla: editing.sigla,
-  obs: editing.obs,
-  ordem: editing.ordem,
-  active_state: editing.active_state,
-  args: editing.argsParsed,
-};
-   
-    atualizarParametro(payload);
+    atualizarParametro({
+      pk_parametro: editing.pk_parametro,
+      designacao: editing.designacao,
+      descricao: editing.descricao,
+      sigla: editing.sigla,
+      obs: editing.obs,
+      ordem: editing.ordem,
+      active_state: editing.active_state,
+      args: editing.argsParsed as Record<string, unknown>[] | Record<string, unknown>,
+    });
 
-    console.log(editing);
-    
-
-    setOpen(false);
     toast({
       title: "Parâmetro atualizado",
       description: `${editing.designacao} foi atualizado com sucesso.`,

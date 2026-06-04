@@ -415,13 +415,13 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/uc",
           permission: [PermissionTypeDetails.VISUALIZAR_HORARIO_POR_UC.sigla],
         },
-        // {
-        //   title: "Parâmetros",
-        //   url: "/horarios/parametros",
-        //   permission: [
-        //     PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla!,
-        //   ],
-        // },
+        {
+          title: "Parâmetros",
+          url: "/horarios/parametros",
+          permission: [
+            PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla!,
+          ],
+        },
       ],
 
       permission: [],

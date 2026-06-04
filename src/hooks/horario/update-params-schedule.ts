@@ -16,11 +16,11 @@ export function useUpdateScheduleParam(
       updateScheduleParamService(id, payload),
 
     onSuccess: (data) => {
-      if (data.sucesso === 0) {
+      if (!data.success) {
         toast({
           variant: "destructive",
           title: "Erro ao atualizar",
-          description: data.mensagem,
+          description: data.message,
         });
         return;
       }
@@ -32,7 +32,7 @@ export function useUpdateScheduleParam(
 
       toast({
         title: "Parâmetro atualizado",
-        description: data.mensagem,
+        description: data.message,
       });
 
       onSuccessReset?.();
