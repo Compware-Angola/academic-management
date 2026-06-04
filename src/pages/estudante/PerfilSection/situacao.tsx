@@ -13,7 +13,6 @@ type SituationProps = {
 };
 
 export function Situacao({ value, codigoMatricula }: SituationProps) {
-
     const mutaionSetSituationStudent = useMutationSetSituationStudent()
     const [form, setForm] = useState({
         estado: '',
@@ -33,7 +32,6 @@ export function Situacao({ value, codigoMatricula }: SituationProps) {
             codigoMotivo: '',
         }))
     }
-
     return (
         <TabsContent value={value} className="mt-0">
             <div className="space-y-6">
