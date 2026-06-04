@@ -6,6 +6,8 @@ import {
   fetchDropDownBolsas,
   ParamsBolsa,
   getAnoLectivoConfirmados,
+  getMotivoSituacao,
+  getEstadoSituacao,
 } from "@/services/dropdown-filters/dropdown-filters.service";
 import { fetchEpocas } from "@/services/fetch-epoca";
 
@@ -59,6 +61,25 @@ export function useDropDownAnoLectivoConfirmados(codigoMatricula: number) {
     queryKey: ["ano-lectivo-confirmados", codigoMatricula],
     queryFn: () => getAnoLectivoConfirmados(codigoMatricula),
     enabled: !!codigoMatricula,
+    staleTime: 1000 * 60 * 10,
+    retry: 0,
+  });
+}
+
+export function useDropDownMotivoSituacao(estado: number) {
+  return useQuery({
+    queryKey: ["motivo-situacao", estado],
+    queryFn: () => getMotivoSituacao(estado),
+    enabled: !!estado,
+    staleTime: 1000 * 60 * 10,
+    retry: 0,
+  });
+}
+
+export function useDropDownEstadoSituacao() {
+  return useQuery({
+    queryKey: ["estado-situacao"],
+    queryFn: getEstadoSituacao,
     staleTime: 1000 * 60 * 10,
     retry: 0,
   });

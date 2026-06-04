@@ -52,3 +52,23 @@ export async function fetchDropDownBolsas(
   );
   return response.data;
 }
+
+export async function getMotivoSituacao(
+  estado: number,
+): Promise<DropdownFilter[]> {
+  const response = await axiosNestGa.get<DropdownFilter[]>(
+    `/dropdown-filters/motivo-situacao`,
+    {
+      params: {
+        estado,
+      },
+    },
+  );
+  return response.data;
+}
+export async function getEstadoSituacao(): Promise<DropdownFilter[]> {
+  const response = await axiosNestGa.get<DropdownFilter[]>(
+    `/dropdown-filters/situacao`,
+  );
+  return response.data;
+}
