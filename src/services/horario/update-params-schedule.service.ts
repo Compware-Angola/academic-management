@@ -7,31 +7,37 @@ export type UpdateScheduleParamPayload = {
   designacao?: string;
   descricao?: string;
   sigla?: string;
-  args?: Record<string, unknown> | string;
+  args?: Record<string, unknown>[] | Record<string, unknown> | string;
   obs?: string;
   ordem?: number;
   active_state?: number;
 };
 
 export type UpdateScheduleParamResponse = {
-  sucesso: number;
-  mensagem: string;
+  success: boolean;
+  message: string;
+  data: {
+    pkParametro: number;
+    designacao: string;
+    descricao: string;
+    sigla: string;
+    args: unknown;
+    obs: string | null;
+    ordem: number;
+    activeState: number;
+  };
 };
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
 
-// Normaliza o args (aceita object, string JSON ou string simples)
-function normalizeArgs(args?: Record<string, unknown> | string) {
+function normalizeArgs(
+  args?: Record<string, unknown>[] | Record<string, unknown> | string
+) {
   if (!args) return args;
-
-  // Se já for object → envia direto
   if (typeof args === "object") return args;
-
-  // Se for string → tenta converter para JSON
   try {
     return JSON.parse(args);
   } catch {
-    // Se não for JSON válido → envia como string mesmo
     return args;
   }
 }
@@ -47,10 +53,6 @@ export async function updateScheduleParamService(
     args: normalizeArgs(payload.args),
   };
 
-  const { data } = await axiosNestGa.patch(
-    `/schedule/parametros/${id}`,
-    body
-  );
-
+  const { data } = await axiosNestGa.patch(`/schedule/parametros/${id}`, body);
   return data;
 }
