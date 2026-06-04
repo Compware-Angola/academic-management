@@ -133,11 +133,22 @@ const Login = () => {
         <LogoBackground top="2.5rem" right="2.5rem" />
         <LogoBackground bottom="2.5rem" left="2.5rem" />
         <div className="w-full max-w-md space-y-8">
-          {/* Logo Mobile */}
-          <div className="flex justify-center lg:hidden">
-            <div className="rounded-2xl bg-white p-3 shadow-md ring-1 ring-border">
-              <img src={logo} alt="Metodista de Angola" className="h-12 w-auto" />
-            </div>
+          {/* Logo Mobile (em cima) */}
+          <div className="flex justify-center lg:hidden absolute top-4 left-1/2 -translate-x-1/2">
+            <img
+              src={logo}
+              alt="Metodista de Angola"
+              className="h-16 w-auto"
+            />
+          </div>
+
+          {/* Logo Desktop (normal) */}
+          <div className="hidden lg:flex justify-center">
+            <img
+              src={logo}
+              alt="Metodista de Angola"
+              className="h-20 w-auto"
+            />
           </div>
 
           <div className="space-y-2">
