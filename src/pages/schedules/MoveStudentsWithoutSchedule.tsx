@@ -1,51 +1,51 @@
 import { useState } from "react";
-import { Card, } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { MoveRight, Loader2 } from "lucide-react";
 
-
 import { Button } from "@/components/ui/button";
-
 
 import { toast } from "sonner";
 
 import { StudentWithoutScheduleCard } from "./components/StudentWithoutScheduleCard";
 import { ScheduleMoveTableWithFilters } from "./components/ScheduleMoveTableWithFilters";
 import { useRepairScheduleMutation } from "@/hooks/horario/use-repair-schedule-mutation";
+import { ScheduleMoveStudentCard } from "./components/ScheduleMoveStudentCard";
 
 export function MoveStudentsWithoutSchedule() {
-  const { mutateAsync: repairSchedule, isPending: repairSchedulePending } = useRepairScheduleMutation()
-  const [selectedGradeAlunoIds, setSelectedGradeAlunoIds] = useState<number[]>([]);
-  const [selectedSchedule, setSelectedSchedule] = useState<number | null>(
-    null
+  const { mutateAsync: repairSchedule, isPending: repairSchedulePending } =
+    useRepairScheduleMutation();
+  const [selectedGradeAlunoIds, setSelectedGradeAlunoIds] = useState<number[]>(
+    [],
   );
+  const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
   const [course, setCourse] = useState<string>("");
 
   const handeleChangeCourse = (course: string) => {
-    setCourse(course)
-
-  }
+    setCourse(course);
+  };
   const handleRepairSchedule = async () => {
     if (!selectedSchedule) {
-      toast.error("Selecione o horario")
-      return
+      toast.error("Selecione o horario");
+      return;
     }
     if (!selectedGradeAlunoIds.length) {
-      toast.error("Selecione os estudantes")
-      return
+      toast.error("Selecione os estudantes");
+      return;
     }
-    await repairSchedule({ toScheduleId: selectedSchedule, studentsCurriculumIds: selectedGradeAlunoIds })
-    handleResetShedule()
-    setSelectedGradeAlunoIds([])
-  }
+    await repairSchedule({
+      toScheduleId: selectedSchedule,
+      studentsCurriculumIds: selectedGradeAlunoIds,
+    });
+    handleResetShedule();
+    setSelectedGradeAlunoIds([]);
+  };
   const handleResetShedule = () => {
-    setSelectedSchedule(null)
-  }
+    setSelectedSchedule(null);
+  };
 
   return (
     <div className="p-4 space-y-4">
-      <p className="text-muted-foreground">
-        Vincula estudantes aos horarios
-      </p>
+      <p className="text-muted-foreground">Vincula estudantes aos horarios</p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         <Card>
           <StudentWithoutScheduleCard
@@ -60,10 +60,17 @@ export function MoveStudentsWithoutSchedule() {
             originScheduleId={selectedSchedule}
             title="Horário de Destino"
             onChangeSchedule={(scheduleId) => {
-              setSelectedSchedule(scheduleId)
+              setSelectedSchedule(scheduleId);
             }}
             course={course}
             onResetSchedule={handleResetShedule}
+          />
+          <ScheduleMoveStudentCard
+            isMovedCard={true}
+            scheduleId={selectedSchedule}
+            handleToggleStudent={(student) => {}}
+            selectedStudents={[]}
+            //movedStudents={[]}
           />
         </Card>
       </div>
@@ -81,8 +88,8 @@ export function MoveStudentsWithoutSchedule() {
           >
             {repairSchedulePending ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />A movimentar que
-                os estudantes...
+                <Loader2 className="h-5 w-5 animate-spin" />A movimentar que os
+                estudantes...
               </>
             ) : (
               <>
@@ -96,5 +103,3 @@ export function MoveStudentsWithoutSchedule() {
     </div>
   );
 }
-
-

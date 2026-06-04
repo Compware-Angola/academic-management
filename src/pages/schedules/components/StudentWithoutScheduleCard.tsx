@@ -1,6 +1,13 @@
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Loader2, BookOpen, Check, CheckSquare, Square } from "lucide-react";
+import {
+  Users,
+  Loader2,
+  BookOpen,
+  Check,
+  CheckSquare,
+  Square,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -21,6 +28,7 @@ import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurri
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { SelectUnidadeCurricularWithFilter } from "@/components/common/global-selects/SelectUnidadeCurricularWithFilter";
 
 interface Props {
   title: string;
@@ -41,6 +49,7 @@ export const StudentWithoutScheduleCard = ({
     curso: "",
     anoCurricular: "",
     searchTerm: "",
+    unidadeCurricular: "",
   });
 
   const selectAllRef = useRef<HTMLInputElement>(null);
@@ -62,26 +71,26 @@ export const StudentWithoutScheduleCard = ({
     !!filters.anoCurricular;
   const allSelected =
     students.length > 0 &&
-    students.every((s) =>
-      selectedGradeAlunoIds.includes(s.codigo_grade_aluno)
-    );
+    students.every((s) => selectedGradeAlunoIds.includes(s.codigo_grade_aluno));
 
-  const someSelected =
-    students.some((s) =>
-      selectedGradeAlunoIds.includes(s.codigo_grade_aluno)
-    );
+  const someSelected = students.some((s) =>
+    selectedGradeAlunoIds.includes(s.codigo_grade_aluno),
+  );
 
   useEffect(() => {
     if (!selectAllRef.current) return;
 
-    selectAllRef.current.indeterminate =
-      someSelected && !allSelected;
+    selectAllRef.current.indeterminate = someSelected && !allSelected;
   }, [someSelected, allSelected]);
 
   useEffect(() => {
     onChangeGradeAluno([]);
-  }, [filters.anoLetivo, filters.semestre, filters.curso, filters.anoCurricular]);
-
+  }, [
+    filters.anoLetivo,
+    filters.semestre,
+    filters.curso,
+    filters.anoCurricular,
+  ]);
 
   const toggle = (id: number) => {
     const exists = selectedGradeAlunoIds.includes(id);
@@ -93,26 +102,21 @@ export const StudentWithoutScheduleCard = ({
     onChangeGradeAluno(updated);
   };
 
-  const isSelected = (id: number) =>
-    selectedGradeAlunoIds.includes(id);
-
+  const isSelected = (id: number) => selectedGradeAlunoIds.includes(id);
 
   const toggleAll = () => {
     const allIds = students.map((s) => s.codigo_grade_aluno);
 
     if (allSelected) {
       const filtered = selectedGradeAlunoIds.filter(
-        (id) => !allIds.includes(id)
+        (id) => !allIds.includes(id),
       );
       onChangeGradeAluno(filtered);
     } else {
-      const merged = Array.from(
-        new Set([...selectedGradeAlunoIds, ...allIds])
-      );
+      const merged = Array.from(new Set([...selectedGradeAlunoIds, ...allIds]));
       onChangeGradeAluno(merged);
     }
   };
-
 
   const handleResetFilters = () => {
     setFilters((prev) => ({
@@ -122,7 +126,7 @@ export const StudentWithoutScheduleCard = ({
       anoCurricular: "",
       searchTerm: "",
     }));
-    onChangeCourse("")
+    onChangeCourse("");
   };
 
   return (
@@ -146,64 +150,66 @@ export const StudentWithoutScheduleCard = ({
             enableDefaultActiveYear
             onlyActive
             value={filters.anoLetivo}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, anoLetivo: v })
-            }
+            onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
           />
 
           <SemestreSelect
             value={filters.semestre}
-            onChangeValue={(v) =>
-              setFilters({ ...filters, semestre: v })
-            }
+            onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
           />
 
           <CourseSelect
             value={filters.curso}
             onChangeValue={(v) => {
-              onChangeCourse(v)
+              onChangeCourse(v);
               setFilters({
                 ...filters,
                 curso: v,
                 anoCurricular: "",
-              })
-            }
-
-            }
+              });
+            }}
           />
 
           <AnoCurricularSelect
             value={filters.anoCurricular}
             disabled={!filters.curso}
             curso={filters.curso}
+            onChangeValue={(v) => setFilters({ ...filters, anoCurricular: v })}
+          />
+          <SelectUnidadeCurricularWithFilter
             onChangeValue={(v) =>
-              setFilters({ ...filters, anoCurricular: v })
+              setFilters({ ...filters, unidadeCurricular: v })
+            }
+            onSelectItem={(it) =>
+              setFilters({
+                ...filters,
+                searchTerm: it.descricao,
+              })
+            }
+            value={filters.unidadeCurricular}
+            filter={{
+              classe: filters.anoCurricular,
+              curso: filters.curso,
+              semestre: filters.semestre,
+            }}
+            disabled={
+              !filters.curso || !filters.semestre || !filters.anoCurricular
             }
           />
-
-          <div className="col-span-1 md:col-span-2 space-y-1">
-            <Label>Pesquisar</Label>
-            <Input
-              placeholder="Pesquisar aluno ou disciplina..."
-              value={filters.searchTerm}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  searchTerm: e.target.value,
-                })
-              }
-            />
-          </div>
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant={allSelected ? "default" : "ghost"} size="icon" aria-label={allSelected ? "Desmarcar todos" : "Selecionar todos"} onClick={toggleAll}  >
+          <Button
+            variant={allSelected ? "default" : "ghost"}
+            size="icon"
+            aria-label={allSelected ? "Desmarcar todos" : "Selecionar todos"}
+            onClick={toggleAll}
+          >
             {allSelected ? (
               <CheckSquare className="h-4 w-4" />
             ) : (
               <Square className="h-4 w-4" />
             )}
-
           </Button>
           <Button
             className="bg-red-500 hover:bg-red-600"
@@ -222,9 +228,7 @@ export const StudentWithoutScheduleCard = ({
       ) : students.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground">
           <BookOpen className="mx-auto mb-3 opacity-30" />
-          {canLoad
-            ? "Nenhum aluno encontrado"
-            : "Selecione os filtros"}
+          {canLoad ? "Nenhum aluno encontrado" : "Selecione os filtros"}
         </div>
       ) : (
         <div className="max-h-[320px] overflow-auto border rounded-md">
@@ -233,15 +237,20 @@ export const StudentWithoutScheduleCard = ({
               <TableRow>
                 {/* HEADER CHECKBOX (GMAIL STYLE) */}
                 <TableHead className="w-12">
-                  <Button variant={allSelected ? "default" : "ghost"} size="icon" aria-label={allSelected ? "Desmarcar todos" : "Selecionar todos"} onClick={toggleAll}  >
+                  <Button
+                    variant={allSelected ? "default" : "ghost"}
+                    size="icon"
+                    aria-label={
+                      allSelected ? "Desmarcar todos" : "Selecionar todos"
+                    }
+                    onClick={toggleAll}
+                  >
                     {allSelected ? (
                       <CheckSquare className="h-4 w-4" />
                     ) : (
                       <Square className="h-4 w-4" />
                     )}
-
                   </Button>
-
                 </TableHead>
 
                 <TableHead>Aluno</TableHead>
@@ -255,23 +264,30 @@ export const StudentWithoutScheduleCard = ({
               {students.map((s) => (
                 <TableRow
                   key={s.codigo_grade_aluno}
-                  className={`cursor-pointer transition-colors ${isSelected(s.codigo_grade_aluno)
-                    ? "bg-primary/10"
-                    : ""
-                    }`}
+                  className={`cursor-pointer transition-colors ${
+                    isSelected(s.codigo_grade_aluno) ? "bg-primary/10" : ""
+                  }`}
                   onClick={() => toggle(s.codigo_grade_aluno)}
                 >
                   <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Button variant={isSelected(s.codigo_grade_aluno) ? "default" : "ghost"} size="icon" aria-label={isSelected(s.codigo_grade_aluno) ? "Desmarcar" : "Selecionar"} onClick={() => toggle(s.codigo_grade_aluno)}  >
+                    <Button
+                      variant={
+                        isSelected(s.codigo_grade_aluno) ? "default" : "ghost"
+                      }
+                      size="icon"
+                      aria-label={
+                        isSelected(s.codigo_grade_aluno)
+                          ? "Desmarcar"
+                          : "Selecionar"
+                      }
+                      onClick={() => toggle(s.codigo_grade_aluno)}
+                    >
                       {isSelected(s.codigo_grade_aluno) ? (
                         <CheckSquare className="h-4 w-4" />
                       ) : (
                         <Square className="h-4 w-4" />
                       )}
-
                     </Button>
-
-
                   </TableCell>
 
                   <TableCell>{s.nome}</TableCell>
