@@ -16,6 +16,7 @@ import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { ChangeShiftStudentPage } from "./change-shift";
 import { StudentMessages } from "./StudentMessages";
+import { Situacao } from "./situacao";
 
 type PerfilSectionProps = {
   value?: string;
@@ -125,6 +126,13 @@ export function PerfilSection({
       icon: Mail,
       permission: hasPermission(PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla),
       component: StudentMessages,
+    },
+    {
+      value: "situacao",
+      label: "Registar Situação do Aluno",
+      icon: Book,
+      permission: true,
+      component: Situacao,
     }
   ] as const;
   return (
