@@ -1,4 +1,5 @@
 import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type Tempo = {
   ordem: number;
@@ -25,12 +26,12 @@ export async function fetchTemposDisponiveis(
   anoLectivo: number,
   periodo: number
 ): Promise<TempoDisponivelItem[]> {
-  const { data } = await axiosApexGa.get<TempoDisponivelResponse>(
-    `/tempos/disponiveis`,
+  const { data } = await axiosNestGa.get<TempoDisponivelResponse>(
+    `/class-times-schedule`,
     {
       params: {
-        ano_lectivo: anoLectivo,
-        periodo: periodo,
+      anoLectivo,
+      periodo: periodo,
       },
     }
   );

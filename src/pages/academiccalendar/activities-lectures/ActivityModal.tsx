@@ -19,6 +19,7 @@ import {
 import { Dispatch, SetStateAction } from "react";
 import { Loader2 } from "lucide-react";
 import { FormSelect } from "@/components/common/FormSelect";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 // Tipos esperados pela API
 interface AnoAcademico {
@@ -152,29 +153,25 @@ export function ActivityModal({
           {/* Tipo de Calendário */}
 
           <div className="space-y-2 col-span-2">
-            <Label>Tipo de Calendário *</Label>
-            <Select
+            <FormCommandSelect
+              label="Tipo de Calendário *"
               value={form.codigo_tipo_calendario?.toString() || ""}
-              onValueChange={(v) =>
+              onChange={(v) =>
                 setForm({ ...form, codigo_tipo_calendario: Number(v) })
               }
+              options={tiposCalendario}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder={
+                loadingTiposCalendario ? "Carregando..." : "Selecione"
+              }
               disabled={loadingTiposCalendario || !!editId}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    loadingTiposCalendario ? "Carregando..." : "Selecione"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {tiposCalendario?.map((tipo) => (
-                  <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
-                    {tipo.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              width="full"
+              isLoading={loadingTiposCalendario}
+            />
           </div>
 
           {/* Data Início */}

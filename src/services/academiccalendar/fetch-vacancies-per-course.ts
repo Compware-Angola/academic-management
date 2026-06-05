@@ -1,5 +1,5 @@
 // src/services/academiccalendar/fetch-academic-year-vacancies.ts
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type Vacancy = {
   codigo: number;
@@ -22,8 +22,8 @@ export async function fetchAcademicYearVacancies(
   codigoAno: number,
   tipoCandidatura: number
 ): Promise<VacanciesResponse> {
-  const { data } = await axiosApexGa.get<VacanciesResponse>(
-    `/ga/teaching-parameters/vacancies/${codigoAno}/${tipoCandidatura}`
+  const { data } = await axiosNestGa.get<VacanciesResponse>(
+    `/academic-calendar/vacancies/${codigoAno}/${tipoCandidatura}`
   );
   return data; // { vagas: [...] }
 }
