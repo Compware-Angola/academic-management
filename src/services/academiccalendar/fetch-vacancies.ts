@@ -1,6 +1,6 @@
 
 
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type Vacancy = {
   numeroVagas: number;
@@ -18,8 +18,8 @@ export type VacanciesResponse = {
 
 
 export async function fetchVacancies(codigoPolo = 1): Promise<Vacancy[]> {
-  const { data } = await axiosApexGa.get<VacanciesResponse>(
-    `/ga/teaching-parameters/vacancies`
+  const { data } = await axiosNestGa.get<VacanciesResponse>(
+    `/academic-calendar/vacancies`
    
   );
   return data.vagas ?? [];

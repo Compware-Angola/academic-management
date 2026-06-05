@@ -1,5 +1,5 @@
 // src/services/academiccalendar/fetch-academic-year-monthly-fees.ts
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type MonthlyFee = {
   designacao: string;        // ex: "OUT-2025"
@@ -17,8 +17,8 @@ export type MonthlyFeesResponse = {
  * @param codigoAno - ex: 23, 24, 25...
  */
 export async function fetchAcademicYearMonthlyFees(codigoAno: number): Promise<MonthlyFeesResponse> {
-  const { data } = await axiosApexGa.get<MonthlyFeesResponse>(
-    `/ga/teaching-parameters/monthly-fees/${codigoAno}`
+  const { data } = await axiosNestGa.get<MonthlyFeesResponse>(
+    `/academic-calendar/monthly-fees/${codigoAno}`
   );
   return data; 
 }
