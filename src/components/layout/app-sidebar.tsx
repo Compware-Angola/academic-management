@@ -43,12 +43,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const suporteItems = useFilterMenuByPermission(suporteStructure?.items ?? []);
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" {...props} >
       <SidebarHeader>
         <TeamSwitcher />
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent  >
         <Administration items={adminItems} />
         <NavIngresso items={ingressoItems} />
         <NavAcademic items={academicItems} />
@@ -64,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavDocs items={docsItems} />
       </SidebarContent>
 
-      <SidebarRail />
+
     </Sidebar>
   );
 }

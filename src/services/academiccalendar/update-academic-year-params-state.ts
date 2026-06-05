@@ -1,4 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export async function updateAcademicYearParamsState(
   codigoAno: number,
@@ -6,8 +6,8 @@ export async function updateAcademicYearParamsState(
     estado: 0 | 1;
   }
 ) {
-  const { data } = await axiosApexGa.put(
-    `ga/teaching-parameters/academic-year/${codigoAno}`,
+  const { data } = await axiosNestGa.put(
+    `/academic-calendar/academic-year/${codigoAno}`,
     payload
   );
 
