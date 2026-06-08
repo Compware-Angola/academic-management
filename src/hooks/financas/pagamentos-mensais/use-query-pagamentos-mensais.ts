@@ -13,7 +13,7 @@ export function useQueryListPagamentosMensais(
   payload: ListPagamentosMensaisPayload,
   options?: QueryPagamentosMensaisOptions,
 ) {
-  const defaultEnabled = !!payload.codigoAnoLectivo && !!payload.codigoCurso;
+  const defaultEnabled = !!payload.codigoAnoLectivo;
 
   return useQuery<ListPagamentosMensaisResponse>({
     queryKey: ["pagamentos-mensais", payload],
