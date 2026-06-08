@@ -29,11 +29,13 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  DollarSign,
   FileText,
   Home,
   Loader2,
   Pencil,
   X,
+  XCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -54,11 +56,17 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import useMutationEstadoCreditoEducacional from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
+import useMutationEstadoCreditoEducacional, { useMutationToggleInstituicaoPagou } from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
 import { EditAttributionModal } from "../AtribuirCredito/components/EditAttributionModal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function ListarBolsaEstudante() {
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [selectedForToggle, setSelectedForToggle] = useState<BolsaEstudante | null>(null);
+  // Estados (adicione junto com os outros)
+  const [confirmEstadoDialogOpen, setConfirmEstadoDialogOpen] = useState(false);
+  const [selectedForEstadoToggle, setSelectedForEstadoToggle] = useState<BolsaEstudante | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState("10");
   const [filters, setFilters] = useState<FetchBolsaEstudanteParams>({
@@ -103,6 +111,45 @@ export default function ListarBolsaEstudante() {
   const totalItems = meta?.total ?? 0;
   const { mutateAsync: switchEstadoBolsa, isPending: isPendingActiveBolsa } =
     useMutationEstadoCreditoEducacional();
+  const { mutateAsync: handleToggleInstituicaoPagou, isPending: isPendingInstituicaoPagou } =
+    useMutationToggleInstituicaoPagou();
+  const handleOpenConfirmDialog = (estudante: BolsaEstudante) => {
+    setSelectedForToggle(estudante);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmToggle = async () => {
+    if (!selectedForToggle) return;
+
+    try {
+      await handleToggleInstituicaoPagou({ codigo: selectedForToggle.codigo });
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setConfirmDialogOpen(false);
+      setSelectedForToggle(null);
+    }
+  };
+  // Funções
+  const handleOpenConfirmEstado = (estudante: BolsaEstudante) => {
+    setSelectedForEstadoToggle(estudante);
+    setConfirmEstadoDialogOpen(true);
+  };
+
+  const handleConfirmEstadoToggle = async () => {
+    if (!selectedForEstadoToggle) return;
+
+    try {
+      await switchEstadoBolsa({ codigo: selectedForEstadoToggle.codigo });
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setConfirmEstadoDialogOpen(false);
+      setSelectedForEstadoToggle(null);
+    }
+  };
   const semestreMap = useMemo(
     () => new Map(semestres?.map((s) => [s.codigo, s.designacao]) ?? []),
     [semestres],
@@ -136,11 +183,7 @@ export default function ListarBolsaEstudante() {
       tipo === "PERCENTUAL" ? `${valor}%` : formatCurrency(valor),
     [],
   );
-  const handleChangeEstado = async (bolsa: BolsaEstudante) => {
-    setSelectedBolsa(bolsa);
-    await switchEstadoBolsa({ codigo: bolsa.codigo });
-    setSelectedBolsa(null);
-  };
+
   const pdfData = useMemo(() => {
     if (!estudantes.length) return null;
 
@@ -448,7 +491,9 @@ export default function ListarBolsaEstudante() {
                     <TableHead>Desconto</TableHead>
                     <TableHead>Tipo Crédito</TableHead>
                     <TableHead>Bolsa</TableHead>
-                    <TableHead>Estado</TableHead>
+
+                    <TableHead>Pago pela Instituição</TableHead>
+                    <TableHead>Estado da Bolsa</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -497,35 +542,65 @@ export default function ListarBolsaEstudante() {
                       >
                         {e.bolsa}
                       </TableCell>
-                      <TableCell>
-                        <span className="flex items-center gap-2">
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span>
+                                <span className="cursor-pointer">
                                   <Switch
-                                    checked={e.status_ === 1}
-                                    onCheckedChange={() => handleChangeEstado(e)}
-                                    disabled={true}
-                                    className="cursor-not-allowed"
+                                    checked={e.instituicao_pagou === 1}
+                                    onCheckedChange={() => handleOpenConfirmDialog(e)}
                                   />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Temporariamente indisponível</p>
+                                <p>
+                                  Clique para {e.instituicao_pagou === 1 ? "desmarcar" : "marcar"} como pago
+                                </p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
+
                           <Loader2
                             className={cn(
                               "h-4 w-4 animate-spin",
-                              selectedBolsa?.codigo === e.codigo &&
-                                isPendingActiveBolsa
+                              selectedBolsa?.codigo === e.codigo && isPendingInstituicaoPagou
                                 ? "block"
-                                : "hidden",
+                                : "hidden"
                             )}
                           />
-                        </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-pointer">
+                                  <Switch
+                                    checked={e.status_ === 1}
+                                    onCheckedChange={() => handleOpenConfirmEstado(e)}
+                                    disabled={true}
+                                  />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {/* <p>Clique para {e.status_ === 1 ? "desativar" : "ativar"} a bolsa</p> */}
+                                <p>Temporariamente Indisponível</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <Loader2
+                            className={cn(
+                              "h-4 w-4 animate-spin",
+                              selectedBolsa?.codigo === e.codigo && isPendingActiveBolsa
+                                ? "block"
+                                : "hidden"
+                            )}
+                          />
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Button
@@ -601,6 +676,112 @@ export default function ListarBolsaEstudante() {
         onClose={() => setEditModalOpen(false)}
         initialValues={selectedStudent!}
       />
+      {/* DIALOG DE CONFIRMAÇÃO */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {selectedForToggle?.instituicao_pagou === 1 ? (
+                <>
+                  <XCircle className="h-6 w-6 text-red-500" />
+                  Desmarcar Pagamento
+                </>
+              ) : (
+                <>
+                  <DollarSign className="h-6 w-6 text-green-500" />
+                  Marcar como Pago
+                </>
+              )}
+            </DialogTitle>
+
+            <DialogDescription className="pt-2">
+              {selectedForToggle?.instituicao_pagou === 1 ? (
+                <>
+                  Tem certeza que deseja <strong className="text-red-600">desmarcar </strong>
+                  como pago pela instituição?
+                </>
+              ) : (
+                <>
+                  Tem certeza que deseja <strong className="text-green-600">marcar </strong>
+                  como pago pela instituição?
+                </>
+              )}
+
+              <div className="mt-4 p-3 bg-muted rounded-lg flex items-center gap-3">
+                <div className="text-3xl">💰</div>
+                <div>
+                  <p className="font-medium">Estudante:</p>
+                  <p>{selectedForToggle?.nome_completo}</p>
+                  <p>Tipo: {selectedForToggle?.tipo_credito}</p>
+                  <p>Matrícula: {selectedForToggle?.codigo_matricula}</p>
+                  <p>Valor Desconto:  {formatDesconto(selectedForToggle?.valor_desconto, selectedForToggle?.tipo_desconto)}</p>
+                </div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setConfirmDialogOpen(false);
+                setSelectedForToggle(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmToggle}
+              disabled={isPendingInstituicaoPagou}
+              className={selectedForToggle?.instituicao_pagou === 1
+                ? "bg-red-600 hover:bg-red-700"
+                : "bg-green-600 hover:bg-green-700"
+              }
+            >
+              {isPendingInstituicaoPagou && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {selectedForToggle?.instituicao_pagou === 1 ? "Desmarcar Pagamento" : "Confirmar Pagamento"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Dialog Estado da Bolsa */}
+      <Dialog open={confirmEstadoDialogOpen} onOpenChange={setConfirmEstadoDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Alteração de Estado</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja{" "}
+              <strong>
+                {selectedForEstadoToggle?.status_ === 1 ? "desativar" : "ativar"}
+              </strong>{" "}
+              a bolsa do estudante?
+              <br />
+              <span className="font-medium mt-2 block">
+                Estudante: {selectedForEstadoToggle?.nome_completo}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setConfirmEstadoDialogOpen(false);
+                setSelectedForEstadoToggle(null);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmEstadoToggle}
+              disabled={isPendingActiveBolsa}
+            >
+              {isPendingActiveBolsa && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
