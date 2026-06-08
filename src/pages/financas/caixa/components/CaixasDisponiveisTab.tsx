@@ -3,12 +3,13 @@ import {
   Loader2,
   LockOpen,
   Search,
-  AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Check,
-  Copy,
   RefreshCw,
+  Plus,
+  SquarePen,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,20 +31,28 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-import { useQueryCashRegisters } from "@/hooks/financa/use-cash-register";
+import { useDeleteCashRegister, useQueryCashRegisters } from "@/hooks/financa/use-cash-register";
 import { CashRegister } from "@/services/finance/cash-register.service";
 
 import { Badge } from "@/components/ui/badge";
 import { OpenCashRegisterForm } from "./open-cash-register-form";
 import { cn } from "@/lib/utils";
-
+import { ModalUpsertCashRegister } from "./moviment/ModalUpsertCashRegister";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionType, PermissionTypeDetails } from "@/constants/permission.type";
 export function CaixasDisponiveisTab() {
+  const { hasPermission } = usePermission();
+  const deleteCashRegister = useDeleteCashRegister();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selectedRegister, setSelectedRegister] = useState<CashRegister | null>(
     null,
   );
-  const [visibleCodes, setVisibleCodes] = useState<Record<number, boolean>>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [cashRegisterToEdit, setCashRegisterToEdit] = useState<{ id: number; name: string } | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const {
     data: dataCashRegisters,
@@ -84,6 +93,37 @@ export function CaixasDisponiveisTab() {
     return <Badge variant="secondary">Fechado</Badge>;
   };
 
+
+  const handleEditCashRegister = (cashRegister: typeof cashRegisterToEdit) => {
+    setCashRegisterToEdit(cashRegister);
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = (open: boolean) => {
+    setIsModalOpen(open);
+    setCashRegisterToEdit(null);
+  };
+  const handleNewCashRegisterModal = () => {
+    setSelectedRegister(null);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+
+    deleteCashRegister.mutate(deleteId, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        setDeleteId(null);
+      },
+    });
+  };
+  const handleDelete = (id: number) => {
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
+  const canManegerCash = hasPermission(PermissionTypeDetails.CONFIGURACAO_CAIXA.sigla);
+
+
   return (
     <>
       <Card>
@@ -105,12 +145,21 @@ export function CaixasDisponiveisTab() {
                 className="pl-9"
               />
             </div>
-            <Button onClick={handleRefresh} variant="default" className="ml-2">
-              <RefreshCw
-                className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")}
-              />
-              Atualizar
-            </Button>
+            <div className="flex items-center gap-2">
+              {canManegerCash && (
+                <Button variant="default" onClick={handleNewCashRegisterModal} className="ml-2">
+                  <Plus />
+                  Novo
+                </Button>
+              )}
+              <Button onClick={handleRefresh} variant="outline" className="ml-2">
+                <RefreshCw
+                  className={cn("mr-2 h-4 w-4", isFetching && "animate-spin")}
+                />
+                Atualizar
+              </Button>
+            </div>
+
           </div>
           <div className="rounded-md border">
             <Table>
@@ -176,35 +225,87 @@ export function CaixasDisponiveisTab() {
                           {item.blocked === "S" ? "Sim" : "Não"}
                         </TableCell>
 
-                        <TableCell className="text-center">
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            disabled={
-                              item.blocked === "S" || item.status === "aberto"
-                            }
-                            className={
-                              item.blocked === "S"
-                                ? "opacity-50 cursor-not-allowed"
-                                : "text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-950"
-                            }
-                            onClick={() =>
-                              setSelectedRegister({
-                                blocked: item.blocked,
-                                id: item.code,
-                                name: item.name,
-                                operatorId: item.operator_code,
-                                status: item.status,
-                              })
-                            }
-                            title={
-                              item.blocked === "S"
-                                ? "Caixa bloqueado"
-                                : "Abrir caixa"
-                            }
-                          >
-                            <LockOpen className="h-4 w-4" />
-                          </Button>
+                        <TableCell className="text-center space-x-2">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                disabled={
+                                  item.blocked === "S" ||
+                                  item.status === "aberto"
+                                }
+                                className={
+                                  item.blocked === "S"
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 dark:text-blue-400 dark:border-blue-900 dark:hover:bg-blue-950"
+                                }
+                                onClick={() =>
+                                  setSelectedRegister({
+                                    blocked: item.blocked,
+                                    id: item.code,
+                                    name: item.name,
+                                    operatorId: item.operator_code,
+                                    status: item.status,
+                                  })
+                                }
+                                title={
+                                  item.blocked === "S"
+                                    ? "Caixa bloqueado"
+                                    : "Abrir caixa"
+                                }
+                              >
+                                <LockOpen className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Abrir caixa</p>
+                            </TooltipContent>
+                          </Tooltip>
+
+                          {
+                            canManegerCash && (<>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    disabled={item.status === "aberto"}
+                                    size="icon"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleEditCashRegister({
+                                        id: item.code,
+                                        name: item.name,
+                                      })
+                                    }
+                                    title="Editar caixa"
+                                  >
+                                    <SquarePen className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Editar caixa</p>
+                                </TooltipContent>
+                              </Tooltip>
+
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    disabled={item.status === "aberto"}
+                                    size="icon"
+                                    variant="destructive"
+                                    onClick={() => handleDelete(item.code)}
+                                    title="Eliminar caixa"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Eliminar caixa</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </>)
+                          }
+
                         </TableCell>
                       </TableRow>
                     ))}
@@ -231,7 +332,7 @@ export function CaixasDisponiveisTab() {
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Anterior
                 </Button>
-                <div className="flex items-center gap-1">
+                {/* <div className="flex items-center gap-1">
                   {Array.from(
                     { length: Math.min(5, meta.totalPages) },
                     (_, i) => {
@@ -259,7 +360,7 @@ export function CaixasDisponiveisTab() {
                       );
                     },
                   )}
-                </div>
+                </div> */}
                 <Button
                   variant="outline"
                   size="sm"
@@ -273,7 +374,7 @@ export function CaixasDisponiveisTab() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card >
 
       <Dialog
         open={!!selectedRegister}
@@ -299,48 +400,65 @@ export function CaixasDisponiveisTab() {
           )}
         </DialogContent>
       </Dialog>
+      <ModalUpsertCashRegister open={isModalOpen} handleOpenChange={handleCloseModal} cashRegister={cashRegisterToEdit} />
+      <DeleteCashRegisterDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onConfirm={confirmDelete}
+        loading={deleteCashRegister.isPending}
+      />
     </>
   );
 }
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
 
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // fallback para browsers antigos
-      const el = document.createElement("textarea");
-      el.value = text;
-      el.style.position = "fixed";
-      el.style.opacity = "0";
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }
 
+
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  loading?: boolean;
+};
+
+export function DeleteCashRegisterDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  loading,
+}: Props) {
   return (
-    <button
-      onClick={handleCopy}
-      title={copied ? "Copiado!" : "Copiar código"}
-      className={`transition-colors ${
-        copied
-          ? "text-emerald-600 dark:text-emerald-400"
-          : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      {copied ? (
-        <Check className="h-3.5 w-3.5" />
-      ) : (
-        <Copy className="h-3.5 w-3.5" />
-      )}
-    </button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-red-600">
+            <AlertTriangle className="h-5 w-5" />
+            Confirmar eliminação
+          </DialogTitle>
+
+          <DialogDescription>
+            Tens a certeza que queres eliminar este caixa? Esta ação não pode ser desfeita.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? "A eliminar..." : "Eliminar"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
