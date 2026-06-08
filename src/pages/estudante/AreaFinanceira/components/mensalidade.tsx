@@ -78,6 +78,7 @@ const getStatusBadge = (status: number) => {
 export function MensalidadesSection({ codigoMatricula }: Props) {
   const [expandedPayment, setExpandedPayment] = useState<number | null>(null);
   const [anoLetivo, setAnoLetivo] = useState<string | null>("23");
+
   const [selectedPayments, setSelectedPayments] = useState<
     Map<number, SelectedPayment>
   >(new Map());
@@ -85,11 +86,22 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   const { mutate: recalculatePayments, isPending: isPendingRecalculatePayments } = useMutationRecalculatePayments();
 
 
-  const handleRecalculate = (invoiceId: number) => {
-    recalculatePayments(invoiceId, {
+  const [recalculatingIds, setRecalculatingIds] = useState<Set<number>>(new Set());
 
+  const handleRecalculate = (invoiceId: number) => {
+    setRecalculatingIds(prev => new Set(prev).add(invoiceId));
+
+    recalculatePayments(invoiceId, {
+      onSettled: () => {
+        setRecalculatingIds(prev => {
+          const next = new Set(prev);
+          next.delete(invoiceId);
+          return next;
+        });
+      },
     });
   };
+
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
       (total, payment) => total + (payment.valorAPagar ?? 0),
@@ -375,11 +387,10 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             variant="outline"
                             size="sm"
                             className="gap-1.5 text-warning border-warning/40 hover:bg-warning/10 hover:text-warning"
-                            onClick={() =>
-                              handleRecalculate(payment.codigo_factura)
-                            }
+                            disabled={recalculatingIds.has(payment.codigo_factura)}
+                            onClick={() => handleRecalculate(payment.codigo_factura)}
                           >
-                            {isPendingRecalculatePayments ? (
+                            {recalculatingIds.has(payment.codigo_factura) ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             ) : (
                               <RefreshCw className="h-3.5 w-3.5" />

@@ -37,7 +37,6 @@ import { useState, useEffect, useRef } from "react";
 import { StudentSugestao } from "@/services/students/students.service";
 import { useStudentSugestoes } from "@/hooks/students/use-query-students";
 import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
-import { useBlockMyCashRegister } from "@/hooks/financa/use-cash-register";
 
 export function Header() {
   const { data: user } = useCurrentUser("GA");
@@ -203,6 +202,14 @@ export function Header() {
                                   <span className="font-bold text-xs text-foreground uppercase">
                                     {aluno.nome_completo}
                                   </span>
+                                  {aluno?.is_bolseiro === 1 && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-[10px] px-1.5 py-0"
+                                    >
+                                      Bolseiro
+                                    </Badge>
+                                  )}
                                   <Badge
                                     variant="outline"
                                     className="text-[10px] px-1.5 py-0"
@@ -232,8 +239,11 @@ export function Header() {
                                   </div>
                                 </div>
 
-                                <div className="text-[10px] bg-muted px-2 py-0.5 rounded w-fit text-muted-foreground font-medium">
-                                  {aluno.periodo}
+                                <div className="flex items-center gap-1 mt-1">
+                                  <div className="text-[10px] bg-muted px-2 py-0.5 rounded w-fit text-muted-foreground font-medium">
+                                    {aluno.periodo}
+                                  </div>
+
                                 </div>
                               </div>
                             </CommandItem>

@@ -15,6 +15,7 @@ export type StudentSugestao = {
   periodo: string;
   nome_completo: string;
   estado: string;
+  is_bolseiro?: number;
 };
 
 
@@ -66,6 +67,7 @@ export type StudentDetail = {
   nacionalidade: string;
   estado_civil: string;
   periodo_codigo: number;
+
 };
 
 
