@@ -39,6 +39,12 @@ export type Mensalidade = {
   codigo_factura: number | null;
   mensalidade: number | null;
   total: number | null;
+  instituicao_pagou?: boolean | null;
+  codigo_bolseiro?: number | null;
+  observacao?: string | null;
+
+
+
 };
 
 export type MonthlyFeeDataResponse = {

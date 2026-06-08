@@ -1,5 +1,6 @@
 import {
   AlertCircle,
+  AlertTriangle,
   Banknote,
   Calendar,
   CheckCircle,
@@ -29,7 +30,7 @@ import { formatNumber } from "@/util/format-number";
 import { Button } from "@/components/ui/button";
 import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
 import { parseFilter } from "@/util/parse-filter";
-import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { useStudentDetail, useStudentInfoBolsa } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
 import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
@@ -84,7 +85,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
   >(new Map());
 
   const { mutate: recalculatePayments, isPending: isPendingRecalculatePayments } = useMutationRecalculatePayments();
-
 
   const [recalculatingIds, setRecalculatingIds] = useState<Set<number>>(new Set());
 
@@ -275,12 +275,15 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                 </span>
               </div>
             ) : monthFee ? (
-              <p className="text-base mt-1 text-destructive font-medium">
-                {monthFee.descricao}{" "}
-                <span className="font-bold">{monthFee.preco} kz</span>
-              </p>
+              <div className="mt-2 space-y-2">
+                <p className="text-base text-destructive font-medium">
+                  {monthFee.descricao}{" "}
+                  <span className="font-bold">{monthFee.preco} kz</span>
+                </p>
+
+
+              </div>
             ) : anoLetivo ? (
-              // FIX: feedback quando não há valor configurado para o ano/curso
               <p className="text-sm mt-1 text-muted-foreground italic">
                 Valor mensal não configurado para este curso
               </p>
