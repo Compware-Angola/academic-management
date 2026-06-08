@@ -45,6 +45,7 @@ export type BolsaEstudante = {
   tipo_credito?: string;
   codigo_bolsa?: number;
   bolsa?: string;
+  instituicao_pagou?: number;
 };
 
 export type Meta = {
