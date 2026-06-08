@@ -277,3 +277,40 @@ export async function recoveryOpeningCodeService(): Promise<void> {
 export async function blockMyCashRegisterService(): Promise<void> {
   await axiosNestFinance.patch(`/cash-registers/me/block`);
 }
+
+export type CreateCashRegisterPayload = {
+  name: string;
+};
+
+export type UpdateCashRegisterPayload = {
+  id: number;
+  name: string;
+};
+
+
+export async function createCashRegisterService(
+  payload: CreateCashRegisterPayload,
+): Promise<CashRegister> {
+  const { data } = await axiosNestFinance.post("/cash-registers", payload);
+  return data.data;
+}
+
+
+export async function updateCashRegisterService(
+  payload: UpdateCashRegisterPayload,
+): Promise<CashRegister> {
+  const { data } = await axiosNestFinance.patch(
+    `/cash-registers/${payload.id}`,
+    {
+      name: payload.name,
+    },
+  );
+
+  return data.data;
+}
+
+
+
+export async function deleteCashRegisterService(id: number): Promise<void> {
+  await axiosNestFinance.delete(`/cash-registers/${id}`);
+}

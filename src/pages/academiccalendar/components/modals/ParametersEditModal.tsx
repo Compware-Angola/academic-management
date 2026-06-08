@@ -14,7 +14,7 @@ import { Calendar, Users, CreditCard, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryVacancies } from "@/hooks/queries/use-query-vacancies";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 import { useAuth } from "@/hooks/use-auth";
 import { AxiosError } from "axios";
 import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
@@ -228,8 +228,8 @@ export function ParametersEditModal({
         codigo_utilizador: user.user?.pk_utilizador,
       };
 
-      const periodoRes = await axiosApexGa.post(
-        "/ga/teaching-parameters/academic-year",
+      const periodoRes = await axiosNestGa.post(
+        "/academic-calendar/academic-year",
         periodoPayload,
       );
       const codigoAnoLectivo = periodoRes.data.codigo;
@@ -251,7 +251,7 @@ export function ParametersEditModal({
           })),
       };
 
-      await axiosApexGa.post("/ga/teaching-parameters/vacancies", vagasPayload);
+      await axiosNestGa.post("/academic-calendar/vacancies", vagasPayload);
 
       if (mensalidadesEditadas.length > 0) {
         await new Promise((resolve, reject) => {

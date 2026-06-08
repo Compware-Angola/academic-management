@@ -35,15 +35,17 @@ export function NavFinance({
   const navigate = useNavigate();
   const location = useLocation();
   const hasAnyItem = items.some(
-  (item) =>
-    item.url || (item.items && item.items.length > 0)
-);
+    (item) =>
+      item.url || (item.items && item.items.length > 0)
+  );
 
   return (
     <SidebarGroup>
-       {hasAnyItem && (
-    <SidebarGroupLabel>Finanças</SidebarGroupLabel>
-  )}
+      {hasAnyItem && (
+        <SidebarGroupLabel className="">
+          Gestão Financeira
+        </SidebarGroupLabel>
+      )}
       <SidebarMenu>
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0;
@@ -67,7 +69,7 @@ export function NavFinance({
                       className={clsx(
                         "transition-colors",
                         isActive &&
-                          "bg-primary text-primary-foreground hover:bg-primary/90"
+                        "bg-primary text-primary-foreground hover:bg-primary/90"
                       )}
                     >
                       {item.icon && <item.icon />}
@@ -87,7 +89,7 @@ export function NavFinance({
                               asChild
                               className={clsx(
                                 subActive &&
-                                  "bg-primary text-primary-foreground hover:bg-primary/90"
+                                "bg-primary text-primary-foreground hover:bg-primary/90"
                               )}
                             >
                               <Link to={subItem.url}>
@@ -112,7 +114,7 @@ export function NavFinance({
                 className={clsx(
                   "transition-colors",
                   isActive &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90"
+                  "bg-primary text-primary-foreground hover:bg-primary/90"
                 )}
               >
                 {item.icon && <item.icon />}
