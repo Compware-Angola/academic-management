@@ -10,3 +10,13 @@ export async function switchEstadoCreditoEducacionalService({
   );
   return data;
 }
+export async function toggleInstituicaoPagouService({
+  codigo,
+}: {
+  codigo: number;
+}) {
+  const { data } = await axiosNestFinance.patch(
+    `/credito-educacional/${codigo}/toggle-instituicao-pagou`,
+  );
+  return data;
+}
