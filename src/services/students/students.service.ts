@@ -117,6 +117,7 @@ export type InfoBolsaEstudante = {
   codigo_bolsa: number;
   bolsa: string;
   isentar_multa: string | null;
+  instituicao_pagou: boolean;
 }
 
 export const fetchInfoBolsaEstudante = async (

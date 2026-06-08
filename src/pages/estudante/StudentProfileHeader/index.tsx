@@ -13,6 +13,8 @@ import {
   Award,
   Calendar as CalendarIcon,
   Clock,
+  CheckCircle,
+  AlertTriangle,
 
 } from "lucide-react";
 import { buildImageAssets } from "@/util/build-image-assets";
@@ -140,29 +142,36 @@ export function StudentProfileHeader({ matricula }: Props) {
 
             {/* === Seção da Bolsa com Dados Reais === */}
 
-
-
             {isBolseiro && bolsaInfo && (
-              <div
-                className="mt-5 p-5 rounded-xl border
-       bg-[oklch(0.97_0.015_25)] dark:bg-[oklch(0.22_0.025_25)] border-[oklch(0.88_0.045_25)] dark:border-[oklch(0.32_0.045_25)]"
-              >
-                <div className="flex items-center gap-3 mb-4">
+              <div className="mt-5 p-5 rounded-xl border bg-[oklch(0.97_0.015_25)] dark:bg-[oklch(0.22_0.025_25)] border-[oklch(0.88_0.045_25)] dark:border-[oklch(0.32_0.045_25)] relative">
+
+                {/* ALERTA NO CANTO SUPERIOR DIREITO */}
+                <div className="absolute top-5 right-5">
+                  {bolsaInfo.instituicao_pagou ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400 shadow-sm">
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      Verificado
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-yellow-100 text-yellow-700 border border-yellow-300 dark:bg-yellow-900/40 dark:text-yellow-400 shadow-sm">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      A Instituição não Pagou ou está em Análise
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 mb-4 pr-40"> {/* pr-40 para dar espaço ao alerta */}
                   <div
                     className="p-3 rounded-xl text-white"
-                    style={{
-                      background: "linear-gradient(135deg, oklch(0.62 0.118 25), oklch(0.54 0.120 25))",
-                    }}
+                    style={{ background: "linear-gradient(135deg, oklch(0.62 0.118 25), oklch(0.54 0.120 25))" }}
                   >
                     <Award className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg
-          text-[oklch(0.38_0.090_25)] dark:text-[oklch(0.88_0.055_25)]">
+                    <h3 className="font-semibold text-lg text-[oklch(0.38_0.090_25)] dark:text-[oklch(0.88_0.055_25)]">
                       Bolsa de Estudo
                     </h3>
-                    <p className="text-sm
-          text-[oklch(0.54_0.120_25)] dark:text-[oklch(0.72_0.090_25)]">
+                    <p className="text-sm text-[oklch(0.54_0.120_25)] dark:text-[oklch(0.72_0.090_25)]">
                       {bolsaInfo.bolsa || "Bolsa Ativa"}
                     </p>
                   </div>
@@ -192,8 +201,7 @@ export function StudentProfileHeader({ matricula }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 flex items-center justify-between text-xs text-muted-foreground border-t
-      border-[oklch(0.86_0.055_25)] dark:border-[oklch(0.28_0.055_25)]">
+                <div className="mt-6 pt-4 flex items-center justify-between text-xs text-muted-foreground border-t border-[oklch(0.86_0.055_25)] dark:border-[oklch(0.28_0.055_25)]">
                   <div className="flex items-center gap-2">
                     <span>Período de Validade</span>
                     <span>{bolsaInfo.semestre === 3 ? 'Anual' : bolsaInfo.semestre + " semestre"}</span>
