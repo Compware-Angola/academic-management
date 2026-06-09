@@ -476,7 +476,7 @@ export default function AddMarkingAssessmentModal({
               map={(u) => ({
                 key: u.codigo,
                 label: u.designacao,
-                value: u.codigo.toString(),
+                value: u.codigo,
               })}
             />
 
