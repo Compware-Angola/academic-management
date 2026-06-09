@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import {
   CardContent,
   CardDescription,
@@ -214,6 +214,15 @@ export function LaunchMigration({
       setIsSaving(false);
     }
   };
+
+  useEffect(() => {
+    setEditState({});
+    setDeletedIds(new Set());
+    setSearch("");
+    setSearchValue("");
+    setIsEquivalence(false);
+  }, [codigoMatricula]);
+
   const getRowStyle = (plan: (typeof plans)[number]) => {
     if (isDirty(plan.codigo))
       return "bg-amber-50 dark:bg-amber-950/30 border-l-2 border-l-amber-400";

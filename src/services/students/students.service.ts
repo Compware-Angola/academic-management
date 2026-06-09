@@ -165,13 +165,14 @@ export type FetchDisciplinasMatriculadasParams = {
   classes?: string | number;
   page?: number;
   limit?: number;
+  ignorarEliminados?: number;
 };
 
 
 export const fetchDisciplinasMatriculadas = async (
   params: FetchDisciplinasMatriculadasParams,
 ): Promise<DisciplinasResponse> => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes,ignorarEliminados } = params;
 
   const queryParams: Record<string, string | number> = {
     matriculaId: String(matriculaId).trim(),
@@ -189,6 +190,10 @@ export const fetchDisciplinasMatriculadas = async (
 
   if (classes !== undefined && classes !== null) {
     queryParams.classes = String(classes).trim();
+  }
+
+  if (ignorarEliminados !== undefined && ignorarEliminados !== null) {
+    queryParams.ignorarEliminados = String(ignorarEliminados).trim();
   }
 
   const response = await axiosNestGa.get<DisciplinasResponse>("/discipline", {
