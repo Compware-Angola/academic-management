@@ -19,7 +19,7 @@ export function useMutationRecalculatePayments() {
         },
         onSuccess: (_, codFactura) => {
             queryClient.invalidateQueries({ queryKey: ["pagamentos-mensais", { codFactura }] });
-            queryClient.invalidateQueries({ queryKey: ["monthly-fees-value", { codFactura }] });
+            queryClient.invalidateQueries({ queryKey: ["monthly-fees-value"] });
             toast.success("Pagamento recalculado com sucesso!");
         },
         onError: () => {
