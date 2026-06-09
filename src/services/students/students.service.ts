@@ -15,6 +15,7 @@ export type StudentSugestao = {
   periodo: string;
   nome_completo: string;
   estado: string;
+  is_bolseiro?: number;
 };
 
 
@@ -66,6 +67,7 @@ export type StudentDetail = {
   nacionalidade: string;
   estado_civil: string;
   periodo_codigo: number;
+
 };
 
 
@@ -115,6 +117,7 @@ export type InfoBolsaEstudante = {
   codigo_bolsa: number;
   bolsa: string;
   isentar_multa: string | null;
+  instituicao_pagou: boolean;
 }
 
 export const fetchInfoBolsaEstudante = async (

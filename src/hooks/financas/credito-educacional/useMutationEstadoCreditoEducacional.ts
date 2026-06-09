@@ -9,6 +9,7 @@ export default function useMutationEstadoCreditoEducacional() {
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["bolsa-estudante"] });
+      queryClient.invalidateQueries({ queryKey: ["student-info-bolsa"] });
     },
   });
 }
@@ -23,6 +24,7 @@ export function useMutationToggleInstituicaoPagou() {
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["bolsa-estudante"] });
+      queryClient.invalidateQueries({ queryKey: ["student-info-bolsa"] });
     },
   });
 }
