@@ -37,8 +37,8 @@ export async function viewFile(fileName: string): Promise<Blob> {
 }
 
 
-export type FileDocType = "FAT" | "REC" | "NF" | "CTR" | "IM" | string;
-export type FileDocTypeS3 = "recibos" | "faturas" | "notafiscal" | "contratos" | "imagens" | string;
+export type FileDocType = "FAT" | "REC" | "NF" | "CTR" | "IM" | "DC" | string;
+export type FileDocTypeS3 = "recibos" | "faturas" | "notafiscal" | "contratos" | "imagens" | "documentos" | "outros" | string;
 
 type ResponseUploadTyped = {
   message: string;
@@ -69,24 +69,28 @@ export async function uploadTypedFile(
 ): Promise<ResponseUploadTyped> {
   const generatedName = buildTypedFileName(docType, file);
 
-  const formData = new FormData();
-  formData.append("file", file);
-
-  if (filePath) {
-    formData.append("filePath", filePath);
-  }
-
   const response = await axiosApexGa.post<ResponseUploadTyped>(
     "/s3/files",
-    formData,
+    file,
     {
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": file.type || "application/octet-stream",
         "X-FILE-NAME": generatedName,
         ...(filePath && { "X-FILE-PATH": filePath }),
       },
     },
   );
+
+  return response.data;
+}
+export async function getTypedFile(filePath: string, fileName: string): Promise<Blob> {
+  const response = await axiosApexGa.get<Blob>("/s3/files", {
+    responseType: "blob",
+    headers: {
+      "X-FILE-NAME": fileName,
+      "X-FILE-PATH": filePath,
+    },
+  });
 
   return response.data;
 }
