@@ -309,7 +309,6 @@ export default function IsencaoServicoItem() {
               <TableRow>
                 <TableHead>Matricula</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Bilhete</TableHead>
                 <TableHead>Curso</TableHead>
                 <TableHead>Grau Academico</TableHead>
                 <TableHead>Serviço</TableHead>
@@ -322,14 +321,14 @@ export default function IsencaoServicoItem() {
             <TableBody>
               {isFetching && items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-10">
+                  <TableCell colSpan={9} className="text-center py-10">
                     <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
                     Carregando...
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center">
+                  <TableCell colSpan={9} className="text-center">
                     Nenhum registro encontrado
                   </TableCell>
                 </TableRow>
@@ -338,7 +337,6 @@ export default function IsencaoServicoItem() {
                   <TableRow key={item.codigo}>
                     <TableCell>{item.codigo_matricula ?? "-"}</TableCell>
                     <TableCell>{item.nome_completo ?? "-"}</TableCell>
-                    <TableCell>{item.bilhete_identidade ?? "-"}</TableCell>
                     <TableCell>{item.curso ?? "-"}</TableCell>
                     <TableCell>{item.grau_academico ?? "-"}</TableCell>
                     <TableCell>{item.servico ?? "-"}</TableCell>

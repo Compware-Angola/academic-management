@@ -302,7 +302,6 @@ export default function IsencaoServicoMultaItem() {
               <TableRow>
                 <TableHead>Matricula</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Bilhete</TableHead>
                 <TableHead>Curso</TableHead>
                 <TableHead>Grau Academico</TableHead>
                 <TableHead>Serviço</TableHead>
@@ -332,7 +331,6 @@ export default function IsencaoServicoMultaItem() {
                   <TableRow>
                     <TableCell>{item.codigo_matricula ?? "-"}</TableCell>
                     <TableCell>{item.nome_completo ?? "-"}</TableCell>
-                    <TableCell>{item.bilhete ?? "-"}</TableCell>
                     <TableCell>{item.curso ?? "-"}</TableCell>
                     <TableCell>{item.candidatura ?? "-"}</TableCell>
                     <TableCell>{item.servico ?? "-"}</TableCell>
