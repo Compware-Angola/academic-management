@@ -141,7 +141,7 @@ const EstudantesMatriculado = () => {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Estudantes Sem Inscrições em UC</CardTitle>
+          <CardTitle>Estudantes Matriculados</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
