@@ -118,7 +118,7 @@ export default function LaunchNotes() {
   const isDocente: boolean = roles?.docente === true;
   let isLoadinAdditionalInformation = false;
   const { data: rawInfo } = useQueryAdditionalInformation(
-    isDocente || isDiretorDeCurso,
+    (isDocente || isDiretorDeCurso) && !haveFullAccess(),
     formData.anoLetivo,
   );
 
@@ -162,14 +162,14 @@ export default function LaunchNotes() {
 
       const filteredClasses = allowedClassIds?.length
         ? classes.filter((c) =>
-            allowedClassIds?.includes(c?.codigo?.toString()),
-          )
+          allowedClassIds?.includes(c?.codigo?.toString()),
+        )
         : classes;
 
       const filteredUnidadesCurriculares = allowedGradeIds?.length
         ? unidadesCurriculares.filter((g) =>
-            allowedGradeIds?.includes(g?.pk?.toString()),
-          )
+          allowedGradeIds?.includes(g?.pk?.toString()),
+        )
         : unidadesCurriculares;
 
       return {
@@ -1262,9 +1262,8 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${
-        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
-      }. Contacte a administração.`,
+      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+        }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",
