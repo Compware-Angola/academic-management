@@ -1,5 +1,6 @@
 import {
   AlertCircle,
+  AlertTriangle,
   Banknote,
   Calendar,
   CheckCircle,
@@ -29,7 +30,7 @@ import { formatNumber } from "@/util/format-number";
 import { Button } from "@/components/ui/button";
 import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
 import { parseFilter } from "@/util/parse-filter";
-import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { useStudentDetail, useStudentInfoBolsa } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
 import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
@@ -78,18 +79,16 @@ const getStatusBadge = (status: number) => {
 export function MensalidadesSection({ codigoMatricula }: Props) {
   const [expandedPayment, setExpandedPayment] = useState<number | null>(null);
   const [anoLetivo, setAnoLetivo] = useState<string | null>("23");
+
   const [selectedPayments, setSelectedPayments] = useState<
     Map<number, SelectedPayment>
   >(new Map());
 
   const { mutate: recalculatePayments, isPending: isPendingRecalculatePayments } = useMutationRecalculatePayments();
 
+  const [recalculatingIds, setRecalculatingIds] = useState<Set<number>>(new Set());
 
-  const handleRecalculate = (invoiceId: number) => {
-    recalculatePayments(invoiceId, {
 
-    });
-  };
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
       (total, payment) => total + (payment.valorAPagar ?? 0),
@@ -152,6 +151,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     data: monthResponse,
     isLoading: isMonthLoading,
     isFetching: isMonthFetching,
+    refetch: refetchMonth,
   } = useQueryFinanceMonthlyFee({
     academicYear: anoLetivo,
     enrollmentCode: codigoMatricula.toString(),
@@ -159,6 +159,22 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     limit: 100,
     page: 1,
   });
+  const handleRecalculate = (invoiceId: number) => {
+    setRecalculatingIds(prev => new Set(prev).add(invoiceId));
+
+    recalculatePayments(invoiceId, {
+      onSettled: () => {
+        setRecalculatingIds(prev => {
+          const next = new Set(prev);
+          next.delete(invoiceId);
+          return next;
+        });
+      },
+      onSuccess: () => {
+        refetchMonth();
+      },
+    });
+  };
 
   const { data: student } = useStudentDetail(codigoMatricula);
   const { mutate: criarFactura, isPending } = useCreateInvoiceNoJob();
@@ -254,6 +270,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
               Histórico de pagamentos, mensalidades pendentes e recibos
             </p>
 
+
             {/* FIX: mostrar loader enquanto carrega o valor mensal */}
             {isMonthValueLoading ? (
               <div className="flex items-center gap-1 mt-1">
@@ -263,12 +280,15 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                 </span>
               </div>
             ) : monthFee ? (
-              <p className="text-base mt-1 text-destructive font-medium">
-                {monthFee.descricao}{" "}
-                <span className="font-bold">{monthFee.preco} kz</span>
-              </p>
+              <div className="mt-2 space-y-2">
+                <p className="text-base text-destructive font-medium">
+                  {monthFee.descricao}{" "}
+                  <span className="font-bold">{monthFee.preco} kz</span>
+                </p>
+
+
+              </div>
             ) : anoLetivo ? (
-              // FIX: feedback quando não há valor configurado para o ano/curso
               <p className="text-sm mt-1 text-muted-foreground italic">
                 Valor mensal não configurado para este curso
               </p>
@@ -287,7 +307,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
       {/* Área de Conteúdo */}
       <div className="space-y-4">
-        {isMonthLoading ? (
+        {(isMonthLoading || isMonthFetching) ? (
           <div className="h-[300px]">
             <div className="flex justify-center items-center">
               <Lottie
@@ -375,11 +395,10 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             variant="outline"
                             size="sm"
                             className="gap-1.5 text-warning border-warning/40 hover:bg-warning/10 hover:text-warning"
-                            onClick={() =>
-                              handleRecalculate(payment.codigo_factura)
-                            }
+                            disabled={recalculatingIds.has(payment.codigo_factura) || isPendingRecalculatePayments || isMonthLoading || isMonthFetching || isMonthValueLoading}
+                            onClick={() => handleRecalculate(payment.codigo_factura)}
                           >
-                            {isPendingRecalculatePayments ? (
+                            {recalculatingIds.has(payment.codigo_factura) ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             ) : (
                               <RefreshCw className="h-3.5 w-3.5" />

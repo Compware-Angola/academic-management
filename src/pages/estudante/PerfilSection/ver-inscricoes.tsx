@@ -49,6 +49,7 @@ import {
   useMutationDeleteGradeCurricularAluno,
   useMutationRestoreGradeCurricularAluno,
 } from "@/hooks/students/use-mutation-student-grade";
+import { FormSelect } from "@/components/common/FormSelect";
 
 type Props = {
   codigoMatricula: number;
@@ -66,6 +67,7 @@ export function InscricoesSection({
     anoLetivo: "23",
     semestre: "1",
     classes: "",
+    ignorarEliminados: "1",
   });
 
   const [horarionDetails, setHorarionDetails] = useState<HorarioDetails | null>(
@@ -81,6 +83,7 @@ export function InscricoesSection({
     anoLectivo: parseFilter(filter.anoLetivo),
     semestre: parseFilter(filter.semestre),
     classes: parseFilter(filter.classes),
+    ignorarEliminados: parseFilter(filter.ignorarEliminados),
     page,
     limit,
   });
@@ -157,12 +160,12 @@ export function InscricoesSection({
         <CardHeader>
           <CardTitle className="text-lg">Histórico de Disciplinas</CardTitle>
           <CardDescription>
-            Lista de todas as disciplinas cursadas e em curso
+            Lista de todas as disciplinas cursadas e em curso 2
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <AcademicYearSelect
               value={filter.anoLetivo}
               onChangeValue={(v) => setFilter({ ...filter, anoLetivo: v })}
@@ -179,6 +182,17 @@ export function InscricoesSection({
               curso={student?.curso_codigo.toString()}
               onChangeValue={(v) => setFilter({ ...filter, classes: v })}
             />
+            <FormSelect
+              label="Estados"
+              value={filter.ignorarEliminados}
+              onChange={(v) => setFilter({ ...filter, ignorarEliminados: v })}
+              options={[
+                { value: "1", label: "Ocultar eliminados" },
+                { value: "0", label: "Mostrar eliminados" },
+              ]}
+              map={(e) => ({ key: e.value, label: e.label, value: e.value })}
+            />
+
           </div>
 
           {isDisciplinasLoading ? (
@@ -281,7 +295,7 @@ export function InscricoesSection({
                                 <Pencil className="h-4 w-4" />
                               </Button>
                               {StatusDisciplina.ELIMINADO ===
-                              disc.estado_codigo ? (
+                                disc.estado_codigo ? (
                                 <Button
                                   onClick={() =>
                                     handleRestoreGradeCurricularAluno(
@@ -309,7 +323,7 @@ export function InscricoesSection({
                                   size="icon"
                                   disabled={
                                     disc.estado_codigo ===
-                                      StatusDisciplina.FEZ_COM_SUCESSO ||
+                                    StatusDisciplina.FEZ_COM_SUCESSO ||
                                     loadingId === disc.codigo
                                   }
                                 >
@@ -403,3 +417,4 @@ export function InscricoesSection({
     </TabsContent>
   );
 }
+

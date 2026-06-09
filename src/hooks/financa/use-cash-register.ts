@@ -17,11 +17,15 @@ import {
   validateMovementService,
   recoveryOpeningCodeService,
   blockMyCashRegisterService,
+  CreateCashRegisterPayload,
+  createCashRegisterService,
+  UpdateCashRegisterPayload,
+  updateCashRegisterService,
+  deleteCashRegisterService,
 } from "@/services/finance/cash-register.service";
-import { AuthStorage } from "@/util/auth-storage";
+
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const useQueryCashRegisters = (filters?: ListCashRegisterFilters) => {
@@ -193,6 +197,52 @@ export const useBlockMyCashRegister = () => {
       queryClient.invalidateQueries({
         queryKey: ["available-operators"],
       });
+    },
+  });
+};
+
+
+export const useCreateCashRegister = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateCashRegisterPayload) =>
+      createCashRegisterService(payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cash-registers"] });
+      queryClient.invalidateQueries({ queryKey: ["available-cash-registers"] });
+      toast.success("Caixa criado com sucesso");
+    },
+  });
+};
+
+export const useUpdateCashRegister = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdateCashRegisterPayload) =>
+      updateCashRegisterService(payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cash-registers"] });
+      queryClient.invalidateQueries({ queryKey: ["available-cash-registers"] });
+      toast.success("Caixa atualizado com sucesso");
+    },
+  });
+};
+
+
+export const useDeleteCashRegister = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => deleteCashRegisterService(id),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cash-registers"] });
+      queryClient.invalidateQueries({ queryKey: ["available-cash-registers"] });
+      toast.success("Caixa eliminado com sucesso");
     },
   });
 };

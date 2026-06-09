@@ -34,7 +34,7 @@ export function useQueryFinanceMonthlyFee({
 
   const queryKey = ["finance-monthly-fee", params];
 
-  const { data, isLoading, error, isError, isFetching } =
+  const { data, isLoading, error, isError, isFetching, refetch } =
     useQuery<MonthlyFeeDataResponse>({
       queryKey: queryKey,
       queryFn: async () => {
@@ -57,5 +57,6 @@ export function useQueryFinanceMonthlyFee({
     isLoading,
     error,
     isError,
+    refetch,
   };
 }

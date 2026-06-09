@@ -14,20 +14,19 @@ export function useMutationRecalculatePayments() {
             await recalculatePaymentsService(codFactura),
         onMutate: async () => {
             toast.loading("Recalculando pagamento...", {
-                id: "recalculate-payment",
+                id: `recalculate-payment`,
             });
         },
         onSuccess: (_, codFactura) => {
-
             queryClient.invalidateQueries({ queryKey: ["pagamentos-mensais", { codFactura }] });
-            queryClient.invalidateQueries({ queryKey: ["financial/monthly-fees", { codFactura }] });
+            queryClient.invalidateQueries({ queryKey: ["monthly-fees-value"] });
             toast.success("Pagamento recalculado com sucesso!");
         },
         onError: () => {
             toast.error("Erro ao recalcular pagamento!");
         },
         onSettled: () => {
-            toast.dismiss("recalculate-payment");
+            toast.dismiss(`recalculate-payment`);
         },
     });
 }
