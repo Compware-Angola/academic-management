@@ -76,7 +76,7 @@ export const useStudentInfoBolsa = (codigoMatricula?: number | string) => {
 export const useStudentDisciplinas = (
   params: FetchDisciplinasMatriculadasParams,
 ) => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes,ignorarEliminados } = params;
 
 
   const queryKey = [
@@ -85,6 +85,7 @@ export const useStudentDisciplinas = (
     anoLectivo ? String(anoLectivo) : null,
     semestre ? String(semestre) : null,
     classes ? String(classes) : null,
+    ignorarEliminados? String(ignorarEliminados) : null,
     page,
     limit,
   ].filter(Boolean);
