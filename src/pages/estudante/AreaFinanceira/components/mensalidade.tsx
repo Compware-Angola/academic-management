@@ -88,19 +88,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
   const [recalculatingIds, setRecalculatingIds] = useState<Set<number>>(new Set());
 
-  const handleRecalculate = (invoiceId: number) => {
-    setRecalculatingIds(prev => new Set(prev).add(invoiceId));
-
-    recalculatePayments(invoiceId, {
-      onSettled: () => {
-        setRecalculatingIds(prev => {
-          const next = new Set(prev);
-          next.delete(invoiceId);
-          return next;
-        });
-      },
-    });
-  };
 
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
@@ -164,6 +151,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     data: monthResponse,
     isLoading: isMonthLoading,
     isFetching: isMonthFetching,
+    refetch: refetchMonth,
   } = useQueryFinanceMonthlyFee({
     academicYear: anoLetivo,
     enrollmentCode: codigoMatricula.toString(),
@@ -171,6 +159,22 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     limit: 100,
     page: 1,
   });
+  const handleRecalculate = (invoiceId: number) => {
+    setRecalculatingIds(prev => new Set(prev).add(invoiceId));
+
+    recalculatePayments(invoiceId, {
+      onSettled: () => {
+        setRecalculatingIds(prev => {
+          const next = new Set(prev);
+          next.delete(invoiceId);
+          return next;
+        });
+      },
+      onSuccess: () => {
+        refetchMonth();
+      },
+    });
+  };
 
   const { data: student } = useStudentDetail(codigoMatricula);
   const { mutate: criarFactura, isPending } = useCreateInvoiceNoJob();
@@ -266,6 +270,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
               Histórico de pagamentos, mensalidades pendentes e recibos
             </p>
 
+
             {/* FIX: mostrar loader enquanto carrega o valor mensal */}
             {isMonthValueLoading ? (
               <div className="flex items-center gap-1 mt-1">
@@ -302,7 +307,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
       {/* Área de Conteúdo */}
       <div className="space-y-4">
-        {isMonthLoading ? (
+        {(isMonthLoading || isMonthFetching) ? (
           <div className="h-[300px]">
             <div className="flex justify-center items-center">
               <Lottie
@@ -390,7 +395,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             variant="outline"
                             size="sm"
                             className="gap-1.5 text-warning border-warning/40 hover:bg-warning/10 hover:text-warning"
-                            disabled={recalculatingIds.has(payment.codigo_factura)}
+                            disabled={recalculatingIds.has(payment.codigo_factura) || isPendingRecalculatePayments || isMonthLoading || isMonthFetching || isMonthValueLoading}
                             onClick={() => handleRecalculate(payment.codigo_factura)}
                           >
                             {recalculatingIds.has(payment.codigo_factura) ? (
