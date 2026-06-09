@@ -1,4 +1,4 @@
-import { uploadSingleFile } from '@/services/upload/upload-single.service'
+import { getTypedFile, uploadSingleFile } from '@/services/upload/upload-single.service'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from "react";
 import {
@@ -57,4 +57,40 @@ export function useTypedUpload() {
   }
 
   return { ...state, upload, previewFileName, reset };
+}
+
+type FetchState = {
+  loading: boolean;
+  error: string | null;
+  url: string | null;  // object URL para exibir/baixar
+};
+
+export function useTypedFile() {
+  const [state, setState] = useState<FetchState>({
+    loading: false,
+    error: null,
+    url: null,
+  });
+
+  async function fetchFile(filePath: string, fileName: string) {
+    setState({ loading: true, error: null, url: null });
+    try {
+      const blob = await getTypedFile(filePath, fileName);
+      const objectUrl = URL.createObjectURL(blob);
+      setState({ loading: false, error: null, url: objectUrl });
+      return objectUrl;
+    } catch (err: any) {
+      const message = err?.response?.data?.message ?? "Erro ao buscar arquivo";
+      setState({ loading: false, error: message, url: null });
+      throw err;
+    }
+  }
+
+  // limpa o object URL da memória quando não precisar mais
+  function release() {
+    if (state.url) URL.revokeObjectURL(state.url);
+    setState({ loading: false, error: null, url: null });
+  }
+
+  return { ...state, fetchFile, release };
 }
