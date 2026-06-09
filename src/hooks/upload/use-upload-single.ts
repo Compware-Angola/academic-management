@@ -38,11 +38,17 @@ export function useTypedUpload() {
     setState({ loading: true, error: null, result: null, previewName: null });
     try {
       const data = await uploadTypedFile(file, docType, filePath);
+      console.log(data);
+
       setState({
         loading: false,
         error: null,
-        result: data.file,
-        previewName: data.file.filename,
+        result: {
+          filename: data?.filename,
+          path: data?.path,
+          size: data?.size,
+        },
+        previewName: data?.filename,
       });
       return data;
     } catch (err: any) {
@@ -58,11 +64,10 @@ export function useTypedUpload() {
 
   return { ...state, upload, previewFileName, reset };
 }
-
 type FetchState = {
   loading: boolean;
   error: string | null;
-  url: string | null;  // object URL para exibir/baixar
+  url: string | null;
 };
 
 export function useTypedFile() {
@@ -75,10 +80,9 @@ export function useTypedFile() {
   async function fetchFile(filePath: string, fileName: string) {
     setState({ loading: true, error: null, url: null });
     try {
-      const blob = await getTypedFile(filePath, fileName);
-      const objectUrl = URL.createObjectURL(blob);
-      setState({ loading: false, error: null, url: objectUrl });
-      return objectUrl;
+      const link = await getTypedFile(filePath, fileName); // ← já é string
+      setState({ loading: false, error: null, url: link });
+      return link;
     } catch (err: any) {
       const message = err?.response?.data?.message ?? "Erro ao buscar arquivo";
       setState({ loading: false, error: message, url: null });
@@ -86,9 +90,8 @@ export function useTypedFile() {
     }
   }
 
-  // limpa o object URL da memória quando não precisar mais
+  // release não precisa mais de revokeObjectURL — é um link S3, não blob
   function release() {
-    if (state.url) URL.revokeObjectURL(state.url);
     setState({ loading: false, error: null, url: null });
   }
 

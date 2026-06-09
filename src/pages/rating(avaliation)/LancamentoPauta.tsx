@@ -35,8 +35,7 @@ import { useLancamentosPauta } from "@/hooks/avaliacao/use-query-lancamento-paut
 import { useCreateLancamentoPauta } from "@/hooks/avaliacao/use-mutation-create-lancamento-pauta copy";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
-import { useUploadSingle } from "@/hooks/upload/use-upload-single";
-import { viewFile } from "@/services/upload/upload-single.service";
+
 import { ApiError } from "@/error";
 import {
   Dialog,
@@ -50,6 +49,12 @@ import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTypedUpload } from "@/hooks/upload/use-upload-single";
+import { getTypedFile } from "@/services/upload/upload-single.service";
+
+// pasta fixa onde as pautas são guardadas no S3
+const PAUTA_FILE_PATH = "pautas";
+const PAUTA_DOC_TYPE = "PAU";
 
 export default function LancamentoPauta() {
   const { toast } = useToast();
@@ -57,7 +62,6 @@ export default function LancamentoPauta() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { user: userData } = useAuth();
 
-  // Verificação de role
   const { data: userDate } = useCurrentUser("GA");
   const isDocente = userDate?.roles?.docente;
 
@@ -67,7 +71,8 @@ export default function LancamentoPauta() {
   const [pautaIdSelecionada, setPautaIdSelecionada] = useState<number | null>(null);
   const [pautaInfo, setPautaInfo] = useState<any>(null);
 
-  const uploadMutation = useUploadSingle();
+  const { upload: uploadTyped, loading: isUploading, previewName } = useTypedUpload();
+
   const createMutation = useCreateLancamentoPauta();
   const atualizarEstadoMutation = useMutationAtualizarEstadoPauta();
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,7 +117,9 @@ export default function LancamentoPauta() {
     limit: limit,
   });
 
-  const { data: teacherInfoData } = useQueryTeacherProfile(userData?.user?.pk_utilizador);
+  const { data: teacherInfoData } = useQueryTeacherProfile(
+    Number(userData.user?.pk_utilizador),
+  );
 
   const pautas = response?.data ?? [];
   const pagination = {
@@ -131,22 +138,37 @@ export default function LancamentoPauta() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type !== "application/pdf") {
-        toast({ title: "Formato inválido", description: "Por favor, selecione um arquivo PDF.", variant: "destructive" });
+        toast({
+          title: "Formato inválido",
+          description: "Por favor, selecione um arquivo PDF.",
+          variant: "destructive",
+        });
         e.target.value = "";
         return;
       }
       setSelectedFile(file);
-      toast({ title: "Arquivo selecionado", description: `${file.name} pronto para submissão.` });
+      toast({
+        title: "Arquivo selecionado",
+        description: `${file.name} pronto para submissão.`,
+      });
     }
   };
 
   const handleOpenSubmitModal = () => {
     if (!selectedFile) {
-      toast({ title: "Nenhum arquivo selecionado", description: "Selecione um PDF.", variant: "destructive" });
+      toast({
+        title: "Nenhum arquivo selecionado",
+        description: "Selecione um PDF.",
+        variant: "destructive",
+      });
       return;
     }
     if (!filters.anoLectivo || !filters.unidadeCurricular || !filters.tipoAvaliacao) {
-      toast({ title: "Campos obrigatórios", description: "Ano letivo, unidade curricular e tipo de avaliação são obrigatórios.", variant: "destructive" });
+      toast({
+        title: "Campos obrigatórios",
+        description: "Ano letivo, unidade curricular e tipo de avaliação são obrigatórios.",
+        variant: "destructive",
+      });
       return;
     }
     setIsModalOpen(true);
@@ -155,16 +177,34 @@ export default function LancamentoPauta() {
   const handleConfirmSubmit = async () => {
     setIsModalOpen(false);
     try {
-      const uploadResponse = await uploadMutation.mutateAsync(selectedFile!);
-      if (!uploadResponse.file?.path) {
-        toast({ title: "Erro ao fazer upload", description: "Não foi possível fazer upload do ficheiro.", variant: "destructive" });
+      // ← usa uploadTyped com docType "PAU" e filePath "pautas"
+      const uploadResponse = await uploadTyped(
+        selectedFile!,
+        PAUTA_DOC_TYPE,
+        PAUTA_FILE_PATH,
+      );
+
+      const ficheiroName = uploadResponse.filename ?? previewName;
+
+      if (!ficheiroName) {
+        toast({
+          title: "Erro ao fazer upload",
+          description: "Não foi possível obter o nome do ficheiro.",
+          variant: "destructive",
+        });
         return;
       }
+
       const docenteId = teacherInfoData?.codigo_docente;
       if (!docenteId) {
-        toast({ title: "Erro ao fazer upload", description: "Somente professor devem submeter a pauta", variant: "destructive" });
+        toast({
+          title: "Erro ao submeter",
+          description: "Somente professores devem submeter a pauta.",
+          variant: "destructive",
+        });
         return;
       }
+
       createMutation.mutate(
         {
           anoLectivoId: Number(filters.anoLectivo),
@@ -172,22 +212,35 @@ export default function LancamentoPauta() {
           gradeCurricularId: Number(filters.unidadeCurricular),
           fkEstadoLancamentoPauta: 1,
           fkTipoAvaliacao: Number(filters.tipoAvaliacao),
-          ficheiroName: uploadResponse.file.filename,
+          ficheiroName: ficheiroName,
         },
         {
           onSuccess: (data) => {
-            toast({ title: "Sucesso!", description: data.message || "Pauta submetida com sucesso." });
+            toast({
+              title: "Sucesso!",
+              description: data.message || "Pauta submetida com sucesso.",
+            });
             clearFileInput();
             setCurrentPage(1);
             refetch();
           },
           onError: (error: any) => {
-            toast({ title: "Erro ao submeter", description: error.message || "Tente novamente.", variant: "destructive" });
+            toast({
+              title: "Erro ao submeter",
+              description: error.message || "Tente novamente.",
+              variant: "destructive",
+            });
           },
         },
       );
-    } catch {
-      toast({ title: "Erro inesperado", description: "Ocorreu um erro ao processar o upload.", variant: "destructive" });
+    } catch (error) {
+      console.log(error);
+
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao processar o upload.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -201,7 +254,10 @@ export default function LancamentoPauta() {
   const confirmarAcao = () => {
     if (!pautaIdSelecionada || !acaoTipo) return;
     atualizarEstadoMutation.mutate(
-      { codigo: pautaIdSelecionada, fkEstadoLancamentoPauta: (acaoTipo === "aprovar" ? 2 : 3) as 2 | 3 },
+      {
+        codigo: pautaIdSelecionada,
+        fkEstadoLancamentoPauta: (acaoTipo === "aprovar" ? 2 : 3) as 2 | 3,
+      },
       {
         onSettled: () => {
           setIsConfirmModalOpen(false);
@@ -216,14 +272,16 @@ export default function LancamentoPauta() {
   const handleDownload = async (ficheiroName: string) => {
     if (!ficheiroName) return;
     try {
-      const blob = await viewFile(ficheiroName);
-      const fileUrl = URL.createObjectURL(blob);
-      window.open(fileUrl, "_blank");
-      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+      const fileName = ficheiroName.split("/").pop()!;
+      console.log("download →", { ficheiroName, fileName, path: PAUTA_FILE_PATH });
+      const link = await getTypedFile(PAUTA_FILE_PATH, fileName);
+      window.open(link, "_blank");
     } catch (error) {
+      console.log(error);
+
       toast({
-        title: "Erro",
-        description: error instanceof ApiError ? error.message : "Erro ao abrir o ficheiro.",
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao processar o upload.",
         variant: "destructive",
       });
     }
@@ -242,6 +300,8 @@ export default function LancamentoPauta() {
   const getCursoLabel = () => cursos?.find((c) => c.codigo === Number(filters.curso))?.designacao || "";
   const getUnidadeCurricularLabel = () => unidadesCurriculares?.find((u) => u.pk === Number(filters.unidadeCurricular))?.descricao || "";
   const getTipoAvaliacaoLabel = () => tipoAvaliacao?.find((t) => t.codigo === Number(filters.tipoAvaliacao))?.designacao || "";
+
+  const isPending = isUploading || createMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -282,7 +342,7 @@ export default function LancamentoPauta() {
         </Alert>
       )}
 
-      {/* Filtros — sempre visíveis */}
+      {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -344,7 +404,7 @@ export default function LancamentoPauta() {
         </div>
       </div>
 
-      {/* Upload — só renderiza se for docente */}
+      {/* Upload — só docentes */}
       {isDocente && (
         <div className="bg-card border rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4">Submeter Nova Pauta</h3>
@@ -362,18 +422,21 @@ export default function LancamentoPauta() {
                 <p className="text-sm text-muted-foreground flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   {selectedFile.name}
+                  {/* preview do nome que vai ser enviado ao S3 */}
+                  {previewName && (
+                    <span className="text-xs text-muted-foreground/70">
+                      → {previewName}
+                    </span>
+                  )}
                   <Button variant="ghost" size="sm" onClick={clearFileInput}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </p>
               )}
             </div>
-            <Button
-              onClick={handleOpenSubmitModal}
-              disabled={!selectedFile || createMutation.isPending || uploadMutation.isPending}
-            >
+            <Button onClick={handleOpenSubmitModal} disabled={!selectedFile || isPending}>
               <Upload className="h-4 w-4 mr-2" />
-              {createMutation.isPending || uploadMutation.isPending ? "Submetendo..." : "Submeter Pauta"}
+              {isPending ? "Submetendo..." : "Submeter Pauta"}
             </Button>
           </div>
         </div>
@@ -391,6 +454,14 @@ export default function LancamentoPauta() {
               <Label className="text-right font-medium">Arquivo:</Label>
               <span className="col-span-3 truncate">{selectedFile?.name}</span>
             </div>
+            {previewName && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right font-medium">Nome S3:</Label>
+                <span className="col-span-3 truncate text-muted-foreground text-xs">
+                  {previewName}
+                </span>
+              </div>
+            )}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right font-medium">Ano Letivo:</Label>
               <span className="col-span-3">{getAnoLetivoLabel()}</span>
@@ -411,11 +482,11 @@ export default function LancamentoPauta() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={createMutation.isPending || uploadMutation.isPending}>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isPending}>
               Cancelar
             </Button>
-            <Button onClick={handleConfirmSubmit} disabled={createMutation.isPending || uploadMutation.isPending}>
-              {createMutation.isPending || uploadMutation.isPending ? "Submetendo..." : "Confirmar Submissão"}
+            <Button onClick={handleConfirmSubmit} disabled={isPending}>
+              {isPending ? "Submetendo..." : "Confirmar Submissão"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -427,7 +498,8 @@ export default function LancamentoPauta() {
           <DialogHeader>
             <DialogTitle>{acaoTipo === "aprovar" ? "Aprovar" : "Rejeitar"} Pauta</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja <strong>{acaoTipo === "aprovar" ? "aprovar" : "rejeitar"}</strong> esta pauta?
+              Tem certeza que deseja{" "}
+              <strong>{acaoTipo === "aprovar" ? "aprovar" : "rejeitar"}</strong> esta pauta?
               <br />
               {pautaInfo && (
                 <>
@@ -441,15 +513,20 @@ export default function LancamentoPauta() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmModalOpen(false)}>Cancelar</Button>
-            <Button variant={acaoTipo === "aprovar" ? "default" : "destructive"} onClick={confirmarAcao}>
+            <Button variant="outline" onClick={() => setIsConfirmModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant={acaoTipo === "aprovar" ? "default" : "destructive"}
+              onClick={confirmarAcao}
+            >
               Confirmar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Tabela — sempre visível */}
+      {/* Tabela */}
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Pautas Submetidas</h3>
         {isLoadingPautas ? (
@@ -495,7 +572,9 @@ export default function LancamentoPauta() {
                           ) : "-"}
                         </div>
                       </TableCell>
-                      <TableCell>{new Date(pauta.created_at).toLocaleDateString("pt-AO")}</TableCell>
+                      <TableCell>
+                        {new Date(pauta.created_at).toLocaleDateString("pt-AO")}
+                      </TableCell>
                       <TableCell>{pauta.curso}</TableCell>
                       <TableCell>{pauta.unidade_curricular}</TableCell>
                       <TableCell>{pauta.classe}</TableCell>
@@ -505,7 +584,11 @@ export default function LancamentoPauta() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           {pauta.ficheiro_name && (
-                            <Button variant="outline" size="sm" onClick={() => handleDownload(pauta.ficheiro_name!)}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownload(pauta.ficheiro_name!)}
+                            >
                               <Download className="h-4 w-4" />
                             </Button>
                           )}
@@ -524,15 +607,19 @@ export default function LancamentoPauta() {
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline" size="sm"
+                  variant="outline"
+                  size="sm"
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                   disabled={currentPage === 1 || isLoadingPautas}
                 >
                   <ChevronLeft className="h-4 w-4" /> Anterior
                 </Button>
-                <span className="text-sm px-3">Página {currentPage} de {pagination.totalPages}</span>
+                <span className="text-sm px-3">
+                  Página {currentPage} de {pagination.totalPages}
+                </span>
                 <Button
-                  variant="outline" size="sm"
+                  variant="outline"
+                  size="sm"
                   onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
                   disabled={currentPage === pagination.totalPages || isLoadingPautas}
                 >
