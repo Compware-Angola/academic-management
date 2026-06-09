@@ -226,7 +226,7 @@ export default function LaunchNotes() {
         curso: Number(formData.curso),
         unidadeCurricular: Number(formData.unidadeCurricular),
         ...(isDocente &&
-          !isDiretorDeCurso && { docente: Number(info?.[0]?.codigo_docente) }),
+          !isDiretorDeCurso && !haveFullAccess() && { docente: Number(info?.[0]?.codigo_docente) }),
       },
       { enabled: canLoadTurmas && canOperateInPage },
     );
@@ -737,6 +737,13 @@ export default function LaunchNotes() {
           />
 
           <CourseSelectTestIsaac
+            disabled={
+              !canOperateInPage ||
+              isLoadingSemestres ||
+              isLoadingPeriodos ||
+              isLoadingAcademicYear ||
+              !formData.semestre
+            }
             value={formData.curso}
             onChangeValue={handleCursoChange}
             allowedIds={allowedIds}
