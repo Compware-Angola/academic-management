@@ -20,6 +20,7 @@ export type Factura = {
   valor_pagar: number;
   desconto?: number;
   data_factura: string;
+  data_pagamento: string | null;
   total_multa: number;
   total_iva: number;
   total_incidencia: number;

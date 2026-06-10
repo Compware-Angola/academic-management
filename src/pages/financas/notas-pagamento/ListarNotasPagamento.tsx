@@ -350,7 +350,7 @@ export default function ListarNotasPagamento() {
                 <TableHead>Curso</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Emissão</TableHead>
-
+                <TableHead>Data de Pagamento</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -359,7 +359,7 @@ export default function ListarNotasPagamento() {
               {isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
+                    colSpan={11}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Carregando...
@@ -368,7 +368,7 @@ export default function ListarNotasPagamento() {
               ) : data?.data?.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={9}
+                    colSpan={11}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Nenhuma nota de pagamento encontrada
@@ -412,7 +412,7 @@ export default function ListarNotasPagamento() {
                       {formatCurrency(nota.valor_pagar)}
                     </TableCell>
                     <TableCell>{formatDate(nota.data_factura)}</TableCell>
-
+                    <TableCell>{formatDate(nota.data_pagamento)}</TableCell>
                     <TableCell>{getStatusBadge(nota.estado)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
