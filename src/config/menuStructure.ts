@@ -257,7 +257,7 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Sem inscrição no curso",
+          title: "Sem inscrição em curso",
           url: "/inscricoes/sem-curso",
           permission: [
             PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla,
