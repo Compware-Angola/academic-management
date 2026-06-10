@@ -14,6 +14,7 @@ import {
   FileText,
   BookUser,
   Files,
+  BarChart3,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -976,9 +977,10 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/relatorios/descontos",
         // },
         {
-          title: "Pagamentos por referência",
-          url: "/financas/pagamento-referencia",
-          permission: [PermissionTypeDetails.PAGAMENTOS_REFERENCIA.sigla],
+          title: "Rel. Pagamentos Instituições",
+          icon:BarChart3,
+          url: "/financas/rel-pagamentos-instituicoes",
+          // permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
         },
         {
           title: "Pagamentos",
