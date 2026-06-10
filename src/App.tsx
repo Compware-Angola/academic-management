@@ -156,6 +156,7 @@ import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
 import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
+import PostGraduationPrimaryRecords from "./pages/post-graduation/PrimaryRecords";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
@@ -1693,6 +1694,20 @@ const App = () => {
                         ]}
                       >
                         <RegistoPrimarioMatriculados />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/pos-graduacao/registos-primarios"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla!,
+                        ]}
+                      >
+                        <PostGraduationPrimaryRecords />
                       </ProtectedRoute>
                     }
                   />
