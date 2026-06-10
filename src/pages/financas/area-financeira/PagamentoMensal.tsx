@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2 } from "lucide-react";
+import { Home, Search, Loader2, Download, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useId, useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -36,8 +36,11 @@ import { useQueryListPagamentosMensais } from "@/hooks/financas/pagamentos-mensa
 import { formatNumber } from "@/util/format-number";
 import { useQueryMonthlyInstallments } from "@/hooks/avaliacao/use-query-monthly-installments";
 import { useDebounce } from "@/hooks/use-debounce"; // ← adicionar este hook
+import { exportPagamentosMensaisService } from "@/services/financas/pagamentos-mensais/fetch-pagamentos-mensais";
+import { toast } from "sonner";
 
 type SearchByType = "codigoMatricula" | "nome" | "pagamentoId";
+type ExportAction = "excel" | "pdf" | "print";
 
 export default function PagamentoMensal() {
   const searchOptions = [
@@ -58,6 +61,8 @@ export default function PagamentoMensal() {
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [exportingAction, setExportingAction] =
+    useState<ExportAction | null>(null);
 
   const [filters, setFilters] = useState({
     anoLectivo: "23",
@@ -115,6 +120,55 @@ export default function PagamentoMensal() {
   const handleFilterChange = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setPage(1);
+  };
+
+  const handleExport = async (action: ExportAction) => {
+    if (exportingAction || total === 0) return;
+
+    const printWindow = action === "print" ? window.open("", "_blank") : null;
+
+    if (action === "print" && !printWindow) {
+      toast.error("O navegador bloqueou a janela de impressão.");
+      return;
+    }
+
+    setExportingAction(action);
+
+    try {
+      const { blob, fileName } = await exportPagamentosMensaisService({
+        codigoAnoLectivo: parseFilter(filters.anoLectivo),
+        codigoCurso: parseFilter(filters.curso),
+        codigoPeriodo: parseFilter(filters.periodo),
+        codigoFaculdade: parseFilter(filters.faculdade),
+        mesId: parseFilter(filters.mes),
+        ...searchParams,
+      }, action === "excel" ? "csv" : "pdf");
+
+      const downloadUrl = URL.createObjectURL(blob);
+
+      if (action === "print") {
+        printWindow!.location.href = downloadUrl;
+        setTimeout(() => {
+          printWindow!.print();
+          URL.revokeObjectURL(downloadUrl);
+        }, 1000);
+      } else {
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+      }
+
+      toast.success("Exportação concluída com sucesso.");
+    } catch {
+      printWindow?.close();
+      toast.error("Não foi possível exportar as mensalidades pagas.");
+    } finally {
+      setExportingAction(null);
+    }
   };
 
   return (
@@ -214,8 +268,49 @@ export default function PagamentoMensal() {
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle>Lista de Pagamentos</CardTitle>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="gap-2"
+              disabled={!!exportingAction || isFetching || total === 0}
+              onClick={() => handleExport("pdf")}
+            >
+              {exportingAction === "pdf" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Exportar PDF
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              disabled={!!exportingAction || isFetching || total === 0}
+              onClick={() => handleExport("print")}
+            >
+              {exportingAction === "print" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Printer className="h-4 w-4" />
+              )}
+              Imprimir
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-2"
+              disabled={!!exportingAction || isFetching || total === 0}
+              onClick={() => handleExport("excel")}
+            >
+              {exportingAction === "excel" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Exportar Excel
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isFetching ? (
@@ -244,8 +339,10 @@ export default function PagamentoMensal() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tableData.map((item) => (
-                  <TableRow key={item.codigopagamento}>
+                {tableData.map((item, index) => (
+                  <TableRow
+                    key={`${item.codigopagamento}-${item.codigofactura}-${item.mes}-${index}`}
+                  >
                     <TableCell>{item.codigopagamento}</TableCell>
                     <TableCell>{item.codigomatricula}</TableCell>
                     <TableCell>{item.tipo}</TableCell>
