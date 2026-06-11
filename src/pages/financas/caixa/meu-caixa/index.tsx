@@ -50,11 +50,10 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <Badge
       variant="outline"
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${
-        isOpen
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${isOpen
           ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
           : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-      }`}
+        }`}
     >
       {isOpen ? <LockOpen className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
       {isOpen ? "Aberto" : "Fechado"}
@@ -189,6 +188,9 @@ function MeuCaixaAtualTab() {
                       valor de abertura:{" "}
                       {formatCurrencyAOA(data?.openingAmount || 0)}
                     </span>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      codigo de abertura: {myCaixa.openingCode}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -233,7 +235,7 @@ function MeuCaixaAtualTab() {
                     <TableCell className="text-right tabular-nums font-mono">
                       {formatCurrencyAOA(
                         data.summary.reduce((acc, i) => acc + i.total, 0) +
-                          data.openingAmount,
+                        data.openingAmount,
                       )}
                     </TableCell>
                   </TableRow>
