@@ -27,8 +27,10 @@ import { InstituicaoSelect } from "@/components/common/global-selects/Instituica
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
-import { useListarPagamentoBolsa } from "@/hooks/financas/bolsa/use-query-listar-pagamento-bolsa";
-import { PagamentosBolsasTable } from "./PagamentosBolsasTable";
+import { useListarPagamentoBolsa } from "@/hooks/financas/bolsa/pagamento-bolsa";
+import { PagamentosBolsasTable } from "./components/PagamentosBolsasTable";
+import { ModalUpsertPagamentoBolsa } from "./components/ModalUpsertPagamentoBolsa";
+import { ReportByTable } from "./components/ReportByTable";
 
 // ---------- MOCK DATA ----------
 interface Estudante {
@@ -132,14 +134,6 @@ const COLORS = ["hsl(221 83% 53%)", "hsl(160 84% 39%)", "hsl(45 93% 47%)", "hsl(
 type SortKey = "instituicao" | "anoLetivo" | "numBolseiros" | "valorDepositado" | "valorCalculado" | "diferenca";
 
 export default function RelPagamentosInstituicoes() {
-    const [filters, setFilters] = useState({
-        anoLectivo: "all",
-        semestre: "all",
-        codigoBolsa: "all",
-        codigoInstituicao: "all",
-        page: 1,
-        limit: 10,
-    })
     const [tab, setTab] = useState("tabela");
     const [anoFiltro, setAnoFiltro] = useState<string>("todos");
     const [semestreFiltro, setSemestreFiltro] = useState<string>("todos");
@@ -152,16 +146,7 @@ export default function RelPagamentosInstituicoes() {
     const [apenasDivergencias, setApenasDivergencias] = useState(false);
     const [detalhe, setDetalhe] = useState<RegistroInstituicao | null>(null);
     const [evolucaoModo, setEvolucaoModo] = useState<"mes" | "semestre" | "ano">("mes");
-    const handleClearFilters = () => {
-        setFilters({
-            anoLectivo: "all",
-            semestre: "all",
-            codigoBolsa: "all",
-            codigoInstituicao: "all",
-            page: 1,
-            limit: 10,
-        })
-    }
+
 
 
     const filtrados = useMemo(() => {
@@ -173,9 +158,7 @@ export default function RelPagamentosInstituicoes() {
             return true;
         });
     }, [anoFiltro, semestreFiltro, instFiltro, busca]);
-    const handleSetPage = (page: number) => {
-        setFilters((f) => ({ ...f, page }));
-    }
+
 
     const ordenados = useMemo(() => {
         const arr = [...filtrados];
@@ -316,48 +299,7 @@ export default function RelPagamentosInstituicoes() {
             <PageHeader
                 title="Relatório de Pagamentos às Instituições"
                 subtitle="Acompanhamento e validação dos pagamentos aos bolseiros vs valores devidos"
-                actions={
-                    <>
-                        <Button>Novo</Button>
-                        <Button variant="outline" onClick={exportCsv}><Download className="h-4 w-4 mr-2" />Excel</Button>
-                        <Button variant="outline" onClick={exportPdf}><FileText className="h-4 w-4 mr-2" />PDF</Button>
-                    </>
-                }
             />
-
-            {/* KPIs */}
-            {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <KpiCard icon={Wallet} title="Total Pago às Instituições" value={fmt(kpis.totalPago)} />
-                <KpiCard icon={BarChart3} title="Total Calculado das Bolsas" value={fmt(kpis.totalCalc)} />
-                <KpiCard
-                    icon={kpis.diferenca >= 0 ? TrendingUp : TrendingDown}
-                    title="Diferença Global"
-                    value={fmt(kpis.diferenca)}
-                    tone={Math.abs(kpis.diferenca) / Math.max(1, kpis.totalCalc) < 0.01 ? "ok" : "warn"}
-                />
-                <KpiCard icon={Percent} title="% Conciliação Financeira" value={`${kpis.conciliacao.toFixed(2)}%`} tone={kpis.conciliacao >= 99 ? "ok" : kpis.conciliacao >= 95 ? "warn" : "high"} />
-                <KpiCard icon={Building} title="Total de Instituições" value={kpis.instituicoes} />
-                <KpiCard icon={Users} title="Total de Bolseiros Ativos" value={kpis.totalBolseiros} />
-                <KpiCard icon={Wallet} title="Média por Bolseiro" value={fmt(kpis.mediaPorBolseiro)} />
-                <KpiCard icon={Building} title="Média por Instituição" value={fmt(kpis.mediaPorInst)} />
-            </div> */}
-
-            {/* Filtros */}
-            <Card>
-                <CardContent className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                        <AcademicYearSelect onChangeValue={(v) => { setFilters((f) => ({ ...f, anoLectivo: v })); setPage(1); }} value={filters.anoLectivo} enableDefaultSelectItem />
-                        <SemestreSelect onChangeValue={(v) => { setFilters((f) => ({ ...f, semestre: v })); setPage(1); }} value={filters.semestre} enableDefaultSelectItem />
-                        <InstituicaoSelect onChangeValue={(v) => { setFilters((f) => ({ ...f, codigoInstituicao: v, codigoBolsa: "all" })); setPage(1); }} value={filters.codigoInstituicao} enableDefaultSelectItem />
-                        <BolsaSelect onChangeValue={(v) => { setFilters((f) => ({ ...f, codigoBolsa: v })); setPage(1); }} value={filters.codigoBolsa} enableDefaultSelectItem codigoInstituicao={filters.codigoInstituicao} disabled={!filters.codigoInstituicao} />
-                    </div>
-                    <div className="flex justify-end gap-4 pt-4">
-                        <Button variant="outline" onClick={handleClearFilters}>Limpar Filtros</Button>
-
-                    </div>
-                </CardContent>
-            </Card>
-
             <Tabs value={tab} onValueChange={setTab}>
                 <TabsList>
                     <TabsTrigger value="tabela"><FileText className="h-4 w-4 mr-2" />Relatório em Tabela</TabsTrigger>
@@ -368,7 +310,7 @@ export default function RelPagamentosInstituicoes() {
 
                 {/* TABELA */}
                 <TabsContent value="tabela" className="mt-4">
-                    <PagamentosBolsasTable filters={filters} onSetPage={handleSetPage} />
+                    <ReportByTable />
                 </TabsContent>
 
                 {/* DASHBOARD */}
@@ -603,6 +545,7 @@ export default function RelPagamentosInstituicoes() {
                     )}
                 </DialogContent>
             </Dialog>
+
         </div>
     );
 }

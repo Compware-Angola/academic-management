@@ -10,6 +10,7 @@ interface BolsaSelectProps {
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
   codigoInstituicao?: string;
+  onBlur?: () => void;
 }
 
 export function BolsaSelect({
@@ -17,7 +18,9 @@ export function BolsaSelect({
   onChangeValue,
   disabled,
   enableDefaultSelectItem,
-  codigoInstituicao
+  codigoInstituicao,
+  onBlur
+
 }: BolsaSelectProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -52,6 +55,7 @@ export function BolsaSelect({
         value: item.codigo.toString(),
         label: item.designacao,
       })}
+      onBlur={onBlur}
       onChange={onChangeValue}
     />
   );

@@ -41,6 +41,7 @@ type FormCommandSelectProps<T> = {
   disabled?: boolean;
   width?: WidthPreset | string;
   isLoading?: boolean;
+  onBlur?: () => void;
 };
 
 /* ------------------ Utilitário de largura ------------------ */
@@ -69,6 +70,7 @@ export function FormCommandSelect<T>({
   disabled = false,
   width = "md",
   isLoading = false,
+  onBlur
 }: FormCommandSelectProps<T>) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -104,7 +106,9 @@ export function FormCommandSelect<T>({
 
   function handleOpenChange(isOpen: boolean) {
     setOpen(isOpen);
+
     if (!isOpen) {
+      onBlur?.();
       setSearchValue("");
       onSearchChange?.("");
     }
@@ -141,8 +145,8 @@ export function FormCommandSelect<T>({
               {selectedItem
                 ? selectedItem.label
                 : labelMode === "inside"
-                ? label
-                : placeholder}
+                  ? label
+                  : placeholder}
             </span>
             <ChevronsUpDown className="h-4 w-4 opacity-50" />
           </button>
@@ -223,3 +227,4 @@ export function FormCommandSelect<T>({
     </div>
   );
 }
+

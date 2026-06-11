@@ -10,16 +10,17 @@ export type PagamentoBolsa = {
   bolsa: string;
   codigo_instituicao: number;
   instituicao: string;
-  codigo_pagamento: string | null;
-  ano_lectivo: string;
-  semestre: string | null;
+  codigo_pagamento: number;
+  codigo_ano_letivo: number;
+  semestre: number;
   valor_depositado: number;
   data_deposito: string;
-  referencia: string | null;
-  observacao: string | null;
-  estado_pagamento: string | null;
-  data_registo: string | null;
+  referencia: string;
+  observacao: string;
+  estado_pagamento: number;
+  data_registo: string;
   qtd_estudantes: number;
+  ano_letivo?: string;
 };
 
 export type Meta = {
@@ -63,6 +64,51 @@ export async function listarPagamentoBolsa(
     {
       params: q,
     },
+  );
+  return response.data;
+}
+export type CriarPagamentoBolsaPayload = {
+  codigoBolsa: number;
+  anoLectivo: number;
+  semestre: number;
+  valorDepositado: number;
+  dataDeposito: string;
+  referencia: string;
+  observacao: string;
+};
+export async function criarPagamentoBolsa(params: CriarPagamentoBolsaPayload) {
+  const response = await axiosNestFinance.post<PagamentoBolsa>(
+    "/pagamentos-bolsa",
+    params,
+  );
+  return response.data;
+}
+
+export type UpdatePagamentoBolsaPayload = {
+  codigoPagamento: number;
+  codigoBolsa: number;
+  anoLectivo: number;
+  semestre: number;
+  valorDepositado: number;
+  dataDeposito: string;
+  referencia: string;
+  observacao: string;
+};
+
+export async function updatePagamentoBolsa(
+  params: UpdatePagamentoBolsaPayload,
+) {
+  const { codigoPagamento, ...data } = params;
+  const response = await axiosNestFinance.put<PagamentoBolsa>(
+    `/pagamentos-bolsa/${codigoPagamento}`,
+    data,
+  );
+  return response.data;
+}
+
+export async function deletePagamentoBolsa(codigoPagamento: number) {
+  const response = await axiosNestFinance.delete<PagamentoBolsa>(
+    `/pagamentos-bolsa/${codigoPagamento}`,
   );
   return response.data;
 }
