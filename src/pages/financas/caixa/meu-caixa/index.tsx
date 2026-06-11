@@ -160,9 +160,7 @@ function MeuCaixaAtualTab() {
   }
 
   if (myCaixa && (myCaixa.status === "fechado" || myCaixa.blocked === "S")) {
-    return <div className="space-y-4"><span className="text-xs text-muted-foreground font-mono">
-      codigo de abertura: {myCaixa?.code}
-    </span> <CashRegisterConfirmationAlert myCaixa={myCaixa} /></div>;
+    return <CashRegisterConfirmationAlert myCaixa={myCaixa} />;
   }
 
   if (myCaixa && myCaixa?.status === "aberto" && myCaixa?.blocked === "N") {
@@ -190,9 +188,6 @@ function MeuCaixaAtualTab() {
                     <span className="text-xs text-muted-foreground font-mono">
                       valor de abertura:{" "}
                       {formatCurrencyAOA(data?.openingAmount || 0)}
-                    </span>
-                    <span className="text-xs text-muted-foreground font-mono">
-                      codigo de abertura: {myCaixa?.code}
                     </span>
                   </div>
                 </div>
