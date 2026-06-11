@@ -24,7 +24,7 @@ const AcademicYearSelect = ({
   const defaultSelectItem = enableDefaultSelectItem
     ? [
       {
-        label: "Todos",
+        label: "Todos os anos letivos",
         value: "all",
         key: id,
       },
@@ -39,7 +39,7 @@ const AcademicYearSelect = ({
         onChangeValue(activeYear.codigo.toString());
       }
     }
-  }, [enableDefaultActiveYear, academicYear]);
+  }, [enableDefaultActiveYear, academicYear, onChangeValue]);
   return (
     <>
       <FormSelect
