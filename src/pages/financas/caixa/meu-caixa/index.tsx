@@ -161,15 +161,15 @@ function MeuCaixaAtualTab() {
 
   if (myCaixa && (myCaixa.status === "fechado" || myCaixa.blocked === "S")) {
     return <div className="space-y-4"><span className="text-xs text-muted-foreground font-mono">
-      codigo de abertura: {myCaixa.code}
+      codigo de abertura: {myCaixa?.code}
     </span> <CashRegisterConfirmationAlert myCaixa={myCaixa} /></div>;
   }
 
-  if (myCaixa && myCaixa.status === "aberto" && myCaixa.blocked === "N") {
+  if (myCaixa && myCaixa?.status === "aberto" && myCaixa?.blocked === "N") {
     return (
       <div className="space-y-4">
         <span className="text-xs text-muted-foreground font-mono">
-          codigo de abertura: {myCaixa.code}
+          codigo de abertura: {myCaixa?.code}
         </span>
         <Card>
           <CardContent className="pt-6">
@@ -180,8 +180,8 @@ function MeuCaixaAtualTab() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">{myCaixa.name}</h2>
-                    <StatusBadge status={myCaixa.status} />
+                    <h2 className="text-lg font-semibold">{myCaixa?.name}</h2>
+                    <StatusBadge status={myCaixa?.status} />
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">
                     {data && data.movementID && (
@@ -194,7 +194,7 @@ function MeuCaixaAtualTab() {
                       {formatCurrencyAOA(data?.openingAmount || 0)}
                     </span>
                     <span className="text-xs text-muted-foreground font-mono">
-                      codigo de abertura: {myCaixa.code}
+                      codigo de abertura: {myCaixa?.code}
                     </span>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ function MeuCaixaAtualTab() {
     return (
       <Card className="border-dashed">
         <span className="text-xs text-muted-foreground font-mono">
-          codigo de abertura: {myCaixa.code}
+          codigo de abertura: {myCaixa?.code}
         </span>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
