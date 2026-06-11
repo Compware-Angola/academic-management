@@ -65,7 +65,11 @@ export function AvisoFormDialog({
     curso: "",
     periodo:
       data?.periodo?.codigo?.toString() ?? data?.periodo?.toString() ?? "",
-    destino: data?.destino?.id?.toString() ?? data?.destino?.toString() ?? "",
+    destino:
+      data?.destinoId?.toString() ??
+      data?.destino?.id?.toString() ??
+      data?.destino?.toString() ??
+      "",
     date_expiracao: data?.date_expiracao
       ? new Date(data.date_expiracao).toISOString().split("T")[0]
       : "",
@@ -91,6 +95,7 @@ export function AvisoFormDialog({
           initialData?.periodo?.toString() ??
           "",
         destino:
+          initialData?.destinoId?.toString() ??
           initialData?.destino?.id?.toString() ??
           initialData?.destino?.toString() ??
           "",
