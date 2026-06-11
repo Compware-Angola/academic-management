@@ -54,8 +54,8 @@ const CourseSelect = ({
       width={width}
       options={filteredCursos}
       map={(f) => ({
-        key: f.codigo.toString(),
-        value: f.codigo.toString(),
+        key: f.codigo?.toString(),
+        value: f.codigo?.toString(),
         label: f.designacao,
       })}
       onChange={(value) => onChangeValue(value)}

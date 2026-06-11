@@ -44,7 +44,7 @@ export function DocenteVigilanteSelect({
       width="full"
       map={(d) => ({
         key: d.codigo_utilizador,
-        value: d.codigo_utilizador.toString(),
+        value: d.codigo_utilizador?.toString(),
         label: d.nome,
       })}
       onChange={handleSelect}

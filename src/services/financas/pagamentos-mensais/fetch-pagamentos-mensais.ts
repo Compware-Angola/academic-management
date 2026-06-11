@@ -37,6 +37,18 @@ export type ListPagamentosMensaisResponse = {
   totalPages: number;
 };
 
+export type ExportPagamentosMensaisPayload = Omit<
+  ListPagamentosMensaisPayload,
+  "page" | "limit"
+>;
+
+export type ExportPagamentosMensaisResponse = {
+  blob: Blob;
+  fileName: string;
+};
+
+type ExportFormat = "csv" | "pdf";
+
 export async function getListPagamentosMensaisService(
   payload: ListPagamentosMensaisPayload,
 ): Promise<ListPagamentosMensaisResponse> {
@@ -52,6 +64,37 @@ export async function getListPagamentosMensaisService(
   );
 
   return data;
+}
+
+export async function exportPagamentosMensaisService(
+  payload: ExportPagamentosMensaisPayload,
+  format: ExportFormat = "csv",
+): Promise<ExportPagamentosMensaisResponse> {
+  const endpoint =
+    format === "pdf"
+      ? "/payment/monthly/export/pdf"
+      : "/payment/monthly/export";
+  const response = await axiosNestFinance.get<Blob>(endpoint, {
+    params: payload,
+    responseType: "blob",
+  });
+
+  const contentDisposition = response.headers["content-disposition"] as
+    | string
+    | undefined;
+  const fileNameMatch = contentDisposition?.match(
+    /filename\*?=(?:UTF-8'')?["']?([^"';]+)["']?/i,
+  );
+  const fallbackFileName = `mensalidades-pagas-${new Date()
+    .toISOString()
+    .slice(0, 10)}.${format}`;
+
+  return {
+    blob: response.data,
+    fileName: fileNameMatch
+      ? decodeURIComponent(fileNameMatch[1])
+      : fallbackFileName,
+  };
 }
 
 
@@ -75,5 +118,3 @@ export async function recalculatePaymentsService(
 
   return data;
 }
-
-

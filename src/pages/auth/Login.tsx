@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/form";
 
 import { useMutationLogin } from "@/hooks/mutations/use-mutation-login";
+import { useQueryLoginGaImage } from "@/hooks/acess/use-query-login-ga-image";
 import { APP_ENV, isDevelop, isPrePrd } from "@/config/env";
 import { useTheme } from "@/hooks/use-theme";
+import { buildImageAssets } from "@/util/build-image-assets";
 
 import logo from "@/assets/logo_uma.png";
 import studentsBg from "@/assets/students-bg.jpg";
@@ -35,12 +37,46 @@ type LoginFormData = z.infer<typeof loginSchema>;
 const Login = () => {
   const { setTheme } = useTheme();
   const loginMutation = useMutationLogin();
+  const { data: loginGaImage } = useQueryLoginGaImage();
   const [showPassword, setShowPassword] = useState(false);
+  const [loginBackground, setLoginBackground] = useState(studentsBg);
 
   // Força modo light enquanto a página de login está montada
   useEffect(() => {
     setTheme("light");
   }, []);
+
+  useEffect(() => {
+    const imageUrl = buildImageAssets(loginGaImage?.filename);
+
+    if (!imageUrl) {
+      setLoginBackground(studentsBg);
+      return;
+    }
+
+    let cancelled = false;
+    const image = new Image();
+
+    image.onload = () => {
+      if (!cancelled) {
+        setLoginBackground(imageUrl);
+      }
+    };
+
+    image.onerror = () => {
+      if (!cancelled) {
+        setLoginBackground(studentsBg);
+      }
+    };
+
+    image.src = imageUrl;
+
+    return () => {
+      cancelled = true;
+      image.onload = null;
+      image.onerror = null;
+    };
+  }, [loginGaImage?.filename]);
 
   const showEnvLabel = isDevelop || isPrePrd;
   const envDisplay = isDevelop
@@ -65,7 +101,7 @@ const Login = () => {
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden text-white p-12">
         <div
           className="pointer-events-none absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${studentsBg})` }}
+          style={{ backgroundImage: `url(${loginBackground})` }}
           aria-hidden
         />
         <div className="pointer-events-none absolute inset-0 bg-animated-red opacity-70 mix-blend-multiply" aria-hidden />

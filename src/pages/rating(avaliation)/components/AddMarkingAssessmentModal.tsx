@@ -216,7 +216,7 @@ export default function AddMarkingAssessmentModal({
       semestre: parseFilter(filters.semestre),
       vigilantes: teacher.map((t) => {
         const docente = docentes.find(
-          (d) => d.codigo_utilizador.toString() === t,
+          (d) => d.codigo_utilizador?.toString() === t,
         );
         return {
           codigoUtilizador: Number(t),

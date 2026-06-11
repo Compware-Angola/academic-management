@@ -40,6 +40,7 @@ type DropdownBolsa = {
 };
 export type ParamsBolsa = {
   designacao?: string;
+  codigoInstituicao?: number;
 };
 export async function fetchDropDownBolsas(
   params?: ParamsBolsa,

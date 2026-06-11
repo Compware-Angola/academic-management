@@ -167,6 +167,8 @@ import { FormaPagamentoPage } from "./pages/financas/forma-pagamento";
 import { CaixaPage } from "./pages/financas/caixa";
 import { CloseCashRegisterPage } from "./pages/financas/fecho-caixa/FechoCaixaUtilizador";
 import { MeuCaixaPage } from "./pages/financas/caixa/meu-caixa";
+import RelPagamentosInstituicoes from "./pages/financas/relatorios/RelPagamentosInstituicoes";
+
 
 const App = () => {
   return (
@@ -1693,6 +1695,18 @@ const App = () => {
                         ]}
                       >
                         <RegistoPrimarioMatriculados />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/rel-pagamentos-instituicoes"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PARAMETROS_MGH.sigla!,
+                        ]}
+                      >
+                        <RelPagamentosInstituicoes />
                       </ProtectedRoute>
                     }
                   />
