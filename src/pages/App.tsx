@@ -26,7 +26,7 @@ export function MainLayout() {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <div className="my-20 mx-auto max-w-7xl w-full px-4">
+        <div className="my-20 mx-auto max-w-full w-full px-2 md:px-2 @container/main">
           <Outlet />
         </div>
       </SidebarInset>

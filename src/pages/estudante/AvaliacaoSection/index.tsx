@@ -25,7 +25,7 @@ export function AvaliacaoSection({
         orientation="vertical"
         className="flex flex-row gap-6"
       >
-        <TabsList className="flex justify-start flex-col h-fit w-52 shrink-0">
+        <TabsList className="flex justify-start flex-col h-fit w-64 shrink-0">
           {hasPermission(
             PermissionTypeDetails.LISTAR_AVALICOES_ESTUDANTE.sigla,
           ) && (
