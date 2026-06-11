@@ -9,6 +9,7 @@ export type CashRegister = {
   operatorId?: number | null;
   createdAt?: string;
   updatedAt?: string;
+  openingCode?: string;
 };
 
 export type ListCashRegisterFilters = {

@@ -50,11 +50,10 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <Badge
       variant="outline"
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${
-        isOpen
-          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-      }`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${isOpen
+        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+        }`}
     >
       {isOpen ? <LockOpen className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
       {isOpen ? "Aberto" : "Fechado"}
@@ -161,12 +160,17 @@ function MeuCaixaAtualTab() {
   }
 
   if (myCaixa && (myCaixa.status === "fechado" || myCaixa.blocked === "S")) {
-    return <CashRegisterConfirmationAlert myCaixa={myCaixa} />;
+    return <div className="space-y-4"><span className="text-xs text-muted-foreground font-mono">
+      codigo de abertura: {myCaixa.code}
+    </span> <CashRegisterConfirmationAlert myCaixa={myCaixa} /></div>;
   }
 
   if (myCaixa && myCaixa.status === "aberto" && myCaixa.blocked === "N") {
     return (
       <div className="space-y-4">
+        <span className="text-xs text-muted-foreground font-mono">
+          codigo de abertura: {myCaixa.code}
+        </span>
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -188,6 +192,9 @@ function MeuCaixaAtualTab() {
                     <span className="text-xs text-muted-foreground font-mono">
                       valor de abertura:{" "}
                       {formatCurrencyAOA(data?.openingAmount || 0)}
+                    </span>
+                    <span className="text-xs text-muted-foreground font-mono">
+                      codigo de abertura: {myCaixa.code}
                     </span>
                   </div>
                 </div>
@@ -233,7 +240,7 @@ function MeuCaixaAtualTab() {
                     <TableCell className="text-right tabular-nums font-mono">
                       {formatCurrencyAOA(
                         data.summary.reduce((acc, i) => acc + i.total, 0) +
-                          data.openingAmount,
+                        data.openingAmount,
                       )}
                     </TableCell>
                   </TableRow>
@@ -308,6 +315,9 @@ function MeuCaixaAtualTab() {
   if (!myCaixa) {
     return (
       <Card className="border-dashed">
+        <span className="text-xs text-muted-foreground font-mono">
+          codigo de abertura: {myCaixa.code}
+        </span>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
             <Wallet className="h-8 w-8 text-muted-foreground" />
