@@ -24,7 +24,7 @@ export function BolsaSelect({
   return (
     <FormCommandSelect
       width="full"
-      label="Bolsa"
+      label="Crédito Educacional"
       value={value}
       disabled={disabled || isLoading}
       isLoading={isLoading}

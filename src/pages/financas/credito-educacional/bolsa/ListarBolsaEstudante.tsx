@@ -230,7 +230,7 @@ export default function ListarBolsaEstudante() {
 
   const pdfContent = pdfData ? (
     <GenericPDFDocument
-      documentTitle="Estudantes com Bolsa"
+      documentTitle="Estudantes com Crédito Educacional"
       subtitle="Lista de estudantes com créditos ou bolsas aplicadas"
       infoSections={[
         { title: "Filtros Aplicados", content: pdfData.filtros },
@@ -306,15 +306,15 @@ export default function ListarBolsaEstudante() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Estudantes com Bolsa</BreadcrumbPage>
+            <BreadcrumbPage>Estudantes com Crédito Educacional</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Estudantes com Bolsa</h1>
+        <h1 className="text-2xl font-bold">Estudantes com Crédito Educacional</h1>
         <p className="text-muted-foreground">
-          Lista completa de estudantes com créditos ou bolsas aplicadas.
+          Lista completa de estudantes com Créditos Educacionais aplicados.
         </p>
       </div>
 
@@ -490,7 +490,7 @@ export default function ListarBolsaEstudante() {
                     <TableHead>Semestre</TableHead>
                     <TableHead>Desconto</TableHead>
                     <TableHead>Tipo Crédito</TableHead>
-                    <TableHead>Bolsa</TableHead>
+                    <TableHead>Crédito Educacional</TableHead>
 
                     <TableHead>Pago pela Instituição</TableHead>
                     <TableHead>Estado da Bolsa</TableHead>

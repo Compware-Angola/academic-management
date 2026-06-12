@@ -289,7 +289,7 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Insentar colisão",
+          title: "Isentar colisão",
           url: "/inscricoes/colisao",
           permission: [
             PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla,
@@ -885,12 +885,12 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/credito/instituicoes/receita",
         // },
         {
-          title: "Bolsas",
+          title: "Credito Educacional",
           url: "financas/credito/bolsa",
           permission: [PermissionTypeDetails.HISTORICO_BOLSAS.sigla],
         },
         {
-          title: "Bolsa Estudante",
+          title: "Créd. Edu. Estudante",
           url: "/financas/credito/bolsa/estudante",
           permission: [PermissionTypeDetails.LISTAR_BOLSEIROS.sigla],
         },
