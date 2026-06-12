@@ -318,7 +318,7 @@ export const academicStructure: MenuStructure = {
       icon: Calendar,
       items: [
         {
-          title: "Atividades letivas",
+          title: "Actividades lectivas",
           url: "/calendario/atividades",
           permission: [PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla],
         },
@@ -779,14 +779,14 @@ export const operacionalStructure: MenuStructure = {
           ],
         },
         {
-          title: "Registro exame de acesso",
+          title: "Registo exame de acesso",
           url: "/ministerio/registro-exame",
           permission: [
             PermissionTypeDetails.REGISTRO_PRIMARIO_EXAME_ACESSO.sigla,
           ],
         },
         {
-          title: "Registro de Matriculados",
+          title: "Registo de Matriculados",
           url: "/ministerio/registro-matricula",
           permission: [
             PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla,
@@ -976,12 +976,15 @@ export const finaceStructure: MenuStructure = {
         //   title: "Estudantes com Desconto",
         //   url: "/financas/relatorios/descontos",
         // },
+
+        /* Relatórios de Pagamentos 
         {
           title: "Rel. Pagamentos Instituições",
-          icon:BarChart3,
+          icon: BarChart3,
           url: "/financas/rel-pagamentos-instituicoes",
-          // permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
+          permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
         },
+        */
         {
           title: "Pagamentos",
           url: "/financas/listar-pagamentos",
