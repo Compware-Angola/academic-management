@@ -7,6 +7,8 @@ export type Atividade = {
   ano_lectivo: string;
   tipo_candidatura: string;
   tipo_calendario: string;
+  codigo_utilizador?: number;
+  descricao_utilizador?: string;
 };
 
 export async function fetchAtividade({

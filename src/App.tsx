@@ -157,6 +157,7 @@ import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantes
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 import PostGraduationPrimaryRecords from "./pages/post-graduation/PrimaryRecords";
+import PostGraduationAcademicActivities from "./pages/post-graduation/AcademicActivities";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
@@ -1708,6 +1709,19 @@ const App = () => {
                         ]}
                       >
                         <PostGraduationPrimaryRecords />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/calendario/atividades"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS
+                            .sigla!,
+                        ]}
+                      >
+                        <PostGraduationAcademicActivities />
                       </ProtectedRoute>
                     }
                   />

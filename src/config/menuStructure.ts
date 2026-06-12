@@ -678,23 +678,6 @@ export const academicStructure: MenuStructure = {
     },
 
     {
-      title: "Pós-Graduação",
-      url: "/pos-graduacao",
-      icon: GraduationCap,
-      permission: [
-        PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
-      ],
-      items: [
-        {
-          title: "Registos Primários",
-          url: "/pos-graduacao/registos-primarios",
-          permission: [
-            PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
-          ],
-        },
-      ],
-    },
-    {
       permission: [PermissionTypeDetails.DEFESA.sigla],
       title: "Gestão de Defesa e TFC",
       url: "/defesa-tfc",
@@ -719,6 +702,37 @@ export const academicStructure: MenuStructure = {
     },
   ],
 };
+
+export const postGraduationStructure: MenuStructure = {
+  items: [
+    {
+      title: "Pós-Graduação",
+      url: "/pos-graduacao",
+      icon: GraduationCap,
+      permission: [
+        PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
+        PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+      ],
+      items: [
+        {
+          title: "Registos Primários",
+          url: "/pos-graduacao/registos-primarios",
+          permission: [
+            PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Atividades Letivas",
+          url: "/pos-graduacao/calendario/atividades",
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export const operacionalStructure: MenuStructure = {
   items: [
     {
