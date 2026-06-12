@@ -4,6 +4,9 @@ export type Atividade = {
   descricao: string;
   data_inicio: string;
   data_termino: string;
+  cod_ano_lectivo: number;
+  codigo_tipo_calendario: number;
+  codigo_tipo_candidatura: number;
   ano_lectivo: string;
   tipo_candidatura: string;
   tipo_calendario: string;
