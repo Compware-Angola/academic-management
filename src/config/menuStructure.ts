@@ -712,6 +712,8 @@ export const postGraduationStructure: MenuStructure = {
       permission: [
         PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
         PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+        PermissionTypeDetails.CALENDARIO_PROVAS.sigla,
+        PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
       ],
       items: [
         {
@@ -727,6 +729,18 @@ export const postGraduationStructure: MenuStructure = {
           permission: [
             PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
           ],
+        },
+        {
+          title: "Parâmetros do Calendário",
+          url: "/pos-graduacao/calendario/parametros",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+          ],
+        },
+        {
+          title: "Calendário de Provas",
+          url: "/pos-graduacao/calendario/provas",
+          permission: [PermissionTypeDetails.CALENDARIO_PROVAS.sigla],
         },
       ],
     },

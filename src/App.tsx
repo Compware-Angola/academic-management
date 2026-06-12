@@ -158,6 +158,7 @@ import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExames
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
 import PostGraduationPrimaryRecords from "./pages/post-graduation/PrimaryRecords";
 import PostGraduationAcademicActivities from "./pages/post-graduation/AcademicActivities";
+import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/AcademicCalendarParameters";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
@@ -1186,7 +1187,15 @@ const App = () => {
                   />
                   <Route
                     path="/calendario-pos/provas"
-                    element={<ExamCalendarPos />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CALENDARIO_PROVAS.sigla!,
+                        ]}
+                      >
+                        <ExamCalendarPos />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route path="/alunos/novo" element={<UnderConstruction />} />
                   {/* <Route path="*" element={<NotFound />} />*/}
@@ -1722,6 +1731,31 @@ const App = () => {
                         ]}
                       >
                         <PostGraduationAcademicActivities />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/calendario/parametros"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO
+                            .sigla!,
+                        ]}
+                      >
+                        <PostGraduationAcademicCalendarParameters />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/calendario/provas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CALENDARIO_PROVAS.sigla!,
+                        ]}
+                      >
+                        <ExamCalendarPos />
                       </ProtectedRoute>
                     }
                   />

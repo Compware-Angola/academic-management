@@ -1,193 +1,333 @@
+import { useEffect, useMemo, useState } from "react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+
 import { PageHeader } from "@/components/common/PageHeader";
+import { DataTable } from "@/components/common/DataTable";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Download, Printer, RefreshCw, Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useQueryExamCalendars } from "@/hooks/post-graduation/use-query-exam-calendars";
+import { useQueryPostGraduationDegrees } from "@/hooks/post-graduation/use-query-degrees";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { PostGraduationExamCalendar } from "@/services/post-graduation/fetch-exam-calendars.service";
+import { formatDateOnlyPt } from "@/util/date-formate";
+
+type FiltersState = {
+  academicYearId: string;
+  degreeId: string;
+};
+
+const initialFilters: FiltersState = {
+  academicYearId: "",
+  degreeId: "",
+};
+
+const ITEMS_PER_PAGE = 10;
+const MASTERS_DEGREE_ID = "2";
+
+function displayValue(value: string | number | null) {
+  return value ?? "-";
+}
 
 export default function ExamCalendarPos() {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState<FiltersState>(initialFilters);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [filterError, setFilterError] = useState("");
+  const [hasInitializedFilters, setHasInitializedFilters] = useState(false);
 
-  const mockData = [
-    { id: 1, modulo: "Gestão Estratégica", programa: "MBA em Gestão", tipo: "Prova Escrita", data: "2025-03-05", horaInicio: "14:00", horaFim: "17:00", sala: "Auditório A" },
-    { id: 2, modulo: "Estruturas Avançadas", programa: "Mestrado em Eng. Civil", tipo: "Defesa de Tese", data: "2025-03-10", horaInicio: "09:00", horaFim: "11:00", sala: "Sala de Defesas" },
-    { id: 3, modulo: "Direito Comercial", programa: "Pós-Graduação em Direito", tipo: "Prova Oral", data: "2025-04-15", horaInicio: "10:00", horaFim: "12:00", sala: "Sala 201" },
+  const {
+    data: academicYears = [],
+    isLoading: isLoadingAcademicYears,
+    isError: isAcademicYearsError,
+  } = useQueryAnoAcademico();
+  const {
+    data: degreesResponse,
+    isLoading: isLoadingDegrees,
+    isError: isDegreesError,
+  } = useQueryPostGraduationDegrees();
+
+  const degrees = useMemo(
+    () =>
+      (degreesResponse?.data ?? []).filter(
+        (degree) => degree.id === 2 || degree.id === 3,
+      ),
+    [degreesResponse],
+  );
+
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isError: isCalendarsError,
+    refetch,
+  } = useQueryExamCalendars({
+    academicYearId: Number(filters.academicYearId),
+    degreeId: Number(filters.degreeId),
+  });
+
+  const calendars = useMemo(
+    () => (Array.isArray(data?.data) ? data.data : []),
+    [data],
+  );
+  const totalPages = Math.max(
+    1,
+    Math.ceil(calendars.length / ITEMS_PER_PAGE),
+  );
+  const paginatedCalendars = useMemo(
+    () =>
+      calendars.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE,
+      ),
+    [calendars, currentPage],
+  );
+
+  useEffect(() => {
+    if (
+      hasInitializedFilters ||
+      academicYears.length === 0 ||
+      degrees.length === 0
+    ) {
+      return;
+    }
+
+    const activeAcademicYear = academicYears.find((year) =>
+      ["activo", "ativo"].includes(year.estado?.trim().toLowerCase()),
+    );
+    const mastersDegree = degrees.find(
+      (degree) => String(degree.id) === MASTERS_DEGREE_ID,
+    );
+
+    if (!activeAcademicYear || !mastersDegree) {
+      setFilterError(
+        !activeAcademicYear
+          ? "Não foi encontrado um ano lectivo ativo."
+          : "Não foi possível selecionar o grau Mestrado.",
+      );
+      setHasInitializedFilters(true);
+      return;
+    }
+
+    setFilters({
+      academicYearId: String(activeAcademicYear.codigo),
+      degreeId: String(mastersDegree.id),
+    });
+    setHasInitializedFilters(true);
+  }, [academicYears, degrees, hasInitializedFilters]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const columns = [
+    { header: "Código", accessor: "id" },
+    { header: "Ano Lectivo", accessor: "academicYear" },
+    { header: "Grau", accessor: "degree" },
+    {
+      header: "Semestre",
+      accessor: "semester",
+      cell: (calendar: PostGraduationExamCalendar) =>
+        displayValue(calendar.semester),
+    },
+    {
+      header: "Época de Avaliação",
+      accessor: "assessmentPeriod",
+      cell: (calendar: PostGraduationExamCalendar) =>
+        displayValue(calendar.assessmentPeriod),
+    },
+    {
+      header: "Data de Início",
+      accessor: "startDate",
+      cell: (calendar: PostGraduationExamCalendar) =>
+        calendar.startDate ? formatDateOnlyPt(calendar.startDate) : "-",
+    },
+    {
+      header: "Data de Término",
+      accessor: "endDate",
+      cell: (calendar: PostGraduationExamCalendar) =>
+        calendar.endDate ? formatDateOnlyPt(calendar.endDate) : "-",
+    },
+    {
+      header: "Observação",
+      accessor: "observation",
+      cell: (calendar: PostGraduationExamCalendar) =>
+        displayValue(calendar.observation),
+    },
+    {
+      header: "Criado por",
+      accessor: "createdBy",
+      cell: (calendar: PostGraduationExamCalendar) =>
+        displayValue(calendar.createdBy),
+    },
   ];
 
-  const handleRefresh = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast({ title: "Calendário atualizado com sucesso" });
-    }, 1000);
-  };
+  function handleFilterChange(key: keyof FiltersState, value: string) {
+    setFilters((current) => ({
+      ...current,
+      [key]: value,
+    }));
+    setCurrentPage(1);
+    setFilterError("");
+  }
+
+  function handleRefresh() {
+    if (filters.academicYearId && filters.degreeId) {
+      refetch();
+    }
+  }
+
+  const isPreparingFilters =
+    isLoadingAcademicYears || isLoadingDegrees || !hasInitializedFilters;
+  const hasSelectedFilters =
+    Boolean(filters.academicYearId) && Boolean(filters.degreeId);
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Calendário de Provas - Pós-Graduação"
-        subtitle="Home / Calendário Académico (Pós) / Calendário de Provas"
+        title="Calendário de Provas de Pós-Graduação"
         actions={
-          <>
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Atualizar
-            </Button>
-            <Button variant="outline" size="sm">
-              <Printer className="h-4 w-4 mr-2" />
-              Imprimir
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar Excel
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Exportar PDF
-            </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Agendar Prova
-            </Button>
-          </>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={!hasSelectedFilters || isFetching}
+          >
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+            />
+            Atualizar
+          </Button>
         }
       />
 
-      <div className="bg-card rounded-lg border p-4 space-y-4">
-        <h3 className="text-sm font-semibold">Filtros</h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="programa">Programa</Label>
-            <Select>
-              <SelectTrigger id="programa">
-                <SelectValue placeholder="Todos os programas" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover">
-                <SelectItem value="all">Todos os programas</SelectItem>
-                <SelectItem value="mba">MBA em Gestão</SelectItem>
-                <SelectItem value="mec">Mestrado em Eng. Civil</SelectItem>
-                <SelectItem value="pgd">Pós-Graduação em Direito</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="tipoProva">Tipo de Prova</Label>
-            <Select>
-              <SelectTrigger id="tipoProva">
-                <SelectValue placeholder="Todos" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover">
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="escrita">Prova Escrita</SelectItem>
-                <SelectItem value="oral">Prova Oral</SelectItem>
-                <SelectItem value="defesa">Defesa de Tese</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="dataInicio">Data Início</Label>
-            <Input id="dataInicio" type="date" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="dataFim">Data Fim</Label>
-            <Input id="dataFim" type="date" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="search">Pesquisar Módulo</Label>
-            <Input id="search" placeholder="Nome do módulo..." />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-card rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Módulo</TableHead>
-              <TableHead>Programa</TableHead>
-              <TableHead>Tipo de Prova</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Hora Início</TableHead>
-              <TableHead>Hora Fim</TableHead>
-              <TableHead>Sala</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  {Array.from({ length: 8 }).map((_, j) => (
-                    <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Ano Lectivo</label>
+              <Select
+                value={filters.academicYearId}
+                onValueChange={(value) =>
+                  handleFilterChange("academicYearId", value)
+                }
+                disabled={isLoadingAcademicYears || isAcademicYearsError}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      isLoadingAcademicYears
+                        ? "Carregando anos..."
+                        : "Selecione o ano lectivo"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {academicYears.map((year) => (
+                    <SelectItem
+                      key={year.codigo}
+                      value={String(year.codigo)}
+                    >
+                      {year.designacao}
+                    </SelectItem>
                   ))}
-                </TableRow>
-              ))
-            ) : mockData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  Nenhuma prova agendada
-                </TableCell>
-              </TableRow>
-            ) : (
-              mockData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.modulo}</TableCell>
-                  <TableCell>{item.programa}</TableCell>
-                  <TableCell>
-                    <Badge variant={item.tipo === "Defesa de Tese" ? "default" : "secondary"}>
-                      {item.tipo}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{item.data}</TableCell>
-                  <TableCell>{item.horaInicio}</TableCell>
-                  <TableCell>{item.horaFim}</TableCell>
-                  <TableCell>{item.sala}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                </SelectContent>
+              </Select>
+              {isAcademicYearsError && (
+                <p className="text-sm text-destructive">
+                  Não foi possível carregar os anos lectivos.
+                </p>
+              )}
+            </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="perPage">Itens por página:</Label>
-          <Select value={itemsPerPage.toString()} onValueChange={(v) => setItemsPerPage(Number(v))}>
-            <SelectTrigger id="perPage" className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover">
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" disabled={currentPage === 1}>Anterior</Button>
-          <span className="text-sm">Página {currentPage} de 1</span>
-          <Button variant="outline" size="sm" disabled>Próxima</Button>
-        </div>
-      </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Grau</label>
+              <Select
+                value={filters.degreeId}
+                onValueChange={(value) =>
+                  handleFilterChange("degreeId", value)
+                }
+                disabled={isLoadingDegrees || isDegreesError}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      isLoadingDegrees
+                        ? "Carregando graus..."
+                        : "Selecione o grau"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {degrees.map((degree) => (
+                    <SelectItem
+                      key={degree.id}
+                      value={String(degree.id)}
+                    >
+                      {degree.designation}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {isDegreesError && (
+                <p className="text-sm text-destructive">
+                  Não foi possível carregar os graus.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {filterError && (
+            <p className="mt-3 text-sm text-destructive">{filterError}</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {isCalendarsError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro ao carregar o calendário</AlertTitle>
+          <AlertDescription>
+            Não foi possível consultar o calendário académico de provas da
+            Pós-Graduação.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {hasSelectedFilters ? (
+        <>
+          <div className="font-semibold text-primary">
+            Total de períodos: {calendars.length}
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={paginatedCalendars}
+            loading={isLoading || isFetching}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      ) : (
+        <Alert>
+          <RefreshCw className="h-4 w-4" />
+          <AlertTitle>Consulta do calendário de provas</AlertTitle>
+          <AlertDescription>
+            {isPreparingFilters
+              ? "A preparar os filtros iniciais..."
+              : "Não foi possível inicializar os filtros da consulta."}
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }

@@ -25,6 +25,15 @@ export const formatDisplayPt = (dateString: string): string => {
   });
 };
 
+export const formatDateOnlyPt = (dateString: string): string => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString);
+
+  if (!match) return formatDisplayPt(dateString);
+
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
+};
+
 export const formatDateForInput = (value: string): string => {
   if (!value) return "";
 
