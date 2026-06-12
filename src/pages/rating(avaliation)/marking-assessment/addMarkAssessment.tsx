@@ -203,7 +203,7 @@ export default function AddMarkingAssessment() {
                 </SelectTrigger>
                 <SelectContent>
                   {anosAcademicos?.map((a) => (
-                    <SelectItem key={a.codigo} value={a.codigo.toString()}>
+                    <SelectItem key={a.codigo} value={a.codigo?.toString()}>
                       {a.designacao}
                     </SelectItem>
                   ))}
@@ -230,7 +230,7 @@ export default function AddMarkingAssessment() {
                 </SelectTrigger>
                 <SelectContent>
                   {semestres?.map((s) => (
-                    <SelectItem key={s.codigo} value={s.codigo.toString()}>
+                    <SelectItem key={s.codigo} value={s.codigo?.toString()}>
                       {s.designacao}
                     </SelectItem>
                   ))}
@@ -250,7 +250,7 @@ export default function AddMarkingAssessment() {
                 </SelectTrigger>
                 <SelectContent>
                   {periodos?.map((p) => (
-                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                    <SelectItem key={p.codigo} value={p.codigo?.toString()}>
                       {p.designacao}
                     </SelectItem>
                   ))}
@@ -294,7 +294,7 @@ export default function AddMarkingAssessment() {
                 </SelectTrigger>
                 <SelectContent>
                   {anosCurriculares.map((ac) => (
-                    <SelectItem key={ac.codigo} value={ac.codigo.toString()}>
+                    <SelectItem key={ac.codigo} value={ac.codigo?.toString()}>
                       {ac.designacao}
                     </SelectItem>
                   ))}
@@ -327,7 +327,7 @@ export default function AddMarkingAssessment() {
 
                 <SelectContent>
                   {unidadesCurriculares?.map((uc) => (
-                    <SelectItem key={uc.pk} value={uc.pk.toString()}>
+                    <SelectItem key={uc.pk} value={uc.pk?.toString()}>
                       {uc.descricao}
                     </SelectItem>
                   ))}

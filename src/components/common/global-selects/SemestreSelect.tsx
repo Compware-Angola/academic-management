@@ -21,12 +21,12 @@ const SemestreSelect = ({
   const id = useId();
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-        {
-          label: "Todos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos os semestres",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
 
   const { data: semestre, isLoading: isLoadingSemestre } = useQuerySemestres();

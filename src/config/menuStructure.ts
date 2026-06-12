@@ -14,6 +14,7 @@ import {
   FileText,
   BookUser,
   Files,
+  BarChart3,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -257,7 +258,7 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Sem inscrição no curso",
+          title: "Sem inscrição em curso",
           url: "/inscricoes/sem-curso",
           permission: [
             PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla,
@@ -976,9 +977,10 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/relatorios/descontos",
         // },
         {
-          title: "Pagamentos por referência",
-          url: "/financas/pagamento-referencia",
-          permission: [PermissionTypeDetails.PAGAMENTOS_REFERENCIA.sigla],
+          title: "Rel. Pagamentos Instituições",
+          icon:BarChart3,
+          url: "/financas/rel-pagamentos-instituicoes",
+          // permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
         },
         {
           title: "Pagamentos",

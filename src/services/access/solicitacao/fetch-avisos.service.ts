@@ -13,7 +13,8 @@ export type Avisos = {
   NOME: string;
   CURSO: string;
   PERIODO: string;
-  DESTINO: string;
+  DESTINO_ID: number | null;
+  DESTINO_NOME: string | null;
   STATUS_: number;
 };
 

@@ -25,7 +25,7 @@ export function AreaFinanceira({
         orientation="vertical"
         className="flex flex-row gap-6"
       >
-        <TabsList className="flex justify-start flex-col h-fit w-52">
+        <TabsList className="flex justify-start flex-col h-fit w-64">
           {
             hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
               <TabsTrigger className="w-full justify-start gap-2" value="resumo">

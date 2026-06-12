@@ -65,7 +65,8 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       name: item.NOME,
       curso: item.CURSO,
       periodo: item.PERIODO,       
-      destino: item.DESTINO, 
+      destinoId: item.DESTINO_ID,
+      destino: item.DESTINO_NOME,
       date_expiracao: item.DATE_EXPIRACAO,
       status: item.STATUS_, 
     }));
@@ -155,7 +156,15 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
 
   const columns = [
     { header: "Assunto", accessor: "assunto" },
-    { header: "Descrição", accessor: "descricao" },
+    {
+      header: "Descrição",
+      accessor: "descricao",
+      cell: (row) => (
+        <div className="max-w-md whitespace-pre-wrap break-words align-top">
+          {row.descricao}
+        </div>
+      ),
+    },
     { header: "Autor", accessor: "name" },
     {
       header: "Curso",
