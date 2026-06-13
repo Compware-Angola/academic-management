@@ -716,6 +716,7 @@ export const postGraduationStructure: MenuStructure = {
         PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
         PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
         PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
+        PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
       ],
       items: [
         {
@@ -756,6 +757,13 @@ export const postGraduationStructure: MenuStructure = {
           url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
           permission: [
             PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
+          ],
+        },
+        {
+          title: "Marcação de Provas",
+          url: "/pos-graduacao/avaliacoes/marcacao-provas",
+          permission: [
+            PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
           ],
         },
       ],

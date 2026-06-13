@@ -161,6 +161,7 @@ import PostGraduationAcademicActivities from "./pages/post-graduation/AcademicAc
 import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/AcademicCalendarParameters";
 import PostGraduationCurricularUnitFormulas from "./pages/post-graduation/CurricularUnitFormulas";
 import PostGraduationOralCurricularUnits from "./pages/post-graduation/OralCurricularUnits";
+import PostGraduationExamMarkings from "./pages/post-graduation/ExamMarkings";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
@@ -1784,6 +1785,19 @@ const App = () => {
                         ]}
                       >
                         <PostGraduationOralCurricularUnits />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/avaliacoes/marcacao-provas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <PostGraduationExamMarkings />
                       </ProtectedRoute>
                     }
                   />
