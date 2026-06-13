@@ -159,6 +159,8 @@ import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatric
 import PostGraduationPrimaryRecords from "./pages/post-graduation/PrimaryRecords";
 import PostGraduationAcademicActivities from "./pages/post-graduation/AcademicActivities";
 import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/AcademicCalendarParameters";
+import PostGraduationCurricularUnitFormulas from "./pages/post-graduation/CurricularUnitFormulas";
+import PostGraduationOralCurricularUnits from "./pages/post-graduation/OralCurricularUnits";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
@@ -1756,6 +1758,32 @@ const App = () => {
                         ]}
                       >
                         <ExamCalendarPos />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/avaliacoes/formula-ucs"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+                        ]}
+                      >
+                        <PostGraduationCurricularUnitFormulas />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/avaliacoes/formula-ucs-oral"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+                        ]}
+                      >
+                        <PostGraduationOralCurricularUnits />
                       </ProtectedRoute>
                     }
                   />

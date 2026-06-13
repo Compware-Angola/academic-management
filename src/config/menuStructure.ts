@@ -714,6 +714,8 @@ export const postGraduationStructure: MenuStructure = {
         PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
         PermissionTypeDetails.CALENDARIO_PROVAS.sigla,
         PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+        PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
+        PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
       ],
       items: [
         {
@@ -741,6 +743,20 @@ export const postGraduationStructure: MenuStructure = {
           title: "Calendário de Provas",
           url: "/pos-graduacao/calendario/provas",
           permission: [PermissionTypeDetails.CALENDARIO_PROVAS.sigla],
+        },
+        {
+          title: "Fórmula de Definição das UCs",
+          url: "/pos-graduacao/avaliacoes/formula-ucs",
+          permission: [
+            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
+          ],
+        },
+        {
+          title: "Fórmula de Definição das UCs Oral",
+          url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
+          permission: [
+            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
+          ],
         },
       ],
     },
