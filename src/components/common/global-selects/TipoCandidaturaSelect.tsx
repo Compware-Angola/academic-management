@@ -1,8 +1,7 @@
 
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 
-import { useDebounce } from "@/hooks/use-debounce";
-import { useId, useState } from "react";
+import { useId, useMemo } from "react";
 import { FormSelect } from "../FormSelect";
 
 interface TipoCandidaturaProps {
@@ -10,6 +9,8 @@ interface TipoCandidaturaProps {
   onChangeValue: (v: string) => void;
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
+  isPostGraduation?: boolean;
+  label?: string;
 }
 
 export function TipoCandidaturaSelect({
@@ -17,28 +18,33 @@ export function TipoCandidaturaSelect({
   onChangeValue,
   disabled,
   enableDefaultSelectItem,
+  isPostGraduation = false,
+  label = "Tipo de Candidatura",
 }: TipoCandidaturaProps) {
   const id = useId();
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-        {
-          label: "Todos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
 
   const { data: tiposCandidatura = [], isLoading } = useQueryTipoCandidatura();
+  const tiposCandidaturaPostGraduation = useMemo(() => {
+    return tiposCandidatura.filter((tipo) => tipo.codigo !== 1);
+  }, [tiposCandidatura]);
   return (
     <FormSelect
-      disabled={isLoading}
+      disabled={isLoading || disabled}
       loading={isLoading}
-      label="Tipo de Candidatura"
+      label={label}
       defaultSelectItem={defaultSelectItem}
       value={value}
       onChange={(v) => onChangeValue(v)}
-      options={tiposCandidatura}
+      options={isPostGraduation ? tiposCandidaturaPostGraduation : tiposCandidatura}
       map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
     />
   );

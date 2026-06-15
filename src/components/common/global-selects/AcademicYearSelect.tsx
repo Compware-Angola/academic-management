@@ -31,15 +31,15 @@ const AcademicYearSelect = ({
     ]
     : undefined;
   useEffect(() => {
-    if (enableDefaultActiveYear) {
-      const activeYear = academicYear?.find(
+    if (enableDefaultActiveYear && academicYear) {
+      const activeYear = academicYear.find(
         (a) => a.estado.toLocaleLowerCase() === "activo",
       );
-      if (activeYear) {
+      if (activeYear && !value) {
         onChangeValue(activeYear.codigo.toString());
       }
     }
-  }, [enableDefaultActiveYear, academicYear, onChangeValue]);
+  }, [enableDefaultActiveYear, academicYear, value]);
   return (
     <>
       <FormSelect

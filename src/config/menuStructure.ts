@@ -721,6 +721,10 @@ export const postGraduationStructure: MenuStructure = {
       ],
       items: [
         {
+          title: "Canditatos inscritos",
+          url: "/pos-graduacao/inscritos",
+        },
+        {
           title: "Registos Primários",
           url: "/pos-graduacao/registos-primarios",
           permission: [

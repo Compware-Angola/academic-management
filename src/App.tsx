@@ -174,6 +174,7 @@ import { CaixaPage } from "./pages/financas/caixa";
 import { CloseCashRegisterPage } from "./pages/financas/fecho-caixa/FechoCaixaUtilizador";
 import { MeuCaixaPage } from "./pages/financas/caixa/meu-caixa";
 import RelPagamentosInstituicoes from "./pages/financas/relatorios/RelPagamentosInstituicoes";
+import { RegisteredCandidates } from "./pages/post-graduation/RegisteredCandidates";
 
 
 const App = () => {
@@ -1712,8 +1713,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
-
                   <Route
                     path="/pos-graduacao/registos-primarios"
                     element={
@@ -1801,6 +1800,16 @@ const App = () => {
                         ]}
                       >
                         <PostGraduationExamMarkings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/inscritos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla!]}
+                      >
+                        <RegisteredCandidates />
                       </ProtectedRoute>
                     }
                   />
