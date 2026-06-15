@@ -162,6 +162,7 @@ import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/Ac
 import PostGraduationCurricularUnitFormulas from "./pages/post-graduation/CurricularUnitFormulas";
 import PostGraduationOralCurricularUnits from "./pages/post-graduation/OralCurricularUnits";
 import PostGraduationExamMarkings from "./pages/post-graduation/ExamMarkings";
+import PostGraduationExamAttendanceList from "./pages/post-graduation/ExamAttendanceList";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
@@ -1801,6 +1802,18 @@ const App = () => {
                         ]}
                       >
                         <PostGraduationExamMarkings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/pos-graduacao/avaliacoes/lista-presenca"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTA_PRESENCA.sigla!,
+                        ]}
+                      >
+                        <PostGraduationExamAttendanceList />
                       </ProtectedRoute>
                     }
                   />
