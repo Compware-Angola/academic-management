@@ -437,7 +437,7 @@ export default function RegistoPrimarioMatriculados() {
       </Card>
 
       <div className="font-semibold text-primary">
-        Total De Registros : {data?.total ?? 0}
+        Total De Registos : {data?.total ?? 0}
       </div>
 
       <DataTable

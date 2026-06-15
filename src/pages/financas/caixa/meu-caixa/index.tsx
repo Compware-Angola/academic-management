@@ -50,11 +50,10 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <Badge
       variant="outline"
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${
-        isOpen
-          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-          : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-      }`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${isOpen
+        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+        : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+        }`}
     >
       {isOpen ? <LockOpen className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
       {isOpen ? "Aberto" : "Fechado"}
@@ -164,9 +163,10 @@ function MeuCaixaAtualTab() {
     return <CashRegisterConfirmationAlert myCaixa={myCaixa} />;
   }
 
-  if (myCaixa && myCaixa.status === "aberto" && myCaixa.blocked === "N") {
+  if (myCaixa && myCaixa?.status === "aberto" && myCaixa?.blocked === "N") {
     return (
       <div className="space-y-4">
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -176,8 +176,8 @@ function MeuCaixaAtualTab() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">{myCaixa.name}</h2>
-                    <StatusBadge status={myCaixa.status} />
+                    <h2 className="text-lg font-semibold">{myCaixa?.name}</h2>
+                    <StatusBadge status={myCaixa?.status} />
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">
                     {data && data.movementID && (
@@ -233,7 +233,7 @@ function MeuCaixaAtualTab() {
                     <TableCell className="text-right tabular-nums font-mono">
                       {formatCurrencyAOA(
                         data.summary.reduce((acc, i) => acc + i.total, 0) +
-                          data.openingAmount,
+                        data.openingAmount,
                       )}
                     </TableCell>
                   </TableRow>
@@ -308,6 +308,7 @@ function MeuCaixaAtualTab() {
   if (!myCaixa) {
     return (
       <Card className="border-dashed">
+
         <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
             <Wallet className="h-8 w-8 text-muted-foreground" />

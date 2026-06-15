@@ -85,17 +85,17 @@ export function ActivityModal({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="">
         <DialogHeader>
-          <DialogTitle>Nova Atividade Letiva</DialogTitle>
+          <DialogTitle>Nova Actividade Lectiva</DialogTitle>
           <DialogDescription>
-            Preencha os dados para cadastrar uma nova atividade no calendário
-            acadêmico.
+            Preencha os dados para cadastrar uma nova actividade no calendário
+            académico.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           {/* Descrição / Nome da Atividade */}
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="descricao">Descrição da Atividade *</Label>
+            <Label htmlFor="descricao">Descrição da Actividade *</Label>
             <Input
               id="designacao"
               value={form.designacao}
@@ -105,21 +105,21 @@ export function ActivityModal({
           </div>
 
           <div className="space-y-2">
-             <FormSelect
-                       
-          
-                          label="Ano Letivo"
-                          value={form.codigo_ano_lectivo?.toString() || ""}
-                          onChange={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
-                          options={anosLetivos?.filter(
-                            (ay) => ay.estado.toLowerCase() === "activo",
-                          )}
-                          map={(a) => ({
-                            key: a.codigo,
-                            label: a.designacao,
-                            value: a.codigo,
-                          })}
-                        />
+            <FormSelect
+
+
+              label="Ano Lectivo"
+              value={form.codigo_ano_lectivo?.toString() || ""}
+              onChange={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
+              options={anosLetivos?.filter(
+                (ay) => ay.estado.toLowerCase() === "activo",
+              )}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
+            />
           </div>
 
           {/* Tipo de Candidatura */}
@@ -211,7 +211,7 @@ export function ActivityModal({
                 {editId ? "Editando" : "Criando..."}
               </>
             ) : (
-              <>{editId ? "Editando" : "Criar Atividade"}</>
+              <>{editId ? "Editando" : "Criar Actividade"}</>
             )}
           </Button>
         </DialogFooter>

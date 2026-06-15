@@ -30,6 +30,7 @@ import { toast } from "@/hooks/use-toast";
 import { useMutationCreateEnrollmentUC } from "@/hooks/students/use-mutate-enrollment-uc";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryResultPlan } from "@/hooks/students/use-query-result-plan";
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 
 type Props = {
   codigoMatricula: number;
@@ -134,25 +135,17 @@ export function InscricoesUC({
 
         <CardContent className="space-y-6">
           <div className="grid grid-cols-3 items-end  gap-4">
-            <FormSelect
-              label="Ano Letivo"
-              disabled={isLoadingAcademicYear}
-              loading={isLoadingAcademicYear}
+            <AcademicYearSelect
+              onlyActive
               value={anoLetivo ?? ""}
-              onChange={(v) => setAnoLetivo(v)}
-              options={anosAcademicos}
-              map={(a) => ({
-                key: a.codigo,
-                label: a.designacao,
-                value: a.codigo,
-              })}
+              onChangeValue={(v) => setAnoLetivo(v)}
             />
             <EpocaSelect
               value={epoca.toString()}
               onChangeValue={(v) => setEpoca(parseInt(v))}
             />
             <Button
-              disabled={!canSubmit}
+              disabled={!canSubmit || selectedGrades.length == 0}
               className="w-full mx-auto"
               onClick={() => handleCreateUc()}
             >

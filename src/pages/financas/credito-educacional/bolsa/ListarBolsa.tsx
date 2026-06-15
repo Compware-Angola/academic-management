@@ -214,19 +214,19 @@ export default function ListarBolsa() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>Gestão de Bolsa</BreadcrumbLink>
+            <BreadcrumbLink>Gestão de Crédito Educacional</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Listar Bolsa</BreadcrumbPage>
+            <BreadcrumbPage>Crédito Educacional</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Listar Bolsa</h1>
+        <h1 className="text-2xl font-bold">Crédito Educacional</h1>
         <p className="text-muted-foreground">
-          Lista completa de bolsas cadastradas.
+          Lista completa  de Créditos Educacionais cadastrados.
         </p>
       </div>
 

@@ -88,7 +88,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
   const [recalculatingIds, setRecalculatingIds] = useState<Set<number>>(new Set());
 
-
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
       (total, payment) => total + (payment.valorAPagar ?? 0),

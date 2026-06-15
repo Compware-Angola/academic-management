@@ -14,6 +14,7 @@ import {
   FileText,
   BookUser,
   Files,
+  BarChart3,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -257,7 +258,7 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Sem inscrição no curso",
+          title: "Sem inscrição em curso",
           url: "/inscricoes/sem-curso",
           permission: [
             PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla,
@@ -289,7 +290,7 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Insentar colisão",
+          title: "Isentar colisão",
           url: "/inscricoes/colisao",
           permission: [
             PermissionTypeDetails.INSENCAO_COLISAO_CURSO_ESTUDANTE.sigla,
@@ -317,7 +318,7 @@ export const academicStructure: MenuStructure = {
       icon: Calendar,
       items: [
         {
-          title: "Atividades letivas",
+          title: "Actividades lectivas",
           url: "/calendario/atividades",
           permission: [PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla],
         },
@@ -847,14 +848,14 @@ export const operacionalStructure: MenuStructure = {
           ],
         },
         {
-          title: "Registro exame de acesso",
+          title: "Registo exame de acesso",
           url: "/ministerio/registro-exame",
           permission: [
             PermissionTypeDetails.REGISTRO_PRIMARIO_EXAME_ACESSO.sigla,
           ],
         },
         {
-          title: "Registro de Matriculados",
+          title: "Registo de Matriculados",
           url: "/ministerio/registro-matricula",
           permission: [
             PermissionTypeDetails.REGISTRO_PRIMARIO_MATRICULADOS.sigla,
@@ -954,12 +955,12 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/credito/instituicoes/receita",
         // },
         {
-          title: "Bolsas",
+          title: "Credito Educacional",
           url: "financas/credito/bolsa",
           permission: [PermissionTypeDetails.HISTORICO_BOLSAS.sigla],
         },
         {
-          title: "Bolsa Estudante",
+          title: "Créd. Edu. Estudante",
           url: "/financas/credito/bolsa/estudante",
           permission: [PermissionTypeDetails.LISTAR_BOLSEIROS.sigla],
         },
@@ -1044,11 +1045,15 @@ export const finaceStructure: MenuStructure = {
         //   title: "Estudantes com Desconto",
         //   url: "/financas/relatorios/descontos",
         // },
+
+        /* Relatórios de Pagamentos 
         {
-          title: "Pagamentos por referência",
-          url: "/financas/pagamento-referencia",
-          permission: [PermissionTypeDetails.PAGAMENTOS_REFERENCIA.sigla],
+          title: "Rel. Pagamentos Instituições",
+          icon: BarChart3,
+          url: "/financas/rel-pagamentos-instituicoes",
+          permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
         },
+        */
         {
           title: "Pagamentos",
           url: "/financas/listar-pagamentos",

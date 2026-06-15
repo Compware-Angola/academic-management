@@ -206,7 +206,6 @@ export default function ListarBolsaEstudante() {
       rows: estudantes.map((e) => ({
         matricula: e.codigo_matricula,
         nome: e.nome_completo,
-        bi: e.bilhete_identidade,
         curso: e.curso,
         instituicao: e.instituicao,
         anoLetivo: e.ano_lectivo,
@@ -230,7 +229,7 @@ export default function ListarBolsaEstudante() {
 
   const pdfContent = pdfData ? (
     <GenericPDFDocument
-      documentTitle="Estudantes com Bolsa"
+      documentTitle="Estudantes com Crédito Educacional"
       subtitle="Lista de estudantes com créditos ou bolsas aplicadas"
       infoSections={[
         { title: "Filtros Aplicados", content: pdfData.filtros },
@@ -240,7 +239,6 @@ export default function ListarBolsaEstudante() {
         headers: [
           { key: "matricula", label: "Matrícula", width: "10%" },
           { key: "nome", label: "Nome", width: "20%" },
-          { key: "bi", label: "BI", width: "10%" },
           { key: "curso", label: "Curso", width: "15%" },
           { key: "instituicao", label: "Instituição", width: "15%" },
           { key: "anoLetivo", label: "Ano Letivo", width: "8%" },
@@ -271,7 +269,6 @@ export default function ListarBolsaEstudante() {
         headers: [
           { key: "matricula", label: "Matrícula", width: 18 },
           { key: "nome", label: "Nome", width: 35 },
-          { key: "bi", label: "BI", width: 20 },
           { key: "curso", label: "Curso", width: 25 },
           { key: "instituicao", label: "Instituição", width: 25 },
           { key: "anoLetivo", label: "Ano Letivo", width: 15 },
@@ -306,15 +303,15 @@ export default function ListarBolsaEstudante() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Estudantes com Bolsa</BreadcrumbPage>
+            <BreadcrumbPage>Estudantes com Crédito Educacional</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Estudantes com Bolsa</h1>
+        <h1 className="text-2xl font-bold">Estudantes com Crédito Educacional</h1>
         <p className="text-muted-foreground">
-          Lista completa de estudantes com créditos ou bolsas aplicadas.
+          Lista completa de estudantes com Créditos Educacionais aplicados.
         </p>
       </div>
 
@@ -483,14 +480,13 @@ export default function ListarBolsaEstudante() {
                   <TableRow>
                     <TableHead>Matrícula</TableHead>
                     <TableHead>Nome</TableHead>
-                    <TableHead>BI</TableHead>
                     <TableHead>Curso</TableHead>
                     <TableHead>Instituição</TableHead>
                     <TableHead>Ano Letivo</TableHead>
                     <TableHead>Semestre</TableHead>
                     <TableHead>Desconto</TableHead>
                     <TableHead>Tipo Crédito</TableHead>
-                    <TableHead>Bolsa</TableHead>
+                    <TableHead>Crédito Educacional</TableHead>
 
                     <TableHead>Pago pela Instituição</TableHead>
                     <TableHead>Estado da Bolsa</TableHead>
@@ -508,9 +504,6 @@ export default function ListarBolsaEstudante() {
                         title={e.nome_completo}
                       >
                         {e.nome_completo}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {e.bilhete_identidade}
                       </TableCell>
                       <TableCell
                         className="truncate max-w-[150px]"

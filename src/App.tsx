@@ -173,6 +173,8 @@ import { FormaPagamentoPage } from "./pages/financas/forma-pagamento";
 import { CaixaPage } from "./pages/financas/caixa";
 import { CloseCashRegisterPage } from "./pages/financas/fecho-caixa/FechoCaixaUtilizador";
 import { MeuCaixaPage } from "./pages/financas/caixa/meu-caixa";
+import RelPagamentosInstituicoes from "./pages/financas/relatorios/RelPagamentosInstituicoes";
+
 
 const App = () => {
   return (
@@ -1711,6 +1713,7 @@ const App = () => {
                     }
                   />
 
+
                   <Route
                     path="/pos-graduacao/registos-primarios"
                     element={
@@ -1812,3 +1815,5 @@ const App = () => {
 };
 
 export default App;
+
+

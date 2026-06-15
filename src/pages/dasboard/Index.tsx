@@ -91,6 +91,7 @@ const Index = () => {
           title="Total de Estudantes"
           value={formatNumber(dashboard?.total_estudantes ?? 0)}
           icon={Users}
+          isAvailable={false}
           description="Matriculados ativos"
         />
         <StatCard

@@ -26,7 +26,7 @@ export function DocumentsSection({
         orientation="vertical"
         className="flex flex-row gap-6"
       >
-        <TabsList className="flex justify-start flex-col h-fit w-52">
+        <TabsList className="flex justify-start flex-col h-fit w-64">
           {hasPermission(PermissionTypeDetails.CARTA_CONCLUSAO.sigla) && (
             <TabsTrigger
               className="w-full justify-start gap-2"

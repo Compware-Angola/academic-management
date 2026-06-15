@@ -103,7 +103,7 @@ export function StudentProfileHeader({ matricula }: Props) {
                   style={{ background: "linear-gradient(to right, oklch(0.68 0.13 25), oklch(0.60 0.13 25))" }}
                 >
                   <Award className="h-4 w-4" />
-                  Bolseiro
+                  Créd. Edu.
                 </Badge>
               )}
 
@@ -169,10 +169,10 @@ export function StudentProfileHeader({ matricula }: Props) {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg text-[oklch(0.38_0.090_25)] dark:text-[oklch(0.88_0.055_25)]">
-                      Bolsa de Estudo
+                      Crédito Educacional
                     </h3>
                     <p className="text-sm text-[oklch(0.54_0.120_25)] dark:text-[oklch(0.72_0.090_25)]">
-                      {bolsaInfo.bolsa || "Bolsa Ativa"}
+                      {bolsaInfo.bolsa || "Crédito Educacional Ativo"}
                     </p>
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export function StudentProfileHeader({ matricula }: Props) {
                     </p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground text-xs">Nome da Bolsa</p>
+                    <p className="text-muted-foreground text-xs">Nome do Crédito Educacional</p>
                     <p className="font-medium">{bolsaInfo.bolsa}</p>
                   </div>
                   <div>

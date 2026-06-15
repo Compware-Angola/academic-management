@@ -99,8 +99,8 @@ export default function ActivitiesLecturesLic() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Atividades Letivas"
-        subtitle="Home / Calendário Académico / Atividades Letivas"
+        title="Actividades Lectivas"
+        subtitle="Home / Calendário Académico / Actividades Lectivas"
         actions={
           <>
             <Button variant="outline" size="sm" onClick={handleRefresh}>
@@ -109,7 +109,7 @@ export default function ActivitiesLecturesLic() {
             </Button>
             <Button size="sm" onClick={() => setOpenModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Nova Atividade
+              Nova Actividade
             </Button>
           </>
         }
