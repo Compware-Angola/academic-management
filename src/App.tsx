@@ -162,6 +162,7 @@ import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/Ac
 import PostGraduationCurricularUnitFormulas from "./pages/post-graduation/CurricularUnitFormulas";
 import PostGraduationOralCurricularUnits from "./pages/post-graduation/OralCurricularUnits";
 import PostGraduationExamMarkings from "./pages/post-graduation/ExamMarkings";
+import PostGraduationExamAttendanceList from "./pages/post-graduation/ExamAttendanceList";
 import HorariosParametros from "./pages/schedules/HorariosParametros";
 import ValidarDocumento from "./pages/documents/ValidarDocumento";
 import ListarPerguntas from "./pages/access_exam/ListarPerguntas";
@@ -1761,45 +1762,6 @@ const App = () => {
                         ]}
                       >
                         <ExamCalendarPos />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/pos-graduacao/avaliacoes/formula-ucs"
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails
-                            .DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
-                        ]}
-                      >
-                        <PostGraduationCurricularUnitFormulas />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/pos-graduacao/avaliacoes/formula-ucs-oral"
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails
-                            .DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
-                        ]}
-                      >
-                        <PostGraduationOralCurricularUnits />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/pos-graduacao/avaliacoes/marcacao-provas"
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO
-                            .sigla!,
-                        ]}
-                      >
-                        <PostGraduationExamMarkings />
                       </ProtectedRoute>
                     }
                   />

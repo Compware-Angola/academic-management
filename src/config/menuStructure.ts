@@ -771,6 +771,11 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
           ],
         },
+        {
+          title: "Lista de Presença",
+          url: "/pos-graduacao/avaliacoes/lista-presenca",
+          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+        },
       ],
     },
   ],
