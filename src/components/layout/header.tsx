@@ -207,7 +207,7 @@ export function Header() {
                                       variant="secondary"
                                       className="text-[10px] px-1.5 py-0"
                                     >
-                                      Bolseiro
+                                      Créd. Edu.
                                     </Badge>
                                   )}
                                   <Badge

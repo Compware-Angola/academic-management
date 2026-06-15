@@ -166,9 +166,28 @@ export const useValidateMovement = () => {
 };
 
 export const useRecoveryOpeningCode = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => recoveryOpeningCodeService(),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-register"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["my-cash-summary"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-registers"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["cash-register-movements"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["available-operators"],
+      });
       toast.success("Enviamos um novo codigo de abertura para o seu e-mail");
     },
   });

@@ -355,7 +355,7 @@ export default function RegistoPrimarioExamesAcesso() {
       </Card>
 
       <div className="text-primary font-semibold">
-        Total De Registros : {data?.total ?? 0}
+        Total De Registos : {data?.total ?? 0}
       </div>
 
       <DataTable

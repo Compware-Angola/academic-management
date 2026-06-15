@@ -24,6 +24,7 @@ import {
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryStudentNotes } from "@/hooks/students/use-query-student-notes";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type NotesProps = {
   codigoMatricula: number;
@@ -68,7 +69,7 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
             onChangeValue={(v) => setAcademicYear(v)}
           />
         </div>
-        <div className="bg-card border rounded-lg p-6">
+        <div className="py-6">
           <h3 className="text-lg font-semibold mb-4">Resultados</h3>
 
           {loadingPauta ? (
@@ -89,7 +90,7 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto bg-card border rounded-lg">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -114,7 +115,17 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
                     {pautas.map((pauta) => (
                       <TableRow key={pauta.codigoGradeAluno}>
                         {/* 👇 mantém teu row igual */}
-                        <TableCell>{pauta.unidadeCurricular}</TableCell>
+                        <TableCell className="truncate max-w-[200px]" aria-label={pauta.unidadeCurricular}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>{pauta.unidadeCurricular}</span>
+
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <span>{pauta.unidadeCurricular}</span>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableCell>
                         <TableCell>{pauta.ano}</TableCell>
                         <TableCell>{pauta.semestre}</TableCell>
                         <TableCell className="text-center">
