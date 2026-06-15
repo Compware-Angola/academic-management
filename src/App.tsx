@@ -1766,7 +1766,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route
+                  
+                  
+                  {/*
+                    <Route
                     path="/pos-graduacao/avaliacoes/formula-ucs"
                     element={
                       <ProtectedRoute
@@ -1778,8 +1781,11 @@ const App = () => {
                         <PostGraduationCurricularUnitFormulas />
                       </ProtectedRoute>
                     }
-                  />
-                  <Route
+                  />  
+                  */}
+
+                  {/*
+                    <Route
                     path="/pos-graduacao/avaliacoes/formula-ucs-oral"
                     element={
                       <ProtectedRoute
@@ -1791,8 +1797,10 @@ const App = () => {
                         <PostGraduationOralCurricularUnits />
                       </ProtectedRoute>
                     }
-                  />
-                  <Route
+                  */}
+                  
+                  {/*
+                      <Route
                     path="/pos-graduacao/avaliacoes/marcacao-provas"
                     element={
                       <ProtectedRoute
@@ -1805,7 +1813,13 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route
+
+                  */}
+
+
+
+                  {/*
+                      <Route
                     path="/pos-graduacao/avaliacoes/lista-presenca"
                     element={
                       <ProtectedRoute
@@ -1817,6 +1831,9 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  */}
+
+                  
                 </Route>
               </Routes>
             </TooltipProvider>
