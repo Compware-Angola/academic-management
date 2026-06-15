@@ -7,6 +7,7 @@ import { MensalidadesSection } from "./components/mensalidade";
 import { OutrosServicosSection } from "./components/outros-servicos";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { DividasSection } from "./components/dividas-geral";
 
 type AreaFinanceiraProps = {
   value?: string;
@@ -58,6 +59,15 @@ export function AreaFinanceira({
               </TabsTrigger>
             )
           }
+          {
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="dividas"
+            >
+              <BanknoteIcon className="h-4 w-4" />
+              <span className="hidden md:inline">Dívidas</span>
+            </TabsTrigger>
+          }
         </TabsList>
 
         <Card className="flex-1 p-6">
@@ -85,7 +95,13 @@ export function AreaFinanceira({
               </TabsContent>
             )
           }
+          {
+            <TabsContent value="dividas">
+              <DividasSection codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          }
         </Card>
+
       </Tabs>
     </TabsContent>
   );
