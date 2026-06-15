@@ -175,11 +175,11 @@ import { CaixaPage } from "./pages/financas/caixa";
 import { CloseCashRegisterPage } from "./pages/financas/fecho-caixa/FechoCaixaUtilizador";
 import { MeuCaixaPage } from "./pages/financas/caixa/meu-caixa";
 import RelPagamentosInstituicoes from "./pages/financas/relatorios/RelPagamentosInstituicoes";
-<<<<<<< HEAD
+
 import { RegisteredCandidates } from "./pages/post-graduation/RegisteredCandidates";
-=======
+
 import PostGraduationNoteLaunch from "./pages/post-graduation/NoteLaunch";
->>>>>>> bdee33f (...)
+
 
 
 const App = () => {
@@ -1781,7 +1781,7 @@ const App = () => {
                   />
 
 
-                  */}
+                  
 
 
 
