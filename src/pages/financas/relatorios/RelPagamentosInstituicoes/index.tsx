@@ -2,8 +2,7 @@ import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -18,19 +17,17 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import {
-    ArrowUpDown, Building, Download, FileText, Filter, Search,
+    ArrowUpDown, Building, Download, FileText,
     TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Users, Wallet,
     PieChart as PieIcon, BarChart3, Percent, Sparkles, Eye,
+    FileSpreadsheet,
 } from "lucide-react";
-import { toast } from "sonner";
-import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
-import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
-import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
-import { useListarPagamentoBolsa } from "@/hooks/financas/bolsa/pagamento-bolsa";
-import { PagamentosBolsasTable } from "./components/PagamentosBolsasTable";
-import { ModalUpsertPagamentoBolsa } from "./components/ModalUpsertPagamentoBolsa";
+
+
 import { ReportByTable } from "./components/ReportByTable";
+import { ConciliacaoTab } from "./components/ConciliacaoTab";
+import { ReportByTableInstSemPagamentos } from "./components/ReportByTableSemPagamentos";
+import { InsightsTab } from "./components/InsightsTab";
 
 // ---------- MOCK DATA ----------
 interface Estudante {
@@ -131,7 +128,6 @@ function statusFromDiff(depositado: number, calculado: number) {
 
 const COLORS = ["hsl(221 83% 53%)", "hsl(160 84% 39%)", "hsl(45 93% 47%)", "hsl(0 84% 60%)", "hsl(280 65% 60%)", "hsl(190 75% 45%)", "hsl(25 95% 53%)", "hsl(330 70% 55%)", "hsl(140 60% 45%)", "hsl(210 50% 40%)"];
 
-type SortKey = "instituicao" | "anoLetivo" | "numBolseiros" | "valorDepositado" | "valorCalculado" | "diferenca";
 
 export default function RelPagamentosInstituicoes() {
     const [tab, setTab] = useState("tabela");
@@ -139,10 +135,7 @@ export default function RelPagamentosInstituicoes() {
     const [semestreFiltro, setSemestreFiltro] = useState<string>("todos");
     const [instFiltro, setInstFiltro] = useState<string>("todos");
     const [busca, setBusca] = useState("");
-    const [sortKey, setSortKey] = useState<SortKey>("instituicao");
-    const [sortAsc, setSortAsc] = useState(true);
-    const [page, setPage] = useState(1);
-    const [pageSize] = useState(10);
+
     const [apenasDivergencias, setApenasDivergencias] = useState(false);
     const [detalhe, setDetalhe] = useState<RegistroInstituicao | null>(null);
     const [evolucaoModo, setEvolucaoModo] = useState<"mes" | "semestre" | "ano">("mes");
@@ -160,25 +153,6 @@ export default function RelPagamentosInstituicoes() {
     }, [anoFiltro, semestreFiltro, instFiltro, busca]);
 
 
-    const ordenados = useMemo(() => {
-        const arr = [...filtrados];
-        arr.sort((a, b) => {
-            let av: any, bv: any;
-            if (sortKey === "diferenca") {
-                av = a.valorDepositado - a.valorCalculado;
-                bv = b.valorDepositado - b.valorCalculado;
-            } else {
-                av = (a as any)[sortKey];
-                bv = (b as any)[sortKey];
-            }
-            if (typeof av === "string") return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
-            return sortAsc ? av - bv : bv - av;
-        });
-        return arr;
-    }, [filtrados, sortKey, sortAsc]);
-
-    const totalPages = Math.max(1, Math.ceil(ordenados.length / pageSize));
-    const pagina = ordenados.slice((page - 1) * pageSize, page * pageSize);
 
     // ---------- KPIs ----------
     const kpis = useMemo(() => {
@@ -269,30 +243,7 @@ export default function RelPagamentosInstituicoes() {
         return { maiorPago, maisBolseiros, divergentes, crescimento, tendencia };
     }, [porInstituicao, conciliacao]);
 
-    function toggleSort(k: SortKey) {
-        if (sortKey === k) setSortAsc(!sortAsc);
-        else { setSortKey(k); setSortAsc(true); }
-    }
 
-    function exportCsv() {
-        const header = ["Instituição", "Ano Letivo", "Semestre", "Nº Bolseiros", "Valor Depositado", "Valor Calculado", "Diferença", "Status"];
-        const rows = ordenados.map((r) => {
-            const s = statusFromDiff(r.valorDepositado, r.valorCalculado);
-            return [r.instituicao, r.anoLetivo, r.semestre, r.numBolseiros, r.valorDepositado, r.valorCalculado, r.valorDepositado - r.valorCalculado, s.label];
-        });
-        const csv = [header, ...rows].map((l) => l.map((c) => `"${c}"`).join(";")).join("\n");
-        const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `relatorio-pagamentos-instituicoes-${Date.now()}.csv`;
-        a.click();
-        toast.success("Exportado para Excel (CSV)");
-    }
-
-    function exportPdf() {
-        window.print();
-        toast.success("A preparar impressão / PDF");
-    }
 
     return (
         <div className="space-y-6">
@@ -306,6 +257,7 @@ export default function RelPagamentosInstituicoes() {
                     <TabsTrigger value="dashboard"><BarChart3 className="h-4 w-4 mr-2" />Dashboard Estatístico</TabsTrigger>
                     <TabsTrigger value="conciliacao"><CheckCircle2 className="h-4 w-4 mr-2" />Conciliação</TabsTrigger>
                     <TabsTrigger value="insights"><Sparkles className="h-4 w-4 mr-2" />Insights</TabsTrigger>
+                    <TabsTrigger value="instituicao"><FileSpreadsheet className="h-4 w-4 mr-2" />Instituições com Bolsa sem Pagamento</TabsTrigger>
                 </TabsList>
 
                 {/* TABELA */}
@@ -409,86 +361,19 @@ export default function RelPagamentosInstituicoes() {
 
                 {/* CONCILIAÇÃO */}
                 <TabsContent value="conciliacao" className="mt-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle className="text-base">Auditoria de Conciliação Financeira</CardTitle>
-                                <p className="text-sm text-muted-foreground mt-1">Compare valores depositados vs valores esperados por instituição</p>
-                            </div>
-                            <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                <Checkbox checked={apenasDivergencias} onCheckedChange={(v) => setApenasDivergencias(!!v)} />
-                                Apenas com divergências
-                            </label>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Instituição</TableHead>
-                                        <TableHead>Valor Depositado</TableHead>
-                                        <TableHead>Valor Esperado</TableHead>
-                                        <TableHead>Diferença</TableHead>
-                                        <TableHead>% Divergência</TableHead>
-                                        <TableHead>Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {conciliacao.map((c) => {
-                                        const s = statusFromDiff(c.depositado, c.calculado);
-                                        return (
-                                            <TableRow key={c.instituicao}>
-                                                <TableCell className="font-medium">{c.instituicao}</TableCell>
-                                                <TableCell>{fmt(c.depositado)}</TableCell>
-                                                <TableCell>{fmt(c.calculado)}</TableCell>
-                                                <TableCell className={c.diferenca < 0 ? "text-rose-600" : c.diferenca > 0 ? "text-amber-600" : ""}>{fmt(c.diferenca)}</TableCell>
-                                                <TableCell>{c.pctDivergencia.toFixed(2)}%</TableCell>
-                                                <TableCell><Badge variant="outline" className={s.className}>{s.label}</Badge></TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+                    <ConciliacaoTab />
                 </TabsContent>
 
                 {/* INSIGHTS */}
                 <TabsContent value="insights" className="mt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <InsightCard
-                            icon={Wallet}
-                            title="Instituição com maior valor recebido"
-                            text={insights.maiorPago ? `${insights.maiorPago.instituicao} recebeu ${fmt(insights.maiorPago.depositado)}` : "Sem dados"}
-                        />
-                        <InsightCard
-                            icon={Users}
-                            title="Instituição com maior número de bolseiros"
-                            text={insights.maisBolseiros ? `${insights.maisBolseiros.instituicao} com ${insights.maisBolseiros.bolseiros} bolseiros activos` : "Sem dados"}
-                        />
-                        <InsightCard
-                            icon={AlertTriangle}
-                            title="Instituições com divergências financeiras"
-                            text={`${insights.divergentes} instituições com divergência ≥ 5%`}
-                            tone={insights.divergentes > 0 ? "warn" : "ok"}
-                        />
-                        <InsightCard
-                            icon={Number(insights.crescimento) >= 0 ? TrendingUp : TrendingDown}
-                            title="Crescimento vs período anterior"
-                            text={`${insights.crescimento}% de ${insights.tendencia} nos pagamentos`}
-                            tone={Number(insights.crescimento) >= 0 ? "ok" : "warn"}
-                        />
-                        <InsightCard
-                            icon={TrendingUp}
-                            title="Tendência dos custos das bolsas"
-                            text={`Custo total das bolsas em ${insights.tendencia} estimado para o próximo período`}
-                        />
-                        <InsightCard
-                            icon={Percent}
-                            title="Saúde da conciliação"
-                            text={`${kpis.conciliacao.toFixed(2)}% das verbas conciliadas com as bolsas calculadas`}
-                            tone={kpis.conciliacao >= 99 ? "ok" : kpis.conciliacao >= 95 ? "warn" : "high"}
-                        />
-                    </div>
+                    <InsightsTab fmt={fmt} />
+                </TabsContent>
+
+
+                {/* SEM PAGAMENTOS */}
+                <TabsContent value="instituicao" className="mt-4">
+                    {/*   <ReportByTableInstSemPagamentos /> */}
+
                 </TabsContent>
             </Tabs>
 
@@ -568,23 +453,6 @@ export default function RelPagamentosInstituicoes() {
 //     );
 // }
 
-function InsightCard({ icon: Icon, title, text, tone }: { icon: any; title: string; text: string; tone?: "ok" | "warn" | "high" }) {
-    const cls =
-        tone === "ok" ? "border-emerald-500/30 bg-emerald-500/5" :
-            tone === "warn" ? "border-amber-500/30 bg-amber-500/5" :
-                tone === "high" ? "border-rose-500/30 bg-rose-500/5" : "";
-    return (
-        <Card className={cls}>
-            <CardContent className="p-4 flex gap-3">
-                <div className="p-2 rounded-md bg-background border h-fit"><Icon className="h-4 w-4" /></div>
-                <div>
-                    <p className="text-sm font-medium">{title}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{text}</p>
-                </div>
-            </CardContent>
-        </Card>
-    );
-}
 
 function MiniStat({ label, value, tone }: { label: string; value: string; tone?: "ok" | "warn" }) {
     const cls = tone === "ok" ? "text-emerald-600" : tone === "warn" ? "text-amber-600" : "";
