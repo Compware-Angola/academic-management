@@ -84,7 +84,14 @@ export const ScheduleMoveTableWithFilters = ({
 
   useEffect(() => {
     onResetSchedule();
-  }, [filters, periodo, course]);
+  }, [
+    filters.semestre,
+    filters.anoCurricular,
+    filters.anoLetivo,
+    filters.curso,
+    filters.unidadeCurricular,
+    periodo,
+  ]);
   console.log("@", filters);
 
   const canLoadTurmas =

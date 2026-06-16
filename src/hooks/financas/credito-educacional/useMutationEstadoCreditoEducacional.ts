@@ -10,6 +10,8 @@ export default function useMutationEstadoCreditoEducacional() {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["bolsa-estudante"] });
       queryClient.invalidateQueries({ queryKey: ["student-info-bolsa"] });
+      queryClient.invalidateQueries({ queryKey: ["finance-monthly-fee"] });
+
     },
   });
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { MoveRight, Loader2 } from "lucide-react";
 
@@ -46,9 +46,9 @@ export function MoveStudentsWithoutSchedule() {
     //handleResetShedule();
     setSelectedGradeAlunoIds([]);
   };
-  const handleResetShedule = () => {
+  const handleResetShedule = useCallback(() => {
     setSelectedSchedule(null);
-  };
+  }, []);
 
   return (
     <div className="p-4 space-y-4">
