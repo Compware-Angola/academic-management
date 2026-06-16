@@ -59,6 +59,7 @@ export function AreaFinanceira({
               </TabsTrigger>
             )
           }
+          {/*
           {
             <TabsTrigger
               className="w-full justify-start gap-2"
@@ -68,6 +69,9 @@ export function AreaFinanceira({
               <span className="hidden md:inline">Dívidas</span>
             </TabsTrigger>
           }
+          */}
+
+
         </TabsList>
 
         <Card className="flex-1 p-6">
