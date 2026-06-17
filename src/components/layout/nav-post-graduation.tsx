@@ -75,8 +75,7 @@ export function NavPostGraduation({
                       )}
                     >
                       {item.icon && <item.icon />}
-                      <NavSidebarItem text={item.title} />
-
+                      <TruncatedText text={item.title} />
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -97,7 +96,7 @@ export function NavPostGraduation({
                               )}
                             >
                               <Link to={subItem.url}>
-                                <span>{subItem.title}</span>
+                                <TruncatedText text={subItem.title} />
                               </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
@@ -135,7 +134,7 @@ export function NavPostGraduation({
 
 
 
-function NavSidebarItem({ text }: { text: string }) {
+function TruncatedText({ text }: { text: string }) {
   const ref = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState(false)
 
