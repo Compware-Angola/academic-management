@@ -22,6 +22,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useCriarPagamentoBolsa, useUpdatePagamentoBolsa } from "@/hooks/financas/bolsa/pagamento-bolsa";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 type ModalUpsertPagamentoBolsaProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
@@ -154,6 +155,7 @@ export const ModalUpsertPagamentoBolsa = ({
                             name="anoLectivo"
                             label="Ano Lectivo"
                             placeholder="Seleciona ano"
+
                             control={form.control}
                             items={
                                 academicYear?.map((item) => ({
@@ -164,19 +166,13 @@ export const ModalUpsertPagamentoBolsa = ({
                             disabled={loadingYear}
                             fullWidth
                         />
-                        <SelectFormField
-                            name="semestre"
-                            label="Semestre"
-                            placeholder="Seleciona semestre"
-                            control={form.control}
-                            items={
-                                semestres?.map((item) => ({
-                                    label: item.designacao,
-                                    value: String(item.codigo),
-                                })) ?? []
-                            }
+                        <SemestreSelect
                             disabled={loadingSemestres}
-                            fullWidth
+                            yearly
+                            value={form.getValues("semestre")}
+                            onChangeValue={(v) => {
+                                form.setValue("semestre", v);
+                            }}
                         />
                         <InputFormField
                             name="valorDepositado"

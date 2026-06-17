@@ -1,4 +1,4 @@
-// src/hooks/study_plan/use-classes.ts
+
 import { useQuery } from "@tanstack/react-query";
 import { getClasses, Classe } from "@/services/fetch-class";
 export function useClasses() {

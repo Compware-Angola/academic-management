@@ -1,4 +1,4 @@
-// src/services/classeService.ts
+
 import { axiosApexGa } from "@/lib/axios-apex-ga";
 
 export interface Classe {
