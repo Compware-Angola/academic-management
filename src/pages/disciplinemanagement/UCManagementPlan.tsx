@@ -59,7 +59,7 @@ import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdo
 export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
-  const [classeId, setClasseId] = useState<string>("");
+  const [classeId, setClasseId] = useState<string>("7");
   const { user: userData } = useAuth();
   // Paginação
   const [page, setPage] = useState(1);
@@ -235,23 +235,25 @@ export default function UCManagementPlan() {
             {loadingClasses ? (
               <Skeleton className="h-10 w-full rounded-md" />
             ) : (
-              <Select
-                value={classeId}
-                onValueChange={setClasseId}
-                disabled={!anoLetivoId || !cursoId}
-              >
+              <Select value={classeId} onValueChange={setClasseId}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o ano curricular..." />
                 </SelectTrigger>
+
                 <SelectContent>
-                  {classes.map((classe) => (
-                    <SelectItem
-                      key={classe.codigo}
-                      value={String(classe.codigo)}
-                    >
-                      {classe.designacao}
-                    </SelectItem>
-                  ))}
+                  {classes
+                    .filter((classe) =>
+                      !classe.designacao
+                        ?.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .includes("pos-graduacao")
+                    )
+                    .map((classe) => (
+                      <SelectItem key={classe.codigo} value={String(classe.codigo)}>
+                        {classe.designacao}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             )}
