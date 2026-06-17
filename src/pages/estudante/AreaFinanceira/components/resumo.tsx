@@ -242,7 +242,7 @@ export function Resumo({
         >
           <CardHeader className="pb-1">
             <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-              <Wallet className="h-3.5 w-3.5" /> Saldo atual
+              <Wallet className="h-3.5 w-3.5" /> Reserva
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -254,13 +254,12 @@ export function Resumo({
             </p>
             <span
               className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
-  ${
-    student?.saldo_atual > 0
-      ? "bg-green-100 text-green-700"
-      : student?.saldo_atual < 0
-        ? "bg-red-100 text-destructive"
-        : "bg-muted text-muted-foreground"
-  }`}
+  ${student?.saldo_atual > 0
+                  ? "bg-green-100 text-green-700"
+                  : student?.saldo_atual < 0
+                    ? "bg-red-100 text-destructive"
+                    : "bg-muted text-muted-foreground"
+                }`}
             >
               {student?.saldo_atual > 0
                 ? "Crédito disponível"
@@ -294,7 +293,7 @@ export function Resumo({
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3 text-destructive" />
-                  {pendingPayments.length} pagamento(s) em atraso
+                  {pendingPayments.length} pagamento(s) de Mensalidades em atraso
                 </p>
               </>
             )}
@@ -721,8 +720,8 @@ export function Resumo({
                             <TableCell>
                               {(item.descricaoservico || "—") +
                                 (Number(item.mesid) !== 3 &&
-                                item.mesid &&
-                                item.mesdescricao
+                                  item.mesid &&
+                                  item.mesdescricao
                                   ? ` (${item.mesdescricao})`
                                   : "")}
                             </TableCell>
