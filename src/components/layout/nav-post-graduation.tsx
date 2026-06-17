@@ -17,6 +17,9 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipProvider } from "../ui/tooltip";
+import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import { useEffect, useRef, useState } from "react";
 
 export function NavPostGraduation({
   items,
@@ -68,11 +71,12 @@ export function NavPostGraduation({
                       className={clsx(
                         "transition-colors",
                         isActive &&
-                          "bg-primary text-primary-foreground hover:bg-primary/90",
+                        "bg-primary text-primary-foreground hover:bg-primary/90",
                       )}
                     >
                       {item.icon && <item.icon />}
-                      <span>{item.title}</span>
+                      <NavSidebarItem text={item.title} />
+
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -89,7 +93,7 @@ export function NavPostGraduation({
                               asChild
                               className={clsx(
                                 subActive &&
-                                  "bg-primary text-primary-foreground hover:bg-primary/90",
+                                "bg-primary text-primary-foreground hover:bg-primary/90",
                               )}
                             >
                               <Link to={subItem.url}>
@@ -114,7 +118,7 @@ export function NavPostGraduation({
                 className={clsx(
                   "transition-colors",
                   isActive &&
-                    "bg-primary text-primary-foreground hover:bg-primary/90",
+                  "bg-primary text-primary-foreground hover:bg-primary/90",
                 )}
               >
                 {item.icon && <item.icon />}
@@ -126,4 +130,42 @@ export function NavPostGraduation({
       </SidebarMenu>
     </SidebarGroup>
   );
+}
+
+
+
+
+function NavSidebarItem({ text }: { text: string }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const [isTruncated, setIsTruncated] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+
+    if (el) {
+      setIsTruncated(el.scrollWidth > el.clientWidth)
+    }
+  }, [text])
+
+  const content = (
+    <span ref={ref} className="block truncate max-w-[200px]">
+      {text}
+    </span>
+  )
+
+  if (!isTruncated) {
+    return content
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {content}
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{text}</p>
+      </TooltipContent>
+    </Tooltip>
+
+  )
 }

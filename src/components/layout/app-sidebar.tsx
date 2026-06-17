@@ -57,13 +57,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavAcademic items={academicItems} />
         <NavPostGraduation items={postGraduationItems} />
         <NavOperacional items={operacionalItems} />
-
-
         <NavCommunication items={comunicationItems} />
-
-
         <NavSuporte items={suporteItems} />
-
         <NavFinance items={financeItems} />
         <NavDocs items={docsItems} />
       </SidebarContent>

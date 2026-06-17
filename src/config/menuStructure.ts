@@ -779,6 +779,17 @@ export const postGraduationStructure: MenuStructure = {
         }
       ],
     },
+    {
+      title: "Gestão de Orientação e Pesquisa",
+      url: "/gestao-orientacao-pesquisa",
+      icon: GraduationCap,
+      items: [
+        {
+          title: "Estudantes",
+          url: "/gestao-orientacao-pesquisa/estudantes",
+        },
+      ],
+    }
   ],
 };
 
