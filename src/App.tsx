@@ -179,6 +179,7 @@ import RelPagamentosInstituicoes from "./pages/financas/relatorios/RelPagamentos
 import { RegisteredCandidates } from "./pages/post-graduation/RegisteredCandidates";
 
 import PostGraduationNoteLaunch from "./pages/post-graduation/NoteLaunch";
+import GuidanceResearchManagementStudent from "./pages/post-graduation/guidance-research-management/ListarEstudante";
 
 
 
@@ -897,7 +898,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/epoca-especial"
                     element={
@@ -911,7 +911,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/horarios"
                     element={
@@ -1779,9 +1778,19 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/gestao-orientacao-pesquisa/estudantes"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla!]}
+                      >
+                        <GuidanceResearchManagementStudent />
+                      </ProtectedRoute>
+                    }
+                  />
 
 
-                  
+
 
 
 
@@ -1799,8 +1808,8 @@ const App = () => {
                     }
                   />
                   */}
-                
-                {/*
+
+                  {/*
                       <Route
                   path="/pos-graduacao/avaliacoes/lancamento-notas"
                   element={
@@ -1814,7 +1823,7 @@ const App = () => {
                   }
                 />
                 */}
-                  
+
 
                 </Route>
               </Routes>

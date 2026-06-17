@@ -46,7 +46,7 @@ import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { TipoCandidatura } from "@/services/fecth-tipo-candidatura";
 
-export default function ListarEstudanteFinalista() {
+export default function GuidanceResearchManagementStudent() {
   const [page, setPage] = useState(1);
 
   const [limit, setLimit] = useState(10);
@@ -107,19 +107,19 @@ export default function ListarEstudanteFinalista() {
 
   const excelProps: GenericExcelProps | null = pdfData
     ? {
-        documentTitle: "Estudantes Finalistas",
-        mainTable: {
-          headers: [
-            { key: "matricula", label: "Nº Matrícula", width: 15 },
-            { key: "nome", label: "Nome", width: 50 },
-            { key: "bilhete", label: "Bilhete", width: 20 },
-            { key: "curso", label: "Curso", width: 30 },
-          ],
-          rows: pdfData.rows,
-        },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+      documentTitle: "Estudantes Finalistas",
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: 15 },
+          { key: "nome", label: "Nome", width: 50 },
+          { key: "bilhete", label: "Bilhete", width: 20 },
+          { key: "curso", label: "Curso", width: 30 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
   const handleRefetch = () => {
     setFilters({
