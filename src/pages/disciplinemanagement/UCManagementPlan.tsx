@@ -87,7 +87,7 @@ export default function UCManagementPlan() {
   } = useGradeCurricular({
     anoLectivo: parseFilter(anoLetivoId),
     curso: parseFilter(cursoId),
-    classe: parseFilter(classeId),
+    classe: classeId !== "7" ? parseFilter(classeId) : undefined,
     page,
     limit,
   });
@@ -112,6 +112,12 @@ export default function UCManagementPlan() {
   const handleCreateUC = () => {
     if (!formData.codigo_disciplina || !formData.codigo_semestre) {
       toast.error("Preencha todos os campos obrigatórios.");
+      return;
+    }
+    if (classeId == "7") {
+      toast.error("Selecione um Ano Curricular válido.");
+      setClasseId("");
+      setIsModalOpen(false);
       return;
     }
     createUC(
