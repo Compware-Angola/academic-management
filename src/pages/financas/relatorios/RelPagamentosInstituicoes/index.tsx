@@ -26,8 +26,9 @@ import {
 
 import { ReportByTable } from "./components/ReportByTable";
 import { ConciliacaoTab } from "./components/ConciliacaoTab";
-import { ReportByTableInstSemPagamentos } from "./components/ReportByTableSemPagamentos";
+import { RepoortByTableInstSemPagamentos } from "./components/ReportByTableSemPagamentos";
 import { InsightsTab } from "./components/InsightsTab";
+import { ReportByTableInstSemCredEdu } from "./components/ReportByTableSemCredEdu";
 
 // ---------- MOCK DATA ----------
 interface Estudante {
@@ -257,7 +258,8 @@ export default function RelPagamentosInstituicoes() {
                     <TabsTrigger value="dashboard"><BarChart3 className="h-4 w-4 mr-2" />Dashboard Estatístico</TabsTrigger>
                     <TabsTrigger value="conciliacao"><CheckCircle2 className="h-4 w-4 mr-2" />Conciliação</TabsTrigger>
                     <TabsTrigger value="insights"><Sparkles className="h-4 w-4 mr-2" />Insights</TabsTrigger>
-                    <TabsTrigger value="instituicao"><FileSpreadsheet className="h-4 w-4 mr-2" />Instituições com Bolsa sem Pagamento</TabsTrigger>
+                    <TabsTrigger value="instituicao-com"><FileSpreadsheet className="h-4 w-4 mr-2" />Instituições com Credito Educacional Sem Pagamento</TabsTrigger>
+                    <TabsTrigger value="instituicao-sem"><FileSpreadsheet className="h-4 w-4 mr-2" />Instituições Sem Credito Educacional</TabsTrigger>
                 </TabsList>
 
                 {/* TABELA */}
@@ -371,8 +373,12 @@ export default function RelPagamentosInstituicoes() {
 
 
                 {/* SEM PAGAMENTOS */}
-                <TabsContent value="instituicao" className="mt-4">
-                    {/*   <ReportByTableInstSemPagamentos /> */}
+                <TabsContent value="instituicao-com" className="mt-4">
+                    <RepoortByTableInstSemPagamentos />
+
+                </TabsContent>
+                <TabsContent value="instituicao-sem" className="mt-4">
+                    <ReportByTableInstSemCredEdu />
 
                 </TabsContent>
             </Tabs>

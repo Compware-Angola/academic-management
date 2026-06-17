@@ -33,7 +33,7 @@ import { ModalDetalhePagamentoBolsa } from "./ModalDetalhePagamentoBolsa";
 const fmt = (v: number) =>
     new Intl.NumberFormat("pt-AO", { style: "currency", currency: "AOA", maximumFractionDigits: 0 }).format(v);
 
-export function RepoortByTableInstSemPagamentos() {
+export function ReportByTableInstSemCredEdu() {
     const [filters, setFilters] = useState({
         anoLectivo: "all",
         semestre: "all",

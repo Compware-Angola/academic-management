@@ -213,8 +213,8 @@ export default function LaunchHistoric() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <BookOpen className="w-4 h-4 text-primary" />
-              <span className="text-sm font-semibold">Passo 2 — Refinar por ano lectivo e disciplina</span>
-              <Badge variant="secondary" className="text-xs">Opcional</Badge>
+              <span className="text-sm font-semibold">Passo 2 — Refinar por ano lectivo e unidade curricular</span>
+              <Badge variant="secondary" className="text-xs"> UC — Opcional</Badge>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
