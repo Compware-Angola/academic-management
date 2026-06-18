@@ -59,3 +59,21 @@ export async function fetchPosGraduationCandidates(
 
   return data;
 }
+
+
+export type PosGraduationCandidateDocument = {
+  nome_arquivo: string;
+  descricao: string;
+};
+
+export async function fetchPosGraduationCandidateDocuments(
+  codigoPreinscricao: number,
+): Promise<PosGraduationCandidateDocument[]> {
+  const { data } = await axiosNestGa.get<
+    PosGraduationCandidateDocument[]
+  >(
+    `/post-graduation/candidates/${codigoPreinscricao}/documents`,
+  );
+
+  return data;
+}

@@ -1,4 +1,4 @@
-import { fetchPosGraduationCandidates, PosGraduationCandidatesParams } from "@/services/post-graduation/candidates.service";
+import { fetchPosGraduationCandidateDocuments, fetchPosGraduationCandidates, PosGraduationCandidatesParams } from "@/services/post-graduation/candidates.service";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 export const useQueryCandidatesPosGraduation = (params: PosGraduationCandidatesParams) => {
@@ -11,3 +11,24 @@ export const useQueryCandidatesPosGraduation = (params: PosGraduationCandidatesP
     gcTime: 1000 * 60 * 10,
   });
 }
+
+
+
+export const useQueryCandidateDocuments = (
+  codigoPreinscricao?: number,
+) => {
+  return useQuery({
+    queryKey: [
+      "pos-graduation",
+      "candidate-documents",
+      codigoPreinscricao,
+    ],
+    queryFn: () =>
+      fetchPosGraduationCandidateDocuments(
+        codigoPreinscricao!,
+      ),
+    enabled: Boolean(codigoPreinscricao),
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+};

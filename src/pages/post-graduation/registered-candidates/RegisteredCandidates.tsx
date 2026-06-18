@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
 
+  EyeIcon,
   Loader2,
   RefreshCw,
 
@@ -21,12 +22,14 @@ import {
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { parseFilter } from "@/util/parse-filter";
-import { PostGraduationCandidateStatus, PostGraduationPaymentStatus } from "@/services/post-graduation/candidates.service";
+import { PosGraduationCandidate, PostGraduationCandidateStatus, PostGraduationPaymentStatus } from "@/services/post-graduation/candidates.service";
 import { useQueryCandidatesPosGraduation } from "@/hooks/post-graduation/use-query-candidates";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CandidateDetailsDialog } from "./candidate-documents-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type FiltersState = {
   academicYearId: string;
@@ -51,6 +54,11 @@ export function RegisteredCandidates() {
   const [filters, setFilters] = useState<FiltersState>(initialFilters);
   const [limit, setLimit] = useState(10);
 
+
+  const [selectedCandidate, setSelectedCandidate] =
+    useState<PosGraduationCandidate | null>(null)
+  const [openDocuments, setOpenDocuments] =
+    useState(false);
   const { data: candidatesResponse, isFetching: isFetchingCandidates, refetch: refetchCandidates, isLoading: isLoadingCandidates } = useQueryCandidatesPosGraduation({
     codigoTipoCandidatura: parseFilter(filters.degreeId),
     codigoAnoLectivo: parseFilter(filters.academicYearId),
@@ -143,7 +151,7 @@ export function RegisteredCandidates() {
               Limpar filtros
 
             </Button>
-            <Select
+            {/* <Select
               value={String(limit)}
               onValueChange={(v) => {
                 setLimit(Number(v));
@@ -159,7 +167,7 @@ export function RegisteredCandidates() {
                 <SelectItem value="50">50</SelectItem>
                 <SelectItem value="100">100</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
         }
       />
@@ -300,6 +308,26 @@ export function RegisteredCandidates() {
                       </span>
                     )}
                   </TableCell>
+                  <TableCell className="text-center">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          aria-label="Ver detalhes do candidato"
+                          size="icon"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedCandidate(candidate);
+                            setOpenDocuments(true);
+                          }}
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Detalhes</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -355,6 +383,11 @@ export function RegisteredCandidates() {
           </div>
         )
       }
+      <CandidateDetailsDialog
+        open={openDocuments}
+        onOpenChange={setOpenDocuments}
+        candidate={selectedCandidate}
+      />
     </div >
   );
 }
