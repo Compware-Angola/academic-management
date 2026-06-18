@@ -212,7 +212,7 @@ export function ProvaFormDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Disciplinas</Label>
+            <Label>Disciplinas que compoem a prova</Label>
             <SelectionList
               value={form.disciplinas}
               items={disciplinas}
