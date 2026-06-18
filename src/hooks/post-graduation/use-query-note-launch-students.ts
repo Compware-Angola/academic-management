@@ -11,8 +11,9 @@ export const POST_GRADUATION_NOTE_LAUNCH_STUDENTS_QUERY_KEY =
 
 export function useQueryNoteLaunchStudents(
   params: FetchNoteLaunchStudentsParams,
+  options?: { enabled?: boolean },
 ) {
-  const enabled =
+  const hasRequiredFilters =
     params.academicYearId > 0 &&
     [2, 3].includes(params.degreeId) &&
     [1, 2].includes(params.semesterId) &&
@@ -42,7 +43,7 @@ export function useQueryNoteLaunchStudents(
       params.limit,
     ],
     queryFn: () => fetchNoteLaunchStudents(params),
-    enabled,
+    enabled: hasRequiredFilters && (options?.enabled ?? true),
     placeholderData: (previousData) => previousData,
     retry: 1,
   });

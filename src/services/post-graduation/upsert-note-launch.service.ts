@@ -2,7 +2,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type UpsertPostGraduationNoteItem = {
   studentCurricularGradeId: number;
-  grade: number;
+  grade: number | null;
   observation?: string;
 };
 
@@ -28,16 +28,13 @@ export type UpsertPostGraduationNotesResponse = {
   total: number;
 };
 
-
-
 export async function upsertPostGraduationNotes(
   payload: UpsertPostGraduationNotesPayload,
 ) {
-  const { data } =
-    await axiosNestGa.put<UpsertPostGraduationNotesResponse>(
-      '/post-graduation/assessments/note-launch',
-      payload,
-    );
+  const { data } = await axiosNestGa.put<UpsertPostGraduationNotesResponse>(
+    "/post-graduation/assessments/note-launch",
+    payload,
+  );
 
   return data;
 }
