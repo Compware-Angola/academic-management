@@ -779,6 +779,39 @@ export const postGraduationStructure: MenuStructure = {
         }
       ],
     },
+     {
+      title: "Docente",
+      url: "/pos-graduacao-docente",
+      icon: GraduationCap,
+      items: [
+        {
+          title: "Calendário de aulas",
+          url: "/pos-graduacao-docente/calendario",
+          permission: [
+            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
+          ],
+        },
+        {
+          title: "Horas de vigilância",
+          url: "/pos-graduacao-docente/vigilancia",
+          permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
+        },
+        {
+          title: "Lançamento do programa da UC",
+          url: "/pos-graduacao-docente/programa",
+          permission: [
+            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+          ],
+        },
+        {
+          title: "Validação do programa",
+          url: "/pos-graduacao-docente/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+        },
+      ],
+
+      permission: [],
+    },
     {
       title: "Gestão de Orientação e Pesquisa",
       url: "/gestao-orientacao-pesquisa",
