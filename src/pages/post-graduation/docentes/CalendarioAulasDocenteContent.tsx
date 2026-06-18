@@ -13,7 +13,7 @@ import { DiaAulasContent } from "./components/DiaAulaContent";
 
 type ViewMode = "MES" | "SEMANA" | "DIA";
 
-export default function CalendarioAulasDocente() {
+export default function PosGraduacaoCalendarioAulasDocente() {
   const [modo, setModo] = useState<ViewMode>("MES");
   const [dataReferencia, setDataReferencia] = useState<Date>(new Date());
   const [diaSelecionado, setDiaSelecionado] = useState<string>(formatISODate(new Date()));

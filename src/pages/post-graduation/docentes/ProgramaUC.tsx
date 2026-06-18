@@ -40,7 +40,7 @@ import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profil
 import { useMutationUpdateProgramaUCVisibilidade } from "@/hooks/docentes/use-mutation-docente-programa-visilidade";
 import { DownloadFileButton } from "@/components/common/DownloadFile";
 
-export default function DocenteLancamentoProgramaUC() {
+export default function PosGraduacaoDocenteLancamentoProgramaUC() {
   const id = useId();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);

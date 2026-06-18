@@ -37,7 +37,7 @@ import { useAssiduidadeDocente } from "@/hooks/docentes/useAssiduidadeDocente";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export default function AssiduidadeDocente() {
+export default function PosGraduacaoAssiduidadeDocente() {
   const { data: userDate } = useCurrentUser("GA");
   const isDocente = userDate?.roles?.docente;
   const { user } = useAuth();
@@ -245,9 +245,9 @@ export default function AssiduidadeDocente() {
               map={(u) => ({ key: u.codigo, value: u.codigo, label: u.nome_cadeira })}
               placeholder={
                 !filters.curso ? "Selecione curso"
-                : !filters.semestre ? "Selecione semestre"
-                : isLoadingUC ? "Carregando UCs..."
-                : "Selecionar UC"
+                  : !filters.semestre ? "Selecione semestre"
+                    : isLoadingUC ? "Carregando UCs..."
+                      : "Selecionar UC"
               }
               onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
             />

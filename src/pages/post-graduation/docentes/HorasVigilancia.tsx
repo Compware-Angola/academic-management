@@ -38,7 +38,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatarData } from "@/util/date-formate";
 
-const HorasVigilancia = () => {
+const PosGraduacaoHorasVigilancia = () => {
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     estado: "",
@@ -331,4 +331,4 @@ const HorasVigilancia = () => {
   );
 };
 
-export default HorasVigilancia;
+export default PosGraduacaoHorasVigilancia;

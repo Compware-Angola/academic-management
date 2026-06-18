@@ -2,6 +2,7 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,6 +33,7 @@ const ValidacaoProgramaSemUC = () => {
     semestre: "",
     curso: "",
     anoCurricular: "",
+    tipoCandidatura: "",
   });
 
   const { data: programaUcResponse, isLoading } = useQueryProgramasSemUC({
@@ -59,7 +61,14 @@ const ValidacaoProgramaSemUC = () => {
               value={filters.semestre}
               onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
             />
+            <TipoCandidaturaSelect
+              isPostGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+            />
             <CourseSelect
+              disabled={!filters.tipoCandidatura}
+              params={{ tipoCandidaturaId: parseFilter(filters.tipoCandidatura) }}
               value={filters.curso}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
             />

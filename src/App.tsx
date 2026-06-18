@@ -180,6 +180,9 @@ import { RegisteredCandidates } from "./pages/post-graduation/registered-candida
 
 import PostGraduationNoteLaunch from "./pages/post-graduation/NoteLaunch";
 import GuidanceResearchManagementStudent from "./pages/post-graduation/guidance-research-management/ListarEstudante";
+import PosGraduacaoHorasVigilancia from "./pages/post-graduation/docentes/HorasVigilancia";
+import PosGraduacaoDocenteLancamentoProgramaUC from "./pages/post-graduation/docentes/ProgramaUC";
+import PosGraduacaoValidacaoProgramaValidacaoPrograma from "./pages/post-graduation/docentes/ValidacaoPrograma";
 
 
 
@@ -463,6 +466,19 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/pos-graduacao-docente/programa"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC
+                            .sigla,
+                        ]}
+                      >
+                        <PosGraduacaoDocenteLancamentoProgramaUC />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/docente/validacao"
                     element={
                       <ProtectedRoute
@@ -471,6 +487,18 @@ const App = () => {
                         ]}
                       >
                         <ValidacaoPrograma />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="pos-graduacao-docente/validacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla,
+                        ]}
+                      >
+                        <PosGraduacaoValidacaoProgramaValidacaoPrograma />
                       </ProtectedRoute>
                     }
                   />
@@ -1051,9 +1079,21 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/docente/calendario"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE
+                            .sigla!,
+                        ]}
+                      >
+                        <CalendarioAulasDocente />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="pos-graduacao-docente/calendario"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
@@ -1460,6 +1500,18 @@ const App = () => {
                         ]}
                       >
                         <HorasVigilancia />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="pos-graduacao-docente/vigilancia"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!,
+                        ]}
+                      >
+                        <PosGraduacaoHorasVigilancia />
                       </ProtectedRoute>
                     }
                   />

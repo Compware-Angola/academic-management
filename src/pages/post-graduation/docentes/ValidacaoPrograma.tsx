@@ -12,7 +12,7 @@ import {
 import { ValidacaoProgramaComUC } from "./components/ValidacaoProgramaComUC";
 import { ValidacaoProgramaSemUC } from "./components/ValidacaoProgramaSemUC";
 
-const ValidacaoPrograma = () => {
+const PosGraduacaoValidacaoProgramaValidacaoPrograma = () => {
   const [activeTab, setActiveTab] = useState<"com-uc" | "sem-uc">("com-uc");
 
   return (
@@ -62,4 +62,4 @@ const ValidacaoPrograma = () => {
   );
 };
 
-export default ValidacaoPrograma;
+export default PosGraduacaoValidacaoProgramaValidacaoPrograma;
