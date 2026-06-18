@@ -31,6 +31,8 @@ import { NoteLaunchFilters, NoteLaunchFilterState } from "./components/NoteLaunc
 import { NoteLaunchSummary } from "./components/NoteLaunchSummary";
 import { NoteLaunchTable } from "./components/NoteLaunchTable";
 import { NoteLaunchPagination } from "./components/NoteLaunchPagination";
+import { useMutationPostGraduationNoteLaunch } from "@/hooks/post-graduation/use-mutation-note-launch";
+import { useToast } from "@/components/ui/use-toast";
 
 
 type DegreeOption = PostGraduationDegree & { id: number };
@@ -50,6 +52,14 @@ const initialFilters: NoteLaunchFilterState = {
   assessmentTypeId: "",
 };
 
+export type EditableNote = {
+      studentCurricularGradeId: number;
+      grade: string;
+      observation: string;
+      originalGrade: number | null;
+      originalObservation: string | null;
+    };
+
 export default function PostGraduationNoteLaunch() {
   const [filters, setFilters] =
     useState<NoteLaunchFilterState>(initialFilters);
@@ -57,6 +67,25 @@ export default function PostGraduationNoteLaunch() {
   const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+
+  /**
+   * Estrutura local para armazenar notas editáveis. A chave é o
+   * `studentCurricularGradeId` e o valor contém a nota/observação em
+   * edição e os valores originais para comparar alterações.
+   */
+  
+
+  // Estado de notas editáveis por estudante
+  const [editableNotes, setEditableNotes] = useState<Record<number, EditableNote>>({});
+
+  // Estado para controlar quais linhas estão a ser guardadas no momento
+  const [savingStudents, setSavingStudents] = useState<number[]>([]);
+
+  // Instância de toast para mensagens de sucesso/erro
+  const { toast } = useToast();
+
+  // Hook de mutação para gravar notas
+  const mutation = useMutationPostGraduationNoteLaunch();
 
   const {
     data: academicYears = [],
@@ -258,6 +287,39 @@ export default function PostGraduationNoteLaunch() {
   const summary = studentsResponse?.summary;
   const totalPages = Math.max(1, studentsResponse?.totalPages ?? 1);
 
+  // Sempre que a lista de estudantes muda, inicializar o estado editável
+  useEffect(() => {
+    setEditableNotes(() => {
+      const entries = students.map((student) => [
+        student.studentCurricularGradeId,
+        {
+          studentCurricularGradeId: student.studentCurricularGradeId,
+          grade:
+            student.note.grade === null
+              ? ""
+              : String(student.note.grade),
+          observation: student.note.observation ?? "",
+          originalGrade: student.note.grade,
+          originalObservation: student.note.observation,
+        },
+      ]);
+      return Object.fromEntries(entries);
+    });
+    // Reset estado de salvamento quando a lista muda
+    setSavingStudents([]);
+  }, [students]);
+
+  // Verificar se existem alterações não guardadas para mostrar botão de guardar em lote
+  const hasUnsavedChanges = useMemo(() => {
+    return Object.values(editableNotes).some((item) => {
+      const parsedGrade = item.grade.trim() === "" ? null : Number(item.grade);
+      return (
+        parsedGrade !== item.originalGrade ||
+        item.observation.trim() !== (item.originalObservation ?? "").trim()
+      );
+    });
+  }, [editableNotes]);
+
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
@@ -319,14 +381,189 @@ export default function PostGraduationNoteLaunch() {
     setPage(1);
   }
 
+  /**
+   * Actualiza a nota (string) de um estudante específico no estado local.
+   */
+  function handleGradeChange(studentId: number, value: string) {
+    setEditableNotes((current) => ({
+      ...current,
+      [studentId]: {
+        ...current[studentId],
+        grade: value,
+      },
+    }));
+  }
+
+  /**
+   * Actualiza a observação de um estudante específico no estado local.
+   */
+  function handleObservationChange(studentId: number, value: string) {
+    setEditableNotes((current) => ({
+      ...current,
+      [studentId]: {
+        ...current[studentId],
+        observation: value,
+      },
+    }));
+  }
+
+  /**
+   * Grava uma única nota individualmente. Aplica validação e mostra
+   * feedback. Utiliza os filtros actuais como contexto no payload.
+   */
+  async function handleSaveOne(studentId: number) {
+    const editableNote = editableNotes[studentId];
+    if (!editableNote) return;
+
+    const parsedGrade = Number(editableNote.grade);
+
+    // Validar nota antes de enviar
+    if (
+      editableNote.grade.trim() === "" ||
+      Number.isNaN(parsedGrade) ||
+      parsedGrade < 0 ||
+      parsedGrade > 20
+    ) {
+      toast({
+        variant: "destructive",
+        title: "Nota inválida",
+        description: "A nota deve ser um número entre 0 e 20.",
+      });
+      return;
+    }
+
+    // Construir payload com o contexto e um único item
+    const payload = {
+      academicYearId: Number(filters.academicYearId),
+      degreeId: Number(filters.degreeId),
+      semesterId: Number(filters.semesterId),
+      periodId: Number(filters.periodId),
+      courseId: Number(filters.courseId),
+      curricularYearId: Number(filters.curricularYearId),
+      curricularGradeId: Number(filters.curricularGradeId),
+      scheduleId: Number(filters.scheduleId),
+      examTypeId: Number(filters.examTypeId),
+      assessmentTypeId: Number(filters.assessmentTypeId),
+      // Como a interface não expõe época, usamos a época padrão da Licenciatura (2).
+      termId: 2,
+      items: [
+        {
+          studentCurricularGradeId: editableNote.studentCurricularGradeId,
+          grade: parsedGrade,
+          observation: editableNote.observation.trim() || undefined,
+        },
+      ],
+    };
+
+    // Marcar a linha como em salvamento
+    setSavingStudents((current) => [...current, studentId]);
+
+    try {
+      await mutation.mutateAsync(payload);
+      toast({ title: "Sucesso", description: "Nota guardada com sucesso." });
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Erro ao guardar a nota.";
+      toast({
+        variant: "destructive",
+        title: "Erro ao guardar",
+        description: String(message),
+      });
+    } finally {
+      setSavingStudents((current) => current.filter((id) => id !== studentId));
+    }
+  }
+
+  /**
+   * Grava todas as notas alteradas. Valida cada nota e mostra mensagens
+   * adequadas. O backend recebe apenas as linhas que sofreram mudança.
+   */
+  async function handleSaveMany() {
+    const changedItems = Object.values(editableNotes).filter((item) => {
+      const parsedGrade = item.grade.trim() === "" ? null : Number(item.grade);
+      return (
+        parsedGrade !== item.originalGrade ||
+        item.observation.trim() !== (item.originalObservation ?? "").trim()
+      );
+    });
+
+    if (changedItems.length === 0) {
+      toast({
+        title: "Nenhuma alteração",
+        description: "Não há notas alteradas para guardar.",
+      });
+      return;
+    }
+
+    // Validar individualmente antes de prosseguir
+    for (const item of changedItems) {
+      const parsedGrade = Number(item.grade);
+      if (
+        item.grade.trim() === "" ||
+        Number.isNaN(parsedGrade) ||
+        parsedGrade < 0 ||
+        parsedGrade > 20
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Nota inválida",
+          description:
+            "Uma ou mais notas são inválidas. Verifique os valores entre 0 e 20.",
+        });
+        return;
+      }
+    }
+
+    // Marcar todas as linhas como em salvamento
+    setSavingStudents(changedItems.map((item) => item.studentCurricularGradeId));
+
+    const payload = {
+      academicYearId: Number(filters.academicYearId),
+      degreeId: Number(filters.degreeId),
+      semesterId: Number(filters.semesterId),
+      periodId: Number(filters.periodId),
+      courseId: Number(filters.courseId),
+      curricularYearId: Number(filters.curricularYearId),
+      curricularGradeId: Number(filters.curricularGradeId),
+      scheduleId: Number(filters.scheduleId),
+      examTypeId: Number(filters.examTypeId),
+      assessmentTypeId: Number(filters.assessmentTypeId),
+      termId: 2,
+      items: changedItems.map((item) => ({
+        studentCurricularGradeId: item.studentCurricularGradeId,
+        grade: Number(item.grade),
+        observation: item.observation.trim() || undefined,
+      })),
+    };
+
+    try {
+      await mutation.mutateAsync(payload);
+      toast({ title: "Sucesso", description: "Notas guardadas com sucesso." });
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Erro ao guardar as notas.";
+      toast({
+        variant: "destructive",
+        title: "Erro ao guardar",
+        description: String(message),
+      });
+    } finally {
+      setSavingStudents([]);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Lançamento de Notas"
-        subtitle="Consulta de estudantes e notas da Pós-Graduação"
+        subtitle="Consulta e lançamento de notas da Pós-Graduação"
         actions={
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">Somente leitura</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Botão de actualizar estudantes */}
             <Button
               variant="outline"
               size="sm"
@@ -339,6 +576,15 @@ export default function PostGraduationNoteLaunch() {
                 }`}
               />
               Actualizar
+            </Button>
+            {/* Botão para guardar alterações em lote, aparece sempre mas pode estar desactivado */}
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!hasUnsavedChanges || mutation.isPending}
+              onClick={handleSaveMany}
+            >
+              Guardar alterações
             </Button>
           </div>
         }
@@ -484,7 +730,15 @@ export default function PostGraduationNoteLaunch() {
             </div>
           ) : (
             <>
-              <NoteLaunchTable students={students} />
+              <NoteLaunchTable
+                students={students}
+                editableNotes={editableNotes}
+                disabled={isFetchingStudents || mutation.isPending}
+                savingStudents={savingStudents}
+                onGradeChange={handleGradeChange}
+                onObservationChange={handleObservationChange}
+                onSaveOne={handleSaveOne}
+              />
               <NoteLaunchPagination
                 page={page}
                 totalPages={totalPages}
