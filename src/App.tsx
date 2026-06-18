@@ -176,7 +176,7 @@ import { CloseCashRegisterPage } from "./pages/financas/fecho-caixa/FechoCaixaUt
 import { MeuCaixaPage } from "./pages/financas/caixa/meu-caixa";
 import RelPagamentosInstituicoes from "./pages/financas/relatorios/RelPagamentosInstituicoes";
 
-import { RegisteredCandidates } from "./pages/post-graduation/RegisteredCandidates";
+import { RegisteredCandidates } from "./pages/post-graduation/registered-candidates/RegisteredCandidates";
 
 import PostGraduationNoteLaunch from "./pages/post-graduation/NoteLaunch";
 import GuidanceResearchManagementStudent from "./pages/post-graduation/guidance-research-management/ListarEstudante";

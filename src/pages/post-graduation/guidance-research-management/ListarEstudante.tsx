@@ -1,19 +1,16 @@
 import { useMemo } from "react";
-
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions, {
   GenericExcelProps,
 } from "@/components/views/excel/GenericExcelExport";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -36,24 +33,20 @@ import { Home, Loader2, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
-import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
-import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
-import { useQueryEstudanteFinalista } from "@/hooks/defesa-tfc/use-query-estudante-finalista-tfc";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
-import { TipoCandidatura } from "@/services/fecth-tipo-candidatura";
-
+import { useQueryGuidanceResearchManagementStudent } from "@/hooks/post-graduation/useQueryGuidanceResearchManagementStudent";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 export default function GuidanceResearchManagementStudent() {
   const [page, setPage] = useState(1);
-
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
   const debounceSearch = useDebounce(search, 500);
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "",
     curso: "",
     estado: "",
     faculdade: "",
@@ -61,14 +54,11 @@ export default function GuidanceResearchManagementStudent() {
     tipoCandidatura: "",
     search: "",
   });
-  const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
-    useQueryTipoCandidatura();
-
   const {
     data: estudanteFinalistaResponse,
     refetch,
     isFetching,
-  } = useQueryEstudanteFinalista({
+  } = useQueryGuidanceResearchManagementStudent({
     anoLectivo: parseFilter(filters.anoLectivo),
     curso: parseFilter(filters.curso),
     tipoCandidatura: parseFilter(filters.tipoCandidatura),
@@ -90,7 +80,7 @@ export default function GuidanceResearchManagementStudent() {
 
   const pdfContent = pdfData ? (
     <GenericPDFDocument
-      documentTitle="Estudantes Finalistas"
+      documentTitle="Estudantes"
       mainTable={{
         headers: [
           { key: "matricula", label: "Nº Matrícula", width: "15%" },
@@ -107,7 +97,7 @@ export default function GuidanceResearchManagementStudent() {
 
   const excelProps: GenericExcelProps | null = pdfData
     ? {
-      documentTitle: "Estudantes Finalistas",
+      documentTitle: "Estudantes",
       mainTable: {
         headers: [
           { key: "matricula", label: "Nº Matrícula", width: 15 },
@@ -139,7 +129,7 @@ export default function GuidanceResearchManagementStudent() {
   const total = estudanteFinalistaResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
-  const baseFileName = `estudantes_finalistas_${new Date()
+  const baseFileName = `estudantes_${new Date()
     .toISOString()
     .slice(0, 10)}`;
   return (
@@ -159,15 +149,15 @@ export default function GuidanceResearchManagementStudent() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>Estudantes Finalistas</BreadcrumbLink>
+            <BreadcrumbLink>Estudantes</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </BreadcrumbList>
       </Breadcrumb>
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold">Estudantes Finalistas</h1>
+        <h1 className="text-2xl font-bold">Estudantes</h1>
         <p className="text-muted-foreground">
-          Consultar estudantes finalistas.
+          Consultar estudantes
         </p>
         <div className="flex justify-end gap-2">
           <Button
@@ -205,6 +195,8 @@ export default function GuidanceResearchManagementStudent() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <AcademicYearSelect
+              enableDefaultActiveYear
+              enableDefaultSelectItem
               value={filters.anoLectivo}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
@@ -215,32 +207,19 @@ export default function GuidanceResearchManagementStudent() {
                 setFilters({ ...filters, faculdade: v, curso: "" })
               }
             />
+            <TipoCandidaturaSelect
+              isPostGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+            />
             <CourseSelect
               enableDefaultSelectItem
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
               }}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
-            />
-            <FormSelect
-              label="Tipo Candidatura"
-              value={filters.tipoCandidatura}
-              onChange={(v) => setFilters({ ...filters, tipoCandidatura: v })}
-              options={[
-                {
-                  codigo: "all",
-                  designacao: "Todos",
-                } as unknown as TipoCandidatura,
-                ...tipoCandidatura,
-              ]}
-              loading={isLoadingTipoCandidatura}
-              disabled={isLoadingTipoCandidatura}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo.toString(),
-              })}
             />
 
             <div className="flex items-end">
@@ -256,10 +235,9 @@ export default function GuidanceResearchManagementStudent() {
         <CardHeader className="flex flex-row items-center justify-between">
           {/* Exportações */}
 
-          <CardTitle>Estudantes Finalistas</CardTitle>
+          <CardTitle>Estudantes</CardTitle>
           <Input
-            disabled={tableData.length == 0}
-            placeholder="Pesquisar por nome de estudante"
+            placeholder="Pesquisar por nome de estudante, número de matrícula, Bilhete de Identidade"
             className="w-1/2"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
