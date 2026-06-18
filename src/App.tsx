@@ -179,6 +179,7 @@ import RelPagamentosInstituicoes from "./pages/financas/relatorios/RelPagamentos
 import { RegisteredCandidates } from "./pages/post-graduation/registered-candidates/RegisteredCandidates";
 
 import PostGraduationNoteLaunch from "./pages/post-graduation/NoteLaunch";
+import PostGraduationAgendaLaunch from "./pages/post-graduation/AgendaLaunch";
 import GuidanceResearchManagementStudent from "./pages/post-graduation/guidance-research-management/ListarEstudante";
 import PosGraduacaoHorasVigilancia from "./pages/post-graduation/docentes/HorasVigilancia";
 import PosGraduacaoDocenteLancamentoProgramaUC from "./pages/post-graduation/docentes/ProgramaUC";
@@ -1888,7 +1889,18 @@ const App = () => {
                   }
                 />
 
-                
+                <Route
+                  path="/pos-graduacao/avaliacoes/lancamento-pauta"
+                  element={
+                    <ProtectedRoute
+                      allowedPermissions={[
+                        PermissionTypeDetails.LANCAMENTO_PAUTA.sigla!,
+                      ]}
+                    >
+                      <PostGraduationAgendaLaunch />
+                    </ProtectedRoute>
+                  }
+                />
 
                 </Route>
               </Routes>
@@ -1901,5 +1913,4 @@ const App = () => {
 };
 
 export default App;
-
 

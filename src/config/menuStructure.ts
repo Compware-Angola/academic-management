@@ -719,6 +719,7 @@ export const postGraduationStructure: MenuStructure = {
         PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
         PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
         PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
+        PermissionTypeDetails.LANCAMENTO_PAUTA.sigla,
       ],
       items: [
         {
@@ -781,7 +782,12 @@ export const postGraduationStructure: MenuStructure = {
           title: "Lançamento de Notas",
           url: "/pos-graduacao/avaliacoes/lancamento-notas",
           permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
-        }
+        },
+        {
+          title: "Lançamento de Pauta",
+          url: "/pos-graduacao/avaliacoes/lancamento-pauta",
+          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+        },
           
       ],
     },
