@@ -1846,7 +1846,7 @@ const App = () => {
 
 
 
-                  {/*
+                  
                       <Route
                     path="/pos-graduacao/avaliacoes/lista-presenca"
                     element={
@@ -1859,10 +1859,23 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  */}
+                  
 
-                  {/*
-                      <Route
+                  <Route
+                    path="/pos-graduacao/avaliacoes/marcacao-provas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla!]}
+                      >
+                        <PostGraduationExamMarkings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  
+                
+                
+
+                <Route
                   path="/pos-graduacao/avaliacoes/lancamento-notas"
                   element={
                     <ProtectedRoute
@@ -1874,8 +1887,8 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
-                */}
 
+                
 
                 </Route>
               </Routes>

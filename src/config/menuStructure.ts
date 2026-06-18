@@ -746,6 +746,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
+        /*
         {
           title: "Fórmula de Definição das UCs",
           url: "/pos-graduacao/avaliacoes/formula-ucs",
@@ -753,6 +754,8 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
           ],
         },
+        */
+        /*
         {
           title: "Fórmula de Definição das UCs Oral",
           url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
@@ -760,6 +763,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
           ],
         },
+        */
         {
           title: "Marcação de Provas",
           url: "/pos-graduacao/avaliacoes/marcacao-provas",
@@ -772,11 +776,13 @@ export const postGraduationStructure: MenuStructure = {
           url: "/pos-graduacao/avaliacoes/lista-presenca",
           permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
         },
+        
         {
           title: "Lançamento de Notas",
           url: "/pos-graduacao/avaliacoes/lancamento-notas",
           permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
         }
+          
       ],
     },
      {
