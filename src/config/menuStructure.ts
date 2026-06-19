@@ -703,24 +703,15 @@ export const academicStructure: MenuStructure = {
   ],
 };
 
+
+
 export const postGraduationStructure: MenuStructure = {
   items: [
     {
-      title: "Pós-Graduação",
+      title: "Avaliações",
       url: "/pos-graduacao",
-      icon: GraduationCap,
-      permission: [
-        PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
-        PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
-        PermissionTypeDetails.CALENDARIO_PROVAS.sigla,
-        PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
-        PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
-        PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
-        PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
-        PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
-        PermissionTypeDetails.LANCAMENTO_PAUTA.sigla,
-        PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
-      ],
+      icon: FileCheck,
+      
       items: [
         {
           title: "Canditatos inscritos",
@@ -733,6 +724,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
           ],
         },
+        /*
         {
           title: "Atividades Letivas",
           url: "/pos-graduacao/calendario/atividades",
@@ -747,6 +739,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
+        */
         
         {
           title: "Fórmula de Definição das UCs",
@@ -796,7 +789,33 @@ export const postGraduationStructure: MenuStructure = {
         },
           
       ],
+      permission: [],
     },
+
+    {
+      title: "Calendário Académico ",
+      url: "/pos-graduacao-calendario",
+      icon: Calendar,
+      items: [
+        {
+          title: "Atividades Letivas",
+          url: "/pos-graduacao/calendario/atividades",
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+          ],
+        },
+        {
+          title: "Parâmetros do Calendário",
+          url: "/pos-graduacao/calendario/parametros",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+          ],
+        },
+      ],
+
+      permission: [],
+    },
+
      {
       title: "Docente",
       url: "/pos-graduacao-docente",
