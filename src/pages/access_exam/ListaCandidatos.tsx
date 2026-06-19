@@ -329,6 +329,7 @@ export default function ListaCandidatos() {
           <div className="space-y-2">
             <CourseSelect
               value={filters.codigoCurso}
+              params={{ tipoCandidaturaId: 1 }}
               onChangeValue={(v) => setFilters({ ...filters, codigoCurso: v })}
             />
           </div>

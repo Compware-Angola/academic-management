@@ -15,6 +15,9 @@ import { cn } from "@/lib/utils";
 import { PosGraduationCandidate } from "@/services/post-graduation/candidates.service";
 import { useQueryCandidateDocuments } from "@/hooks/post-graduation/use-query-candidates";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { viewFile } from "@/services/upload/upload-single.service";
+import { toast } from "sonner";
+import { ApiError } from "@/error";
 
 type Props = {
     open: boolean;
@@ -53,19 +56,25 @@ export function CandidateDetailsDialog({
     const { data: documents, isLoading } = useQueryCandidateDocuments(
         candidate?.codigo_preinscricao,
     );
-
+    const handleDownload = async (ficheiroName: string) => {
+        if (!ficheiroName) return;
+        try {
+            const blob = await viewFile(ficheiroName);
+            const fileUrl = URL.createObjectURL(blob);
+            window.open(fileUrl, "_blank");
+            setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+        } catch (error) {
+            toast.error(
+                error instanceof ApiError ? error.message : "Erro ao abrir o ficheiro.",
+            );
+        }
+    };
     const canApprove =
         candidate?.estado === "Pendente" &&
         candidate?.pagamento_realizado === 1;
 
     const isPaid = Boolean(candidate?.pagamento_realizado);
 
-    function handleDownload(fileName: string) {
-        window.open(
-            `${import.meta.env.VITE_API_URL}/uploads/${fileName}`,
-            "_blank",
-        );
-    }
 
     function handleApproveCandidate() {
         if (!candidate) return;
