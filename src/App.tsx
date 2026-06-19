@@ -185,6 +185,7 @@ import PosGraduacaoHorasVigilancia from "./pages/post-graduation/docentes/HorasV
 import PosGraduacaoDocenteLancamentoProgramaUC from "./pages/post-graduation/docentes/ProgramaUC";
 import PosGraduacaoValidacaoProgramaValidacaoPrograma from "./pages/post-graduation/docentes/ValidacaoPrograma";
 import GuidanceResearchManagementListarOrientadores from "./pages/post-graduation/guidance-research-management/ListarOrientadores";
+import GuidanceResearchManagementVinculos from "./pages/post-graduation/guidance-research-management/Vinculos";
 
 
 
@@ -1486,6 +1487,18 @@ const App = () => {
                         ]}
                       >
                         <GuidanceResearchManagementListarOrientadores />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/gestao-orientacao-pesquisa/vinculos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFESA.sigla!,
+                        ]}
+                      >
+                        <GuidanceResearchManagementVinculos />
                       </ProtectedRoute>
                     }
                   />

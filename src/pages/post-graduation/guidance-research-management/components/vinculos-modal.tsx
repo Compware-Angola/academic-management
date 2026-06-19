@@ -2,6 +2,8 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { EstudanteFinalistaCommandSelect } from "@/components/common/global-selects/EstudanteFinalistaCommandSelect";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -29,6 +31,7 @@ export function VinculosModal({
     orientador: "",
     estudante: "",
     tema: "",
+    tipoCandidatura: "",
   });
 
   const { data: orientadoresResponse, isFetching: loadingOrientadores } =
@@ -47,6 +50,7 @@ export function VinculosModal({
       orientador: "",
       estudante: "",
       tema: "",
+      tipoCandidatura: "",
     });
   };
 
@@ -89,9 +93,21 @@ export function VinculosModal({
             onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             onlyActive
           />
+          <FacultySelect
+            value={filters.faculdade}
+            onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+          />
+          <TipoCandidaturaSelect
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+          />
 
           <CourseSelect
-            enableDefaultSelectItem
+            params={{
+              faculdadeId: parseFilter(filters.faculdade),
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+            }}
+            disabled={!filters.faculdade || !filters.tipoCandidatura}
             value={filters.curso}
             onChangeValue={(v) => setFilters({ ...filters, curso: v })}
           />

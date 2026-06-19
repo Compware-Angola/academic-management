@@ -22,19 +22,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, Loader2, RefreshCcw, Plus, Trash2 } from "lucide-react";
+import { Home, Loader2, RefreshCcw, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { OrientadorModal } from "./components/orientador-modal";
 import { useQueryVinculos } from "@/hooks/defesa-tfc/use-query-vinculos";
 import { FormSelect } from "@/components/common/FormSelect";
-import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { VinculosModal } from "./components/vinculos-modal";
 import { ApagarVinculoAlert } from "./components/apagar-vinculo-alert.tfc";
 const statusConfig = {
@@ -54,12 +50,9 @@ const statusConfig = {
     className: "bg-yellow-100 text-yellow-700 border-yellow-300",
   },
 };
-export default function VinculosTFC() {
+export default function GuidanceResearchManagementVinculos() {
   //Options
-  const searchOptions = [
-    { id: "codigoMatricula", label: "Código da Matrícula" },
-    { id: "nome", label: "Nome do Aluno" },
-  ];
+
   // paginação
   const [page, setPage] = useState(1);
 
@@ -112,11 +105,12 @@ export default function VinculosTFC() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink> Gestão de Defesa e TFC</BreadcrumbLink>
+            <BreadcrumbLink>
+              Gestão de Pesquisa de Orientação</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>Vínculos de TFC</BreadcrumbLink>
+            <BreadcrumbLink>Vínculos de Orientação</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
         </BreadcrumbList>
@@ -139,6 +133,7 @@ export default function VinculosTFC() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <AcademicYearSelect
               value={filters.anoLectivo}
+              enableDefaultActiveYear
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
 

@@ -10,6 +10,7 @@ interface TipoCandidaturaProps {
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
   isPostGraduation?: boolean;
+  isGraduation?: boolean;
   label?: string;
 }
 
@@ -19,6 +20,7 @@ export function TipoCandidaturaSelect({
   disabled,
   enableDefaultSelectItem,
   isPostGraduation = false,
+  isGraduation = false,
   label = "Tipo de Candidatura",
 }: TipoCandidaturaProps) {
   const id = useId();
@@ -36,6 +38,9 @@ export function TipoCandidaturaSelect({
   const tiposCandidaturaPostGraduation = useMemo(() => {
     return tiposCandidatura.filter((tipo) => tipo.codigo !== 1);
   }, [tiposCandidatura]);
+  const tiposCandidaturaGraduation = useMemo(() => {
+    return tiposCandidatura.filter((tipo) => tipo.codigo === 1);
+  }, [tiposCandidatura]);
   return (
     <FormSelect
       disabled={isLoading || disabled}
@@ -44,7 +49,7 @@ export function TipoCandidaturaSelect({
       defaultSelectItem={defaultSelectItem}
       value={value}
       onChange={(v) => onChangeValue(v)}
-      options={isPostGraduation ? tiposCandidaturaPostGraduation : tiposCandidatura}
+      options={isGraduation ? tiposCandidaturaGraduation : isPostGraduation ? tiposCandidaturaPostGraduation : tiposCandidatura}
       map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
     />
   );

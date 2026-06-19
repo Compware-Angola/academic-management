@@ -51,6 +51,8 @@ import ExcelActions, {
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -80,6 +82,8 @@ export default function ListarOrientadores() {
     anoLectivo: "23",
     curso: "",
     estado: "",
+    faculdade: "",
+    tipoCandidatura: "",
   });
   const [orientandoModal, setOrientandoModal] = useState(false);
   const [apagarOrientadorModal, setApagarOrientadorModal] = useState(false);
@@ -112,16 +116,16 @@ export default function ListarOrientadores() {
 
   const excelProps: GenericExcelProps | null = pdfData
     ? {
-        documentTitle: "Orientadores",
-        mainTable: {
-          headers: [
-            { key: "nome", label: "Nome", width: 50 },
-            { key: "curso", label: "Curso", width: 35 },
-            { key: "anoLectivo", label: "Ano Letivo", width: 15 },
-          ],
-          rows: pdfData.rows,
-        },
-      }
+      documentTitle: "Orientadores",
+      mainTable: {
+        headers: [
+          { key: "nome", label: "Nome", width: 50 },
+          { key: "curso", label: "Curso", width: 35 },
+          { key: "anoLectivo", label: "Ano Letivo", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -143,6 +147,8 @@ export default function ListarOrientadores() {
       anoLectivo: "23",
       curso: "",
       estado: "",
+      faculdade: "",
+      tipoCandidatura: "",
     });
     setPage(1);
     setLimit(10);
@@ -226,10 +232,25 @@ export default function ListarOrientadores() {
               enableDefaultSelectItem
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
+            <FacultySelect
+              value={filters.faculdade}
+              onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+            />
+            <TipoCandidaturaSelect
+              isGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+              disabled={!filters.faculdade}
+            />
 
             <CourseSelect
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
+              disabled={!filters.faculdade || !filters.tipoCandidatura}
+              params={{
+                faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
             />
             {/* <div className="flex flex-col gap-2">
               <Label>Estado</Label>

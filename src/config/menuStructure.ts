@@ -837,6 +837,11 @@ export const postGraduationStructure: MenuStructure = {
           title: "Orientadores",
           url: "/gestao-orientacao-pesquisa/orientadores",
         },
+         {
+          title: "Vínculos",
+          url: "/gestao-orientacao-pesquisa/vinculos",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
       ],
     }
   ],
