@@ -180,6 +180,7 @@ import { RegisteredCandidates } from "./pages/post-graduation/registered-candida
 
 import PostGraduationNoteLaunch from "./pages/post-graduation/NoteLaunch";
 import PostGraduationAgendaLaunch from "./pages/post-graduation/AgendaLaunch";
+import PostGraduationAgendaValidation from "./pages/post-graduation/AgendaValidation";
 import GuidanceResearchManagementStudent from "./pages/post-graduation/guidance-research-management/ListarEstudante";
 import PosGraduacaoHorasVigilancia from "./pages/post-graduation/docentes/HorasVigilancia";
 import PosGraduacaoDocenteLancamentoProgramaUC from "./pages/post-graduation/docentes/ProgramaUC";
@@ -1948,6 +1949,45 @@ const App = () => {
                     }
                   />
 
+                <Route
+                  path="/pos-graduacao/avaliacoes/validacao-pauta"
+                  element={
+                    <ProtectedRoute
+                      allowedPermissions={[
+                        PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla!,
+                      ]}
+                    >
+                      <PostGraduationAgendaValidation />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/pos-graduacao/avaliacoes/formula-ucs"
+                  element={
+                    <ProtectedRoute
+                      allowedPermissions={[
+                        PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+                      ]}
+                    >
+                      <PostGraduationCurricularUnitFormulas />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/pos-graduacao/avaliacoes/formula-ucs-oral"
+                  element={
+                    <ProtectedRoute
+                      allowedPermissions={[
+                        PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+                      ]}
+                    >
+                      <PostGraduationOralCurricularUnits />
+                    </ProtectedRoute>
+                  }
+                />
+
                 </Route>
               </Routes>
             </TooltipProvider>
@@ -1959,4 +1999,3 @@ const App = () => {
 };
 
 export default App;
-

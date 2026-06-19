@@ -719,6 +719,7 @@ export const postGraduationStructure: MenuStructure = {
         PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
         PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
         PermissionTypeDetails.LANCAMENTO_PAUTA.sigla,
+        PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
       ],
       items: [
         {
@@ -746,7 +747,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
-        /*
+        
         {
           title: "Fórmula de Definição das UCs",
           url: "/pos-graduacao/avaliacoes/formula-ucs",
@@ -754,8 +755,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
           ],
         },
-        */
-        /*
+      
         {
           title: "Fórmula de Definição das UCs Oral",
           url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
@@ -763,7 +763,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
           ],
         },
-        */
+       
         {
           title: "Marcação de Provas",
           url: "/pos-graduacao/avaliacoes/marcacao-provas",
@@ -786,6 +786,13 @@ export const postGraduationStructure: MenuStructure = {
           title: "Lançamento de Pauta",
           url: "/pos-graduacao/avaliacoes/lancamento-pauta",
           permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+        },
+        {
+          title: "Validação de Pauta",
+          url: "/pos-graduacao/avaliacoes/validacao-pauta",
+          permission: [
+            PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
+          ],
         },
           
       ],
