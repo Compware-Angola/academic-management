@@ -26,6 +26,9 @@ import { AgendamentoAulaItem } from "@/services/sumario/fetch-sumario-agendament
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMutationCreateSumario } from "@/hooks/sumario/use-mutation-create-sumario";
 import { useMutationUpdateSumario } from "@/hooks/sumario/use-mutation-update-sumario";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -79,6 +82,7 @@ export default function PostGraduationAulasAgendadas() {
     const [filters, setFilters] = useState({
         docente: "",
         anoCurricular: "all",
+        tipoCandidatura: "",
         unidadeCurricular: "",
         dataInicio: "",
         dataFim: "",
@@ -230,6 +234,7 @@ export default function PostGraduationAulasAgendadas() {
                                     unidadeCurricular: "",
                                     page: 1,
                                     limit: itemsPerPage,
+                                    tipoCandidatura: ""
                                 });
                                 setCurrentPage(1);
                             }}
@@ -313,19 +318,15 @@ export default function PostGraduationAulasAgendadas() {
 
                     {showMoreFilters && (
                         <>
-                            <div className="space-y-1.5">
-                                <Label>Curso</Label>
-                                <FormCommandSelect
-                                    value={filters.curso}
-                                    options={cursos}
-                                    map={(c) => ({
-                                        key: c.codigo.toString(),
-                                        value: c.codigo.toString(),
-                                        label: c.designacao,
-                                    })}
-                                    onChange={(v) => updateFilters({ curso: v, unidadeCurricular: "" })}
-                                />
-                            </div>
+                            <TipoCandidaturaSelect
+                                isPostGraduation
+                                value={filters.tipoCandidatura}
+                                onChangeValue={(v) => updateFilters({ tipoCandidatura: v, curso: "", unidadeCurricular: "" })} />
+
+                            <CourseSelect
+                                params={{ tipoCandidaturaId: parseFilter(filters.tipoCandidatura) }}
+                                value={filters.curso}
+                                onChangeValue={(v) => updateFilters({ curso: v, unidadeCurricular: "" })} disabled={!filters.tipoCandidatura} />
 
                             <div className="space-y-1.5">
                                 <Label>Ano Curricular</Label>

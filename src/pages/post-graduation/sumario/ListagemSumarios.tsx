@@ -34,34 +34,34 @@ import { useMutationValidarSumario } from "@/hooks/sumario/use-mutation-validar-
 type EstadoAssiduidade = 1 | 2 | 3 | 4 | 5 | 6;
 
 function EstadoBadge({ estado }: { estado: EstadoAssiduidade }) {
-const map = {
-  1: {
-    label: "Aguarda Validação do Dir. Curso",
-    className: "bg-amber-100 text-amber-800 border-amber-300",     // amarelo suave – aguardando
-  },
-  2: {
-    label: "Aguarda Validação do Decano",
-    className: "bg-amber-100 text-amber-800 border-amber-300",     // mesma cor (estágio similar)
-    // ou se quiser diferenciar um pouco: bg-orange-100 text-orange-800 border-orange-300
-  },
-  3: {
-    label: "Aguarda Validação da Reitoria",
-    className: "bg-blue-100 text-blue-800 border-blue-300",        // azul = nível mais alto, ainda em espera
-  },
-  4: {
-    label: "Validado",
-    className: "bg-emerald-100 text-emerald-800 border-emerald-300", // verde = sucesso
-  },
-  5: {
-    label: "Rejeitado",
-    className: "bg-red-100 text-red-800 border-red-300",           // vermelho = negativo
-  },
-  6: {
-    label: "Aguarda Validação do Sec. Geral",
-    className: "bg-purple-100 text-purple-800 border-purple-300",  // roxo = etapa especial/final administrativa
-    // ou mantém amber se for só mais uma espera normal
-  },
-};
+  const map = {
+    1: {
+      label: "Aguarda Validação do Dir. Curso",
+      className: "bg-amber-100 text-amber-800 border-amber-300",     // amarelo suave – aguardando
+    },
+    2: {
+      label: "Aguarda Validação do Decano",
+      className: "bg-amber-100 text-amber-800 border-amber-300",     // mesma cor (estágio similar)
+      // ou se quiser diferenciar um pouco: bg-orange-100 text-orange-800 border-orange-300
+    },
+    3: {
+      label: "Aguarda Validação da Reitoria",
+      className: "bg-blue-100 text-blue-800 border-blue-300",        // azul = nível mais alto, ainda em espera
+    },
+    4: {
+      label: "Validado",
+      className: "bg-emerald-100 text-emerald-800 border-emerald-300", // verde = sucesso
+    },
+    5: {
+      label: "Rejeitado",
+      className: "bg-red-100 text-red-800 border-red-300",           // vermelho = negativo
+    },
+    6: {
+      label: "Aguarda Validação do Sec. Geral",
+      className: "bg-purple-100 text-purple-800 border-purple-300",  // roxo = etapa especial/final administrativa
+      // ou mantém amber se for só mais uma espera normal
+    },
+  };
 
   const info = map[estado] || { label: "Desconhecido", className: "" };
 
@@ -75,9 +75,9 @@ const map = {
 export default function ListagemSumarios() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
- const { hasPermission } = usePermission();
+  const { hasPermission } = usePermission();
   const [selectedSumario, setSelectedSumario] = useState<SumarioItem | null>(null);
-const { toast } = useToast();
+  const { toast } = useToast();
 
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
@@ -295,19 +295,19 @@ const { toast } = useToast();
               placeholder="Selecione o ano..."
             />
           </div>
-            <div className="space-y-1.5">
-              <Label>Estado Sumário</Label>
-          <FormSelect
-            disabled={isLoadingAcademicYear}
-            value={filters.estado ?? ""}
-            onChange={(v) => updateFilters({ estado: v === "" ? "" : v })}
-            options={[
-              { key: "todos", label: "Todos os estados", value: null },
-              ...estados,
-            ]}
-            map={(opt) => opt}
-            placeholder="Selecione o estado..."
-          />
+          <div className="space-y-1.5">
+            <Label>Estado Sumário</Label>
+            <FormSelect
+              disabled={isLoadingAcademicYear}
+              value={filters.estado ?? ""}
+              onChange={(v) => updateFilters({ estado: v === "" ? "" : v })}
+              options={[
+                { key: "todos", label: "Todos os estados", value: null },
+                ...estados,
+              ]}
+              map={(opt) => opt}
+              placeholder="Selecione o estado..."
+            />
           </div>
           <div className="space-y-1.5">
             <Label>Semestre</Label>
@@ -323,6 +323,7 @@ const { toast } = useToast();
           <div className="space-y-1.5">
             <Label>Docente</Label>
             <FormCommandSelect
+              width="full"
               value={filters.docente}
               options={teachersData}
               map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
@@ -353,6 +354,7 @@ const { toast } = useToast();
               <div className="space-y-1.5">
                 <Label>Curso</Label>
                 <FormCommandSelect
+                  width="full"
                   value={filters.curso}
                   options={cursos}
                   map={(c) => ({
@@ -388,6 +390,7 @@ const { toast } = useToast();
               <div className="space-y-1.5">
                 <Label>Unidade Curricular</Label>
                 <FormCommandSelect
+                  width="full"
                   value={filters.unidadeCurricular}
                   options={unidadesCurriculares}
                   map={(u) => ({ key: u.pk.toString(), value: u.pk.toString(), label: u.descricao })}
@@ -430,7 +433,7 @@ const { toast } = useToast();
                 <TableHead>Ano Curricular</TableHead>
                 <TableHead>UC</TableHead>
                 <TableHead>Docente</TableHead>
-      
+
                 <TableHead>Sala</TableHead>
                 <TableHead>Estado</TableHead>
 
@@ -445,7 +448,7 @@ const { toast } = useToast();
                   <TableCell>{a.classe}</TableCell>
                   <TableCell>{a.unidade_curricular}</TableCell>
                   <TableCell>{a.docente}</TableCell>
-                 
+
                   <TableCell className="max-w-[150px] truncate">{a.sala}</TableCell>
                   <TableCell>
                     <EstadoBadge estado={a.sumario_estado as EstadoAssiduidade} />
@@ -462,7 +465,7 @@ const { toast } = useToast();
                         <Eye className="h-4 w-4" />
                       </Button>
 
-                      
+
                     </div>
                   </TableCell>
                 </TableRow>
@@ -527,8 +530,8 @@ const { toast } = useToast();
               </div>
               <Separator />
               <div className="grid grid-cols-2 gap-3 text-sm">
-              
-              
+
+
                 <div>
                   <span className="text-muted-foreground">Horário:</span>
                   <p className="font-medium">{selectedSumario.horario}</p>
@@ -569,41 +572,41 @@ const { toast } = useToast();
                   )}
                 </p>
               </div>
-               <Separator />
-                            {
-                              hasPermission(PermissionTypeDetails.SUMARIO_POR_VALIDAR.sigla)   && (
-                                <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                                  <Button
-                                    variant="outline"
-                                    className="flex-1 border-emerald-600/40 hover:bg-emerald-50"
-                                     disabled={selectedSumario.sumario_estado === 4}
-                                    onClick={() => marcar(selectedSumario.sumario_codigo, "aprovar")}
-                                  >
-                                    <CheckCircle className="h-4 w-4 mr-2 text-emerald-600" />
-                                    Aprovar
-                                  </Button>
-              
-                                  <Button
-                                    variant="outline"
-                                    className="flex-1 border-red-600/40 hover:bg-red-50"
-                                     disabled={selectedSumario.sumario_estado === 5}
-                                    onClick={() => marcar(selectedSumario.sumario_codigo, "rejeitar")}
-                                   >
-                                    <XCircle className="h-4 w-4 mr-2 text-red-600" />
-                                    Rejeitar
-                                  </Button>
-              
-                                
-                                </div>
-              
-              
-                              )}
+              <Separator />
+              {
+                hasPermission(PermissionTypeDetails.SUMARIO_POR_VALIDAR.sigla) && (
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-emerald-600/40 hover:bg-emerald-50"
+                      disabled={selectedSumario.sumario_estado === 4}
+                      onClick={() => marcar(selectedSumario.sumario_codigo, "aprovar")}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2 text-emerald-600" />
+                      Aprovar
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-red-600/40 hover:bg-red-50"
+                      disabled={selectedSumario.sumario_estado === 5}
+                      onClick={() => marcar(selectedSumario.sumario_codigo, "rejeitar")}
+                    >
+                      <XCircle className="h-4 w-4 mr-2 text-red-600" />
+                      Rejeitar
+                    </Button>
+
+
+                  </div>
+
+
+                )}
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-   
+
     </div>
   );
 }

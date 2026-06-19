@@ -864,12 +864,7 @@ export const postGraduationStructure: MenuStructure = {
           title: "Listar Sumários",
           url: "/pos-graduacao-sumario/listar",
           permission: [PermissionTypeDetails.LISTAR_SUMARIO.sigla],
-        },
-        {
-          title: "Parâmetros",
-          url: "/pos-graduacao-sumario/parametros",
-          permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
-        },
+        }
       ],
     }
   ],

@@ -21,10 +21,13 @@ import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assidui
 import { useQueryControloGeralAssiduidade } from "@/hooks/sumario/use-fetch-controle-geral-assiduidade-sumario";
 import { FormSelect } from "@/components/common/FormSelect";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 
 
-export default function ControleGeral() {
+export default function PostGraduationControleGeral() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
@@ -51,6 +54,8 @@ export default function ControleGeral() {
     curso: "",
     page: 1,
     limit: 10,
+    tipoCandidatura: ""
+
   });
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
@@ -323,6 +328,7 @@ export default function ControleGeral() {
                   anoCurricular: "all",
                   unidadeCurricular: "",
                   page: 1,
+                  tipoCandidatura: "",
                   limit: itemsPerPage,
                 });
                 setCurrentPage(1);
@@ -380,6 +386,7 @@ export default function ControleGeral() {
           <div className="space-y-1.5">
             <Label>Docente</Label>
             <FormCommandSelect
+              width="full"
               value={filters.docente}
               options={teachersData}
               map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
@@ -407,19 +414,15 @@ export default function ControleGeral() {
 
           {showMoreFilters && (
             <>
-              <div className="space-y-1.5">
-                <Label>Curso</Label>
-                <FormCommandSelect
-                  value={filters.curso}
-                  options={cursos}
-                  map={(c) => ({
-                    key: c.codigo.toString(),
-                    value: c.codigo.toString(),
-                    label: c.designacao,
-                  })}
-                  onChange={(v) => updateFilters({ curso: v, unidadeCurricular: "" })}
-                />
-              </div>
+              <TipoCandidaturaSelect
+                isPostGraduation
+                value={filters.tipoCandidatura}
+                onChangeValue={(v) => updateFilters({ tipoCandidatura: v, curso: "", unidadeCurricular: "" })} />
+
+              <CourseSelect
+                params={{ tipoCandidaturaId: parseFilter(filters.tipoCandidatura) }}
+                value={filters.curso}
+                onChangeValue={(v) => updateFilters({ curso: v, unidadeCurricular: "" })} disabled={!filters.tipoCandidatura} />
 
               <div className="space-y-1.5">
                 <Label>Ano Curricular</Label>
@@ -445,6 +448,7 @@ export default function ControleGeral() {
               <div className="space-y-1.5">
                 <Label>Unidade Curricular</Label>
                 <FormCommandSelect
+                  width="full"
                   value={filters.unidadeCurricular}
                   options={unidadesCurriculares}
                   map={(u) => ({ key: u.pk.toString(), value: u.pk.toString(), label: u.descricao })}

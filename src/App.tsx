@@ -186,6 +186,8 @@ import PosGraduacaoDocenteLancamentoProgramaUC from "./pages/post-graduation/doc
 import PosGraduacaoValidacaoProgramaValidacaoPrograma from "./pages/post-graduation/docentes/ValidacaoPrograma";
 import GuidanceResearchManagementListarOrientadores from "./pages/post-graduation/guidance-research-management/ListarOrientadores";
 import GuidanceResearchManagementVinculos from "./pages/post-graduation/guidance-research-management/Vinculos";
+import PostGraduationAulasAgendadas from "./pages/post-graduation/sumario/AulasAgendadas";
+import PostGraduationControleGeral from "./pages/post-graduation/sumario/ControleGeral";
 
 
 
@@ -249,7 +251,7 @@ const App = () => {
                   <Route
                     path="/financas/listar-pagamentos"
                     element={<ListarPagamentos />}
-                  />
+                  />``
 
                   <Route
                     path="/controle-acesso/all-solicitacoes"
@@ -336,6 +338,20 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+
+                  <Route
+                    path="pos-graduacao-sumario/aulas-agendadas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.AULAS_AGENDADAS.sigla!,
+                        ]}
+                      >
+                        <PostGraduationAulasAgendadas />
+                      </ProtectedRoute>
+                    }
+                  />
+
 
                   <Route
                     path="sumario/parametros"
@@ -445,6 +461,10 @@ const App = () => {
                   <Route
                     path="/sumario/controle-geral"
                     element={<ControleGeral />}
+                  />
+                  <Route
+                    path="/pos-graduacao-sumario/controle-geral"
+                    element={<PostGraduationControleGeral />}
                   />
                   <Route
                     path="/sumario/listar"
