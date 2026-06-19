@@ -13,8 +13,7 @@ import {
   GraduationCap,
   FileText,
   BookUser,
-  Files,
-  BarChart3,
+  Files
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -821,7 +820,6 @@ export const postGraduationStructure: MenuStructure = {
           permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
         },
       ],
-
       permission: [],
     },
     {
@@ -841,6 +839,36 @@ export const postGraduationStructure: MenuStructure = {
           title: "Vínculos",
           url: "/gestao-orientacao-pesquisa/vinculos",
           permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
+      ],
+    },
+
+    {
+      title: "Sumário",
+      url: "/pos-graduacao-sumario",
+      permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+      items: [
+        {
+          title: "Aulas Agendadas",
+          url: "/pos-graduacao-sumario/aulas-agendadas",
+          permission: [PermissionTypeDetails.AULAS_AGENDADAS.sigla],
+        },
+        {
+          title: "Controle Geral de Sumário & Assiduidade",
+          url: "/pos-graduacao-sumario/controle-geral",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
+          ],
+        },
+        {
+          title: "Listar Sumários",
+          url: "/pos-graduacao-sumario/listar",
+          permission: [PermissionTypeDetails.LISTAR_SUMARIO.sigla],
+        },
+        {
+          title: "Parâmetros",
+          url: "/pos-graduacao-sumario/parametros",
+          permission: [PermissionTypeDetails.SUMARIO_PARAMETROS.sigla],
         },
       ],
     }
