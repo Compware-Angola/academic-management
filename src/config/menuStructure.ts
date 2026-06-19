@@ -703,23 +703,15 @@ export const academicStructure: MenuStructure = {
   ],
 };
 
+
+
 export const postGraduationStructure: MenuStructure = {
   items: [
     {
-      title: "Pós-Graduação",
+      title: "Avaliações",
       url: "/pos-graduacao",
-      icon: GraduationCap,
-      permission: [
-        PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
-        PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
-        PermissionTypeDetails.CALENDARIO_PROVAS.sigla,
-        PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
-        PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
-        PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
-        PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
-        PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
-        PermissionTypeDetails.LANCAMENTO_PAUTA.sigla,
-      ],
+      icon: FileCheck,
+      
       items: [
         {
           title: "Canditatos inscritos",
@@ -732,6 +724,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
           ],
         },
+        /*
         {
           title: "Atividades Letivas",
           url: "/pos-graduacao/calendario/atividades",
@@ -746,7 +739,8 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
-        /*
+        */
+        
         {
           title: "Fórmula de Definição das UCs",
           url: "/pos-graduacao/avaliacoes/formula-ucs",
@@ -754,8 +748,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
           ],
         },
-        */
-        /*
+      
         {
           title: "Fórmula de Definição das UCs Oral",
           url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
@@ -763,7 +756,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
           ],
         },
-        */
+       
         {
           title: "Marcação de Provas",
           url: "/pos-graduacao/avaliacoes/marcacao-provas",
@@ -787,9 +780,42 @@ export const postGraduationStructure: MenuStructure = {
           url: "/pos-graduacao/avaliacoes/lancamento-pauta",
           permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
         },
+        {
+          title: "Validação de Pauta",
+          url: "/pos-graduacao/avaliacoes/validacao-pauta",
+          permission: [
+            PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
+          ],
+        },
           
       ],
+      permission: [],
     },
+
+    {
+      title: "Calendário Académico ",
+      url: "/pos-graduacao-calendario",
+      icon: Calendar,
+      items: [
+        {
+          title: "Atividades Letivas",
+          url: "/pos-graduacao/calendario/atividades",
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+          ],
+        },
+        {
+          title: "Parâmetros do Calendário",
+          url: "/pos-graduacao/calendario/parametros",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+          ],
+        },
+      ],
+
+      permission: [],
+    },
+
      {
       title: "Docente",
       url: "/pos-graduacao-docente",
