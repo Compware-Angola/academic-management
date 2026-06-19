@@ -833,6 +833,10 @@ export const postGraduationStructure: MenuStructure = {
           title: "Estudantes",
           url: "/gestao-orientacao-pesquisa/estudantes",
         },
+        {
+          title: "Orientadores",
+          url: "/gestao-orientacao-pesquisa/orientadores",
+        },
       ],
     }
   ],

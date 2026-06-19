@@ -1,6 +1,8 @@
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -23,14 +25,16 @@ export function OrientadorModal({
     curso: "",
     docente: "",
     faculdade: "",
+    tipoCandidatura: "",
   });
   const handleClose = () => {
     setOpen(false);
     setFilters({
-      anoLectivo: "23",
+      anoLectivo: "",
       curso: "",
       docente: "",
       faculdade: "",
+      tipoCandidatura: "",
     });
   };
   const handleOpenChange = (open: boolean) => {
@@ -61,6 +65,23 @@ export function OrientadorModal({
             value={filters.anoLectivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
           />
+
+          <FacultySelect
+            value={filters.faculdade}
+            onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+          />
+          <TipoCandidaturaSelect
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+          />
+          <CourseSelect
+            disabled={!filters.faculdade || !filters.tipoCandidatura}
+            value={filters.curso}
+            onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+            params={{
+              faculdadeId: parseFilter(filters.faculdade),
+            }}
+          />
           <div className="space-y-1.5">
             <Label>Docente</Label>
             <FormCommandSelect
@@ -71,13 +92,6 @@ export function OrientadorModal({
             />
           </div>
 
-          <CourseSelect
-            value={filters.curso}
-            onChangeValue={(v) => setFilters({ ...filters, curso: v })}
-            params={{
-              faculdadeId: parseFilter(filters.faculdade),
-            }}
-          />
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={handleClose}>

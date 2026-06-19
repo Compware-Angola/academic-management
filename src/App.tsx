@@ -184,6 +184,7 @@ import GuidanceResearchManagementStudent from "./pages/post-graduation/guidance-
 import PosGraduacaoHorasVigilancia from "./pages/post-graduation/docentes/HorasVigilancia";
 import PosGraduacaoDocenteLancamentoProgramaUC from "./pages/post-graduation/docentes/ProgramaUC";
 import PosGraduacaoValidacaoProgramaValidacaoPrograma from "./pages/post-graduation/docentes/ValidacaoPrograma";
+import GuidanceResearchManagementListarOrientadores from "./pages/post-graduation/guidance-research-management/ListarOrientadores";
 
 
 
@@ -1477,6 +1478,18 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/gestao-orientacao-pesquisa/orientadores"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFESA.sigla!,
+                        ]}
+                      >
+                        <GuidanceResearchManagementListarOrientadores />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/defesa-tfc/vinculos"
                     element={
                       <ProtectedRoute
@@ -1847,8 +1860,8 @@ const App = () => {
 
 
 
-                  
-                      <Route
+
+                  <Route
                     path="/pos-graduacao/avaliacoes/lista-presenca"
                     element={
                       <ProtectedRoute
@@ -1860,7 +1873,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  
+
 
                   <Route
                     path="/pos-graduacao/avaliacoes/marcacao-provas"
@@ -1872,35 +1885,35 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  
-                
-                
 
-                <Route
-                  path="/pos-graduacao/avaliacoes/lancamento-notas"
-                  element={
-                    <ProtectedRoute
-                      allowedPermissions={[
-                        PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla!,
-                      ]}
-                    >
-                      <PostGraduationNoteLaunch />
-                    </ProtectedRoute>
-                  }
-                />
 
-                <Route
-                  path="/pos-graduacao/avaliacoes/lancamento-pauta"
-                  element={
-                    <ProtectedRoute
-                      allowedPermissions={[
-                        PermissionTypeDetails.LANCAMENTO_PAUTA.sigla!,
-                      ]}
-                    >
-                      <PostGraduationAgendaLaunch />
-                    </ProtectedRoute>
-                  }
-                />
+
+
+                  <Route
+                    path="/pos-graduacao/avaliacoes/lancamento-notas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla!,
+                        ]}
+                      >
+                        <PostGraduationNoteLaunch />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/pos-graduacao/avaliacoes/lancamento-pauta"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LANCAMENTO_PAUTA.sigla!,
+                        ]}
+                      >
+                        <PostGraduationAgendaLaunch />
+                      </ProtectedRoute>
+                    }
+                  />
 
                 </Route>
               </Routes>

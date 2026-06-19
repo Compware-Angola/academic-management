@@ -51,6 +51,8 @@ import ExcelActions, {
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
+import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -68,7 +70,7 @@ const statusConfig = {
     className: "bg-yellow-100 text-yellow-700 border-yellow-300",
   },
 };
-export default function ListarOrientadores() {
+export default function GuidanceResearchManagementListarOrientadores() {
   const [page, setPage] = useState(1);
   const [docenteId, setDocenteId] = useState("");
   const [limit, setLimit] = useState(10);
@@ -77,9 +79,11 @@ export default function ListarOrientadores() {
   const debouncedSearch = useDebounce(search, 500);
 
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "",
     curso: "",
     estado: "",
+    tipoCandidatura: "",
+    faculdade: "",
   });
   const [orientandoModal, setOrientandoModal] = useState(false);
   const [apagarOrientadorModal, setApagarOrientadorModal] = useState(false);
@@ -112,16 +116,16 @@ export default function ListarOrientadores() {
 
   const excelProps: GenericExcelProps | null = pdfData
     ? {
-        documentTitle: "Orientadores",
-        mainTable: {
-          headers: [
-            { key: "nome", label: "Nome", width: 50 },
-            { key: "curso", label: "Curso", width: 35 },
-            { key: "anoLectivo", label: "Ano Letivo", width: 15 },
-          ],
-          rows: pdfData.rows,
-        },
-      }
+      documentTitle: "Orientadores",
+      mainTable: {
+        headers: [
+          { key: "nome", label: "Nome", width: 50 },
+          { key: "curso", label: "Curso", width: 35 },
+          { key: "anoLectivo", label: "Ano Letivo", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -140,9 +144,11 @@ export default function ListarOrientadores() {
 
   const handleRefetch = () => {
     setFilters({
-      anoLectivo: "23",
+      anoLectivo: "",
       curso: "",
       estado: "",
+      tipoCandidatura: "",
+      faculdade: "",
     });
     setPage(1);
     setLimit(10);
@@ -222,48 +228,37 @@ export default function ListarOrientadores() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <AcademicYearSelect
-              value={filters.anoLectivo}
+              enableDefaultActiveYear
               enableDefaultSelectItem
+              value={filters.anoLectivo}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
-
+            <FacultySelect
+              allOption
+              value={filters.faculdade}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, faculdade: v, curso: "" })
+              }
+            />
+            <TipoCandidaturaSelect
+              isPostGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+            />
             <CourseSelect
+              disabled={!filters.faculdade || !filters.tipoCandidatura}
+              enableDefaultSelectItem
+              params={{
+                faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
             />
-            {/* <div className="flex flex-col gap-2">
-              <Label>Estado</Label>
-              <Select
-                value={filters.estado}
-                onValueChange={(v) => setFilters({ ...filters, estado: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div> */}
-
-            <div className="flex flex-col gap-2">
-              <Label>Pesquisar</Label>
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
             <div className="flex items-end">
-              <Button
-                aria-label="Actualizar"
-                className="cursor-pointer"
-                onClick={handleRefetch}
-              >
+              <Button onClick={handleRefetch}>
+                <RefreshCw className="h-4 w-4" />
                 Atualizar
-                <RefreshCcw className="h-4 w-4" />
               </Button>
             </div>
           </div>

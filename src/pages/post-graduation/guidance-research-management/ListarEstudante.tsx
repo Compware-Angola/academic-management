@@ -214,6 +214,7 @@ export default function GuidanceResearchManagementStudent() {
             />
             <CourseSelect
               enableDefaultSelectItem
+              disabled={!filters.faculdade || !filters.tipoCandidatura}
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
                 tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
