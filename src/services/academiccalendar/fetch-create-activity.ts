@@ -5,7 +5,7 @@ export interface CriarAtividadePayload {
   codigo_ano_lectivo: number;
   codigo_tipo_candidatura: number;
   codigo_tipo_calendario: number;
-  codigo_utilizador: number;
+  codigo_utilizador?: number;
   data_inicio: string; // formato YYYY-MM-DD
   data_fim: string; // formato YYYY-MM-DD
 }
