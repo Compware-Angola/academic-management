@@ -463,12 +463,8 @@ export default function ListagemProvas() {
         setForm={setForm}
         academicYears={academicYears}
         isLoadingAcademicYears={isLoadingAcademicYears}
-        cursos={cursos}
-        isLoadingCursos={isLoadingCursos}
         disciplinas={disciplinas}
         isLoadingDisciplinas={isLoadingDisciplinas}
-        perguntas={perguntas}
-        isLoadingPerguntas={isLoadingPerguntas}
         isSaving={isSaving}
         onClose={closeForm}
         onSave={handleSave}

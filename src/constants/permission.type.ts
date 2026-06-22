@@ -170,6 +170,7 @@ export enum PermissionType {
   PARAMETROS_MSA = "PARAMETROS_MSA",
 
   DEFINIR_FORMULA_UNIDADE_CURRICULAR = "DEFINIR_FORMULA_UNIDADE_CURRICULAR",
+  MARCAR_PROVA_POS_GRADUACAO = "MARCAR_PROVA_POS_GRADUACAO",
   LISTA_PRESENCA_MAV = "LISTA_PRESENCA_MAV",
   ACTUALIZAR_SENHA_ESTUDANTE = "ACTUALIZAR_SENHA_ESTUDANTE",
   DOCENTES_SEM_AFECTACAO = "DOCENTES_SEM_AFECTACAO",
@@ -903,6 +904,10 @@ export const PermissionTypeDetails = {
   DEFINIR_FORMULA_UNIDADE_CURRICULAR: {
     designacao: "Definir Fórmula Para Unidade Curricular",
     sigla: "mav_a_dfuc",
+  },
+  MARCAR_PROVA_POS_GRADUACAO: {
+    designacao: "Marcar Prova da Pós-Graduação",
+    sigla: "mpgs_mp",
   },
   LISTA_PRESENCA_MAV: { designacao: "Lista de Presença", sigla: "mav_a_lp" },
   ACTUALIZAR_SENHA_ESTUDANTE: {
