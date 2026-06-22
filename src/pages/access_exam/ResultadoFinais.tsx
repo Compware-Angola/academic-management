@@ -23,6 +23,7 @@ import { useQuerySalas } from "@/hooks/salas/use-query-sala";
 import { parseFilter } from "@/util/parse-filter";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { useCorrigirProvas } from "@/hooks/access_exam/use-corrigir-provas";
+import { BarraDeProgresso } from "./components/BarraDeProgresso";
 
 type Filters = {
   codigoAnoLetivo: string;
@@ -78,7 +79,8 @@ export default function ResultadoFinais() {
     page: filters.page,
     limit: filters.limit,
   });
-  const { mutate: corrigirProvas, isPending } = useCorrigirProvas();
+  const [isProcessando, setIsProcessando] = useState(false);
+  const { mutate: corrigirProvas, isPending, } = useCorrigirProvas(setIsProcessando);
 
   const seen = new Set<number>();
   const candidatos = (data?.data ?? []).filter((item) => {
@@ -228,6 +230,7 @@ export default function ResultadoFinais() {
   }
   return (
     <div className="space-y-6">
+      {isProcessando && <BarraDeProgresso />}
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -254,8 +257,8 @@ export default function ResultadoFinais() {
 
           {candidatos.length > 0
             && (
-              <Button onClick={() => corrigirProvas()} disabled={isPending} className="gap-2">
-                {isPending ? (
+              <Button onClick={() => corrigirProvas()} disabled={isPending || isProcessando} className="gap-2">
+                {isPending || isProcessando ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <PlayCircle className="h-4 w-4" />
@@ -313,7 +316,7 @@ export default function ResultadoFinais() {
             />
           </div>
 
-         
+
           <div className="space-y-2">
             <FacultySelect
               allOption
@@ -321,13 +324,13 @@ export default function ResultadoFinais() {
               onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
             />
           </div>
-           <div className="space-y-2">
+          <div className="space-y-2">
             <CourseSelect
               value={filters.codigoCurso}
               onChangeValue={(v) => setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))}
             />
           </div>
-         <div className="space-y-2">
+          <div className="space-y-2">
             <FormSelect
               disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.codigoAnoLetivo === ""}
               loading={isLoadingPeriodos}

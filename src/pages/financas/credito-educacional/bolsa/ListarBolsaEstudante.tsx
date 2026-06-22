@@ -488,7 +488,7 @@ export default function ListarBolsaEstudante() {
                     <TableHead>Tipo Crédito</TableHead>
                     <TableHead>Crédito Educacional</TableHead>
 
-                    <TableHead>Pago pela Instituição</TableHead>
+
                     <TableHead>Estado da Bolsa</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
@@ -535,36 +535,7 @@ export default function ListarBolsaEstudante() {
                       >
                         {e.bolsa}
                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="cursor-pointer">
-                                  <Switch
-                                    checked={e.instituicao_pagou === 1}
-                                    onCheckedChange={() => handleOpenConfirmDialog(e)}
-                                  />
-                                </span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>
-                                  Clique para {e.instituicao_pagou === 1 ? "desmarcar" : "marcar"} como pago
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
 
-                          <Loader2
-                            className={cn(
-                              "h-4 w-4 animate-spin",
-                              selectedBolsa?.codigo === e.codigo && isPendingInstituicaoPagou
-                                ? "block"
-                                : "hidden"
-                            )}
-                          />
-                        </div>
-                      </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
                           <TooltipProvider>
@@ -574,13 +545,13 @@ export default function ListarBolsaEstudante() {
                                   <Switch
                                     checked={e.status_ === 1}
                                     onCheckedChange={() => handleOpenConfirmEstado(e)}
-                                    disabled={true}
+                                    disabled={false}
                                   />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent>
-                                {/* <p>Clique para {e.status_ === 1 ? "desativar" : "ativar"} a bolsa</p> */}
-                                <p>Temporariamente Indisponível</p>
+                                <p>Clique para {e.status_ === 1 ? "desativar" : "ativar"} a bolsa</p>
+
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>

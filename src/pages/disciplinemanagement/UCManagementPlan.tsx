@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus } from "lucide-react";
+import { BookText, Plus } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -59,7 +59,7 @@ import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdo
 export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
-  const [classeId, setClasseId] = useState<string>("");
+  const [classeId, setClasseId] = useState<string>("7");
   const { user: userData } = useAuth();
   // Paginação
   const [page, setPage] = useState(1);
@@ -87,7 +87,7 @@ export default function UCManagementPlan() {
   } = useGradeCurricular({
     anoLectivo: parseFilter(anoLetivoId),
     curso: parseFilter(cursoId),
-    classe: parseFilter(classeId),
+    classe: classeId !== "7" ? parseFilter(classeId) : undefined,
     page,
     limit,
   });
@@ -102,7 +102,7 @@ export default function UCManagementPlan() {
   const handleOpenModal = () => {
     if (!anoLetivoId || !cursoId || !classeId) {
       toast.error(
-        "Selecione ano letivo, curso e classe antes de adicionar uma UC.",
+        "Selecione o ano letivo, o curso e o ano curricular antes de adicionar uma UC.",
       );
       return;
     }
@@ -112,6 +112,12 @@ export default function UCManagementPlan() {
   const handleCreateUC = () => {
     if (!formData.codigo_disciplina || !formData.codigo_semestre) {
       toast.error("Preencha todos os campos obrigatórios.");
+      return;
+    }
+    if (classeId == "7") {
+      toast.error("Selecione um Ano Curricular válido.");
+      setClasseId("");
+      setIsModalOpen(false);
       return;
     }
     createUC(
@@ -166,7 +172,7 @@ export default function UCManagementPlan() {
       {/* Cabeçalho */}
       <PageHeader
         title="Gestão de Unidades Curriculares no Plano"
-        subtitle="Visualizar e gerir todas as UCs por ano letivo, curso e classe"
+        subtitle="Visualizar e gerir todas as UCs por ano letivo, curso e ano curricular"
         actions={
           <Button onClick={handleOpenModal} size="sm">
             <Plus className="h-4 w-4 mr-2" />
@@ -224,28 +230,30 @@ export default function UCManagementPlan() {
           {/* Classe */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Classe
+              Ano Curricular
             </label>
             {loadingClasses ? (
               <Skeleton className="h-10 w-full rounded-md" />
             ) : (
-              <Select
-                value={classeId}
-                onValueChange={setClasseId}
-                disabled={!anoLetivoId || !cursoId}
-              >
+              <Select value={classeId} onValueChange={setClasseId}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione a classe..." />
+                  <SelectValue placeholder="Selecione o ano curricular..." />
                 </SelectTrigger>
+
                 <SelectContent>
-                  {classes.map((classe) => (
-                    <SelectItem
-                      key={classe.codigo}
-                      value={String(classe.codigo)}
-                    >
-                      {classe.designacao}
-                    </SelectItem>
-                  ))}
+                  {classes
+                    .filter((classe) =>
+                      !classe.designacao
+                        ?.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .includes("pos-graduacao")
+                    )
+                    .map((classe) => (
+                      <SelectItem key={classe.codigo} value={String(classe.codigo)}>
+                        {classe.designacao}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             )}
@@ -273,16 +281,14 @@ export default function UCManagementPlan() {
         ) : grades.length === 0 ? (
           <div className="p-16 text-center text-muted-foreground">
             <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <span className="text-3xl">Document</span>
+              <BookText className="text-3xl" />
             </div>
             <p className="text-lg font-medium mb-2">
               {anoLetivoId && cursoId && classeId
                 ? "Nenhuma unidade curricular encontrada"
-                : "Selecione o ano letivo, curso e classe"}
+                : "Selecione o ano letivo, curso e ano curricular para visualizar as unidades curriculares"}
             </p>
-            <p className="text-sm">
-              Após selecionar os filtros, as UCs aparecerão aqui.
-            </p>
+
           </div>
         ) : (
           <>
@@ -292,7 +298,7 @@ export default function UCManagementPlan() {
                   <TableHead className="w-24">Código</TableHead>
                   <TableHead>Unidade Curricular</TableHead>
                   <TableHead className="w-64">Curso</TableHead>
-                  <TableHead className="w-64">Classe</TableHead>
+                  <TableHead className="w-64">Ano Curricular</TableHead>
                   <TableHead className="w-32">Semestre</TableHead>
                 </TableRow>
               </TableHeader>

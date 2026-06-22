@@ -37,6 +37,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { VinculosModal } from "./components/vinculos-modal";
 import { ApagarVinculoAlert } from "./components/apagar-vinculo-alert.tfc";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -73,6 +74,8 @@ export default function VinculosTFC() {
     faculdade: "",
     orientador: "",
     estado: "",
+    tipoCandidatura: "",
+
   });
 
   const { data: orientadoresResponse } = useQueryOrientadoresTFC({
@@ -142,9 +145,24 @@ export default function VinculosTFC() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
 
+            <FacultySelect
+              value={filters.faculdade}
+              onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
+            />
+            <TipoCandidaturaSelect
+              isGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+            />
+
             <CourseSelect
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
+              params={{
+                faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
+              disabled={!filters.faculdade || !filters.tipoCandidatura}
             />
             <FormSelect
               label="Orientador"
@@ -172,6 +190,7 @@ export default function VinculosTFC() {
                     orientador: "",
                     estado: "",
                     faculdade: "",
+                    tipoCandidatura: "",
                   });
                   setPage(1);
                   setLimit(25);

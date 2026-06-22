@@ -57,7 +57,7 @@ export default function ControloSaldo() {
                 <TableHead>Saldo Anterior</TableHead>
                 <TableHead>Créditos</TableHead>
                 <TableHead>Débitos</TableHead>
-                <TableHead>Saldo Atual</TableHead>
+                <TableHead>Reserva</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

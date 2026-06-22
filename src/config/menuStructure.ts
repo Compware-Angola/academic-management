@@ -14,7 +14,7 @@ import {
   FileText,
   BookUser,
   Files,
-  BarChart3,
+  BarChart3
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -703,6 +703,200 @@ export const academicStructure: MenuStructure = {
     },
   ],
 };
+
+
+
+export const postGraduationStructure: MenuStructure = {
+  items: [
+    {
+      title: "Avaliações",
+      url: "/pos-graduacao",
+      icon: FileCheck,
+      
+      items: [
+        {
+          title: "Canditatos inscritos",
+          url: "/pos-graduacao/inscritos",
+        },
+        {
+          title: "Registos Primários",
+          url: "/pos-graduacao/registos-primarios",
+          permission: [
+            PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
+          ],
+        },
+        /*
+        {
+          title: "Atividades Letivas",
+          url: "/pos-graduacao/calendario/atividades",
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+          ],
+        },
+        {
+          title: "Parâmetros do Calendário",
+          url: "/pos-graduacao/calendario/parametros",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+          ],
+        },
+        */
+        
+        {
+          title: "Fórmula de Definição das UCs",
+          url: "/pos-graduacao/avaliacoes/formula-ucs",
+          permission: [
+            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
+          ],
+        },
+      
+        {
+          title: "Fórmula de Definição das UCs Oral",
+          url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
+          permission: [
+            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
+          ],
+        },
+       
+        {
+          title: "Marcação de Provas",
+          url: "/pos-graduacao/avaliacoes/marcacao-provas",
+          permission: [
+            PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Lista de Presença",
+          url: "/pos-graduacao/avaliacoes/lista-presenca",
+          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+        },
+        
+        {
+          title: "Lançamento de Notas",
+          url: "/pos-graduacao/avaliacoes/lancamento-notas",
+          permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
+        },
+        {
+          title: "Lançamento de Pauta",
+          url: "/pos-graduacao/avaliacoes/lancamento-pauta",
+          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+        },
+        {
+          title: "Validação de Pauta",
+          url: "/pos-graduacao/avaliacoes/validacao-pauta",
+          permission: [
+            PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
+          ],
+        },
+          
+      ],
+      permission: [],
+    },
+
+    {
+      title: "Calendário Académico ",
+      url: "/pos-graduacao-calendario",
+      icon: Calendar,
+      items: [
+        {
+          title: "Atividades Letivas",
+          url: "/pos-graduacao/calendario/atividades",
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+          ],
+        },
+        {
+          title: "Parâmetros do Calendário",
+          url: "/pos-graduacao/calendario/parametros",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+          ],
+        },
+      ],
+
+      permission: [],
+    },
+
+     {
+      title: "Docente",
+      url: "/pos-graduacao-docente",
+      icon: GraduationCap,
+      items: [
+        {
+          title: "Calendário de aulas",
+          url: "/pos-graduacao-docente/calendario",
+          permission: [
+            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
+          ],
+        },
+        {
+          title: "Horas de vigilância",
+          url: "/pos-graduacao-docente/vigilancia",
+          permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
+        },
+        {
+          title: "Lançamento do programa da UC",
+          url: "/pos-graduacao-docente/programa",
+          permission: [
+            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+          ],
+        },
+        {
+          title: "Validação do programa",
+          url: "/pos-graduacao-docente/validacao",
+          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+        },
+      ],
+      permission: [],
+    },
+    {
+      title: "Gestão de Orientação e Pesquisa",
+      url: "/gestao-orientacao-pesquisa",
+      icon: GraduationCap,
+      items: [
+        {
+          title: "Estudantes",
+          url: "/gestao-orientacao-pesquisa/estudantes",
+        },
+        {
+          title: "Orientadores",
+          url: "/gestao-orientacao-pesquisa/orientadores",
+        },
+         {
+          title: "Vínculos",
+          url: "/gestao-orientacao-pesquisa/vinculos",
+          permission: [PermissionTypeDetails.DEFESA.sigla],
+        },
+      ],
+    },
+
+    {
+      title: "Sumário",
+      url: "/pos-graduacao-sumario",
+      permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+      items: [
+        {
+          title: "Aulas Agendadas",
+          url: "/pos-graduacao-sumario/aulas-agendadas",
+          permission: [PermissionTypeDetails.AULAS_AGENDADAS.sigla],
+        },
+        {
+          title: "Controle Geral de Sumário & Assiduidade",
+          url: "/pos-graduacao-sumario/controle-geral",
+          permission: [
+            PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
+          ],
+        },
+        {
+          title: "Listar Sumários",
+          url: "/pos-graduacao-sumario/listar",
+          permission: [PermissionTypeDetails.LISTAR_SUMARIO.sigla],
+        }
+      ],
+    }
+  ],
+};
+
 export const operacionalStructure: MenuStructure = {
   items: [
     {
@@ -977,14 +1171,14 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/relatorios/descontos",
         // },
 
-        /* Relatórios de Pagamentos 
+        /* Relatórios de Pagamentos  */
         {
           title: "Rel. Pagamentos Instituições",
           icon: BarChart3,
           url: "/financas/rel-pagamentos-instituicoes",
           permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
         },
-        */
+
         {
           title: "Pagamentos",
           url: "/financas/listar-pagamentos",

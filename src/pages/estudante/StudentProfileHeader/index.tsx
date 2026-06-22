@@ -145,7 +145,7 @@ export function StudentProfileHeader({ matricula }: Props) {
             {isBolseiro && bolsaInfo && (
               <div className="mt-5 p-5 rounded-xl border bg-[oklch(0.97_0.015_25)] dark:bg-[oklch(0.22_0.025_25)] border-[oklch(0.88_0.045_25)] dark:border-[oklch(0.32_0.045_25)] relative">
 
-                {/* ALERTA NO CANTO SUPERIOR DIREITO */}
+                {/* ALERTA NO CANTO SUPERIOR DIREITO 
                 <div className="absolute top-5 right-5">
                   {bolsaInfo.instituicao_pagou ? (
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400 shadow-sm">
@@ -159,7 +159,7 @@ export function StudentProfileHeader({ matricula }: Props) {
                     </div>
                   )}
                 </div>
-
+                */}
                 <div className="flex items-center gap-3 mb-4 pr-40"> {/* pr-40 para dar espaço ao alerta */}
                   <div
                     className="p-3 rounded-xl text-white"
