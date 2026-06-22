@@ -1206,6 +1206,10 @@ export const PermissionTypeDetails = {
     designacao: "Pós-graduação Candidatos Inscritos",
     sigla: "pg_mpgs_ca",
   },
+    POST_GRADUACAO_LISTAR_SUMARIO: {
+    designacao: "Pós-graduação Listar sumários",
+    sigla: "pg_listar_sumario",
+  },
 
 
 

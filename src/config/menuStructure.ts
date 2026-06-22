@@ -896,7 +896,7 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Listar Sumários",
           url: "/pos-graduacao-sumario/listar",
-          permission: [PermissionTypeDetails.LISTAR_SUMARIO.sigla],
+          permission: [PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla],
         }
       ],
     }

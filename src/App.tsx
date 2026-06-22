@@ -189,6 +189,7 @@ import GuidanceResearchManagementListarOrientadores from "./pages/post-graduatio
 import GuidanceResearchManagementVinculos from "./pages/post-graduation/guidance-research-management/Vinculos";
 import PostGraduationAulasAgendadas from "./pages/post-graduation/sumario/AulasAgendadas";
 import PostGraduationControleGeral from "./pages/post-graduation/sumario/ControleGeral";
+import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario/ListagemSumarios";
 
 
 
@@ -352,6 +353,17 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/pos-graduacao-sumario/listar"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla!,
+                        ]}
+                      >
+                        <PostGraduationAulasListagemSumarios />
+                      </ProtectedRoute>
+                    } />
 
 
                   <Route
