@@ -172,7 +172,7 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
       content: [
         `Ano Lectivo: ${anoLetivo}`,
         `Curso: ${curso}`,
-        `Classe: ${classes}`,
+        `Ano Curricular: ${classes}`,
         `Semestre: ${semestre}`,
         `Período: ${periodo}`,
         `Horário: ${horario}`,
@@ -287,12 +287,9 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
             {mainTable.headers.map((col, colIdx) => {
               let value = row[col.key];
 
-              // Campos manuais limpos
               if (col.key === "assinatura" || col.key === "nota") {
                 value = "";
-              }
-              // Fallback para dados estruturais ausentes
-              else if (value === undefined || value === null || value === "") {
+              } else if (value === undefined || value === null || value === "") {
                 value = "—";
               }
 
@@ -313,6 +310,23 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
             })}
           </View>
         ))}
+
+        {/* ==================== ESPAÇO PARA ASSINATURAS ==================== */}
+        <View style={{ marginTop: 40, flexDirection: "row", justifyContent: "space-around" }}>
+          <View style={{ alignItems: "center", width: "45%" }}>
+            <Text style={{ fontSize: 9, marginBottom: 4 }}>______________________________</Text>
+            <Text style={{ fontSize: 9, fontWeight: "bold" }}>Docente</Text>
+
+          </View>
+
+          <View style={{ alignItems: "center", width: "45%" }}>
+            <Text style={{ fontSize: 9, marginBottom: 4 }}>______________________________</Text>
+            <Text style={{ fontSize: 9, fontWeight: "bold" }}>Diretor do Curso</Text>
+
+          </View>
+        </View>
+
+
 
         {/* RODAPÉ */}
         <Text style={baseStyles.footer}>

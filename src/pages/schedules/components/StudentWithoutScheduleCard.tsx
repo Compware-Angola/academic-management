@@ -107,10 +107,26 @@ export const StudentWithoutScheduleCard = ({
   }, [someSelected, allSelected]);
 
   useEffect(() => {
-    onChangeGradeAluno([]);
     onFilterChange?.(filters);
+  }, [
+    filters.anoLetivo,
+    filters.semestre,
+    filters.curso,
+    filters.anoCurricular,
+    filters.unidadeCurricular,
+    filters.searchTerm,
+  ]);
+
+  useEffect(() => {
+    onChangeGradeAluno([]);
     setPage(1);
-  }, [filters]);
+  }, [
+    filters.anoLetivo,
+    filters.semestre,
+    filters.curso,
+    filters.anoCurricular,
+    filters.unidadeCurricular,
+  ]);
 
   const toggle = (id: number) => {
     const exists = selectedGradeAlunoIds.includes(id);

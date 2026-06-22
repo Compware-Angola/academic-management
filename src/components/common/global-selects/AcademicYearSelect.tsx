@@ -1,6 +1,6 @@
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "../FormSelect";
-import { useEffect, useId } from "react";
+import { useEffect, useId, useRef } from "react";
 
 interface AcademicYearSelectProps {
   value: string;
@@ -10,6 +10,7 @@ interface AcademicYearSelectProps {
   onlyActive?: boolean;
   enableDefaultActiveYear?: boolean;
 }
+
 const AcademicYearSelect = ({
   onChangeValue,
   value,
@@ -21,6 +22,8 @@ const AcademicYearSelect = ({
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
   const id = useId();
+  const hasSetDefault = useRef(false);
+
   const defaultSelectItem = enableDefaultSelectItem
     ? [
       {
@@ -30,16 +33,19 @@ const AcademicYearSelect = ({
       },
     ]
     : undefined;
+
   useEffect(() => {
-    if (enableDefaultActiveYear && academicYear) {
+    if (enableDefaultActiveYear && !hasSetDefault.current && academicYear?.length) {
       const activeYear = academicYear.find(
         (a) => a.estado.toLocaleLowerCase() === "activo",
       );
-      if (activeYear && !value) {
+      if (activeYear) {
+        hasSetDefault.current = true;
         onChangeValue(activeYear.codigo.toString());
       }
     }
-  }, [enableDefaultActiveYear, academicYear, value]);
+  }, [enableDefaultActiveYear, academicYear, onChangeValue]);
+
   return (
     <>
       <FormSelect

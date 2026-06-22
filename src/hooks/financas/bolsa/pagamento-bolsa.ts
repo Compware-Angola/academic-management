@@ -1,10 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ListarPagamentoBolsaConciliacaoInsightsParams,
+  ListarPagamentoBolsaConciliacaoResumoParams,
+  ListarPagamentoBolsaEstudantesParams,
   ListarPagamentoBolsaParams,
   UpdatePagamentoBolsaPayload,
   criarPagamentoBolsa,
   deletePagamentoBolsa,
   listarPagamentoBolsa,
+  listarPagamentoBolsaConciliacaoInsights,
+  listarPagamentoBolsaConciliacaoResumo,
+  listarPagamentoBolsaEstudantes,
   updatePagamentoBolsa,
 } from "@/services/financas/bolsa/pagamento-bolsa.service";
 import { toast } from "sonner";
@@ -66,3 +72,40 @@ export const useDeletePagamentoBolsa = () => {
     },
   });
 };
+
+export const useListarPagamentoBolsaEstudantes = (
+  params?: ListarPagamentoBolsaEstudantesParams,
+  { enabled = true }: { enabled?: boolean } = {},
+) => {
+  return useQuery({
+    queryKey: ["pagamento-bolsa-estudantes", params],
+    queryFn: () => listarPagamentoBolsaEstudantes(params),
+    staleTime: 1000 * 60 * 5,
+    enabled,
+  });
+};
+
+export const useConciliacaoFinanceira = (
+  params?: ListarPagamentoBolsaConciliacaoResumoParams,
+  { enabled = true }: { enabled?: boolean } = {},
+) => {
+  return useQuery({
+    queryKey: ["pagamento-bolsa-conciliacao-resumo", params],
+    queryFn: () => listarPagamentoBolsaConciliacaoResumo(params),
+    staleTime: 1000 * 60 * 5,
+    enabled,
+  });
+};
+
+export const useListarPagamentoBolsaConciliacaoInsights = (
+  params?: ListarPagamentoBolsaConciliacaoInsightsParams,
+  { enabled = true }: { enabled?: boolean } = {},
+) => {
+  return useQuery({
+    queryKey: ["pagamento-bolsa-conciliacao-insights", params],
+    queryFn: () => listarPagamentoBolsaConciliacaoInsights(params),
+    staleTime: 1000 * 60 * 5,
+    enabled,
+  });
+};
+

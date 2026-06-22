@@ -33,13 +33,13 @@ import { ModalDetalhePagamentoBolsa } from "./ModalDetalhePagamentoBolsa";
 const fmt = (v: number) =>
     new Intl.NumberFormat("pt-AO", { style: "currency", currency: "AOA", maximumFractionDigits: 0 }).format(v);
 
-export function ReportByTable() {
+export function RepoortByTableInstSemPagamentos() {
     const [filters, setFilters] = useState({
         anoLectivo: "all",
         semestre: "all",
         codigoBolsa: "all",
         codigoInstituicao: "all",
-
+        apenasSemPagamento: "0", // ✅ string para ficar consistente com o Select
         page: 1,
         limit: 5,
     });
@@ -64,7 +64,7 @@ export function ReportByTable() {
         semestre: parseFilter(filters.semestre),
         codigoBolsa: parseFilter(filters.codigoBolsa),
         codigoInstituicao: parseFilter(filters.codigoInstituicao),
-
+        apenasSemPagamento: Number(filters.apenasSemPagamento), // ✅ converte só na hora de enviar
         page: filters.page,
         limit: filters.limit,
     });
@@ -78,6 +78,7 @@ export function ReportByTable() {
             semestre: "all",
             codigoBolsa: "all",
             codigoInstituicao: "all",
+            apenasSemPagamento: "0", // ✅ consistente
             page: 1,
             limit: 10,
         });
@@ -94,10 +95,7 @@ export function ReportByTable() {
     return (
         <div className="space-y-6">
             <div className="flex justify-end gap-4">
-                <Button onClick={handleOpenUpsert}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Novo
-                </Button>
+
                 <Button variant="outline" onClick={handleClearFilters}>Limpar Filtros</Button>
                 <Button onClick={() => refetch()} variant="outline">
                     <RefreshCcw className={cn("h-4 w-4", isFetching && "animate-spin")} />
@@ -126,32 +124,7 @@ export function ReportByTable() {
                             enableDefaultSelectItem
                         />
 
-                        <InstituicaoSelect
-                            onChangeValue={(v) => {
-                                setFilters((f) => ({
-                                    ...f,
-                                    codigoInstituicao: v,
-                                    codigoBolsa: "all",
-                                }));
-                                handleSetPage(1);
-                            }}
-                            value={filters.codigoInstituicao}
-                            enableDefaultSelectItem
-                        />
 
-                        <BolsaSelect
-                            onChangeValue={(v) => {
-                                setFilters((f) => ({ ...f, codigoBolsa: v }));
-                                handleSetPage(1);
-                            }}
-                            value={filters.codigoBolsa}
-                            enableDefaultSelectItem
-                            codigoInstituicao={filters.codigoInstituicao}
-                            disabled={
-                                !filters.codigoInstituicao ||
-                                filters.codigoInstituicao === "all"
-                            }
-                        />
 
 
                     </div>
@@ -169,7 +142,7 @@ export function ReportByTable() {
                                 <TableHead>Ano Letivo</TableHead>
                                 <TableHead>Semestre</TableHead>
                                 <TableHead>Nº Bolseiros</TableHead>
-                                <TableHead>Valor Depositado</TableHead>
+
                                 <TableHead className="text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -201,7 +174,6 @@ export function ReportByTable() {
                                         <TableCell>{r.ano_letivo ?? "N/A"}</TableCell>
                                         <TableCell>{r.semestre ?? "N/A"}</TableCell>
                                         <TableCell>{r.qtd_estudantes}</TableCell>
-                                        <TableCell>{fmt(r.valor_depositado ?? 0)}</TableCell>
                                         <TableCell className="text-right">
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
@@ -217,36 +189,7 @@ export function ReportByTable() {
                                                 <TooltipContent><p>Detalhes</p></TooltipContent>
                                             </Tooltip>
 
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        aria-label="Editar"
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        onClick={() => {
-                                                            setSelectedPagamentoBolsa(r);
-                                                            setOpenModalUpsert(true);
-                                                        }}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent><p>Editar</p></TooltipContent>
-                                            </Tooltip>
 
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        aria-label="Deletar"
-                                                        size="icon"
-                                                        variant="destructive"
-                                                        onClick={() => handleOpenDelete(r)}
-                                                    >
-                                                        <Trash className="h-4 w-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent><p>Deletar</p></TooltipContent>
-                                            </Tooltip>
                                         </TableCell>
                                     </TableRow>
                                 ))
