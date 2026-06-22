@@ -716,8 +716,9 @@ export const postGraduationStructure: MenuStructure = {
       permission: [],
       items: [
         {
-          title: "Canditatos inscritos",
+          title: "Candidatos inscritos",
           url: "/pos-graduacao/inscritos",
+          permission: [PermissionTypeDetails.POST_GRADUACAO_CANDIDATOS_INSCRITOS.sigla],
         },
         {
           title: "Registos Primários",
@@ -827,25 +828,25 @@ export const postGraduationStructure: MenuStructure = {
           title: "Calendário de aulas",
           url: "/pos-graduacao-docente/calendario",
           permission: [
-            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
+            PermissionTypeDetails.POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
           ],
         },
         {
           title: "Horas de vigilância",
           url: "/pos-graduacao-docente/vigilancia",
-          permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
+          permission: [PermissionTypeDetails.POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla!],
         },
         {
           title: "Lançamento do programa da UC",
           url: "/pos-graduacao-docente/programa",
           permission: [
-            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+            PermissionTypeDetails.POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
         {
           title: "Validação do programa",
           url: "/pos-graduacao-docente/validacao",
-          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+          permission: [PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla],
         },
       ],
       permission: [],

@@ -1188,6 +1188,26 @@ export const PermissionTypeDetails = {
     designacao: "Pós-graduação Gestao Orientacao Pesquisa Vinculos",
     sigla: "pg_gop_v",
   },
+   POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE: {
+    designacao: "Visualizar Horário Por Docente",
+    sigla: "pg_mgh_vhpd",
+  },
+   POST_GRADUACAO_HORAS_DE_VIGILANCIA: { designacao: "Horas De Vigilancia", sigla: "pg_mgd_hv" },
+
+    POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC: {
+    designacao: "Docente lançamento do programa da UC",
+    sigla: "pg_doc_lanc_prog_uc",
+  },
+  POST_GRADUACAO_VALIDACAO_PROGRAMA_UC: {
+    designacao: "Validação do programa da UC",
+    sigla: "pg_doc_val_prog_uc",
+  },
+    POST_GRADUACAO_CANDIDATOS_INSCRITOS: {
+    designacao: "Pós-graduação Candidatos Inscritos",
+    sigla: "pg_mpgs_ca",
+  },
+
+
 
  
 } as const;

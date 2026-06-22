@@ -494,8 +494,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC
-                            .sigla,
+                          PermissionTypeDetails.POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla
                         ]}
                       >
                         <PosGraduacaoDocenteLancamentoProgramaUC />
@@ -519,7 +518,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla,
+                          PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla
                         ]}
                       >
                         <PosGraduacaoValidacaoProgramaValidacaoPrograma />
@@ -1121,8 +1120,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE
-                            .sigla!,
+                          PermissionTypeDetails.POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE.sigla
                         ]}
                       >
                         <CalendarioAulasDocente />
@@ -1504,7 +1502,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.DEFESA.sigla!,
+                          PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES.sigla!,
                         ]}
                       >
                         <GuidanceResearchManagementListarOrientadores />
@@ -1516,7 +1514,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.DEFESA.sigla!,
+                          PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS.sigla!,
                         ]}
                       >
                         <GuidanceResearchManagementVinculos />
@@ -1556,7 +1554,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!,
+                          PermissionTypeDetails.POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla
                         ]}
                       >
                         <PosGraduacaoHorasVigilancia />
@@ -1872,7 +1870,7 @@ const App = () => {
                     path="/pos-graduacao/inscritos"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla!]}
+                        allowedPermissions={[PermissionTypeDetails.POST_GRADUACAO_CANDIDATOS_INSCRITOS.sigla!]}
                       >
                         <RegisteredCandidates />
                       </ProtectedRoute>
@@ -1882,19 +1880,12 @@ const App = () => {
                     path="/gestao-orientacao-pesquisa/estudantes"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.CANDIDATOS_INSCRITOS.sigla!]}
+                        allowedPermissions={[PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES.sigla!]}
                       >
                         <GuidanceResearchManagementStudent />
                       </ProtectedRoute>
                     }
                   />
-
-
-
-
-
-
-
                   <Route
                     path="/pos-graduacao/avaliacoes/lista-presenca"
                     element={
@@ -1907,8 +1898,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
-
                   <Route
                     path="/pos-graduacao/avaliacoes/marcacao-provas"
                     element={
@@ -1949,44 +1938,44 @@ const App = () => {
                     }
                   />
 
-                <Route
-                  path="/pos-graduacao/avaliacoes/validacao-pauta"
-                  element={
-                    <ProtectedRoute
-                      allowedPermissions={[
-                        PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla!,
-                      ]}
-                    >
-                      <PostGraduationAgendaValidation />
-                    </ProtectedRoute>
-                  }
-                />
+                  <Route
+                    path="/pos-graduacao/avaliacoes/validacao-pauta"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla!,
+                        ]}
+                      >
+                        <PostGraduationAgendaValidation />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                <Route
-                  path="/pos-graduacao/avaliacoes/formula-ucs"
-                  element={
-                    <ProtectedRoute
-                      allowedPermissions={[
-                        PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
-                      ]}
-                    >
-                      <PostGraduationCurricularUnitFormulas />
-                    </ProtectedRoute>
-                  }
-                />
+                  <Route
+                    path="/pos-graduacao/avaliacoes/formula-ucs"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+                        ]}
+                      >
+                        <PostGraduationCurricularUnitFormulas />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                <Route
-                  path="/pos-graduacao/avaliacoes/formula-ucs-oral"
-                  element={
-                    <ProtectedRoute
-                      allowedPermissions={[
-                        PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
-                      ]}
-                    >
-                      <PostGraduationOralCurricularUnits />
-                    </ProtectedRoute>
-                  }
-                />
+                  <Route
+                    path="/pos-graduacao/avaliacoes/formula-ucs-oral"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+                        ]}
+                      >
+                        <PostGraduationOralCurricularUnits />
+                      </ProtectedRoute>
+                    }
+                  />
 
                 </Route>
               </Routes>
