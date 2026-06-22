@@ -13,7 +13,8 @@ import {
   GraduationCap,
   FileText,
   BookUser,
-  Files
+  Files,
+  BarChart3
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
