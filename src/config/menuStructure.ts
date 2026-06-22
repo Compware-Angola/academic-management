@@ -707,12 +707,13 @@ export const academicStructure: MenuStructure = {
 
 
 export const postGraduationStructure: MenuStructure = {
+
   items: [
     {
       title: "Avaliações",
       url: "/pos-graduacao",
       icon: FileCheck,
-      
+      permission: [],
       items: [
         {
           title: "Canditatos inscritos",
@@ -790,7 +791,7 @@ export const postGraduationStructure: MenuStructure = {
         },
           
       ],
-      permission: [],
+     
     },
 
     {
@@ -853,19 +854,23 @@ export const postGraduationStructure: MenuStructure = {
       title: "Gestão de Orientação e Pesquisa",
       url: "/gestao-orientacao-pesquisa",
       icon: GraduationCap,
+      permission: [],
       items: [
         {
           title: "Estudantes",
           url: "/gestao-orientacao-pesquisa/estudantes",
+          permission: [PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES.sigla],
+
         },
         {
           title: "Orientadores",
           url: "/gestao-orientacao-pesquisa/orientadores",
+          permission:[PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES.sigla]
         },
          {
-          title: "Vínculos",
+          title: "Vinculos",
           url: "/gestao-orientacao-pesquisa/vinculos",
-          permission: [PermissionTypeDetails.DEFESA.sigla],
+          permission: [PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS.sigla],
         },
       ],
     },

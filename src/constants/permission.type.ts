@@ -1175,6 +1175,21 @@ export const PermissionTypeDetails = {
     designacao: "Anular Multa",
     sigla: "mg_a_mult",
   },
+
+  POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES: {
+    designacao: "Pós-graduação Gestao e Orientacao Pesquisa Estudantes",
+    sigla: "pg_gop_e",
+  },
+  POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES: {
+    designacao: "Pós-graduação Gestao Orientacao Pesquisa Orientadores",
+    sigla: "pg_gop_o",
+  },
+   POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS: {
+    designacao: "Pós-graduação Gestao Orientacao Pesquisa Vinculos",
+    sigla: "pg_gop_v",
+  },
+
+ 
 } as const;
 
 export type PermissionDetail = {
