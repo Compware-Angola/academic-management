@@ -907,6 +907,18 @@ export const postGraduationStructure: MenuStructure = {
           permission: [PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla],
         }
       ],
+    },{
+      permission: [],
+      title: "Horários",
+      url: "/pos-graduacao-horario",
+      items:[
+        {
+          title:"Criar Horários",
+          url: "/pos-graduacao-horario/criar",
+          permission: [],
+
+        }
+      ]
     }
   ],
 };

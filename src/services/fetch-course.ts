@@ -1,4 +1,5 @@
 import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export interface Curso {
   codigo: number;
@@ -7,22 +8,26 @@ export interface Curso {
 }
 
 export interface CursoParams {
+  search?: string;
   faculdadeId?: number;
   tipoCandidaturaId?: number;
+  level?:"GRADUATION"|"POST_GRADUATION"
 }
 
 export interface CursoResponse {
-  cursos: Curso[];
+  data: Curso[];
 }
 
 export async function getCursosDropdown(
   params?: CursoParams,
 ): Promise<Curso[]> {
-  const response = await axiosApexGa.get<CursoResponse>("/uma/course/all", {
+  const response = await axiosNestGa.get<CursoResponse>("/cursos", {
     params: {
       faculdadeId: params?.faculdadeId,
       tipoCandidaturaId: params?.tipoCandidaturaId,
+      level: params?.level,
+      limit:100
     },
   });
-  return response.data.cursos ?? [];
+  return response.data.data ?? [];
 }
