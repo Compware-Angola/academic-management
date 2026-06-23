@@ -879,7 +879,7 @@ export const postGraduationStructure: MenuStructure = {
     {
       title: "Sumário",
       url: "/pos-graduacao-sumario",
-      permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+      permission: [],
       items: [
         {
           title: "Aulas Agendadas",
