@@ -822,21 +822,7 @@ export const postGraduationStructure: MenuStructure = {
       permission: [],
     },
 
-    {
-      title: "Exame de Acesso",
-      url: "/pos-graduacao-exame-acesso",
-      icon: Files,
-      items: [
-        {
-          title: "Configurar Vagas",
-          url: "/pos-graduacao/exame-acesso/configurar-vagas",
-          permission: [
-            PermissionTypeDetails.DEFINIR_VAGAS_POS_GRADUACAO.sigla,
-          ],
-        },
-      ],
-      permission: [],
-    },
+    
 
      {
       title: "Docente",
