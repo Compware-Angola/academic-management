@@ -179,7 +179,7 @@ export function InscricoesSection({
             <AnoCurricularSelect
               enableDefaultSelectItem
               value={filter.classes}
-              curso={student?.curso_codigo.toString()}
+              curso={student?.curso_codigo?.toString()}
               onChangeValue={(v) => setFilter({ ...filter, classes: v })}
             />
             <FormSelect
@@ -279,16 +279,16 @@ export function InscricoesSection({
                                 }
                                 onClick={() => {
                                   openModalHorario({
-                                    codigo: disc.codigo.toString(),
+                                    codigo: disc.codigo?.toString(),
                                     anoLectivo: filter.anoLetivo,
-                                    curso: student.curso_codigo.toString(),
+                                    curso: student?.curso_codigo?.toString(),
                                     semestre: filter.semestre,
                                     codigoGradeCurricular:
-                                      disc.codigo_grade_curricular.toString(),
+                                      disc?.codigo_grade_curricular?.toString(),
                                     estado: "3",
-                                    periodo: student.periodo_codigo.toString(),
-                                    classes: disc.codigo_classe.toString(),
-                                    disciplina: disc.disciplina,
+                                    periodo: student?.periodo_codigo?.toString(),
+                                    classes: disc?.codigo_classe?.toString(),
+                                    disciplina: disc?.disciplina,
                                   });
                                 }}
                               >
