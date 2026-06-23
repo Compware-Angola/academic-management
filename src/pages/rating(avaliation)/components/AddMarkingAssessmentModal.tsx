@@ -34,7 +34,11 @@ import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-pr
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryExamCreationPrompt } from "@/hooks/academiccalendar/use-query-exam-creation-prompt";
 import { calcularDuracao } from "@/util/calcular-duracao";
-import { DocenteVigilanteSelect } from "@/components/common/global-selects/DocenteVigitantesSelect";
+import {
+  DocenteSelected,
+  DocenteVigilantePicker,
+} from "./DocenteVigilantePicker";
+import { buildVigilantesPayloads } from "./helpers";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -70,7 +74,7 @@ export default function AddMarkingAssessmentModal({
     useMutationCreateCalendar();
   // filtros
   const [filters, setFilters] = useState<Filters>({});
-  const [teacher, setTeacher] = useState<string[]>([]);
+  const [teacher, setTeacher] = useState<DocenteSelected[]>([]);
   const { data: anosAcademicos, isLoading: isLoadingAnosAcademicos } =
     useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
@@ -82,8 +86,7 @@ export default function AddMarkingAssessmentModal({
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
+
   const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
     useQueryTipoCandidatura();
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
@@ -140,17 +143,6 @@ export default function AddMarkingAssessmentModal({
     gradesPeriodStatus === "OUT_OF_PERIOD" ||
     gradesPeriodStatus === "NO_YEAR_SELECTED";
 
-  const handleVigilantesChange = (values: string[]) => {
-    if (values.length > 2) {
-      toast({
-        description: "Só é permitido selecionar no máximo 2 vigilantes.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setTeacher(values);
-  };
   const isFormInvalid =
     isInvalid(filters.anoLetivo) ||
     isInvalid(filters.semestre) ||
@@ -214,15 +206,7 @@ export default function AddMarkingAssessmentModal({
       anoLectivo: parseFilter(filters.anoLetivo),
       tipoCandidatura: parseFilter(filters.tipoCandidatura),
       semestre: parseFilter(filters.semestre),
-      vigilantes: teacher.map((t) => {
-        const docente = docentes.find(
-          (d) => d.codigo_utilizador?.toString() === t,
-        );
-        return {
-          codigoUtilizador: Number(t),
-          desc: docente?.nome ?? "",
-        };
-      }),
+      vigilantes: buildVigilantesPayloads(teacher),
     };
 
     createCalendar(payload, {
@@ -479,14 +463,6 @@ export default function AddMarkingAssessmentModal({
                 value: u.codigo,
               })}
             />
-
-            <DocenteVigilanteSelect
-              values={teacher}
-              label="Vigilante"
-              onChange={handleVigilantesChange}
-              max={2}
-            />
-
             <FormSelect
               label="Horarios"
               value={filters.horarioId}
@@ -567,6 +543,13 @@ export default function AddMarkingAssessmentModal({
                 }
               />
             </div>
+          </div>
+          <div className="mt-6">
+            <DocenteVigilantePicker
+              onChange={(v) => setTeacher(v)}
+              values={teacher}
+              max={10}
+            />
           </div>
         </div>
 
