@@ -748,7 +748,7 @@ export const postGraduationStructure: MenuStructure = {
           title: "Fórmula de Definição das UCs",
           url: "/pos-graduacao/avaliacoes/formula-ucs",
           permission: [
-            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
+            PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO.sigla,
           ],
         },
       
@@ -756,7 +756,7 @@ export const postGraduationStructure: MenuStructure = {
           title: "Fórmula de Definição das UCs Oral",
           url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
           permission: [
-            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
+            PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO.sigla,
           ],
         },
        
@@ -770,24 +770,30 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Lista de Presença",
           url: "/pos-graduacao/avaliacoes/lista-presenca",
-          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+          permission: [
+            PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO.sigla,
+          ],
         },
         
         {
           title: "Lançamento de Notas",
           url: "/pos-graduacao/avaliacoes/lancamento-notas",
-          permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Lançamento de Pauta",
           url: "/pos-graduacao/avaliacoes/lancamento-pauta",
-          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Validação de Pauta",
           url: "/pos-graduacao/avaliacoes/validacao-pauta",
           permission: [
-            PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
+            PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla,
           ],
         },
           
@@ -818,6 +824,8 @@ export const postGraduationStructure: MenuStructure = {
 
       permission: [],
     },
+
+    
 
      {
       title: "Docente",
