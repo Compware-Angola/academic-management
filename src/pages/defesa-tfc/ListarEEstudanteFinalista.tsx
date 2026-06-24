@@ -45,6 +45,7 @@ import { useQueryEstudanteFinalista } from "@/hooks/defesa-tfc/use-query-estudan
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { TipoCandidatura } from "@/services/fecth-tipo-candidatura";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 export default function ListarEstudanteFinalista() {
   const [page, setPage] = useState(1);
@@ -107,19 +108,19 @@ export default function ListarEstudanteFinalista() {
 
   const excelProps: GenericExcelProps | null = pdfData
     ? {
-        documentTitle: "Estudantes Finalistas",
-        mainTable: {
-          headers: [
-            { key: "matricula", label: "Nº Matrícula", width: 15 },
-            { key: "nome", label: "Nome", width: 50 },
-            { key: "bilhete", label: "Bilhete", width: 20 },
-            { key: "curso", label: "Curso", width: 30 },
-          ],
-          rows: pdfData.rows,
-        },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+      documentTitle: "Estudantes Finalistas",
+      mainTable: {
+        headers: [
+          { key: "matricula", label: "Nº Matrícula", width: 15 },
+          { key: "nome", label: "Nome", width: 50 },
+          { key: "bilhete", label: "Bilhete", width: 20 },
+          { key: "curso", label: "Curso", width: 30 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
   const handleRefetch = () => {
     setFilters({
@@ -215,33 +216,25 @@ export default function ListarEstudanteFinalista() {
                 setFilters({ ...filters, faculdade: v, curso: "" })
               }
             />
+            <TipoCandidaturaSelect
+              isGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+              disabled={!filters.faculdade}
+            />
+
             <CourseSelect
+              disabled={!filters.faculdade || !filters.tipoCandidatura}
               enableDefaultSelectItem
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
               }}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
               value={filters.curso}
+
             />
-            <FormSelect
-              label="Tipo Candidatura"
-              value={filters.tipoCandidatura}
-              onChange={(v) => setFilters({ ...filters, tipoCandidatura: v })}
-              options={[
-                {
-                  codigo: "all",
-                  designacao: "Todos",
-                } as unknown as TipoCandidatura,
-                ...tipoCandidatura,
-              ]}
-              loading={isLoadingTipoCandidatura}
-              disabled={isLoadingTipoCandidatura}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo.toString(),
-              })}
-            />
+
 
             <div className="flex items-end">
               <Button onClick={handleRefetch}>
