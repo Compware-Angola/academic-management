@@ -71,9 +71,9 @@ export function DividasSection({ codigoMatricula }: Props) {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Dívidas em Aberto</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Negociação de Dívidas em Aberto</h1>
                 <p className="text-muted-foreground">
-                    Consulte as dívidas pendentes de mensalidades e outros serviços
+                    Informe seus dados para consultar as dívidas pendentes
                 </p>
             </div>
 
