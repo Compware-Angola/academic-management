@@ -160,6 +160,7 @@ import PostGraduationPrimaryRecords from "./pages/post-graduation/PrimaryRecords
 import PostGraduationAcademicActivities from "./pages/post-graduation/AcademicActivities";
 import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/AcademicCalendarParameters";
 import PostGraduationVacancies from "./pages/post-graduation/Vacancies";
+import PostGraduationFinalResults from "./pages/post-graduation/FinalResults";
 import PostGraduationCurricularUnitFormulas from "./pages/post-graduation/CurricularUnitFormulas";
 import PostGraduationOralCurricularUnits from "./pages/post-graduation/OralCurricularUnits";
 import PostGraduationExamMarkings from "./pages/post-graduation/ExamMarkings";
@@ -1995,6 +1996,34 @@ const App = () => {
                       ]}
                     >
                       <PostGraduationOralCurricularUnits />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                    path="/pos-graduacao/exame-acesso/configurar-vagas"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.DEFINIR_VAGAS_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <PostGraduationVacancies />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                <Route
+                  path="/pos-graduacao/exame-acesso/resultados-finais"
+                  element={
+                    <ProtectedRoute
+                      allowedPermissions={[
+                        PermissionTypeDetails.RESULTADOS_FINAIS_POS_GRADUACAO
+                          .sigla!,
+                      ]}
+                    >
+                      <PostGraduationFinalResults />
                     </ProtectedRoute>
                   }
                 />
