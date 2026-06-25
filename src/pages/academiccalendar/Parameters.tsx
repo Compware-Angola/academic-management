@@ -261,12 +261,12 @@ export default function Parameters() {
         </CardHeader>
         <CardContent>
           {isLoadingGlobal ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
               <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-12 w-full" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
               {/* Ano Letivo */}
               <div className="space-y-2">
                 <Label>Ano Letivo</Label>
@@ -297,21 +297,29 @@ export default function Parameters() {
               {/* Tipo de Candidatura */}
               <div className="space-y-2">
                 <Label>Tipo de Candidatura</Label>
-                <Select
-                  value={tipoCandidaturaSelecionado}
-                  onValueChange={setTipoCandidaturaSelecionado}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tiposCandidatura.map((t) => (
-                      <SelectItem key={t.codigo} value={String(t.codigo)}>
-                        {t.designacao}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {tiposCandidatura.length === 0 ? (
+                  <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                    Nenhum tipo de candidatura encontrado.
+                  </div>
+                ) : (
+                  <Tabs
+                    value={tipoCandidaturaSelecionado}
+                    onValueChange={setTipoCandidaturaSelecionado}
+                    className="w-full"
+                  >
+                    <TabsList className="flex h-auto w-full flex-wrap justify-start gap-2 p-1">
+                      {tiposCandidatura.map((t) => (
+                        <TabsTrigger
+                          key={t.codigo}
+                          value={String(t.codigo)}
+                          className="min-w-32"
+                        >
+                          {t.designacao}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                )}
               </div>
             </div>
           )}
