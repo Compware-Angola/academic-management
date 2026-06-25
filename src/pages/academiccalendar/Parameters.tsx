@@ -239,7 +239,7 @@ export default function Parameters() {
             <Button
               size="sm"
               onClick={() => setIsEditModalOpen(true)}
-              disabled={!currentYearParams}
+              disabled={!currentYearParams || !tipoCandidaturaId}
             >
               <Save className="h-4 w-4 mr-2" />
               Novo Parâmetro
@@ -834,6 +834,7 @@ export default function Parameters() {
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
         anoLetivo={currentYearParams?.designacao || ""}
+        tipoCandidaturaId={tipoCandidaturaId}
       />
       {vagaSelecionada && (
         <EditVagaModal

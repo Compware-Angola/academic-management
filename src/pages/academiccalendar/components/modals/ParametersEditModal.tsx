@@ -84,6 +84,7 @@ interface ParametersEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   anoLetivo?: string;
+  tipoCandidaturaId?: number;
   onSuccess?: () => void;
 }
 
@@ -109,6 +110,7 @@ export function ParametersEditModal({
   open,
   onOpenChange,
   anoLetivo,
+  tipoCandidaturaId,
   onSuccess,
 }: ParametersEditModalProps) {
   const [currentStep, setCurrentStep] = useState<Step>("periodos");
@@ -218,6 +220,9 @@ export function ParametersEditModal({
   const mutationTudo = useMutation({
     mutationFn: async () => {
       if (!isPeriodoValid()) throw new Error("Períodos incompletos");
+      if (!tipoCandidaturaId) {
+        throw new Error("Tipo de candidatura não selecionado");
+      }
 
       const periodoPayload = {
         designacao: periodosForm.designacao,
@@ -226,6 +231,7 @@ export function ParametersEditModal({
         data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
         data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
         codigo_utilizador: user.user?.pk_utilizador,
+        codigo_tipo_candidatura: tipoCandidaturaId,
       };
 
       const periodoRes = await axiosNestGa.post(
