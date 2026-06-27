@@ -27,12 +27,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Download,
+  FileText,
   Home,
   Search,
   BookOpen,
   Eye,
   Loader2,
   Plus,
+  Printer,
   Pencil,
   User2,
   Trash2,
@@ -53,6 +56,13 @@ import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc
 import AddMarkingAssessmentModal from "../components/AddMarkingAssessmentModal";
 import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import {
+  exportMarkingAssessmentExcelService,
+  exportMarkingAssessmentPdfService,
+} from "@/services/avaliacao/export-marking-assessment.service";
+import { toast } from "sonner";
+
+type ExportAction = "excel" | "pdf" | "print";
 import EditMarkingAssessmentModal from "../components/EditMarkingAssessmentModal";
 import { useMutationDeleteMarkingAssessment } from "@/hooks/avaliacao/use-mutation-delete-marking-assessment";
 
@@ -84,6 +94,9 @@ export default function AddMarkingAssessment() {
   // paginação
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [exportingAction, setExportingAction] = useState<ExportAction | null>(
+    null,
+  );
 
   // === Dados base ===
   const { data: anosAcademicos } = useQueryAnoAcademico();
@@ -163,6 +176,63 @@ export default function AddMarkingAssessment() {
   const tableData = markingResponse?.data || [];
   const total = markingResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+
+  const handleExport = async (action: ExportAction) => {
+    if (exportingAction || !canLoadTurmas || total === 0) return;
+
+    const printWindow = action === "print" ? window.open("", "_blank") : null;
+
+    if (action === "print" && !printWindow) {
+      toast.error("O navegador bloqueou a janela de impressão.");
+      return;
+    }
+
+    setExportingAction(action);
+
+    try {
+      const exportPayload = {
+        anoLectivo: Number(filters.anoLetivo),
+        semestre: Number(filters.semestre),
+        periodo: parseFilter(filters.periodo),
+        curso: Number(filters.curso),
+        prazoId: Number(filters.prazoId),
+        tipoHorario: 1,
+        anoCurricular: parseFilter(filters.anoCurricular),
+        horarioId: parseFilter(filters.horarioId),
+        unidadeCurricular: parseFilter(filters.unidadeCurricular),
+      };
+
+      const { blob, fileName } =
+        action === "excel"
+          ? await exportMarkingAssessmentExcelService(exportPayload, total)
+          : await exportMarkingAssessmentPdfService(exportPayload);
+
+      const downloadUrl = URL.createObjectURL(blob);
+
+      if (action === "print") {
+        printWindow!.location.href = downloadUrl;
+        setTimeout(() => {
+          printWindow!.print();
+          URL.revokeObjectURL(downloadUrl);
+        }, 1000);
+      } else {
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+      }
+
+      toast.success("Exportação concluída com sucesso.");
+    } catch {
+      printWindow?.close();
+      toast.error("Não foi possível exportar as marcações de provas.");
+    } finally {
+      setExportingAction(null);
+    }
+  };
 
   return (
     <div className="p-6 space-y-8">
@@ -388,7 +458,40 @@ export default function AddMarkingAssessment() {
       {/* Tabela */}
       <Card>
         <CardHeader>
-          <CardTitle>Horários Encontradas</CardTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>Horários Encontradas</CardTitle>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport("pdf")}
+                disabled={!canLoadTurmas || total === 0 || !!exportingAction}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                {exportingAction === "pdf" ? "A exportar..." : "Exportar PDF"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport("print")}
+                disabled={!canLoadTurmas || total === 0 || !!exportingAction}
+              >
+                <Printer className="mr-2 h-4 w-4" />
+                {exportingAction === "print" ? "A imprimir..." : "Imprimir"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport("excel")}
+                disabled={!canLoadTurmas || total === 0 || !!exportingAction}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {exportingAction === "excel"
+                  ? "A exportar..."
+                  : "Exportar Excel"}
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loadingTurmas ? (
