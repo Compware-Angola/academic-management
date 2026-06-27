@@ -26,15 +26,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, BookOpen, Eye, Loader2, Plus } from "lucide-react";
+import {
+  Home,
+  Search,
+  BookOpen,
+  Eye,
+  Loader2,
+  Plus,
+  Pencil,
+  User2,
+  Trash2,
+} from "lucide-react";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
 import { formatarData } from "@/util/date-formate";
@@ -43,16 +51,23 @@ import { convertGuards } from "./convertGuards";
 import MarkingDetailsGuardModal from "../components/MarkingDetailsGuardModal";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import AddMarkingAssessmentModal from "../components/AddMarkingAssessmentModal";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import EditMarkingAssessmentModal from "../components/EditMarkingAssessmentModal";
+import { useMutationDeleteMarkingAssessment } from "@/hooks/avaliacao/use-mutation-delete-marking-assessment";
 
 export default function AddMarkingAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setEditIsModalOpen] = useState(false);
+  const [selectedMarkId, setSelectedMarkId] = useState<number>(null);
   const [isAddMarkingModalOpen, setIsMarkingModalOpen] = useState(false);
   const [guards, setGuards] = useState<string[]>([]);
 
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
+  const onOpenEditModal = (id: number) => {
+    setEditIsModalOpen(true);
+    setSelectedMarkId(id);
+  };
 
   // filtros
   const [filters, setFilters] = useState({
@@ -74,10 +89,6 @@ export default function AddMarkingAssessment() {
   const { data: anosAcademicos } = useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-  const { data: cursos } = useCursos();
-
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
 
   const { data: prazos = [], isLoading: isLoadingPrazos } =
     useQueryMarcacaoProvaPrazo({
@@ -88,6 +99,8 @@ export default function AddMarkingAssessment() {
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
+  const { mutate: deleteMarkingAssessment, isPending: isPendingDelete } =
+    useMutationDeleteMarkingAssessment();
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -137,6 +150,14 @@ export default function AddMarkingAssessment() {
   };
   const openAddMarkingModal = () => {
     setIsMarkingModalOpen(true);
+  };
+  const onDeleteMarkingAssessment = (id: number) => {
+    setSelectedMarkId(id);
+    deleteMarkingAssessment(id, {
+      onSuccess() {
+        setSelectedMarkId(null);
+      },
+    });
   };
   const schedules = scheduleResponse?.data || [];
   const tableData = markingResponse?.data || [];
@@ -418,11 +439,40 @@ export default function AddMarkingAssessment() {
                         <TableCell className="text-center">
                           <div className="flex space-x-2">
                             <Button
-                              size="sm"
+                              size="icon"
                               variant="outline"
                               onClick={() => openDetails(item.vigilantes)}
                             >
-                              <Eye className="h-4 w-4 mr-2" /> Ver Vigilantes
+                              <User2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => onOpenEditModal(item.codigoprova)}
+                            >
+                              <Pencil className="h-4 w-4 " />
+                            </Button>
+                            <Button
+                              disabled={
+                                isPendingDelete &&
+                                item.codigoprova == selectedMarkId
+                              }
+                              size="icon"
+                              variant="outline"
+                              onClick={() =>
+                                onDeleteMarkingAssessment(item.codigoprova)
+                              }
+                            >
+                              {isPendingDelete &&
+                              item.codigoprova == selectedMarkId ? (
+                                <>
+                                  <Loader2 className="animate-spin h-4 w-4" />
+                                </>
+                              ) : (
+                                <>
+                                  <Trash2 className="h-4 w-4" />
+                                </>
+                              )}
                             </Button>
                           </div>
                         </TableCell>
@@ -496,6 +546,16 @@ export default function AddMarkingAssessment() {
           setSelectedTurmaId(null);
         }}
       />
+      {selectedMarkId && (
+        <EditMarkingAssessmentModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setEditIsModalOpen(false);
+            setSelectedMarkId(null);
+          }}
+          provaId={selectedMarkId}
+        />
+      )}
     </div>
   );
 }
