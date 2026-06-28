@@ -176,6 +176,11 @@ export default function AddMarkingAssessment() {
   const tableData = markingResponse?.data || [];
   const total = markingResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+  const isExamExpired = (data: string, hora: string) => {
+    if (!data || !hora) return false;
+    const examDate = new Date(`${data}T${hora}`);
+    return new Date() > examDate;
+  };
 
   const handleExport = async (action: ExportAction) => {
     if (exportingAction || !canLoadTurmas || total === 0) return;
@@ -524,63 +529,73 @@ export default function AddMarkingAssessment() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tableData.map((item) => (
-                      <TableRow key={item.codigoprova}>
-                        <TableCell>{item.curso}</TableCell>
-                        <TableCell>{item.disciplina}</TableCell>
-                        <TableCell>{item.anolectivo}</TableCell>
-                        <TableCell>{item.classe}</TableCell>
-                        <TableCell>{item.horario}</TableCell>
-                        <TableCell>{item.periodo}</TableCell>
-                        <TableCell>{item.tb_salas_designacao}</TableCell>
-                        <TableCell>
-                          {formatarData(item.tcp_data_prova)}
-                        </TableCell>
-                        <TableCell>{item.duracaoprova}</TableCell>
-                        <TableCell>{item.tcp_hora_prova}</TableCell>
-                        <TableCell>{item.horatermino}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex space-x-2">
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => openDetails(item.vigilantes)}
-                            >
-                              <User2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => onOpenEditModal(item.codigoprova)}
-                            >
-                              <Pencil className="h-4 w-4 " />
-                            </Button>
-                            <Button
-                              disabled={
-                                isPendingDelete &&
-                                item.codigoprova == selectedMarkId
-                              }
-                              size="icon"
-                              variant="outline"
-                              onClick={() =>
-                                onDeleteMarkingAssessment(item.codigoprova)
-                              }
-                            >
-                              {isPendingDelete &&
-                              item.codigoprova == selectedMarkId ? (
-                                <>
-                                  <Loader2 className="animate-spin h-4 w-4" />
-                                </>
-                              ) : (
-                                <>
-                                  <Trash2 className="h-4 w-4" />
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {tableData?.map((item) => {
+                      const expired = isExamExpired(
+                        item.tcp_data_prova,
+                        item.tcp_hora_prova,
+                      );
+                      return (
+                        <TableRow key={item.codigoprova}>
+                          <TableCell>{item.curso}</TableCell>
+                          <TableCell>{item.disciplina}</TableCell>
+                          <TableCell>{item.anolectivo}</TableCell>
+                          <TableCell>{item.classe}</TableCell>
+                          <TableCell>{item.horario}</TableCell>
+                          <TableCell>{item.periodo}</TableCell>
+                          <TableCell>{item.tb_salas_designacao}</TableCell>
+                          <TableCell>
+                            {formatarData(item.tcp_data_prova)}
+                          </TableCell>
+                          <TableCell>{item.duracaoprova}</TableCell>
+                          <TableCell>{item.tcp_hora_prova}</TableCell>
+                          <TableCell>{item.horatermino}</TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex space-x-2">
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => openDetails(item.vigilantes)}
+                              >
+                                <User2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                disabled={expired}
+                                size="icon"
+                                variant="outline"
+                                onClick={() =>
+                                  onOpenEditModal(item.codigoprova)
+                                }
+                              >
+                                <Pencil className="h-4 w-4 " />
+                              </Button>
+                              <Button
+                                disabled={
+                                  (isPendingDelete &&
+                                    item.codigoprova == selectedMarkId) ||
+                                  expired
+                                }
+                                size="icon"
+                                variant="outline"
+                                onClick={() =>
+                                  onDeleteMarkingAssessment(item.codigoprova)
+                                }
+                              >
+                                {isPendingDelete &&
+                                item.codigoprova == selectedMarkId ? (
+                                  <>
+                                    <Loader2 className="animate-spin h-4 w-4" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <Trash2 className="h-4 w-4" />
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
