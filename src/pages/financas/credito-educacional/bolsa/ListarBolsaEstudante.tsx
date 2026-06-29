@@ -394,7 +394,11 @@ export default function ListarBolsaEstudante() {
             onClick={() => handleExport("pdf")}
             disabled={!!exportingAction}
           >
-            <FileText className="mr-2 h-4 w-4" />
+            {exportingAction === "pdf" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileText className="mr-2 h-4 w-4" />
+            )}
             {exportingAction === "pdf" ? "A exportar..." : "Exportar PDF"}
           </Button>
           <Button
@@ -403,7 +407,11 @@ export default function ListarBolsaEstudante() {
             onClick={() => handleExport("print")}
             disabled={!!exportingAction}
           >
-            <Printer className="mr-2 h-4 w-4" />
+            {exportingAction === "print" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Printer className="mr-2 h-4 w-4" />
+            )}
             {exportingAction === "print" ? "A imprimir..." : "Imprimir"}
           </Button>
           <Button
@@ -412,7 +420,11 @@ export default function ListarBolsaEstudante() {
             onClick={() => handleExport("excel")}
             disabled={!!exportingAction}
           >
-            <Download className="mr-2 h-4 w-4" />
+            {exportingAction === "excel" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
             {exportingAction === "excel"
               ? "A exportar..."
               : "Exportar Excel"}

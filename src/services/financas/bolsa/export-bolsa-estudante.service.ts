@@ -32,7 +32,7 @@ export async function exportBolsaEstudanteExcelService(
   params: FetchBolsaEstudanteParams,
 ): Promise<ExportBolsaEstudanteResponse> {
   const response = await axiosNestFinance.get<Blob>(
-    "credito-educacional/export",
+    "credito-educacional/export/excel",
     {
       params,
       responseType: "blob",
@@ -45,7 +45,7 @@ export async function exportBolsaEstudanteExcelService(
       response.headers["content-disposition"] as string | undefined,
       `estudantes-credito-educacional-${new Date()
         .toISOString()
-        .slice(0, 10)}.csv`,
+        .slice(0, 10)}.xlsx`,
     ),
   };
 }
