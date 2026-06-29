@@ -29,11 +29,13 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   DollarSign,
   FileText,
   Home,
   Loader2,
   Pencil,
+  Printer,
   X,
   XCircle,
 } from "lucide-react";
@@ -50,16 +52,19 @@ import {
   BolsaEstudante,
   FetchBolsaEstudanteParams,
 } from "@/services/financas/bolsa/fetch-bolsa-estudante.service";
-import PDFActions, {
-  GenericPDFDocument,
-} from "@/components/views/pdf/GenericPDFDocument";
-import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import useMutationEstadoCreditoEducacional, { useMutationToggleInstituicaoPagou } from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
 import { EditAttributionModal } from "../AtribuirCredito/components/EditAttributionModal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  exportBolsaEstudanteExcelService,
+  exportBolsaEstudantePdfService,
+} from "@/services/financas/bolsa/export-bolsa-estudante.service";
+import { toast } from "sonner";
+
+type ExportAction = "pdf" | "print" | "excel";
 
 export default function ListarBolsaEstudante() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -83,6 +88,9 @@ export default function ListarBolsaEstudante() {
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<BolsaEstudante | null>(
+    null,
+  );
+  const [exportingAction, setExportingAction] = useState<ExportAction | null>(
     null,
   );
 
@@ -184,107 +192,50 @@ export default function ListarBolsaEstudante() {
     [],
   );
 
-  const pdfData = useMemo(() => {
-    if (!estudantes.length) return null;
+  const handleExport = async (action: ExportAction) => {
+    if (exportingAction || totalItems === 0) return;
 
-    const filtrosAplicados =
-      [
-        filters.nome && `Nome: ${filters.nome}`,
-        filters.codigoMatricula && `Matrícula: ${filters.codigoMatricula}`,
-        filters.cursoId && `Curso ID: ${filters.cursoId}`,
-        filters.codigoAnoLectivo && `Ano Letivo: ${filters.codigoAnoLectivo}`,
-        filters.codigoInstituicao &&
-        `Instituição ID: ${filters.codigoInstituicao}`,
-        filters.codigoBolsa && `Bolsa ID: ${filters.codigoBolsa}`,
-      ]
-        .filter(Boolean)
-        .join(" | ") || "Sem filtros";
+    const printWindow = action === "print" ? window.open("", "_blank") : null;
 
-    return {
-      filtros: filtrosAplicados,
-      total: estudantes.length,
-      rows: estudantes.map((e) => ({
-        matricula: e.codigo_matricula,
-        nome: e.nome_completo,
-        curso: e.curso,
-        instituicao: e.instituicao,
-        anoLetivo: e.ano_lectivo,
-        semestre: semestreMap.get(e.semestre) ?? "-",
-        desconto: formatDesconto(e.valor_desconto, e.tipo_desconto),
-        tipoCredito: e.tipo_credito,
-        bolsa: e.bolsa,
-      })),
-    };
-  }, [
-    estudantes,
-    filters.codigoAnoLectivo,
-    filters.codigoBolsa,
-    filters.codigoInstituicao,
-    filters.codigoMatricula,
-    filters.cursoId,
-    filters.nome,
-    formatDesconto,
-    semestreMap,
-  ]);
-
-  const pdfContent = pdfData ? (
-    <GenericPDFDocument
-      documentTitle="Estudantes com Crédito Educacional"
-      subtitle="Lista de estudantes com créditos ou bolsas aplicadas"
-      infoSections={[
-        { title: "Filtros Aplicados", content: pdfData.filtros },
-        { title: "Resumo", content: [`Total de estudantes: ${pdfData.total}`] },
-      ]}
-      mainTable={{
-        headers: [
-          { key: "matricula", label: "Matrícula", width: "10%" },
-          { key: "nome", label: "Nome", width: "20%" },
-          { key: "curso", label: "Curso", width: "15%" },
-          { key: "instituicao", label: "Instituição", width: "15%" },
-          { key: "anoLetivo", label: "Ano Letivo", width: "8%" },
-          { key: "semestre", label: "Semestre", width: "8%" },
-          { key: "desconto", label: "Desconto", width: "8%" },
-          { key: "tipoCredito", label: "Tipo Crédito", width: "10%" },
-          { key: "bolsa", label: "Bolsa", width: "10%" },
-        ],
-        rows: pdfData.rows,
-        headerBackground: "#0D1B48",
-      }}
-      footerNotice="Documento gerado automaticamente pelo sistema."
-    />
-  ) : null;
-
-  const excelProps = pdfData
-    ? {
-      documentTitle: "Estudantes com Bolsa",
-      subtitle: "Lista de estudantes com créditos ou bolsas aplicadas",
-      infoSections: [
-        { title: "Filtros Aplicados", content: pdfData.filtros },
-        {
-          title: "Resumo",
-          content: [`Total de estudantes: ${pdfData.total}`],
-        },
-      ],
-      mainTable: {
-        headers: [
-          { key: "matricula", label: "Matrícula", width: 18 },
-          { key: "nome", label: "Nome", width: 35 },
-          { key: "curso", label: "Curso", width: 25 },
-          { key: "instituicao", label: "Instituição", width: 25 },
-          { key: "anoLetivo", label: "Ano Letivo", width: 15 },
-          { key: "semestre", label: "Semestre", width: 18 },
-          { key: "desconto", label: "Desconto", width: 20 },
-          { key: "tipoCredito", label: "Tipo Crédito", width: 22 },
-          { key: "bolsa", label: "Bolsa", width: 25 },
-        ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
+    if (action === "print" && !printWindow) {
+      toast.error("O navegador bloqueou a janela de impressão.");
+      return;
     }
-    : null;
 
-  const baseFileName = `Estudantes_Bolsa_${new Date().toISOString().slice(0, 10)}`;
+    setExportingAction(action);
+
+    try {
+      const { blob, fileName } =
+        action === "excel"
+          ? await exportBolsaEstudanteExcelService(filters)
+          : await exportBolsaEstudantePdfService(filters);
+
+      const downloadUrl = URL.createObjectURL(blob);
+
+      if (action === "print") {
+        printWindow!.location.href = downloadUrl;
+        setTimeout(() => {
+          printWindow!.print();
+          URL.revokeObjectURL(downloadUrl);
+        }, 1000);
+      } else {
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+      }
+
+      toast.success("Exportação concluída com sucesso.");
+    } catch {
+      printWindow?.close();
+      toast.error("Não foi possível exportar os estudantes com crédito.");
+    } finally {
+      setExportingAction(null);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -435,21 +386,37 @@ export default function ListarBolsaEstudante() {
         </CardContent>
       </Card>
 
-      {pdfData && excelProps && (
+      {totalItems > 0 && (
         <div className="flex justify-end gap-2">
-          {pdfContent && (
-            <PDFActions
-              document={pdfContent}
-              fileName={`${baseFileName}.pdf`}
-              showDownload
-              showPrint
-            />
-          )}
-          <ExcelActions
-            excelProps={excelProps}
-            fileName={`${baseFileName}.xlsx`}
-            showDownload
-          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("pdf")}
+            disabled={!!exportingAction}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            {exportingAction === "pdf" ? "A exportar..." : "Exportar PDF"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("print")}
+            disabled={!!exportingAction}
+          >
+            <Printer className="mr-2 h-4 w-4" />
+            {exportingAction === "print" ? "A imprimir..." : "Imprimir"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("excel")}
+            disabled={!!exportingAction}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            {exportingAction === "excel"
+              ? "A exportar..."
+              : "Exportar Excel"}
+          </Button>
         </div>
       )}
 
