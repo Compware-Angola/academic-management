@@ -1,6 +1,7 @@
 // src/hooks/assessment/useQueryMarkingAssessment.ts
 
 import {
+  getMarcacaoProvaByIdService,
   GetMarkingAssessmentPayload,
   GetMarkingAssessmentResponse,
   getMarkingAssessmentService,
@@ -60,3 +61,15 @@ export const useQueryMarkingAssessment = (
     refetchOnReconnect: true,
   });
 };
+
+// ===================================== by  id ===============================
+
+export function useQueryMarkingAssesmentById(id?: number) {
+  return useQuery({
+    queryKey: ["marking-assessment-id", id],
+    queryFn: () => getMarcacaoProvaByIdService(id!),
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+}

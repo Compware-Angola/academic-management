@@ -160,7 +160,7 @@ export function InscricoesSection({
         <CardHeader>
           <CardTitle className="text-lg">Histórico de Disciplinas</CardTitle>
           <CardDescription>
-            Lista de todas as disciplinas cursadas e em curso 2
+            Lista de todas as disciplinas cursadas e em curso
           </CardDescription>
         </CardHeader>
 
