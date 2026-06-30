@@ -50,7 +50,6 @@ export const formatDateForInput = (value: string): string => {
   return `${year}-${month}-${day}`;
 };
 
-
 export function formatDateTimePt(value?: string | null) {
   if (!value) return "Sem data";
 
@@ -67,4 +66,9 @@ export const formatTimeFromDate = (dateTime: string | null) => {
   if (!dateTime) return "---";
   const date = new Date(dateTime);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};
+
+export const parseLocalDate = (dateString: string): Date => {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day); // local time, não UTC
 };

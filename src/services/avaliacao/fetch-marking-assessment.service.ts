@@ -83,3 +83,41 @@ export async function getMarkingAssessmentService(
 
   return data;
 }
+
+//================================================================== BY ID =======================================================================
+export interface Vigilante {
+  codigo_utilizador: number;
+  nome_vigilante: string;
+  codigo_docente: number;
+}
+
+export interface MarcacaoProva {
+  codigo_prazo: string;
+  codigo_horario: number;
+  horario: string;
+  codigo_ano_lectivo: string;
+  codigo_semestre: string;
+  codigo_periodo: string;
+  codigo_curso: number;
+  codigo_classe: number;
+  codigo_grade: number;
+  codigo_prova: number;
+  codigo_tipo_prova: number;
+  codigo_sala: number;
+  hora_termino: string;
+  hora_prova: string;
+  data_prova: string;
+  codigo_modalidade: number;
+  tipo_candidatura: number;
+  vigilantes: Vigilante[];
+}
+
+export async function getMarcacaoProvaByIdService(
+  id: number,
+): Promise<MarcacaoProva> {
+  const { data } = await axiosNestGa.get<MarcacaoProva>(
+    `/assessment/marcacoes-provas/${id}`,
+  );
+
+  return data;
+}
