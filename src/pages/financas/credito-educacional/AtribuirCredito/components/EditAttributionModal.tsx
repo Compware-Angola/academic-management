@@ -38,10 +38,10 @@ export function EditAttributionModal({
   useEffect(() => {
     if (open && initialValues) {
       setPayload({
-        codigoMatricula: initialValues.codigo_matricula.toString(),
-        codigoAnoLectivo: initialValues.codigo_anolectivo.toString(),
-        semestre: initialValues.semestre.toString(),
-        codigoBolsa: initialValues.codigo_bolsa?.toString() ?? "",
+        codigoMatricula: initialValues?.codigo_matricula?.toString() || "",
+        codigoAnoLectivo: initialValues?.codigo_anolectivo?.toString() || "",
+        semestre: initialValues?.semestre?.toString() || "",
+        codigoBolsa: initialValues?.codigo_bolsa?.toString() ?? "",
         isentaMulta: initialValues?.isentar_multa,
       });
     }
