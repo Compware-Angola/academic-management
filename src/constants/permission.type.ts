@@ -169,6 +169,20 @@ export enum PermissionType {
   VALIDACAO_DOCENTE = "VALIDACAO_DOCENTE",
   PARAMETROS_MSA = "PARAMETROS_MSA",
 
+  CALENDARIO_ACADEMICO_POS_GRADUACAO = "CALENDARIO_ACADEMICO_POS_GRADUACAO",
+  PARAMETROS_ACADEMICOS_POS_GRADUACAO = "PARAMETROS_ACADEMICOS_POS_GRADUACAO",
+  ATIVIDADES_LETIVAS_POS_GRADUACAO = "ATIVIDADES_LETIVAS_POS_GRADUACAO",
+  PRAZOS_ACADEMICOS_POS_GRADUACAO = "PRAZOS_ACADEMICOS_POS_GRADUACAO",
+  MESES_TEMPORARIOS_POS_GRADUACAO = "MESES_TEMPORARIOS_POS_GRADUACAO",
+  VAGAS_POR_CURSO_POS_GRADUACAO = "VAGAS_POR_CURSO_POS_GRADUACAO",
+  FORMULA_UCS_POS_GRADUACAO = "FORMULA_UCS_POS_GRADUACAO",
+  FORMULA_UCS_ORAL_POS_GRADUACAO = "FORMULA_UCS_ORAL_POS_GRADUACAO",
+  MARCACAO_PROVAS_POS_GRADUACAO = "MARCACAO_PROVAS_POS_GRADUACAO",
+  LISTA_PRESENCA_POS_GRADUACAO = "LISTA_PRESENCA_POS_GRADUACAO",
+  LANCAMENTO_NOTAS_POS_GRADUACAO = "LANCAMENTO_NOTAS_POS_GRADUACAO",
+  LANCAMENTO_PAUTA_POS_GRADUACAO = "LANCAMENTO_PAUTA_POS_GRADUACAO",
+  VALIDACAO_PAUTA_POS_GRADUACAO = "VALIDACAO_PAUTA_POS_GRADUACAO",
+
   DEFINIR_FORMULA_UNIDADE_CURRICULAR = "DEFINIR_FORMULA_UNIDADE_CURRICULAR",
   MARCAR_PROVA_POS_GRADUACAO = "MARCAR_PROVA_POS_GRADUACAO",
   LISTA_PRESENCA_MAV = "LISTA_PRESENCA_MAV",
@@ -900,6 +914,59 @@ export const PermissionTypeDetails = {
   },
   VALIDACAO_DOCENTE: { designacao: "Validação Docente", sigla: "mgd_ad" },
   PARAMETROS_MSA: { designacao: "Parâmetros", sigla: "msa_p_i" },
+
+  CALENDARIO_ACADEMICO_POS_GRADUACAO: {
+    designacao: "Calendário Acadêmico Pós-Graduação",
+    sigla: "mpgs_cal",
+  },
+  PARAMETROS_ACADEMICOS_POS_GRADUACAO: {
+    designacao: "Parâmetros Acadêmicos Pós-Graduação",
+    sigla: "mpgs_param",
+  },
+  ATIVIDADES_LETIVAS_POS_GRADUACAO: {
+    designacao: "Atividades Letivas Pós-Graduação",
+    sigla: "mpgs_ativ_let",
+  },
+  PRAZOS_ACADEMICOS_POS_GRADUACAO: {
+    designacao: "Prazos Acadêmicos Pós-Graduação",
+    sigla: "mpgs_prazos",
+  },
+  MESES_TEMPORARIOS_POS_GRADUACAO: {
+    designacao: "Meses Temporários Pós-Graduação",
+    sigla: "mpgs_meses_tmp",
+  },
+  VAGAS_POR_CURSO_POS_GRADUACAO: {
+    designacao: "Vagas por Curso Pós-Graduação",
+    sigla: "mpgs_vagas",
+  },
+  FORMULA_UCS_POS_GRADUACAO: {
+    designacao: "Fórmula de Definição das UCs Pós-Graduação",
+    sigla: "mpgs_fuc",
+  },
+  FORMULA_UCS_ORAL_POS_GRADUACAO: {
+    designacao: "Fórmula de Definição das UCs Oral Pós-Graduação",
+    sigla: "mpgs_fuc_oral",
+  },
+  MARCACAO_PROVAS_POS_GRADUACAO: {
+    designacao: "Marcação de Provas Pós-Graduação",
+    sigla: "mpgs_mp",
+  },
+  LISTA_PRESENCA_POS_GRADUACAO: {
+    designacao: "Lista de Presença Pós-Graduação",
+    sigla: "mpgs_lpa",
+  },
+  LANCAMENTO_NOTAS_POS_GRADUACAO: {
+    designacao: "Lançamento de Notas Pós-Graduação",
+    sigla: "mpgs_ln",
+  },
+  LANCAMENTO_PAUTA_POS_GRADUACAO: {
+    designacao: "Lançamento de Pauta Pós-Graduação",
+    sigla: "mpgs_lpauta",
+  },
+  VALIDACAO_PAUTA_POS_GRADUACAO: {
+    designacao: "Validação de Pauta Pós-Graduação",
+    sigla: "mpgs_vpauta",
+  },
 
   DEFINIR_FORMULA_UNIDADE_CURRICULAR: {
     designacao: "Definir Fórmula Para Unidade Curricular",
