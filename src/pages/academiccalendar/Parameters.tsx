@@ -1,7 +1,9 @@
 
 import { PageHeader } from "@/components/common/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Licenciatura from "./components/licenciatura";
+import { Doutoramento } from "./components/doutoramento";
+import { Licenciatura } from "./components/licenciatura";
+import { Mestrado } from "./components/mestrado";
 
 export default function Parameters() {
   return (
@@ -21,10 +23,10 @@ export default function Parameters() {
           <Licenciatura />
         </TabsContent>
         <TabsContent value="mestrado">
-          {/* <Mestrado /> */}
+          <Mestrado />
         </TabsContent>
-        <TabsContent value="mensalidades">
-          {/* <Mensalidades /> */}
+        <TabsContent value="doutoramento">
+          <Doutoramento />
         </TabsContent>
       </Tabs>
     </div>

@@ -33,7 +33,7 @@ import { ParametersModal } from "./modals/parameters-modal";
 import { EditVagaModal } from "./modals/EditVagaModal";
 
 
-export function Licenciatura() {
+export function Mestrado() {
     const { toast } = useToast();
     const [anoLetivoSelecionado, setAnoLetivoSelecionado] = useState<string>("");
     const [tipoCandidaturaSelecionado, setTipoCandidaturaSelecionado] =
@@ -53,7 +53,7 @@ export function Licenciatura() {
         data: academicYears = [],
         isLoading: isLoadingYears,
         refetch: refetchYears,
-    } = useQueryAnoAcademico({ tipo_candidatura: 1 });
+    } = useQueryAnoAcademico({ tipo_candidatura: 2 });
 
     const { data: tiposCandidatura = [], isLoading: isLoadingTipos } =
         useQueryTipoCandidatura();
@@ -85,16 +85,15 @@ export function Licenciatura() {
         enabled: !!selectedCodigo,
     });
 
-    // Vagas
-    const tipoCandidaturaId = Number(tipoCandidaturaSelecionado);
+
     const {
         vacancies = [],
         isLoading: isLoadingVacancies,
         isFetching: isFetchingVacancies,
     } = useQueryAcademicYearVacancies({
         codigoAno: selectedCodigo,
-        tipoCandidatura: tipoCandidaturaId,
-        enabled: !!selectedCodigo && !!tipoCandidaturaId,
+        tipoCandidatura: 2,
+        enabled: !!selectedCodigo
     });
     const handleEditVaga = (vaga: Vacancy) => {
         setVagaSelecionada({
@@ -171,7 +170,7 @@ export function Licenciatura() {
         });
     };
 
-    const tipoCandidaturaNome = "Licenciatura"
+    const tipoCandidaturaNome = "Mestrado"
 
 
 

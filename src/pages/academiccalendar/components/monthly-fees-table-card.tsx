@@ -128,7 +128,7 @@ export function MonthlyFeesTableCard({
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell className="font-medium">
-                                                        {formatarData(fee.dataLimite.split("T")[0])}
+                                                        {formatarData(fee.dataLimite?.split("T")[0])}
                                                     </TableCell>
                                                     <TableCell className="text-center">
                                                         {isOverdue ? (

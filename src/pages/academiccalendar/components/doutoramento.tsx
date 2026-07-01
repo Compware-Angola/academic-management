@@ -33,7 +33,7 @@ import { ParametersModal } from "./modals/parameters-modal";
 import { EditVagaModal } from "./modals/EditVagaModal";
 
 
-export function Licenciatura() {
+export function Doutoramento() {
     const { toast } = useToast();
     const [anoLetivoSelecionado, setAnoLetivoSelecionado] = useState<string>("");
     const [tipoCandidaturaSelecionado, setTipoCandidaturaSelecionado] =
@@ -53,7 +53,7 @@ export function Licenciatura() {
         data: academicYears = [],
         isLoading: isLoadingYears,
         refetch: refetchYears,
-    } = useQueryAnoAcademico({ tipo_candidatura: 1 });
+    } = useQueryAnoAcademico({ tipo_candidatura: 3 });
 
     const { data: tiposCandidatura = [], isLoading: isLoadingTipos } =
         useQueryTipoCandidatura();
@@ -163,18 +163,12 @@ export function Licenciatura() {
             });
             return;
         }
-
-        // Atualiza o backend
         updateEstadoMutation.mutate({
             codigoAno: selectedCodigo,
             estado: ativo ? 1 : 0,
         });
     };
-
-    const tipoCandidaturaNome = "Licenciatura"
-
-
-
+    const tipoCandidaturaNome = "Doutoramento"
     return (
         <div className="space-y-8 pb-10">
             {/* Header */}

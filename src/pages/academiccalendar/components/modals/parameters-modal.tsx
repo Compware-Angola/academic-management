@@ -66,25 +66,11 @@ export function ParametersModal({
                         Configure períodos e vagas. Tudo será salvo ao final.
                     </DialogDescription>
                 </DialogHeader>
-
                 <StepProgress steps={STEPS} currentIndex={currentIndex} />
-
                 <div className="min-h-96">
                     {currentStep === "periodos" && (
                         <PeriodoStep periodosForm={periodosForm} setPeriodosForm={setPeriodosForm} />
                     )}
-
-                    {currentStep === "vagas" && (
-                        <VagasStep
-                            loadingVagas={loadingVagas}
-                            vagasOriginais={vagasOriginais?.vagas || []}
-                            cursosDisponiveis={vagasOriginais?.cursosDisponiveis || []}
-                            handleVagaChange={handleVagaChange}
-                            vagasEditadas={vagasEditadas}
-                            setVagasEditadas={setVagasEditadas}
-                        />
-                    )}
-
                     {currentStep === "mensalidades" && (
                         <MensalidadesStep
                             loadingMeses={loadingMeses}
@@ -94,7 +80,6 @@ export function ParametersModal({
                         />
                     )}
                 </div>
-
                 <div className="flex justify-between mt-8 pt-6 border-t">
                     <Button variant="outline" onClick={handlePrev} disabled={currentIndex === 0}>
                         Anterior
