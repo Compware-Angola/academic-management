@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -35,9 +36,16 @@ import PDFActions, {
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryAccesses } from "@/hooks/acess/use-query-accesses";
 import { useMutationUpdateEstadoAcesso } from "@/hooks/acess/use-mutation-update-estado";
+import { useAccessRestrictionsByAccess } from "@/hooks/acess/use-query-access-restrictions-by-access";
 import { AcessoFormDialog } from "./components/CreateAcessModal";
 import { format } from "date-fns";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
+
+type SelectedAccessRestrictionView = {
+  codigo: number;
+  designacao: string;
+  sigla: string;
+};
 
 export function ListarAcessos() {
   const PASSWORD = "123456";
@@ -50,6 +58,8 @@ export function ListarAcessos() {
 
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [selectedAccessRestrictionView, setSelectedAccessRestrictionView] =
+    useState<SelectedAccessRestrictionView | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(25);
@@ -83,9 +93,20 @@ export function ListarAcessos() {
     ...(apenasAtivos !== "all" && { apenasAtivos }),
   });
 
-  const data = acessos?.data ?? [];
+  const data = useMemo(() => acessos?.data ?? [], [acessos?.data]);
   const total = acessos?.total ?? 0;
   const totalPages = acessos?.totalPages ?? 1;
+  const {
+    data: accessRestrictions = [],
+    isLoading: loadingAccessRestrictions,
+    error: accessRestrictionsError,
+  } = useAccessRestrictionsByAccess({
+    codigoAcesso: selectedAccessRestrictionView?.codigo ?? 0,
+    enabled: !!selectedAccessRestrictionView,
+  });
+  const activeAccessRestrictions = accessRestrictions.filter(
+    (restriction) => restriction.status === 1,
+  );
 
   // ─── PDF ────────────────────────────────────────────────
   const pdfData = useMemo(() => {
@@ -268,13 +289,14 @@ export function ListarAcessos() {
               <TableHead>Tipo</TableHead>
               <TableHead>Data Ativação</TableHead>
               <TableHead>Estado</TableHead>
+              <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={8} className="text-center">
                   A carregar...
                 </TableCell>
               </TableRow>
@@ -299,11 +321,27 @@ export function ListarAcessos() {
                       }
                     />
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setSelectedAccessRestrictionView({
+                          codigo: acesso.pk_acesso,
+                          designacao: acesso.designacao,
+                          sigla: acesso.sigla,
+                        })
+                      }
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Ver restrições
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={8} className="text-center">
                   Nenhum acesso encontrado
                 </TableCell>
               </TableRow>
@@ -386,6 +424,71 @@ export function ListarAcessos() {
         open={createOpen}
         onClose={() => setCreateOpen(false)}
       />
+
+      <Dialog
+        open={!!selectedAccessRestrictionView}
+        onOpenChange={(open) => {
+          if (!open) setSelectedAccessRestrictionView(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Utilizadores restritos neste acesso</DialogTitle>
+          </DialogHeader>
+
+          {selectedAccessRestrictionView && (
+            <div className="space-y-1 rounded-md border p-3">
+              <p className="text-sm font-medium">
+                {selectedAccessRestrictionView.codigo} –{" "}
+                {selectedAccessRestrictionView.designacao}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Sigla: {selectedAccessRestrictionView.sigla}
+              </p>
+            </div>
+          )}
+
+          {loadingAccessRestrictions ? (
+            <p className="text-sm text-muted-foreground">A carregar...</p>
+          ) : accessRestrictionsError ? (
+            <p className="text-sm text-destructive">
+              Erro ao carregar restrições deste acesso.
+            </p>
+          ) : activeAccessRestrictions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhum utilizador restrito neste acesso.
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-72 overflow-y-auto">
+              {activeAccessRestrictions.map((restriction) => (
+                <div
+                  key={`${restriction.codigo_acesso}-${restriction.codigo_utilizador}`}
+                  className="flex items-center justify-between rounded-md border p-3"
+                >
+                  <div>
+                    <p className="text-sm font-medium">
+                      Utilizador: {restriction.codigo_utilizador}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Código do acesso: {restriction.codigo_acesso}
+                    </p>
+                  </div>
+                  <Badge variant="destructive">Restrito</Badge>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setSelectedAccessRestrictionView(null)}
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
