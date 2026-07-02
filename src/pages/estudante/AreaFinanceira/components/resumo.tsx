@@ -95,6 +95,7 @@ export function Resumo({
   const activeAcademicYear = academicYear?.find(
     (year) => year.estado.toLowerCase() === "activo",
   );
+
   const {
     data: monthlyFeeData,
     isLoading: isFeesLoading,
@@ -158,6 +159,11 @@ export function Resumo({
   const hasError = isFeesError;
   const hasNoData = !isFeesLoading && pendingPayments.length === 0;
   const yearLabel = activeAcademicYear?.designacao ?? "Ano letivo";
+
+  const facturaSelecionada = data?.data?.find(
+    (nota) => nota.codigo === selectedFacturaCodigo,
+  );
+
   const getStatusBadge = (status: number) => {
     switch (status) {
       case 0:
@@ -219,6 +225,10 @@ export function Resumo({
   const selectedFactura = data?.data.find(
     (f) => f.codigo === selectedFacturaCodigo,
   );
+  console.log("selectedFactura", selectedFactura);
+  const cadeirasRecurso = facturaSelecionada?.cadeiras_recurso_epoca_especial
+    ? facturaSelecionada.cadeiras_recurso_epoca_especial.split(" , ")
+    : [];
 
   const placeholders: Record<string, string> = {
     reference: "Pesquisar por referência da factura...",
@@ -254,12 +264,13 @@ export function Resumo({
             </p>
             <span
               className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
-  ${student?.saldo_atual > 0
-                  ? "bg-green-100 text-green-700"
-                  : student?.saldo_atual < 0
-                    ? "bg-red-100 text-destructive"
-                    : "bg-muted text-muted-foreground"
-                }`}
+  ${
+    student?.saldo_atual > 0
+      ? "bg-green-100 text-green-700"
+      : student?.saldo_atual < 0
+        ? "bg-red-100 text-destructive"
+        : "bg-muted text-muted-foreground"
+  }`}
             >
               {student?.saldo_atual > 0
                 ? "Crédito disponível"
@@ -293,7 +304,8 @@ export function Resumo({
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3 text-destructive" />
-                  {pendingPayments.length} pagamento(s) de Mensalidades em atraso
+                  {pendingPayments.length} pagamento(s) de Mensalidades em
+                  atraso
                 </p>
               </>
             )}
@@ -660,10 +672,26 @@ export function Resumo({
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
+                      Nº da Operação Bancária
+                    </p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.n_operacao_bancaria || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
                       Data de Emissão
                     </p>
                     <p className="font-medium">
                       {formatDate(selectedFactura.data_factura)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Data de Pagamento
+                    </p>
+                    <p className="font-medium">
+                      {formatDate(selectedFactura.data_pagamento)}
                     </p>
                   </div>
                   <div>
@@ -712,33 +740,39 @@ export function Resumo({
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {itens.data.map((item: FacturaItem, index: number) => (
-                          <TableRow
-                            key={index}
-                            className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                          >
-                            <TableCell>
-                              {(item.descricaoservico || "—") +
-                                (Number(item.mesid) !== 3 &&
-                                  item.mesid &&
-                                  item.mesdescricao
-                                  ? ` (${item.mesdescricao})`
-                                  : "")}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {item.quantidade ?? 1}
-                            </TableCell>
-                            <TableCell className="text-center text-orange-600 dark:text-orange-400">
-                              {item.multa ? formatCurrency(item.multa) : "—"}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                              {formatCurrency(item.preco)}
-                            </TableCell>
-                            <TableCell className="text-right font-mono font-semibold pr-6">
-                              {formatCurrency(item.total)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {itens.data.map((item: FacturaItem, index: number) => {
+                          const cadeira = cadeirasRecurso[index];
+
+                          const descricaoCompleta =
+                            (item.descricaoservico || "—") +
+                            (cadeira ? ` (${cadeira})` : "") +
+                            (Number(item.mesid) !== 3 &&
+                            item.mesid &&
+                            item.mesdescricao
+                              ? ` (${item.mesdescricao})`
+                              : "");
+
+                          return (
+                            <TableRow
+                              key={index}
+                              className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                            >
+                              <TableCell>{descricaoCompleta}</TableCell>
+                              <TableCell className="text-center">
+                                {item.quantidade ?? 1}
+                              </TableCell>
+                              <TableCell className="text-center text-orange-600 dark:text-orange-400">
+                                {item.multa ? formatCurrency(item.multa) : "—"}
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                {formatCurrency(item.preco)}
+                              </TableCell>
+                              <TableCell className="text-right font-mono font-semibold pr-6">
+                                {formatCurrency(item.total)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                         <TableRow className="bg-gray-100 dark:bg-gray-800 font-semibold">
                           <TableCell colSpan={4} className="text-right">
                             Total Unitário

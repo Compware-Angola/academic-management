@@ -32,6 +32,7 @@ export type Factura = {
   nome_aluno: string;
   ano_lectivo: string;
   servicos: string;
+  n_operacao_bancaria: string;
   codigo_ano_lectivo?: number;
 
   curso: string;
@@ -40,6 +41,7 @@ export type Factura = {
   motivo_anulacao: string | null;
   data_anulacao: string | null;
   utilizador_anulacao: string | null;
+  cadeiras_recurso_epoca_especial?: string | null;
 };
 
 /* ---------- RESPONSE ITEM ---------- */
@@ -167,9 +169,10 @@ export async function buscarFacturaService(
   return data;
 }
 
-export async function annulInvoiceService(
-  params: { facturaId: number | string, motivo: string },
-): Promise<{ sucesso: boolean; mensagem: string }> {
+export async function annulInvoiceService(params: {
+  facturaId: number | string;
+  motivo: string;
+}): Promise<{ sucesso: boolean; mensagem: string }> {
   const { facturaId, motivo } = params;
   const { data } = await axiosNestFinance.delete(`/invoices/${facturaId}`, {
     data: { motivo },

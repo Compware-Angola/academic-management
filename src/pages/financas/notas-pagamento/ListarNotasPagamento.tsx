@@ -218,7 +218,7 @@ export default function ListarNotasPagamento() {
   };
 
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
-
+  console.log(data);
   return (
     <div className="p-6 space-y-6">
       {/* Breadcrumb */}
@@ -342,15 +342,13 @@ export default function ListarNotasPagamento() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Codigo</TableHead>
-                <TableHead>Ref</TableHead>
-                <TableHead>Serviços</TableHead>
-                <TableHead>Estudante</TableHead>
-                <TableHead>Matrícula</TableHead>
-                <TableHead>Curso</TableHead>
-                <TableHead>Valor</TableHead>
-                <TableHead>Emissão</TableHead>
+                <TableHead>ID</TableHead>
                 <TableHead>Data de Pagamento</TableHead>
+                <TableHead>Matrícula</TableHead>
+                <TableHead>Estudante</TableHead>
+                <TableHead>Curso</TableHead>
+                <TableHead>Serviços</TableHead>
+                <TableHead>Valor</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ações</TableHead>
               </TableRow>
@@ -380,9 +378,13 @@ export default function ListarNotasPagamento() {
                     <TableCell className="font-mono font-medium">
                       {nota.codigo}
                     </TableCell>
-                    <TableCell className="font-mono font-medium">
-                      {nota.referencia}
+
+                    <TableCell>{formatDate(nota.data_pagamento)}</TableCell>
+                    <TableCell className="font-mono">
+                      {nota.codigo_matricula || "N/A"}
                     </TableCell>
+                    <TableCell>{nota.nome_aluno}</TableCell>
+                    <TableCell>{nota.curso || "N/A"}</TableCell>
                     <TableCell className="font-mono">
                       {nota.servicos ? (
                         nota.servicos.length > 10 ? (
@@ -402,17 +404,9 @@ export default function ListarNotasPagamento() {
                         "N/A"
                       )}
                     </TableCell>
-
-                    <TableCell>{nota.nome_aluno}</TableCell>
-                    <TableCell className="font-mono">
-                      {nota.codigo_matricula || "N/A"}
-                    </TableCell>
-                    <TableCell>{nota.curso || "N/A"}</TableCell>
                     <TableCell className="font-medium">
                       {formatCurrency(nota.valor_pagar)}
                     </TableCell>
-                    <TableCell>{formatDate(nota.data_factura)}</TableCell>
-                    <TableCell>{formatDate(nota.data_pagamento)}</TableCell>
                     <TableCell>{getStatusBadge(nota.estado)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -646,10 +640,26 @@ export default function ListarNotasPagamento() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
+                      Nº da Operação Bancária
+                    </p>
+                    <p className="font-medium font-mono">
+                      {selectedFactura.n_operacao_bancaria || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
                       Data de Emissão
                     </p>
                     <p className="font-medium">
                       {formatDate(selectedFactura.data_factura)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Data de Pagamento
+                    </p>
+                    <p className="font-medium">
+                      {formatDate(selectedFactura.data_pagamento)}
                     </p>
                   </div>
                   <div>
