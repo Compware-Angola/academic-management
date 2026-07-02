@@ -32,3 +32,4 @@ export async function getConfigurationGeral(): Promise<TypeConfigurationGeralRes
 
     return response.data ?? null;
 }
+

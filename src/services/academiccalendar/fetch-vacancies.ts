@@ -14,13 +14,16 @@ export type Vacancy = {
 
 export type VacanciesResponse = {
   vagas: Vacancy[];
+  cursosDisponiveis: {
+    codigo: number;
+    designacao: string;
+  }[];
 };
 
 
-export async function fetchVacancies(codigoPolo = 1): Promise<Vacancy[]> {
+export async function fetchVacancies(): Promise<VacanciesResponse> {
   const { data } = await axiosNestGa.get<VacanciesResponse>(
     `/academic-calendar/vacancies`
-   
   );
-  return data.vagas ?? [];
+  return data;
 }

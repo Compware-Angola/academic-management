@@ -1,4 +1,4 @@
-import { AcademicYear, AcademicYearParamsResponse, fetchAcademicYearParams } from "@/services/academiccalendar/fetch-academic-years-params";
+import { AcademicYear, AcademicYearParamsResponse, fetchAcademicYearParams, fetchDraftAcademicYear } from "@/services/academiccalendar/fetch-academic-years-params";
 import { useQuery } from "@tanstack/react-query";
 
 export function useQueryAcademicYearParams(
@@ -33,4 +33,15 @@ export function useQueryAcademicYearParams(
     error: query.error,
     refetch: query.refetch,
   };
+}
+
+export function useQueryDraftAcademicYear() {
+return useQuery({
+    queryKey: ["academic-year", "draft-academic-year"],
+    queryFn: () => fetchDraftAcademicYear(),
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+
+  
 }

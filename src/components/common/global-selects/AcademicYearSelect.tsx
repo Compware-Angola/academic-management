@@ -9,6 +9,7 @@ interface AcademicYearSelectProps {
   enableDefaultSelectItem?: boolean;
   onlyActive?: boolean;
   enableDefaultActiveYear?: boolean;
+  tipoCandidaturaId?: number;
 }
 
 const AcademicYearSelect = ({
@@ -18,9 +19,10 @@ const AcademicYearSelect = ({
   enableDefaultSelectItem = false,
   onlyActive = false,
   enableDefaultActiveYear = false,
+  tipoCandidaturaId = 1,
 }: AcademicYearSelectProps) => {
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+    useQueryAnoAcademico({ tipo_candidatura: tipoCandidaturaId });
   const id = useId();
   const hasSetDefault = useRef(false);
 

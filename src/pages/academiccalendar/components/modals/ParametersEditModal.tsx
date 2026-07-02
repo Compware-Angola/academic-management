@@ -7,8 +7,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Calendar, Users, CreditCard, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -18,67 +16,15 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 import { useAuth } from "@/hooks/use-auth";
 import { AxiosError } from "axios";
 import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useMutationCreateMesTemp } from "@/hooks/academiccalendar/use-mutation-create-mes-temp";
+import { PeriodoStep } from "./periodos-step";
+import { MensalidadesStep } from "./mensalidades-step";
+import { VagasStep } from "./vagas.step";
+import { useQueryDraftAcademicYear } from "@/hooks/academiccalendar/use-query-academic-years-params";
+import { useMutationConfigureAcademicCalendar } from "@/hooks/academiccalendar/configureAcademicCalendar";
 
-// Memoiza o item da vaga para evitar re-renders desnecessários
-const VagaItem = React.memo(
-  ({
-    vaga,
-    index,
-    onChange,
-  }: {
-    vaga: any;
-    index: number;
-    onChange: (index: number, newValue: number) => void;
-  }) => {
-    return (
-      <div className="flex items-center justify-between p-4 border rounded-lg bg-card hover:bg-accent/30 transition-colors">
-        <div className="flex-1 min-w-0">
-          <p className="font-medium truncate">{vaga.cursoDescricao}</p>
-          <p className="text-sm text-muted-foreground truncate">
-            {vaga.periodoDescricao}
-          </p>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(index, Math.max(0, vaga.numeroVagas - 1))}
-          >
-            -
-          </Button>
-          <Input
-            type="number"
-            value={vaga.numeroVagas}
-            onChange={(e) => {
-              const val = Number(e.target.value) || 0;
-              onChange(index, val);
-            }}
-            className="w-24 text-center"
-            min="0"
-          />
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => onChange(index, vaga.numeroVagas + 1)}
-          >
-            +
-          </Button>
-        </div>
-      </div>
-    );
-  },
-);
 
-type Step = "periodos" | "vagas" | "mensalidades";
+type Step = "periodos" | "mensalidades" | "vagas";
 
 interface ParametersEditModalProps {
   open: boolean;
@@ -94,15 +40,16 @@ const steps: { id: Step; title: string; icon: React.ReactNode }[] = [
     icon: <Calendar className="h-5 w-5" />,
   },
   {
-    id: "vagas",
-    title: "Vagas Disponíveis",
-    icon: <Users className="h-5 w-5" />,
-  },
-  {
     id: "mensalidades",
     title: "Mensalidades",
     icon: <CreditCard className="h-5 w-5" />,
   },
+  {
+    id: "vagas",
+    title: "Vagas Disponíveis",
+    icon: <Users className="h-5 w-5" />,
+  },
+
 ];
 
 export function ParametersEditModal({
@@ -123,7 +70,7 @@ export function ParametersEditModal({
     dataInicioSegundoSemestre: "",
     dataFimSegundoSemestre: "",
   });
-
+  const { data: draft } = useQueryDraftAcademicYear();
   const [anoInicioDefinido, setAnoInicioDefinido] = useState<
     number | undefined
   >(undefined);
@@ -134,12 +81,11 @@ export function ParametersEditModal({
   const [vagasEditadas, setVagasEditadas] = useState<any[]>([]);
   const [mensalidadesEditadas, setMensalidadesEditadas] = useState<any[]>([]);
 
-  const { data: vagasOriginais = [], isLoading: loadingVagas } =
+  const { data: vagasOriginais, isLoading: loadingVagas } =
     useQueryVacancies();
 
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
-  // Gera designação e define anos APENAS uma vez
   useEffect(() => {
     const inicio1 = periodosForm.dataInicioPrimeiroSemestre;
     const fim2 = periodosForm.dataFimSegundoSemestre;
@@ -167,13 +113,14 @@ export function ParametersEditModal({
     periodosForm.dataFimSegundoSemestre,
   ]);
 
-  // Carrega vagas apenas quando necessário (evita loop)
+
+
   useEffect(() => {
     if (currentStep !== "vagas") return;
-    if (vagasOriginais.length === 0 || vagasEditadas.length > 0) return;
+    if (vagasOriginais?.vagas.length === 0 || vagasEditadas.length > 0) return;
 
     setVagasEditadas(
-      vagasOriginais.map((v) => ({ ...v, numeroVagas: v.numeroVagas || 0 })),
+      vagasOriginais?.vagas.map((v) => ({ ...v, numeroVagas: v.numeroVagas || 0 })),
     );
   }, [currentStep, vagasOriginais]);
 
@@ -218,7 +165,7 @@ export function ParametersEditModal({
   const mutationTudo = useMutation({
     mutationFn: async () => {
       if (!isPeriodoValid()) throw new Error("Períodos incompletos");
-
+      let codigoAnoLectivo: number
       const periodoPayload = {
         designacao: periodosForm.designacao,
         data_inicio_primeiro_semestre: periodosForm.dataInicioPrimeiroSemestre,
@@ -226,13 +173,18 @@ export function ParametersEditModal({
         data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
         data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
         codigo_utilizador: user.user?.pk_utilizador,
+        codigo_tipo_candidatura: 1
       };
-
-      const periodoRes = await axiosNestGa.post(
-        "/academic-calendar/academic-year",
-        periodoPayload,
-      );
-      const codigoAnoLectivo = periodoRes.data.codigo;
+      if (!draft?.ano_lectivo?.codigo) {
+        const periodoRes = await axiosNestGa.post(
+          "/academic-calendar/academic-year",
+          periodoPayload,
+        );
+        codigoAnoLectivo = periodoRes.data.codigo;
+      }
+      if (draft) {
+        codigoAnoLectivo = draft.ano_lectivo.codigo;
+      }
 
       if (!codigoAnoLectivo)
         throw new Error("Código do ano letivo não retornado");
@@ -298,7 +250,49 @@ export function ParametersEditModal({
         variant: "destructive",
       });
     },
+
+
   });
+
+  const { mutateAsync: mutateAcademicCalendar, isPending: isLoadingCreateAcademicCalendar } = useMutationConfigureAcademicCalendar();
+
+  const handleCreate = async () => {
+    await mutateAcademicCalendar({
+      periodo: {
+        designacao: periodosForm.designacao,
+        data_inicio_primeiro_semestre: periodosForm.dataInicioPrimeiroSemestre,
+        data_fim_primeiro_semestre: periodosForm.dataFimPrimeiroSemestre,
+        data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
+        data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
+        codigo_tipo_candidatura: 1
+      },
+      vagas: vagasEditadas
+        .filter((v) => v.numeroVagas > 0)
+        .map((v) => ({
+          codigo_vaga: v?.codigo_vaga,
+          codigo_periodo: v.codigo_periodo,
+          codigo_curso: v.codigoCurso,
+          polo_id: v.codigo_polo,
+          numero_vagas: v.numeroVagas,
+        })),
+      meses: mensalidadesEditadas.map((mes) => ({
+        designacao: mes.designacao,
+        isencao: mes.isencao,
+        ordem_mes: mes.ordem_mes,
+        prestacao: mes.prestacao,
+        activo: mes.activo ? 1 : 0,
+        activo_posgraduacao: mes.activo_posgraduacao ? 1 : 0,
+        data_limite: mes.data_limite || mes.data_final,
+        data_inicial: mes.data_inicial,
+        data_final: mes.data_final,
+        data_final_desconto: mes.data_final_desconto,
+        semestre: mes.semestre,
+        semestre_posgraduacao: mes.semestre_posgraduacao,
+      })),
+
+    })
+
+  }
 
   const resetForm = () => {
     setPeriodosForm({
@@ -380,7 +374,7 @@ export function ParametersEditModal({
     if (nextIndex < steps.length) {
       setCurrentStep(steps[nextIndex].id);
     } else {
-      mutationTudo.mutate();
+      handleCreate()
     }
   };
 
@@ -428,11 +422,10 @@ export function ParametersEditModal({
                 className="flex flex-col items-center gap-2 flex-1 relative"
               >
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                    index <= currentIndex
-                      ? "bg-primary text-white"
-                      : "bg-muted text-muted-foreground"
-                  }`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${index <= currentIndex
+                    ? "bg-primary text-white"
+                    : "bg-muted text-muted-foreground"
+                    }`}
                 >
                   {index < currentIndex ? (
                     <CheckCircle className="h-6 w-6" />
@@ -441,19 +434,17 @@ export function ParametersEditModal({
                   )}
                 </div>
                 <span
-                  className={`text-xs font-medium text-center ${
-                    index <= currentIndex
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
+                  className={`text-xs font-medium text-center ${index <= currentIndex
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                    }`}
                 >
                   {step.title}
                 </span>
                 {index < steps.length - 1 && (
                   <div
-                    className={`absolute top-6 left-12 right-0 h-1 -z-10 ${
-                      index < currentIndex ? "bg-primary" : "bg-muted"
-                    }`}
+                    className={`absolute top-6 left-12 right-0 h-1 -z-10 ${index < currentIndex ? "bg-primary" : "bg-muted"
+                      }`}
                   />
                 )}
               </div>
@@ -464,178 +455,27 @@ export function ParametersEditModal({
         {/* Conteúdo */}
         <div className="min-h-96">
           {currentStep === "periodos" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-                <Calendar className="h-5 w-5" /> Períodos Letivos
-              </h3>
-              <div className="space-y-2">
-                <Label>Designação (automática)</Label>
-                <Input
-                  value={periodosForm.designacao}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {[
-                  "Início 1º Semestre",
-                  "Fim 1º Semestre",
-                  "Início 2º Semestre",
-                  "Fim 2º Semestre",
-                ].map((label, i) => {
-                  const keys = [
-                    "dataInicioPrimeiroSemestre",
-                    "dataFimPrimeiroSemestre",
-                    "dataInicioSegundoSemestre",
-                    "dataFimSegundoSemestre",
-                  ] as const;
-                  return (
-                    <div key={label} className="space-y-2">
-                      <Label>{label} *</Label>
-                      <Input
-                        type="date"
-                        value={periodosForm[keys[i]]}
-                        onChange={(e) =>
-                          setPeriodosForm((prev) => ({
-                            ...prev,
-                            [keys[i]]: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <PeriodoStep periodosForm={periodosForm} setPeriodosForm={setPeriodosForm} />
           )}
 
           {currentStep === "vagas" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-                <Users className="h-5 w-5" /> Vagas por Curso e Período
-              </h3>
-
-              {loadingVagas ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p>Carregando vagas...</p>
-                </div>
-              ) : vagasOriginais.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                  <p>Nenhuma vaga encontrada</p>
-                  <p className="text-sm mt-2">
-                    Verifique se há cursos/períodos cadastrados
-                  </p>
-                </div>
-              ) : vagasEditadas.length === 0 ? (
-                <p className="text-center py-10 text-muted-foreground">
-                  Preparando dados para edição...
-                </p>
-              ) : (
-                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
-                  {vagasEditadas.map((vaga, index) => (
-                    <VagaItem
-                      key={`${vaga.codigoCurso}-${vaga.codigo_periodo}-${index}`}
-                      vaga={vaga}
-                      index={index}
-                      onChange={handleVagaChange}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            <VagasStep
+              loadingVagas={loadingVagas}
+              vagasOriginais={vagasOriginais?.vagas || []}
+              cursosDisponiveis={vagasOriginais?.cursosDisponiveis || []}
+              handleVagaChange={handleVagaChange}
+              vagasEditadas={vagasEditadas}
+              setVagasEditadas={setVagasEditadas}
+            />
           )}
 
           {currentStep === "mensalidades" && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-                <CreditCard className="h-5 w-5" /> Mensalidades Geradas
-              </h3>
-
-              {loadingMeses ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p>Gerando mensalidades...</p>
-                </div>
-              ) : errorMeses ? (
-                <div className="text-center py-12 text-destructive">
-                  <p>Erro ao gerar mensalidades</p>
-                  <p className="text-sm">
-                    {(errorMeses as Error)?.message || "Tente novamente"}
-                  </p>
-                </div>
-              ) : mensalidadesEditadas.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground border rounded-lg">
-                  <p>Nenhuma mensalidade gerada ainda</p>
-                  <p className="text-sm mt-2">
-                    Preencha as datas dos semestres e avance para gerar
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-card rounded-lg border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Designação</TableHead>
-                        <TableHead>Ordem</TableHead>
-                        <TableHead>Prestação</TableHead>
-                        <TableHead>Semestre</TableHead>
-                        <TableHead>Data Inicial</TableHead>
-                        <TableHead>Data Final</TableHead>
-                        <TableHead>Data Limite</TableHead>
-                        <TableHead>Isenção</TableHead>
-                        <TableHead>Activo</TableHead>
-                        <TableHead>Pós-Grad.</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {mensalidadesEditadas.map((item, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">
-                            {item.designacao}
-                          </TableCell>
-                          <TableCell>{item.ordem_mes}</TableCell>
-                          <TableCell>{item.prestacao}ª</TableCell>
-                          <TableCell>{item.semestre}º</TableCell>
-                          <TableCell>
-                            {item.data_inicial?.split("T")[0] || "-"}
-                          </TableCell>
-                          <TableCell>
-                            {item.data_final?.split("T")[0] || "-"}
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              type="date"
-                              value={item.data_limite?.split("T")[0] || ""}
-                              onChange={(e) => {
-                                const newValue = e.target.value;
-                                setMensalidadesEditadas((prev) =>
-                                  prev.map((mes, i) =>
-                                    i === index
-                                      ? { ...mes, data_limite: newValue }
-                                      : mes,
-                                  ),
-                                );
-                              }}
-                              className="w-[150px]"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {item.isencao === 1 ? "Sim" : "Não"}
-                          </TableCell>
-                          <TableCell>
-                            {item.activo === 1 ? "Activo" : "Inactivo"}
-                          </TableCell>
-                          <TableCell>
-                            {item.activo_posgraduacao === 1 ? "Sim" : "Não"}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </div>
+            <MensalidadesStep
+              loadingMeses={loadingMeses}
+              errorMeses={errorMeses}
+              mensalidadesEditadas={mensalidadesEditadas}
+              setMensalidadesEditadas={setMensalidadesEditadas}
+            />
           )}
         </div>
 
@@ -655,11 +495,11 @@ export function ParametersEditModal({
             <Button
               onClick={handleNext}
               disabled={
-                mutationTudo.isPending ||
+                isLoadingCreateAcademicCalendar ||
                 (currentStep === "periodos" && !isPeriodoValid())
               }
             >
-              {mutationTudo.isPending ? (
+              {isLoadingCreateAcademicCalendar ? (
                 <>
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5"
