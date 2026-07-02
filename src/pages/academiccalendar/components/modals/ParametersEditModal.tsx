@@ -24,7 +24,7 @@ import { useQueryDraftAcademicYear } from "@/hooks/academiccalendar/use-query-ac
 import { useMutationConfigureAcademicCalendar } from "@/hooks/academiccalendar/configureAcademicCalendar";
 
 
-type Step = "periodos" | "vagas" | "mensalidades";
+type Step = "periodos" | "mensalidades" | "vagas";
 
 interface ParametersEditModalProps {
   open: boolean;
@@ -40,15 +40,16 @@ const steps: { id: Step; title: string; icon: React.ReactNode }[] = [
     icon: <Calendar className="h-5 w-5" />,
   },
   {
-    id: "vagas",
-    title: "Vagas Disponíveis",
-    icon: <Users className="h-5 w-5" />,
-  },
-  {
     id: "mensalidades",
     title: "Mensalidades",
     icon: <CreditCard className="h-5 w-5" />,
   },
+  {
+    id: "vagas",
+    title: "Vagas Disponíveis",
+    icon: <Users className="h-5 w-5" />,
+  },
+
 ];
 
 export function ParametersEditModal({

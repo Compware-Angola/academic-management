@@ -16,10 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
-
-
 import { useQueryAcademicYearParams } from "@/hooks/academiccalendar/use-query-academic-years-params";
-import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryAcademicYearVacancies } from "@/hooks/academiccalendar/use-query-academic-year-vacancies";
 import { useQueryAcademicYearMonthlyFees } from "@/hooks/academiccalendar/use-query-academic-year-monthly-fees";
@@ -32,12 +29,11 @@ import { MonthlyFeesTableCard } from "./monthly-fees-table-card";
 import { ParametersModal } from "./modals/parameters-modal";
 import { EditVagaModal } from "./modals/EditVagaModal";
 
+const TIPO_CANDIDATURA_DOUTORAMENTO = 3
 
 export function Doutoramento() {
     const { toast } = useToast();
     const [anoLetivoSelecionado, setAnoLetivoSelecionado] = useState<string>("");
-    const [tipoCandidaturaSelecionado, setTipoCandidaturaSelecionado] =
-        useState<string>("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPageMonthly, setCurrentPageMonthly] = useState(1);
@@ -50,13 +46,10 @@ export function Doutoramento() {
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const {
-        data: academicYears = [],
-        isLoading: isLoadingYears,
-        refetch: refetchYears,
-    } = useQueryAnoAcademico({ tipo_candidatura: 3 });
+        data: academicYears = []
+    } = useQueryAnoAcademico({ tipo_candidatura: TIPO_CANDIDATURA_DOUTORAMENTO });
 
-    const { data: tiposCandidatura = [], isLoading: isLoadingTipos } =
-        useQueryTipoCandidatura();
+
     const updateEstadoMutation = useMutationUpdateAcademicYearState();
 
 
@@ -86,15 +79,16 @@ export function Doutoramento() {
     });
 
     // Vagas
-    const tipoCandidaturaId = Number(tipoCandidaturaSelecionado);
+
+
     const {
         vacancies = [],
         isLoading: isLoadingVacancies,
         isFetching: isFetchingVacancies,
     } = useQueryAcademicYearVacancies({
         codigoAno: selectedCodigo,
-        tipoCandidatura: tipoCandidaturaId,
-        enabled: !!selectedCodigo && !!tipoCandidaturaId,
+        tipoCandidatura: TIPO_CANDIDATURA_DOUTORAMENTO,
+        enabled: !!selectedCodigo
     });
     const handleEditVaga = (vaga: Vacancy) => {
         setVagaSelecionada({
@@ -115,20 +109,13 @@ export function Doutoramento() {
             if (anoAtivo) setAnoLetivoSelecionado(anoAtivo.designacao);
         }
 
-        if (tiposCandidatura.length > 0 && !tipoCandidaturaSelecionado) {
-            setTipoCandidaturaSelecionado(String(tiposCandidatura[0].codigo));
-        }
     }, [
         academicYears,
-        tiposCandidatura,
         anoLetivoSelecionado,
-        tipoCandidaturaSelecionado,
+
     ]);
 
-    // Resetar página ao mudar filtros
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [selectedCodigo, tipoCandidaturaSelecionado]);
+
 
     // Paginação das vagas
     const filteredVacancies = vacancies;

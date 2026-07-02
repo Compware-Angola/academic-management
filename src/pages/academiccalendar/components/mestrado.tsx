@@ -32,6 +32,7 @@ import { MonthlyFeesTableCard } from "./monthly-fees-table-card";
 import { ParametersModal } from "./modals/parameters-modal";
 import { EditVagaModal } from "./modals/EditVagaModal";
 
+const TIPO_CANDIDATURA_MESTRADO = 2
 
 export function Mestrado() {
     const { toast } = useToast();

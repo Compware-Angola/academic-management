@@ -2,7 +2,6 @@ import { axiosNestGa } from "@/lib/axios-nest-ga"
 
 export type ConfigureAcademicCalendar = {
   periodo: Periodo
-  vagas: Vaga[]
   meses: Mese[]
 }
 
@@ -40,6 +39,6 @@ export type Mese = {
 
 
 export const configureAcademicCalendarService = async (data: ConfigureAcademicCalendar) => {
-    const response = await axiosNestGa.post('/academic-calendar', data);
-    return response.data ?? null;
+  const response = await axiosNestGa.post('/academic-calendar', data);
+  return response.data ?? null;
 }

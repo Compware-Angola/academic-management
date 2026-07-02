@@ -6,18 +6,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Vacancy } from "@/services/academiccalendar/fetch-vacancies-per-course";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Pencil, Users } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
 
 type VacanciesTableCardProps = {
     vacancies: Vacancy[];
     paginatedVacancies: Vacancy[];
     filteredVacancies: Vacancy[];
-
     loading?: boolean;
-
     tipoCandidaturaNome: string;
     anoLetivo?: string;
-
     currentPage: number;
     totalPages: number;
     itemsPerPage: number;
@@ -42,6 +39,8 @@ export function VacanciesTableCard({
     onPageChange,
     onItemsPerPageChange,
 }: VacanciesTableCardProps) {
+    const navigate = useNavigate();
+
     return (
         <Card>
             <CardHeader>
@@ -73,6 +72,13 @@ export function VacanciesTableCard({
                         <p className="text-lg">
                             Nenhuma vaga encontrada para este ano e tipo de candidatura.
                         </p>
+                        <Button
+                            onClick={() => {
+                                navigate("/exame/configurar-vaga");
+                            }}
+                        >
+                            Configurar vagas
+                        </Button>
                     </div>
                 ) : (
                     <>
@@ -239,6 +245,6 @@ export function VacanciesTableCard({
                     </>
                 )}
             </CardContent>
-        </Card>
+        </Card >
     )
 }

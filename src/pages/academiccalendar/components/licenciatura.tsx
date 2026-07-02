@@ -32,6 +32,7 @@ import { MonthlyFeesTableCard } from "./monthly-fees-table-card";
 import { ParametersModal } from "./modals/parameters-modal";
 import { EditVagaModal } from "./modals/EditVagaModal";
 
+const TIPO_CANDIDATURA_LICENCIATURA = 1
 
 export function Licenciatura() {
     const { toast } = useToast();
@@ -51,12 +52,10 @@ export function Licenciatura() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const {
         data: academicYears = [],
-        isLoading: isLoadingYears,
-        refetch: refetchYears,
-    } = useQueryAnoAcademico({ tipo_candidatura: 1 });
 
-    const { data: tiposCandidatura = [], isLoading: isLoadingTipos } =
-        useQueryTipoCandidatura();
+    } = useQueryAnoAcademico({ tipo_candidatura: TIPO_CANDIDATURA_LICENCIATURA });
+
+
     const updateEstadoMutation = useMutationUpdateAcademicYearState();
 
 
@@ -115,12 +114,8 @@ export function Licenciatura() {
             if (anoAtivo) setAnoLetivoSelecionado(anoAtivo.designacao);
         }
 
-        if (tiposCandidatura.length > 0 && !tipoCandidaturaSelecionado) {
-            setTipoCandidaturaSelecionado(String(tiposCandidatura[0].codigo));
-        }
     }, [
         academicYears,
-        tiposCandidatura,
         anoLetivoSelecionado,
         tipoCandidaturaSelecionado,
     ]);
