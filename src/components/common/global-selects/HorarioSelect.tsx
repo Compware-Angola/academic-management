@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useQueryHorariosExistentes } from "@/hooks/horario/use-query-horarios-existentes";
 import { FormCommandSelect, LabelMode } from "../FormCommandSelect";
 import { parseFilter } from "@/util/parse-filter";
@@ -26,20 +27,27 @@ export function HorarioSelect({
   unidadeCurricular,
   estado,
 }: Props) {
-  const { data: horarios, isLoading } = useQueryHorariosExistentes({
-    page: 1,
-    limit: 100,
-    anoLectivo: parseFilter(anoLectivo),
-    curso: parseFilter(curso),
-    periodo: parseFilter(periodo),
-    semestre: parseFilter(semestre),
-    unidadeCurricular: parseFilter(unidadeCurricular),
-    estado: parseFilter(estado),
-    anoCurricular: parseFilter(classes),
-  }
-,{
-  enabled: !!anoLectivo && !!curso && !!semestre && !!classes,
-});
+  const { data: horarios, isLoading } = useQueryHorariosExistentes(
+    {
+      page: 1,
+      limit: 100,
+      anoLectivo: parseFilter(anoLectivo),
+      curso: parseFilter(curso),
+      periodo: parseFilter(periodo),
+      semestre: parseFilter(semestre),
+      unidadeCurricular: parseFilter(unidadeCurricular),
+      estado: parseFilter(estado),
+      anoCurricular: parseFilter(classes),
+    },
+    {
+      enabled: !!anoLectivo && !!curso && !!semestre && !!classes,
+    }
+  );
+
+  // sempre que o período (ou outro filtro-chave) mudar, limpa o horário selecionado
+  useEffect(() => {
+    onChangeValue("");
+  }, [periodo]);
 
   return (
     <FormCommandSelect
