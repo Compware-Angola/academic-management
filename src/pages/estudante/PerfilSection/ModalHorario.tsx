@@ -103,36 +103,40 @@ export const ModalHorario = ({
           <DialogDescription>
             Selecione o horário para {horarionDetails?.disciplina}
           </DialogDescription>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Período</label>
-            <Select
-              value={filters.periodo}
-              onValueChange={(v) => setFilters({ ...filters, periodo: v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar" />
-              </SelectTrigger>
-              <SelectContent>
-                {periodos?.map((p) => (
-                  <SelectItem key={p.codigo} value={p.codigo.toString()}>
-                    {p.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="flex gap-4 items-end">
+            <div className="space-y-2 w-40">
+              <label className="text-sm font-medium">Período</label>
+              <Select
+                value={filters.periodo}
+                onValueChange={(v) => setFilters({ ...filters, periodo: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {periodos?.map((p) => (
+                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                      {p.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <HorarioSelect
-            value={horarioId?.toString()}
-            onChangeValue={(v) => setHorarioId(v ? Number(v) : null)}
-            anoLectivo={horarionDetails?.anoLectivo ?? ""}
-            curso={horarionDetails?.curso ?? ""}
-            semestre={horarionDetails?.semestre ?? ""}
-            unidadeCurricular={horarionDetails?.codigoGradeCurricular ?? ""}
-            estado={horarionDetails?.estado ?? ""}
-            periodo={horarionDetails?.periodo ?? ""}
-            classes={horarionDetails?.classes ?? ""}
-          />
+            <div className="flex-1">
+              <HorarioSelect
+                value={horarioId?.toString()}
+                onChangeValue={(v) => setHorarioId(v ? Number(v) : null)}
+                anoLectivo={horarionDetails?.anoLectivo ?? ""}
+                curso={horarionDetails?.curso ?? ""}
+                semestre={horarionDetails?.semestre ?? ""}
+                unidadeCurricular={horarionDetails?.codigoGradeCurricular ?? ""}
+                estado={horarionDetails?.estado ?? ""}
+                periodo={filters.periodo ?? ""}
+                classes={horarionDetails?.classes ?? ""}
+              />
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-6">
