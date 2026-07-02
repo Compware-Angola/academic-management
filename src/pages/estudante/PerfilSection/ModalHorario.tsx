@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import { useQueryScheduleDetails } from "@/hooks/horario/use-query-schedule-details";
 import { Loader2, Save } from "lucide-react";
 import { useMutationUpdateGradeCurricularHorarioAluno } from "@/hooks/students/use-Mutation-update-grade-curricular-horario-aluno";
+import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type HorarioDetails = {
   codigo: string;
@@ -21,7 +23,7 @@ export type HorarioDetails = {
   semestre: string;
   codigoGradeCurricular: string;
   estado: string;
-  periodo: string;
+  periodo?: string;
   classes: string;
 };
 
@@ -38,7 +40,10 @@ export const ModalHorario = ({
 }: ModalHorarioProps) => {
   const mutation = useMutationUpdateGradeCurricularHorarioAluno();
   const [horarioId, setHorarioId] = useState<number | null>(null);
-
+  const [filters, setFilters] = useState({
+    periodo: "",
+  });
+  const { data: periodos } = useQueryPeriod();
   const handleSave = () => {
     mutation.mutate({
       horarioID: horarioId!,
@@ -98,18 +103,40 @@ export const ModalHorario = ({
           <DialogDescription>
             Selecione o horário para {horarionDetails?.disciplina}
           </DialogDescription>
+          <div className="flex gap-4 items-end">
+            <div className="space-y-2 w-40">
+              <label className="text-sm font-medium">Período</label>
+              <Select
+                value={filters.periodo}
+                onValueChange={(v) => setFilters({ ...filters, periodo: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  {periodos?.map((p) => (
+                    <SelectItem key={p.codigo} value={p.codigo.toString()}>
+                      {p.designacao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <HorarioSelect
-            value={horarioId?.toString()}
-            onChangeValue={(v) => setHorarioId(v ? Number(v) : null)}
-            anoLectivo={horarionDetails?.anoLectivo ?? ""}
-            curso={horarionDetails?.curso ?? ""}
-            semestre={horarionDetails?.semestre ?? ""}
-            unidadeCurricular={horarionDetails?.codigoGradeCurricular ?? ""}
-            estado={horarionDetails?.estado ?? ""}
-            periodo={horarionDetails?.periodo ?? ""}
-            classes={horarionDetails?.classes ?? ""}
-          />
+            <div className="flex-1">
+              <HorarioSelect
+                value={horarioId?.toString()}
+                onChangeValue={(v) => setHorarioId(v ? Number(v) : null)}
+                anoLectivo={horarionDetails?.anoLectivo ?? ""}
+                curso={horarionDetails?.curso ?? ""}
+                semestre={horarionDetails?.semestre ?? ""}
+                unidadeCurricular={horarionDetails?.codigoGradeCurricular ?? ""}
+                estado={horarionDetails?.estado ?? ""}
+                periodo={filters.periodo ?? ""}
+                classes={horarionDetails?.classes ?? ""}
+              />
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-6">
@@ -139,19 +166,17 @@ export const ModalHorario = ({
                 return (
                   <div
                     key={day}
-                    className={`rounded-xl border-2 bg-card shadow-md overflow-hidden transition-all ${
-                      dayItems
-                        ? "border-primary/20 ring-2 ring-primary/10"
-                        : "border-dashed border-muted-foreground/30 opacity-60"
-                    }`}
+                    className={`rounded-xl border-2 bg-card shadow-md overflow-hidden transition-all ${dayItems
+                      ? "border-primary/20 ring-2 ring-primary/10"
+                      : "border-dashed border-muted-foreground/30 opacity-60"
+                      }`}
                   >
                     {/* Cabeçalho do dia */}
                     <div
-                      className={`px-5 py-3 font-bold text-lg text-center ${
-                        dayItems
-                          ? "bg-primary/10 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      }`}
+                      className={`px-5 py-3 font-bold text-lg text-center ${dayItems
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground"
+                        }`}
                     >
                       {day.substring(0, 3)}
                       <span className="block text-sm font-medium opacity-80">
@@ -173,14 +198,13 @@ export const ModalHorario = ({
                                 {aula.horaInicio}–{aula.horaTermino}
                               </span>
                               <span
-                                className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  aula.tipoAula.includes("Teórica") ||
+                                className={`px-2 py-0.5 rounded text-xs font-medium ${aula.tipoAula.includes("Teórica") ||
                                   aula.tipoAula.includes("Teorico")
-                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                                    : aula.tipoAula.includes("Prática")
-                                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                                      : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
-                                }`}
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                                  : aula.tipoAula.includes("Prática")
+                                    ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                                    : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                                  }`}
                               >
                                 {aula.tipoAula.replace("Teorico", "Teórico")}
                               </span>
@@ -199,7 +223,7 @@ export const ModalHorario = ({
                                 <span>Docente</span>
                                 <span className="font-medium text-foreground truncate max-w-[140px]">
                                   {aula.docenteNome &&
-                                  aula.docenteNome !== "Sem docente"
+                                    aula.docenteNome !== "Sem docente"
                                     ? aula.docenteNome
                                     : "—"}
                                 </span>

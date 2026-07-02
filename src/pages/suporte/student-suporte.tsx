@@ -28,8 +28,9 @@ import { ModalDetalhesSolicitacao } from "./components/ModalDetalhesSolicitacao"
 import { ModalAnexos } from "./components/ModalAnexos";
 import { SolicitacoesSuporteHeader } from "./components/SolicitacoesSuporteHeader";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Button } from "react-day-picker";
+
 import { RotateCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ITEMS_PER_PAGE = 10;
 
