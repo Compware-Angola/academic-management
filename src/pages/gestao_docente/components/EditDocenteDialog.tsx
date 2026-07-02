@@ -199,6 +199,8 @@ export const EditarDocenteModal = ({
               />
             </div>
             <TipoCandidaturaSelect
+              temporarilyUnavailable={true}
+              disabled={true}
               value={params.tipoCandidatura}
               onChangeValue={(v) => handleChangeInput("tipoCandidatura", v)}
             />
