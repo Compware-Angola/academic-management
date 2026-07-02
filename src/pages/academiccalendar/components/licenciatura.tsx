@@ -280,6 +280,7 @@ export function Licenciatura() {
                 open={isEditModalOpen}
                 onOpenChange={setIsEditModalOpen}
                 anoLetivo={currentYearParams?.designacao || ""}
+                tipo_candidatura={TIPO_CANDIDATURA_LICENCIATURA}
             />
             {vagaSelecionada && (
                 <EditVagaModal

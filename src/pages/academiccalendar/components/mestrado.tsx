@@ -285,6 +285,7 @@ export function Mestrado() {
                 open={isEditModalOpen}
                 onOpenChange={setIsEditModalOpen}
                 anoLetivo={currentYearParams?.designacao || ""}
+                tipo_candidatura={TIPO_CANDIDATURA_MESTRADO}
             />
             {vagaSelecionada && (
                 <EditVagaModal

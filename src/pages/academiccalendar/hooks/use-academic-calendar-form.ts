@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-
 import { useQueryVacancies } from "@/hooks/queries/use-query-vacancies";
 import { useQueryGenerateMesTemp } from "@/hooks/academiccalendar/use-query-generate-mes-temp";
 import { useQueryDraftAcademicYear } from "@/hooks/academiccalendar/use-query-academic-years-params";
@@ -27,11 +26,12 @@ const STEP_ORDER: Step[] = [
 interface UseAcademicCalendarFormArgs {
     onSuccess?: () => void;
     onClose: () => void;
+    tipo_candidatura: number;
 }
-
 export function useAcademicCalendarForm({
     onSuccess,
     onClose,
+    tipo_candidatura,
 }: UseAcademicCalendarFormArgs) {
     const { toast } = useToast();
     const queryClient = useQueryClient();
@@ -74,7 +74,7 @@ export function useAcademicCalendarForm({
             designacao,
             anoInicio,
             anoFim,
-        } = deriveAnoLectivo(inicio1, fim2);
+        } = deriveAnoLectivo(inicio1, fim2, tipo_candidatura);
 
         setPeriodosForm((prev) => ({
             ...prev,
@@ -98,6 +98,7 @@ export function useAcademicCalendarForm({
         {
             anoInicial: anoInicioDefinido,
             anoFinal: anoFimDefinido,
+            tipo_candidatura
         },
         {
             enabled:
@@ -152,7 +153,7 @@ export function useAcademicCalendarForm({
                     periodosForm.dataInicioSegundoSemestre,
                 data_fim_segundo_semestre:
                     periodosForm.dataFimSegundoSemestre,
-                codigo_tipo_candidatura: 1,
+                codigo_tipo_candidatura: tipo_candidatura,
             },
 
             meses: mensalidadesEditadas.map((mes) => ({

@@ -24,6 +24,7 @@ export type MesTemp = {
 export type GenerateMesTempPayload = {
   anoInicial: number;
   anoFinal: number;
+  tipo_candidatura: number;
 };
 
 /* ---------- RESPONSE ---------- */
@@ -47,6 +48,7 @@ export async function generateMesTempService(
   const params = {
     anoInicial: normalizeParam(anoInicial),
     anoFinal: normalizeParam(anoFinal),
+    tipo_candidatura: payload.tipo_candidatura,
   };
 
   try {
@@ -62,10 +64,10 @@ export async function generateMesTempService(
       response: error.response?.data,
       status: error.response?.status,
     });
-    
+
     // Pode lançar um erro mais amigável ou retornar um fallback conforme tua estratégia
     throw new Error(
-      error.response?.data?.message || 
+      error.response?.data?.message ||
       "Falha ao gerar o calendário de meses temporários. Tente novamente."
     );
   }

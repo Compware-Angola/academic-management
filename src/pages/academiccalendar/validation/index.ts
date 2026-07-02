@@ -61,14 +61,26 @@ export function validatePeriodoDatas(form: PeriodosForm): ValidationResult {
 export function deriveAnoLectivo(
     dataInicioPrimeiroSemestre: string,
     dataFimSegundoSemestre: string,
+    tipo_candidatura: number
 ): { designacao: string; anoInicio: number; anoFim: number } {
     const startYear = new Date(dataInicioPrimeiroSemestre).getFullYear();
     const endYear = new Date(dataFimSegundoSemestre).getFullYear();
     const finalYear = endYear >= startYear ? endYear : startYear + 1;
-
+    const designacao = deriveDesignacao({ tipo_candidatura });
     return {
-        designacao: `${startYear}-${finalYear}`,
+        designacao: designacao !== null ? `${designacao} ${startYear}-${finalYear}` : `${startYear}-${finalYear}`,
         anoInicio: startYear,
         anoFim: finalYear,
     };
+}
+
+function deriveDesignacao({ tipo_candidatura }: { tipo_candidatura: number }): string | null {
+    switch (tipo_candidatura) {
+        case 2:
+            return "Ciclo Mestrado";
+        case 3:
+            return "Ciclo Doutoramento";
+        default:
+            return null;
+    }
 }

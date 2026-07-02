@@ -266,6 +266,7 @@ export function Doutoramento() {
                 open={isEditModalOpen}
                 onOpenChange={setIsEditModalOpen}
                 anoLetivo={currentYearParams?.designacao || ""}
+                tipo_candidatura={TIPO_CANDIDATURA_DOUTORAMENTO}
             />
             {vagaSelecionada && (
                 <EditVagaModal

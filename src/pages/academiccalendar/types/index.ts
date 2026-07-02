@@ -44,6 +44,7 @@ export interface ParametersEditModalProps {
     onOpenChange: (open: boolean) => void;
     anoLetivo?: string;
     onSuccess?: () => void;
+    tipo_candidatura: number;
 }
 
 export const EMPTY_PERIODOS_FORM: PeriodosForm = {

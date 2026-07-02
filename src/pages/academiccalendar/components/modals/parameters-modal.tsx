@@ -9,9 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Users, CreditCard, CheckCircle2 } from "lucide-react";
 import { PeriodoStep } from "./periodos-step";
 import { MensalidadesStep } from "./mensalidades-step";
-
-
-
 import { ParametersEditModalProps, StepConfig } from "../../types";
 import { useAcademicCalendarForm } from "../../hooks/use-academic-calendar-form";
 import { StepProgress } from "../step-progress";
@@ -28,6 +25,7 @@ export function ParametersModal({
     open,
     onOpenChange,
     onSuccess,
+    tipo_candidatura
 }: ParametersEditModalProps) {
     const navigate = useNavigate();
     const {
@@ -44,10 +42,12 @@ export function ParametersModal({
         handlePrev,
         handleClose,
         isSubmitting,
+
         isSuccess
     } = useAcademicCalendarForm({
         onSuccess,
         onClose: () => onOpenChange(false),
+        tipo_candidatura,
     });
 
     const isLastStep = currentIndex === STEPS.length - 1;
