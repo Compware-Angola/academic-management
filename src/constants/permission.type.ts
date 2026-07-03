@@ -179,10 +179,7 @@ export enum PermissionType {
   FORMULA_UCS_POS_GRADUACAO = "FORMULA_UCS_POS_GRADUACAO",
   FORMULA_UCS_ORAL_POS_GRADUACAO = "FORMULA_UCS_ORAL_POS_GRADUACAO",
   MARCACAO_PROVAS_POS_GRADUACAO = "MARCACAO_PROVAS_POS_GRADUACAO",
-  LISTA_PRESENCA_POS_GRADUACAO = "LISTA_PRESENCA_POS_GRADUACAO",
-  LANCAMENTO_NOTAS_POS_GRADUACAO = "LANCAMENTO_NOTAS_POS_GRADUACAO",
-  LANCAMENTO_PAUTA_POS_GRADUACAO = "LANCAMENTO_PAUTA_POS_GRADUACAO",
-  VALIDACAO_PAUTA_POS_GRADUACAO = "VALIDACAO_PAUTA_POS_GRADUACAO",
+  
 
   DEFINIR_FORMULA_UNIDADE_CURRICULAR = "DEFINIR_FORMULA_UNIDADE_CURRICULAR",
   MARCAR_PROVA_POS_GRADUACAO = "MARCAR_PROVA_POS_GRADUACAO",
@@ -1000,22 +997,6 @@ export const PermissionTypeDetails = {
   DEFINIR_UC_ORAL_POS_GRADUACAO: {
     designacao: "Definir UCs com Oral - Pós-Graduação",
     sigla: "mpgs_duco",
-  },
-  LISTA_PRESENCA_POS_GRADUACAO: {
-    designacao: "Lista de Presença - Pós-Graduação",
-    sigla: "mpgs_lppg",
-  },
-  LANCAMENTO_NOTAS_POS_GRADUACAO: {
-    designacao: "Lançamento de Notas - Pós-Graduação",
-    sigla: "mpgs_lnpg",
-  },
-  LANCAMENTO_PAUTA_POS_GRADUACAO: {
-    designacao: "Lançamento de Pauta - Pós-Graduação",
-    sigla: "mpgs_lpg",
-  },
-  VALIDACAO_PAUTA_POS_GRADUACAO: {
-    designacao: "Validação de Pauta - Pós-Graduação",
-    sigla: "mpgs_vp",
   },
   RESULTADOS_FINAIS_POS_GRADUACAO: {
     designacao: "Resultados Finais do Exame de Acesso - Pós-Graduação",
