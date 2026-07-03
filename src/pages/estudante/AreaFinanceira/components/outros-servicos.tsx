@@ -352,6 +352,7 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
                           item.status === "sucesso"
                         }
                         onClick={() => handleAbrirModalUC(item)}
+                        title="Adicionar Cadeiras"
                       >
                         <BookPlus className="h-4 w-4 text-blue-600" />
                       </Button>

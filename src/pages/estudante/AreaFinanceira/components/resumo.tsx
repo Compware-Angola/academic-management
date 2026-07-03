@@ -6,10 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TabsContent } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -33,10 +31,7 @@ import {
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
-import {
-  useQueryFacturaItens,
-  useQueryFacturas,
-} from "@/hooks/horario/use-query-invoice";
+import { useQueryFacturas } from "@/hooks/horario/use-query-invoice";
 import {
   Dialog,
   DialogContent,
@@ -44,15 +39,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-
-import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
-import { FacturaItem } from "@/services/finance/listar-facturas.service";
-import { usePermission } from "@/auth/permission.helper";
-import { PermissionTypeDetails } from "@/constants/permission.type";
 import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-query-finance-monthly-fee";
+import { FacturaDetalhesModal } from "@/components/financas/factura-detalhes-modal";
+import { StatusBadge } from "@/components/financas/status-badge";
+import { formatCurrency, formatDate, truncate } from "@/util/finance-format";
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -67,14 +60,11 @@ const searchOptions = [
   { id: "codigoFatura", label: "Codigo da Factura" },
 ];
 
-function truncate(text: string, max = 10) {
-  if (!text) return "";
-  return text.length > max ? text.slice(0, max) + "..." : text;
-}
 type ResumoProps = {
   codigoMatricula: number;
   value?: string;
 };
+
 export function Resumo({
   value = "resumo",
   codigoMatricula: matricula,
@@ -82,16 +72,24 @@ export function Resumo({
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
-  const { hasPermission } = usePermission();
+  const [searchBy, setSearchBy] = useState<"reference" | "codigoFatura">(
+    "codigoFatura",
+  );
+  const [filters, setFilters] = useState({
+    anoLetivo: "",
+    estado: undefined as string | undefined,
+  });
+
   const [selectedFacturaCodigo, setSelectedFacturaCodigo] = useState<
     number | null
   >(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [openServicesModal, setOpenServicesModal] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string | null>(null);
+
   const { data: student } = useStudentDetail(matricula);
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+  const { data: academicYear } = useQueryAnoAcademico();
   const activeAcademicYear = academicYear?.find(
     (year) => year.estado.toLowerCase() === "activo",
   );
@@ -107,24 +105,13 @@ export function Resumo({
     page: 1,
     limit: 100,
   });
+
   const { data: monthValueResponse, isLoading: isMonthValueLoading } =
     useQueryMonthlyFeesValue({
       anoLectivoId: parseFilter(activeAcademicYear?.codigo?.toString()),
       cursoId: student?.curso_codigo,
       poloId: 1,
     });
-  function handleOpenServices(services: string) {
-    setSelectedServices(services);
-    setOpenServicesModal(true);
-  }
-
-  const [searchBy, setSearchBy] = useState<"reference" | "codigoFatura">(
-    "codigoFatura",
-  );
-  const [filters, setFilters] = useState({
-    anoLetivo: "",
-    estado: undefined as string | undefined,
-  });
 
   const {
     data,
@@ -132,25 +119,17 @@ export function Resumo({
     isError: isErrorFacturas,
     error: errorFacturas,
     refetch,
-  } = useQueryFacturas(
-    {
-      anoLectivo: filters.anoLetivo,
-      status: filters.estado,
-      page,
-      limit,
-      codigoMatricula: matricula,
-      reference:
-        searchBy === "reference" && searchTerm ? searchTerm : undefined,
-      codigoFatura:
-        searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
-    },
-    hasPermission(PermissionTypeDetails.FACTURAS.sigla),
-  );
-  const {
-    data: itens,
-    isLoading: isLoadingItens,
-    isFetching: isFetchingItens,
-  } = useQueryFacturaItens(selectedFacturaCodigo ?? undefined);
+  } = useQueryFacturas({
+    anoLectivo: filters.anoLetivo,
+    status: filters.estado,
+    page,
+    limit,
+    codigoMatricula: matricula,
+    reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
+    codigoFatura:
+      searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
+  });
+
   const monthFee = monthValueResponse?.[0];
   const pendingPayments = monthlyFeeData?.data ?? [];
   const totalPending = useMemo(() => {
@@ -160,54 +139,14 @@ export function Resumo({
   const hasNoData = !isFeesLoading && pendingPayments.length === 0;
   const yearLabel = activeAcademicYear?.designacao ?? "Ano letivo";
 
-  const facturaSelecionada = data?.data?.find(
-    (nota) => nota.codigo === selectedFacturaCodigo,
+  const selectedFactura = data?.data.find(
+    (f) => f.codigo === selectedFacturaCodigo,
   );
 
-  const getStatusBadge = (status: number) => {
-    switch (status) {
-      case 0:
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            Pendente
-          </Badge>
-        );
-      case 1:
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Pago
-          </Badge>
-        );
-      case 2:
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-            Parcelado
-          </Badge>
-        );
-      case 3:
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            Anulado
-          </Badge>
-        );
-      default:
-        return <Badge>Desconhecido</Badge>;
-    }
-  };
-
-  const formatCurrency = (value: number | undefined) => {
-    if (value === undefined) return "—";
-    return new Intl.NumberFormat("pt-AO", {
-      style: "currency",
-      currency: "AOA",
-      minimumFractionDigits: 2,
-    }).format(value);
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "—";
-    return new Date(dateStr).toLocaleDateString("pt-AO");
-  };
+  function handleOpenServices(services: string) {
+    setSelectedServices(services);
+    setOpenServicesModal(true);
+  }
 
   const handleViewDetails = (codigo: number) => {
     setSelectedFacturaCodigo(codigo);
@@ -221,14 +160,6 @@ export function Resumo({
   const handlePrevPage = () => {
     if (page > 1) setPage(page - 1);
   };
-
-  const selectedFactura = data?.data.find(
-    (f) => f.codigo === selectedFacturaCodigo,
-  );
-  console.log("selectedFactura", selectedFactura);
-  const cadeirasRecurso = facturaSelecionada?.cadeiras_recurso_epoca_especial
-    ? facturaSelecionada.cadeiras_recurso_epoca_especial.split(" , ")
-    : [];
 
   const placeholders: Record<string, string> = {
     reference: "Pesquisar por referência da factura...",
@@ -352,6 +283,7 @@ export function Resumo({
           </CardContent>
         </Card>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
@@ -362,7 +294,6 @@ export function Resumo({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Filtros mantidos (sem pesquisa por matrícula/referência/código) */}
           <div className="flex flex-wrap gap-4 items-end">
             <div className="min-w-[200px]">
               <AcademicYearSelect
@@ -386,7 +317,6 @@ export function Resumo({
               />
             </div>
 
-            {/* Tipo de Pesquisa */}
             <div className="min-w-[220px]">
               <FormSelect
                 label="Pesquisar por"
@@ -405,7 +335,6 @@ export function Resumo({
               />
             </div>
 
-            {/* Input Pesquisa */}
             <div className="flex-1 min-w-[260px] relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -514,7 +443,7 @@ export function Resumo({
                           {formatDate(nota.data_factura)}
                         </TableCell>
                         <TableCell className="text-center">
-                          {getStatusBadge(nota.estado)}
+                          <StatusBadge status={nota.estado} />
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -562,273 +491,11 @@ export function Resumo({
         </CardContent>
       </Card>
 
-      {/* Modal de detalhes */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-4xl! max-h-[90vh]! overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-md">
-          <DialogHeader className="pb-6 border-b border-gray-200 dark:border-gray-800">
-            <DialogTitle className="flex items-center justify-between gap-4 text-2xl font-bold">
-              <div className="flex items-center gap-3">
-                Detalhes da Nota de Pagamento
-                {selectedFactura && (
-                  <span className="inline-flex px-3 py-1 text-sm font-mono bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md font-medium">
-                    {selectedFactura.referencia ||
-                      selectedFactura.codigo ||
-                      "—"}
-                  </span>
-                )}
-              </div>
-              {selectedFactura && getStatusBadge(selectedFactura.estado)}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedFactura && (
-            <div className="space-y-8 pt-6">
-              {/* Valor total destacado, mas sem gradiente */}
-              <div className="bg-gray-50 dark:bg-gray-900 px-4 py-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                      Valor Total
-                    </p>
-                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                      {formatCurrency(selectedFactura.total_preco)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                      Valor a Pagar
-                    </p>
-                    <p className="text-2xl font-bold text-primary">
-                      {formatCurrency(selectedFactura.valor_pagar)}
-                    </p>
-                  </div>
-
-                  <div className="sm:text-right">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                      Emitida em
-                    </p>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {formatDate(selectedFactura.data_factura)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Dados do Estudante */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">
-                  Dados do Estudante
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Código da Matrícula
-                    </p>
-                    <p className="font-medium font-mono">
-                      {selectedFactura.codigo_matricula || "—"}
-                    </p>
-                  </div>
-                  <div className="col-span-2 lg:col-span-1">
-                    <p className="text-sm text-muted-foreground">
-                      Nome do Estudante
-                    </p>
-                    <p className="font-semibold text-lg">
-                      {selectedFactura.nome_aluno || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Curso</p>
-                    <p className="font-medium">
-                      {selectedFactura.curso || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ano Lectivo</p>
-                    <p className="font-medium">
-                      {selectedFactura.ano_lectivo || "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Informações da Nota */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">
-                  Informações da Nota
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Nº da Nota</p>
-                    <p className="font-medium font-mono">
-                      {selectedFactura.referencia ||
-                        selectedFactura.codigo ||
-                        "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Nº da Operação Bancária
-                    </p>
-                    <p className="font-medium font-mono">
-                      {selectedFactura.n_operacao_bancaria || "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Data de Emissão
-                    </p>
-                    <p className="font-medium">
-                      {formatDate(selectedFactura.data_factura)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Data de Pagamento
-                    </p>
-                    <p className="font-medium">
-                      {formatDate(selectedFactura.data_pagamento)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Multa</p>
-                    <p className="font-medium text-orange-600 dark:text-orange-400">
-                      {formatCurrency(selectedFactura.total_multa || 0)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Estado</p>
-                    {getStatusBadge(selectedFactura.estado)}
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Itens da Factura */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">
-                  Itens da Nota de Pagamento
-                </h3>
-
-                {isLoadingItens || isFetchingItens ? (
-                  <div className="py-10 text-center text-muted-foreground bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                    A carregar itens da factura...
-                  </div>
-                ) : !itens.data?.length ? (
-                  <div className="py-10 text-center border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/30 text-muted-foreground">
-                    Nenhum item encontrado para esta nota de pagamento
-                  </div>
-                ) : (
-                  <div className="rounded-lg border overflow-hidden">
-                    <Table>
-                      <TableHeader className="bg-gray-100 dark:bg-gray-800">
-                        <TableRow>
-                          <TableHead>Descrição</TableHead>
-                          <TableHead className="text-center">Qtd</TableHead>
-                          <TableHead className="text-center">Multa</TableHead>
-                          <TableHead className="text-right">
-                            Valor Unit.
-                          </TableHead>
-                          <TableHead className="text-right pr-6">
-                            Valor Total
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {itens.data.map((item: FacturaItem, index: number) => {
-                          const cadeira = cadeirasRecurso[index];
-
-                          const descricaoCompleta =
-                            (item.descricaoservico || "—") +
-                            (cadeira ? ` (${cadeira})` : "") +
-                            (Number(item.mesid) !== 3 &&
-                            item.mesid &&
-                            item.mesdescricao
-                              ? ` (${item.mesdescricao})`
-                              : "");
-
-                          return (
-                            <TableRow
-                              key={index}
-                              className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                            >
-                              <TableCell>{descricaoCompleta}</TableCell>
-                              <TableCell className="text-center">
-                                {item.quantidade ?? 1}
-                              </TableCell>
-                              <TableCell className="text-center text-orange-600 dark:text-orange-400">
-                                {item.multa ? formatCurrency(item.multa) : "—"}
-                              </TableCell>
-                              <TableCell className="text-right font-mono">
-                                {formatCurrency(item.preco)}
-                              </TableCell>
-                              <TableCell className="text-right font-mono font-semibold pr-6">
-                                {formatCurrency(item.total)}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                        <TableRow className="bg-gray-100 dark:bg-gray-800 font-semibold">
-                          <TableCell colSpan={4} className="text-right">
-                            Total Unitário
-                          </TableCell>
-                          <TableCell className="text-right text-primary pr-6">
-                            {formatCurrency(
-                              itens.data.reduce((total, item) => {
-                                const quantidade = item.quantidade ?? 1;
-                                return total + item.preco * quantidade;
-                              }, 0),
-                            )}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow className="bg-gray-100 dark:bg-gray-800 font-semibold">
-                          <TableCell colSpan={4} className="text-right">
-                            Total Preço
-                          </TableCell>
-                          <TableCell className="text-right text-primary pr-6">
-                            {formatCurrency(
-                              itens.data.reduce((total, item) => {
-                                const quantidade = item.quantidade ?? 1;
-                                return total + item.total * quantidade;
-                              }, 0),
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Ações */}
-              <div className="flex justify-end pt-2">
-                <PaymentNoteActions
-                  nota={selectedFactura}
-                  itens={itens?.data || []}
-                  showDownload={true}
-                  showPrint={true}
-                  showliquidarNota={hasPermission(
-                    PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla,
-                  )}
-                />
-              </div>
-            </div>
-          )}
-
-          {!selectedFactura && !isLoadingItens && (
-            <div className="py-12 text-center text-muted-foreground">
-              Não foi possível carregar os detalhes desta nota de pagamento.
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <FacturaDetalhesModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        factura={selectedFactura}
+      />
 
       <Dialog open={openServicesModal} onOpenChange={setOpenServicesModal}>
         <DialogContent>
