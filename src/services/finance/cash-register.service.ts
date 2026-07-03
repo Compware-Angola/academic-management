@@ -321,6 +321,7 @@ export type ListPaymentReportsForOperatorFilters = {
   page?: number
   search?: string;
   caixaId?: number;
+  formaPagamento?: number;
   startDate?: string;
   endDate?: string;
 }

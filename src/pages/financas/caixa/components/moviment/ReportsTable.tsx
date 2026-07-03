@@ -56,12 +56,14 @@ export function ReportsTable() {
   const [caixa, setCaixa] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [tipoPagamento, setTipoPagamento] = useState("");
   const [page, setPage] = useState(1);
 
   const { data, isLoading, isFetching, refetch } =
     useQueryPaymentReportsForOperator({
       search: search || undefined,
       operatorId: parseFilter(operatorId),
+      formaPagamento: parseFilter(tipoPagamento),
       caixaId: parseFilter(caixa),
       startDate: startDate || undefined,
       endDate: endDate || undefined,
@@ -189,6 +191,8 @@ export function ReportsTable() {
           setSearch(v);
           setPage(1);
         }}
+        tipoPagamento={tipoPagamento}
+        onTipoPagamentoChange={setTipoPagamento}
         operatorId={operatorId}
         onOperatorChange={setOperatorId}
         caixa={caixa}
