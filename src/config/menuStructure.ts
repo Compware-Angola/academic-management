@@ -506,7 +506,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Docente Afectados",
           url: "/gestao-docente/docente-afectados",
-          permission: [PermissionTypeDetails.GESTAO_AFETACOES!.sigla],
+          permission: [PermissionTypeDetails.LISTA_DOCENTES_AFETADOS!.sigla],
         },
       ],
       permission: [],
@@ -712,7 +712,7 @@ export const postGraduationStructure: MenuStructure = {
       title: "Avaliações",
       url: "/pos-graduacao",
       icon: FileCheck,
-      
+
       items: [
         {
           title: "Canditatos inscritos",
@@ -741,7 +741,7 @@ export const postGraduationStructure: MenuStructure = {
           ],
         },
         */
-        
+
         {
           title: "Fórmula de Definição das UCs",
           url: "/pos-graduacao/avaliacoes/formula-ucs",
@@ -749,7 +749,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
           ],
         },
-      
+
         {
           title: "Fórmula de Definição das UCs Oral",
           url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
@@ -757,7 +757,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
           ],
         },
-       
+
         {
           title: "Marcação de Provas",
           url: "/pos-graduacao/avaliacoes/marcacao-provas",
@@ -770,7 +770,7 @@ export const postGraduationStructure: MenuStructure = {
           url: "/pos-graduacao/avaliacoes/lista-presenca",
           permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
         },
-        
+
         {
           title: "Lançamento de Notas",
           url: "/pos-graduacao/avaliacoes/lancamento-notas",
@@ -788,7 +788,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
           ],
         },
-          
+
       ],
       permission: [],
     },
@@ -817,7 +817,7 @@ export const postGraduationStructure: MenuStructure = {
       permission: [],
     },
 
-     {
+    {
       title: "Docente",
       url: "/pos-graduacao-docente",
       icon: GraduationCap,
@@ -862,7 +862,7 @@ export const postGraduationStructure: MenuStructure = {
           title: "Orientadores",
           url: "/gestao-orientacao-pesquisa/orientadores",
         },
-         {
+        {
           title: "Vínculos",
           url: "/gestao-orientacao-pesquisa/vinculos",
           permission: [PermissionTypeDetails.DEFESA.sigla],
