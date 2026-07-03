@@ -27,7 +27,12 @@ import { AnularPagamentoModal } from "./AnularPagamentoModal";
 import { AnularMultaModal } from "./AnularMultaModal";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { HasPermission } from "@/components/common/HasPermission";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 type PagamentosTableProps = {
   payments: PaymentItem[];
   loading: boolean;
@@ -71,11 +76,23 @@ export function PagamentosTable({
   const [openAnularMultaModal, setAnularMultaModal] = useState<boolean>(false);
   const [selectedPagId, setSelectedPagId] = useState<number>(1);
 
+  const [selectedServices, setSelectedServices] = useState<string | null>(null);
+  const [openServicesModal, setOpenServicesModal] = useState(false);
   const closePagamentoModal = () => setAnularPagamentoModal(false);
   const openPagamentoModal = (pagId: number) => {
     setSelectedPagId(pagId);
     setAnularPagamentoModal(true);
   };
+  console.log("payments", payments);
+  function truncate(text: string, max = 10) {
+    if (!text) return "";
+    return text.length > max ? text.slice(0, max) + "..." : text;
+  }
+
+  function handleOpenServices(services: string) {
+    setSelectedServices(services);
+    setOpenServicesModal(true);
+  }
 
   //MULTA
   const closeMultaModal = () => setAnularMultaModal(false);
@@ -121,56 +138,34 @@ export function PagamentosTable({
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-left whitespace-nowrap">
-                      Código
+                      ID
+                    </TableHead>
+                    <TableHead className="text-center whitespace-nowrap">
+                      Data do Pagamento
                     </TableHead>
                     <TableHead className="text-left whitespace-nowrap">
-                      Factura
-                    </TableHead>
-                    <TableHead className="text-left whitespace-nowrap">
-                      Curso
-                    </TableHead>
-                    <TableHead className="text-left whitespace-nowrap">
-                      Código Matrícula
+                      Matrícula
                     </TableHead>
                     <TableHead className="text-left whitespace-nowrap">
                       Estudante
                     </TableHead>
                     <TableHead className="text-left whitespace-nowrap">
-                      Nº Operação Bancária
+                      Curso
                     </TableHead>
                     <TableHead className="text-left whitespace-nowrap">
-                      Nº 2ª Operação Bancária
+                      Serviços
                     </TableHead>
-                    <TableHead className="text-left whitespace-nowrap">
-                      Forma de Pagamento
-                    </TableHead>
-                    <TableHead className="text-left whitespace-nowrap">
-                      Nome Operador
-                    </TableHead>
-                    <TableHead className="text-left whitespace-nowrap">
-                      Caixa
-                    </TableHead>
-                    <TableHead className="text-left whitespace-nowrap">
-                      Canal
+                    <TableHead className="text-right whitespace-nowrap">
+                      Valor Total Liquido
                     </TableHead>
                     <TableHead className="text-right whitespace-nowrap">
                       Valor Total
                     </TableHead>
-                    <TableHead className="text-right whitespace-nowrap">
-                      Valor Depositado
-                    </TableHead>
-                    <TableHead className="text-center whitespace-nowrap">
-                      Data Banco
-                    </TableHead>
-                    <TableHead className="text-center whitespace-nowrap">
-                      Data Registo
-                    </TableHead>
+
                     <TableHead className="text-center whitespace-nowrap">
                       Status Pgto.
                     </TableHead>
-                    <TableHead className="text-left whitespace-nowrap">
-                      Tipo de Pagamento
-                    </TableHead>
+
                     <TableHead className="text-center whitespace-nowrap">
                       Ações
                     </TableHead>
@@ -183,46 +178,41 @@ export function PagamentosTable({
                         {pag?.codigo_pagamento}
                       </TableCell>
 
-                      <TableCell className="whitespace-nowrap">
-                        {pag?.codigo_factura || "---"}
-                      </TableCell>
-
-                      <TableCell className="whitespace-nowrap">
-                        {pag?.curso || "---"}
+                      <TableCell className="text-center text-sm whitespace-nowrap">
+                        {formatarData(pag?.databanco || "")}
                       </TableCell>
 
                       <TableCell className="whitespace-nowrap">
                         {pag?.codigo_matricula || "---"}
                       </TableCell>
-
                       <TableCell className="whitespace-nowrap">
                         <p className="text-sm font-medium whitespace-nowrap">
                           {pag?.nome_completo || "---"}
                         </p>
                       </TableCell>
 
-                      <TableCell className="font-mono text-sm whitespace-nowrap">
-                        {pag?.operacao_bancaria || "---"}
+                      <TableCell className="whitespace-nowrap">
+                        {pag?.curso || "---"}
                       </TableCell>
 
-                      <TableCell className="font-mono text-sm whitespace-nowrap">
-                        {pag?.seg_operacao_bancaria || "---"}
-                      </TableCell>
-
-                      <TableCell className="text-sm whitespace-nowrap">
-                        {pag?.forma_pagamento || "---"}
-                      </TableCell>
-
-                      <TableCell className="text-sm whitespace-nowrap">
-                        {pag?.nome_operador || "---"}
-                      </TableCell>
-
-                      <TableCell className="text-sm whitespace-nowrap">
-                        {pag?.caixa || "---"}
-                      </TableCell>
-
-                      <TableCell className="text-sm whitespace-nowrap">
-                        {pag?.canal || "---"}
+                      <TableCell className="font-mono">
+                        {pag.servicos ? (
+                          pag.servicos.length > 10 ? (
+                            <span className="flex items-center gap-1">
+                              {truncate(pag.servicos, 10)}
+                              <button
+                                className="text-blue-500 underline text-xs"
+                                onClick={() => handleOpenServices(pag.servicos)}
+                              >
+                                ver mais
+                              </button>
+                            </span>
+                          ) : (
+                            pag.servicos
+                          )
+                        ) : (
+                          "N/A"
+                        )}
                       </TableCell>
 
                       <TableCell className="text-right font-medium whitespace-nowrap">
@@ -233,20 +223,8 @@ export function PagamentosTable({
                         {formatNumber(pag?.valor_depositado || 0)}
                       </TableCell>
 
-                      <TableCell className="text-center text-sm whitespace-nowrap">
-                        {formatarData(pag?.databanco || "")}
-                      </TableCell>
-
-                      <TableCell className="text-center text-sm whitespace-nowrap">
-                        {formatarData(pag?.data_registro || "")}
-                      </TableCell>
-
                       <TableCell className="text-center">
                         {getStatusPagamentoBadge(pag?.status_pagamento || "")}
-                      </TableCell>
-
-                      <TableCell className="text-sm whitespace-nowrap">
-                        {pag?.tipo_pagamento || "---"}
                       </TableCell>
 
                       <TableCell className="text-center space-x-1 whitespace-nowrap">
@@ -350,6 +328,25 @@ export function PagamentosTable({
         open={openAnularMultaModal}
         onClose={closeMultaModal}
       />
+
+      <Dialog open={openServicesModal} onOpenChange={setOpenServicesModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Serviços / Descrição Completa</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-sm whitespace-pre-wrap">
+            {selectedServices || "Sem descrição adicional"}
+          </div>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setOpenServicesModal(false)}
+            >
+              Fechar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
