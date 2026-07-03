@@ -9,7 +9,7 @@ export interface AlunoMatriculaResponse {
 }
 
 export async function fetchAlunoMatricula(
-  enrollmentCode: number
+  enrollmentCode: number,
 ): Promise<AlunoMatriculaResponse> {
   const { data } = await axiosNestFinance.get(`alunos/${enrollmentCode}`);
 

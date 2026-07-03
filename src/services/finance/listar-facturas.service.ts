@@ -1,5 +1,3 @@
-// src/services/factura/listar-facturas.service.ts
-
 import { axiosNestFinance } from "@/lib/axios-nest-finance";
 import { normalizeParam } from "@/util/normalize-param";
 
@@ -32,6 +30,8 @@ export type Factura = {
   nome_aluno: string;
   ano_lectivo: string;
   servicos: string;
+  n_operacao_bancaria: string;
+  n_operacao_bancaria2: string;
   codigo_ano_lectivo?: number;
 
   curso: string;
@@ -40,6 +40,12 @@ export type Factura = {
   motivo_anulacao: string | null;
   data_anulacao: string | null;
   utilizador_anulacao: string | null;
+  cadeiras_recurso_epoca_especial?: string | null;
+  caixa: string | null;
+  tipo_pagamento: string | null;
+  data_banco: string | null;
+  nome_utilizador_pagamento: string | null;
+  forma_pagamento: string | null;
 };
 
 /* ---------- RESPONSE ITEM ---------- */
@@ -167,9 +173,10 @@ export async function buscarFacturaService(
   return data;
 }
 
-export async function annulInvoiceService(
-  params: { facturaId: number | string, motivo: string },
-): Promise<{ sucesso: boolean; mensagem: string }> {
+export async function annulInvoiceService(params: {
+  facturaId: number | string;
+  motivo: string;
+}): Promise<{ sucesso: boolean; mensagem: string }> {
   const { facturaId, motivo } = params;
   const { data } = await axiosNestFinance.delete(`/invoices/${facturaId}`, {
     data: { motivo },

@@ -37,6 +37,7 @@ export type PaymentItem = {
   codigo_matricula: number;
   curso: string;
   codigo_factura: number;
+  servicos?: string;
 };
 
 export type ListPaymentsResponse = {
