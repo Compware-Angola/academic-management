@@ -26,15 +26,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Home, Search, BookOpen, Eye, Loader2, Plus } from "lucide-react";
+import {
+  Download,
+  FileText,
+  Home,
+  Search,
+  BookOpen,
+  Eye,
+  Loader2,
+  Plus,
+  Printer,
+  Pencil,
+  User2,
+  Trash2,
+} from "lucide-react";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
 import { formatarData } from "@/util/date-formate";
@@ -43,16 +54,30 @@ import { convertGuards } from "./convertGuards";
 import MarkingDetailsGuardModal from "../components/MarkingDetailsGuardModal";
 import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
 import AddMarkingAssessmentModal from "../components/AddMarkingAssessmentModal";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import {
+  exportMarkingAssessmentExcelService,
+  exportMarkingAssessmentPdfService,
+} from "@/services/avaliacao/export-marking-assessment.service";
+import { toast } from "sonner";
+
+type ExportAction = "excel" | "pdf" | "print";
+import EditMarkingAssessmentModal from "../components/EditMarkingAssessmentModal";
+import { useMutationDeleteMarkingAssessment } from "@/hooks/avaliacao/use-mutation-delete-marking-assessment";
 
 export default function AddMarkingAssessment() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setEditIsModalOpen] = useState(false);
+  const [selectedMarkId, setSelectedMarkId] = useState<number>(null);
   const [isAddMarkingModalOpen, setIsMarkingModalOpen] = useState(false);
   const [guards, setGuards] = useState<string[]>([]);
 
   const [selectedTurmaId, setSelectedTurmaId] = useState<number | null>(null);
+  const onOpenEditModal = (id: number) => {
+    setEditIsModalOpen(true);
+    setSelectedMarkId(id);
+  };
 
   // filtros
   const [filters, setFilters] = useState({
@@ -69,15 +94,14 @@ export default function AddMarkingAssessment() {
   // paginação
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [exportingAction, setExportingAction] = useState<ExportAction | null>(
+    null,
+  );
 
   // === Dados base ===
   const { data: anosAcademicos } = useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-  const { data: cursos } = useCursos();
-
-  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
-    useQueryTipoAvaliacao();
 
   const { data: prazos = [], isLoading: isLoadingPrazos } =
     useQueryMarcacaoProvaPrazo({
@@ -88,6 +112,8 @@ export default function AddMarkingAssessment() {
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
+  const { mutate: deleteMarkingAssessment, isPending: isPendingDelete } =
+    useMutationDeleteMarkingAssessment();
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -138,10 +164,80 @@ export default function AddMarkingAssessment() {
   const openAddMarkingModal = () => {
     setIsMarkingModalOpen(true);
   };
+  const onDeleteMarkingAssessment = (id: number) => {
+    setSelectedMarkId(id);
+    deleteMarkingAssessment(id, {
+      onSuccess() {
+        setSelectedMarkId(null);
+      },
+    });
+  };
   const schedules = scheduleResponse?.data || [];
   const tableData = markingResponse?.data || [];
   const total = markingResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
+  const isExamExpired = (data: string, hora: string) => {
+    if (!data || !hora) return false;
+    const examDate = new Date(`${data}T${hora}`);
+    return new Date() > examDate;
+  };
+
+  const handleExport = async (action: ExportAction) => {
+    if (exportingAction || !canLoadTurmas || total === 0) return;
+
+    const printWindow = action === "print" ? window.open("", "_blank") : null;
+
+    if (action === "print" && !printWindow) {
+      toast.error("O navegador bloqueou a janela de impressão.");
+      return;
+    }
+
+    setExportingAction(action);
+
+    try {
+      const exportPayload = {
+        anoLectivo: Number(filters.anoLetivo),
+        semestre: Number(filters.semestre),
+        periodo: parseFilter(filters.periodo),
+        curso: Number(filters.curso),
+        prazoId: Number(filters.prazoId),
+        tipoHorario: 1,
+        anoCurricular: parseFilter(filters.anoCurricular),
+        horarioId: parseFilter(filters.horarioId),
+        unidadeCurricular: parseFilter(filters.unidadeCurricular),
+      };
+
+      const { blob, fileName } =
+        action === "excel"
+          ? await exportMarkingAssessmentExcelService(exportPayload, total)
+          : await exportMarkingAssessmentPdfService(exportPayload);
+
+      const downloadUrl = URL.createObjectURL(blob);
+
+      if (action === "print") {
+        printWindow!.location.href = downloadUrl;
+        setTimeout(() => {
+          printWindow!.print();
+          URL.revokeObjectURL(downloadUrl);
+        }, 1000);
+      } else {
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+      }
+
+      toast.success("Exportação concluída com sucesso.");
+    } catch {
+      printWindow?.close();
+      toast.error("Não foi possível exportar as marcações de provas.");
+    } finally {
+      setExportingAction(null);
+    }
+  };
 
   return (
     <div className="p-6 space-y-8">
@@ -367,7 +463,40 @@ export default function AddMarkingAssessment() {
       {/* Tabela */}
       <Card>
         <CardHeader>
-          <CardTitle>Horários Encontradas</CardTitle>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>Horários Encontradas</CardTitle>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport("pdf")}
+                disabled={!canLoadTurmas || total === 0 || !!exportingAction}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                {exportingAction === "pdf" ? "A exportar..." : "Exportar PDF"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport("print")}
+                disabled={!canLoadTurmas || total === 0 || !!exportingAction}
+              >
+                <Printer className="mr-2 h-4 w-4" />
+                {exportingAction === "print" ? "A imprimir..." : "Imprimir"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport("excel")}
+                disabled={!canLoadTurmas || total === 0 || !!exportingAction}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {exportingAction === "excel"
+                  ? "A exportar..."
+                  : "Exportar Excel"}
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loadingTurmas ? (
@@ -400,34 +529,73 @@ export default function AddMarkingAssessment() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tableData.map((item) => (
-                      <TableRow key={item.codigoprova}>
-                        <TableCell>{item.curso}</TableCell>
-                        <TableCell>{item.disciplina}</TableCell>
-                        <TableCell>{item.anolectivo}</TableCell>
-                        <TableCell>{item.classe}</TableCell>
-                        <TableCell>{item.horario}</TableCell>
-                        <TableCell>{item.periodo}</TableCell>
-                        <TableCell>{item.tb_salas_designacao}</TableCell>
-                        <TableCell>
-                          {formatarData(item.tcp_data_prova)}
-                        </TableCell>
-                        <TableCell>{item.duracaoprova}</TableCell>
-                        <TableCell>{item.tcp_hora_prova}</TableCell>
-                        <TableCell>{item.horatermino}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openDetails(item.vigilantes)}
-                            >
-                              <Eye className="h-4 w-4 mr-2" /> Ver Vigilantes
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {tableData?.map((item) => {
+                      const expired = isExamExpired(
+                        item.tcp_data_prova,
+                        item.tcp_hora_prova,
+                      );
+                      return (
+                        <TableRow key={item.codigoprova}>
+                          <TableCell>{item.curso}</TableCell>
+                          <TableCell>{item.disciplina}</TableCell>
+                          <TableCell>{item.anolectivo}</TableCell>
+                          <TableCell>{item.classe}</TableCell>
+                          <TableCell>{item.horario}</TableCell>
+                          <TableCell>{item.periodo}</TableCell>
+                          <TableCell>{item.tb_salas_designacao}</TableCell>
+                          <TableCell>
+                            {formatarData(item.tcp_data_prova)}
+                          </TableCell>
+                          <TableCell>{item.duracaoprova}</TableCell>
+                          <TableCell>{item.tcp_hora_prova}</TableCell>
+                          <TableCell>{item.horatermino}</TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex space-x-2">
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => openDetails(item.vigilantes)}
+                              >
+                                <User2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                disabled={expired}
+                                size="icon"
+                                variant="outline"
+                                onClick={() =>
+                                  onOpenEditModal(item.codigoprova)
+                                }
+                              >
+                                <Pencil className="h-4 w-4 " />
+                              </Button>
+                              <Button
+                                disabled={
+                                  (isPendingDelete &&
+                                    item.codigoprova == selectedMarkId) ||
+                                  expired
+                                }
+                                size="icon"
+                                variant="outline"
+                                onClick={() =>
+                                  onDeleteMarkingAssessment(item.codigoprova)
+                                }
+                              >
+                                {isPendingDelete &&
+                                item.codigoprova == selectedMarkId ? (
+                                  <>
+                                    <Loader2 className="animate-spin h-4 w-4" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <Trash2 className="h-4 w-4" />
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -496,6 +664,16 @@ export default function AddMarkingAssessment() {
           setSelectedTurmaId(null);
         }}
       />
+      {selectedMarkId && (
+        <EditMarkingAssessmentModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setEditIsModalOpen(false);
+            setSelectedMarkId(null);
+          }}
+          provaId={selectedMarkId}
+        />
+      )}
     </div>
   );
 }

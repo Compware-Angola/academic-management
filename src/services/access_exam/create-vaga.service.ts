@@ -6,6 +6,7 @@ export type CreateVagaPayload = {
   periodoId: number;
   anoLetivoId: number;
   numVagas: number;
+  tipoCandidaturaId: number;
 };
 
 export type CreateVagaResponse = {

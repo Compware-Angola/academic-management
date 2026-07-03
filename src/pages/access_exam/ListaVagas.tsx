@@ -36,6 +36,8 @@ import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 const PAGE_SIZE = 10;
 
@@ -48,6 +50,7 @@ function parseFilter(value: string) {
 }
 
 export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
+  const [tipoCandidaturaId, setTipoCandidaturaId] = useState("1");
   const [cursoId, setCursoId] = useState("all");
   const [periodoId, setPeriodoId] = useState("all");
   const [anoLetivoId, setAnoLetivoId] = useState("all");
@@ -72,6 +75,7 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
     cursoId: parseFilter(cursoId),
     periodoId: parseFilter(periodoId),
     anoLetivoId: parseFilter(anoLetivoId),
+    tipoCandidaturaId: parseFilter(tipoCandidaturaId),
     page,
     limit: PAGE_SIZE,
   });
@@ -134,32 +138,32 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
 
   const excelProps = exportRows.length
     ? {
-        documentTitle: "Listagem de Vagas",
-        subtitle: "Vagas configuradas por curso, período e ano lectivo",
-        infoSections: [
-          {
-            title: "Filtros Aplicados",
-            content: filtrosExportacao || "Sem filtros",
-          },
-          {
-            title: "Resumo",
-            content: [`Total de registos: ${pagination?.total ?? exportRows.length}`],
-          },
-        ],
-        mainTable: {
-          headers: [
-            { key: "curso", label: "Curso", width: 35 },
-            { key: "periodo", label: "Período", width: 18 },
-            { key: "anoLectivo", label: "Ano lectivo", width: 18 },
-            { key: "totalVagas", label: "Total", width: 12 },
-            { key: "vagasDisponiveis", label: "Disponíveis", width: 16 },
-            { key: "cursosOpcionais", label: "Cursos opcionais", width: 30 },
-          ],
-          rows: exportRows,
+      documentTitle: "Listagem de Vagas",
+      subtitle: "Vagas configuradas por curso, período e ano lectivo",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: filtrosExportacao || "Sem filtros",
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        {
+          title: "Resumo",
+          content: [`Total de registos: ${pagination?.total ?? exportRows.length}`],
+        },
+      ],
+      mainTable: {
+        headers: [
+          { key: "curso", label: "Curso", width: 35 },
+          { key: "periodo", label: "Período", width: 18 },
+          { key: "anoLectivo", label: "Ano lectivo", width: 18 },
+          { key: "totalVagas", label: "Total", width: 12 },
+          { key: "vagasDisponiveis", label: "Disponíveis", width: 16 },
+          { key: "cursosOpcionais", label: "Cursos opcionais", width: 30 },
+        ],
+        rows: exportRows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Listagem_Vagas_${new Date().toISOString().slice(0, 10)}`;
@@ -207,6 +211,7 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
       anoLetivoId: String(vaga.ano_lectivo_id),
       numVagas: String(vaga.num_vagas),
       cursosOpcionais: vaga.cursosopcionais ?? "",
+
     });
   }
 
@@ -223,7 +228,6 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
           periodoId: Number(editForm.periodoId),
           anoLetivoId: Number(editForm.anoLetivoId),
           numVagas: Number(editForm.numVagas),
-          cursosOpcionais: editForm.cursosOpcionais.trim() || undefined,
         },
       },
       {
@@ -246,12 +250,36 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
     <Card>
       <CardContent className="space-y-4 pt-6">
         <div className="grid gap-4 md:grid-cols-3">
+          <TipoCandidaturaSelect
+            value={tipoCandidaturaId}
+            onChangeValue={(value) => {
+              handleFilterChange(setTipoCandidaturaId, value)
+              setAnoLetivoId("all");
+              setCursoId("all");
+              setPeriodoId("all");
+            }}
+          />
+          <AcademicYearSelect
+            value={anoLetivoId}
+            tipoCandidaturaId={parseFilter(tipoCandidaturaId)}
+            onChangeValue={(value) => {
+              handleFilterChange(setAnoLetivoId, value)
+              setCursoId("all");
+              setPeriodoId("all");
+            }}
+          />
           <CourseSelect
             label="Curso"
             value={cursoId}
-            onChangeValue={(value) => handleFilterChange(setCursoId, value)}
+            params={{ tipoCandidaturaId: parseFilter(tipoCandidaturaId) }}
+
+            onChangeValue={(value) => {
+              handleFilterChange(setCursoId, value)
+              setPeriodoId("all");
+            }}
             enableDefaultSelectItem
           />
+
 
           <FormSelect
             label="Período"
@@ -267,19 +295,7 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
             })}
           />
 
-          <FormSelect
-            label="Ano lectivo"
-            value={anoLetivoId}
-            onChange={(value) => handleFilterChange(setAnoLetivoId, value)}
-            options={anosLetivos}
-            loading={isLoadingAnosLetivos}
-            defaultSelectItem={[{ value: "all", label: "Todos" }]}
-            map={(anoLetivo) => ({
-              key: anoLetivo.codigo,
-              value: anoLetivo.codigo,
-              label: anoLetivo.designacao,
-            })}
-          />
+
         </div>
 
         {isLoading ? (
@@ -301,7 +317,7 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
                 <TableHead>Ano lectivo</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Disponíveis</TableHead>
-                
+
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -315,7 +331,7 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
                   <TableCell>
                     <Badge variant="outline">{vaga.vagas_disponiveis}</Badge>
                   </TableCell>
-            
+
                   <TableCell>
                     <div className="flex justify-end gap-2">
                       <Button
@@ -443,21 +459,6 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
                   disabled={updateVaga.isPending}
                 />
               </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="edit-cursos-opcionais">Cursos opcionais</Label>
-              <Textarea
-                id="edit-cursos-opcionais"
-                value={editForm.cursosOpcionais}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    cursosOpcionais: event.target.value,
-                  }))
-                }
-                disabled={updateVaga.isPending}
-              />
             </div>
 
             <DialogFooter>

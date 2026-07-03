@@ -66,7 +66,7 @@ export function AreaFinanceira({
               value="dividas"
             >
               <BanknoteIcon className="h-4 w-4" />
-              <span className="hidden md:inline">Dívidas</span>
+              <span className="hidden md:inline">Negociação de Dívidas</span>
             </TabsTrigger>
           }
 

@@ -4,6 +4,7 @@ export type ListarVagasParams = {
   cursoId?: number;
   periodoId?: number;
   anoLetivoId?: number;
+  tipoCandidaturaId?: number;
   page?: number;
   limit?: number;
 };

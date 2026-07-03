@@ -562,6 +562,7 @@ export default function AddMarkingAssessmentModal({
               isCreateLoadingCalendar ||
               isFormInvalid ||
               shouldDisable ||
+              teacher.length == 0 ||
               gradesPeriodStatus != "ALLOWED"
             }
             onClick={handleCreateCalendarioProva}

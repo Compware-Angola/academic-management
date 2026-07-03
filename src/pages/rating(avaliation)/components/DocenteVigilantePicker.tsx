@@ -62,7 +62,7 @@ export function DocenteVigilantePicker({ values, onChange, max = 2 }: Props) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Pesquisar por nome ou departamento..."
+            placeholder="Pesquisar por nome..."
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           />
           <span className="text-xs text-muted-foreground shrink-0">

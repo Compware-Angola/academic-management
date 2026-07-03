@@ -21,6 +21,16 @@ import {
   MapPin,
   Calendar,
   ArrowLeft,
+  HandCoins,
+  Wallet,
+  Hash,
+  Banknote,
+  AlertTriangle,
+  Tag,
+  Coins,
+  CalendarCheck,
+  Landmark,
+  Receipt,
 } from "lucide-react";
 import Lottie from "lottie-react";
 import TimeLoader from "@/assets/timeloader.json";
@@ -73,7 +83,7 @@ export const ListaPagamentoModal = ({
   );
   const isLoading =
     isLoadingFacturaItens || isLoadingFactura || isLoadingStudent;
-
+  console.log("factura", factura);
   const baseFileName = `Detalhes_Pagamento_${factura?.codigo || factureId}_${new Date()
     .toISOString()
     .slice(0, 10)}`;
@@ -93,7 +103,7 @@ export const ListaPagamentoModal = ({
     <>
       {/* Modal de Detalhes */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-5xl! max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl! max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <FileText className="h-5 w-5" />
@@ -160,49 +170,123 @@ export const ListaPagamentoModal = ({
                   <CreditCard className="h-5 w-5 text-primary" />
                   Detalhes do Pagamento
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-muted/30 p-4 rounded-lg">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Referência</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Hash className="h-4 w-4" /> Referência
+                    </p>
                     <p className="font-mono font-medium">
                       {factura?.referencia}
                     </p>
                   </div>
+
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Valor Total</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Banknote className="h-4 w-4" /> Valor Total Liquido
+                    </p>
                     <p className="font-medium text-lg text-primary">
                       {factura?.total_preco}
                     </p>
                   </div>
+
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">
-                      Valor da Multa
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <AlertTriangle className="h-4 w-4" /> Valor da Multa
                     </p>
                     <p className="font-medium">
                       {formatNumber(factura?.total_multa)}
                     </p>
                   </div>
+
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">
-                      Valor de Desconto
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Tag className="h-4 w-4" /> Valor de Desconto
                     </p>
                     <p className="font-medium">
                       {formatNumber(factura?.desconto)}
                     </p>
                   </div>
+
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">
-                      Valor Apagar
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Coins className="h-4 w-4" /> Valor Total
                     </p>
                     <p className="font-medium">
                       {formatNumber(factura?.valor_pagar)}
                     </p>
                   </div>
+
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground flex items-center gap-1">
                       <Calendar className="h-4 w-4" /> Data de Factura
                     </p>
                     <p className="font-medium">
                       {formatarData(factura?.data_factura)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <CalendarCheck className="h-4 w-4" /> Data Registro
+                    </p>
+                    <p className="font-medium">
+                      {formatarData(factura?.data_banco)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <HandCoins className="h-4 w-4" /> Caixa
+                    </p>
+                    <p className="font-medium">
+                      {factura?.caixa || "Indefinido"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Landmark className="h-4 w-4" /> Número da Operação
+                      Bancária
+                    </p>
+                    <p className="font-medium">
+                      {factura?.n_operacao_bancaria || "---"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Landmark className="h-4 w-4" /> Número da 2ª Operação
+                      Bancária
+                    </p>
+                    <p className="font-medium">
+                      {factura?.n_operacao_bancaria2 || "---"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Wallet className="h-4 w-4" /> Forma de Pagamento
+                    </p>
+                    <p className="font-medium">
+                      {factura?.forma_pagamento || "Indefinido"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Receipt className="h-4 w-4" /> Tipo de Pagamento
+                    </p>
+                    <p className="font-medium">
+                      {factura?.tipo_pagamento || "Indefinido"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                      <User className="h-4 w-4" /> Nome do Operador
+                    </p>
+                    <p className="font-medium">
+                      {factura?.nome_utilizador_pagamento || "Indefinido"}
                     </p>
                   </div>
                 </div>

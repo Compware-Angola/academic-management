@@ -37,9 +37,11 @@ function getEstadoBadge(estado: string) {
 }
 
 export function StudentProfileHeader({ matricula }: Props) {
+  console.log("matricula", matricula);
   const { data: student, isLoading } = useStudentDetail(matricula);
   const { data: bolsaInfo, isLoading: isLoadingInfoBolsa } = useStudentInfoBolsa(matricula);
-
+  console.log("student", student);
+  console.log("bolsaInfo", bolsaInfo);
   if (isLoading || !student || isLoadingInfoBolsa) {
     return (
       <Card className="flex-1">

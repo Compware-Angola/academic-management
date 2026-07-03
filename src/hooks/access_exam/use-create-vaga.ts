@@ -11,6 +11,7 @@ export function useCreateVaga() {
     mutationFn: (payload: CreateVagaPayload) => createVaga(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vagas"] });
+      queryClient.invalidateQueries({ queryKey: ["academic-year-vacancies"] });
     },
     onError: (error) => {
       console.error(error);
