@@ -315,3 +315,48 @@ export async function updateCashRegisterService(
 export async function deleteCashRegisterService(id: number): Promise<void> {
   await axiosNestFinance.delete(`/cash-registers/${id}`);
 }
+export type ListPaymentReportsForOperatorFilters = {
+  operatorId: number;
+  limit?: number;
+  page?: number
+  search?: string;
+  caixaId?: number;
+  startDate?: string;
+  endDate?: string;
+}
+export type CashRegisterPaymentReport = {
+  data_pagamento: string
+  valor_depositado: number
+  forma_pagamento: string
+  nome_utilizador: string
+  aluno: string
+  caixa: string | null
+  factura_item_codigo: number
+  servico_descricao: string
+  quantidade: number
+  preco: number
+  multa: number
+  total: number
+}
+export type ListPaymentReportsForOperatorResponse = {
+  data: CashRegisterPaymentReport[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }
+}
+
+export async function listPaymentReportsForOperatorService(
+  filters?: ListPaymentReportsForOperatorFilters,
+): Promise<ListPaymentReportsForOperatorResponse> {
+  const { operatorId, ...rest } = filters
+  const { data } = await axiosNestFinance.get(
+    `/cash-registers/reports/${operatorId}`,
+    { params: rest },
+  );
+  return data;
+}
+
+

@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 type Props = {
   search: string;
   onSearchChange: (v: string) => void;
+  tipoPagamento?: string;
+  onTipoPagamentoChange?: (v: string) => void;
 
   operatorId: string;
   onOperatorChange: (v: string) => void;
@@ -58,9 +60,8 @@ export const FiltersBar = ({
     <Card>
       <CardContent className="pt-6 space-y-4">
         <div
-          className={`grid gap-4 ${
-            singleOperator ? "md:grid-cols-1" : "md:grid-cols-3"
-          }`}
+          className={`grid gap-4 ${singleOperator ? "md:grid-cols-1" : "md:grid-cols-3"
+            }`}
         >
           {!singleOperator && (
             <>

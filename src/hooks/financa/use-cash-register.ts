@@ -22,6 +22,8 @@ import {
   UpdateCashRegisterPayload,
   updateCashRegisterService,
   deleteCashRegisterService,
+  listPaymentReportsForOperatorService,
+  ListPaymentReportsForOperatorFilters,
 } from "@/services/finance/cash-register.service";
 
 
@@ -263,5 +265,16 @@ export const useDeleteCashRegister = () => {
       queryClient.invalidateQueries({ queryKey: ["available-cash-registers"] });
       toast.success("Caixa eliminado com sucesso");
     },
+  });
+};
+
+export const useQueryPaymentReportsForOperator = (
+  filters: ListPaymentReportsForOperatorFilters,
+) => {
+  return useQuery({
+    queryKey: ["payment-reports-for-operator", filters],
+    queryFn: () => listPaymentReportsForOperatorService(filters),
+    enabled: !!filters.operatorId,
+    staleTime: 1000 * 60 * 5,
   });
 };
