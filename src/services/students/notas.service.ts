@@ -1,6 +1,5 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-
 type NotaDisciplina = {
   codigo: number;
   disciplina: string;
@@ -13,7 +12,6 @@ type NotaDisciplina = {
   semestre: number;
   classe: number;
 };
-
 
 export interface NotasServiceParams {
   codigoMatricula: number;
