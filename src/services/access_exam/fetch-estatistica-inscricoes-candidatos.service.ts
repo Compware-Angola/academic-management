@@ -5,6 +5,8 @@ export type InscricoesPorDataParams = {
   codigoCurso?: number;
   codigoFaculdade?: number;
   codigoTurno?: number;
+  dataInicio?: string;
+  dataFim?: string;
   page?: number;
   limit?: number;
 };
@@ -28,11 +30,11 @@ export type InscricoesPorDataResponse = {
 };
 
 export async function fetchInscricoesPorData(
-  params: InscricoesPorDataParams
+  params: InscricoesPorDataParams,
 ): Promise<InscricoesPorDataResponse> {
   const { data } = await axiosNestGa.get(
     "/exames-de-acesso/estatistica/candidatos",
-    { params }
+    { params },
   );
   return data;
 }

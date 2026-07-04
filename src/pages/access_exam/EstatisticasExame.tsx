@@ -1,12 +1,38 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { RefreshCw, Download, Printer, Home, ChevronLeft, ChevronRight, BarChart3, X } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableFooter,
+} from "@/components/ui/table";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  RefreshCw,
+  Download,
+  Printer,
+  Home,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
-import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { ChartAreaInteractive } from "./components/chart-area-interactive";
@@ -18,9 +44,11 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useInscricoesPorData } from "@/hooks/access_exam/use-estatitica-candidato";
 import { parseFilter } from "@/util/parse-filter";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 
 export default function EstatisticasExame() {
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const [filters, setFilters] = useState({
@@ -30,13 +58,21 @@ export default function EstatisticasExame() {
     codigoCurso: undefined,
     codigoTurno: undefined,
     codigoFaculdade: undefined,
+    dataInicio: undefined as string | undefined,
+    dataFim: undefined as string | undefined,
   });
 
-  const { data: estatistica, isLoading: isLoadingEstatistica, refetch } = useInscricoesPorData({
+  const {
+    data: estatistica,
+    isLoading: isLoadingEstatistica,
+    refetch,
+  } = useInscricoesPorData({
     codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
     codigoCurso: parseFilter(filters.codigoCurso),
     codigoTurno: parseFilter(filters.codigoTurno),
     codigoFaculdade: parseFilter(filters.codigoFaculdade),
+    dataInicio: filters.dataInicio,
+    dataFim: filters.dataFim,
     page: filters.page,
     limit: filters.limit,
   });
@@ -55,8 +91,12 @@ export default function EstatisticasExame() {
   const pdfData = exportRows.length
     ? {
         filtros: [
-          filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
-          filters.codigoFaculdade ? `Faculdade: ${filters.codigoFaculdade}` : null,
+          filters.codigoAnoLetivo
+            ? `Ano Letivo: ${filters.codigoAnoLetivo}`
+            : null,
+          filters.codigoFaculdade
+            ? `Faculdade: ${filters.codigoFaculdade}`
+            : null,
           filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
           filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
         ]
@@ -72,7 +112,10 @@ export default function EstatisticasExame() {
       documentTitle="Estatísticas do Exame de Acesso"
       subtitle="Inscrições por data, turno e curso"
       infoSections={[
-        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
         { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
       ]}
       mainTable={{
@@ -94,7 +137,10 @@ export default function EstatisticasExame() {
         documentTitle: "Estatísticas do Exame de Acesso",
         subtitle: "Inscrições por data, turno e curso",
         infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
           { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
         ],
         mainTable: {
@@ -121,6 +167,8 @@ export default function EstatisticasExame() {
       codigoCurso: undefined,
       codigoTurno: undefined,
       codigoFaculdade: undefined,
+      dataInicio: undefined,
+      dataFim: undefined,
       page: 1,
       limit: filters.limit,
     });
@@ -132,19 +180,27 @@ export default function EstatisticasExame() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/"><Home className="h-4 w-4" /></Link>
+              <Link to="/">
+                <Home className="h-4 w-4" />
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Exame de Acesso</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Exame de Acesso</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Estatísticas</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Estatísticas</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Estatísticas do Exame de Acesso</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Estatísticas do Exame de Acesso
+          </h1>
           <p className="text-muted-foreground mt-1">
             Candidatos inscritos por data, turno e curso no exame de acesso.
           </p>
@@ -191,22 +247,35 @@ export default function EstatisticasExame() {
             disabled={isLoadingAcademicYear}
             loading={isLoadingAcademicYear}
             value={filters.codigoAnoLetivo?.toString() ?? "all"}
-            onChange={(v) => setFilters({ ...filters, codigoAnoLetivo: v, page: 1 })}
+            onChange={(v) =>
+              setFilters({ ...filters, codigoAnoLetivo: v, page: 1 })
+            }
             options={academicYear}
-            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
           />
 
           <FacultySelect
             allOption
             value={filters.codigoFaculdade}
             onChangeValue={(v) =>
-              setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined, page: 1 })
+              setFilters({
+                ...filters,
+                codigoFaculdade: v,
+                codigoCurso: undefined,
+                page: 1,
+              })
             }
           />
 
           <CourseSelect
             value={filters.codigoCurso}
-            onChangeValue={(v) => setFilters({ ...filters, codigoCurso: v, page: 1 })}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, codigoCurso: v, page: 1 })
+            }
           />
 
           <FormSelect
@@ -221,15 +290,55 @@ export default function EstatisticasExame() {
                 page: 1,
               }))
             }
-            options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
+            options={[
+              { codigo: "all", designacao: "Todos" },
+              ...(periodos ?? []),
+            ]}
             map={(p) => ({
               key: p.codigo.toString(),
               label: p.designacao,
               value: p.codigo.toString(),
             })}
           />
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Data Início</label>
+            <Input
+              type="date"
+              value={filters.dataInicio ?? ""}
+              onChange={(e) =>
+                setFilters((p) => ({
+                  ...p,
+                  dataInicio: e.target.value || undefined,
+                  page: 1,
+                }))
+              }
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Data Fim</label>
+            <Input
+              type="date"
+              min={filters.dataInicio} // impede escolher "fim" antes do "início"
+              value={filters.dataFim ?? ""}
+              onChange={(e) =>
+                setFilters((p) => ({
+                  ...p,
+                  dataFim: e.target.value || undefined,
+                  page: 1,
+                }))
+              }
+            />
+          </div>
         </div>
       </div>
+
+      {/* Chart */}
+      <ChartAreaInteractive
+        data={estatistica?.data}
+        isLoading={isLoadingEstatistica}
+      />
 
       {/* Tabela + Exportações já incluídas acima */}
       <Card>
@@ -245,47 +354,77 @@ export default function EstatisticasExame() {
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableHead className="font-semibold">Data</TableHead>
-                  <TableHead className="text-center font-semibold">Laboral</TableHead>
-                  <TableHead className="text-center font-semibold">Pós-Laboral</TableHead>
-                  <TableHead className="text-center font-semibold">Total/Dia</TableHead>
+                  <TableHead className="text-center font-semibold">
+                    Laboral
+                  </TableHead>
+                  <TableHead className="text-center font-semibold">
+                    Pós-Laboral
+                  </TableHead>
+                  <TableHead className="text-center font-semibold">
+                    Total/Dia
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoadingEstatistica ? (
-                  Array.from({ length: filters.limit }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="h-4 w-12 mx-auto" /></TableCell>
-                      <TableCell className="text-center"><Skeleton className="h-6 w-16 mx-auto rounded-full" /></TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  estatistica?.data.map((item, index) => (
-                    <TableRow key={index} className="hover:bg-muted/30">
-                      <TableCell className="font-mono font-medium">{item.data}</TableCell>
-                      <TableCell className="text-center font-semibold text-primary">{item.qt_diurno}</TableCell>
-                      <TableCell className="text-center font-semibold">{item.qt_noturno}</TableCell>
-                      <TableCell className="text-center">
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
-                          {item.total_dia}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                {isLoadingEstatistica
+                  ? Array.from({ length: filters.limit }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-4 w-12 mx-auto" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-4 w-12 mx-auto" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-6 w-16 mx-auto rounded-full" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : estatistica?.data.map((item, index) => (
+                      <TableRow key={index} className="hover:bg-muted/30">
+                        <TableCell className="font-mono font-medium">
+                          {item.data}
+                        </TableCell>
+                        <TableCell className="text-center font-semibold text-primary">
+                          {item.qt_diurno}
+                        </TableCell>
+                        <TableCell className="text-center font-semibold">
+                          {item.qt_noturno}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
+                            {item.total_dia}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
               </TableBody>
               <TableFooter>
                 <TableRow className="font-bold">
                   <TableCell>Totais</TableCell>
                   <TableCell className="text-center text-primary">
-                    {isLoadingEstatistica ? <Skeleton className="h-4 w-12 mx-auto" /> : estatistica?.data.reduce((a, b) => a + b.qt_diurno, 0)}
+                    {isLoadingEstatistica ? (
+                      <Skeleton className="h-4 w-12 mx-auto" />
+                    ) : (
+                      estatistica?.data.reduce((a, b) => a + b.qt_diurno, 0)
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
-                    {isLoadingEstatistica ? <Skeleton className="h-4 w-12 mx-auto" /> : estatistica?.data.reduce((a, b) => a + b.qt_noturno, 0)}
+                    {isLoadingEstatistica ? (
+                      <Skeleton className="h-4 w-12 mx-auto" />
+                    ) : (
+                      estatistica?.data.reduce((a, b) => a + b.qt_noturno, 0)
+                    )}
                   </TableCell>
                   <TableCell className="text-center text-primary">
-                    {isLoadingEstatistica ? <Skeleton className="h-4 w-12 mx-auto" /> : estatistica?.data.reduce((a, b) => a + b.total_dia, 0)}
+                    {isLoadingEstatistica ? (
+                      <Skeleton className="h-4 w-12 mx-auto" />
+                    ) : (
+                      estatistica?.data.reduce((a, b) => a + b.total_dia, 0)
+                    )}
                   </TableCell>
                 </TableRow>
               </TableFooter>
@@ -295,7 +434,8 @@ export default function EstatisticasExame() {
           {/* Paginação */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Página {filters.page} de {estatistica?.totalpages} — {estatistica?.total} registos
+              Página {filters.page} de {estatistica?.totalpages} —{" "}
+              {estatistica?.total} registos
             </p>
             <div className="flex gap-2">
               <Button
@@ -318,12 +458,6 @@ export default function EstatisticasExame() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Chart */}
-      <ChartAreaInteractive
-        data={estatistica?.data}
-        isLoading={isLoadingEstatistica}
-      />
     </div>
   );
 }
