@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookText, Plus } from "lucide-react";
+import { BookText, Plus, X } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -55,11 +55,14 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdown-disciplines";
+import { useMutationUpdateDiscipline } from "@/hooks/study_plan/use-mutation-update-discipline";
+import { Switch } from "@/components/ui/switch";
 
 export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
   const [classeId, setClasseId] = useState<string>("7");
+  const [estado, setEstado] = useState<number>();
   const { user: userData } = useAuth();
   // Paginação
   const [page, setPage] = useState(1);
@@ -72,12 +75,27 @@ export default function UCManagementPlan() {
     codigo_semestre: "",
   });
 
+  const hasActiveFilters =
+    !!cursoId ||
+    (classeId !== undefined && classeId !== "7") ||
+    estado !== undefined;
+
+  const limparFiltros = () => {
+    setCursoId("");
+    setClasseId("");
+    setEstado(undefined);
+    setPage(1); // importante: volta à primeira página ao limpar
+    // mantém anoLetivoId se for um filtro "base" obrigatório,
+    // ou reseta também se fizer sentido no teu fluxo
+  };
+
   const { data: anosLetivos = [], isLoading: loadingAnos } =
     useQueryAnoAcademico();
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
   const { data: classes = [], isLoading: loadingClasses } = useClasses();
   const { data: disciplines = [], isLoading: loadingDisciplines } =
     useQueryDropdownDisciplines();
+
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const {
     data: gradeResponses,
@@ -88,9 +106,21 @@ export default function UCManagementPlan() {
     anoLectivo: parseFilter(anoLetivoId),
     curso: parseFilter(cursoId),
     classe: classeId !== "7" ? parseFilter(classeId) : undefined,
+    estado: estado,
     page,
     limit,
   });
+
+  const { mutate: update, isPending: updating } = useMutationUpdateDiscipline();
+
+  const handleStatusChange = (codigo: number, status: boolean) => {
+    update({
+      codigo,
+      status: status ? 1 : 0,
+    });
+  };
+
+  console.log("Grade Curricular", gradeResponses);
 
   const { mutate: createUC, isPending: isCreating } = useAddUCToPlan();
 
@@ -182,8 +212,23 @@ export default function UCManagementPlan() {
       />
 
       {/* Filtros */}
-      <div className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">Filtros</h3>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={limparFiltros}
+              className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+              Limpar Filtros
+            </Button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {/* Ano Letivo */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
@@ -209,14 +254,14 @@ export default function UCManagementPlan() {
 
           {/* Curso */}
           <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Curso</label>
             {loadingCursos ? (
               <Skeleton className="h-10 w-full rounded-md" />
             ) : (
               <FormCommandSelect
                 value={cursoId}
-                label="Curso"
                 options={cursos}
-                width="lg"
+                width="w-full"
                 map={(c) => ({
                   key: c.codigo.toString(),
                   value: c.codigo.toString(),
@@ -239,24 +284,49 @@ export default function UCManagementPlan() {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o ano curricular..." />
                 </SelectTrigger>
-
                 <SelectContent>
                   {classes
-                    .filter((classe) =>
-                      !classe.designacao
-                        ?.toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .includes("pos-graduacao")
+                    .filter(
+                      (classe) =>
+                        !classe.designacao
+                          ?.toLowerCase()
+                          .normalize("NFD")
+                          .replace(/[\u0300-\u036f]/g, "")
+                          .includes("pos-graduacao"),
                     )
                     .map((classe) => (
-                      <SelectItem key={classe.codigo} value={String(classe.codigo)}>
+                      <SelectItem
+                        key={classe.codigo}
+                        value={String(classe.codigo)}
+                      >
                         {classe.designacao}
                       </SelectItem>
                     ))}
                 </SelectContent>
               </Select>
             )}
+          </div>
+
+          {/* Estado da UC */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              Estado da Unidade Curricular
+            </label>
+            <Select
+              value={estado === undefined ? "all" : String(estado)}
+              onValueChange={(v) =>
+                setEstado(v === "all" ? undefined : Number(v))
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Todos os Estados" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Estados</SelectItem>
+                <SelectItem value="1">Ativas</SelectItem>
+                <SelectItem value="0">Inativas</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -283,15 +353,39 @@ export default function UCManagementPlan() {
             <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <BookText className="text-3xl" />
             </div>
-            <p className="text-lg font-medium mb-2">
-              {anoLetivoId && cursoId && classeId
-                ? "Nenhuma unidade curricular encontrada"
-                : "Selecione o ano letivo, curso e ano curricular para visualizar as unidades curriculares"}
-            </p>
 
+            {/* ⬇️ Aqui entra o bloco único, substituindo os 2 <p> antigos */}
+            {(() => {
+              const filtrosObrigatoriosPreenchidos = !!(
+                anoLetivoId &&
+                cursoId &&
+                classeId
+              );
+
+              let mensagem: string;
+
+              if (!filtrosObrigatoriosPreenchidos) {
+                const faltantes: string[] = [];
+                if (!anoLetivoId) faltantes.push("o ano letivo");
+                if (!cursoId) faltantes.push("o curso");
+                if (!classeId) faltantes.push("o ano curricular");
+
+                mensagem = `Selecione ${faltantes.join(", ")} para visualizar as unidades curriculares`;
+              } else if (estado !== undefined) {
+                mensagem = `Nenhuma unidade curricular ${
+                  estado === 1 ? "ativa" : "inativa"
+                } encontrada para os filtros selecionados`;
+              } else {
+                mensagem =
+                  "Nenhuma unidade curricular encontrada para os filtros selecionados";
+              }
+
+              return <p className="text-lg font-medium mb-2">{mensagem}</p>;
+            })()}
           </div>
         ) : (
           <>
+            {/* resto da tabela */}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -300,6 +394,7 @@ export default function UCManagementPlan() {
                   <TableHead className="w-64">Curso</TableHead>
                   <TableHead className="w-64">Ano Curricular</TableHead>
                   <TableHead className="w-32">Semestre</TableHead>
+                  <TableHead className="w-32">Estado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -329,13 +424,22 @@ export default function UCManagementPlan() {
                         {uc.designacao_semestre}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      <Switch
+                        disabled={updating}
+                        checked={uc.status === 1}
+                        onCheckedChange={(checked) => {
+                          handleStatusChange(uc.codigo_disciplina, checked);
+                        }}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
 
             {/* Paginação */}
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center justify-between m-4">
               <p className="text-sm text-muted-foreground">
                 A mostrar {grades.length} de {total} registos
               </p>
