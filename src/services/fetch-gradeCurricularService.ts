@@ -4,6 +4,7 @@ export type GradeCurricularPayload = {
   classe: number;
   curso: number;
   anoLectivo: number;
+  estado: number;
   page?: number;
   limit?: number;
 };
@@ -41,7 +42,7 @@ export type AddUCToPlanPayload = {
 export async function getGradeCurricular(
   payload: GradeCurricularPayload,
 ): Promise<GradeCurricularResponse> {
-  const { classe, curso, anoLectivo, page = 1, limit = 25 } = payload;
+  const { classe, curso, anoLectivo, estado, page = 1, limit = 25 } = payload;
 
   const { data } = await axiosNestGa.get<GradeCurricularResponse>(
     "/discipline/grade-curricular",
@@ -50,6 +51,7 @@ export async function getGradeCurricular(
         classe,
         curso,
         anoLectivo,
+        estado,
         page,
         limit,
       },

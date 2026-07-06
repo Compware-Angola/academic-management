@@ -11,16 +11,26 @@ export function useGradeCurricular({
   anoLectivo,
   classe,
   curso,
+  estado,
   limit,
   page,
 }: GradeCurricularPayload) {
   return useQuery<GradeCurricularResponse, Error>({
-    queryKey: ["grade-curricular", anoLectivo, classe, curso, limit, page],
+    queryKey: [
+      "grade-curricular",
+      anoLectivo,
+      classe,
+      curso,
+      estado,
+      limit,
+      page,
+    ],
     queryFn: () =>
       getGradeCurricular({
         anoLectivo,
         classe,
         curso,
+        estado,
         limit,
         page,
       }),
