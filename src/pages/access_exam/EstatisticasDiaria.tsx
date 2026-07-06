@@ -3,12 +3,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { RefreshCw, Download, Printer, Home, ChevronLeft, ChevronRight, CalendarDays, Users, X } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableFooter,
+} from "@/components/ui/table";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  RefreshCw,
+  Download,
+  Printer,
+  Home,
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  Users,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
-import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { ChartLineInteractive } from "./components/chart-line-interactive";
@@ -21,7 +48,8 @@ import { parseFilter } from "@/util/parse-filter";
 import { useInscricoesPorDia } from "@/hooks/access_exam/use-estatistica-por-dia";
 
 export default function EstatisticasDiaria() {
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const [filters, setFilters] = useState({
@@ -31,13 +59,21 @@ export default function EstatisticasDiaria() {
     codigoCurso: undefined,
     codigoTurno: undefined,
     codigoFaculdade: undefined,
+    dataInicio: undefined,
+    dataFim: undefined,
   });
 
-  const { data: estatisticaDiaria, isLoading: isLoadingEstatisticaDiaria, refetch } = useInscricoesPorDia({
+  const {
+    data: estatisticaDiaria,
+    isLoading: isLoadingEstatisticaDiaria,
+    refetch,
+  } = useInscricoesPorDia({
     codigoAnoLetivo: parseFilter(filters.codigoAnoLetivo),
     codigoCurso: parseFilter(filters.codigoCurso),
     codigoTurno: parseFilter(filters.codigoTurno),
     codigoFaculdade: parseFilter(filters.codigoFaculdade),
+    dataInicio: filters.dataInicio,
+    dataFim: filters.dataFim,
     page: filters.page,
     limit: filters.limit,
   });
@@ -52,8 +88,12 @@ export default function EstatisticasDiaria() {
       numero: (currentPage - 1) * filters.limit + index + 1,
       data: item.data,
       subtotal: item.subtotal,
-      percentagem: estatisticaDiaria?.data?.length 
-        ? Math.round((item.subtotal / Math.max(...estatisticaDiaria.data.map(d => d.subtotal || 0))) * 100) 
+      percentagem: estatisticaDiaria?.data?.length
+        ? Math.round(
+            (item.subtotal /
+              Math.max(...estatisticaDiaria.data.map((d) => d.subtotal || 0))) *
+              100,
+          )
         : 0,
     }));
   }, [estatisticaDiaria, currentPage, filters.limit]);
@@ -61,8 +101,12 @@ export default function EstatisticasDiaria() {
   const pdfData = exportRows.length
     ? {
         filtros: [
-          filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
-          filters.codigoFaculdade ? `Faculdade: ${filters.codigoFaculdade}` : null,
+          filters.codigoAnoLetivo
+            ? `Ano Letivo: ${filters.codigoAnoLetivo}`
+            : null,
+          filters.codigoFaculdade
+            ? `Faculdade: ${filters.codigoFaculdade}`
+            : null,
           filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
           filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
         ]
@@ -78,7 +122,10 @@ export default function EstatisticasDiaria() {
       documentTitle="Estatísticas Diárias - Exame de Acesso"
       subtitle="Número de candidatos por dia de inscrição"
       infoSections={[
-        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
         { title: "Resumo", content: [`Total de candidatos: ${pdfData.total}`] },
       ]}
       mainTable={{
@@ -100,8 +147,14 @@ export default function EstatisticasDiaria() {
         documentTitle: "Estatísticas Diárias - Exame de Acesso",
         subtitle: "Número de candidatos por dia de inscrição",
         infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
-          { title: "Resumo", content: [`Total de candidatos: ${pdfData.total}`] },
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
+          {
+            title: "Resumo",
+            content: [`Total de candidatos: ${pdfData.total}`],
+          },
         ],
         mainTable: {
           headers: [
@@ -123,7 +176,7 @@ export default function EstatisticasDiaria() {
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
-    setFilters(prev => ({ ...prev, page: newPage }));
+    setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
   const resetFilters = () => {
@@ -134,6 +187,8 @@ export default function EstatisticasDiaria() {
       codigoCurso: undefined,
       codigoTurno: undefined,
       codigoFaculdade: undefined,
+      dataInicio: undefined,
+      dataFim: undefined,
     });
   };
 
@@ -143,19 +198,27 @@ export default function EstatisticasDiaria() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/"><Home className="h-4 w-4" /></Link>
+              <Link to="/">
+                <Home className="h-4 w-4" />
+              </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Exame de Acesso</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Exame de Acesso</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Estatísticas Diária</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Estatísticas Diária</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Estatísticas Diárias</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Estatísticas Diárias
+          </h1>
           <p className="text-muted-foreground mt-1">
             Número de candidatos por dia de inscrição no exame de acesso.
           </p>
@@ -202,22 +265,35 @@ export default function EstatisticasDiaria() {
             disabled={isLoadingAcademicYear}
             loading={isLoadingAcademicYear}
             value={filters.codigoAnoLetivo?.toString() ?? "all"}
-            onChange={(v) => setFilters({ ...filters, codigoAnoLetivo: v, page: 1 })}
+            onChange={(v) =>
+              setFilters({ ...filters, codigoAnoLetivo: v, page: 1 })
+            }
             options={academicYear}
-            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
           />
 
           <FacultySelect
             allOption
             value={filters.codigoFaculdade}
             onChangeValue={(v) =>
-              setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined, page: 1 })
+              setFilters({
+                ...filters,
+                codigoFaculdade: v,
+                codigoCurso: undefined,
+                page: 1,
+              })
             }
           />
 
           <CourseSelect
             value={filters.codigoCurso}
-            onChangeValue={(v) => setFilters({ ...filters, codigoCurso: v, page: 1 })}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, codigoCurso: v, page: 1 })
+            }
           />
 
           <FormSelect
@@ -232,7 +308,10 @@ export default function EstatisticasDiaria() {
                 page: 1,
               }))
             }
-            options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
+            options={[
+              { codigo: "all", designacao: "Todos" },
+              ...(periodos ?? []),
+            ]}
             map={(p) => ({
               key: p.codigo.toString(),
               label: p.designacao,
@@ -240,7 +319,46 @@ export default function EstatisticasDiaria() {
             })}
           />
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Data Início</label>
+            <Input
+              type="date"
+              value={filters.dataInicio ?? ""}
+              onChange={(e) =>
+                setFilters((p) => ({
+                  ...p,
+                  dataInicio: e.target.value || undefined,
+                  page: 1,
+                }))
+              }
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Data Fim</label>
+            <Input
+              type="date"
+              min={filters.dataInicio} // impede escolher "fim" antes do "início"
+              value={filters.dataFim ?? ""}
+              onChange={(e) =>
+                setFilters((p) => ({
+                  ...p,
+                  dataFim: e.target.value || undefined,
+                  page: 1,
+                }))
+              }
+            />
+          </div>
+        </div>
       </div>
+
+      {/* Chart */}
+      <ChartLineInteractive
+        data={estatisticaDiaria?.data}
+        isLoading={isLoadingEstatisticaDiaria}
+      />
 
       {/* Tabela */}
       <Card>
@@ -258,31 +376,45 @@ export default function EstatisticasDiaria() {
                   <TableHead className="font-semibold w-16">#</TableHead>
                   <TableHead className="font-semibold">Data</TableHead>
                   <TableHead className="font-semibold">Distribuição</TableHead>
-                  <TableHead className="text-right font-semibold">Subtotal</TableHead>
+                  <TableHead className="text-right font-semibold">
+                    Subtotal
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoadingEstatisticaDiaria ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">Carregando...</TableCell>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      Carregando...
+                    </TableCell>
                   </TableRow>
                 ) : estatisticaDiaria?.data?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={4}
+                      className="h-24 text-center text-muted-foreground"
+                    >
                       Nenhum resultado encontrado
                     </TableCell>
                   </TableRow>
                 ) : (
                   estatisticaDiaria?.data?.map((item, index) => {
-                    const maxSubtotal = Math.max(...(estatisticaDiaria.data?.map((d) => d.subtotal) || [0]));
-                    const pct = maxSubtotal > 0 ? (item.subtotal / maxSubtotal) * 100 : 0;
+                    const maxSubtotal = Math.max(
+                      ...(estatisticaDiaria.data?.map((d) => d.subtotal) || [
+                        0,
+                      ]),
+                    );
+                    const pct =
+                      maxSubtotal > 0 ? (item.subtotal / maxSubtotal) * 100 : 0;
 
                     return (
                       <TableRow key={index} className="hover:bg-muted/30">
                         <TableCell className="text-muted-foreground">
                           {(currentPage - 1) * filters.limit + index + 1}
                         </TableCell>
-                        <TableCell className="font-mono font-medium">{item.data}</TableCell>
+                        <TableCell className="font-mono font-medium">
+                          {item.data}
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-5 rounded-full bg-muted overflow-hidden">
@@ -310,7 +442,9 @@ export default function EstatisticasDiaria() {
                 <TableRow className="font-bold">
                   <TableCell colSpan={3}>Total na Página</TableCell>
                   <TableCell className="text-right text-primary">
-                    {estatisticaDiaria?.total?.toLocaleString() || 0}
+                    {(estatisticaDiaria?.data ?? [])
+                      .reduce((acc, item) => acc + (item.subtotal || 0), 0)
+                      .toLocaleString()}
                   </TableCell>
                 </TableRow>
               </TableFooter>
@@ -322,7 +456,8 @@ export default function EstatisticasDiaria() {
             <p className="text-sm text-muted-foreground">
               Página <span className="font-medium">{currentPage}</span> de{" "}
               <span className="font-medium">{totalPages}</span> •{" "}
-              {estatisticaDiaria?.totalgeralcandidatos?.toLocaleString() || 0} candidatos no total
+              {estatisticaDiaria?.totalgeralcandidatos?.toLocaleString() || 0}{" "}
+              candidatos no total
             </p>
 
             <div className="flex items-center gap-2">
@@ -349,12 +484,6 @@ export default function EstatisticasDiaria() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Chart */}
-      <ChartLineInteractive 
-        data={estatisticaDiaria?.data} 
-        isLoading={isLoadingEstatisticaDiaria} 
-      />
     </div>
   );
 }
