@@ -135,7 +135,7 @@ export type CashRegisterPaymentSummary = {
   total: number;
 };
 type GetMyCashRegisterSummaryServiceResponse = {
-  summary: CashRegisterPaymentSummary[];
+  summary: { cash: number, card: number }
   openingAmount: number;
   movementID: number;
 };
@@ -143,7 +143,7 @@ type GetMyCashRegisterSummaryServiceResponse = {
 export async function getMyCashRegisterSummaryService(): Promise<GetMyCashRegisterSummaryServiceResponse> {
   const { data } = await axiosNestFinance.get(`/cash-registers/me/summary`);
 
-  return data.data;
+  return data;
 }
 export type UserOperator = {
   codigo: number;
@@ -250,8 +250,6 @@ export async function listCashRegisterMovementsService(
 
   return data;
 }
-
-// Adicione no arquivo: src/services/finance/cash-register.service.ts
 
 export type ValidateMovementPayload = {
   movementId: number;
