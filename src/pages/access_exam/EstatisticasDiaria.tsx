@@ -318,7 +318,9 @@ export default function EstatisticasDiaria() {
               value: p.codigo.toString(),
             })}
           />
+        </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Data Início</label>
             <Input
