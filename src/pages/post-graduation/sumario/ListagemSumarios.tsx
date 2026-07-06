@@ -72,7 +72,7 @@ function EstadoBadge({ estado }: { estado: EstadoAssiduidade }) {
   );
 }
 
-export default function ListagemSumarios() {
+export default function PostGraduationAulasListagemSumarios() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const { hasPermission } = usePermission();

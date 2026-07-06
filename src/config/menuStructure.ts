@@ -13,8 +13,7 @@ import {
   GraduationCap,
   FileText,
   BookUser,
-  Files,
-  BarChart3
+  Files
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -746,7 +745,7 @@ export const postGraduationStructure: MenuStructure = {
           title: "Fórmula de Definição das UCs",
           url: "/pos-graduacao/avaliacoes/formula-ucs",
           permission: [
-            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla,
+            PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO.sigla,
           ],
         },
 
@@ -754,7 +753,7 @@ export const postGraduationStructure: MenuStructure = {
           title: "Fórmula de Definição das UCs Oral",
           url: "/pos-graduacao/avaliacoes/formula-ucs-oral",
           permission: [
-            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla,
+            PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO.sigla,
           ],
         },
 
@@ -768,24 +767,30 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Lista de Presença",
           url: "/pos-graduacao/avaliacoes/lista-presenca",
-          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+          permission: [
+            PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO.sigla,
+          ],
         },
 
         {
           title: "Lançamento de Notas",
           url: "/pos-graduacao/avaliacoes/lancamento-notas",
-          permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Lançamento de Pauta",
           url: "/pos-graduacao/avaliacoes/lancamento-pauta",
-          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Validação de Pauta",
           url: "/pos-graduacao/avaliacoes/validacao-pauta",
           permission: [
-            PermissionTypeDetails.VALIDACAO_PAUTA_DOCENTE.sigla,
+            PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla,
           ],
         },
 
@@ -818,6 +823,31 @@ export const postGraduationStructure: MenuStructure = {
     },
 
     {
+
+      title: "Exame de Acesso",
+      url: "/pos-graduacao-exame-acesso",
+      icon: Files,
+      items: [
+        {
+          title: "Configurar Vagas",
+          url: "/pos-graduacao/exame-acesso/configurar-vagas",
+          permission: [
+            PermissionTypeDetails.DEFINIR_VAGAS_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Resultados Finais",
+          url: "/pos-graduacao/exame-acesso/resultados-finais",
+          permission: [
+            PermissionTypeDetails.RESULTADOS_FINAIS_POS_GRADUACAO.sigla,
+          ],
+        },
+      ],
+      permission: [],
+    },
+
+     {
+
       title: "Docente",
       url: "/pos-graduacao-docente",
       icon: GraduationCap,
@@ -1171,14 +1201,14 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/relatorios/descontos",
         // },
 
-        /* Relatórios de Pagamentos  */
+        /* Relatórios de Pagamentos 
         {
           title: "Rel. Pagamentos Instituições",
           icon: BarChart3,
           url: "/financas/rel-pagamentos-instituicoes",
           permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
         },
-
+        */
         {
           title: "Pagamentos",
           url: "/financas/listar-pagamentos",

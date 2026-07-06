@@ -2,9 +2,18 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AtualizarSenha } from "./atualisar-senha";
 import { Contacto } from "./contacto";
-import { Book, Clock, Contact, GraduationCap, Key, Mail } from "lucide-react";
+import {
+  Ban,
+  Book,
+  Clock,
+  Contact,
+  GraduationCap,
+  Key,
+  Mail,
+} from "lucide-react";
 import { DadosPessoais } from "./dados-pessoais";
 import { AtivarMatricula } from "./ativar-matricula";
+import { InativarMatricula } from "./inativar-matricula";
 import { InscricoesSection } from "./ver-inscricoes";
 import { InscricoesUC } from "./inscricoes-uc";
 import { DefinirEspecialidade } from "./definir-especialidade";
@@ -64,6 +73,13 @@ export function PerfilSection({
         PermissionTypeDetails.ACTIVAR_MATRICULA_CANCELADA.sigla,
       ),
       component: AtivarMatricula,
+    },
+    {
+      value: "inativar-matricula",
+      label: "Inativar Matrícula",
+      icon: Ban,
+      permission: hasPermission(PermissionTypeDetails.INATIVAR_MATRICULA.sigla),
+      component: InativarMatricula,
     },
     {
       value: "ativar-confirmacao",

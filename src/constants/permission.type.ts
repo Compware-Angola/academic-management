@@ -55,6 +55,7 @@ export enum PermissionType {
   ISENCAO_PAGAMENTOS = "ISENCAO_PAGAMENTOS",
   ESTUDANTES_INSCRITOS_POR_AVALIACAO = "ESTUDANTES_INSCRITOS_POR_AVALIACAO",
   ACTIVAR_MATRICULA_CANCELADA = "ACTIVAR_MATRICULA_CANCELADA",
+  INATIVAR_MATRICULA = "INATIVAR_MATRICULA",
   PRAZOS_PARA_CRIACAO_HORARIOS = "PRAZOS_PARA_CRIACAO_HORARIOS",
   ACTIVIDADES_LECTIVAS_MPGS = "ACTIVIDADES_LECTIVAS_MPGS",
   CALENDARIO_PROVAS = "CALENDARIO_PROVAS",
@@ -178,13 +179,18 @@ export enum PermissionType {
   FORMULA_UCS_POS_GRADUACAO = "FORMULA_UCS_POS_GRADUACAO",
   FORMULA_UCS_ORAL_POS_GRADUACAO = "FORMULA_UCS_ORAL_POS_GRADUACAO",
   MARCACAO_PROVAS_POS_GRADUACAO = "MARCACAO_PROVAS_POS_GRADUACAO",
+  
+
+  DEFINIR_FORMULA_UNIDADE_CURRICULAR = "DEFINIR_FORMULA_UNIDADE_CURRICULAR",
+  MARCAR_PROVA_POS_GRADUACAO = "MARCAR_PROVA_POS_GRADUACAO",
+  DEFINIR_VAGAS_POS_GRADUACAO = "DEFINIR_VAGAS_POS_GRADUACAO",
+  DEFINIR_FORMULA_UC_POS_GRADUACAO = "DEFINIR_FORMULA_UC_POS_GRADUACAO",
+  DEFINIR_UC_ORAL_POS_GRADUACAO = "DEFINIR_UC_ORAL_POS_GRADUACAO",
   LISTA_PRESENCA_POS_GRADUACAO = "LISTA_PRESENCA_POS_GRADUACAO",
   LANCAMENTO_NOTAS_POS_GRADUACAO = "LANCAMENTO_NOTAS_POS_GRADUACAO",
   LANCAMENTO_PAUTA_POS_GRADUACAO = "LANCAMENTO_PAUTA_POS_GRADUACAO",
   VALIDACAO_PAUTA_POS_GRADUACAO = "VALIDACAO_PAUTA_POS_GRADUACAO",
-
-  DEFINIR_FORMULA_UNIDADE_CURRICULAR = "DEFINIR_FORMULA_UNIDADE_CURRICULAR",
-  MARCAR_PROVA_POS_GRADUACAO = "MARCAR_PROVA_POS_GRADUACAO",
+  RESULTADOS_FINAIS_POS_GRADUACAO = "RESULTADOS_FINAIS_POS_GRADUACAO",
   LISTA_PRESENCA_MAV = "LISTA_PRESENCA_MAV",
   ACTUALIZAR_SENHA_ESTUDANTE = "ACTUALIZAR_SENHA_ESTUDANTE",
   DOCENTES_SEM_AFECTACAO = "DOCENTES_SEM_AFECTACAO",
@@ -564,6 +570,10 @@ export const PermissionTypeDetails = {
   ACTIVAR_MATRICULA_CANCELADA: {
     designacao: "Activar Matrícula Cancelada",
     sigla: "mga_a_amc",
+  },
+  INATIVAR_MATRICULA: {
+    designacao: "Inativar Matrícula",
+    sigla: "mga_a_im",
   },
   PRAZOS_PARA_CRIACAO_HORARIOS: {
     designacao: "Prazos Para Criação De Horários",
@@ -976,6 +986,22 @@ export const PermissionTypeDetails = {
     designacao: "Marcar Prova da Pós-Graduação",
     sigla: "mpgs_mp",
   },
+  DEFINIR_VAGAS_POS_GRADUACAO: {
+    designacao: "Definir Vagas por Curso - Pós-Graduação",
+    sigla: "mpgs_dvpc",
+  },
+  DEFINIR_FORMULA_UC_POS_GRADUACAO: {
+    designacao: "Definir Fórmula das UCs - Pós-Graduação",
+    sigla: "mpgs_dfuc",
+  },
+  DEFINIR_UC_ORAL_POS_GRADUACAO: {
+    designacao: "Definir UCs com Oral - Pós-Graduação",
+    sigla: "mpgs_duco",
+  },
+  RESULTADOS_FINAIS_POS_GRADUACAO: {
+    designacao: "Resultados Finais do Exame de Acesso - Pós-Graduação",
+    sigla: "mpgs_rfea",
+  },
   LISTA_PRESENCA_MAV: { designacao: "Lista de Presença", sigla: "mav_a_lp" },
   ACTUALIZAR_SENHA_ESTUDANTE: {
     designacao: "Atualizar Senha",
@@ -1242,6 +1268,45 @@ export const PermissionTypeDetails = {
     designacao: "Anular Multa",
     sigla: "mg_a_mult",
   },
+
+  POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES: {
+    designacao: "Pós-graduação Gestao e Orientacao Pesquisa Estudantes",
+    sigla: "pg_gop_e",
+  },
+  POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES: {
+    designacao: "Pós-graduação Gestao Orientacao Pesquisa Orientadores",
+    sigla: "pg_gop_o",
+  },
+   POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS: {
+    designacao: "Pós-graduação Gestao Orientacao Pesquisa Vinculos",
+    sigla: "pg_gop_v",
+  },
+   POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE: {
+    designacao: "Visualizar Horário Por Docente",
+    sigla: "pg_mgh_vhpd",
+  },
+   POST_GRADUACAO_HORAS_DE_VIGILANCIA: { designacao: "Horas De Vigilancia", sigla: "pg_mgd_hv" },
+
+    POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC: {
+    designacao: "Docente lançamento do programa da UC",
+    sigla: "pg_doc_lanc_prog_uc",
+  },
+  POST_GRADUACAO_VALIDACAO_PROGRAMA_UC: {
+    designacao: "Validação do programa da UC",
+    sigla: "pg_doc_val_prog_uc",
+  },
+    POST_GRADUACAO_CANDIDATOS_INSCRITOS: {
+    designacao: "Pós-graduação Candidatos Inscritos",
+    sigla: "pg_mpgs_ca",
+  },
+    POST_GRADUACAO_LISTAR_SUMARIO: {
+    designacao: "Pós-graduação Listar sumários",
+    sigla: "pg_listar_sumario",
+  },
+
+
+
+ 
 } as const;
 
 export type PermissionDetail = {
