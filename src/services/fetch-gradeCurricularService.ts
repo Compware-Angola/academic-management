@@ -11,6 +11,7 @@ export type GradeCurricularPayload = {
 export type GradeCurricularItem = {
   codigo: number;
   codigo_disciplina: number;
+  codigo_grade_curricular: number;
   descricao_disciplina: string;
   descricao_curso: string;
   codigo_curso: number;
@@ -18,6 +19,7 @@ export type GradeCurricularItem = {
   codigo_classe: number;
   codigo_semestre: number;
   designacao_semestre: string;
+  status: number;
 };
 
 export type GradeCurricularResponse = {

@@ -55,6 +55,8 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdown-disciplines";
+import { useMutationUpdateDiscipline } from "@/hooks/study_plan/use-mutation-update-discipline";
+import { Switch } from "@/components/ui/switch";
 
 export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -78,6 +80,7 @@ export default function UCManagementPlan() {
   const { data: classes = [], isLoading: loadingClasses } = useClasses();
   const { data: disciplines = [], isLoading: loadingDisciplines } =
     useQueryDropdownDisciplines();
+
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const {
     data: gradeResponses,
@@ -91,6 +94,17 @@ export default function UCManagementPlan() {
     page,
     limit,
   });
+
+  const { mutate: update, isPending: updating } = useMutationUpdateDiscipline();
+
+  const handleStatusChange = (codigo: number, status: boolean) => {
+    update({
+      codigo,
+      status: status ? 1 : 0,
+    });
+  };
+
+  console.log("Grade Curricular", gradeResponses);
 
   const { mutate: createUC, isPending: isCreating } = useAddUCToPlan();
 
@@ -242,15 +256,19 @@ export default function UCManagementPlan() {
 
                 <SelectContent>
                   {classes
-                    .filter((classe) =>
-                      !classe.designacao
-                        ?.toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .includes("pos-graduacao")
+                    .filter(
+                      (classe) =>
+                        !classe.designacao
+                          ?.toLowerCase()
+                          .normalize("NFD")
+                          .replace(/[\u0300-\u036f]/g, "")
+                          .includes("pos-graduacao"),
                     )
                     .map((classe) => (
-                      <SelectItem key={classe.codigo} value={String(classe.codigo)}>
+                      <SelectItem
+                        key={classe.codigo}
+                        value={String(classe.codigo)}
+                      >
                         {classe.designacao}
                       </SelectItem>
                     ))}
@@ -288,7 +306,6 @@ export default function UCManagementPlan() {
                 ? "Nenhuma unidade curricular encontrada"
                 : "Selecione o ano letivo, curso e ano curricular para visualizar as unidades curriculares"}
             </p>
-
           </div>
         ) : (
           <>
@@ -300,6 +317,7 @@ export default function UCManagementPlan() {
                   <TableHead className="w-64">Curso</TableHead>
                   <TableHead className="w-64">Ano Curricular</TableHead>
                   <TableHead className="w-32">Semestre</TableHead>
+                  <TableHead className="w-32">Estado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -328,6 +346,18 @@ export default function UCManagementPlan() {
                       >
                         {uc.designacao_semestre}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      <Switch
+                        disabled={updating}
+                        checked={uc.status === 1}
+                        onCheckedChange={(checked) => {
+                          handleStatusChange(
+                            uc.codigo_grade_curricular,
+                            checked,
+                          );
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
