@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import * as React from "react";
+import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
 import {
   Card,
@@ -9,22 +9,21 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
-import { Skeleton } from "@/components/ui/skeleton"
-import { InscricaoPorDia } from "@/services/access_exam/fecth-inscricoes-por-dia.service"
-
+} from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
+import { InscricaoPorDia } from "@/services/access_exam/fecth-inscricoes-por-dia.service";
 
 interface ChartLineInteractiveProps {
-  data: InscricaoPorDia[] | undefined
-  isLoading: boolean
-  title?: string
-  description?: string
+  data: InscricaoPorDia[] | undefined;
+  isLoading: boolean;
+  title?: string;
+  description?: string;
 }
 
 const chartConfig = {
@@ -32,35 +31,35 @@ const chartConfig = {
     label: "Inscrições",
     color: "var(--chart-1)",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function ChartLineInteractive({
   data,
   isLoading,
   title = "Estatísticas Diárias",
-  description = "Evolução do número de inscrições por dia"
+  description = "Evolução do número de inscrições por dia",
 }: ChartLineInteractiveProps) {
-
   const chartData = React.useMemo(() => {
-    if (!data) return []
+    if (!data) return [];
 
     return data
       .map((item) => {
-        const [day, month, year] = item.data.split("/")
-        const dateObj = new Date(Number(year), Number(month) - 1, Number(day))
+        const [day, month, year] = item.data.split("/");
+        const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 
         return {
           originalDate: item.data,
-          date: dateObj.toISOString().split("T")[0], 
+          date: isoDate,
           subtotal: item.subtotal || 0,
-        }
+        };
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  }, [data])
+      .sort((a, b) => a.date.localeCompare(b.date)); // strings ISO já ordenam corretamente
+  }, [data]);
 
-  const totalInscricoes = React.useMemo(() => 
-    chartData.reduce((acc, curr) => acc + curr.subtotal, 0), [chartData]
-  )
+  const totalInscricoes = React.useMemo(
+    () => chartData.reduce((acc, curr) => acc + curr.subtotal, 0),
+    [chartData],
+  );
 
   if (isLoading) {
     return (
@@ -73,7 +72,7 @@ export function ChartLineInteractive({
           <Skeleton className="h-[250px] w-full" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -85,7 +84,9 @@ export function ChartLineInteractive({
         </div>
 
         <div className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 sm:border-t-0 sm:border-l sm:px-8 sm:py-6">
-          <span className="text-xs text-muted-foreground">Total de Inscrições</span>
+          <span className="text-xs text-muted-foreground">
+            Total de Inscrições
+          </span>
           <span className="text-2xl sm:text-3xl font-bold text-primary">
             {totalInscricoes.toLocaleString()}
           </span>
@@ -111,9 +112,10 @@ export function ChartLineInteractive({
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) =>
-                new Date(value).toLocaleDateString("pt-PT", {
+                new Date(`${value}T00:00:00Z`).toLocaleDateString("pt-PT", {
                   month: "short",
                   day: "numeric",
+                  timeZone: "UTC",
                 })
               }
             />
@@ -146,5 +148,5 @@ export function ChartLineInteractive({
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

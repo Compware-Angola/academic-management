@@ -442,7 +442,9 @@ export default function EstatisticasDiaria() {
                 <TableRow className="font-bold">
                   <TableCell colSpan={3}>Total na Página</TableCell>
                   <TableCell className="text-right text-primary">
-                    {estatisticaDiaria?.total?.toLocaleString() || 0}
+                    {(estatisticaDiaria?.data ?? [])
+                      .reduce((acc, item) => acc + (item.subtotal || 0), 0)
+                      .toLocaleString()}
                   </TableCell>
                 </TableRow>
               </TableFooter>
