@@ -108,7 +108,7 @@ export default function ScheduleList() {
     roles?.Acessor_do_Reitor === true ||
     roles?.Coordenador === true ||
     roles?.Decano === true ||
-    roles.Director === true
+    roles?.Director === true
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
