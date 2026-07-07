@@ -7,25 +7,27 @@ interface FormasPagamentoSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
   disabled?: boolean;
+  allowAll?: boolean;
 }
 const FormaPagamentoSelect = ({
   onChangeValue,
   value,
   disabled,
+  allowAll = false,
 }: FormasPagamentoSelectProps) => {
   const { hasPermission } = usePermission();
   const { data: formas, isLoading: isLoadingFormas } = useQueryFormaPagamento({
-    status: 1,
+    status: allowAll ? undefined : 1,
   });
+
+  const isBlocked = !allowAll && !hasPermission(PermissionTypeDetails.PAGAMENTO_EM_CASH.sigla);
   const filter = formas?.filter((f) => {
-    if (
-      !hasPermission(PermissionTypeDetails.PAGAMENTO_EM_CASH.sigla) &&
-      f.codigo === 6
-    ) {
+    if (isBlocked && f.codigo === 6) {
       return false;
     }
     return f;
   });
+
   return (
     <>
       <FormSelect

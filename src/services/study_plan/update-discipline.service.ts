@@ -11,15 +11,10 @@ type UpdateDisciplineParams = {
   duracao?: number;
   status?: number;
 };
+
 export async function updateDiscipline(payload: UpdateDisciplineParams) {
   const { codigo, ...rest } = payload;
   const response = await axiosNestGa.patch(`discipline/${codigo}`, rest);
 
   return response.data;
 }
-
-
-
-
-
-

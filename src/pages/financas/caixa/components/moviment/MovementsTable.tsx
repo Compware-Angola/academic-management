@@ -294,7 +294,7 @@ export function MovementsTable() {
 
   const movements = data?.data ?? [];
   const meta = data?.meta;
-  const colSpan = 8;
+  const colSpan = 11;
 
   return (
     <>

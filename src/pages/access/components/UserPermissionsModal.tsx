@@ -9,7 +9,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield, ShieldCheck, Users, ChevronRight, Plus } from "lucide-react";
+import {
+  Shield,
+  ShieldCheck,
+  Users,
+  ChevronRight,
+  Plus,
+  ShieldX,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -33,12 +40,24 @@ import { useRemoveGruopFromUser } from "@/hooks/acess/use-remove-gruop-from-user
 import { useQueryClient } from "@tanstack/react-query";
 import { GroupSelect } from "@/components/common/global-selects/GroupSelect";
 import { AccessSelect } from "@/components/common/global-selects/AccessSelect";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAccessRestrictionsByUser } from "@/hooks/acess/use-query-access-restrictions-by-user";
+import { useCreateAccessRestriction } from "@/hooks/acess/use-create-access-restriction";
+import { useRemoveAccessRestriction } from "@/hooks/acess/use-remove-access-restriction";
 
 interface UserPermissionsModalProps {
   user: User;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+type LocalGroupAccess = {
+  codigo: number;
+  descricao: string;
+  disponibilidade: number;
+  blocking: boolean;
+  "Update at"?: string;
+};
 
 export function UserPermissionsModal({
   user,
@@ -54,6 +73,9 @@ export function UserPermissionsModal({
   const [selectedGroupToAdd, setSelectedGroupToAdd] = useState<number | null>(
     null,
   );
+  const [selectedAccessToRestrict, setSelectedAccessToRestrict] = useState<
+    number | null
+  >(null);
 
   /** Grupos do utilizador */
   const {
@@ -77,7 +99,9 @@ export function UserPermissionsModal({
   });
 
   /** Estado local — fonte de verdade enquanto o modal estiver aberto */
-  const [localGroupAccesses, setLocalGroupAccesses] = useState<any[]>([]);
+  const [localGroupAccesses, setLocalGroupAccesses] = useState<
+    LocalGroupAccess[]
+  >([]);
 
   // Sempre que o grupo selecionado mudar → limpa + força refetch + atualiza estado local
   useEffect(() => {
@@ -121,6 +145,23 @@ export function UserPermissionsModal({
   const { mutateAsync: blockAccess } = useBlockUserAccess();
   const { mutateAsync: removeGruop, isPending: removingGruop } =
     useRemoveGruopFromUser();
+  const {
+    data: accessRestrictions = [],
+    isLoading: loadingAccessRestrictions,
+    error: accessRestrictionsError,
+  } = useAccessRestrictionsByUser({
+    codigoUtilizador: user.codigo,
+    enabled: open,
+  });
+  const { mutateAsync: createAccessRestriction, isPending: restrictingAccess } =
+    useCreateAccessRestriction();
+  const {
+    mutateAsync: removeAccessRestriction,
+    isPending: removingRestriction,
+  } = useRemoveAccessRestriction();
+  const activeAccessRestrictions = accessRestrictions.filter(
+    (restriction) => restriction.status === 1,
+  );
 
   async function handleGrantAccess() {
     if (!selectedAccessToGrant) return;
@@ -241,6 +282,31 @@ export function UserPermissionsModal({
     }
   }
 
+  async function handleCreateAccessRestriction() {
+    if (!selectedAccessToRestrict) return;
+
+    try {
+      await createAccessRestriction({
+        codigoAcesso: selectedAccessToRestrict,
+        codigoUtilizador: user.codigo,
+      });
+      setSelectedAccessToRestrict(null);
+    } catch (err) {
+      console.error("Erro ao restringir acesso:", err);
+    }
+  }
+
+  async function handleRemoveAccessRestriction(accessCodigo: number) {
+    try {
+      await removeAccessRestriction({
+        codigoAcesso: accessCodigo,
+        codigoUtilizador: user.codigo,
+      });
+    } catch (err) {
+      console.error("Erro ao remover restrição de acesso:", err);
+    }
+  }
+
   function isGrupoUnitario(group?: UserGroup): boolean {
     return group?.tipo_grupo === 2;
   }
@@ -256,24 +322,31 @@ export function UserPermissionsModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
-          {/* COLUNA 1 — Grupos */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 font-semibold">
-              <Users className="h-5 w-5" />
-              Grupos Associados
-            </div>
+        <Tabs defaultValue="permissions" className="mt-4">
+          <TabsList>
+            <TabsTrigger value="permissions">Permissões</TabsTrigger>
+            <TabsTrigger value="restrictions">Restrições</TabsTrigger>
+          </TabsList>
 
-            {loadingGroups ? (
-              <Skeleton className="h-32 w-full" />
-            ) : (
-              groups.map((group) => (
-                <div
-                  key={group.codigo}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedGroup(group)}
-                  className={`
+          <TabsContent value="permissions">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+              {/* COLUNA 1 — Grupos */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Users className="h-5 w-5" />
+                  Grupos Associados
+                </div>
+
+                {loadingGroups ? (
+                  <Skeleton className="h-32 w-full" />
+                ) : (
+                  groups.map((group) => (
+                    <div
+                      key={group.codigo}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setSelectedGroup(group)}
+                      className={`
                     w-full flex items-center justify-between
                     px-4 py-2 rounded-md border
                     cursor-pointer transition-colors
@@ -283,168 +356,275 @@ export function UserPermissionsModal({
                         : "hover:bg-muted"
                     }
                   `}
-                >
-                  <span>{group.descricao}</span>
+                    >
+                      <span>{group.descricao}</span>
 
-                  <div className="flex items-center gap-2">
-                    <ChevronRight className="h-4 w-4" />
+                      <div className="flex items-center gap-2">
+                        <ChevronRight className="h-4 w-4" />
 
-                    {group.tipo_grupo !== 2 && (
-                      <X
-                        className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveGroup(group.codigo);
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-
-            {/* Adicionar Grupo */}
-            <div className="space-y-4 mt-6">
-              <div className="flex items-center gap-2 font-semibold">
-                <Plus className="h-5 w-5" />
-                Adicionar grupo
-              </div>
-
-              {loadingTodosGrupos ? (
-                <Skeleton className="h-10 w-full" />
-              ) : (
-                <>
-                  <GroupSelect
-                    value={selectedGroupToAdd?.toString() ?? ""}
-                    onChangeValue={(v) => setSelectedGroupToAdd(Number(v))}
-                    excludeGroups={groups}
-                    labelMode="inside"
-                  />
-
-                  <Button
-                    className="w-full"
-                    onClick={handleAddGroup}
-                    disabled={
-                      !selectedGroupToAdd ||
-                      loadingTodosGrupos ||
-                      addGroupLoading
-                    }
-                  >
-                    {addGroupLoading ? "A conceder..." : "Conceder grupo"}
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* COLUNA 2 — Permissões do grupo */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <ShieldCheck className="h-5 w-5" />
-              Permissões Ativas
-              {selectedGroup && (
-                <Badge className="ml-2">{selectedGroup.descricao}</Badge>
-              )}
-            </div>
-
-            {!selectedGroup ? (
-              <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-                <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>Selecione um grupo à esquerda para ver as permissões</p>
-              </div>
-            ) : loadingGroupAccesses ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            ) : errorAccesses ? (
-              <p className="text-destructive">Erro ao carregar permissões.</p>
-            ) : localGroupAccesses.length === 0 ? (
-              <p className="text-muted-foreground italic">
-                Este grupo não tem permissões associadas.
-              </p>
-            ) : (
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {localGroupAccesses.map((access) => (
-                  <div
-                    key={access.codigo}
-                    className="flex flex-col p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-green-600" />
-                      <span className="font-medium text-sm">
-                        {access.codigo} – {access.descricao}
-                      </span>
-                    </div>
-
-                    {access["Update at"] && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Atualizado em:{" "}
-                        {format(
-                          new Date(access["Update at"]),
-                          "dd/MM/yyyy HH:mm",
+                        {group.tipo_grupo !== 2 && (
+                          <X
+                            className="h-4 w-4 text-destructive cursor-pointer hover:opacity-80"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveGroup(group.codigo);
+                            }}
+                          />
                         )}
-                      </p>
-                    )}
+                      </div>
+                    </div>
+                  ))
+                )}
 
-                    <div className="flex items-center justify-between mt-2">
-                      <Badge
-                        variant={
-                          access.disponibilidade === 1
-                            ? "default"
-                            : "destructive"
+                {/* Adicionar Grupo */}
+                <div className="space-y-4 mt-6">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <Plus className="h-5 w-5" />
+                    Adicionar grupo
+                  </div>
+
+                  {loadingTodosGrupos ? (
+                    <Skeleton className="h-10 w-full" />
+                  ) : (
+                    <>
+                      <GroupSelect
+                        value={selectedGroupToAdd?.toString() ?? ""}
+                        onChangeValue={(v) => setSelectedGroupToAdd(Number(v))}
+                        excludeGroups={groups}
+                        labelMode="inside"
+                      />
+
+                      <Button
+                        className="w-full"
+                        onClick={handleAddGroup}
+                        disabled={
+                          !selectedGroupToAdd ||
+                          loadingTodosGrupos ||
+                          addGroupLoading
                         }
                       >
-                        {access.disponibilidade === 1 ? "Ativo" : "Bloqueado"}
-                      </Badge>
+                        {addGroupLoading ? "A conceder..." : "Conceder grupo"}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
 
-                      {access.disponibilidade === 1 &&
-                        isGrupoUnitario(selectedGroup) && (
+              {/* COLUNA 2 — Permissões do grupo */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-lg font-semibold">
+                  <ShieldCheck className="h-5 w-5" />
+                  Permissões Ativas
+                  {selectedGroup && (
+                    <Badge className="ml-2">{selectedGroup.descricao}</Badge>
+                  )}
+                </div>
+
+                {!selectedGroup ? (
+                  <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                    <Shield className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>Selecione um grupo à esquerda para ver as permissões</p>
+                  </div>
+                ) : loadingGroupAccesses ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : errorAccesses ? (
+                  <p className="text-destructive">
+                    Erro ao carregar permissões.
+                  </p>
+                ) : localGroupAccesses.length === 0 ? (
+                  <p className="text-muted-foreground italic">
+                    Este grupo não tem permissões associadas.
+                  </p>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {localGroupAccesses.map((access) => (
+                      <div
+                        key={access.codigo}
+                        className="flex flex-col p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4 text-green-600" />
+                          <span className="font-medium text-sm">
+                            {access.codigo} – {access.descricao}
+                          </span>
+                        </div>
+
+                        {access["Update at"] && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Atualizado em:{" "}
+                            {format(
+                              new Date(access["Update at"]),
+                              "dd/MM/yyyy HH:mm",
+                            )}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between mt-2">
+                          <Badge
+                            variant={
+                              access.disponibilidade === 1
+                                ? "default"
+                                : "destructive"
+                            }
+                          >
+                            {access.disponibilidade === 1
+                              ? "Ativo"
+                              : "Bloqueado"}
+                          </Badge>
+
+                          {access.disponibilidade === 1 &&
+                            isGrupoUnitario(selectedGroup) && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() =>
+                                  handleBlockAccess(access.codigo)
+                                }
+                                disabled={access.blocking}
+                              >
+                                {access.blocking ? "Removendo..." : "Remover"}
+                              </Button>
+                            )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* COLUNA 3 — Adicionar acesso */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 font-semibold">
+                  <Plus className="h-5 w-5" />
+                  Adicionar acesso
+                </div>
+
+                {loadingAllAccesses ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <>
+                    <AccessSelect
+                      value={selectedAccessToGrant?.toString() ?? ""}
+                      onChangeValue={(v) => setSelectedAccessToGrant(Number(v))}
+                      labelMode="inside"
+                    />
+
+                    <Button
+                      className="w-full"
+                      onClick={handleGrantAccess}
+                      disabled={!selectedAccessToGrant || granting}
+                    >
+                      {granting ? "A conceder..." : "Conceder acesso"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="restrictions">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+              <div className="space-y-4 lg:col-span-1">
+                <div className="flex items-center gap-2 font-semibold">
+                  <ShieldX className="h-5 w-5" />
+                  Restringir acesso
+                </div>
+
+                {loadingAllAccesses ? (
+                  <Skeleton className="h-10 w-full" />
+                ) : (
+                  <>
+                    <AccessSelect
+                      value={selectedAccessToRestrict?.toString() ?? ""}
+                      onChangeValue={(v) =>
+                        setSelectedAccessToRestrict(Number(v))
+                      }
+                      labelMode="inside"
+                    />
+
+                    <Button
+                      className="w-full"
+                      variant="destructive"
+                      onClick={handleCreateAccessRestriction}
+                      disabled={!selectedAccessToRestrict || restrictingAccess}
+                    >
+                      {restrictingAccess
+                        ? "A restringir..."
+                        : "Adicionar restrição"}
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              <div className="space-y-4 lg:col-span-2">
+                <div className="flex items-center gap-2 text-lg font-semibold">
+                  <ShieldX className="h-5 w-5" />
+                  Restrições do utilizador
+                </div>
+
+                {loadingAccessRestrictions ? (
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : accessRestrictionsError ? (
+                  <p className="text-destructive">
+                    Erro ao carregar restrições.
+                  </p>
+                ) : activeAccessRestrictions.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+                    <ShieldX className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>Este utilizador não tem restrições de acesso.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {activeAccessRestrictions.map((restriction) => (
+                      <div
+                        key={restriction.codigo_acesso}
+                        className="flex flex-col gap-3 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <ShieldX className="h-4 w-4 text-destructive" />
+                            <span className="font-medium text-sm">
+                              {restriction.codigo_acesso} –{" "}
+                              {restriction.designacao}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Sigla: {restriction.sigla}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Badge variant="destructive">Ativa</Badge>
+
                           <Button
                             size="sm"
-                            variant="destructive"
-                            onClick={() => handleBlockAccess(access.codigo)}
-                            disabled={access.blocking}
+                            variant="outline"
+                            onClick={() =>
+                              handleRemoveAccessRestriction(
+                                restriction.codigo_acesso,
+                              )
+                            }
+                            disabled={removingRestriction}
                           >
-                            {access.blocking ? "Removendo..." : "Remover"}
+                            Remover
                           </Button>
-                        )}
-                    </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            )}
-          </div>
-
-          {/* COLUNA 3 — Adicionar acesso */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 font-semibold">
-              <Plus className="h-5 w-5" />
-              Adicionar acesso
             </div>
-
-            {loadingAllAccesses ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (
-              <>
-                <AccessSelect
-                  value={selectedAccessToGrant?.toString() ?? ""}
-                  onChangeValue={(v) => setSelectedAccessToGrant(Number(v))}
-                  labelMode="inside"
-                />
-
-                <Button
-                  className="w-full"
-                  onClick={handleGrantAccess}
-                  disabled={!selectedAccessToGrant || granting}
-                >
-                  {granting ? "A conceder..." : "Conceder acesso"}
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
 
         <div className="flex justify-end mt-6">
           <Button variant="outline" onClick={() => onOpenChange(false)}>

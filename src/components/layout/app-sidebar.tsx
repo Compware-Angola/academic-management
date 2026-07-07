@@ -42,7 +42,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const operacionalItems = useFilterMenuByPermission(operacionalStructure?.items ?? []);
   const comunicationItems = useFilterMenuByPermission(comunicationStructure?.items ?? []);
   const docsItems = useFilterMenuByPermission(documentStructure?.items ?? []);
-
   const suporteItems = useFilterMenuByPermission(suporteStructure?.items ?? []);
 
   return (
@@ -55,7 +54,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Administration items={adminItems} />
         <NavIngresso items={ingressoItems} />
         <NavAcademic items={academicItems} />
-        {/* <NavPostGraduation items={postGraduationItems} /> */}
+        {process.env.NODE_ENV === "development" && (
+          <NavPostGraduation items={postGraduationItems} />
+        )}
         <NavOperacional items={operacionalItems} />
         <NavCommunication items={comunicationItems} />
         <NavSuporte items={suporteItems} />
