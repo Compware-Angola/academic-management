@@ -102,7 +102,13 @@ export default function ScheduleList() {
   };
 
   const isPrivilegedUser: boolean =
-    haveFullAccess()
+    haveFullAccess() ||
+    roles?.Reitor === true ||
+    roles?.Vice_Reitor === true ||
+    roles?.Acessor_do_Reitor === true ||
+    roles?.Coordenador === true ||
+    roles?.Decano === true ||
+    roles.Director === true
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
