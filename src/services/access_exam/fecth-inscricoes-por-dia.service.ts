@@ -5,6 +5,8 @@ export type InscricoesPorDiaParams = {
   codigoCurso?: number;
   codigoFaculdade?: number;
   codigoTurno?: number;
+  dataInicio?: string;
+  dataFim?: string;
   page?: number;
   limit?: number;
 };
@@ -24,11 +26,10 @@ export type InscricoesPorDiaResponse = {
 };
 
 export async function fetchInscricoesPorDia(
-  params: InscricoesPorDiaParams
+  params: InscricoesPorDiaParams,
 ): Promise<InscricoesPorDiaResponse> {
-  const { data } = await axiosNestGa.get(
-    "/exames-de-acesso/estatistica/dia",
-    { params }
-  );
+  const { data } = await axiosNestGa.get("/exames-de-acesso/estatistica/dia", {
+    params,
+  });
   return data;
 }

@@ -45,6 +45,7 @@ export default function PerfilEstudante() {
     hasPermission(PermissionTypeDetails.ACTUALIZAR_CONTACTOS_ESTUDANTE.sigla) ||
     hasPermission(PermissionTypeDetails.ACTUALIZAR_DADOS_ESTUDANTE.sigla) ||
     hasPermission(PermissionTypeDetails.ACTIVAR_MATRICULA_CANCELADA.sigla) ||
+    hasPermission(PermissionTypeDetails.INATIVAR_MATRICULA.sigla) ||
     hasPermission(PermissionTypeDetails.ACTIVAR_CONFIRMACAO.sigla) ||
     hasPermission(PermissionTypeDetails.VER_INSCRICOES.sigla) ||
     hasPermission(PermissionTypeDetails.INSCRICOES_UC.sigla) ||

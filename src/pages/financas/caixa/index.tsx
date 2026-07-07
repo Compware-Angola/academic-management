@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, History, ListChecks } from "lucide-react";
+import { Home, History, ListChecks, FileText } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { CaixasDisponiveisTab } from "./components/CaixasDisponiveisTab";
 import { MovementsTable } from "./components/moviment/MovementsTable";
+import { ReportsTable } from "./components/moviment/ReportsTable";
 
 export function CaixaPage() {
   return (
@@ -53,6 +54,10 @@ export function CaixaPage() {
             <History className="h-4 w-4" />
             Histórico de Movimentos
           </TabsTrigger>
+          <TabsTrigger value="relatorios" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Relatórios
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="caixas">
@@ -61,6 +66,9 @@ export function CaixaPage() {
 
         <TabsContent value="movimentos">
           <MovementsTable />
+        </TabsContent>
+        <TabsContent value="relatorios">
+          <ReportsTable />
         </TabsContent>
       </Tabs>
     </div>

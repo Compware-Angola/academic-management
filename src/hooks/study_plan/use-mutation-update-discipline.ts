@@ -19,6 +19,7 @@ export function useMutationUpdateDiscipline() {
       });
 
       queryClient.invalidateQueries({ queryKey: ["disciplines"] });
+      queryClient.invalidateQueries({ queryKey: ["grade-curricular"] });
     },
 
     onError: (error: any) => {

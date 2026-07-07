@@ -110,7 +110,7 @@ function MeuCaixaAtualTab() {
     if (!myCaixa) return;
 
     const { data: response } = await closeMutation.mutateAsync(myCaixa.id);
-
+    console.log({ data });
     const blob = await pdf(
       <CashClosingPDF
         data={{
@@ -205,7 +205,7 @@ function MeuCaixaAtualTab() {
           <CardContent>
             {isLoadingSummary ? (
               <SummarySkeleton />
-            ) : !data || data.summary.length === 0 ? (
+            ) : !data || Object.keys(data?.summary).length === 0 ? (
               <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
                 Sem movimentos registados neste caixa.
               </div>
@@ -218,22 +218,22 @@ function MeuCaixaAtualTab() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.summary.map((item) => (
-                    <TableRow key={item.forma_pagamento_codigo}>
-                      <TableCell className="font-medium">
-                        {item.forma_pagamento}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums font-mono text-sm">
-                        {formatCurrencyAOA(item.total)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  <TableRow>
+                    <TableCell>Cash</TableCell>
+                    <TableCell className="text-right tabular-nums font-mono text-sm">{formatCurrencyAOA(data?.summary.cash)}</TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell>TPA</TableCell>
+                    <TableCell className="text-right tabular-nums font-mono text-sm">{formatCurrencyAOA(data?.summary.card)}</TableCell>
+                  </TableRow>
+
                   <TableRow className="border-t-2 font-semibold bg-muted/30">
                     <TableCell>Total geral</TableCell>
                     <TableCell className="text-right tabular-nums font-mono">
                       {formatCurrencyAOA(
-                        data.summary.reduce((acc, i) => acc + i.total, 0) +
-                        data.openingAmount,
+                        Object.values(data.summary).reduce((acc, v) => acc + v, 0) +
+                        data.openingAmount
                       )}
                     </TableCell>
                   </TableRow>

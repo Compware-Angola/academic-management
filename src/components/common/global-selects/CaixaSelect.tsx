@@ -8,11 +8,13 @@ interface CaixaSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
   disabled?: boolean;
+
+  allowAll?: boolean;
 }
 
-const CaixaSelect = ({ onChangeValue, value, disabled }: CaixaSelectProps) => {
+const CaixaSelect = ({ onChangeValue, value, disabled, allowAll = false }: CaixaSelectProps) => {
   const { data: response, isLoading: isLoadingCaixas } = useQueryCashRegisters({
-    blocked: "N",
+    blocked: allowAll ? undefined : "N",
   });
   const caixas = useMemo(() => response?.data || [], [response]);
   return (

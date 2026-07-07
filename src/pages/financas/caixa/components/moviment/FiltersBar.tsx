@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 
 import { AvaliableOperatorsSelect } from "@/components/common/global-selects/AvaliableOperators";
 import { CaixaSelect } from "@/components/common/global-selects/CaixaSelect";
+import { FormaPagamentoSelect } from "@/components/common/global-selects/TipoPagamentoSelect";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,9 @@ import { cn } from "@/lib/utils";
 type Props = {
   search: string;
   onSearchChange: (v: string) => void;
+
+  tipoPagamento?: string;
+  onTipoPagamentoChange?: (v: string) => void;
 
   operatorId: string;
   onOperatorChange: (v: string) => void;
@@ -28,7 +32,6 @@ type Props = {
   onClearFilters: () => void;
   onRefresh: () => void;
 
-  singleOperator?: boolean;
   isRefreshing?: boolean;
 };
 
@@ -51,48 +54,56 @@ export const FiltersBar = ({
   onClearFilters,
   onRefresh,
 
-  singleOperator = false,
+  tipoPagamento,
+  onTipoPagamentoChange,
+
   isRefreshing = false,
 }: Props) => {
   return (
     <Card>
-      <CardContent className="pt-6 space-y-4">
-        <div
-          className={`grid gap-4 ${
-            singleOperator ? "md:grid-cols-1" : "md:grid-cols-3"
-          }`}
-        >
-          {!singleOperator && (
-            <>
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">
-                  Pesquisa
-                </Label>
+      <CardContent className="pt-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          {/* SEARCH */}
+          <div className="space-y-2">
+            <Label>Pesquisa</Label>
 
-                  <Input
-                    value={search}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    placeholder="Pesquisar..."
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-              <AvaliableOperatorsSelect
-                value={operatorId}
-                onChangeValue={onOperatorChange}
-                availability="all"
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+
+              <Input
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Pesquisar..."
+                className="pl-9"
               />
-            </>
+            </div>
+          </div>
+
+          {/* OPERATOR */}
+          <AvaliableOperatorsSelect
+            value={operatorId}
+            onChangeValue={onOperatorChange}
+            availability="all"
+          />
+
+          {/* CAIXA */}
+          <CaixaSelect
+            value={caixa}
+            onChangeValue={onCaixaChange}
+            allowAll
+          />
+
+          {/* FORMA PAGAMENTO */}
+          {onTipoPagamentoChange && (
+            <FormaPagamentoSelect
+              value={tipoPagamento ?? ""}
+              onChangeValue={onTipoPagamentoChange}
+              allowAll
+            />
           )}
 
-          <CaixaSelect value={caixa} onChangeValue={onCaixaChange} />
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
+          <div className="space-y-1">
             <Label>Data Inicial</Label>
             <Input
               type="date"
@@ -101,7 +112,7 @@ export const FiltersBar = ({
             />
           </div>
 
-          <div>
+          <div className="space-y-1">
             <Label>Data Final</Label>
             <Input
               type="date"
@@ -109,25 +120,28 @@ export const FiltersBar = ({
               onChange={(e) => onEndDateChange(e.target.value)}
             />
           </div>
+
+
+        </div>
+        <div className="flex justify-end gap-2">
+
+          <Button variant="outline" onClick={onClearFilters}>
+            <X className="w-4 h-4 mr-2" />
+            Limpar
+          </Button>
+
+          <Button variant="default" onClick={onRefresh}>
+            <RefreshCw
+              className={cn(
+                "w-4 h-4 mr-2",
+                isRefreshing ? "animate-spin" : ""
+              )}
+            />
+            Atualizar
+          </Button>
+
         </div>
 
-        <div className="flex justify-end">
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClearFilters}>
-              <X className="w-4 h-4 mr-2" />
-              Limpar
-            </Button>
-            <Button variant="default" onClick={onRefresh}>
-              <RefreshCw
-                className={cn(
-                  "w-4 h-4 mr-2",
-                  isRefreshing ? "animate-spin" : "",
-                )}
-              />
-              Atualizar
-            </Button>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
