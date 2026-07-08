@@ -170,16 +170,18 @@ export async function generateGenericExcel(
   const ws = wb.addWorksheet("Relatório");
 
   // ── Larguras de colunas ──
+  // A tabela é escrita a partir da coluna 1 (hRow.getCell(i+1)) — as mesmas
+  // colunas usadas pelo cabeçalho/logo (que usa merge de células). Por isso
+  // as larguras NÃO podem reservar colunas extra pro logo antes da tabela,
+  // senão a largura de cada coluna fica desalinhada com os dados nela escritos.
   const colWidths: number[] = [];
-  // Col 1-2: logo
-  colWidths.push(14, 6);
   if (mainTable) {
-    mainTable.headers.forEach((col, i) => {
+    mainTable.headers.forEach((col) => {
       colWidths.push(col.width ?? 18);
     });
-    // preenche até NUM_COLS
     while (colWidths.length < NUM_COLS) colWidths.push(10);
   } else {
+    colWidths.push(14, 6);
     while (colWidths.length < NUM_COLS) colWidths.push(18);
   }
   ws.columns = colWidths.map((w) => ({ width: w }));

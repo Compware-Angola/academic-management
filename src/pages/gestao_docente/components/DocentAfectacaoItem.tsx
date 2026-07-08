@@ -34,6 +34,7 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { buildExport } from "@/components/common/exports/docExport";
+import { formatarData } from "@/util/date-formate";
 
 const DocentAfectacaoItem = () => {
   const id = useId();
@@ -70,20 +71,37 @@ const DocentAfectacaoItem = () => {
         subtitle: "Lista de Docentes Afectados (s)",
         content: [`Total de Docentes Afectados (s): ${afectacoes.length}`],
         headers: [
-          { key: "codigo", label: "Código", pdfWidth: 30, excelWidth: 30 },
+          { key: "codigo", label: "Código", pdfWidth: 10, excelWidth: 10 },
           { key: "docente", label: "Docente", pdfWidth: 30, excelWidth: 30 },
+          { key: "curso", label: "Curso", pdfWidth: 30, excelWidth: 30 },
           {
-            key: "mecanografico",
-            label: "Nº Mecanográfico",
-            pdfWidth: 40,
-            excelWidth: 40,
+            key: "uc",
+            label: "Unidade Curricular",
+            pdfWidth: 30,
+            excelWidth: 30,
           },
+          { key: "data", label: "Data Afetação", pdfWidth: 30, excelWidth: 30 },
+          {
+            key: "afetadopor",
+            label: "Afetado Por",
+            pdfWidth: 30,
+            excelWidth: 30,
+          },
+          // {
+          //   key: "mecanografico",
+          //   label: "Nº Mecanográfico",
+          //   pdfWidth: 40,
+          //   excelWidth: 40,
+          // },
         ],
 
         mapRow: (afectacao) => ({
           codigo: afectacao.codigo_docente,
           docente: afectacao.docente,
-          mecanografico: afectacao.mecanografico,
+          curso: afectacao.curso,
+          uc: afectacao.uc,
+          data: formatarData(afectacao.data),
+          afetadopor: afectacao.afectadopor,
         }),
       }),
     [afectacoes],
@@ -177,7 +195,11 @@ const DocentAfectacaoItem = () => {
                     <TableRow>
                       <TableHead>Código</TableHead>
                       <TableHead>Docente</TableHead>
-                      <TableHead>Nº Mecanográfico</TableHead>
+                      {/* <TableHead>Nº Mecanográfico</TableHead> */}
+                      <TableHead>Curso</TableHead>
+                      <TableHead>Unidade Curricular</TableHead>
+                      <TableHead>Data Afetação</TableHead>
+                      <TableHead>Afetado por</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -185,7 +207,11 @@ const DocentAfectacaoItem = () => {
                       <TableRow key={item.codigo_docente}>
                         <TableCell>{item.codigo_docente}</TableCell>
                         <TableCell>{item.docente}</TableCell>
-                        <TableCell>{item.mecanografico}</TableCell>
+                        {/* <TableCell>{item.mecanografico}</TableCell> */}
+                        <TableCell>{item.curso}</TableCell>
+                        <TableCell>{item.uc}</TableCell>
+                        <TableCell>{formatarData(item.data)}</TableCell>
+                        <TableCell>{item.afectadopor}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

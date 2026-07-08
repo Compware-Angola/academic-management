@@ -2,15 +2,21 @@
 
 export interface PessoaWizardData {
   nomeCompleto: string;
+  nomePai: string;
+  nomeMae: string;
+  dataDeNascimento?: string;
   numDocIdentificacao: string;
-  email: string;
+  tipoDocumentoId?: number;
+  dataDeEmissaoDocumento?: string;
+  dataDeExpiracaoDocumento?: string;
+  sexoId?: number;
+  nacionalidadeId?: number;
+  endereco?: string;
+  naturalidadeId?: number;
+  estadoCivilId?: number;
   telefone1?: string;
   telefone2?: string;
-  dataDeNascimento?: string;
-  tipoDocumentoId?: number;
-  sexoId?: number;
-  estadoCivilId?: number;
-  nacionalidadeId?: number;
+  email: string;
 }
 
 export interface CandidaturaWizardData {
@@ -30,7 +36,7 @@ export interface DocenteWizardData {
   tbCategoriaDocente?: number;
   faculdade?: number;
   valorHora?: number;
-  n_mecanografico?: string;
+  mecanografico?: string;
   totalAnoExperiencia?: number;
   dataInicioDocencia?: string;
   propostaDeContratacao?: string;

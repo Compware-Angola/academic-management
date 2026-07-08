@@ -1,4 +1,5 @@
 // components/novo-docente-wizard/StepPessoa.tsx
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PessoaWizardData } from "@/services/docentes/types/gestao-docente/docente-wizard.types";
@@ -8,7 +9,23 @@ interface StepPessoaProps {
   onChange: (data: Partial<PessoaWizardData>) => void;
 }
 
+const BI_REGEX = /^\d{9}[A-Za-z]{2}\d{3}$/;
+
 export function StepPessoa({ data, onChange }: StepPessoaProps) {
+  const [biError, setBiError] = useState<string | null>(null);
+
+  function handleBiBlur() {
+    if (!data.numDocIdentificacao) {
+      setBiError(null);
+      return;
+    }
+    setBiError(
+      BI_REGEX.test(data.numDocIdentificacao)
+        ? null
+        : "Formato inválido. Use: 9 dígitos + 2 letras + 3 dígitos (ex: 123456789LA042)",
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <div className="space-y-1.5 md:col-span-2">
@@ -20,10 +37,49 @@ export function StepPessoa({ data, onChange }: StepPessoaProps) {
       </div>
 
       <div className="space-y-1.5">
+        <Label>Nome do pai *</Label>
+        <Input
+          value={data.nomePai ?? ""}
+          onChange={(e) => onChange({ nomePai: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Nome da mãe *</Label>
+        <Input
+          value={data.nomeMae ?? ""}
+          onChange={(e) => onChange({ nomeMae: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-1.5">
         <Label>Nº documento de identificação *</Label>
         <Input
           value={data.numDocIdentificacao}
           onChange={(e) => onChange({ numDocIdentificacao: e.target.value })}
+          onBlur={handleBiBlur}
+          placeholder="123456789LA042"
+        />
+        {biError && <p className="text-sm text-red-500">{biError}</p>}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Data de emissão do documento</Label>
+        <Input
+          type="date"
+          value={data.dataDeEmissaoDocumento ?? ""}
+          onChange={(e) => onChange({ dataDeEmissaoDocumento: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Data de expiração do documento</Label>
+        <Input
+          type="date"
+          value={data.dataDeExpiracaoDocumento ?? ""}
+          onChange={(e) =>
+            onChange({ dataDeExpiracaoDocumento: e.target.value })
+          }
         />
       </div>
 
@@ -61,9 +117,32 @@ export function StepPessoa({ data, onChange }: StepPessoaProps) {
         />
       </div>
 
-      {/* TODO: tipoDocumentoId, sexoId, estadoCivilId, nacionalidadeId
-          são FKs — precisam de Select alimentado por endpoint próprio.
-          Ver pergunta no final da resposta. */}
+      <div className="space-y-1.5">
+        <Label>Sexo</Label>
+        <select
+          className="w-full rounded-md border px-3 py-2 text-sm"
+          value={data.sexoId ?? ""}
+          onChange={(e) =>
+            onChange({ sexoId: Number(e.target.value) || undefined })
+          }
+        >
+          <option value="">Selecione</option>
+          <option value={1}>Masculino</option>
+          <option value={2}>Feminino</option>
+        </select>
+      </div>
+
+      <div className="space-y-1.5 md:col-span-2">
+        <Label>Endereço</Label>
+        <Input
+          value={data.endereco ?? ""}
+          onChange={(e) => onChange({ endereco: e.target.value })}
+        />
+      </div>
+
+      {/* TODO: tipoDocumentoId, sexoId, estadoCivilId, nacionalidadeId, naturalidadeId
+          são FKs — precisam de <Select> seguindo o mesmo padrão do CourseSelect/FacultySelect
+          (endpoint próprio + opção "Todos" quando aplicável, aqui sem "Todos" pois é criação). */}
     </div>
   );
 }

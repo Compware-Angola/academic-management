@@ -16,6 +16,16 @@ export type DocenteAfectacaoItem = {
   docente: string;
   mecanografico: string;
   codigo_docente: number;
+  codigo: number;
+  anolectivo: string;
+  uc: string;
+  categoria: string;
+  classe: string;
+  semestre: string;
+  curso: string;
+  data: string;
+  afectadopor: string;
+  estado: number;
 };
 
 export type ListDocentesAfectacaoResponse = {
