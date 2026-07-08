@@ -28,6 +28,10 @@ import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useQueryConfigurationGeral } from "@/hooks/academiccalendar/use-query-configuration";
+import { PaymentServiceComparisonWidget } from "./components/teste";
+import { PaymentComparisonChart } from "./components/teste2";
+import { PaymenttDailyStatsCard } from "./components/paymentt-daily-Stats-card";
+import { PaymentMonthlyStatsCard } from "./components/payment-monthly-StatsCard";
 
 
 const Index = () => {
@@ -158,6 +162,14 @@ const Index = () => {
 
         </CardContent>
       </Card>
+      <div className="grid gap-4 md:grid-cols-2">
+        <PaymentServiceComparisonWidget />
+        <PaymentComparisonChart />
+        <PaymenttDailyStatsCard />
+        <PaymentMonthlyStatsCard />
+
+      </div>
+
     </div>
   );
 };
