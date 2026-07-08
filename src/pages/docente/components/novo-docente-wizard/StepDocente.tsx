@@ -18,9 +18,9 @@ interface StepDocenteProps {
 // TODO: substituir por hooks reais assim que a origem dos dados for definida
 // (ex: useQueryEscalao, useQueryCategoriaDocente, useQueryFaculdade, useQueryContrato)
 const ESCALAO_OPTIONS = [
-  { value: "1", label: "Escalão 1" },
-  { value: "2", label: "Escalão 2" },
-  { value: "3", label: "Escalão 3" },
+  { value: "1", label: "1º Escalão" },
+  { value: "2", label: "2º Escalão" },
+  { value: "3", label: "3º Escalão" },
 ];
 
 const CATEGORIA_DOCENTE_OPTIONS = [
@@ -54,6 +54,19 @@ export function StepDocente({ data, onChange }: StepDocenteProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="space-y-1.5">
+        <Label>Número Mecanogrico</Label>
+        <Input
+          type="text"
+          value={data.mecanografico ?? ""}
+          onChange={(e) =>
+            onChange({
+              mecanografico: e.target.value ? e.target.value : undefined,
+            })
+          }
+        />
+      </div>
+
       <div className="space-y-1.5">
         <Label>Escalão</Label>
         <Select
@@ -98,7 +111,7 @@ export function StepDocente({ data, onChange }: StepDocenteProps) {
         </Select>
       </div>
 
-      <div className="space-y-1.5">
+      {/* <div className="space-y-1.5">
         <Label>Faculdade</Label>
         <Select
           value={data.faculdade ? String(data.faculdade) : undefined}
@@ -115,9 +128,9 @@ export function StepDocente({ data, onChange }: StepDocenteProps) {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
 
-      <div className="space-y-1.5">
+      {/* <div className="space-y-1.5">
         <Label>Tipo de contrato</Label>
         <Select
           value={data.codContrato ? String(data.codContrato) : undefined}
@@ -134,7 +147,7 @@ export function StepDocente({ data, onChange }: StepDocenteProps) {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
 
       <div className="space-y-1.5">
         <Label>Valor/hora</Label>
@@ -151,6 +164,15 @@ export function StepDocente({ data, onChange }: StepDocenteProps) {
       </div>
 
       <div className="space-y-1.5">
+        <Label>Data de início de docência</Label>
+        <Input
+          type="date"
+          value={data.dataInicioDocencia ?? ""}
+          onChange={(e) => onChange({ dataInicioDocencia: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-1.5">
         <Label>Total anos de experiência</Label>
         <Input
           type="number"
@@ -162,15 +184,6 @@ export function StepDocente({ data, onChange }: StepDocenteProps) {
                 : undefined,
             })
           }
-        />
-      </div>
-
-      <div className="space-y-1.5 md:col-span-2">
-        <Label>Data de início de docência</Label>
-        <Input
-          type="date"
-          value={data.dataInicioDocencia ?? ""}
-          onChange={(e) => onChange({ dataInicioDocencia: e.target.value })}
         />
       </div>
 

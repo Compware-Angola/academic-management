@@ -49,7 +49,7 @@ export function StepCandidatura({ data, onChange }: StepCandidaturaProps) {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="space-y-1.5">
+      <div className="space-y-1.5  md:col-span-2">
         <Label>Grau académico</Label>
         <Select
           value={data.grauAcademico ? String(data.grauAcademico) : undefined}
@@ -87,7 +87,7 @@ export function StepCandidatura({ data, onChange }: StepCandidaturaProps) {
         </Select>
       </div> */}
 
-      <div className="space-y-1.5">
+      {/* <div className="space-y-1.5">
         <Label>Estado da candidatura</Label>
         <Select
           value={
@@ -110,7 +110,7 @@ export function StepCandidatura({ data, onChange }: StepCandidaturaProps) {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
 
       {/* <div className="space-y-1.5">
         <Label>Faculdade</Label>
@@ -144,14 +144,14 @@ export function StepCandidatura({ data, onChange }: StepCandidaturaProps) {
         />
       </div> */}
 
-      <div className="space-y-1.5">
+      {/* <div className="space-y-1.5">
         <Label>Data início experiência</Label>
         <Input
           type="date"
           value={data.dataInicioExperiencia ?? ""}
           onChange={(e) => onChange({ dataInicioExperiencia: e.target.value })}
         />
-      </div>
+      </div> */}
 
       {/* <div className="space-y-1.5">
         <Label>Data fim experiência</Label>

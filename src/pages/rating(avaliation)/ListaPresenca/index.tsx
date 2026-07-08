@@ -107,6 +107,8 @@ export default function PresenceList() {
   const { data: parameterResponse, isLoading: isLoadingParameters } =
     useQueryAssessmentAttendanceParameters();
 
+  console.log("Parametros: ", parameterResponse);
+
   const [appliedFilters, setAppliedFilters] = useState<Filters | null>(null);
   const [searchApplied, setSearchApplied] = useState({
     searchBy: "codigoMatricula" as "codigoMatricula" | "nome",
@@ -148,6 +150,8 @@ export default function PresenceList() {
     },
     !!appliedFilters,
   );
+  console.log("Presence: ", presenceAttendanceList);
+  console.log("Presence: ", presenceAttendanceList);
 
   const handleSearch = () => {
     if (!isValidFilters(formData)) {
@@ -185,6 +189,8 @@ export default function PresenceList() {
       limit: 100,
     });
   const schedules = scheduleResponse?.data || [];
+
+  console.log("Schedules : ", schedules);
   const parameters = parameterResponse?.[0];
 
   const { data: mesTemp = [] } = useQueryMesTemp({
@@ -192,6 +198,8 @@ export default function PresenceList() {
   });
 
   const mesDescricao = mesTemp[0]?.designacao;
+
+  console.log("MesTemp: ", mesDescricao);
   const students = presenceAttendanceList?.data || [];
   const pdfData = useMemo(() => {
     if (!students.length || !appliedFilters) return null;
@@ -216,6 +224,7 @@ export default function PresenceList() {
     };
   }, [students, appliedFilters, searchApplied]);
 
+  console.log(students);
   const pdfContent = appliedFilters ? (
     <PresenceListPDFDocument
       anoLetivo={
@@ -250,6 +259,8 @@ export default function PresenceList() {
           (c) => c.codigo === parseFilter(appliedFilters.anoCurricular),
         )?.designacao
       }
+      criadaEm={parameterResponse?.[0]?.created_at}
+      descricao={parameterResponse?.[0]?.descricao}
       total={students.length}
       rows={students.map((s, index) => ({
         numero: index + 1,
