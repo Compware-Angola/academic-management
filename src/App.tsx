@@ -479,7 +479,15 @@ const App = () => {
                   />
                   <Route
                     path="/pos-graduacao-sumario/controle-geral"
-                    element={<PostGraduationControleGeral />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
+                        ]}
+                      >
+                        <PostGraduationControleGeral />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/sumario/listar"
@@ -1847,7 +1855,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS
+                          PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO
                             .sigla!,
                         ]}
                       >
@@ -1860,7 +1868,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO
+                          PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO
                             .sigla!,
                         ]}
                       >
