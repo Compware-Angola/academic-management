@@ -13,8 +13,7 @@ interface CourseSelectProps {
   placeholder?: string;
   width?: string;
   label?: string;
-  enableDefaultSelectItem?: boolean;
-  allowedIds?: string[]; // ← novo
+  allowedIds?: string[];
 }
 
 const CourseSelect = ({
@@ -22,13 +21,12 @@ const CourseSelect = ({
   onChangeValue,
   value,
   params,
-  enableDefaultSelectItem,
   label = "Cursos",
   placeholder,
   width = "full",
   labelMode = "outside",
   showLabel = true,
-  allowedIds, // ← novo
+  allowedIds,
 }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
   const id = useId();
@@ -37,10 +35,7 @@ const CourseSelect = ({
     if (!allowedIds || allowedIds.length === 0) return cursos;
     return cursos.filter((c) => allowedIds.includes(c.codigo.toString()));
   }, [cursos, allowedIds]);
-
-  const defaultSelectItem = enableDefaultSelectItem
-    ? [{ label: "Todos", value: "all", key: id }]
-    : undefined;
+  const defaultSelectItem = [{ label: "Todos", value: "0", key: id }];
 
   return (
     <FormCommandSelect

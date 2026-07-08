@@ -51,6 +51,7 @@ export type FilterCandidatoParams = {
   limit?: number;
   codigoTurno?: number;
   codigoCandidato?: number;
+  codigoFaculdade?: number;
   codigoCurso?: number;
   codigoAnoLetivo?: number;
 };
@@ -63,7 +64,9 @@ export type CandidatoResponse = {
   totalpages: number;
 };
 
-export async function fetchCandidatos(filters: FilterCandidatoParams = {}): Promise<CandidatoResponse> {
+export async function fetchCandidatos(
+  filters: FilterCandidatoParams = {},
+): Promise<CandidatoResponse> {
   const { data } = await axiosNestGa.get("/exames-de-acesso/candidato", {
     params: {
       ...filters,

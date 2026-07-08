@@ -70,22 +70,22 @@ export function FormCommandSelect<T>({
   disabled = false,
   width = "md",
   isLoading = false,
-  onBlur
+  onBlur,
 }: FormCommandSelectProps<T>) {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
   // Cache do item selecionado — persiste mesmo quando `options` muda por nova busca
-  const [cachedSelectedItem, setCachedSelectedItem] = useState<MapResult | undefined>();
+  const [cachedSelectedItem, setCachedSelectedItem] = useState<
+    MapResult | undefined
+  >();
 
   const widthClass = resolveWidthClass(width);
 
   const allItems = [...defaultSelectItem, ...options.map(map)];
 
   // Tenta encontrar o item nas options atuais
-  const itemFromOptions = allItems.find(
-    (item) => String(item.value) === value
-  );
+  const itemFromOptions = allItems.find((item) => String(item.value) === value);
 
   // Sincroniza o cache sempre que o item for encontrado nas options
   useEffect(() => {
@@ -138,7 +138,7 @@ export function FormCommandSelect<T>({
               "flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              widthClass
+              widthClass,
             )}
           >
             <span className="truncate">
@@ -192,7 +192,7 @@ export function FormCommandSelect<T>({
                           "mr-2 h-4 w-4",
                           value === String(item.value)
                             ? "opacity-100"
-                            : "opacity-0"
+                            : "opacity-0",
                         )}
                       />
                       {item.label}
@@ -211,7 +211,7 @@ export function FormCommandSelect<T>({
                             "mr-2 h-4 w-4",
                             value === String(mapped.value)
                               ? "opacity-100"
-                              : "opacity-0"
+                              : "opacity-0",
                           )}
                         />
                         {mapped.label}
@@ -227,4 +227,3 @@ export function FormCommandSelect<T>({
     </div>
   );
 }
-
