@@ -16,7 +16,8 @@ export const TableActions = ({
   ) => void;
 }) => {
   const canValidate =
-    movement.closing_date && movement.validation_date === null;
+    movement.closing_date && movement.admin_status === "pendente";
+
 
   return (
     <div className="flex items-center justify-center gap-1">
