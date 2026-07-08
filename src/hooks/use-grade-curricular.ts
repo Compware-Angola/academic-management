@@ -34,7 +34,8 @@ export function useGradeCurricular({
         limit,
         page,
       }),
-    enabled: !!anoLectivo && !!curso,
+    enabled: !!anoLectivo,
+    //  && !!curso
     staleTime: 1000 * 60 * 10,
   });
 }

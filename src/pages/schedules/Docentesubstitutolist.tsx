@@ -72,11 +72,13 @@ import { useQueryDocenteSubstituto } from "@/hooks/horario/use-docente-substitut
 import { useMutationDeletarDocenteSubstituto } from "@/hooks/horario/use-mutation-deletar-docente-substituto";
 import { useMutationAtualizarDocenteSubstituto } from "@/hooks/horario/use-mutation-atualizar-docente-substituto";
 import { DocenteSubstituto } from "@/services/horario/listar-docente-substituto.service";
-import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { i } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
-
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 type EditForm = {
   fkDocenteOriginal: string;
@@ -91,12 +93,12 @@ type EditForm = {
 export default function DocenteSubstitutoList() {
   const navigate = useNavigate();
 
-    const {
-      data: docentes = [],
-  
-      refetch,
-      error,
-    } = useQueryTeacther();
+  const {
+    data: docentes = [],
+
+    refetch,
+    error,
+  } = useQueryTeacther();
 
   // Delete
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -178,10 +180,8 @@ export default function DocenteSubstitutoList() {
     dataTermino: filters.dataTermino || undefined,
   };
 
-  const {
-    data: substitutoResponse,
-    isLoading: isLoadingSubstitutos,
-  } = useQueryDocenteSubstituto(queryParams);
+  const { data: substitutoResponse, isLoading: isLoadingSubstitutos } =
+    useQueryDocenteSubstituto(queryParams);
 
   const deleteMutation = useMutationDeletarDocenteSubstituto();
   const updateMutation = useMutationAtualizarDocenteSubstituto();
@@ -195,7 +195,7 @@ export default function DocenteSubstitutoList() {
     if (itemIdToDelete) {
       deleteMutation.mutate(
         { id: itemIdToDelete },
-        { onSuccess: () => setIsDeleteDialogOpen(false) }
+        { onSuccess: () => setIsDeleteDialogOpen(false) },
       );
     }
   };
@@ -240,7 +240,7 @@ export default function DocenteSubstitutoList() {
         dataTermino: editForm.dataTermino || undefined,
         obs: editForm.obs || undefined,
       },
-      { onSuccess: () => setIsEditDialogOpen(false) }
+      { onSuccess: () => setIsEditDialogOpen(false) },
     );
   };
 
@@ -273,20 +273,21 @@ export default function DocenteSubstitutoList() {
 
   // ====================== EXPORTAÇÃO ======================
 
-  const exportRows = useMemo(() =>
-    tableData.map((item) => ({
-      docenteOriginal: item.nomedocenteoriginal ?? "—",
-      idDocenteOriginal: item.fkdocenteoriginal ?? "",
-      docenteSubstituto: item.nomedocentesubstituto ?? "—",
-      idDocenteSubstituto: item.fkdocentesubstituto ?? "",
-      unidadeCurricular: item.unidadecurricular ?? "—",
-      curso: item.curso ?? "—",
+  const exportRows = useMemo(
+    () =>
+      tableData.map((item) => ({
+        docenteOriginal: item.nomedocenteoriginal ?? "—",
+        idDocenteOriginal: item.fkdocenteoriginal ?? "",
+        docenteSubstituto: item.nomedocentesubstituto ?? "—",
+        idDocenteSubstituto: item.fkdocentesubstituto ?? "",
+        unidadeCurricular: item.unidadecurricular ?? "—",
+        curso: item.curso ?? "—",
 
-      periodoSubstituicao: `${item.datainicio ?? "—"} → ${item.datatermino ?? "—"}`,
-      criadoPor: item.criadopor ?? "—",
-      criadoEm: item.datacriacao ?? "—",
-    })),
-    [tableData]
+        periodoSubstituicao: `${item.datainicio ?? "—"} → ${item.datatermino ?? "—"}`,
+        criadoPor: item.criadopor ?? "—",
+        criadoEm: item.datacriacao ?? "—",
+      })),
+    [tableData],
   );
 
   // Filtros aplicados para mostrar no PDF/Excel
@@ -307,9 +308,9 @@ export default function DocenteSubstitutoList() {
 
   const pdfData = exportRows.length
     ? {
-      filtros: filtrosAplicados || "Sem filtros aplicados",
-      rows: exportRows,
-    }
+        filtros: filtrosAplicados || "Sem filtros aplicados",
+        rows: exportRows,
+      }
     : null;
 
   const pdfContent = pdfData ? (
@@ -323,11 +324,23 @@ export default function DocenteSubstitutoList() {
       mainTable={{
         headers: [
           { key: "docenteOriginal", label: "Docente Original", width: "22%" },
-          { key: "docenteSubstituto", label: "Docente Substituto", width: "22%" },
-          { key: "unidadeCurricular", label: "Unidade Curricular", width: "20%" },
+          {
+            key: "docenteSubstituto",
+            label: "Docente Substituto",
+            width: "22%",
+          },
+          {
+            key: "unidadeCurricular",
+            label: "Unidade Curricular",
+            width: "20%",
+          },
           { key: "curso", label: "Curso", width: "12%" },
 
-          { key: "periodoSubstituicao", label: "Período Substituição", width: "18%" },
+          {
+            key: "periodoSubstituicao",
+            label: "Período Substituição",
+            width: "18%",
+          },
           { key: "criadoPor", label: "Criado Por", width: "10%" },
           { key: "criadoEm", label: "Criado Em", width: "10%" },
         ],
@@ -340,28 +353,40 @@ export default function DocenteSubstitutoList() {
 
   const excelProps = pdfData
     ? {
-      documentTitle: "Docentes Substitutos",
-      subtitle: "Lista de substituições de docentes por horário",
-      infoSections: [
-        { title: "Filtros Aplicados", content: pdfData.filtros },
-        { title: "Resumo", content: [`Total de registos: ${total}`] },
-      ],
-      mainTable: {
-        headers: [
-          { key: "docenteOriginal", label: "Docente Original", width: 30 },
-          { key: "docenteSubstituto", label: "Docente Substituto", width: 30 },
-          { key: "unidadeCurricular", label: "Unidade Curricular", width: 35 },
-          { key: "curso", label: "Curso", width: 25 },
-
-          { key: "periodoSubstituicao", label: "Período Substituição", width: 25 },
-          { key: "criadoPor", label: "Criado Por", width: 20 },
-          { key: "criadoEm", label: "Criado Em", width: 18 },
+        documentTitle: "Docentes Substitutos",
+        subtitle: "Lista de substituições de docentes por horário",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de registos: ${total}`] },
         ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
+        mainTable: {
+          headers: [
+            { key: "docenteOriginal", label: "Docente Original", width: 30 },
+            {
+              key: "docenteSubstituto",
+              label: "Docente Substituto",
+              width: 30,
+            },
+            {
+              key: "unidadeCurricular",
+              label: "Unidade Curricular",
+              width: 35,
+            },
+            { key: "curso", label: "Curso", width: 25 },
+
+            {
+              key: "periodoSubstituicao",
+              label: "Período Substituição",
+              width: 25,
+            },
+            { key: "criadoPor", label: "Criado Por", width: 20 },
+            { key: "criadoEm", label: "Criado Em", width: 18 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
     : null;
 
   const baseFileName = `Docentes_Substitutos_${new Date().toISOString().slice(0, 10)}`;
@@ -413,7 +438,6 @@ export default function DocenteSubstitutoList() {
             />
           )}
         </div>
-
       </div>
 
       {/* Filtros */}
@@ -442,7 +466,11 @@ export default function DocenteSubstitutoList() {
               value={filters.anoLetivo}
               onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
               options={anosAcademicos}
-              map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
             />
 
             <FormSelect
@@ -452,46 +480,66 @@ export default function DocenteSubstitutoList() {
               value={filters.semestre}
               onChange={(v) => setFilters({ ...filters, semestre: v })}
               options={semestres}
-              map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
             />
 
             <div className="space-y-2">
               <FormSelect
-                disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLetivo === ""}
+                disabled={
+                  isLoadingPeriodos ||
+                  isLoadingAcademicYear ||
+                  filters.anoLetivo === ""
+                }
                 loading={isLoadingPeriodos}
                 label="Período"
                 value={filters.periodo?.toString() ?? "all"}
-                onChange={(v) => setFilters((p) => ({ ...p, periodo: v === "all" ? undefined : v, page: 1 }))}
-                options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
-                map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+                onChange={(v) =>
+                  setFilters((p) => ({
+                    ...p,
+                    periodo: v === "all" ? undefined : v,
+                    page: 1,
+                  }))
+                }
+                options={[
+                  { codigo: "all", designacao: "Todos" },
+                  ...(periodos ?? []),
+                ]}
+                map={(p) => ({
+                  key: p.codigo.toString(),
+                  label: p.designacao,
+                  value: p.codigo.toString(),
+                })}
               />
             </div>
-            <FormCommandSelect
-              value={filters.curso}
+            <CourseSelect
               label="Curso"
-              options={cursos}
-              map={(c) => ({
-                key: c.codigo.toString(),
-                value: c.codigo.toString(),
-                label: c.designacao,
-              })}
-              onChange={(v) =>
-                setFilters({ ...filters, curso: v, unidadeCurricular: "" })
+              value={filters.curso}
+              onChangeValue={(value) =>
+                setFilters({ ...filters, curso: value, unidadeCurricular: "" })
               }
             />
-
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Curricular</label>
               <Select
                 value={filters.anoCurricular}
                 onValueChange={(v) =>
-                  setFilters({ ...filters, anoCurricular: v, unidadeCurricular: "" })
+                  setFilters({
+                    ...filters,
+                    anoCurricular: v,
+                    unidadeCurricular: "",
+                  })
                 }
                 disabled={!filters.curso}
               >
                 <SelectTrigger>
                   <SelectValue
-                    placeholder={filters.curso ? "Todos os anos" : "Selecione curso"}
+                    placeholder={
+                      filters.curso ? "Todos os anos" : "Selecione curso"
+                    }
                   />
                 </SelectTrigger>
                 <SelectContent>
@@ -563,7 +611,9 @@ export default function DocenteSubstitutoList() {
           {isLoadingSubstitutos ? (
             <div className="flex flex-col items-center justify-center py-16">
               <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Carregando substituições...</p>
+              <p className="text-muted-foreground">
+                Carregando substituições...
+              </p>
             </div>
           ) : tableData.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-center">
@@ -637,7 +687,8 @@ export default function DocenteSubstitutoList() {
                           <div className="flex items-center gap-1 text-sm">
                             <Calendar className="h-3 w-3 text-muted-foreground" />
                             <span>
-                              {item.datainicio ?? "—"} → {item.datatermino ?? "—"}
+                              {item.datainicio ?? "—"} →{" "}
+                              {item.datatermino ?? "—"}
                             </span>
                           </div>
                         </TableCell>
@@ -671,7 +722,7 @@ export default function DocenteSubstitutoList() {
                               }
                             >
                               {deleteMutation.isPending &&
-                                itemIdToDelete === item.codigo ? (
+                              itemIdToDelete === item.codigo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
@@ -757,26 +808,27 @@ export default function DocenteSubstitutoList() {
                   ID: {editForm.fkDocenteOriginal}
                 </p>
               </div>
-             
-                  <div className="space-y-2">
-                            <Label>Docente Substituto <span className="text-red-500">*</span></Label>
-                            <FormCommandSelect
-                              value={editForm.fkDocenteSubstituto}
-                              placeholder="Selecione o docente substituto"
-                              options={docentes}
-                              map={(d: any) => ({
-                                key: d.codigo?.toString(),
-                                value: d.codigo?.toString(),
-                                label: d.nome,
-                              })}
-                              onChange={(v) => setEditForm((p) => ({ ...p, fkDocenteSubstituto: v }))}
-                              disabled={isLoadingSubstitutos || docentes.length === 0}
-                            />
-                          </div>
-              
-            </div>
 
-         
+              <div className="space-y-2">
+                <Label>
+                  Docente Substituto <span className="text-red-500">*</span>
+                </Label>
+                <FormCommandSelect
+                  value={editForm.fkDocenteSubstituto}
+                  placeholder="Selecione o docente substituto"
+                  options={docentes}
+                  map={(d: any) => ({
+                    key: d.codigo?.toString(),
+                    value: d.codigo?.toString(),
+                    label: d.nome,
+                  })}
+                  onChange={(v) =>
+                    setEditForm((p) => ({ ...p, fkDocenteSubstituto: v }))
+                  }
+                  disabled={isLoadingSubstitutos || docentes.length === 0}
+                />
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -823,7 +875,10 @@ export default function DocenteSubstitutoList() {
             >
               Cancelar
             </Button>
-            <Button onClick={handleEditConfirmed} disabled={updateMutation.isPending}>
+            <Button
+              onClick={handleEditConfirmed}
+              disabled={updateMutation.isPending}
+            >
               {updateMutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -836,10 +891,15 @@ export default function DocenteSubstitutoList() {
       </Dialog>
 
       {/* ===== DIALOG ELIMINAR ===== */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Tem certeza que deseja eliminar?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Tem certeza que deseja eliminar?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Esta ação é irreversível. O registo de substituição será removido
               permanentemente.

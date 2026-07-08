@@ -49,9 +49,17 @@ function parseFilter(value: string) {
   return value === "all" ? undefined : Number(value);
 }
 
+const CURSO_ALL_VALUES = ["all", "0"];
+const isCursoAll = (value: string) => CURSO_ALL_VALUES.includes(value);
+
+function parseCursoFilter(value: string): number | undefined {
+  // era "all" no retorno
+  return isCursoAll(value) ? undefined : Number(value); // era return "all"
+}
+
 export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState("1");
-  const [cursoId, setCursoId] = useState("all");
+  const [cursoId, setCursoId] = useState("0");
   const [periodoId, setPeriodoId] = useState("all");
   const [anoLetivoId, setAnoLetivoId] = useState("all");
   const [page, setPage] = useState(1);
@@ -72,7 +80,7 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
     useQueryAnoAcademico();
 
   const { data, isLoading, isError } = useListarVagas({
-    cursoId: parseFilter(cursoId),
+    cursoId: parseCursoFilter(cursoId), // ← era parseFilter(cursoId)
     periodoId: parseFilter(periodoId),
     anoLetivoId: parseFilter(anoLetivoId),
     tipoCandidaturaId: parseFilter(tipoCandidaturaId),
@@ -95,11 +103,11 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
         vagasDisponiveis: vaga.vagas_disponiveis,
         cursosOpcionais: vaga.cursosopcionais ?? "-",
       })),
-    [vagas]
+    [vagas],
   );
 
   const filtrosExportacao = [
-    cursoId !== "all" ? `Curso: ${cursoId}` : null,
+    !isCursoAll(cursoId) ? `Curso: ${cursoId}` : null,
     periodoId !== "all" ? `Período: ${periodoId}` : null,
     anoLetivoId !== "all" ? `Ano lectivo: ${anoLetivoId}` : null,
   ]
@@ -117,7 +125,9 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
         },
         {
           title: "Resumo",
-          content: [`Total de registos: ${pagination?.total ?? exportRows.length}`],
+          content: [
+            `Total de registos: ${pagination?.total ?? exportRows.length}`,
+          ],
         },
       ]}
       mainTable={{
@@ -138,32 +148,34 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
 
   const excelProps = exportRows.length
     ? {
-      documentTitle: "Listagem de Vagas",
-      subtitle: "Vagas configuradas por curso, período e ano lectivo",
-      infoSections: [
-        {
-          title: "Filtros Aplicados",
-          content: filtrosExportacao || "Sem filtros",
-        },
-        {
-          title: "Resumo",
-          content: [`Total de registos: ${pagination?.total ?? exportRows.length}`],
-        },
-      ],
-      mainTable: {
-        headers: [
-          { key: "curso", label: "Curso", width: 35 },
-          { key: "periodo", label: "Período", width: 18 },
-          { key: "anoLectivo", label: "Ano lectivo", width: 18 },
-          { key: "totalVagas", label: "Total", width: 12 },
-          { key: "vagasDisponiveis", label: "Disponíveis", width: 16 },
-          { key: "cursosOpcionais", label: "Cursos opcionais", width: 30 },
+        documentTitle: "Listagem de Vagas",
+        subtitle: "Vagas configuradas por curso, período e ano lectivo",
+        infoSections: [
+          {
+            title: "Filtros Aplicados",
+            content: filtrosExportacao || "Sem filtros",
+          },
+          {
+            title: "Resumo",
+            content: [
+              `Total de registos: ${pagination?.total ?? exportRows.length}`,
+            ],
+          },
         ],
-        rows: exportRows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
+        mainTable: {
+          headers: [
+            { key: "curso", label: "Curso", width: 35 },
+            { key: "periodo", label: "Período", width: 18 },
+            { key: "anoLectivo", label: "Ano lectivo", width: 18 },
+            { key: "totalVagas", label: "Total", width: 12 },
+            { key: "vagasDisponiveis", label: "Disponíveis", width: 16 },
+            { key: "cursosOpcionais", label: "Cursos opcionais", width: 30 },
+          ],
+          rows: exportRows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
     : null;
 
   const baseFileName = `Listagem_Vagas_${new Date().toISOString().slice(0, 10)}`;
@@ -211,7 +223,6 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
       anoLetivoId: String(vaga.ano_lectivo_id),
       numVagas: String(vaga.num_vagas),
       cursosOpcionais: vaga.cursosopcionais ?? "",
-
     });
   }
 
@@ -232,7 +243,7 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
       },
       {
         onSuccess: () => setVagaEmEdicao(null),
-      }
+      },
     );
   }
 
@@ -253,9 +264,9 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
           <TipoCandidaturaSelect
             value={tipoCandidaturaId}
             onChangeValue={(value) => {
-              handleFilterChange(setTipoCandidaturaId, value)
+              handleFilterChange(setTipoCandidaturaId, value);
               setAnoLetivoId("all");
-              setCursoId("all");
+              setCursoId("0");
               setPeriodoId("all");
             }}
           />
@@ -263,8 +274,8 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
             value={anoLetivoId}
             tipoCandidaturaId={parseFilter(tipoCandidaturaId)}
             onChangeValue={(value) => {
-              handleFilterChange(setAnoLetivoId, value)
-              setCursoId("all");
+              handleFilterChange(setAnoLetivoId, value);
+              setCursoId("0");
               setPeriodoId("all");
             }}
           />
@@ -272,14 +283,12 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
             label="Curso"
             value={cursoId}
             params={{ tipoCandidaturaId: parseFilter(tipoCandidaturaId) }}
-
             onChangeValue={(value) => {
-              handleFilterChange(setCursoId, value)
+              handleFilterChange(setCursoId, value);
               setPeriodoId("all");
             }}
-            enableDefaultSelectItem
+            // enableDefaultSelectItem
           />
-
 
           <FormSelect
             label="Período"
@@ -294,8 +303,6 @@ export function ListaVagas({ onExportActionsChange }: ListaVagasProps) {
               label: periodo.designacao,
             })}
           />
-
-
         </div>
 
         {isLoading ? (

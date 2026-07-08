@@ -1,14 +1,14 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type DocentePauta = {
-      codigo: number,
-      anolectivo: string,
-      docente: string,
-      gradecurricular: string,
-      estado: number,
-      datacriacao: string,
-      dataactualizacao: string,
-      arquivo: string
+  codigo: number;
+  anolectivo: string;
+  docente: string;
+  gradecurricular: string;
+  estado: number;
+  datacriacao: string;
+  dataactualizacao: string;
+  arquivo: string;
 };
 
 export type DocentePautaResponse = {
@@ -22,7 +22,7 @@ export type DocentePautaResponse = {
 export type FilterDocentePautaParams = {
   anoLectivo: number;
   semestre: number;
-  codigoCurso: number;
+  codigoCurso: number | string;
   docenteId?: number;
   anoCurricular: number;
   page?: number;
@@ -33,11 +33,11 @@ export type FilterDocentePautaParams = {
  * Rota: GET /api/docentes/programa-uc
  */
 export async function fetchDocenteLancamentosPauta(
-  params: FilterDocentePautaParams
+  params: FilterDocentePautaParams,
 ): Promise<DocentePautaResponse> {
   const response = await axiosNestGa.get<DocentePautaResponse>(
     "docentes/programa-uc",
-    { params }
+    { params },
   );
 
   return (
@@ -49,12 +49,7 @@ export async function fetchDocenteLancamentosPauta(
       totalPages: 0,
     }
   );
-
-
-
-  
 }
-
 
 // export async function fetchLancamentosUcSemPauta(
 //   params: FilterLancamentoPautaParams = {}
@@ -74,8 +69,4 @@ export async function fetchDocenteLancamentosPauta(
 //     }
 //   );
 
-
-
-  
 // }
-
