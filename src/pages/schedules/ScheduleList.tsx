@@ -105,7 +105,14 @@ export default function ScheduleList() {
     setIsSubstitutoModalOpen(true);
   };
 
-  const isPrivilegedUser: boolean = haveFullAccess();
+  const isPrivilegedUser: boolean =
+    haveFullAccess() ||
+    roles?.Reitor === true ||
+    roles?.Vice_Reitor === true ||
+    roles?.Acessor_do_Reitor === true ||
+    roles?.Coordenador === true ||
+    roles?.Decano === true ||
+    roles?.Director === true;
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
