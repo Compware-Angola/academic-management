@@ -13,7 +13,6 @@ import { GestaoAfectacaoPorUC } from "./components/GestaoAfectacaoPorUC";
 import { GestaoAfectacaoPorDocente } from "./components/GestaoAfectacaoPorDocente";
 import { Button } from "@/components/ui/button";
 import { GestaoAfectacaoModal } from "./components/GestaoAfectacaoModal";
-
 const GestaoAfectacao = () => {
   const [activeTab, setActiveTab] = useState<"docente" | "uc">("docente");
   const [isShowModal, setIsShowModal] = useState<boolean>(false);

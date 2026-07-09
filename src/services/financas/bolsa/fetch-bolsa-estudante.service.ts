@@ -9,7 +9,7 @@ export type FetchBolsaEstudanteParams = {
   codigoTipoCredito?: number;
   codigoMatricula?: number;
   nome?: string;
-  cursoId?: number;
+  cursoId?: string | number;
   page?: number;
   limit?: number;
 };

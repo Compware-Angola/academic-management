@@ -36,6 +36,14 @@ import { Loader2, RefreshCcw } from "lucide-react";
 
 import { useId, useState, useEffect } from "react";
 
+const CURSO_ALL_VALUES = ["all", "0"];
+const isCursoAll = (value: string) => CURSO_ALL_VALUES.includes(value);
+
+function parseCursoFilter(value: string): number | undefined {
+  // era "all" no retorno
+  return isCursoAll(value) ? undefined : Number(value); // era return "all"
+}
+
 const ListarUCDocenteSemAfetacao = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -45,7 +53,7 @@ const ListarUCDocenteSemAfetacao = () => {
     anoLectivo: "",
     semestre: "",
     docente: "",
-    curso: "",
+    curso: "0",
     anoCurricular: "",
   });
 
@@ -55,7 +63,7 @@ const ListarUCDocenteSemAfetacao = () => {
     refetch,
   } = useQueryUCDocenteSemAfectacao({
     anoLectivoId: parseFilter(filters.anoLectivo),
-    cursoId: parseFilter(filters.curso),
+    cursoId: parseCursoFilter(filters.curso),
     semestreId: parseFilter(filters.semestre),
     classeId: parseFilter(filters.anoCurricular),
     search: debouncedSearch,
@@ -68,7 +76,7 @@ const ListarUCDocenteSemAfetacao = () => {
       anoLectivo: "",
       semestre: "",
       docente: "",
-      curso: "",
+      curso: "0",
       anoCurricular: "",
     });
     setSearch("");
@@ -124,9 +132,10 @@ const ListarUCDocenteSemAfetacao = () => {
             />
             <CourseSelect
               value={filters.curso}
-              enableDefaultSelectItem
+              // enableDefaultSelectItem
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
             />
+
             <AnoCurricularSelect
               enableDefaultSelectItem
               value={filters.anoCurricular}

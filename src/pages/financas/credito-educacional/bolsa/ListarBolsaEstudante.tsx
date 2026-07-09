@@ -54,10 +54,24 @@ import {
 } from "@/services/financas/bolsa/fetch-bolsa-estudante.service";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import useMutationEstadoCreditoEducacional, { useMutationToggleInstituicaoPagou } from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
+import useMutationEstadoCreditoEducacional, {
+  useMutationToggleInstituicaoPagou,
+} from "@/hooks/financas/credito-educacional/useMutationEstadoCreditoEducacional";
 import { EditAttributionModal } from "../AtribuirCredito/components/EditAttributionModal";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   exportBolsaEstudanteExcelService,
   exportBolsaEstudantePdfService,
@@ -66,12 +80,22 @@ import { toast } from "sonner";
 
 type ExportAction = "pdf" | "print" | "excel";
 
+const CURSO_ALL_VALUES = ["all", "0", undefined];
+const isCursoAll = (value: string) => CURSO_ALL_VALUES.includes(value);
+
+function parseCursoFilter(value: string): number | undefined {
+  // era "all" no retorno
+  return isCursoAll(value) ? undefined : Number(value); // era return "all"
+}
+
 export default function ListarBolsaEstudante() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [selectedForToggle, setSelectedForToggle] = useState<BolsaEstudante | null>(null);
+  const [selectedForToggle, setSelectedForToggle] =
+    useState<BolsaEstudante | null>(null);
   // Estados (adicione junto com os outros)
   const [confirmEstadoDialogOpen, setConfirmEstadoDialogOpen] = useState(false);
-  const [selectedForEstadoToggle, setSelectedForEstadoToggle] = useState<BolsaEstudante | null>(null);
+  const [selectedForEstadoToggle, setSelectedForEstadoToggle] =
+    useState<BolsaEstudante | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState("10");
   const [filters, setFilters] = useState<FetchBolsaEstudanteParams>({
@@ -119,8 +143,10 @@ export default function ListarBolsaEstudante() {
   const totalItems = meta?.total ?? 0;
   const { mutateAsync: switchEstadoBolsa, isPending: isPendingActiveBolsa } =
     useMutationEstadoCreditoEducacional();
-  const { mutateAsync: handleToggleInstituicaoPagou, isPending: isPendingInstituicaoPagou } =
-    useMutationToggleInstituicaoPagou();
+  const {
+    mutateAsync: handleToggleInstituicaoPagou,
+    isPending: isPendingInstituicaoPagou,
+  } = useMutationToggleInstituicaoPagou();
   const handleOpenConfirmDialog = (estudante: BolsaEstudante) => {
     setSelectedForToggle(estudante);
     setConfirmDialogOpen(true);
@@ -131,7 +157,6 @@ export default function ListarBolsaEstudante() {
 
     try {
       await handleToggleInstituicaoPagou({ codigo: selectedForToggle.codigo });
-
     } catch (error) {
       console.error(error);
     } finally {
@@ -150,7 +175,6 @@ export default function ListarBolsaEstudante() {
 
     try {
       await switchEstadoBolsa({ codigo: selectedForEstadoToggle.codigo });
-
     } catch (error) {
       console.error(error);
     } finally {
@@ -260,7 +284,9 @@ export default function ListarBolsaEstudante() {
       </Breadcrumb>
 
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Estudantes com Crédito Educacional</h1>
+        <h1 className="text-2xl font-bold">
+          Estudantes com Crédito Educacional
+        </h1>
         <p className="text-muted-foreground">
           Lista completa de estudantes com Créditos Educacionais aplicados.
         </p>
@@ -340,12 +366,12 @@ export default function ListarBolsaEstudante() {
             </div>
 
             <CourseSelect
-              value={filters.cursoId?.toString() || ""}
+              value={filters.cursoId?.toString() || "0"}
               onChangeValue={(v) => {
                 setPage(1);
                 setFilters((prev) => ({
                   ...prev,
-                  cursoId: v ? Number(v) : undefined,
+                  cursoId: parseCursoFilter(v),
                 }));
               }}
             />
@@ -425,9 +451,7 @@ export default function ListarBolsaEstudante() {
             ) : (
               <Download className="mr-2 h-4 w-4" />
             )}
-            {exportingAction === "excel"
-              ? "A exportar..."
-              : "Exportar Excel"}
+            {exportingAction === "excel" ? "A exportar..." : "Exportar Excel"}
           </Button>
         </div>
       )}
@@ -466,7 +490,6 @@ export default function ListarBolsaEstudante() {
                     <TableHead>Desconto</TableHead>
                     <TableHead>Tipo Crédito</TableHead>
                     <TableHead>Crédito Educacional</TableHead>
-
 
                     <TableHead>Estado da Bolsa</TableHead>
                     <TableHead>Ações</TableHead>
@@ -523,14 +546,19 @@ export default function ListarBolsaEstudante() {
                                 <span className="cursor-pointer">
                                   <Switch
                                     checked={e.status_ === 1}
-                                    onCheckedChange={() => handleOpenConfirmEstado(e)}
+                                    onCheckedChange={() =>
+                                      handleOpenConfirmEstado(e)
+                                    }
                                     disabled={false}
                                   />
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Clique para {e.status_ === 1 ? "desativar" : "ativar"} a bolsa</p>
-
+                                <p>
+                                  Clique para{" "}
+                                  {e.status_ === 1 ? "desativar" : "ativar"} a
+                                  bolsa
+                                </p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -538,9 +566,10 @@ export default function ListarBolsaEstudante() {
                           <Loader2
                             className={cn(
                               "h-4 w-4 animate-spin",
-                              selectedBolsa?.codigo === e.codigo && isPendingActiveBolsa
+                              selectedBolsa?.codigo === e.codigo &&
+                                isPendingActiveBolsa
                                 ? "block"
-                                : "hidden"
+                                : "hidden",
                             )}
                           />
                         </div>
@@ -640,12 +669,14 @@ export default function ListarBolsaEstudante() {
             <DialogDescription className="pt-2">
               {selectedForToggle?.instituicao_pagou === 1 ? (
                 <>
-                  Tem certeza que deseja <strong className="text-red-600">desmarcar </strong>
+                  Tem certeza que deseja{" "}
+                  <strong className="text-red-600">desmarcar </strong>
                   como pago pela instituição?
                 </>
               ) : (
                 <>
-                  Tem certeza que deseja <strong className="text-green-600">marcar </strong>
+                  Tem certeza que deseja{" "}
+                  <strong className="text-green-600">marcar </strong>
                   como pago pela instituição?
                 </>
               )}
@@ -657,7 +688,13 @@ export default function ListarBolsaEstudante() {
                   <p>{selectedForToggle?.nome_completo}</p>
                   <p>Tipo: {selectedForToggle?.tipo_credito}</p>
                   <p>Matrícula: {selectedForToggle?.codigo_matricula}</p>
-                  <p>Valor Desconto:  {formatDesconto(selectedForToggle?.valor_desconto, selectedForToggle?.tipo_desconto)}</p>
+                  <p>
+                    Valor Desconto:{" "}
+                    {formatDesconto(
+                      selectedForToggle?.valor_desconto,
+                      selectedForToggle?.tipo_desconto,
+                    )}
+                  </p>
                 </div>
               </div>
             </DialogDescription>
@@ -676,26 +713,36 @@ export default function ListarBolsaEstudante() {
             <Button
               onClick={handleConfirmToggle}
               disabled={isPendingInstituicaoPagou}
-              className={selectedForToggle?.instituicao_pagou === 1
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-green-600 hover:bg-green-700"
+              className={
+                selectedForToggle?.instituicao_pagou === 1
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-green-600 hover:bg-green-700"
               }
             >
-              {isPendingInstituicaoPagou && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {selectedForToggle?.instituicao_pagou === 1 ? "Desmarcar Pagamento" : "Confirmar Pagamento"}
+              {isPendingInstituicaoPagou && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {selectedForToggle?.instituicao_pagou === 1
+                ? "Desmarcar Pagamento"
+                : "Confirmar Pagamento"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       {/* Dialog Estado da Bolsa */}
-      <Dialog open={confirmEstadoDialogOpen} onOpenChange={setConfirmEstadoDialogOpen}>
+      <Dialog
+        open={confirmEstadoDialogOpen}
+        onOpenChange={setConfirmEstadoDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar Alteração de Estado</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja{" "}
               <strong>
-                {selectedForEstadoToggle?.status_ === 1 ? "desativar" : "ativar"}
+                {selectedForEstadoToggle?.status_ === 1
+                  ? "desativar"
+                  : "ativar"}
               </strong>{" "}
               a bolsa do estudante?
               <br />
@@ -719,7 +766,9 @@ export default function ListarBolsaEstudante() {
               onClick={handleConfirmEstadoToggle}
               disabled={isPendingActiveBolsa}
             >
-              {isPendingActiveBolsa && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isPendingActiveBolsa && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Confirmar
             </Button>
           </DialogFooter>
