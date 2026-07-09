@@ -49,6 +49,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 type SortField = "n_mecanografico" | "nome" | "grau_academico" | "escalao";
 
 const SEMESTRE = [
@@ -287,7 +288,7 @@ export default function SalarioDocente() {
             />
           </div>
 
-          <div className="space-y-1.5">
+          {/* <div className="space-y-1.5">
             <Label>Curso</Label>
             <FormCommandSelect
               value={filters.curso}
@@ -299,7 +300,13 @@ export default function SalarioDocente() {
               })}
               onChange={(v) => updateFilters({ curso: v })}
             />
-          </div>
+          </div> */}
+
+          <CourseSelect
+            value={filters.curso}
+            // enableDefaultSelectItem
+            onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+          />
 
           <div className="space-y-1.5">
             <Label>Data início</Label>

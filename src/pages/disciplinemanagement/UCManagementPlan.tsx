@@ -57,6 +57,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdown-disciplines";
 import { useMutationUpdateDiscipline } from "@/hooks/study_plan/use-mutation-update-discipline";
 import { Switch } from "@/components/ui/switch";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function UCManagementPlan() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -253,7 +254,7 @@ export default function UCManagementPlan() {
           </div>
 
           {/* Curso */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Curso</label>
             {loadingCursos ? (
               <Skeleton className="h-10 w-full rounded-md" />
@@ -270,7 +271,13 @@ export default function UCManagementPlan() {
                 onChange={(v) => setCursoId(v)}
               />
             )}
-          </div>
+          </div> */}
+
+          <CourseSelect
+            label="Curso"
+            value={cursoId}
+            onChangeValue={(v) => setCursoId(v)}
+          />
 
           {/* Classe */}
           <div className="space-y-2">

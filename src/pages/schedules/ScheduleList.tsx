@@ -70,13 +70,16 @@ import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { usePermission } from "@/auth/permission.helper";
-import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 import { ExcelActions } from "@/components/views/excel/GenericExcelExport";
 import { useMutationCriarDocenteSubstituto } from "@/hooks/horario/use-mutation-criar-docente-substituto";
 import DocenteSubstitutoModal from "./components/DocenteSubstitutoModal";
 import { Roles } from "./EditSchedule";
 import Lottie from "lottie-react";
 import Notallowed from "@/assets/Notallowed.json";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -91,7 +94,8 @@ export default function ScheduleList() {
   const [itemIdToConfirm, setItemIdToConfirm] = useState<number | null>(null);
 
   const [isSubstitutoModalOpen, setIsSubstitutoModalOpen] = useState(false);
-  const [selectedHorarioForSubstituto, setSelectedHorarioForSubstituto] = useState<number | null>(null);
+  const [selectedHorarioForSubstituto, setSelectedHorarioForSubstituto] =
+    useState<number | null>(null);
 
   const { haveFullAccess } = usePermission();
   const roles = userData?.roles as Roles | undefined;
@@ -108,7 +112,7 @@ export default function ScheduleList() {
     roles?.Acessor_do_Reitor === true ||
     roles?.Coordenador === true ||
     roles?.Decano === true ||
-    roles?.Director === true
+    roles?.Director === true;
   // Filtros
   const [filters, setFilters] = useState({
     anoLetivo: "",
@@ -162,16 +166,21 @@ export default function ScheduleList() {
     ...(filters.afetacaoDocente != null &&
       filters.afetacaoDocente !== "" &&
       !isNaN(Number(filters.afetacaoDocente)) && {
-      afetacaoDocente: Number(filters.afetacaoDocente),
-    }),
+        afetacaoDocente: Number(filters.afetacaoDocente),
+      }),
 
     ...(filters.estado != null &&
       filters.estado !== "" &&
       !isNaN(Number(filters.estado)) && {
-      estado: Number(filters.estado),
-    }),
+        estado: Number(filters.estado),
+      }),
   };
-  const canLoadSchedules = isPrivilegedUser && !!filters.anoLetivo || (!!filters.anoLetivo && !!filters.curso && !!filters.semestre && !!filters.periodo)
+  const canLoadSchedules =
+    (isPrivilegedUser && !!filters.anoLetivo) ||
+    (!!filters.anoLetivo &&
+      !!filters.curso &&
+      !!filters.semestre &&
+      !!filters.periodo);
 
   const {
     data: ScheduleResponse,
@@ -222,20 +231,21 @@ export default function ScheduleList() {
   };
   // ====================== EXPORTAÇÃO PDF + EXCEL ======================
 
-  const exportRows = useMemo(() =>
-    tableData.map((item) => ({
-      designacao: item.designacao ?? "—",
-      curso: item.curso ?? "—",
-      unidadeCurricular: item.unidadecurricular ?? "—",
-      anoCurricular: item.ano ?? "—",
-      capacidade: item.capacidade ?? "—",
-      estado: item.estado ?? "—",
-      disponibilidade: item.disponibilidade ?? "—",
-      criadoEm: item.datacriacao ?? "—",
-      criadoPor: item.criadopor ?? "—",
-      atualizadoPor: item.atualizadopor ?? "—",
-    })),
-    [tableData]
+  const exportRows = useMemo(
+    () =>
+      tableData.map((item) => ({
+        designacao: item.designacao ?? "—",
+        curso: item.curso ?? "—",
+        unidadeCurricular: item.unidadecurricular ?? "—",
+        anoCurricular: item.ano ?? "—",
+        capacidade: item.capacidade ?? "—",
+        estado: item.estado ?? "—",
+        disponibilidade: item.disponibilidade ?? "—",
+        criadoEm: item.datacriacao ?? "—",
+        criadoPor: item.criadopor ?? "—",
+        atualizadoPor: item.atualizadopor ?? "—",
+      })),
+    [tableData],
   );
 
   // Filtros aplicados para mostrar no documento
@@ -247,7 +257,9 @@ export default function ScheduleList() {
     filters.anoCurricular && filters.anoCurricular !== "all"
       ? `Ano Curricular: ${filters.anoCurricular}`
       : null,
-    filters.unidadeCurricular ? `Unidade Curricular: ${filters.unidadeCurricular}` : null,
+    filters.unidadeCurricular
+      ? `Unidade Curricular: ${filters.unidadeCurricular}`
+      : null,
     filters.estado ? `Estado: ${filters.estado}` : null,
     filters.afetacaoDocente ? `Docente: ${filters.afetacaoDocente}` : null,
   ]
@@ -256,9 +268,9 @@ export default function ScheduleList() {
 
   const pdfData = exportRows.length
     ? {
-      filtros: filtrosAplicados || "Sem filtros aplicados",
-      rows: exportRows,
-    }
+        filtros: filtrosAplicados || "Sem filtros aplicados",
+        rows: exportRows,
+      }
     : null;
 
   const pdfContent = pdfData ? (
@@ -273,7 +285,11 @@ export default function ScheduleList() {
         headers: [
           { key: "designacao", label: "Designação", width: "20%" },
           { key: "curso", label: "Curso", width: "15%" },
-          { key: "unidadeCurricular", label: "Unidade Curricular", width: "20%" },
+          {
+            key: "unidadeCurricular",
+            label: "Unidade Curricular",
+            width: "20%",
+          },
           { key: "anoCurricular", label: "Ano Curricular", width: "10%" },
           { key: "capacidade", label: "Capacidade", width: "8%" },
           { key: "estado", label: "Estado", width: "10%" },
@@ -290,29 +306,33 @@ export default function ScheduleList() {
 
   const excelProps = pdfData
     ? {
-      documentTitle: "Horários Existentes",
-      subtitle: "Lista de horários por curso, semestre e ano letivo",
-      infoSections: [
-        { title: "Filtros Aplicados", content: pdfData.filtros },
-        { title: "Resumo", content: [`Total de registos: ${total}`] },
-      ],
-      mainTable: {
-        headers: [
-          { key: "designacao", label: "Designação", width: 30 },
-          { key: "curso", label: "Curso", width: 25 },
-          { key: "unidadeCurricular", label: "Unidade Curricular", width: 35 },
-          { key: "anoCurricular", label: "Ano Curricular", width: 15 },
-          { key: "capacidade", label: "Capacidade", width: 12 },
-          { key: "estado", label: "Estado", width: 15 },
-          { key: "disponibilidade", label: "Disponibilidade", width: 15 },
-          { key: "criadoEm", label: "Criado Em", width: 18 },
-          { key: "criadoPor", label: "Criado Por", width: 20 },
+        documentTitle: "Horários Existentes",
+        subtitle: "Lista de horários por curso, semestre e ano letivo",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de registos: ${total}`] },
         ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
+        mainTable: {
+          headers: [
+            { key: "designacao", label: "Designação", width: 30 },
+            { key: "curso", label: "Curso", width: 25 },
+            {
+              key: "unidadeCurricular",
+              label: "Unidade Curricular",
+              width: 35,
+            },
+            { key: "anoCurricular", label: "Ano Curricular", width: 15 },
+            { key: "capacidade", label: "Capacidade", width: 12 },
+            { key: "estado", label: "Estado", width: 15 },
+            { key: "disponibilidade", label: "Disponibilidade", width: 15 },
+            { key: "criadoEm", label: "Criado Em", width: 18 },
+            { key: "criadoPor", label: "Criado Por", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
     : null;
 
   const baseFileName = `Horarios_Existentes_${new Date().toISOString().slice(0, 10)}`;
@@ -346,7 +366,6 @@ export default function ScheduleList() {
         </div>
         <div className="flex flex-wrap gap-2">
           {/* Botão Criar Horário */}
-
 
           {/* === BOTÕES DE EXPORTAÇÃO === */}
           {pdfContent && (
@@ -457,21 +476,11 @@ export default function ScheduleList() {
               </Select>
             </div>
 
-            <FormCommandSelect
-              value={filters.curso}
+            <CourseSelect
               label="Curso"
-              options={cursos}
-              map={(c) => ({
-                key: c.codigo.toString(),
-                value: c.codigo.toString(),
-                label: c.designacao,
-              })}
-              onChange={(v) =>
-                setFilters({
-                  ...filters,
-                  curso: v,
-                  unidadeCurricular: "",
-                })
+              value={filters.curso}
+              onChangeValue={(value) =>
+                setFilters({ ...filters, curso: value, unidadeCurricular: "" })
               }
             />
 
@@ -566,9 +575,7 @@ export default function ScheduleList() {
 
       {/* Tabela */}
       <Card>
-        <CardHeader>
-
-        </CardHeader>
+        <CardHeader></CardHeader>
         <CardContent>
           {isLoadingSchedule ? (
             <div className="flex flex-col items-center justify-center py-16">
@@ -578,7 +585,6 @@ export default function ScheduleList() {
           ) : tableData.length === 0 ? (
             <div className="text-center py-12 bg-card border rounded-lg">
               <div className="flex flex-col items-center gap-3">
-
                 <Lottie
                   animationData={Notallowed}
                   loop={true}
@@ -595,10 +601,10 @@ export default function ScheduleList() {
 
                 {!canLoadSchedules && (
                   <p className="text-muted-foreground">
-                    Selecione o Ano Letivo, Curso, Semestre, Período e Turma para carregar os horários.
+                    Selecione o Ano Letivo, Curso, Semestre, Período e Turma
+                    para carregar os horários.
                   </p>
                 )}
-
               </div>
             </div>
           ) : (
@@ -632,7 +638,7 @@ export default function ScheduleList() {
                           <Badge
                             variant={
                               item.estado.toLowerCase().includes("pendente") ||
-                                item.estado.toLowerCase().includes("distribuição")
+                              item.estado.toLowerCase().includes("distribuição")
                                 ? "secondary"
                                 : "default"
                             }
@@ -678,7 +684,9 @@ export default function ScheduleList() {
                               variant="outline"
                               size="icon"
                               title="Editar horário"
-                              onClick={() => navigate(`/schedule/${item.codigo}/edit`)}
+                              onClick={() =>
+                                navigate(`/schedule/${item.codigo}/edit`)
+                              }
                               disabled={!isPrivilegedUser}
                             >
                               <Pencil className="h-4 w-4" />
@@ -702,11 +710,13 @@ export default function ScheduleList() {
                               size="icon"
                               onClick={() => openDeleteDialog(item.codigo)}
                               disabled={
-                                deleteMutation.isPending && itemIdToConfirm === item.codigo ||
+                                (deleteMutation.isPending &&
+                                  itemIdToConfirm === item.codigo) ||
                                 !isPrivilegedUser
                               }
                             >
-                              {deleteMutation.isPending && itemIdToConfirm === item.codigo ? (
+                              {deleteMutation.isPending &&
+                              itemIdToConfirm === item.codigo ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Trash2 className="h-4 w-4" />
@@ -714,24 +724,31 @@ export default function ScheduleList() {
                             </Button>
 
                             {/* Validar (condicional) */}
-                            {Number(item.estadoid) === 2 && hasPermission(PermissionTypeDetails.VALIDACAO_HORARIO.sigla) && (
-                              <Button
-                                variant="default"
-                                size="icon"
-                                onClick={() => openValidateDialog(item.codigo)}
-                                disabled={
-                                  validarMutation.isPending && itemIdToConfirm === item.codigo ||
-                                  !isPrivilegedUser
-                                }
-                                className="bg-green-500 hover:bg-green-600"
-                              >
-                                {validarMutation.isPending && itemIdToConfirm === item.codigo ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Check className="h-4 w-4" />
-                                )}
-                              </Button>
-                            )}
+                            {Number(item.estadoid) === 2 &&
+                              hasPermission(
+                                PermissionTypeDetails.VALIDACAO_HORARIO.sigla,
+                              ) && (
+                                <Button
+                                  variant="default"
+                                  size="icon"
+                                  onClick={() =>
+                                    openValidateDialog(item.codigo)
+                                  }
+                                  disabled={
+                                    (validarMutation.isPending &&
+                                      itemIdToConfirm === item.codigo) ||
+                                    !isPrivilegedUser
+                                  }
+                                  className="bg-green-500 hover:bg-green-600"
+                                >
+                                  {validarMutation.isPending &&
+                                  itemIdToConfirm === item.codigo ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Check className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -798,7 +815,6 @@ export default function ScheduleList() {
           setIsModalOpen(false);
           setSelectedTurmaId(null);
         }}
-
       />
       <DocenteSubstitutoModal
         isOpen={isSubstitutoModalOpen}
