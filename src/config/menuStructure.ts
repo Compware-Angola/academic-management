@@ -13,8 +13,7 @@ import {
   GraduationCap,
   FileText,
   BookUser,
-  Files,
-  BarChart3
+  Files
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -1202,14 +1201,14 @@ export const finaceStructure: MenuStructure = {
         //   url: "/financas/relatorios/descontos",
         // },
 
-
+        /* Relatórios de Pagamentos 
         {
           title: "Rel. Pagamentos Instituições",
           icon: BarChart3,
           url: "/financas/rel-pagamentos-instituicoes",
           permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
         },
-
+        */
         {
           title: "Pagamentos",
           url: "/financas/listar-pagamentos",
