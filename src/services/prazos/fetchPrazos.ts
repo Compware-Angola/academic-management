@@ -11,6 +11,8 @@ export type Prazo = {
   data_fim: string;
   tipo_avaliacao: string;
   criado_por_nome: string;
+  atualizado_por_nome: string;
+  fk_semestre: string;
 };
 type PrazosParams = {
   anoLetivoId: string;

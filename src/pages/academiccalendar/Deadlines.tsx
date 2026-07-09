@@ -54,7 +54,6 @@ import { set } from "date-fns";
 import { MCALTipoAvaliacoesSelectSelect } from "@/components/common/global-selects/MCALTipoAvaliacoesSelect";
 
 export default function Deadlines() {
-
   const pk_utilizador = useAuth()?.user?.user?.pk_utilizador;
 
   const [prazoId, setPrazoId] = useState<number>(0);
@@ -92,6 +91,7 @@ export default function Deadlines() {
     data_fim: "",
     observacao: "",
     fk_created_by: pk_utilizador?.toString(),
+    fk_updated_by: pk_utilizador?.toString(),
     anoletivo: "",
     tipoCandidaturaId: "",
   });
@@ -101,21 +101,12 @@ export default function Deadlines() {
   const itemsPerPage = 10;
 
   const handleDeletePrazo = async (prazoId: number) => {
-
     try {
-
       await removerPrazo(prazoId);
       toast.success("Prazo removido com sucesso");
-
     } catch (error: any) {
-
-      toast.error(
-        error?.response?.data?.message ||
-        "Erro ao remover prazo"
-      );
-
+      toast.error(error?.response?.data?.message || "Erro ao remover prazo");
     }
-
   };
 
   const handleSelecionarPrazo = (prazo: Prazo) => {
@@ -126,11 +117,12 @@ export default function Deadlines() {
     setForm({
       fk_tipo_prazo: tipoPrazoId,
       fk_tipo_avaliacao: prazo.tipo_avaliacao_id?.toString() || "",
-      fk_semestre: semestres[0]?.codigo.toString() || "",
+      fk_semestre: prazo.fk_semestre,
       data_inicio: dataInicioFormatada,
       data_fim: dataFimFormatada,
       observacao: prazo.observacao || "",
       fk_created_by: "1397",
+      fk_updated_by: "1397",
       anoletivo: anoLetivoId.toString(),
       tipoCandidaturaId: tipoCandidaturaId,
     });
@@ -139,7 +131,6 @@ export default function Deadlines() {
   };
 
   const handleActualizarPrazo = async () => {
-
     await actualizarPrazo({
       pk_prazo: prazoId,
       observacao: form.observacao,
@@ -189,6 +180,7 @@ export default function Deadlines() {
         data_fim: "",
         observacao: "",
         fk_created_by: pk_utilizador.toString(),
+        fk_updated_by: pk_utilizador.toString(),
         anoletivo: "",
         tipoCandidaturaId: "",
       });
@@ -229,7 +221,7 @@ export default function Deadlines() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-
+  console.log(paginated);
   return (
     <div className="space-y-6">
       <PageHeader
@@ -284,10 +276,13 @@ export default function Deadlines() {
           {/* Tipo de Prazo */}
           <div className="space-y-2">
             <Label>Tipo de Prazo</Label>
-            <Select value={tipoPrazoId} onValueChange={(v) => {
-              setTipoPrazoId(v)
-              setForm({ ...form, fk_tipo_prazo: v })
-            }}>
+            <Select
+              value={tipoPrazoId}
+              onValueChange={(v) => {
+                setTipoPrazoId(v);
+                setForm({ ...form, fk_tipo_prazo: v });
+              }}
+            >
               <SelectTrigger>
                 <SelectValue
                   placeholder={
@@ -343,7 +338,8 @@ export default function Deadlines() {
               <TableHead>Período</TableHead>
               <TableHead>Observação</TableHead>
               <TableHead>Criado por</TableHead>
-              <TableHead>Acções</TableHead>
+              <TableHead>Actualizado por</TableHead>
+              <TableHead className="text-right">Acções</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -362,12 +358,18 @@ export default function Deadlines() {
                   <TableCell>
                     <Skeleton className="h-8 w-40" />
                   </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-40" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-8 w-40" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : paginated.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={6}
                   className="text-center py-16 text-muted-foreground"
                 >
                   Nenhum prazo encontrado para os filtros selecionados
@@ -392,6 +394,10 @@ export default function Deadlines() {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {p.criado_por_nome}
+                  </TableCell>
+
+                  <TableCell className="text-sm text-muted-foreground">
+                    {p.atualizado_por_nome ?? "---"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="flex justify-end gap-2">
@@ -437,8 +443,8 @@ export default function Deadlines() {
               <Select
                 value={form.fk_tipo_prazo}
                 onValueChange={(v) => {
-                  setTipoPrazoId(v)
-                  setForm({ ...form, fk_tipo_prazo: v })
+                  setTipoPrazoId(v);
+                  setForm({ ...form, fk_tipo_prazo: v });
                 }}
               >
                 <SelectTrigger>
@@ -531,7 +537,7 @@ export default function Deadlines() {
             <div className="space-y-2">
               <Label>Semestre *</Label>
               <Select
-                value={form.fk_semestre}
+                value={form.fk_semestre?.toString() ?? ""}
                 onValueChange={(v) => setForm({ ...form, fk_semestre: v })}
               >
                 <SelectTrigger>
@@ -601,6 +607,7 @@ export default function Deadlines() {
                   data_fim: "",
                   observacao: "",
                   fk_created_by: pk_utilizador.toString(),
+                  fk_updated_by: pk_utilizador.toString(),
                   anoletivo: "",
                   tipoCandidaturaId: "",
                 });

@@ -182,8 +182,8 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
         `Horário: ${horario}`,
         `Unidade Curricular: ${unidadeCurricular}`,
         `Total de estudantes: ${total}`,
-        `Data da Prova: ${criadaEm}`,
-        `Prova de: ${descricao}`,
+        `Tipo de Avaliação: ${descricao}`,
+        `Data da Avaliação: ${criadaEm}`,
       ].filter(Boolean),
     },
   ];
