@@ -28,8 +28,8 @@ import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { useState } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { useQueryConfigurationGeral } from "@/hooks/academiccalendar/use-query-configuration";
-import { PaymentServiceComparisonWidget } from "./components/teste";
-import { PaymentComparisonChart } from "./components/teste2";
+import { PaymentServiceComparison } from "./components/payment-comparison";
+import { PaymentComparisonChart } from "./components/payment-comparison-chart";
 import { PaymenttDailyStatsCard } from "./components/paymentt-daily-Stats-card";
 import { PaymentMonthlyStatsCard } from "./components/payment-monthly-StatsCard";
 
@@ -85,9 +85,9 @@ const Index = () => {
         }
       />
 
-      <Dialog open={openAvisoModal} onOpenChange={setOpenAvisoModal}>
+      {/* <Dialog open={openAvisoModal} onOpenChange={setOpenAvisoModal}>
 
-      </Dialog>
+      </Dialog> */}
 
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -116,15 +116,15 @@ const Index = () => {
       </div>
 
       {/* Recent Activity Section */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         <UpcomingEventsCard />
 
-        <SemesterStatsCard
+        {/* <SemesterStatsCard
           title={"Desempenho Académico do  " + (configurationGeral?.semestreAtual?.semestre === 1 ? "1º" : "2º") + " Semestre"}
 
           description={""}
 
-        />
+        /> */}
 
         <QuickActionsCard
           title="Configuração Académica Atual"
@@ -135,7 +135,15 @@ const Index = () => {
         />
       </div>
 
-      {/* Quick Access Links */}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <PaymenttDailyStatsCard />
+        <PaymentMonthlyStatsCard />
+        <PaymentServiceComparison />
+        <PaymentComparisonChart />
+
+
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Acesso Rápido aos Módulos</CardTitle>
@@ -162,13 +170,7 @@ const Index = () => {
 
         </CardContent>
       </Card>
-      <div className="grid gap-4 md:grid-cols-2">
-        <PaymentServiceComparisonWidget />
-        <PaymentComparisonChart />
-        <PaymenttDailyStatsCard />
-        <PaymentMonthlyStatsCard />
 
-      </div>
 
     </div>
   );
