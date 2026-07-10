@@ -20,15 +20,6 @@ import {
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ChevronLeft,
-  ChevronRight,
   FileText,
   Home,
   Loader2,
@@ -54,6 +45,7 @@ import { useMutationUpdateBolsa } from "../../../../hooks/financas/bolsa/use-mut
 import { CreditoEducacionalTipoSelect } from "@/components/common/global-selects/CreditoEducacionalTipoSelect";
 import { CreditoEducacionalTipoDescontoSelect } from "@/components/common/global-selects/CreditoEducacionalTipoDescontoSelect";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
+import { PaginationComponent } from "@/components/common/PaginationComponent";
 
 export default function ListarBolsa() {
   const { toast } = useToast();
@@ -61,7 +53,7 @@ export default function ListarBolsa() {
   const [editingBolsa, setEditingBolsa] = useState<Bolsa | null>(null);
   const [selectedBolsa, setSelectedBolsa] = useState<Bolsa | null>(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState("10");
+  const [limit, setLimit] = useState(10);
 
   const [filters, setFilters] = useState<FetchBolsaParams>({
     codigoInstituicao: undefined,
@@ -99,7 +91,7 @@ export default function ListarBolsa() {
       codigoTipoCredito: filters.codigoTipoCredito || undefined,
       codigoTipoDesconto: filters.codigoTipoDesconto || undefined,
       page: String(page),
-      limit,
+      limit: String(limit),
     });
   }, [
     debouncedDesignacao,
@@ -114,8 +106,7 @@ export default function ListarBolsa() {
   const bolsas = data?.data ?? [];
   const meta = data?.meta;
   const totalPages = meta?.totalPages ?? 1;
-  const currentPage = meta?.page ?? 1;
-  const totalItems = meta?.total ?? 0;
+  const hasNext = page < totalPages;
 
   const resetForm = () => {
     setFormData({
@@ -375,53 +366,13 @@ export default function ListarBolsa() {
               </Table>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
-              <div className="text-sm text-muted-foreground">
-                Mostrando página <strong>{currentPage}</strong> de{" "}
-                <strong>{totalPages}</strong> • Total de{" "}
-                <strong>{totalItems}</strong> registos
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <Label>Itens por página</Label>
-                  <Select
-                    value={limit}
-                    onValueChange={(value) => {
-                      setLimit(value);
-                      setPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-[100px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={currentPage <= 1}
-                  onClick={() => setPage((prev) => prev - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Anterior
-                </Button>
-                <div className="text-sm font-medium px-4">{currentPage}</div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setPage((prev) => prev + 1)}
-                >
-                  Próxima
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </div>
+            <PaginationComponent
+              hasNext={hasNext}
+              limit={limit}
+              page={page}
+              setLimit={setLimit}
+              setPage={setPage}
+            />
           </>
         )}
       </div>
