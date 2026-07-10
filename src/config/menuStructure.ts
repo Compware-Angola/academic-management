@@ -1136,6 +1136,7 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/credito/atribuir",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
+        //ISAAC
 
         // {
         //   title: "Pagamentos Bolseiros",
