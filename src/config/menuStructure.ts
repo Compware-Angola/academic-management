@@ -807,14 +807,14 @@ export const postGraduationStructure: MenuStructure = {
           title: "Atividades Letivas",
           url: "/pos-graduacao/calendario/atividades",
           permission: [
-            PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla,
+            PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
           ],
         },
         {
           title: "Parâmetros do Calendário",
           url: "/pos-graduacao/calendario/parametros",
           permission: [
-            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+            PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
           ],
         },
       ],
@@ -856,25 +856,25 @@ export const postGraduationStructure: MenuStructure = {
           title: "Calendário de aulas",
           url: "/pos-graduacao-docente/calendario",
           permission: [
-            PermissionTypeDetails.VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
+            PermissionTypeDetails.POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
           ],
         },
         {
           title: "Horas de vigilância",
           url: "/pos-graduacao-docente/vigilancia",
-          permission: [PermissionTypeDetails.HORAS_DE_VIGILANCIA.sigla!],
+          permission: [PermissionTypeDetails.POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla],
         },
         {
           title: "Lançamento do programa da UC",
           url: "/pos-graduacao-docente/programa",
           permission: [
-            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+            PermissionTypeDetails.POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
         {
           title: "Validação do programa",
           url: "/pos-graduacao-docente/validacao",
-          permission: [PermissionTypeDetails.VALIDACAO_PROGRAMA_UC.sigla],
+          permission: [PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla],
         },
       ],
       permission: [],
@@ -887,15 +887,23 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Estudantes",
           url: "/gestao-orientacao-pesquisa/estudantes",
+          permission: [
+            PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES.sigla,
+          ],
         },
         {
           title: "Orientadores",
           url: "/gestao-orientacao-pesquisa/orientadores",
+          permission: [
+            PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES.sigla,
+          ],
         },
         {
           title: "Vínculos",
           url: "/gestao-orientacao-pesquisa/vinculos",
-          permission: [PermissionTypeDetails.DEFESA.sigla],
+          permission: [
+            PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS.sigla,
+          ],
         },
       ],
     },
@@ -903,7 +911,7 @@ export const postGraduationStructure: MenuStructure = {
     {
       title: "Sumário",
       url: "/pos-graduacao-sumario",
-      permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+      permission: [],
       items: [
         {
           title: "Aulas Agendadas",
@@ -920,7 +928,7 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Listar Sumários",
           url: "/pos-graduacao-sumario/listar",
-          permission: [PermissionTypeDetails.LISTAR_SUMARIO.sigla],
+          permission: [PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla],
         }
       ],
     }
