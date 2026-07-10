@@ -159,7 +159,7 @@ const Login = () => {
 
         <div className="relative z-10 space-y-4">
           <p className="text-xs text-white/70">
-            © {new Date().getFullYear()} Universidade Metodista de Angola  | Isaac Bunga (debug)
+            © {new Date().getFullYear()} Universidade Metodista de Angola
           </p>
         </div>
       </aside>
