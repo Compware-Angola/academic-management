@@ -1200,7 +1200,6 @@ export const finaceStructure: MenuStructure = {
         //   title: "Estudantes com Desconto",
         //   url: "/financas/relatorios/descontos",
         // },
-
         /* Relatórios de Pagamentos 
         {
           title: "Rel. Pagamentos Instituições",
