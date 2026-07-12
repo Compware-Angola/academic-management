@@ -14,7 +14,7 @@ interface CourseSelectProps {
   width?: string;
   label?: string;
   enableDefaultSelectItem?: boolean;
-  allowedIds?: string[]; // ← novo
+  allowedIds?: string[];
 }
 
 const CourseSelect = ({
@@ -28,7 +28,7 @@ const CourseSelect = ({
   width = "full",
   labelMode = "outside",
   showLabel = true,
-  allowedIds, // ← novo
+  allowedIds,
 }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
   const id = useId();

@@ -60,6 +60,11 @@ import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher
 import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
+import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -152,6 +157,7 @@ export default function CreateSchedule() {
     docente: "",
     tipoAula: "",
     sala: "",
+    tipoCandidatura: "1",
   });
 
   const { data: rawInfo } = useQueryAdditionalInformation(
@@ -348,6 +354,7 @@ export default function CreateSchedule() {
       docente: "",
       tipoAula: "",
       sala: "",
+      tipoCandidatura: "1",
     });
     setAulas([]);
   };
@@ -496,27 +503,23 @@ export default function CreateSchedule() {
           )}
 
           {/* FORMULÁRIO - Sempre visível */}
+
           <div className="grid md:grid-cols-4 gap-4">
-            <FormSelect
-              disabled={isLoadingAcademicYear}
-              loading={isLoadingAcademicYear}
-              label="Ano Letivo"
+            <TipoCandidaturaSelect
+              value={formData.tipoCandidatura}
+              onChangeValue={(v) => setFormData({ ...formData, tipoCandidatura: v })}
+            />
+            <AcademicYearSelect
+              onlyActive
+              enableDefaultActiveYear
+              tipoCandidaturaId={parseFilter(formData.tipoCandidatura)}
               value={formData.anoLetivo}
-              onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
-              options={academicYear?.filter((ay) => ay.estado.toLowerCase() === "activo")}
-              map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+              onChangeValue={(v) => setFormData({ ...formData, anoLetivo: v })}
             />
-
-            <FormSelect
-              disabled={isLoadingSemestres}
-              loading={isLoadingSemestres}
-              label="Semestre"
+            <SemestreSelect
               value={formData.semestre}
-              onChange={(v) => setFormData({ ...formData, semestre: v })}
-              options={semestres}
-              map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
+              onChangeValue={(v) => setFormData({ ...formData, semestre: v })}
             />
-
             <FormSelect
               disabled={isLoadingPeriodos || isDisabledForm}
               loading={isLoadingPeriodos}
@@ -527,7 +530,8 @@ export default function CreateSchedule() {
               map={(p) => ({ key: p.codigo, label: p.designacao, value: p.codigo })}
             />
 
-            <CourseSelectTestIsaac
+            <CourseSelect
+              params={{ tipoCandidaturaId: parseFilter(formData.tipoCandidatura) }}
               value={formData.curso}
               disabled={isLoadingPeriodos || isDisabledForm}
               onChangeValue={(v) => {
@@ -540,19 +544,14 @@ export default function CreateSchedule() {
                 });
               }}
               allowedIds={allowedCursoIds}
-              cursos={filteredCursos}
-              isLoading={loadingCursos}
             />
-
-            <FormSelect
-              label="Ano Curricular"
+            <AnoCurricularSelect
+              curso={formData.curso}
+              onChangeValue={(v) => setFormData({ ...formData, classes: v })}
               value={formData.classes}
               disabled={isLoadingClasses || isDisabledForm}
-              onChange={(v) => setFormData({ ...formData, classes: v })}
-              options={filteredClasses}
-              map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
-              loading={isLoadingClasses}
             />
+
 
             <FormSelect
               label="Unidade Curricular"
