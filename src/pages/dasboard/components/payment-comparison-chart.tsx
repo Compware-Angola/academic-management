@@ -1,8 +1,6 @@
 "use client"
-
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
-
 import {
     Card,
     CardContent,
@@ -18,9 +16,10 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 import { formatKz, formatKzCompact } from "../utils/payment-stats-format"
-import { Wallet, CalendarRange } from "lucide-react"
+import { Wallet, CalendarRange, AlertCircle, RefreshCw } from "lucide-react"
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 import { useQueryPaymentPerformanceMonthly } from "@/hooks/statics"
 
 
@@ -28,8 +27,18 @@ export function PaymentComparisonChart() {
     const [activeYear, setActiveYear] = React.useState<string>("")
     const [compareYear, setCompareYear] = React.useState<string>("")
     const hasSelection = Boolean(activeYear) && Boolean(compareYear)
-    const { data: monthlyPaymentComparison, isLoading: isLoadingMonthlyPaymentComparison, isError: isErrorMonthlyPaymentComparison, error: errorMonthlyPaymentComparison } = useQueryPaymentPerformanceMonthly({ currentYear: Number(activeYear), previousYear: Number(compareYear) })
+    const {
+        data: monthlyPaymentComparison,
+        isLoading: isLoadingMonthlyPaymentComparison,
+        isError: isErrorMonthlyPaymentComparison,
+        error: errorMonthlyPaymentComparison,
+        refetch: refetchMonthlyPaymentComparison,
+    } = useQueryPaymentPerformanceMonthly({ currentYear: Number(activeYear), previousYear: Number(compareYear) })
 
+    const errorMessage =
+        (errorMonthlyPaymentComparison as any)?.response?.data?.message ??
+        (errorMonthlyPaymentComparison as Error | undefined)?.message ??
+        "Não foi possível carregar os dados de pagamentos. Tente novamente."
 
     const labelAnoAtual =
         monthlyPaymentComparison?.totalAnual?.anoAtual.label ?? monthlyPaymentComparison?.mensal[0]?.label_ano_atual ?? "Ano atual"
@@ -68,12 +77,13 @@ export function PaymentComparisonChart() {
                         />
                         <AcademicYearSelect
                             value={compareYear}
+                            enableDefaultActiveYear
                             onChangeValue={(value) => setCompareYear(value)}
                         />
                     </div>
                 </div>
 
-                {hasSelection && (
+                {hasSelection && !isErrorMonthlyPaymentComparison && (
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex flex-1 flex-wrap gap-6">
                             {isLoadingMonthlyPaymentComparison ? (
@@ -131,6 +141,25 @@ export function PaymentComparisonChart() {
                                 Escolha os dois anos acima para ver o comparativo de pagamentos.
                             </p>
                         </div>
+                    </div>
+                ) : isErrorMonthlyPaymentComparison ? (
+                    <div className="flex h-[300px] flex-col items-center justify-center gap-3 text-center">
+                        <span className="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                            <AlertCircle className="size-6" />
+                        </span>
+                        <div className="max-w-sm">
+                            <p className="font-medium text-destructive">Erro ao carregar os dados</p>
+                            <p className="text-sm text-muted-foreground">{errorMessage}</p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => refetchMonthlyPaymentComparison()}
+                        >
+                            <RefreshCw className="size-4" />
+                            Tentar novamente
+                        </Button>
                     </div>
                 ) : isLoadingMonthlyPaymentComparison ? (
                     <Skeleton className="h-[300px] w-full" />
