@@ -137,7 +137,8 @@ export function PaymentComparisonChart() {
                       {formatKz(totalValorAnterior)}
                     </CardTitle>
                     <span className="text-xs text-muted-foreground">
-                      {totalPagamentosAnterior.toLocaleString("pt-PT")} pagamentos
+                      {totalPagamentosAnterior.toLocaleString("pt-PT")}{" "}
+                      pagamentos
                     </span>
                   </div>
                 </>
