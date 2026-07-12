@@ -32,15 +32,19 @@ import { PaymentServiceComparison } from "./components/payment-comparison";
 import { PaymentComparisonChart } from "./components/payment-comparison-chart";
 import { PaymenttDailyStatsCard } from "./components/paymentt-daily-Stats-card";
 import { PaymentMonthlyStatsCard } from "./components/payment-monthly-StatsCard";
+import { usePermission } from "@/auth/permission.helper";
 
 
 const Index = () => {
   const [openAvisoModal, setOpenAvisoModal] = useState(false);
+  const { haveFullAccess } = usePermission();
   const { user: userData } = useAuth();
+
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
   const { data: configurationGeral, isLoading: isLoadingConfigurationGeral } =
     useQueryConfigurationGeral();
+  const canViewStats = haveFullAccess()
 
 
   // encontra o ano activo
@@ -135,15 +139,13 @@ const Index = () => {
         />
       </div>
 
-
-      <div className="grid gap-4 md:grid-cols-2">
+      {canViewStats && <div className="grid gap-4 md:grid-cols-2">
         <PaymenttDailyStatsCard />
         <PaymentMonthlyStatsCard />
         <PaymentServiceComparison />
         <PaymentComparisonChart />
+      </div>}
 
-
-      </div>
       <Card>
         <CardHeader>
           <CardTitle>Acesso Rápido aos Módulos</CardTitle>
