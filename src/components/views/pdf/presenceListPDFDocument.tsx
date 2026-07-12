@@ -148,8 +148,6 @@ interface GenericPDFProps {
   rows: PresenceRow[];
   horario: string;
   classes: string;
-  criadaEm: string;
-  descricao: string;
 }
 
 // ──────────────────────────────────────────────
@@ -165,8 +163,6 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
     rows,
     horario,
     classes,
-    criadaEm,
-    descricao,
   } = props;
   const documentTitle = "Lista de Presença";
   const subtitle = "Universidade Metodista de Angola - Registo de Avaliação";
@@ -182,8 +178,6 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
         `Horário: ${horario}`,
         `Unidade Curricular: ${unidadeCurricular}`,
         `Total de estudantes: ${total}`,
-        `Data da Prova: ${criadaEm}`,
-        `Prova de: ${descricao}`,
       ].filter(Boolean),
     },
   ];

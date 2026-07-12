@@ -3,7 +3,13 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PessoaWizardData } from "@/services/docentes/types/gestao-docente/docente-wizard.types";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 interface StepPessoaProps {
   data: PessoaWizardData;
   onChange: (data: Partial<PessoaWizardData>) => void;
@@ -119,17 +125,20 @@ export function StepPessoa({ data, onChange }: StepPessoaProps) {
 
       <div className="space-y-1.5">
         <Label>Sexo</Label>
-        <select
-          className="w-full rounded-md border px-3 py-2 text-sm"
-          value={data.sexoId ?? ""}
-          onChange={(e) =>
-            onChange({ sexoId: Number(e.target.value) || undefined })
+        <Select
+          value={data.sexoId ? String(data.sexoId) : ""}
+          onValueChange={(value) =>
+            onChange({ sexoId: value ? Number(value) : undefined })
           }
         >
-          <option value="">Selecione</option>
-          <option value={1}>Masculino</option>
-          <option value={2}>Feminino</option>
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">Masculino</SelectItem>
+            <SelectItem value="2">Feminino</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-1.5 md:col-span-2">
