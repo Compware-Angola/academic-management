@@ -963,11 +963,11 @@ export const PermissionTypeDetails = {
   },
   LISTA_PRESENCA_POS_GRADUACAO: {
     designacao: "Lista de Presença Pós-Graduação",
-    sigla: "mpgs_lpa",
+    sigla: "pg_lista_pres",
   },
   LANCAMENTO_NOTAS_POS_GRADUACAO: {
     designacao: "Lançamento de Notas Pós-Graduação",
-    sigla: "mpgs_ln",
+    sigla: "pg_lanc_notas",
   },
   LANCAMENTO_PAUTA_POS_GRADUACAO: {
     designacao: "Lançamento de Pauta Pós-Graduação",

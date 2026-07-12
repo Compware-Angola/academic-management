@@ -63,19 +63,19 @@ export default function ConfigurarVaga() {
       },
       {
         onSuccess: resetForm,
-      }
+      },
     );
   }
 
-
-
   return (
     <>
-      <PageHeader
-        title="Configurar Vaga"
-      />
+      <PageHeader title="Configurar Vaga" />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <TabsList>
             <TabsTrigger value="listagem">Listagem de vagas</TabsTrigger>
@@ -104,7 +104,7 @@ export default function ConfigurarVaga() {
                     value={anoLetivoId}
                     tipoCandidaturaId={parseFilter(tipoCandidaturaId)}
                     onChangeValue={(value) => {
-                      setAnoLetivoId((value))
+                      setAnoLetivoId(value);
                       setCursoId("all");
                       setPeriodoId("all");
                     }}
@@ -115,7 +115,9 @@ export default function ConfigurarVaga() {
                     value={cursoId}
                     onChangeValue={setCursoId}
                     disabled={createVaga.isPending}
-                    params={{ tipoCandidaturaId: parseFilter(tipoCandidaturaId) }}
+                    params={{
+                      tipoCandidaturaId: parseFilter(tipoCandidaturaId),
+                    }}
                   />
 
                   <FormSelect
@@ -132,7 +134,6 @@ export default function ConfigurarVaga() {
                     })}
                   />
 
-
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="num-vagas">Número de vagas</Label>
                     <Input
@@ -145,7 +146,6 @@ export default function ConfigurarVaga() {
                     />
                   </div>
                 </div>
-
 
                 <Button type="submit" disabled={createVaga.isPending}>
                   {createVaga.isPending ? (

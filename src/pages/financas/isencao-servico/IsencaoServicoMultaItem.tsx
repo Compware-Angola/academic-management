@@ -241,6 +241,7 @@ export default function IsencaoServicoMultaItem() {
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <FacultySelect
+              allOption
               placeholder="Faculdade"
               value={filters.faculdade}
               onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}

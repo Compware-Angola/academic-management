@@ -54,9 +54,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <Administration items={adminItems} />
         <NavIngresso items={ingressoItems} />
         <NavAcademic items={academicItems} />
-        {process.env.NODE_ENV === "development" && (
-          <NavPostGraduation items={postGraduationItems} />
-        )}
+
+        <NavPostGraduation items={postGraduationItems} />
         <NavOperacional items={operacionalItems} />
         <NavCommunication items={comunicationItems} />
         <NavSuporte items={suporteItems} />

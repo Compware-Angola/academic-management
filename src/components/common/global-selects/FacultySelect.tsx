@@ -28,7 +28,7 @@ const FacultySelect = ({
     if (allOption) {
       setAllFaculdades([
         {
-          codigo: "all",
+          codigo: 0,
           designacao: "Todos",
         } as unknown as Faculdade,
         ...faculdades,
