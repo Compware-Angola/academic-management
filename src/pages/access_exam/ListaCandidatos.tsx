@@ -463,7 +463,9 @@ export default function ListaCandidatos() {
                     <TableHead>BI</TableHead>
                     <TableHead>Curso</TableHead>
                     <TableHead>Período</TableHead>
-                    <TableHead className="text-center">Média Final</TableHead>
+                    <TableHead className="text-center">
+                      Média Ensino Médio
+                    </TableHead>
                     <TableHead>Ano Lectivo</TableHead>
                     <TableHead>Tipo Candidatura</TableHead>
                     <TableHead className="text-right">Ações</TableHead>

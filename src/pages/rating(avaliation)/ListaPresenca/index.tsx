@@ -259,8 +259,6 @@ export default function PresenceList() {
           (c) => c.codigo === parseFilter(appliedFilters.anoCurricular),
         )?.designacao
       }
-      criadaEm={parameterResponse?.[0]?.created_at}
-      descricao={parameterResponse?.[0]?.descricao}
       total={students.length}
       rows={students.map((s, index) => ({
         numero: index + 1,
