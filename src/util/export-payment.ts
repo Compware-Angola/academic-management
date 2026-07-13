@@ -28,6 +28,7 @@ const createFacturaItem = (
       description: description,
       paymentMode: payment?.forma_pagamento,
       value: formatNumberMilhares(t?.total),
+      cadeiras_recurso_epoca_especial: t?.cadeiras_recurso_epoca_especial
     };
   });
 };
@@ -57,6 +58,8 @@ const createPaymentItem = ({
     officer: payment?.nome_operador,
     department: "Central de Atendimento",
     documentType: "Comprovativo de Pagamento",
+
+
   };
   return receiptData;
 };
