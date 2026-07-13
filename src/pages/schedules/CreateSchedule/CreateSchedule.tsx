@@ -60,6 +60,7 @@ import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher
 import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -139,6 +140,7 @@ export default function CreateSchedule() {
 
   // ─── Form State ───────────────────────────────────────────────────────────
   const [formData, setFormData] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -162,7 +164,9 @@ export default function CreateSchedule() {
   const info = useMemo(() => rawInfo, [JSON.stringify(rawInfo)]);
 
   // ─── Queries ──────────────────────────────────────────────────────────────
-  const { data: cursos, isLoading: loadingCursos } = useCursos();
+  const { data: cursos, isLoading: loadingCursos } = useCursos({
+    tipoCandidaturaId: parseFilter(formData.tipoCandidatura),
+  });
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -213,7 +217,9 @@ export default function CreateSchedule() {
   }, [isDirector, info, cursos, classes]);
 
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+    useQueryAnoAcademico({
+      tipo_candidatura: parseFilter(formData.tipoCandidatura),
+    });
 
   const activeAcademicYear = academicYear?.find(
     (year) => year.estado.toLowerCase() === "activo",
@@ -497,6 +503,21 @@ export default function CreateSchedule() {
 
           {/* FORMULÁRIO - Sempre visível */}
           <div className="grid md:grid-cols-4 gap-4">
+            <TipoCandidaturaSelect
+              value={formData.tipoCandidatura}
+              onChangeValue={(v) =>
+                setFormData({
+                  ...formData,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "",
+                  unidadeCurricular: "",
+                  designacao: "",
+                  classes: "",
+                })
+              }
+            />
+
             <FormSelect
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}

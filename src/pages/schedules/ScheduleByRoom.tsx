@@ -41,6 +41,7 @@ import { useQuerySchedulesByClassRoom } from "@/hooks/horario/use-query-schedule
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 export default function SchedulesByRoom() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +50,7 @@ export default function SchedulesByRoom() {
 
   // filtros
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -63,7 +65,9 @@ export default function SchedulesByRoom() {
   const [limit, setLimit] = useState(10);
 
   // === Dados base ===
-  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: anosAcademicos } = useQueryAnoAcademico({
+    tipo_candidatura: parseFilter(filters.tipoCandidatura),
+  });
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
 
@@ -148,6 +152,21 @@ export default function SchedulesByRoom() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => {
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "",
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                });
+                setPage(1);
+              }}
+            />
+
             {/* Ano Letivo */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Letivo</label>
@@ -242,6 +261,9 @@ export default function SchedulesByRoom() {
                     anoCurricular: "",
                     unidadeCurricular: "",
                   });
+                }}
+                params={{
+                  tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
                 }}
               />
             </div>
