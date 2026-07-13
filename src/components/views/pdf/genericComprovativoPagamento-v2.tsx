@@ -39,6 +39,7 @@ export interface PaymentRow {
   description: string;
   paymentMode: string;
   value: string;
+  cadeiras_recurso_epoca_especial: string;
 }
 
 export interface ReceiptData {
@@ -312,6 +313,7 @@ export function GenericComprovativoPagamentoPDF({
               <Text style={[S.tdCell, { width: W.date }]}>{row.date}</Text>
               <Text style={[S.tdCell, { width: W.desc }]}>
                 {row.description}
+                {row?.cadeiras_recurso_epoca_especial ? " (" + row?.cadeiras_recurso_epoca_especial + ")" : ""}
               </Text>
               <Text style={[S.tdCellCenter, { width: W.mode }]}>
                 {row.paymentMode}
