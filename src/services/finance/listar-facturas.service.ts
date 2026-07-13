@@ -144,6 +144,7 @@ export type FacturaItem = {
   mesid: number | null;
   mesdescricao: string | null;
   prestacao: number | null;
+  cadeiras_recurso_epoca_especial: string | null;
 };
 
 /* ---------- RESPONSE PADRÃO API ---------- */
