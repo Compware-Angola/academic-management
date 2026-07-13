@@ -12,38 +12,30 @@ import {
   GraduationCap,
   BookOpen,
   FileCheck,
-  TrendingUp,
   Calendar,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import UpcomingEventsCard from "./components/UpcomingEventsCard";
-import SemesterStatsCard from "./components/SemesterStatsCard";
 import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryDashboard } from "@/hooks/dashboard/use-query-dashboard";
 import { formatNumber } from "@/util/format-number";
-
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
-import { useState } from "react";
-import { Dialog } from "@/components/ui/dialog";
 import { useQueryConfigurationGeral } from "@/hooks/academiccalendar/use-query-configuration";
 import { PaymentServiceComparison } from "./components/payment-comparison";
 import { PaymentComparisonChart } from "./components/payment-comparison-chart";
 import { PaymenttDailyStatsCard } from "./components/paymentt-daily-Stats-card";
 import { PaymentMonthlyStatsCard } from "./components/payment-monthly-StatsCard";
-
+import { usePermission } from "@/auth/permission.helper";
 
 const Index = () => {
-  const [openAvisoModal, setOpenAvisoModal] = useState(false);
+  const { haveFullAccess } = usePermission();
   const { user: userData } = useAuth();
-  const { data: dashboard, isLoading: isLoadingDashboard } =
-    useQueryDashboard();
+
+  const { data: dashboard } = useQueryDashboard();
   const { data: configurationGeral, isLoading: isLoadingConfigurationGeral } =
     useQueryConfigurationGeral();
-
-
-  // encontra o ano activo
+  const canViewStats = haveFullAccess();
 
   const quickLinks = [
     {
@@ -73,8 +65,8 @@ const Index = () => {
   ];
   const { user } = userData || {};
 
-
   const allowedQuickLinks = useFilterMenuByPermission(quickLinks);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -85,11 +77,6 @@ const Index = () => {
         }
       />
 
-      {/* <Dialog open={openAvisoModal} onOpenChange={setOpenAvisoModal}>
-
-      </Dialog> */}
-
-      {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total de Estudantes"
@@ -115,35 +102,26 @@ const Index = () => {
         />
       </div>
 
-      {/* Recent Activity Section */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
         <UpcomingEventsCard />
-
-        {/* <SemesterStatsCard
-          title={"Desempenho Académico do  " + (configurationGeral?.semestreAtual?.semestre === 1 ? "1º" : "2º") + " Semestre"}
-
-          description={""}
-
-        /> */}
 
         <QuickActionsCard
           title="Configuração Académica Atual"
           description=""
           configuration={configurationGeral}
           isLoading={isLoadingConfigurationGeral}
-
         />
       </div>
 
+      {canViewStats && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <PaymenttDailyStatsCard />
+          <PaymentMonthlyStatsCard />
+          <PaymentServiceComparison />
+          <PaymentComparisonChart />
+        </div>
+      )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <PaymenttDailyStatsCard />
-        <PaymentMonthlyStatsCard />
-        <PaymentServiceComparison />
-        <PaymentComparisonChart />
-
-
-      </div>
       <Card>
         <CardHeader>
           <CardTitle>Acesso Rápido aos Módulos</CardTitle>
@@ -166,12 +144,8 @@ const Index = () => {
               );
             })}
           </div>
-
-
         </CardContent>
       </Card>
-
-
     </div>
   );
 };
