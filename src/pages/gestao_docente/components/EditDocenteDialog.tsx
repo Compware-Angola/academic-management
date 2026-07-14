@@ -58,27 +58,35 @@ export const EditarDocenteModal = ({
     });
   };
   useEffect(() => {
-    if (docente) {
-      const categoria = docente?.categoriaid?.toString() ?? "";
-      const faculdade = docente?.faculdadeid?.toString() ?? "";
-      const escalao = docente?.escalaoid?.toString() ?? "";
-      const tipoCandidatura = docente?.candidaturaid?.toString() ?? "";
-      setParams({
-        ...params,
-        nMecanografico: docente?.numero_mec,
-        escalao,
-        categoria,
-        faculdade,
-        ano_experiencia: docente?.ano_experiencia,
-        apreciacao: docente?.apreciacao,
-        codigo_validacao: docente?.codigo_validacao,
-        data_inicio_docencia: docente?.data_inicio_docencia,
-        proposta_contratacao: docente?.proposta_contratacao,
-        valor_hora: docente?.valor_hora,
-        tipoCandidatura: tipoCandidatura,
-      });
-    }
+    if (!docente) return;
+
+    const categoria = docente?.categoriaid?.toString() ?? "";
+    const faculdade = docente?.faculdadeid?.toString() ?? "";
+    const escalao = docente?.escalaoid?.toString() ?? "";
+    const tipoCandidatura = docente?.candidaturaid?.toString() ?? "";
+
+    // input type="date" só aceita "YYYY-MM-DD"
+    const dataInicioDocencia = docente?.data_inicio_docencia
+      ? docente.data_inicio_docencia.slice(0, 10)
+      : "";
+
+    setParams((prev) => ({
+      ...prev,
+      nMecanografico: docente?.numero_mec ?? "",
+      escalao,
+      categoria,
+      faculdade,
+      ano_experiencia: docente?.ano_experiencia ?? 0,
+      apreciacao: docente?.apreciacao ?? "",
+      codigo_validacao: docente?.codigo_validacao ?? "",
+      data_inicio_docencia: dataInicioDocencia,
+      proposta_contratacao: docente?.proposta_contratacao ?? "",
+      valor_hora: docente?.valor_hora ?? 0,
+      tipoCandidatura,
+    }));
   }, [docente]);
+
+  console.log(docente);
 
   const handleSubmit = async () => {
     if (!docente) return;
