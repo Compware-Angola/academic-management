@@ -33,6 +33,7 @@ import { PaymentComparisonChart } from "./components/payment-comparison-chart";
 import { PaymenttDailyStatsCard } from "./components/paymentt-daily-Stats-card";
 import { PaymentMonthlyStatsCard } from "./components/payment-monthly-StatsCard";
 import { usePermission } from "@/auth/permission.helper";
+import { StudentEnrollmentStatsCard } from "./components/student-enrollment-stats-card";
 
 
 const Index = () => {
@@ -140,10 +141,14 @@ const Index = () => {
       </div>
 
       {canViewStats && <div className="grid gap-4 md:grid-cols-2">
+        <StudentEnrollmentStatsCard />
         <PaymenttDailyStatsCard />
         <PaymentMonthlyStatsCard />
         <PaymentServiceComparison />
-        <PaymentComparisonChart />
+        <div className="col-span-2">
+          <PaymentComparisonChart />
+        </div>
+
       </div>}
 
       <Card>
