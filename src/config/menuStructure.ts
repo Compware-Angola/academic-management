@@ -354,7 +354,10 @@ export const academicStructure: MenuStructure = {
         {
           title: "Criar horário",
           url: "/horarios/criar",
-          permission: [PermissionTypeDetails.CRIAR_HORARIO.sigla],
+          permission: [
+            PermissionTypeDetails.CRIAR_HORARIO.sigla,
+            PermissionTypeDetails.CRIAR_HORARIOS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Horários semanais",
@@ -374,6 +377,8 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/movimentar/estudantes",
           permission: [
             PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
+            PermissionTypeDetails.MOVIMENTAR_ESTUDANTES_HORARIOS_POS_GRADUACAO
+              .sigla,
           ],
         },
         {
@@ -381,6 +386,7 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/permissao",
           permission: [
             PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO.sigla,
+            PermissionTypeDetails.EDITAR_HORARIOS_POS_GRADUACAO.sigla,
           ],
         },
         {
@@ -398,7 +404,10 @@ export const academicStructure: MenuStructure = {
         {
           title: "Listar horário",
           url: "/horarios/listar",
-          permission: [PermissionTypeDetails.LISTAR_HORARIOS.sigla],
+          permission: [
+            PermissionTypeDetails.LISTAR_HORARIOS.sigla,
+            PermissionTypeDetails.LISTAR_HORARIOS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Eliminados",
@@ -765,6 +774,28 @@ export const postGraduationStructure: MenuStructure = {
           ],
         },
         {
+          title: "Controle de Marcação de Provas",
+          url: "/marcacao-provas/controle",
+          permission: [
+            PermissionTypeDetails.CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Controle de Lançamento de Notas",
+          url: "/avaliacoes/controle",
+          permission: [
+            PermissionTypeDetails.CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Histórico de Lançamento de Notas",
+          url: "/avaliacoes/historico",
+          permission: [
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO
+              .sigla,
+          ],
+        },
+        {
           title: "Lista de Presença",
           url: "/pos-graduacao/avaliacoes/lista-presenca",
           permission: [
@@ -784,6 +815,27 @@ export const postGraduationStructure: MenuStructure = {
           url: "/pos-graduacao/avaliacoes/lancamento-pauta",
           permission: [
             PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Pauta Geral",
+          url: "/avaliacoes/pauta-geral",
+          permission: [
+            PermissionTypeDetails.PAUTA_GERAL_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Pauta Geral por UC",
+          url: "/avaliacoes/pauta-uc",
+          permission: [
+            PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Permissão fora do prazo",
+          url: "/avaliacoes/permissao",
+          permission: [
+            PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO.sigla,
           ],
         },
         {
@@ -817,8 +869,82 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
           ],
         },
+        {
+          title: "Prazos",
+          url: "/calendario/prazos",
+          permission: [
+            PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla,
+          ],
+        },
       ],
 
+      permission: [],
+    },
+
+    {
+      title: "Plano de Estudo",
+      url: "/pos-graduacao-plano-estudo",
+      icon: BookOpen,
+      items: [
+        {
+          title: "Gestão de Disciplinas",
+          url: "/plano/disciplinas",
+          permission: [
+            PermissionTypeDetails.GESTAO_DISCIPLINAS_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Gestão de UC por departamento",
+          url: "/plano/uc-departamento",
+          permission: [
+            PermissionTypeDetails.GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Gestão de UC no plano",
+          url: "/plano/uc-plano",
+          permission: [
+            PermissionTypeDetails.GESTAO_UC_PLANO_POS_GRADUACAO.sigla,
+          ],
+        },
+      ],
+      permission: [],
+    },
+
+    {
+      title: "Gestão de Docentes",
+      url: "/pos-graduacao-gestao-docentes",
+      icon: BookUser,
+      items: [
+        {
+          title: "Gestão de Afetação",
+          url: "/gestao-docente/afectacoes",
+          permission: [
+            PermissionTypeDetails.GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Docentes afetados",
+          url: "/gestao-docente/docente-afectados",
+          permission: [
+            PermissionTypeDetails.DOCENTES_AFETADOS_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Lista de Docentes",
+          url: "/gestao-docentes/docentes",
+          permission: [
+            PermissionTypeDetails.LISTA_DOCENTES_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Lista de UC sem docentes afetados",
+          url: "/gestao-docente/sem-afetacao/uc",
+          permission: [
+            PermissionTypeDetails.UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO.sigla,
+          ],
+        },
+      ],
       permission: [],
     },
 
@@ -875,6 +1001,28 @@ export const postGraduationStructure: MenuStructure = {
           title: "Validação do programa",
           url: "/pos-graduacao-docente/validacao",
           permission: [PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla],
+        },
+      ],
+      permission: [],
+    },
+    {
+      title: "Assiduidade",
+      url: "/pos-graduacao-assiduidade",
+      icon: ListChecks,
+      items: [
+        {
+          title: "Marcação de Assiduidade",
+          url: "/assiduidade/marcacao",
+          permission: [
+            PermissionTypeDetails.MARCACAO_ASSIDUIDADE_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Controle de Assiduidade",
+          url: "/assiduidade/controle",
+          permission: [
+            PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO.sigla,
+          ],
         },
       ],
       permission: [],
