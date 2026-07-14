@@ -29,6 +29,7 @@ export type Factura = {
   descricao: string;
   estado: number;
   nome_aluno: string;
+  bi_aluno: string;
   ano_lectivo: string;
   servicos: string;
   n_operacao_bancaria: string;

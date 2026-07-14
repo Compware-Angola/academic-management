@@ -51,7 +51,7 @@ export function FacturaDetalhesModal({
         : [],
     [factura?.cadeiras_recurso_epoca_especial],
   );
-
+  console.table(factura);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl! max-h-[90vh]! overflow-y-auto p-6 sm:p-8 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-md">
