@@ -73,11 +73,13 @@ export function PaymentComparisonChart() {
                         <AcademicYearSelect
                             enableDefaultActiveYear
                             value={activeYear}
+                            label={"Ano Lectivo: Inicio"}
                             onChangeValue={(value) => setActiveYear(value)}
                         />
                         <AcademicYearSelect
                             value={compareYear}
                             enableDefaultActiveYear
+                            label={"Ano Lectivo: Fim"}
                             onChangeValue={(value) => setCompareYear(value)}
                         />
                     </div>

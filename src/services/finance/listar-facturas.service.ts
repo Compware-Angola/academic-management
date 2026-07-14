@@ -6,6 +6,7 @@ export type ListarFacturasPayload = {
   codigoMatricula?: string | number;
   reference?: string | number;
   codigoFatura?: string | number;
+  biEstudante?: string | number;
   anoLectivo?: number | string;
   status?: number | null | string;
   page?: number;
@@ -143,6 +144,7 @@ export type FacturaItem = {
   mesid: number | null;
   mesdescricao: string | null;
   prestacao: number | null;
+  cadeiras_recurso_epoca_especial: string | null;
 };
 
 /* ---------- RESPONSE PADRÃO API ---------- */

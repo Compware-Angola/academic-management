@@ -185,6 +185,7 @@ export default function PresenceList() {
       limit: 100,
     });
   const schedules = scheduleResponse?.data || [];
+
   const parameters = parameterResponse?.[0];
 
   const { data: mesTemp = [] } = useQueryMesTemp({
@@ -192,6 +193,7 @@ export default function PresenceList() {
   });
 
   const mesDescricao = mesTemp[0]?.designacao;
+
   const students = presenceAttendanceList?.data || [];
   const pdfData = useMemo(() => {
     if (!students.length || !appliedFilters) return null;

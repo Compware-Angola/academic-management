@@ -39,7 +39,7 @@ export interface CreatePrazoPayload {
 export async function createPrazo(payload: CreatePrazoPayload) {
   const response = await axiosNestGa.post(
     "/academic-activities/terms",
-    payload
+    payload,
   );
 
   return response.data;

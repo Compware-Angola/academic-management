@@ -22,7 +22,7 @@ export type GetAssessmentAttendanceParameterResponse = {
 export async function getAssessmentAttendanceParameterService(): Promise<GetAssessmentAttendanceParameterResponse> {
   const { data } =
     await axiosNestGa.get<GetAssessmentAttendanceParameterResponse>(
-      "/assessment/parametros-avaliacoes-attendance-list"
+      "/assessment/parametros-avaliacoes-attendance-list",
     );
 
   return data;

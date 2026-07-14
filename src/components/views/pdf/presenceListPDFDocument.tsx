@@ -289,7 +289,11 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
 
               if (col.key === "assinatura" || col.key === "nota") {
                 value = "";
-              } else if (value === undefined || value === null || value === "") {
+              } else if (
+                value === undefined ||
+                value === null ||
+                value === ""
+              ) {
                 value = "—";
               }
 
@@ -312,21 +316,29 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
         ))}
 
         {/* ==================== ESPAÇO PARA ASSINATURAS ==================== */}
-        <View style={{ marginTop: 40, flexDirection: "row", justifyContent: "space-around" }}>
+        <View
+          style={{
+            marginTop: 40,
+            flexDirection: "row",
+            justifyContent: "space-around",
+          }}
+        >
           <View style={{ alignItems: "center", width: "45%" }}>
-            <Text style={{ fontSize: 9, marginBottom: 4 }}>______________________________</Text>
+            <Text style={{ fontSize: 9, marginBottom: 4 }}>
+              ______________________________
+            </Text>
             <Text style={{ fontSize: 9, fontWeight: "bold" }}>Docente</Text>
-
           </View>
 
           <View style={{ alignItems: "center", width: "45%" }}>
-            <Text style={{ fontSize: 9, marginBottom: 4 }}>______________________________</Text>
-            <Text style={{ fontSize: 9, fontWeight: "bold" }}>Diretor do Curso</Text>
-
+            <Text style={{ fontSize: 9, marginBottom: 4 }}>
+              ______________________________
+            </Text>
+            <Text style={{ fontSize: 9, fontWeight: "bold" }}>
+              Diretor do Curso
+            </Text>
           </View>
         </View>
-
-
 
         {/* RODAPÉ */}
         <Text style={baseStyles.footer}>

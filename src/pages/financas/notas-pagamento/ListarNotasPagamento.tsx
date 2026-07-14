@@ -98,7 +98,7 @@ export default function ListarNotasPagamento() {
   }
 
   const [searchBy, setSearchBy] = useState<
-    "codigoMatricula" | "reference" | "codigoFatura"
+    "codigoMatricula" | "reference" | "codigoFatura" | "biEstudante"
   >("codigoMatricula");
   const [filters, setFilters] = useState({
     anoLetivo: "23",
@@ -143,6 +143,9 @@ export default function ListarNotasPagamento() {
     reference: searchBy === "reference" && searchTerm ? searchTerm : undefined,
     codigoFatura:
       searchBy === "codigoFatura" && searchTerm ? searchTerm : undefined,
+
+    biEstudante:
+      searchBy === "biEstudante" && searchTerm ? searchTerm : undefined,
   });
 
   // const {
@@ -294,7 +297,11 @@ export default function ListarNotasPagamento() {
                 value={searchBy}
                 onChange={(v) => {
                   setSearchBy(
-                    v as "codigoMatricula" | "reference" | "codigoFatura",
+                    v as
+                      | "codigoMatricula"
+                      | "reference"
+                      | "codigoFatura"
+                      | "BI do estudante",
                   );
                   setSearchTerm("");
                   setPage(1);

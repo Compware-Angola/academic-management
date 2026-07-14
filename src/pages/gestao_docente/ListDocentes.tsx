@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Search,
   Edit2,
+  Plus,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ import { useQueryAreaFormacaoDocentes } from "@/hooks/gestao_docente/use-query-a
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { EditarDocenteModal } from "./components/EditDocenteDialog";
 import { TeachersItem } from "@/services/gestao-docente/fetch-list-teachers.service";
+import { NovoDocenteModal } from "../docente/components/NovoDocenteModal";
 
 interface AreaFormacao {
   codigo: number;
@@ -85,6 +87,8 @@ export default function ListagemDocentes() {
   const [selectedDocente, setSelectedDocente] = useState<TeachersItem | null>(
     null,
   );
+
+  const [isNovoDocenteOpen, setIsNovoDocenteOpen] = useState(false);
 
   const [filters, setFilters] = useState<FiltersState>({
     page: 1,
@@ -155,20 +159,20 @@ export default function ListagemDocentes() {
     filters.area === 0
       ? "Todas"
       : (areasFormacao.find((area) => area.codigo === filters.area)
-          ?.designacao ?? "Selecionar");
+        ?.designacao ?? "Selecionar");
 
   const exportRows = docentes.map((item) => ({
-  numeroMec: item.numeroMec,
-  nome: item.nome,
-  escalao: item.escalao,
-  categoria: item.categoria,
-  grauAcademico: item.grauAcademico,
-  email: item.email,
-  areaFormacao: item.areaFormacaoNome,
-}));
+    numeroMec: item.numeroMec,
+    nome: item.nome,
+    escalao: item.escalao,
+    categoria: item.categoria,
+    grauAcademico: item.grauAcademico,
+    email: item.email,
+    areaFormacao: item.areaFormacaoNome,
+  }));
 
-const pdfData = exportRows.length
-  ? {
+  const pdfData = exportRows.length
+    ? {
       filtros: [
         `Área de Formação: ${selectedAreaLabel}`,
         filters.search ? `Pesquisa: ${filters.search}` : null,
@@ -178,38 +182,44 @@ const pdfData = exportRows.length
       total: exportRows.length,
       rows: exportRows,
     }
-  : null;
+    : null;
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Lista de Docentes"
-    subtitle="Gestão completa do corpo docente"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
-      { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "numeroMec", label: "Nº Mec", width: "12%" },
-        { key: "nome", label: "Nome", width: "24%" },
-        { key: "escalao", label: "Escalão", width: "12%" },
-        { key: "categoria", label: "Categoria", width: "16%" },
-        { key: "grauAcademico", label: "Grau", width: "16%" },
-        { key: "email", label: "Email", width: "20%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lista de Docentes"
+      subtitle="Gestão completa do corpo docente"
+      infoSections={[
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
+        { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "numeroMec", label: "Nº Mec", width: "12%" },
+          { key: "nome", label: "Nome", width: "24%" },
+          { key: "escalao", label: "Escalão", width: "12%" },
+          { key: "categoria", label: "Categoria", width: "16%" },
+          { key: "grauAcademico", label: "Grau", width: "16%" },
+          { key: "email", label: "Email", width: "20%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const excelProps = pdfData
-  ? {
+  const excelProps = pdfData
+    ? {
       documentTitle: "Lista de Docentes",
       subtitle: "Gestão completa do corpo docente",
       infoSections: [
-        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
         { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
       ],
       mainTable: {
@@ -227,10 +237,9 @@ const excelProps = pdfData
       footerNotice: "Documento gerado automaticamente pelo sistema.",
       primaryColor: "#0D1B48",
     }
-  : null;
+    : null;
 
-const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
-
+  const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
 
   const handleFilterChange = <K extends keyof FiltersState>(
     field: K,
@@ -268,8 +277,6 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
   const inicio = totalRegistos === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const fim = Math.min(currentPage * itemsPerPage, totalRegistos);
 
-  
-
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -293,6 +300,12 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
         </div>
 
         <div className="flex flex-wrap gap-2">
+          {/* no bloco de botões, ANTES do botão "Atualizar lista" 
+          <Button size="sm" onClick={() => setIsNovoDocenteOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo docente
+          </Button>
+          */}
           <Button
             //variant="outline"
             size="sm"
@@ -308,24 +321,23 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
             Atualizar lista
           </Button>
 
-  {pdfContent && (
-    <PDFActions
-      document={pdfContent}
-      fileName={`${baseFileName}.pdf`}
-      showDownload
-      showPrint
-    />
-  )}
+          {pdfContent && (
+            <PDFActions
+              document={pdfContent}
+              fileName={`${baseFileName}.pdf`}
+              showDownload
+              showPrint
+            />
+          )}
 
-  {excelProps && (
-    <ExcelActions
-      excelProps={excelProps}
-      fileName={`${baseFileName}.xlsx`}
-      showDownload
-    />
-  )}
-</div>
-        
+          {excelProps && (
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          )}
+        </div>
       </div>
 
       <div className="rounded-lg border bg-card p-6">
@@ -514,6 +526,11 @@ const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
               </Button>
             </div>
           </div>
+          {/* junto ao EditarDocenteModal já existente, no final do JSX */}
+          <NovoDocenteModal
+            isOpen={isNovoDocenteOpen}
+            onClose={() => setIsNovoDocenteOpen(false)}
+          />
           <EditarDocenteModal
             docente={selectedDocente}
             isModalOpen={isShowModal}
