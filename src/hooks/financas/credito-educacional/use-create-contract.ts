@@ -9,9 +9,8 @@ export function useCreateInstitutionalContract() {
         mutationFn: createInstitutionalContract,
         onSuccess: () => {
             toast.success("Contrato de crédito educacional criado com sucesso");
-            queryClient.invalidateQueries({
-                queryKey: ["institutional-contracts", "contract-estatisticas"],
-            });
+            queryClient.invalidateQueries({ queryKey: ["institutional-contracts"] });
+            queryClient.invalidateQueries({ queryKey: ["contract-estatisticas"] });
         },
         onError: (error: any) => {
             if (error?.statusCode === 409) {
