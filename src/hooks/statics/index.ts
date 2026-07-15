@@ -8,7 +8,7 @@ import {
     PaymentMonthlySummary,
     PaymentPerformanceMonthlyParams,
     PaymentSummaryParams,
-    StudentStatsParams,
+
 } from "@/services/statics/statitis.service"
 
 const REFETCH_INTERVAL = 1000 * 60 * 2
@@ -46,12 +46,12 @@ export const useQueryPaymentPerformanceMonthly = (
 }
 
 export const useQueryStudentStats = (
-    params: StudentStatsParams | undefined,
+
     isActive: boolean,
 ) => {
     return useQuery({
-        queryKey: ["statics", "student-stats", params],
-        queryFn: () => getStudentStats(params),
+        queryKey: ["statics", "student-stats"],
+        queryFn: () => getStudentStats(),
         refetchInterval: isActive ? REFETCH_INTERVAL : false,
         ...DASHBOARD_QUERY_OPTIONS,
     })

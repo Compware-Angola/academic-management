@@ -60,27 +60,32 @@ export async function getPaymentPerformanceMonthly(params: PaymentPerformanceMon
     return response.data
 }
 
-export type StudentStatsParams = {
-    codigoCandidatura?: number
-}
+
+
 export type StudentStatsData = {
     academicYear: string
-    applicationTypeCode: number
-    applicationType: string
-    totalEnrollments: number
-    totalStudents: number
-}
-export type StudentStatsResponse = {
-    data: StudentStatsData[]
+    newStudents: number
+    accumulatedStudents: number
+
 }
 
-export async function getStudentStats(
-    params?: StudentStatsParams
-): Promise<StudentStatsResponse> {
-    const response = await axiosNestGa.get<StudentStatsResponse>(
-        "/stats/students",
-        { params }
-    )
+export type StudentStatsResponse = {
+
+    data: StudentStatsData[]
+
+}
+
+
+
+export async function getStudentStats()
+    : Promise<StudentStatsResponse> {
+
+    const response =
+        await axiosNestGa.get<StudentStatsResponse>(
+            "/stats/students",
+        )
+
+
     return response.data
 }
 
