@@ -2,8 +2,6 @@ import { useQuery } from "@tanstack/react-query"
 
 import {
     getPaymentComparison,
-    getPaymentDailySummary,
-    getPaymentMonthlySummary,
     getPaymentPerformanceMonthly,
     getPaymentSummary,
     getStudentStats,
@@ -21,30 +19,6 @@ const DASHBOARD_QUERY_OPTIONS = {
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: false,
-}
-
-export const useQueryPaymentDailySummary = (
-    formaPagamento: number | undefined,
-    isActive: boolean,
-) => {
-    return useQuery({
-        queryKey: ["statics", "payment-daily-summary", formaPagamento],
-        queryFn: () => getPaymentDailySummary(formaPagamento),
-        refetchInterval: isActive ? REFETCH_INTERVAL : false,
-        ...DASHBOARD_QUERY_OPTIONS,
-    })
-}
-
-export const useQueryPaymentMonthlySummary = (
-    params: PaymentMonthlySummary | undefined,
-    isActive: boolean,
-) => {
-    return useQuery({
-        queryKey: ["statics", "payment-monthly-summary", params],
-        queryFn: () => getPaymentMonthlySummary(params),
-        refetchInterval: isActive ? REFETCH_INTERVAL : false,
-        ...DASHBOARD_QUERY_OPTIONS,
-    })
 }
 
 export const useQueryPaymentComparison = (
