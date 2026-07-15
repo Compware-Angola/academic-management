@@ -1,32 +1,10 @@
 import { axiosNestFinance } from "@/lib/axios-nest-finance"
-
-
-type PaymentSummary = {
-    totalPayments: number
-    totalCollected: number
-    averagePayment: number
-    smallestPayment: number
-    largestPayment: number
-}
-export async function getPaymentDailySummary(formaPagamento?: number) {
-    const response = await axiosNestFinance.get<PaymentSummary>(`payment/statics/summary/daily`, {
-        params: {
-            formaPagamento
-        }
-    })
-    return response.data
-}
+import { axiosNestGa } from "@/lib/axios-nest-ga"
 
 export type PaymentMonthlySummary = {
     month?: number
     year?: number
     formaPagamento?: number
-}
-export async function getPaymentMonthlySummary(params?: PaymentMonthlySummary) {
-    const response = await axiosNestFinance.get<PaymentSummary>(`payment/statics/summary/monthly`, {
-        params
-    })
-    return response.data
 }
 
 export type PaymentComparison = {
@@ -81,3 +59,56 @@ export async function getPaymentPerformanceMonthly(params: PaymentPerformanceMon
     })
     return response.data
 }
+
+
+
+export type StudentStatsData = {
+    academicYear: string
+    newStudents: number
+    accumulatedStudents: number
+
+}
+
+export type StudentStatsResponse = {
+
+    data: StudentStatsData[]
+
+}
+
+
+
+export async function getStudentStats()
+    : Promise<StudentStatsResponse> {
+
+    const response =
+        await axiosNestGa.get<StudentStatsResponse>(
+            "/stats/students",
+        )
+
+
+    return response.data
+}
+
+type PaymentSummaryItem = {
+    codigoFormaPagamento: number
+    tipoPagamento: string
+    totalPagamentos: number
+    totalPago: number
+}
+export type PaymentSummaryResponse = {
+    data: PaymentSummaryItem[]
+}
+export type PaymentSummaryParams = {
+    dataInicio?: string
+    dataFim?: string
+    codigoFormaPagamento?: number
+}
+export async function getPaymentSummary(params?: PaymentSummaryParams) {
+    const response = await axiosNestFinance.get<PaymentSummaryResponse>(`payment/statics/summary`, {
+        params
+
+    })
+    return response.data
+}
+
+
