@@ -11,7 +11,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
     AlertTriangle, Building2, CalendarClock, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight,
-    ChevronsLeft, ChevronsRight, Home, Pencil, Plus, Search, X, XCircle,
+    ChevronsLeft, ChevronsRight, Home, Pencil, Plus, Search, Trash, X, XCircle,
 } from "lucide-react";
 
 import { fmt, fmtDate, getStatus } from "./contratos-data";
@@ -25,6 +25,7 @@ import { useQueryInstitutionalContractAlertas } from "@/hooks/financas/credito-e
 import { Switch } from "@/components/ui/switch";
 import { useToggleContractEstado } from "@/hooks/financas/credito-educacional/use-mutation-switch";
 import { formatCurrency } from "@/util/finance-format";
+import { useDeleteInstitutionalContract } from "@/hooks/financas/credito-educacional/use-delete-contract";
 
 function StatusBadge({ dataFim }: { dataFim: string }) {
     const { status, diasRestantes } = getStatus(dataFim);
@@ -66,6 +67,7 @@ export default function ContratosInstituicao() {
 
     });
     const { data: alertas, isLoading: isLoadingAlertas } = useQueryInstitutionalContractAlertas();
+    const deleteContract = useDeleteInstitutionalContract();
     const toggleEstado = useToggleContractEstado();
     const lista = responseContratos?.data ?? [];
     const total = responseContratos?.total ?? 0;
@@ -176,10 +178,18 @@ export default function ContratosInstituicao() {
                     <div><p className="text-sm text-muted-foreground">Total</p><p className="text-2xl font-bold">{alertas?.total}</p></div>
                     <Building2 className="h-8 w-8 text-primary" />
                 </CardContent></Card>
-                <Card><CardContent className="p-4 flex items-center justify-between">
-                    <div><p className="text-sm text-muted-foreground">Activos</p><p className="text-2xl font-bold">{alertas?.ativos}</p></div>
-                    <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-                </CardContent></Card>
+                <Card>
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Activos</p>
+                            <p className="text-2xl font-bold">{alertas?.ativos}</p>
+                            <span className="inline-block text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded mt-1">
+                                Activo e dentro do prazo
+                            </span>
+                        </div>
+                        <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                    </CardContent>
+                </Card>
                 <Card><CardContent className="p-4 flex items-center justify-between">
                     <div><p className="text-sm text-muted-foreground">A expirar (≤30d)</p><p className="text-2xl font-bold">{alertas?.aExpirar}</p></div>
                     <CalendarClock className="h-8 w-8 text-amber-500" />
@@ -215,7 +225,8 @@ export default function ContratosInstituicao() {
                                 <TableHead>Valor Total</TableHead>
                                 <TableHead>Vencimento</TableHead>
                                 <TableHead>Estado</TableHead>
-                                <TableHead className="w-8" />
+                                <TableHead className="w-8" > Acções</TableHead>
+
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -266,6 +277,15 @@ export default function ContratosInstituicao() {
                                                     onClick={() => openEditModal(c)} title="Editar contrato">
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
+                                                {c.estado === 0 && (
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8"
+                                                        onClick={() => deleteContract.mutate(
+                                                            c.codigoContrato.toString(),
+                                                        )}
+                                                    >
+                                                        <Trash className="h-4 w-4" />
+                                                    </Button>
+                                                )}
                                             </TableCell>
                                         </TableRow>
                                         {isOpen && (
