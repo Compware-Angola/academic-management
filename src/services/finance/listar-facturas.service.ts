@@ -6,7 +6,7 @@ export type ListarFacturasPayload = {
   codigoMatricula?: string | number;
   reference?: string | number;
   codigoFatura?: string | number;
-  biEstudante?: string | number;
+  biEstudante?: string;
   anoLectivo?: number | string;
   status?: number | null | string;
   page?: number;
@@ -29,6 +29,7 @@ export type Factura = {
   descricao: string;
   estado: number;
   nome_aluno: string;
+  bi_aluno: string;
   ano_lectivo: string;
   servicos: string;
   n_operacao_bancaria: string;
@@ -108,6 +109,7 @@ export async function listarFacturasService(
     codigoMatricula,
     reference,
     codigoFatura,
+    biEstudante,
   } = payload;
 
   const params = {
@@ -117,6 +119,7 @@ export async function listarFacturasService(
     reference: normalizeParam(reference),
     status: normalizeParam(status),
     codigoFatura: normalizeParam(codigoFatura),
+    biEstudante: normalizeParam(biEstudante),
     page,
     limit,
   };
