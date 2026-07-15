@@ -96,11 +96,11 @@ const Index = () => {
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total de Estudantes"
+          title="Total de Estudantes Inscritos"
           value={formatNumber(dashboard?.total_estudantes ?? 0)}
           icon={Users}
           isAvailable={false}
-          description="Matriculados ativos"
+          description="Inscritos no Ano Lectivo Atual"
         />
         <StatCard
           title="Docentes"
