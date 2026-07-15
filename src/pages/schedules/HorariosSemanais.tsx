@@ -26,11 +26,12 @@ import {
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQuerySchedulesByDayOfWeek } from "@/hooks/horario/use-query-schedules-by-week";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 const DIAS_SEMANA = [
   { id: 1, label: "Domingo" },
@@ -47,6 +48,7 @@ const HorariosSemanais = () => {
   const [limit] = useState(25);
 
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -57,10 +59,11 @@ const HorariosSemanais = () => {
   });
 
   // Dados base
-  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: anosAcademicos } = useQueryAnoAcademico({
+    tipo_candidatura: parseFilter(filters.tipoCandidatura),
+  });
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-  const { data: cursos } = useCursos();
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -154,6 +157,22 @@ const HorariosSemanais = () => {
 
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              label=""
+              placeholder="Tipo de Candidatura"
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "",
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                })
+              }
+            />
+
             {/* Ano Letivo */}
             <Select
               value={filters.anoLetivo}
@@ -214,22 +233,21 @@ const HorariosSemanais = () => {
 
             {/* Curso */}
 
-                <CourseSelect
-                                              
-                                            labelMode="inside"
-                                              value={filters.curso}
-                                              onChangeValue={(v) => {
-                                              setFilters({
-                                              ...filters,
-                                                curso: v,
-                                                anoCurricular: "",
-                                                unidadeCurricular: "",
-                                                });
-                                                                        
-                                                }}
-                                                  />
-
-            
+            <CourseSelect
+              labelMode="inside"
+              params={{
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
+              value={filters.curso}
+              onChangeValue={(v) => {
+                setFilters({
+                  ...filters,
+                  curso: v,
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                });
+              }}
+            />
 
             {/* Ano Curricular */}
             <Select

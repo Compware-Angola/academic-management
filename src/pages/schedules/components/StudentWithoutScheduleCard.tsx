@@ -27,6 +27,7 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ interface Props {
   onChangeGradeAluno(ids: number[]): void;
   onChangeCourse(course: string): void;
   onFilterChange?: (filter: {
+    tipoCandidatura: string;
     anoLetivo: string;
     semestre: string;
     curso: string;
@@ -62,6 +64,7 @@ export const StudentWithoutScheduleCard = ({
   onChangeGradeAluno,
 }: Props) => {
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     curso: "",
@@ -110,6 +113,7 @@ export const StudentWithoutScheduleCard = ({
     onFilterChange?.(filters);
   }, [
     filters.anoLetivo,
+    filters.tipoCandidatura,
     filters.semestre,
     filters.curso,
     filters.anoCurricular,
@@ -182,9 +186,28 @@ export const StudentWithoutScheduleCard = ({
       {/* FILTROS */}
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TipoCandidaturaSelect
+            value={filters.tipoCandidatura}
+            label=""
+            placeholder="Tipo de Candidatura"
+            onChangeValue={(v) => {
+              onChangeCourse("");
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLetivo: "",
+                curso: "",
+                anoCurricular: "",
+                unidadeCurricular: "",
+                searchTerm: "",
+              });
+            }}
+          />
+
           <AcademicYearSelect
             enableDefaultActiveYear
             onlyActive
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura)}
             value={filters.anoLetivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
           />
@@ -195,6 +218,9 @@ export const StudentWithoutScheduleCard = ({
           />
 
           <CourseSelect
+            params={{
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+            }}
             value={filters.curso}
             onChangeValue={(v) => {
               onChangeCourse(v);
