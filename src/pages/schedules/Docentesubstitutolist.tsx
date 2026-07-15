@@ -60,7 +60,6 @@ import {
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 
@@ -79,6 +78,8 @@ import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { i } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 type EditForm = {
   fkDocenteOriginal: string;
@@ -119,6 +120,7 @@ export default function DocenteSubstitutoList() {
 
   // Filtros
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -137,11 +139,12 @@ export default function DocenteSubstitutoList() {
 
   // Dados base
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+    useQueryAnoAcademico({
+      tipo_candidatura: parseFilter(filters.tipoCandidatura),
+    });
   const { data: semestres, isLoading: isLoadingSemestres } =
     useQuerySemestres();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
-  const { data: cursos } = useCursos();
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -247,6 +250,7 @@ export default function DocenteSubstitutoList() {
   // ===== FILTROS =====
   const limparFiltros = () => {
     setFilters({
+      tipoCandidatura: "1",
       anoLetivo: "",
       semestre: "",
       periodo: "",
@@ -262,6 +266,7 @@ export default function DocenteSubstitutoList() {
   };
 
   const filtrosAtivos =
+    filters.tipoCandidatura !== "1" ||
     !!filters.anoLetivo ||
     !!filters.semestre ||
     !!filters.periodo ||
@@ -459,6 +464,20 @@ export default function DocenteSubstitutoList() {
 
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "",
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                })
+              }
+            />
+
             <FormSelect
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
@@ -517,6 +536,9 @@ export default function DocenteSubstitutoList() {
             </div>
             <CourseSelect
               label="Curso"
+              params={{
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
               value={filters.curso}
               onChangeValue={(value) =>
                 setFilters({ ...filters, curso: value, unidadeCurricular: "" })

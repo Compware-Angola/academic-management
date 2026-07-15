@@ -53,7 +53,6 @@ import {
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 
@@ -80,6 +79,7 @@ import { Roles } from "./EditSchedule";
 import Lottie from "lottie-react";
 import Notallowed from "@/assets/Notallowed.json";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -115,6 +115,7 @@ export default function ScheduleList() {
     roles?.Director === true;
   // Filtros
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -131,11 +132,14 @@ export default function ScheduleList() {
 
   // Dados base
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+    useQueryAnoAcademico({
+      tipo_candidatura: filters.tipoCandidatura
+        ? Number(filters.tipoCandidatura)
+        : undefined,
+    });
   const { data: semestres, isLoading: isLoadingSemestres } =
     useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-  const { data: cursos } = useCursos();
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -401,6 +405,7 @@ export default function ScheduleList() {
             size="sm"
             onClick={() => {
               setFilters({
+                tipoCandidatura: "1",
                 anoLetivo: "",
                 semestre: "",
                 periodo: "",
@@ -415,6 +420,7 @@ export default function ScheduleList() {
             }}
             className=" hover:text-foreground hover:bg-muted/50"
             disabled={
+              filters.tipoCandidatura === "1" &&
               !filters.anoLetivo &&
               !filters.semestre &&
               !filters.periodo &&
@@ -429,6 +435,21 @@ export default function ScheduleList() {
 
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(value) => {
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: value,
+                  anoLetivo: "",
+                  curso: "",
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                });
+                setPage(1);
+              }}
+            />
+
             <FormSelect
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
@@ -482,6 +503,11 @@ export default function ScheduleList() {
               onChangeValue={(value) =>
                 setFilters({ ...filters, curso: value, unidadeCurricular: "" })
               }
+              params={{
+                tipoCandidaturaId: filters.tipoCandidatura
+                  ? Number(filters.tipoCandidatura)
+                  : undefined,
+              }}
             />
 
             <div className="space-y-2">
