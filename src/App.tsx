@@ -192,6 +192,7 @@ import GuidanceResearchManagementVinculos from "./pages/post-graduation/guidance
 import PostGraduationAulasAgendadas from "./pages/post-graduation/sumario/AulasAgendadas";
 import PostGraduationControleGeral from "./pages/post-graduation/sumario/ControleGeral";
 import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario/ListagemSumarios";
+import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
 
 
 
@@ -246,10 +247,22 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PARAMETROS_MGH.sigla!,
+
                         ]}
                       >
                         <RelPagamentosInstituicoes />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/contratos-instituicao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla!,
+                        ]}
+                      >
+                        <ContratosInstituicao />
                       </ProtectedRoute>
                     }
                   />

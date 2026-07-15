@@ -13,7 +13,8 @@ import {
   GraduationCap,
   FileText,
   BookUser,
-  Files
+  Files,
+  BarChart3
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -1220,19 +1221,7 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/servicos-emolumentos",
           permission: [PermissionTypeDetails.SERVICOS_PRECARIOS.sigla],
         },
-        // { title: "Estudantes Devedores", url: "/financas/devedores" },
-        // { title: "Estudantes Inactivos", url: "/financas/inactivos" },
-        // {
-        //   title: "Estud. Finalistas Inactivos",
-        //   url: "/financas/finalistas-inactivos",
-        // },
-        // { title: "Consult. Nº Operação", url: "/financas/num-operacao" },
-        // { title: "Controlo Actual. Saldo", url: "/financas/controlo-saldo" },
-        // { title: "Isentar Serviços (Novos)", url: "/financas/isentar-novos" },
-        // {
-        //   title: "Isentar Serviços (Antigos)",
-        //   url: "/financas/isentar-antigos",
-        // },
+
 
         {
           title: "Negociação de Dívida",
@@ -1246,25 +1235,14 @@ export const finaceStructure: MenuStructure = {
             PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla,
           ],
         },
-        // { title: "Talão em Desuso", url: "/financas/talao-desuso" },
-        // { title: "Serviços e Emolumentos", url: "/financas/emolumentos" },
 
-        /* Crédito Educacional */
-        //  { title: "Instituições", url: "/financas/credito/instituicoes" },
         {
           title: "Instituições - Todas",
           url: "/financas/credito/instituicoes/todas",
           permission: [PermissionTypeDetails.INSTITUICOES.sigla],
         },
 
-        // {
-        //   title: "Instituições com Despesa",
-        //   url: "/financas/credito/instituicoes/despesa",
-        // },
-        // {
-        //   title: "Instituições com Receita",
-        //   url: "/financas/credito/instituicoes/receita",
-        // },
+
         {
           title: "Credito Educacional",
           url: "financas/credito/bolsa",
@@ -1275,29 +1253,25 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/credito/bolsa/estudante",
           permission: [PermissionTypeDetails.LISTAR_BOLSEIROS.sigla],
         },
-        // {
-        //   title: "Tipos de Estudantes",
-        //   url: "/financas/credito/tipo-estudantes",
-        // },
+
         {
           title: "Atribuir Crédito Educacional",
           url: "/financas/credito/atribuir",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-        //ISAAC
-
-        // {
-        //   title: "Pagamentos Bolseiros",
-        //   url: "/financas/credito/pag-bolseiros",
-        // },
-        // {
-        //   title: "Listar Pagamentos de Bolseiros",
-        //   url: "/financas/credito/listar-bolseiros",
-        // },
-        // {
-        //   title: "Listar Crédito Educacional",
-        //   url: "/financas/credito/listar",
-        // },
+        {
+          title: "Contratos - Instituição",
+          url: "/financas/contratos-instituicao",
+          permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
+        },
+        /*
+        {
+          title: "Rel. Pagamentos Instituições",
+          icon: BarChart3,
+          url: "/financas/rel-pagamentos-instituicoes",
+          permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
+        },
+       */
 
         /* Gestão de Descontos */
         {
@@ -1310,61 +1284,7 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/descontos/atribuicao",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-        // {
-        //   title: "Atribuição de Desconto",
-        //   url: "/financas/descontos/atribuicao",
-        // },
-        // {
-        //   title: "Estudantes com Descontos",
-        //   url: "/financas/descontos/estudantes",
-        // },
-        // { title: "Listar Descontos", url: "/financas/descontos/listar" },
 
-        /* Fecho de Caixa */
-        // { title: "Fecho Caixa Diário", url: "/financas/caixa/diario" },
-        // { title: "Fecho Caixa Geral", url: "/financas/caixa/geral" },
-        // { title: "Fecho Caixa Utilizador", url: "/financas/caixa/utilizador" },
-
-        // /* Outros Recursos */
-        // {
-        //   title: "Pagamentos Docentes",
-        //   url: "/financas/outros/pagamentos-docentes",
-        // },
-
-        // /* Relatórios */
-        // {
-        //   title: "Estudantes Matriculados",
-        //   url: "/financas/relatorios/matriculados",
-        // },
-        // {
-        //   title: "Listar Estudantes Isentos",
-        //   url: "/financas/relatorios/isentos",
-        // },
-        // {
-        //   title: "Estudantes Matriculadas",
-        //   url: "/financas/relatorios/matriculadas",
-        // },
-        // { title: "Listar Todos", url: "/financas/relatorios/todos" },
-        // {
-        //   title: "Estudantes Finalistas",
-        //   url: "/financas/relatorios/finalistas",
-        // },
-        // {
-        //   title: "Estudantes com Crédito Institucional",
-        //   url: "/financas/relatorios/credito-institucional",
-        // },
-        // {
-        //   title: "Estudantes com Desconto",
-        //   url: "/financas/relatorios/descontos",
-        // },
-        /* Relatórios de Pagamentos 
-        {
-          title: "Rel. Pagamentos Instituições",
-          icon: BarChart3,
-          url: "/financas/rel-pagamentos-instituicoes",
-          permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
-        },
-        */
         {
           title: "Pagamentos",
           url: "/financas/listar-pagamentos",
@@ -1385,12 +1305,7 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/forma-pagamento",
           permission: [PermissionTypeDetails.FORMA_PAGAMENTO.sigla],
         },
-        // { title: "Listar Loggs", url: "/financas/relatorios/loggs" },
 
-        // /* Serviços Tributários */
-        // { title: "Nota de Crédito", url: "/financas/agt/nota-credito" },
-        // { title: "Taxa do IVA", url: "/financas/agt/iva" },
-        // { title: "Gerar SAFT", url: "/financas/agt/saft" },
         {
           title: "Caixas",
           url: "/financas/caixas",
