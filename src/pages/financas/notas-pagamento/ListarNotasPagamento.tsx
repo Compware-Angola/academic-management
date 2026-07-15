@@ -72,6 +72,7 @@ const searchOptions = [
   { id: "codigoMatricula", label: "Código da Matrícula" },
   { id: "reference", label: "Referência da Factura" },
   { id: "codigoFatura", label: "Codigo da Factura" },
+  { id: "biEstudante", label: "Bi do Estudante" },
 ];
 function truncate(text: string, max = 10) {
   if (!text) return "";
@@ -219,6 +220,7 @@ export default function ListarNotasPagamento() {
     codigoMatricula: "Pesquisar por código da matrícula...",
     reference: "Pesquisar por referência da factura...",
     codigoFatura: "Pesquisar por Codigo da factura...",
+    biEstudante: "Pesquisar pelo Bi do estudante...",
   };
 
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
@@ -298,10 +300,10 @@ export default function ListarNotasPagamento() {
                 onChange={(v) => {
                   setSearchBy(
                     v as
-                      | "codigoMatricula"
-                      | "reference"
-                      | "codigoFatura"
-                      | "BI do estudante",
+                    | "codigoMatricula"
+                    | "reference"
+                    | "codigoFatura"
+                    | "biEstudante",
                   );
                   setSearchTerm("");
                   setPage(1);
@@ -598,9 +600,8 @@ export default function ListarNotasPagamento() {
             </label>
 
             <Textarea
-              placeholder={`Digite o motivo da ${
-                acaoTipo === "anular" ? "anulação" : "reactivação"
-              }`}
+              placeholder={`Digite o motivo da ${acaoTipo === "anular" ? "anulação" : "reactivação"
+                }`}
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
             />

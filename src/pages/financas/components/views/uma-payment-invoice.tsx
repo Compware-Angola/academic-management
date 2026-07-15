@@ -250,10 +250,15 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps) {
         {/* Dados do Estudante */}
         <View style={styles.section}>
           <Text style={{ ...styles.label, fontSize: 12, marginBottom: 6 }}>
-            Dados do Estudante
+            Dados do {nota.codigo_matricula ? "Estudante" : "Candidato"}
           </Text>
+
           <Text>Nome: {nota.nome_aluno}</Text>
-          <Text>Matrícula: {nota.codigo_matricula}</Text>
+          <Text>BI: {nota.bi_aluno}</Text>
+
+          {nota.codigo_matricula && (
+            <Text>Matrícula: {nota.codigo_matricula}</Text>
+          )}
         </View>
 
         {/* Tabela de itens */}
