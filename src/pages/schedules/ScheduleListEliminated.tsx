@@ -35,7 +35,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 
 import { useQueryHorariosEliminados } from "@/hooks/horario/use-query-horarios-existentes-eliminados";
@@ -50,10 +49,12 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { Roles } from "./EditSchedule";
 import { usePermission } from "@/auth/permission.helper";
 import { useAuth } from "@/hooks/use-auth";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 export default function ScheduleListEliminated() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLectivo: "",
     semestre: "",
     curso: "",
@@ -71,12 +72,18 @@ export default function ScheduleListEliminated() {
     codigo: number;
     descricao: string;
   } | null>(null);
+  const parseFilter = (value?: string) => {
+    if (!value || value === "all") return undefined;
+    const numberValue = Number(value);
+    return Number.isNaN(numberValue) ? undefined : numberValue;
+  };
   // Queries dos filtros
   const { data: anosAcademicos, isLoading: loadingAnos } =
-    useQueryAnoAcademico();
+    useQueryAnoAcademico({
+      tipo_candidatura: parseFilter(filters.tipoCandidatura),
+    });
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
-  const { data: cursos, isLoading: loadingCursos } = useCursos();
   const { data: anosCurriculares = [], isLoading: loadingAnosCurriculares } =
     useQueryClassFilterByCurso({ curso: filters.curso });
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -174,18 +181,32 @@ export default function ScheduleListEliminated() {
       {/* ---------- Filtros ---------- */}
       <div className="rounded-lg border bg-card p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TipoCandidaturaSelect
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLectivo: "",
+                curso: "",
+                anoCurricular: "",
+                unidadeCurricular: "",
+              })
+            }
+          />
+
           <FormSelect
             label="Ano Letivo"
             value={filters.anoLectivo}
             loading={loadingAnos}
             onChange={(v) =>
               setFilters({
+                ...filters,
                 anoLectivo: v,
                 semestre: "",
                 curso: "",
                 anoCurricular: "",
                 unidadeCurricular: "",
-                search: "",
                 periodo: "",
               })
             }
@@ -248,6 +269,9 @@ export default function ScheduleListEliminated() {
                 unidadeCurricular: "",
               });
 
+            }}
+            params={{
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
             }}
           />
 

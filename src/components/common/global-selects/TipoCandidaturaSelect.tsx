@@ -11,6 +11,7 @@ interface TipoCandidaturaProps {
   isPostGraduation?: boolean;
   isGraduation?: boolean;
   label?: string;
+  placeholder?: string;
   temporarilyUnavailable?: boolean; // <- nova prop
 }
 
@@ -22,6 +23,7 @@ export function TipoCandidaturaSelect({
   isPostGraduation = false,
   isGraduation = false,
   label = "Tipo de Candidatura",
+  placeholder,
   temporarilyUnavailable = false,
 }: TipoCandidaturaProps) {
   const id = useId();
@@ -52,7 +54,7 @@ export function TipoCandidaturaSelect({
         // adicionar um loader spinner com a mesm cor do input disabled ou cinza escuro
         temporarilyUnavailable
           ? "Temporariamente indisponível"
-          : undefined
+          : placeholder
       }
       defaultSelectItem={defaultSelectItem}
       value={temporarilyUnavailable ? "" : value}

@@ -40,7 +40,6 @@ import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useSchedulePermission } from "@/hooks/horario/use-schedule-permission";
@@ -49,12 +48,15 @@ import { useScheduleWithPermissionQuery } from "@/hooks/horario/use-query-schedu
 import { formatarData } from "@/util/date-formate";
 import { ScheduleWithPermissao } from "@/services/horario/fetch-schedule-with-permission.service";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function SchedulesWithPermission() {
   const navigate = useNavigate();
 
   // --------- Estado ---------
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -83,10 +85,11 @@ export default function SchedulesWithPermission() {
 
   // --------- Queries de filtros ---------
   const { data: anosAcademicos, isLoading: loadingAnos } =
-    useQueryAnoAcademico();
+    useQueryAnoAcademico({
+      tipo_candidatura: parseFilter(filters.tipoCandidatura),
+    });
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
-  const { data: cursos } = useCursos();
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
@@ -207,6 +210,20 @@ export default function SchedulesWithPermission() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "",
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                })
+              }
+            />
+
             <FormSelect
               label="Ano Letivo"
               value={filters.anoLetivo}
@@ -267,19 +284,19 @@ export default function SchedulesWithPermission() {
               </Select>
             </div>
             <CourseSelect
-                                                          
-                                                        
-                                                          value={filters.curso}
-                                                          onChangeValue={(v) => {
-                                                          setFilters({
-                                                          ...filters,
-                                                            curso: v,
-                                                            anoCurricular: "",
-                                                            unidadeCurricular: "",
-                                                            });
-                                                                                    
-                                                            }}
-                                                              />
+              params={{
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
+              value={filters.curso}
+              onChangeValue={(v) => {
+                setFilters({
+                  ...filters,
+                  curso: v,
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                });
+              }}
+            />
             <FormSelect
               label="Ano Curricular"
               value={filters.anoCurricular}
