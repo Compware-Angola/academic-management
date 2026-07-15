@@ -331,7 +331,7 @@ export const PermissionTypeDetails = {
   },
   PROVA: {
     designacao: "Lista de Provas",
-    sigla: "mgea_lp",
+    sigla: "mgea_lpr",
   },
   TOPICO_PROVA: {
     designacao: "Lista de Tópicos",
