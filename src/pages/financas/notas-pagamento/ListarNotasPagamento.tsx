@@ -300,10 +300,10 @@ export default function ListarNotasPagamento() {
                 onChange={(v) => {
                   setSearchBy(
                     v as
-                      | "codigoMatricula"
-                      | "reference"
-                      | "codigoFatura"
-                      | "biEstudante",
+                    | "codigoMatricula"
+                    | "reference"
+                    | "codigoFatura"
+                    | "biEstudante",
                   );
                   setSearchTerm("");
                   setPage(1);
@@ -600,9 +600,8 @@ export default function ListarNotasPagamento() {
             </label>
 
             <Textarea
-              placeholder={`Digite o motivo da ${
-                acaoTipo === "anular" ? "anulação" : "reactivação"
-              }`}
+              placeholder={`Digite o motivo da ${acaoTipo === "anular" ? "anulação" : "reactivação"
+                }`}
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
             />

@@ -6,7 +6,7 @@ export type ListarFacturasPayload = {
   codigoMatricula?: string | number;
   reference?: string | number;
   codigoFatura?: string | number;
-  biEstudante?: string;
+  biEstudante?: string | number;
   anoLectivo?: number | string;
   status?: number | null | string;
   page?: number;
