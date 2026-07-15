@@ -1,4 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+
 import { axiosNestFinance } from "@/lib/axios-nest-finance";
 
 export type CreateTipoCreditoEducacionalBody = {
