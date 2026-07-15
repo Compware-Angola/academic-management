@@ -3,10 +3,8 @@ import {
     getPaymentDailySummary,
     getPaymentMonthlySummary,
     getPaymentPerformanceMonthly,
-    getStudentStats,
     PaymentMonthlySummary,
     PaymentPerformanceMonthlyParams,
-    StudentStatsParams,
 } from "@/services/statics/statitis.service"
 import { useQuery } from "@tanstack/react-query"
 
@@ -50,17 +48,6 @@ export const useQueryPaymentPerformanceMonthly = (
     return useQuery({
         queryKey: ["statics", "payment-performance-monthly", params],
         queryFn: () => getPaymentPerformanceMonthly(params),
-        refetchInterval: 5000,
-        ...DASHBOARD_QUERY_OPTIONS,
-    })
-}
-
-export const useQueryStudentStats = (
-    params?: StudentStatsParams
-) => {
-    return useQuery({
-        queryKey: ["statics", "student-stats", params],
-        queryFn: () => getStudentStats(params),
         refetchInterval: 5000,
         ...DASHBOARD_QUERY_OPTIONS,
     })
