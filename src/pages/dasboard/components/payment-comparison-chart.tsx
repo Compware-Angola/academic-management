@@ -1,4 +1,3 @@
-"use client"
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import {
@@ -21,9 +20,11 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { useQueryPaymentPerformanceMonthly } from "@/hooks/statics"
+import { useUserActivity } from "@/hooks/use-user-activity"
 
 
 export function PaymentComparisonChart() {
+    const isActive = useUserActivity()
     const [activeYear, setActiveYear] = React.useState<string>("")
     const [compareYear, setCompareYear] = React.useState<string>("")
     const hasSelection = Boolean(activeYear) && Boolean(compareYear)
@@ -33,7 +34,7 @@ export function PaymentComparisonChart() {
         isError: isErrorMonthlyPaymentComparison,
         error: errorMonthlyPaymentComparison,
         refetch: refetchMonthlyPaymentComparison,
-    } = useQueryPaymentPerformanceMonthly({ currentYear: Number(activeYear), previousYear: Number(compareYear) })
+    } = useQueryPaymentPerformanceMonthly({ currentYear: Number(activeYear), previousYear: Number(compareYear) }, isActive)
 
     const errorMessage =
         (errorMonthlyPaymentComparison as any)?.response?.data?.message ??
@@ -186,13 +187,7 @@ export function PaymentComparisonChart() {
                                 tickMargin={8}
                                 tickFormatter={(value) => value.slice(0, 3)}
                             />
-                            <YAxis
-                                tickLine={false}
-                                axisLine={false}
-                                tickMargin={8}
-                                tickFormatter={formatKzCompact}
-                                width={64}
-                            />
+
                             <ChartTooltip
                                 cursor={false}
                                 content={

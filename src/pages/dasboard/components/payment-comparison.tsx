@@ -27,6 +27,7 @@ import { FormaPagamentoSelect } from "@/components/common/global-selects/TipoPag
 import { MonthYearPicker } from "./month-year-picker"
 import { useQueryPaymentComparison } from "@/hooks/statics"
 import { parseFilter } from "@/util/parse-filter"
+import { useUserActivity } from "@/hooks/use-user-activity"
 
 interface PaymentServiceComparisonWidgetProps {
     title?: string
@@ -210,12 +211,14 @@ export function PaymentServiceComparison({
 }: PaymentServiceComparisonWidgetProps) {
     const [formaPagamento, setFormaPagamento] = React.useState("")
     const [date, setDate] = React.useState<Date>(new Date())
+    const isActive = useUserActivity()
 
     const { data: comparison, isLoading: isLoadingComparison } = useQueryPaymentComparison({
         month: date.getMonth() + 1,
         year: date.getFullYear(),
         formaPagamento: parseFilter(formaPagamento),
-    })
+
+    }, isActive)
 
     const items: ServiceItem[] = React.useMemo(
         () =>
