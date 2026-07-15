@@ -12,35 +12,28 @@ import {
   GraduationCap,
   BookOpen,
   FileCheck,
-  TrendingUp,
+
   Calendar,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import UpcomingEventsCard from "./components/UpcomingEventsCard";
-import SemesterStatsCard from "./components/SemesterStatsCard";
 import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryDashboard } from "@/hooks/dashboard/use-query-dashboard";
 import { formatNumber } from "@/util/format-number";
-
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
-import { useState } from "react";
-import { Dialog } from "@/components/ui/dialog";
 import { useQueryConfigurationGeral } from "@/hooks/academiccalendar/use-query-configuration";
 import { PaymentServiceComparison } from "./components/payment-comparison";
 import { PaymentComparisonChart } from "./components/payment-comparison-chart";
-import { PaymenttDailyStatsCard } from "./components/paymentt-daily-Stats-card";
-import { PaymentMonthlyStatsCard } from "./components/payment-monthly-StatsCard";
+import { PaymentDailyStatsCard } from "./components/paymentt-daily-Stats-card";
 import { usePermission } from "@/auth/permission.helper";
 import { StudentEnrollmentStatsCard } from "./components/student-enrollment-stats-card";
 
 
 const Index = () => {
-  const [openAvisoModal, setOpenAvisoModal] = useState(false);
+
   const { haveFullAccess } = usePermission();
   const { user: userData } = useAuth();
-
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
   const { data: configurationGeral, isLoading: isLoadingConfigurationGeral } =
@@ -142,13 +135,9 @@ const Index = () => {
 
       {canViewStats && <div className="grid gap-4 md:grid-cols-2">
         <StudentEnrollmentStatsCard />
-        <PaymenttDailyStatsCard />
-        <PaymentMonthlyStatsCard />
+        <PaymentDailyStatsCard />
         <PaymentServiceComparison />
-        <div className="col-span-2">
-          <PaymentComparisonChart />
-        </div>
-
+        <PaymentComparisonChart />
       </div>}
 
       <Card>

@@ -107,3 +107,26 @@ export async function getStudentStats(
     return response.data
 }
 
+type PaymentSummaryItem = {
+    codigoFormaPagamento: number
+    tipoPagamento: string
+    totalPagamentos: number
+    totalPago: number
+}
+export type PaymentSummaryResponse = {
+    data: PaymentSummaryItem[]
+}
+export type PaymentSummaryParams = {
+    dataInicio?: string
+    dataFim?: string
+    codigoFormaPagamento?: number
+}
+export async function getPaymentSummary(params?: PaymentSummaryParams) {
+    const response = await axiosNestFinance.get<PaymentSummaryResponse>(`payment/statics/summary`, {
+        params
+
+    })
+    return response.data
+}
+
+

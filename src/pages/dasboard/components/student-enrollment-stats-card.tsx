@@ -5,8 +5,10 @@ import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCa
 import { useQueryStudentStats } from "@/hooks/statics"
 import { parseFilter } from "@/util/parse-filter"
 import { StudentStatsCard } from "./student-stats-card"
+import { useUserActivity } from "@/hooks/use-user-activity"
 
 export function StudentEnrollmentStatsCard() {
+    const isActive = useUserActivity()
     const [tipoCandidatura, setTipoCandidatura] = React.useState("1")
 
     const {
@@ -16,7 +18,7 @@ export function StudentEnrollmentStatsCard() {
         error: errorStatics,
     } = useQueryStudentStats({
         codigoCandidatura: parseFilter(tipoCandidatura),
-    })
+    }, isActive)
 
     return (
         <StudentStatsCard
