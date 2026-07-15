@@ -179,7 +179,7 @@ export enum PermissionType {
   FORMULA_UCS_POS_GRADUACAO = "FORMULA_UCS_POS_GRADUACAO",
   FORMULA_UCS_ORAL_POS_GRADUACAO = "FORMULA_UCS_ORAL_POS_GRADUACAO",
   MARCACAO_PROVAS_POS_GRADUACAO = "MARCACAO_PROVAS_POS_GRADUACAO",
-  
+
 
   DEFINIR_FORMULA_UNIDADE_CURRICULAR = "DEFINIR_FORMULA_UNIDADE_CURRICULAR",
   MARCAR_PROVA_POS_GRADUACAO = "MARCAR_PROVA_POS_GRADUACAO",
@@ -331,7 +331,7 @@ export const PermissionTypeDetails = {
   },
   PROVA: {
     designacao: "Lista de Provas",
-    sigla: "mgea_lp",
+    sigla: "mgea_lpr",
   },
   TOPICO_PROVA: {
     designacao: "Lista de Tópicos",
@@ -1277,17 +1277,17 @@ export const PermissionTypeDetails = {
     designacao: "Pós-graduação Gestao Orientacao Pesquisa Orientadores",
     sigla: "pg_gop_o",
   },
-   POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS: {
+  POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS: {
     designacao: "Pós-graduação Gestao Orientacao Pesquisa Vinculos",
     sigla: "pg_gop_v",
   },
-   POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE: {
+  POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE: {
     designacao: "Visualizar Horário Por Docente",
     sigla: "pg_mgh_vhpd",
   },
-   POST_GRADUACAO_HORAS_DE_VIGILANCIA: { designacao: "Horas De Vigilancia", sigla: "pg_mgd_hv" },
+  POST_GRADUACAO_HORAS_DE_VIGILANCIA: { designacao: "Horas De Vigilancia", sigla: "pg_mgd_hv" },
 
-    POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC: {
+  POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC: {
     designacao: "Docente lançamento do programa da UC",
     sigla: "pg_doc_lanc_prog_uc",
   },
@@ -1295,18 +1295,23 @@ export const PermissionTypeDetails = {
     designacao: "Validação do programa da UC",
     sigla: "pg_doc_val_prog_uc",
   },
-    POST_GRADUACAO_CANDIDATOS_INSCRITOS: {
+  POST_GRADUACAO_CANDIDATOS_INSCRITOS: {
     designacao: "Pós-graduação Candidatos Inscritos",
     sigla: "pg_mpgs_ca",
   },
-    POST_GRADUACAO_LISTAR_SUMARIO: {
+  POST_GRADUACAO_LISTAR_SUMARIO: {
     designacao: "Pós-graduação Listar sumários",
     sigla: "pg_listar_sumario",
   },
 
+  CONTROLE_CONTRATO_INSTITUICAO: {
+    designacao: "Controle de Contrato Instituição",
+    sigla: "maf_cci",
+  },
 
 
- 
+
+
 } as const;
 
 export type PermissionDetail = {

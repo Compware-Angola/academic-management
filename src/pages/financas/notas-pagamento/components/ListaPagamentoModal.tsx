@@ -313,7 +313,17 @@ export const ListaPagamentoModal = ({
                     {facturaItens?.data?.map((item) => (
                       <TableRow>
                         <TableCell className="font-medium">
-                          {item?.descricaoservico} {item?.mesdescricao}
+                          {item?.descricaoservico}
+                          {item?.mesdescricao
+                            ? " (" +
+                            item?.mesdescricao +
+                            ")"
+                            : ""}
+                          {item?.cadeiras_recurso_epoca_especial
+                            ? " (" +
+                            item?.cadeiras_recurso_epoca_especial +
+                            ")"
+                            : ""}
                         </TableCell>
                         <TableCell className="font-mono">
                           {item?.codigofactura}

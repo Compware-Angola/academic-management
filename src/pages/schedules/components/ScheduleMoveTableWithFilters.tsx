@@ -30,8 +30,11 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { SelectUnidadeCurricularWithFilter } from "@/components/common/global-selects/SelectUnidadeCurricularWithFilter";
 import { Label } from "@/components/ui/label";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 interface IFilter {
+  tipoCandidatura: string;
   anoLetivo: string;
   semestre: string;
   curso: string;
@@ -125,10 +128,19 @@ export const ScheduleMoveTableWithFilters = ({
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TipoCandidaturaSelect
+            disabled
+            value={filters.tipoCandidatura}
+            label=""
+            placeholder="Tipo de Candidatura"
+            onChangeValue={() => {}}
+          />
+
           <AcademicYearSelect
             enableDefaultActiveYear
             onlyActive
             disabled
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura)}
             value={filters.anoLetivo}
             onChangeValue={() => {}}
           />
@@ -141,6 +153,9 @@ export const ScheduleMoveTableWithFilters = ({
 
           <CourseSelect
             disabled
+            params={{
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+            }}
             value={filters.curso}
             onChangeValue={() => {}}
           />

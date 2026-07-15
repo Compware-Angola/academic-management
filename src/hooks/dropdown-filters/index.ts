@@ -47,12 +47,13 @@ export function useEpocasDropdownFilter() {
   });
 }
 
-export function useDropDownBolsas(params?: ParamsBolsa) {
+export function useDropDownBolsas(params?: ParamsBolsa, enabled: boolean = true) {
   return useQuery({
     queryKey: ["bolsas-dropdown", params],
     queryFn: () => fetchDropDownBolsas(params),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
+    enabled
   });
 }
 

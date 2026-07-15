@@ -10,7 +10,6 @@ import {
 import { MoveRight, Loader2 } from "lucide-react";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { ScheduleMoveTable } from "./components/ScheduleMoveTable";
@@ -21,6 +20,8 @@ import { useMutationMoveStudents } from "@/hooks/horario/use-mutation-move-stude
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 export  function MoveStudentsWithSchedule() {
   //Hooks
@@ -107,6 +108,7 @@ export  function MoveStudentsWithSchedule() {
   };
   // === Filtros ===
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -115,9 +117,10 @@ export  function MoveStudentsWithSchedule() {
     unidadeCurricular: "",
   });
   // === Dados base ===
-  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: anosAcademicos } = useQueryAnoAcademico({
+    tipo_candidatura: parseFilter(filters.tipoCandidatura),
+  });
   const { data: semestres } = useQuerySemestres();
-  const { data: cursos } = useCursos();
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
@@ -152,6 +155,22 @@ export  function MoveStudentsWithSchedule() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <TipoCandidaturaSelect
+                value={filters.tipoCandidatura}
+                label=""
+                placeholder="Tipo de Candidatura"
+                onChangeValue={(v) =>
+                  setFilters({
+                    ...filters,
+                    tipoCandidatura: v,
+                    anoLetivo: "",
+                    curso: "",
+                    anoCurricular: "",
+                    unidadeCurricular: "",
+                  })
+                }
+              />
+
               {/* Ano Letivo */}
               <Select
                 value={filters.anoLetivo}
@@ -195,7 +214,9 @@ export  function MoveStudentsWithSchedule() {
               {/* Curso */}
                   <CourseSelect
                     labelMode="inside"
-                  
+                    params={{
+                      tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+                    }}
                     value={filters.curso}
                     onChangeValue={(v) => {
                     setFilters({

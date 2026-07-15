@@ -49,6 +49,8 @@ import { useQuerySchedulesByDocente } from "@/hooks/horario/use-query-schedules-
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { formatReadableTimeInterval } from "@/util/format-readable-time-interval";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 // Converte ticks .NET → HH:mm
 const formatTime = (ticks: string): string => {
@@ -62,6 +64,7 @@ const formatTime = (ticks: string): string => {
 
 export default function TeacherSchedules() {
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -73,7 +76,9 @@ export default function TeacherSchedules() {
   const [limit, setLimit] = useState(10);
   const [openDocente, setOpenDocente] = useState(false);
   // Dados base
-  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: anosAcademicos } = useQueryAnoAcademico({
+    tipo_candidatura: parseFilter(filters.tipoCandidatura),
+  });
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
   const {
@@ -148,6 +153,18 @@ export default function TeacherSchedules() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => {
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                });
+                setPage(1);
+              }}
+            />
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Letivo</label>
               <Select

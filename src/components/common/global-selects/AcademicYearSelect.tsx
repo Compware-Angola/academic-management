@@ -10,6 +10,7 @@ interface AcademicYearSelectProps {
   onlyActive?: boolean;
   enableDefaultActiveYear?: boolean;
   tipoCandidaturaId?: number;
+  label?: string;
 }
 
 const AcademicYearSelect = ({
@@ -20,6 +21,7 @@ const AcademicYearSelect = ({
   onlyActive = false,
   enableDefaultActiveYear = false,
   tipoCandidaturaId = 1,
+  label,
 }: AcademicYearSelectProps) => {
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico({ tipo_candidatura: tipoCandidaturaId });
@@ -53,7 +55,7 @@ const AcademicYearSelect = ({
       <FormSelect
         disabled={isLoadingAcademicYear || disabled}
         loading={isLoadingAcademicYear}
-        label="Ano Letivo"
+        label={label ? label : "Ano Letivo"}
         value={value}
         defaultSelectItem={defaultSelectItem}
         onChange={(v) => onChangeValue(v)}

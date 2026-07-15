@@ -20,6 +20,7 @@ export function MoveStudentsWithoutSchedule() {
   const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
   const [course, setCourse] = useState<string>("");
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     curso: "",

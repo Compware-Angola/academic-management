@@ -36,6 +36,8 @@ import { ScheduleParamItem } from "@/services/horario/schedule-params.service";
 import { parseFilter } from "@/util/parse-filter";
 import { useUpdateScheduleParam } from "@/hooks/horario/update-params-schedule";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 // ─── Tipos dos args por sigla ─────────────────────────────────────────────────
 
@@ -519,6 +521,7 @@ interface EditingState extends ScheduleParamItem {
 export default function HorariosParametros() {
   const { toast } = useToast();
 
+  const [tipoCandidaturaFiltro, setTipoCandidaturaFiltro] = useState("1");
   const [tipoFiltro, setTipoFiltro] = useState<string>("");
   const [cursoFiltro, setCursoFiltro] = useState<string>("");
   const [search, setSearch] = useState("");
@@ -529,7 +532,7 @@ export default function HorariosParametros() {
   const { data, isLoading, isError, isFetching } = useQueryScheduleParams({
     tipoParametro: parseFilter(tipoFiltro),
     search: search || undefined,
-    curso: cursoFiltro ? Number(cursoFiltro) : undefined,
+    curso: cursoFiltro && cursoFiltro !== "0" ? Number(cursoFiltro) : undefined,
     page,
     limit: LIMIT,
   });
@@ -541,6 +544,7 @@ export default function HorariosParametros() {
   const [open, setOpen] = useState(false);
 
   const limparFiltros = () => {
+    setTipoCandidaturaFiltro("1");
     setTipoFiltro("");
     setCursoFiltro("");
     setSearch("");
@@ -601,6 +605,31 @@ export default function HorariosParametros() {
       <Card className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           <div className="space-y-2 md:col-span-3">
+            <TipoCandidaturaSelect
+              value={tipoCandidaturaFiltro}
+              onChangeValue={(value) => {
+                setTipoCandidaturaFiltro(value);
+                setCursoFiltro("");
+                setPage(1);
+              }}
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-3">
+            <CourseSelect
+              label="Curso"
+              value={cursoFiltro}
+              onChangeValue={(value) => {
+                setCursoFiltro(value);
+                setPage(1);
+              }}
+              params={{
+                tipoCandidaturaId: parseFilter(tipoCandidaturaFiltro),
+              }}
+            />
+          </div>
+
+          <div className="space-y-2 md:col-span-3">
             <Label>Tipo de Parâmetro</Label>
             <Select
               value={String(tipoFiltro)}
@@ -619,7 +648,7 @@ export default function HorariosParametros() {
             </Select>
           </div>
 
-          <div className="space-y-2 md:col-span-7">
+          <div className="space-y-2 md:col-span-9">
             <Label>Pesquisar</Label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

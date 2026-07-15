@@ -30,13 +30,13 @@ import { useState } from "react";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQueryRegistrationBySchedule } from "@/hooks/horario/use-query-schedule-inscription";
 import { RegistrationScheduleItem } from "@/services/horario/fetch-schedule-inscription.service";
 import ScheduleDetailsSchoolModal from "./components/ScheduleDetailsStudentModal";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 export default function SchedulesInscription() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,6 +51,7 @@ export default function SchedulesInscription() {
     return Number.isNaN(n) ? undefined : n;
   };
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -63,10 +64,11 @@ export default function SchedulesInscription() {
 
   // === Dados base ===
   const { data: anosAcademicos, isLoading: loadingAnos } =
-    useQueryAnoAcademico();
+    useQueryAnoAcademico({
+      tipo_candidatura: parseFilter(filters.tipoCandidatura),
+    });
   const { data: semestres, isLoading: loadingSemestres } = useQuerySemestres();
   const { data: periodos, isLoading: loadingPeriodos } = useQueryPeriod();
-  const { data: cursos, isLoading: loadingCursos } = useCursos();
 
   // Anos curriculares do curso
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
@@ -166,6 +168,21 @@ export default function SchedulesInscription() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) => {
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "all",
+                  anoCurricular: "all",
+                  unidadeCurricular: "all",
+                });
+                setPage(1);
+              }}
+            />
+
             {/* Ano Letivo */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Ano Letivo</label>
@@ -250,6 +267,11 @@ export default function SchedulesInscription() {
                                 });
                                                         
                                 }}
+                              params={{
+                                tipoCandidaturaId: parseFilter(
+                                  filters.tipoCandidatura
+                                ),
+                              }}
                                   />
             </div>
 
