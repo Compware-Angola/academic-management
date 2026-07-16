@@ -42,6 +42,8 @@ export type Candidato = {
   periodo_opcional: string;
   codigo_tipo_candidatura: number;
   tipo_candidatura: string;
+  tentou_universidade_publica: number;
+  doc_universidade_valido: number;
   documentos: Documento[];
 };
 
@@ -72,6 +74,16 @@ export async function fetchCandidatos(
       ...filters,
     },
   });
+
+  return data;
+}
+
+export async function validarDocumentoUniversidadePublica(id: number) {
+  const { data } = await axiosNestGa.post(
+    `/exames-de-acesso/validar-documento-publico/${id}`,
+    {},
+    { showSuccess: true },
+  );
 
   return data;
 }
