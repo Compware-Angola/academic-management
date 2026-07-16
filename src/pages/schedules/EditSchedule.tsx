@@ -264,10 +264,10 @@ export function EditSchedule() {
       periodo: Number(formData.periodo),
     },
     initialDataSchedule ?
-      initialDataSchedule.cursoId.toString() !== formData.curso ||
-      initialDataSchedule.unidadeCurricularId.toFixed() !== formData.unidadeCurricular ||
-      initialDataSchedule.semestre.toString() !== formData.semestre ||
-      initialDataSchedule.periodo.toString() !== formData.periodo
+      initialDataSchedule?.cursoId?.toString() !== formData.curso ||
+      initialDataSchedule?.unidadeCurricularId?.toString() !== formData.unidadeCurricular ||
+      initialDataSchedule?.semestre?.toString() !== formData.semestre ||
+      initialDataSchedule?.periodo?.toString() !== formData.periodo
       : false
   );
 
