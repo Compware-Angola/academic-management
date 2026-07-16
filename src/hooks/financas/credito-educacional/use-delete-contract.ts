@@ -7,7 +7,7 @@ export function useDeleteInstitutionalContract() {
     return useMutation({
         mutationFn: deleteInstitutionalContract,
         onSuccess: () => {
-            toast.success("Contrato de crédito educacional criado com sucesso");
+            toast.success("Contrato de crédito educacional eliminado com sucesso");
             queryClient.invalidateQueries({ queryKey: ["institutional-contracts"] });
             queryClient.invalidateQueries({ queryKey: ["contract-estatisticas"] });
         },
@@ -15,7 +15,7 @@ export function useDeleteInstitutionalContract() {
             if (error?.statusCode === 409) {
                 toast.error(error.message);
             } else {
-                toast.error("Erro ao criar contrato");
+                toast.error("Erro ao eliminar contrato");
             }
         },
     });

@@ -10,7 +10,7 @@ export function useUpdateInstitutionalContract({ id, body }: { id: string, body:
     return useMutation({
         mutationFn: () => updateInstitutionalContract(id, body),
         onSuccess: () => {
-            toast.success("Contrato de crédito educacional criado com sucesso");
+            toast.success("Contrato de crédito educacional atualizado com sucesso");
             queryClient.invalidateQueries({ queryKey: ["institutional-contracts"] });
             queryClient.invalidateQueries({ queryKey: ["contract-estatisticas"] });
         },

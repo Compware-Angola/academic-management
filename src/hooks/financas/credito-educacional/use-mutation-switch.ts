@@ -12,7 +12,7 @@ export function useToggleContractEstado() {
     return useMutation({
         mutationFn: ({ id }: ToggleContractEstadoParams) => toggleContractEstado(id),
         onSuccess: () => {
-            toast.success("Contrato de crédito educacional criado com sucesso");
+            toast.success("Estado do Contrato de crédito educacional Actualizado com sucesso");
             queryClient.invalidateQueries({ queryKey: ["institutional-contracts"] });
             queryClient.invalidateQueries({ queryKey: ["contract-estatisticas"] });
         },
@@ -20,7 +20,7 @@ export function useToggleContractEstado() {
             if (error?.statusCode === 409) {
                 toast.error(error.message);
             } else {
-                toast.error("Erro ao actualizar estado do contrato");
+                toast.error("Erro ao activar contrato");
             }
         },
     });
