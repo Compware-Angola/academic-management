@@ -1,7 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type createLogsParams = {
-  dataInicio?: string;  
+  dataInicio?: string;
   dataFim?: string;
   search?: string;
   page: number;
@@ -15,7 +15,7 @@ export type LogsAccesses = {
   fkFuncionalidade: number | null;
   fkUtilizadorResponsavel: number;
   fkGrupoAfetado: number | null;
-  fkOperacaoLog: number;         
+  fkOperacaoLog: number;
   createdAt: string;
   ip: string;
 
@@ -34,19 +34,14 @@ export type LogsPaginatedResponse = {
 };
 
 export async function fetchLogsAccessos(
-  params: createLogsParams
+  params: createLogsParams,
 ): Promise<LogsPaginatedResponse> {
-  const _params = { ...params};
-
-
+  const _params = { ...params };
 
   const { data } = await axiosNestGa.get(
     "/acess_management/logs-acessos-funcionalidade",
-    { params: _params }
+    { params: _params },
   );
-
-
 
   return data;
 }
-
