@@ -600,9 +600,8 @@ export default function ListarNotasPagamento() {
             </label>
 
             <Textarea
-              placeholder={`Digite o motivo da ${
-                acaoTipo === "anular" ? "anulação" : "reactivação"
-              }`}
+              placeholder={`Digite o motivo da ${acaoTipo === "anular" ? "anulação" : "reactivação"
+                }`}
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
             />
