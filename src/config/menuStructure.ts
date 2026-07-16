@@ -1259,19 +1259,20 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/credito/atribuir",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-        {
-          title: "Contratos - Instituição",
-          url: "/financas/contratos-instituicao",
-          permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
-        },
         /*
-        {
-          title: "Rel. Pagamentos Instituições",
-          icon: BarChart3,
-          url: "/financas/rel-pagamentos-instituicoes",
-          permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
-        },
-       */
+      {
+        title: "Contratos - Instituição",
+        url: "/financas/contratos-instituicao",
+        permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
+      },
+    
+      {
+        title: "Rel. Pagamentos Instituições",
+        icon: BarChart3,
+        url: "/financas/rel-pagamentos-instituicoes",
+        permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
+      },
+     */
 
         /* Gestão de Descontos */
         {
