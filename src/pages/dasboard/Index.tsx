@@ -132,13 +132,13 @@ const Index = () => {
 
         />
       </div>
-
+      {/* 
       {canViewStats && <div className="grid gap-4 md:grid-cols-2">
         <StudentEnrollmentStatsCard />
         <PaymentDailyStatsCard />
         <PaymentServiceComparison />
         <PaymentComparisonChart />
-      </div>}
+      </div>} */}
 
       <Card>
         <CardHeader>
