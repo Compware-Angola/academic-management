@@ -7,6 +7,7 @@ import {
 export async function criarDocenteCompletoService(
   payload: DocenteWizardState,
 ): Promise<CriarDocenteCompletoResponse> {
+  console.table(payload);
   const { data } = await axiosNestGa.post<CriarDocenteCompletoResponse>(
     "/docentes/completo",
     payload,
