@@ -234,6 +234,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.CRIAR_HORARIO.sigla!,
+                          PermissionTypeDetails.CRIAR_HORARIOS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <CreateSchedule />
@@ -405,7 +407,20 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route path="/horarios/listar" element={<ScheduleList />} />
+                  <Route
+                    path="/horarios/listar"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_HORARIOS.sigla!,
+                          PermissionTypeDetails.LISTAR_HORARIOS_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <ScheduleList />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/horarios/eliminados"
                     element={
@@ -425,6 +440,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.PERMISSAO_PARA_EDITAR_HORARIO
+                            .sigla,
+                          PermissionTypeDetails.EDITAR_HORARIOS_POS_GRADUACAO
                             .sigla,
                         ]}
                       >
@@ -452,6 +469,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla!,
+                          PermissionTypeDetails.GESTAO_DISCIPLINAS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <DisciplineManagementList />
@@ -465,6 +484,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
                           PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
+                          PermissionTypeDetails.MARCACAO_ASSIDUIDADE_POS_GRADUACAO
+                            .sigla,
                         ]}
                       >
                         <MarcarAssiduidade />
@@ -478,6 +499,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
+                          PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO
+                            .sigla,
                         ]}
                       >
                         <ControleAssiduidade />
@@ -603,7 +626,16 @@ const App = () => {
                   />
                   <Route
                     path="/avaliacoes/controle"
-                    element={<ControlNotes />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <ControlNotes />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/avaliacoes/formula-uc"
@@ -649,6 +681,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.PAUTA_GERAL.sigla!,
+                          PermissionTypeDetails.PAUTA_GERAL_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <PautaGeral />
@@ -661,6 +695,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!,
+                          PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <PautaGeralPorUC />
@@ -700,6 +736,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS
                             .sigla!,
+                          PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <LaunchHistoric />
@@ -721,7 +759,16 @@ const App = () => {
                   />
                   <Route
                     path="/marcacao-provas/controle"
-                    element={<MarkingAssessment />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <MarkingAssessment />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="avaliacoes/estatisticas"
@@ -733,6 +780,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO
+                            .sigla!,
+                          PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO
                             .sigla!,
                         ]}
                       >
@@ -1182,6 +1231,9 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails
                             .MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
+                          PermissionTypeDetails
+                            .MOVIMENTAR_ESTUDANTES_HORARIOS_POS_GRADUACAO
+                            .sigla,
                         ]}
                       >
                         <MovimentarEstudantes />
@@ -1194,6 +1246,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO
+                            .sigla!,
+                          PermissionTypeDetails.GESTAO_UC_PLANO_POS_GRADUACAO
                             .sigla!,
                         ]}
                       >
@@ -1208,6 +1262,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails
                             .GESTAO_UNIDADE_CURRICULAR_DEPARTAMENTO.sigla!,
+                          PermissionTypeDetails.GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <UcDepartmentManagement />
@@ -1285,6 +1341,7 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla!,
+                          PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <Deadlines />
@@ -1614,6 +1671,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_AFETACOES.sigla!,
+                          PermissionTypeDetails.GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <GestaoAfectacao />
@@ -1627,6 +1686,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS
                             .sigla,
+                          PermissionTypeDetails.UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO
+                            .sigla,
                         ]}
                       >
                         <ListarUCDocenteSemAfetacao />
@@ -1639,6 +1700,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_AFETACOES.sigla!,
+                          PermissionTypeDetails.DOCENTES_AFETADOS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <DocenteAfectacao />
@@ -1787,6 +1850,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_DE_DOCENTES.sigla!,
+                          PermissionTypeDetails.LISTA_DOCENTES_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <ListagemDocentes />

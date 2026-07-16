@@ -300,10 +300,10 @@ export default function ListarNotasPagamento() {
                 onChange={(v) => {
                   setSearchBy(
                     v as
-                    | "codigoMatricula"
-                    | "reference"
-                    | "codigoFatura"
-                    | "biEstudante",
+                      | "codigoMatricula"
+                      | "reference"
+                      | "codigoFatura"
+                      | "biEstudante",
                   );
                   setSearchTerm("");
                   setPage(1);
