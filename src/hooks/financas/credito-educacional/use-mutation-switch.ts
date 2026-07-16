@@ -10,12 +10,11 @@ interface ToggleContractEstadoParams {
 
 export function useToggleContractEstado() {
     return useMutation({
-        mutationFn: ({ id, estado }: ToggleContractEstadoParams) => toggleContractEstado(id),
+        mutationFn: ({ id }: ToggleContractEstadoParams) => toggleContractEstado(id),
         onSuccess: () => {
-            toast.success("Estado do contrato actualizado com sucesso");
-            queryClient.invalidateQueries({
-                queryKey: ["institutional-contracts"],
-            });
+            toast.success("Contrato de crédito educacional criado com sucesso");
+            queryClient.invalidateQueries({ queryKey: ["institutional-contracts"] });
+            queryClient.invalidateQueries({ queryKey: ["contract-estatisticas"] });
         },
         onError: (error: any) => {
             if (error?.statusCode === 409) {

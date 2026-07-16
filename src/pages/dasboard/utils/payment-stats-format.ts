@@ -7,8 +7,8 @@ const kzFullFormatter = new Intl.NumberFormat("pt-AO", {
 const kzCompactFormatter = new Intl.NumberFormat("pt-AO", {
     style: "currency",
     currency: "AOA",
-    notation: "compact",
-    compactDisplay: "short",
+    notation: "standard",
+    compactDisplay: "long",
     maximumFractionDigits: 1,
 })
 

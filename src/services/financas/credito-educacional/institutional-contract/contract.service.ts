@@ -111,3 +111,8 @@ export async function toggleContractEstado(id: string) {
     return data;
 }
 
+export async function deleteInstitutionalContract(id: string) {
+    const { data } = await axiosNestFinance.delete(`/institutional-contract/${id}`);
+    return data;
+}
+

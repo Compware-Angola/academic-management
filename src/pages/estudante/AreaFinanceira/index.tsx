@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Contact, FileText, Key, DollarSign, Package, BanknoteIcon } from "lucide-react";
+import { Contact, FileText, Key, DollarSign, Package, BanknoteIcon, Activity } from "lucide-react";
 
 import { Resumo } from "./components/resumo";
 import { MensalidadesSection } from "./components/mensalidade";
@@ -8,6 +8,7 @@ import { OutrosServicosSection } from "./components/outros-servicos";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { DividasSection } from "./components/dividas-geral";
+import { HistoryAccountMovimentSection } from "./components/history-account-moviment";
 
 type AreaFinanceiraProps = {
   value?: string;
@@ -24,9 +25,9 @@ export function AreaFinanceira({
       <Tabs
         defaultValue="resumo"
         orientation="vertical"
-        className="flex flex-row gap-6"
+        className="flex flex-row gap-6 min-w-0"
       >
-        <TabsList className="flex justify-start flex-col h-fit w-64">
+        <TabsList className="flex justify-start flex-col h-fit w-64 shrink-0">
           {
             hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
               <TabsTrigger className="w-full justify-start gap-2" value="resumo">
@@ -47,6 +48,16 @@ export function AreaFinanceira({
               </TabsTrigger>
             )
           }
+          {/*
+          {
+            hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
+              <TabsTrigger className="w-full justify-start gap-2" value="historico-movimentacoes">
+                <Activity className="h-4 w-4" />
+                <span className="hidden md:inline">Hist. Movimentações</span>
+              </TabsTrigger>
+            )
+          }
+            */}
 
           {
             hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla) && (
@@ -74,7 +85,10 @@ export function AreaFinanceira({
 
         </TabsList>
 
-        <Card className="flex-1 p-6">
+        {/* min-w-0 é essencial aqui: sem isto, um item flex por defeito não
+            encolhe abaixo do tamanho do seu conteúdo (ex: a tabela larga do
+            histórico), o que empurra a página inteira para os lados. */}
+        <Card className="flex-1 min-w-0 p-6">
           {
             hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
               <TabsContent value="resumo">
@@ -82,6 +96,15 @@ export function AreaFinanceira({
               </TabsContent>
             )
           }
+          {/*
+          {
+            hasPermission(PermissionTypeDetails.HISTORICO_MOVIMENTACOES_ESTUDANTE.sigla) && (
+              <TabsContent value="historico-movimentacoes">
+                <HistoryAccountMovimentSection codigoMatricula={codigoMatricula} />
+              </TabsContent>
+            )
+          }
+            */}
 
           {
             hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (

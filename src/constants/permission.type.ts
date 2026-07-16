@@ -1308,6 +1308,10 @@ export const PermissionTypeDetails = {
     designacao: "Controle de Contrato Instituição",
     sigla: "maf_cci",
   },
+  HISTORICO_MOVIMENTACOES_ESTUDANTE: {
+    designacao: "Histórico de Movimentações",
+    sigla: "mfe_hst_mov",
+  },
 
 
 

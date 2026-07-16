@@ -9,4 +9,4 @@ export function useQueryContracts(params: paramsGetInstitutionalContracts, optio
         gcTime: 1000 * 60 * 10,
         enabled: options?.enabled ?? true,
     });
-}
+}   

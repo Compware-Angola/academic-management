@@ -11,6 +11,11 @@ export const useMutationUpdateAcademicYearState = () => {
     onSuccess: (_, { codigoAno }) => {
       query.invalidateQueries({
         queryKey: ["academic-year-params"],
+
+      });
+      query.invalidateQueries({
+        queryKey: ["anosLetivos"],
+
       });
       toast({
         title: "Atualizado",
