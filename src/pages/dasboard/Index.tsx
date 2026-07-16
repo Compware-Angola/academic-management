@@ -19,7 +19,7 @@ import { Link } from "react-router-dom";
 import UpcomingEventsCard from "./components/UpcomingEventsCard";
 import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
-import { useQueryDashboard } from "@/hooks/dashboard/use-query-dashboard";
+import { useQueryDashboard, useQueryDashboardStatisticsReports } from "@/hooks/dashboard/use-query-dashboard";
 import { formatNumber } from "@/util/format-number";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { useQueryConfigurationGeral } from "@/hooks/academiccalendar/use-query-configuration";
@@ -36,6 +36,8 @@ const Index = () => {
   const { user: userData } = useAuth();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
+  const { data: dashboardStatisticsReports, isLoading: isLoadingDashboardStatisticsReports } =
+    useQueryDashboardStatisticsReports();
   const { data: configurationGeral, isLoading: isLoadingConfigurationGeral } =
     useQueryConfigurationGeral();
   const canViewStats = haveFullAccess()
@@ -90,11 +92,11 @@ const Index = () => {
       {/* Statistics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total de Estudantes Inscritos"
-          value={formatNumber(dashboard?.total_estudantes ?? 0)}
+          title="Total de Estudantes"
+          value={formatNumber(dashboardStatisticsReports?.totalAlunosInscritos?.total ?? 0)}
           icon={Users}
-          isAvailable={false}
-          description="Inscritos no Ano Lectivo Atual"
+          isAvailable={dashboardStatisticsReports?.totalAlunosInscritos?.total > 0}
+          description={dashboardStatisticsReports?.totalAlunosInscritos?.descricao}
         />
         <StatCard
           title="Docentes"

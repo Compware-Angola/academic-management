@@ -159,7 +159,7 @@ export default function ListagemDocentes() {
     filters.area === 0
       ? "Todas"
       : (areasFormacao.find((area) => area.codigo === filters.area)
-        ?.designacao ?? "Selecionar");
+          ?.designacao ?? "Selecionar");
 
   const exportRows = docentes.map((item) => ({
     numeroMec: item.numeroMec,
@@ -173,15 +173,15 @@ export default function ListagemDocentes() {
 
   const pdfData = exportRows.length
     ? {
-      filtros: [
-        `Área de Formação: ${selectedAreaLabel}`,
-        filters.search ? `Pesquisa: ${filters.search}` : null,
-      ]
-        .filter(Boolean)
-        .join(" | "),
-      total: exportRows.length,
-      rows: exportRows,
-    }
+        filtros: [
+          `Área de Formação: ${selectedAreaLabel}`,
+          filters.search ? `Pesquisa: ${filters.search}` : null,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        total: exportRows.length,
+        rows: exportRows,
+      }
     : null;
 
   const pdfContent = pdfData ? (
@@ -213,30 +213,30 @@ export default function ListagemDocentes() {
 
   const excelProps = pdfData
     ? {
-      documentTitle: "Lista de Docentes",
-      subtitle: "Gestão completa do corpo docente",
-      infoSections: [
-        {
-          title: "Filtros Aplicados",
-          content: pdfData.filtros || "Sem filtros",
-        },
-        { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
-      ],
-      mainTable: {
-        headers: [
-          { key: "numeroMec", label: "Nº Mec", width: 15 },
-          { key: "nome", label: "Nome", width: 30 },
-          { key: "escalao", label: "Escalão", width: 18 },
-          { key: "categoria", label: "Categoria", width: 22 },
-          { key: "grauAcademico", label: "Grau", width: 20 },
-          { key: "email", label: "Email", width: 32 },
-          { key: "areaFormacao", label: "Área de Formação", width: 28 },
+        documentTitle: "Lista de Docentes",
+        subtitle: "Gestão completa do corpo docente",
+        infoSections: [
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
+          { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
         ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
+        mainTable: {
+          headers: [
+            { key: "numeroMec", label: "Nº Mec", width: 15 },
+            { key: "nome", label: "Nome", width: 30 },
+            { key: "escalao", label: "Escalão", width: 18 },
+            { key: "categoria", label: "Categoria", width: 22 },
+            { key: "grauAcademico", label: "Grau", width: 20 },
+            { key: "email", label: "Email", width: 32 },
+            { key: "areaFormacao", label: "Área de Formação", width: 28 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
     : null;
 
   const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
@@ -300,12 +300,10 @@ export default function ListagemDocentes() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {/* no bloco de botões, ANTES do botão "Atualizar lista" 
           <Button size="sm" onClick={() => setIsNovoDocenteOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Novo docente
           </Button>
-          */}
           <Button
             //variant="outline"
             size="sm"

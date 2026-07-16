@@ -180,6 +180,26 @@ export enum PermissionType {
   FORMULA_UCS_ORAL_POS_GRADUACAO = "FORMULA_UCS_ORAL_POS_GRADUACAO",
   MARCACAO_PROVAS_POS_GRADUACAO = "MARCACAO_PROVAS_POS_GRADUACAO",
 
+  PRAZOS_POS_GRADUACAO = "PRAZOS_POS_GRADUACAO",
+  CRIAR_HORARIOS_POS_GRADUACAO = "CRIAR_HORARIOS_POS_GRADUACAO",
+  LISTAR_HORARIOS_POS_GRADUACAO = "LISTAR_HORARIOS_POS_GRADUACAO",
+  EDITAR_HORARIOS_POS_GRADUACAO = "EDITAR_HORARIOS_POS_GRADUACAO",
+  MOVIMENTAR_ESTUDANTES_HORARIOS_POS_GRADUACAO = "MOVIMENTAR_ESTUDANTES_HORARIOS_POS_GRADUACAO",
+  GESTAO_DISCIPLINAS_POS_GRADUACAO = "GESTAO_DISCIPLINAS_POS_GRADUACAO",
+  GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO = "GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO",
+  GESTAO_UC_PLANO_POS_GRADUACAO = "GESTAO_UC_PLANO_POS_GRADUACAO",
+  GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO = "GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO",
+  DOCENTES_AFETADOS_POS_GRADUACAO = "DOCENTES_AFETADOS_POS_GRADUACAO",
+  LISTA_DOCENTES_POS_GRADUACAO = "LISTA_DOCENTES_POS_GRADUACAO",
+  UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO = "UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO",
+  CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO = "CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO",
+  HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO = "HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO",
+  PAUTA_GERAL_POS_GRADUACAO = "PAUTA_GERAL_POS_GRADUACAO",
+  PAUTA_GERAL_UC_POS_GRADUACAO = "PAUTA_GERAL_UC_POS_GRADUACAO",
+  PERMISSAO_FORA_PRAZO_POS_GRADUACAO = "PERMISSAO_FORA_PRAZO_POS_GRADUACAO",
+  CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO = "CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO",
+  MARCACAO_ASSIDUIDADE_POS_GRADUACAO = "MARCACAO_ASSIDUIDADE_POS_GRADUACAO",
+  CONTROLE_ASSIDUIDADE_POS_GRADUACAO = "CONTROLE_ASSIDUIDADE_POS_GRADUACAO",
 
   DEFINIR_FORMULA_UNIDADE_CURRICULAR = "DEFINIR_FORMULA_UNIDADE_CURRICULAR",
   MARCAR_PROVA_POS_GRADUACAO = "MARCAR_PROVA_POS_GRADUACAO",
@@ -976,6 +996,86 @@ export const PermissionTypeDetails = {
   VALIDACAO_PAUTA_POS_GRADUACAO: {
     designacao: "Validação de Pauta Pós-Graduação",
     sigla: "mpgs_vpauta",
+  },
+  PRAZOS_POS_GRADUACAO: {
+    designacao: "Prazos - Pós-Graduação",
+    sigla: "pg_prazos",
+  },
+  CRIAR_HORARIOS_POS_GRADUACAO: {
+    designacao: "Criar Horários - Pós-Graduação",
+    sigla: "pg_h_criar",
+  },
+  LISTAR_HORARIOS_POS_GRADUACAO: {
+    designacao: "Listar Horários - Pós-Graduação",
+    sigla: "pg_h_listar",
+  },
+  EDITAR_HORARIOS_POS_GRADUACAO: {
+    designacao: "Editar Horários - Pós-Graduação",
+    sigla: "pg_h_editar",
+  },
+  MOVIMENTAR_ESTUDANTES_HORARIOS_POS_GRADUACAO: {
+    designacao: "Movimentar Estudantes em Horários - Pós-Graduação",
+    sigla: "pg_h_mov_est",
+  },
+  GESTAO_DISCIPLINAS_POS_GRADUACAO: {
+    designacao: "Gestão de Disciplinas - Pós-Graduação",
+    sigla: "pg_pe_disc",
+  },
+  GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO: {
+    designacao: "Gestão de UC por Departamento - Pós-Graduação",
+    sigla: "pg_pe_uc_dep",
+  },
+  GESTAO_UC_PLANO_POS_GRADUACAO: {
+    designacao: "Gestão de UC no Plano - Pós-Graduação",
+    sigla: "pg_pe_uc_plano",
+  },
+  GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO: {
+    designacao: "Gestão de Afetação Docente - Pós-Graduação",
+    sigla: "pg_gd_afet",
+  },
+  DOCENTES_AFETADOS_POS_GRADUACAO: {
+    designacao: "Docentes Afetados - Pós-Graduação",
+    sigla: "pg_gd_doc_afet",
+  },
+  LISTA_DOCENTES_POS_GRADUACAO: {
+    designacao: "Lista de Docentes - Pós-Graduação",
+    sigla: "pg_gd_docentes",
+  },
+  UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO: {
+    designacao: "UC sem Docentes Afetados - Pós-Graduação",
+    sigla: "pg_gd_uc_sem_doc",
+  },
+  CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO: {
+    designacao: "Controle de Lançamento de Notas - Pós-Graduação",
+    sigla: "pg_av_ctrl_notas",
+  },
+  HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO: {
+    designacao: "Histórico de Lançamento de Notas - Pós-Graduação",
+    sigla: "pg_av_hist_notas",
+  },
+  PAUTA_GERAL_POS_GRADUACAO: {
+    designacao: "Pauta Geral - Pós-Graduação",
+    sigla: "pg_av_pauta_geral",
+  },
+  PAUTA_GERAL_UC_POS_GRADUACAO: {
+    designacao: "Pauta Geral por UC - Pós-Graduação",
+    sigla: "pg_av_pauta_uc",
+  },
+  PERMISSAO_FORA_PRAZO_POS_GRADUACAO: {
+    designacao: "Permissão Fora do Prazo - Pós-Graduação",
+    sigla: "pg_av_fora_prazo",
+  },
+  CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO: {
+    designacao: "Controle de Marcação de Provas - Pós-Graduação",
+    sigla: "pg_mp_controle",
+  },
+  MARCACAO_ASSIDUIDADE_POS_GRADUACAO: {
+    designacao: "Marcação de Assiduidade - Pós-Graduação",
+    sigla: "pg_ass_marcar",
+  },
+  CONTROLE_ASSIDUIDADE_POS_GRADUACAO: {
+    designacao: "Controle de Assiduidade - Pós-Graduação",
+    sigla: "pg_ass_controle",
   },
 
   DEFINIR_FORMULA_UNIDADE_CURRICULAR: {
