@@ -61,6 +61,7 @@ import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -203,14 +204,12 @@ export default function CreateSchedule() {
 
     const filteredCursos = allowedCursoIds.length
       ? (cursos ?? []).filter((c) =>
-        allowedCursoIds.includes(c.codigo?.toString()),
-      )
+          allowedCursoIds.includes(c.codigo?.toString()),
+        )
       : (cursos ?? []);
 
     const filteredClasses = allowedClassIds.length
-      ? classes.filter((c) =>
-        allowedClassIds.includes(c?.codigo?.toString()),
-      )
+      ? classes.filter((c) => allowedClassIds.includes(c?.codigo?.toString()))
       : classes;
 
     return { filteredCursos, filteredClasses, allowedCursoIds };
@@ -241,7 +240,7 @@ export default function CreateSchedule() {
     Number(formData.semestre),
     {
       enabled: !!activeAcademicYearId && !!formData.semestre,
-    }
+    },
   );
 
   const shouldCheckDeadline = !!formData.anoLetivo && !!formData.semestre;
@@ -282,15 +281,15 @@ export default function CreateSchedule() {
     {
       cursoSigla: formData.curso
         ? gerarSiglaCurso(
-          cursos?.find((c) => c.codigo.toString() === formData.curso)
-            ?.designacao || "",
-        )
+            cursos?.find((c) => c.codigo.toString() === formData.curso)
+              ?.designacao || "",
+          )
         : undefined,
       ano: formData.classes,
       codigoUC: formData.unidadeCurricular
         ? unidadesCurriculares.find(
-          (c) => c.pk.toString() === formData.unidadeCurricular,
-        )?.codigo || ""
+            (c) => c.pk.toString() === formData.unidadeCurricular,
+          )?.codigo || ""
         : "",
       periodo: Number(formData.periodo),
       anoLectivo: Number(formData.anoLetivo),
@@ -407,7 +406,13 @@ export default function CreateSchedule() {
       });
     }
   };
-  const isDisabledForm = !isPrivilegedUser && (!scheduleCreationPrompt || !scheduleCreationPrompt?.is_in_prazo || isLoadingPeriodos || formData.anoLetivo === "" || formData.semestre === "")
+  const isDisabledForm =
+    !isPrivilegedUser &&
+    (!scheduleCreationPrompt ||
+      !scheduleCreationPrompt?.is_in_prazo ||
+      isLoadingPeriodos ||
+      formData.anoLetivo === "" ||
+      formData.semestre === "");
 
   // ─── Loading Inicial ──────────────────────────────────────────────────────
   if (isLoadingAcademicYear || isLoadingScheduleCreationPrompt) {
@@ -463,15 +468,18 @@ export default function CreateSchedule() {
               {!shouldCheckDeadline ? (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm flex items-center gap-2">
                   <span className="h-2 w-2 bg-blue-500 rounded-full" />
-                  Selecione o <strong>Ano Letivo</strong> e o <strong>Semestre</strong> para verificar o prazo de criação.
+                  Selecione o <strong>Ano Letivo</strong> e o{" "}
+                  <strong>Semestre</strong> para verificar o prazo de criação.
                 </div>
               ) : !scheduleCreationPrompt ? (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-5 w-5" />
-                  <AlertTitle>Nenhum Prazo de Criação de Horários Definido</AlertTitle>
+                  <AlertTitle>
+                    Nenhum Prazo de Criação de Horários Definido
+                  </AlertTitle>
                   <AlertDescription>
-                    Ainda não foi definido um período para criação de horários neste semestre.
-                    Contacte a administração.
+                    Ainda não foi definido um período para criação de horários
+                    neste semestre. Contacte a administração.
                   </AlertDescription>
                 </Alert>
               ) : !scheduleCreationPrompt?.is_in_prazo ? (
@@ -483,11 +491,15 @@ export default function CreateSchedule() {
                   <AlertDescription>
                     O período para criação de horários é de{" "}
                     <strong>
-                      {new Date(scheduleCreationPrompt.data_inicio).toLocaleDateString("pt-AO")}
+                      {new Date(
+                        scheduleCreationPrompt.data_inicio,
+                      ).toLocaleDateString("pt-AO")}
                     </strong>{" "}
                     a{" "}
                     <strong>
-                      {new Date(scheduleCreationPrompt.data_fim).toLocaleDateString("pt-AO")}
+                      {new Date(
+                        scheduleCreationPrompt.data_fim,
+                      ).toLocaleDateString("pt-AO")}
                     </strong>
                     .
                   </AlertDescription>
@@ -518,16 +530,28 @@ export default function CreateSchedule() {
               }
             />
 
-            <FormSelect
+            {/* <FormSelect
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
               label="Ano Letivo"
               value={formData.anoLetivo}
               onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
-              options={academicYear?.filter((ay) => ay.estado.toLowerCase() === "activo")}
-              map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+              options={academicYear?.filter(
+                (ay) => ay.estado.toLowerCase() === "activo",
+              )}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
+            /> */}
+            <AcademicYearsAvailableForOperationSelect
+              onChangeValue={(v) => setFormData({ ...formData, anoLetivo: v })}
+              tipoCandidaturaId={parseFilter(formData.tipoCandidatura)}
+              value={formData.anoLetivo}
+              enableDefaultActiveYear
+              label="Ano Letivo"
             />
-
             <FormSelect
               disabled={isLoadingSemestres}
               loading={isLoadingSemestres}
@@ -535,7 +559,11 @@ export default function CreateSchedule() {
               value={formData.semestre}
               onChange={(v) => setFormData({ ...formData, semestre: v })}
               options={semestres}
-              map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
             />
 
             <FormSelect
@@ -545,7 +573,11 @@ export default function CreateSchedule() {
               value={formData.periodo}
               onChange={(v) => setFormData({ ...formData, periodo: v })}
               options={periodos}
-              map={(p) => ({ key: p.codigo, label: p.designacao, value: p.codigo })}
+              map={(p) => ({
+                key: p.codigo,
+                label: p.designacao,
+                value: p.codigo,
+              })}
             />
 
             <CourseSelectTestIsaac
@@ -571,7 +603,11 @@ export default function CreateSchedule() {
               disabled={isLoadingClasses || isDisabledForm}
               onChange={(v) => setFormData({ ...formData, classes: v })}
               options={filteredClasses}
-              map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
+              map={(c) => ({
+                key: c.codigo,
+                label: c.designacao,
+                value: c.codigo,
+              })}
               loading={isLoadingClasses}
             />
 
@@ -597,7 +633,11 @@ export default function CreateSchedule() {
               disabled={isLoadingModalidade || isDisabledForm}
               onChange={(v) => setFormData({ ...formData, modalidade: v })}
               options={modalidade}
-              map={(m) => ({ key: m.pkModalidade, label: m.designacao, value: m.pkModalidade })}
+              map={(m) => ({
+                key: m.pkModalidade,
+                label: m.designacao,
+                value: m.pkModalidade,
+              })}
               loading={isLoadingModalidade}
             />
 
@@ -605,7 +645,9 @@ export default function CreateSchedule() {
               label="Reservada para novos estudantes"
               value={formData.apenasPrimeiroAno}
               disabled={isLoadingModalidade || isDisabledForm}
-              onChange={(v) => setFormData({ ...formData, apenasPrimeiroAno: v })}
+              onChange={(v) =>
+                setFormData({ ...formData, apenasPrimeiroAno: v })
+              }
               options={onlyFirstYear}
               map={(m) => ({ key: m.value, label: m.label, value: m.value })}
             />
@@ -616,7 +658,9 @@ export default function CreateSchedule() {
                 readOnly
                 placeholder="Ex: Horário LEI 1º Ano - Manhã"
                 value={formData.designacao}
-                onChange={(e) => setFormData({ ...formData, designacao: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, designacao: e.target.value })
+                }
               />
             </div>
 
@@ -628,7 +672,9 @@ export default function CreateSchedule() {
                 placeholder="Ex: 40"
                 disabled={isDisabledForm}
                 value={formData.capacidade}
-                onChange={(e) => setFormData({ ...formData, capacidade: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, capacidade: e.target.value })
+                }
               />
             </div>
 
@@ -653,7 +699,10 @@ export default function CreateSchedule() {
                 </SelectTrigger>
                 <SelectContent>
                   {tipoDeSalas.map((tipo) => (
-                    <SelectItem key={tipo.pkTipoAula} value={tipo.pkTipoAula.toString()}>
+                    <SelectItem
+                      key={tipo.pkTipoAula}
+                      value={tipo.pkTipoAula.toString()}
+                    >
                       {tipo.designacao}
                     </SelectItem>
                   ))}
@@ -668,7 +717,9 @@ export default function CreateSchedule() {
                 value={formData.sala}
                 disabled={!formData.tipoAula || isDisabledForm}
                 isLoading={isLoadingSala}
-                placeholder={isLoadingSala ? "Carregando..." : "Selecione Salas"}
+                placeholder={
+                  isLoadingSala ? "Carregando..." : "Selecione Salas"
+                }
                 options={salas ?? []}
                 map={(sala) => ({
                   key: sala.salaid,
@@ -707,7 +758,11 @@ export default function CreateSchedule() {
               <List className="mr-2 h-4 w-4" />
               Listar Horário
             </Button>
-            <Button type="button" variant="outline" onClick={handleResetHorario}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleResetHorario}
+            >
               <X className="mr-2 h-4 w-4" />
               Cancelar
             </Button>
