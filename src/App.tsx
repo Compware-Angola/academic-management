@@ -192,6 +192,9 @@ import GuidanceResearchManagementVinculos from "./pages/post-graduation/guidance
 import PostGraduationAulasAgendadas from "./pages/post-graduation/sumario/AulasAgendadas";
 import PostGraduationControleGeral from "./pages/post-graduation/sumario/ControleGeral";
 import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario/ListagemSumarios";
+import PostGraduationMarkAttendance from "./pages/post-graduation/attendance/MarkAttendance";
+import PostGraduationAttendanceControl from "./pages/post-graduation/attendance/AttendanceControl";
+import PostGraduationTeacherAttendance from "./pages/post-graduation/attendance/TeacherAttendance";
 import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
 
 
@@ -504,6 +507,48 @@ const App = () => {
                         ]}
                       >
                         <ControleAssiduidade />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/pos-graduacao/assiduidade/marcacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.MARCACAO_ASSIDUIDADE_POS_GRADUACAO
+                            .sigla,
+                        ]}
+                      >
+                        <PostGraduationMarkAttendance />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/pos-graduacao/assiduidade/controle"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO
+                            .sigla,
+                        ]}
+                      >
+                        <PostGraduationAttendanceControl />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/pos-graduacao/assiduidade/docente"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO
+                            .sigla,
+                        ]}
+                      >
+                        <PostGraduationTeacherAttendance />
                       </ProtectedRoute>
                     }
                   />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import {
   Tabs,
@@ -65,6 +65,10 @@ import { useMutationMarcarProva } from "@/hooks/assiduidade/use-mutation-marcar-
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { usePermission } from "@/auth/permission.helper";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useQueryPostGraduationAttendanceTeachers } from "@/hooks/post-graduation/use-query-attendance-teachers";
+import { useMutationMarkPostGraduationTestAttendance } from "@/hooks/post-graduation/use-mutation-mark-attendance-test";
+import { useQueryPostGraduationAttendanceStatus } from "@/hooks/post-graduation/use-query-attendance-status";
+import { useQueryPostGraduationAttendanceTests } from "@/hooks/post-graduation/use-query-attendance-tests";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -93,24 +97,48 @@ function EstadoBadge({ estado }: { estado: EstadoAssiduidade }) {
   );
 }
 
-export default function ProvaContent() {
+type ProvaContentProps = {
+  isPostGraduationAttendance?: boolean;
+  degreeId?: string;
+  topFiltersSlot?: ReactNode;
+};
+
+export default function ProvaContent({
+  isPostGraduationAttendance = false,
+  degreeId,
+  topFiltersSlot,
+}: ProvaContentProps) {
   const { toast } = useToast();
   const { hasPermission } = usePermission();
   const [selectedRegisto, setSelectedRegisto] = useState<ProvaAssiduidadeItem | null>(null);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } = useQueryStatusAgendamento({ enabled: true });
+  const {
+    data: regularStatusAgendamentos = [],
+    isLoading: isLoadingRegularStatusAgendamento,
+  } = useQueryStatusAgendamento({ enabled: !isPostGraduationAttendance });
+  const {
+    data: postGraduationStatusAgendamentos = [],
+    isLoading: isLoadingPostGraduationStatusAgendamento,
+  } = useQueryPostGraduationAttendanceStatus({
+    enabled: isPostGraduationAttendance,
+  });
+  const statusAgendamentos = isPostGraduationAttendance
+    ? postGraduationStatusAgendamentos
+    : regularStatusAgendamentos;
+  const isLoadingStatusAgendamento = isPostGraduationAttendance
+    ? isLoadingPostGraduationStatusAgendamento
+    : isLoadingRegularStatusAgendamento;
  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const SEMESTRE = [
     { key: "1", label: "1º Semestre", value: "1" },
     { key: "2", label: "2º Semestre", value: "2" },
   ];
-  const {
-    data: teachersData = [],
-
-
-  } = useQueryTeacther();
-  const mutarion = useMutationMarcarProva();
+  const regularMutation = useMutationMarcarProva();
+  const postGraduationMutation = useMutationMarkPostGraduationTestAttendance();
+  const mutarion = isPostGraduationAttendance
+    ? postGraduationMutation
+    : regularMutation;
   const [filters, setFilters] = useState({
     docente: "",
     anoCurricular: "all",
@@ -125,19 +153,34 @@ export default function ProvaContent() {
     page: 1,
     limit: 15,
   });
+  const toNumber = (value: string | undefined): number | undefined => {
+    if (!value || value === "") return undefined;
+    const parsed = Number(value);
+    return isNaN(parsed) ? undefined : parsed;
+  };
+  const { data: regularTeachersData = [] } = useQueryTeacther({
+    enabled: !isPostGraduationAttendance,
+  });
+  const { data: postGraduationTeachersData = [] } =
+    useQueryPostGraduationAttendanceTeachers(
+      {
+        degreeId: toNumber(degreeId),
+        anoLectivo: toNumber(filters.anoLectivo),
+        semestre: toNumber(filters.semestre),
+      },
+      { enabled: isPostGraduationAttendance },
+    );
+  const teachersData = isPostGraduationAttendance
+    ? postGraduationTeachersData
+    : regularTeachersData;
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
     curso: filters.curso,
     semestre: filters.semestre,
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
-  const toNumber = (value: string | undefined): number | undefined => {
-    if (!value || value === "") return undefined;
-    const parsed = Number(value);
-    return isNaN(parsed) ? undefined : parsed;
-  };
-  const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryProvaAssiduidade(
-    {
+  const attendanceTestParams = {
+      ...(toNumber(degreeId) && { degreeId: toNumber(degreeId) }),
       ...(toNumber(filters.docente) && { docente: toNumber(filters.docente) }),
       ...(toNumber(filters.unidadeCurricular) && { disciplina: toNumber(filters.unidadeCurricular) }),
       ...(filters.dataInicio && { dataInicio: filters.dataInicio }),
@@ -148,10 +191,32 @@ export default function ProvaContent() {
       ...(toNumber(filters.codigoTurno) && { periodoId: toNumber(filters.codigoTurno) }),
       ...(filters.page && { page: filters.page }),
       ...(filters.limit && { limit: filters.limit }),
-    }
-  );
+    };
 
-  const { data: cursos } = useCursos();
+  const {
+    data: regularAssiduidadeAula,
+    isLoading: isLoadingRegularAssiduidade,
+  } = useQueryProvaAssiduidade(attendanceTestParams, {
+    enabled: !isPostGraduationAttendance,
+  });
+  const {
+    data: postGraduationAssiduidadeAula,
+    isLoading: isLoadingPostGraduationAssiduidade,
+  } = useQueryPostGraduationAttendanceTests(attendanceTestParams, {
+    enabled: isPostGraduationAttendance,
+  });
+  const assiduidadeAula = isPostGraduationAttendance
+    ? postGraduationAssiduidadeAula
+    : regularAssiduidadeAula;
+  const isLoadingAssiduidade = isPostGraduationAttendance
+    ? isLoadingPostGraduationAssiduidade
+    : isLoadingRegularAssiduidade;
+
+  const { data: cursos } = useCursos(
+    isPostGraduationAttendance
+      ? { tipoCandidaturaId: toNumber(degreeId) }
+      : undefined,
+  );
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -246,6 +311,8 @@ export default function ProvaContent() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {topFiltersSlot}
+
           {/* Sempre visíveis */}
           <div className="space-y-1.5">
             <Label>Ano Letivo</Label>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
 import {
   Tabs,
@@ -62,6 +62,10 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { useQueryPostGraduationAttendanceTeachers } from "@/hooks/post-graduation/use-query-attendance-teachers";
+import { useMutationMarkPostGraduationClassAttendance } from "@/hooks/post-graduation/use-mutation-mark-attendance-class";
+import { useQueryPostGraduationAttendanceSchedules } from "@/hooks/post-graduation/use-query-attendance-schedules";
+import { useQueryPostGraduationAttendanceStatus } from "@/hooks/post-graduation/use-query-attendance-status";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -90,24 +94,48 @@ function EstadoBadge({ estado }: { estado: EstadoAssiduidade }) {
   );
 }
 
-export default function AulaNormalContent() {
+type AulaNormalContentProps = {
+  isPostGraduationAttendance?: boolean;
+  degreeId?: string;
+  topFiltersSlot?: ReactNode;
+};
+
+export default function AulaNormalContent({
+  isPostGraduationAttendance = false,
+  degreeId,
+  topFiltersSlot,
+}: AulaNormalContentProps) {
   const { toast } = useToast();
   const { hasPermission } = usePermission();
   const [selectedRegisto, setSelectedRegisto] = useState<FiltroAssiduidadeItem | null>(null);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } = useQueryStatusAgendamento({ enabled: true });
+  const {
+    data: regularStatusAgendamentos = [],
+    isLoading: isLoadingRegularStatusAgendamento,
+  } = useQueryStatusAgendamento({ enabled: !isPostGraduationAttendance });
+  const {
+    data: postGraduationStatusAgendamentos = [],
+    isLoading: isLoadingPostGraduationStatusAgendamento,
+  } = useQueryPostGraduationAttendanceStatus({
+    enabled: isPostGraduationAttendance,
+  });
+  const statusAgendamentos = isPostGraduationAttendance
+    ? postGraduationStatusAgendamentos
+    : regularStatusAgendamentos;
+  const isLoadingStatusAgendamento = isPostGraduationAttendance
+    ? isLoadingPostGraduationStatusAgendamento
+    : isLoadingRegularStatusAgendamento;
  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const SEMESTRE = [
     { key: "1", label: "1º Semestre", value: "1" },
     { key: "2", label: "2º Semestre", value: "2" },
   ];
-  const {
-    data: teachersData = [],
-
-
-  } = useQueryTeacther();
-  const mutarion = useMutationMarcarAula();
+  const regularMutation = useMutationMarcarAula();
+  const postGraduationMutation = useMutationMarkPostGraduationClassAttendance();
+  const mutarion = isPostGraduationAttendance
+    ? postGraduationMutation
+    : regularMutation;
   const [filters, setFilters] = useState({
     docente: "",
     codigoTurno: "",
@@ -122,16 +150,31 @@ export default function AulaNormalContent() {
     page: 1,
     limit: 15,
   });
+  const toNumber = (value: string | undefined) => 
+  value && value !== "" ? Number(value) : undefined;
+  const { data: regularTeachersData = [] } = useQueryTeacther({
+    enabled: !isPostGraduationAttendance,
+  });
+  const { data: postGraduationTeachersData = [] } =
+    useQueryPostGraduationAttendanceTeachers(
+      {
+        degreeId: toNumber(degreeId),
+        anoLectivo: toNumber(filters.anoLectivo),
+        semestre: toNumber(filters.semestre),
+      },
+      { enabled: isPostGraduationAttendance },
+    );
+  const teachersData = isPostGraduationAttendance
+    ? postGraduationTeachersData
+    : regularTeachersData;
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
     curso: filters.curso,
     semestre: filters.semestre,
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
-  const toNumber = (value: string | undefined) => 
-  value && value !== "" ? Number(value) : undefined;
-const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltroAssiduidade(
-  {
+const attendanceScheduleParams = {
+    ...(toNumber(degreeId) && { degreeId: toNumber(degreeId) }),
     ...(toNumber(filters.docente) && { docente: toNumber(filters.docente) }),
     ...(toNumber(filters.unidadeCurricular) && { unidadeCurricular: toNumber(filters.unidadeCurricular) }),
     ...(filters.dataInicio && { dataInicial: filters.dataInicio }),
@@ -139,13 +182,35 @@ const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltr
     ...(toNumber(filters.estado) && { estado: toNumber(filters.estado) }),
     ...(toNumber(filters.anoLectivo) && { anoLectivo: toNumber(filters.anoLectivo) }),
     ...(toNumber(filters.semestre) && { semestre: toNumber(filters.semestre) }),
-      ...(toNumber(filters.codigoTurno) && { periodoId: toNumber(filters.codigoTurno) }),
+    ...(toNumber(filters.codigoTurno) && { periodoId: toNumber(filters.codigoTurno) }),
     ...(filters.page && { page: filters.page }),
     ...(filters.limit && { limit: filters.limit }),
-  }
-);
+  };
 
-  const { data: cursos } = useCursos();
+const {
+  data: regularAssiduidadeAula,
+  isLoading: isLoadingRegularAssiduidade,
+} = useQueryFiltroAssiduidade(attendanceScheduleParams, {
+  enabled: !isPostGraduationAttendance,
+});
+const {
+  data: postGraduationAssiduidadeAula,
+  isLoading: isLoadingPostGraduationAssiduidade,
+} = useQueryPostGraduationAttendanceSchedules(attendanceScheduleParams, {
+  enabled: isPostGraduationAttendance,
+});
+const assiduidadeAula = isPostGraduationAttendance
+  ? postGraduationAssiduidadeAula
+  : regularAssiduidadeAula;
+const isLoadingAssiduidade = isPostGraduationAttendance
+  ? isLoadingPostGraduationAssiduidade
+  : isLoadingRegularAssiduidade;
+
+  const { data: cursos } = useCursos(
+    isPostGraduationAttendance
+      ? { tipoCandidaturaId: toNumber(degreeId) }
+      : undefined,
+  );
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -240,6 +305,8 @@ const { data: assiduidadeAula, isLoading: isLoadingAssiduidade } = useQueryFiltr
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {topFiltersSlot}
+
           {/* Sempre visíveis */}
           <div className="space-y-1.5">
             <Label>Ano Letivo</Label>

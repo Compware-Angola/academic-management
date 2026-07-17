@@ -6,7 +6,8 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 export const useQueryFiltroAssiduidade = (
-  filters: FiltroAssiduidadePayload & { page?: number; limit?: number }
+  filters: FiltroAssiduidadePayload & { page?: number; limit?: number },
+  options?: { enabled?: boolean },
 ) => {
   const {
     unidadeCurricular,
@@ -35,7 +36,10 @@ export const useQueryFiltroAssiduidade = (
     !isNaN(Date.parse(dataInicial)) &&
     !isNaN(Date.parse(dataFinal));
 
-  const enabled = hasAno && hasBothDates;
+  const enabled =
+    typeof options?.enabled === "boolean"
+      ? options.enabled && hasAno && hasBothDates
+      : hasAno && hasBothDates;
 
   // Monta payload apenas com valores realmente úteis
   const payload: FiltroAssiduidadePayload = {

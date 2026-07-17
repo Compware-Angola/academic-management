@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { EventoRow } from "@/util/types";
 import { useQueryGeneralAttendanceCalendar } from "@/hooks/assiduidade/use-query-general-attendance-calendar";
+import { useQueryPostGraduationTeacherGeneralAttendanceCalendar } from "@/hooks/post-graduation/use-query-teacher-general-attendance-calendar";
 
 type Props = {
   canFetch: boolean;
@@ -23,6 +24,8 @@ type Props = {
   setPdfContent: (value: ReactElement | null) => void;
   setExcelProps: (value: any | null) => void;
   setBaseFileName: (value: string) => void;
+  isPostGraduationAttendance?: boolean;
+  degreeId?: string;
 };
 
 type Estado = 1 | 2 | 3;
@@ -52,18 +55,31 @@ export default function DiaContent({
   setPdfContent,
   setExcelProps,
   setBaseFileName,
+  isPostGraduationAttendance = false,
+  degreeId,
 }: Props) {
   const docenteIdNum = docenteId ? Number(docenteId) : undefined;
 
-  const { data, isLoading, isError } = useQueryGeneralAttendanceCalendar(
-    {
+  const params = {
       modo: "DIA",
       dataReferencia,
       docenteId: docenteIdNum,
       docenteNome: docenteIdNum ? undefined : docenteNome || undefined,
-    },
-    { enabled: canFetch }
-  );
+  } as const;
+  const regularQuery = useQueryGeneralAttendanceCalendar(params, {
+    enabled: canFetch && !isPostGraduationAttendance,
+  });
+  const postGraduationQuery =
+    useQueryPostGraduationTeacherGeneralAttendanceCalendar(
+      {
+        ...params,
+        degreeId: degreeId ? Number(degreeId) : undefined,
+      },
+      { enabled: canFetch && isPostGraduationAttendance },
+    );
+  const { data, isLoading, isError } = isPostGraduationAttendance
+    ? postGraduationQuery
+    : regularQuery;
 
   const rows = (data && data.modo !== "MES" ? data.data : []) as EventoRow[];
 

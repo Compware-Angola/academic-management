@@ -3,7 +3,7 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -35,6 +35,9 @@ import { useQueryControleAssiduidade } from "@/hooks/assiduidade/use-fetch-contr
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useCursos } from "@/hooks/use-cursos";
+import { useQueryPostGraduationAttendanceTeachers } from "@/hooks/post-graduation/use-query-attendance-teachers";
+import { useQueryPostGraduationAttendanceControl } from "@/hooks/post-graduation/use-query-attendance-control";
+import { useQueryPostGraduationAttendanceStatus } from "@/hooks/post-graduation/use-query-attendance-status";
 
 function SummaryCard({
   title,
@@ -59,16 +62,22 @@ function SummaryCard({
   );
 }
 
-export default function ControleAssiduidade() {
+type ControleAssiduidadeProps = {
+  isPostGraduationAttendance?: boolean;
+  degreeId?: string;
+  topFiltersSlot?: ReactNode;
+};
+
+export default function ControleAssiduidade({
+  isPostGraduationAttendance = false,
+  degreeId,
+  topFiltersSlot,
+}: ControleAssiduidadeProps) {
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const { data: anosAcademicos, isLoading: loadingAno } =
     useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
-  const { data: teachersData = [] } = useQueryTeacther();
-  const { data: lessonState = [] } = useQueryStateLesson();
-  const { data: cursos = [] } = useCursos();
-
   const [filters, setFilters] = useState({
     docente: "",
     dataInicial: "",
@@ -82,6 +91,39 @@ export default function ControleAssiduidade() {
     page: 1,
     limit: 20,
   });
+  const { data: regularTeachersData = [] } = useQueryTeacther({
+    enabled: !isPostGraduationAttendance,
+  });
+  const { data: postGraduationTeachersData = [] } =
+    useQueryPostGraduationAttendanceTeachers(
+      {
+        degreeId: degreeId ? Number(degreeId) : undefined,
+        anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
+        semestre: filters.semestre ? Number(filters.semestre) : undefined,
+      },
+      { enabled: isPostGraduationAttendance },
+    );
+  const teachersData = isPostGraduationAttendance
+    ? postGraduationTeachersData
+    : regularTeachersData;
+  const { data: regularLessonState = [] } = useQueryStateLesson({
+    enabled: !isPostGraduationAttendance,
+  });
+  const { data: postGraduationLessonState = [] } =
+    useQueryPostGraduationAttendanceStatus({
+      enabled: isPostGraduationAttendance,
+    });
+  const lessonState = isPostGraduationAttendance
+    ? postGraduationLessonState.map((state) => ({
+        PK_ESTADO_AGENDAMENTO: state.codigo,
+        DESIGNACAO: state.designacao,
+      }))
+    : regularLessonState;
+  const { data: cursos = [] } = useCursos(
+    isPostGraduationAttendance
+      ? { tipoCandidaturaId: degreeId ? Number(degreeId) : undefined }
+      : undefined,
+  );
 
   const { data: gradesCurriculares = [], isLoading: isLoadingGradeCurricular } =
     useQueryDisciplinaWithFilter(
@@ -102,7 +144,7 @@ export default function ControleAssiduidade() {
     }));
   };
 
-  const queryFilters = {
+  const regularQueryFilters = {
     docente: filters.docente ? Number(filters.docente) : undefined,
     dataInicial: filters.dataInicial || undefined,
     dataFinal: filters.dataFinal || undefined,
@@ -117,15 +159,44 @@ export default function ControleAssiduidade() {
     limit: filters.limit,
   };
 
-  const { data: response, isLoading } = useQueryControleAssiduidade(
-    queryFilters,
+  const postGraduationQueryFilters = {
+    ...regularQueryFilters,
+    degreeId: degreeId ? Number(degreeId) : undefined,
+    curso: filters.curso ? Number(filters.curso) : undefined,
+  };
+
+  const { data: regularResponse, isLoading: isLoadingRegularResponse } =
+    useQueryControleAssiduidade(
+      regularQueryFilters,
+      {
+        enabled:
+          !isPostGraduationAttendance &&
+          !!regularQueryFilters.docente &&
+          !!regularQueryFilters.dataInicial &&
+          !!regularQueryFilters.dataFinal,
+      },
+    );
+
+  const {
+    data: postGraduationResponse,
+    isLoading: isLoadingPostGraduationResponse,
+  } = useQueryPostGraduationAttendanceControl(
+    postGraduationQueryFilters,
     {
       enabled:
-        !!queryFilters.docente &&
-        !!queryFilters.dataInicial &&
-        !!queryFilters.dataFinal,
+        isPostGraduationAttendance &&
+        !!postGraduationQueryFilters.docente &&
+        !!postGraduationQueryFilters.dataInicial &&
+        !!postGraduationQueryFilters.dataFinal,
     },
   );
+
+  const response = isPostGraduationAttendance
+    ? postGraduationResponse
+    : regularResponse;
+  const isLoading = isPostGraduationAttendance
+    ? isLoadingPostGraduationResponse
+    : isLoadingRegularResponse;
 
   const aulas = response?.data ?? [];
   const resumo = response?.resumo ?? {
@@ -328,6 +399,8 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
 
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-5">
+            {topFiltersSlot}
+
             {/* Filtros principais - sempre visíveis */}
             <FormSelect
               label="Ano Letivo"

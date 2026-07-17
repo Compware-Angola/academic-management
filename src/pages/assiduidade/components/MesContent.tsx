@@ -6,6 +6,7 @@ import { MesRow } from "@/util/types";
 import AttendanceSummaryCards from "./AttendanceSummaryCards";
 import CalendarMesGrid from "./CalendarMesGrid";
 import { useQueryGeneralAttendanceCalendar } from "@/hooks/assiduidade/use-query-general-attendance-calendar";
+import { useQueryPostGraduationTeacherGeneralAttendanceCalendar } from "@/hooks/post-graduation/use-query-teacher-general-attendance-calendar";
 
 // ✅ teu hook real
 
@@ -20,6 +21,8 @@ type Props = {
   setPdfContent: (value: ReactElement | null) => void;
   setExcelProps: (value: any | null) => void;
   setBaseFileName: (value: string) => void;
+  isPostGraduationAttendance?: boolean;
+  degreeId?: string;
 };
 
 export default function MesContent(props: Props) {
@@ -33,6 +36,8 @@ export default function MesContent(props: Props) {
     setPdfContent,
     setExcelProps,
     setBaseFileName,
+    isPostGraduationAttendance = false,
+    degreeId,
   } = props;
 
   const docenteIdNum = docenteId ? Number(docenteId) : undefined;
@@ -51,7 +56,20 @@ export default function MesContent(props: Props) {
     !!params.modo &&
     (!!params.docenteId || !!params.docenteNome);
 
-  const { data, isLoading, error } = useQueryGeneralAttendanceCalendar(params, { enabled });
+  const regularQuery = useQueryGeneralAttendanceCalendar(params, {
+    enabled: enabled && !isPostGraduationAttendance,
+  });
+  const postGraduationQuery =
+    useQueryPostGraduationTeacherGeneralAttendanceCalendar(
+      {
+        ...params,
+        degreeId: degreeId ? Number(degreeId) : undefined,
+      },
+      { enabled: enabled && isPostGraduationAttendance },
+    );
+  const { data, isLoading, error } = isPostGraduationAttendance
+    ? postGraduationQuery
+    : regularQuery;
 
   const rows = (data?.data ?? []) as MesRow[];
 

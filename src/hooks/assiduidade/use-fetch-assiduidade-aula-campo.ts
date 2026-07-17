@@ -35,7 +35,10 @@ export const useQueryFiltroAssiduidadeCampo = (
     !isNaN(Date.parse(dataInicial)) &&
     !isNaN(Date.parse(dataFinal));
 
-  const enabled = hasAno && hasBothDates;
+  const enabled =
+    typeof options?.enabled === "boolean"
+      ? options.enabled && hasAno && hasBothDates
+      : hasAno && hasBothDates;
 
   // Monta o payload somente com os campos definidos
   const payload: FiltroAssiduidadePayload = {

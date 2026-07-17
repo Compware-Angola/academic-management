@@ -7,7 +7,20 @@ import {
 import AulaNormalContent from "./components/AulaNormalContent";
 import AulaCampoContent from "./components/AulaCampoContent";
 import ProvaContent from "./components/ProvaContent";
-export default function MarcarAssiduidade() {
+import type { ReactNode } from "react";
+
+type MarcarAssiduidadeProps = {
+  isPostGraduationAttendance?: boolean;
+  degreeId?: string;
+  topFiltersSlot?: ReactNode;
+};
+
+export default function MarcarAssiduidade({
+  isPostGraduationAttendance = false,
+  degreeId,
+  topFiltersSlot,
+}: MarcarAssiduidadeProps) {
+
   return (
     <div className="space-y-6 pb-10">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -17,7 +30,6 @@ export default function MarcarAssiduidade() {
             Registar presenças por tipo: Aulas, Provas e Aulas de Campo
           </p>
         </div>
-
 
       </div>
 
@@ -31,15 +43,27 @@ export default function MarcarAssiduidade() {
 
         <TabsContent value="aulas" className="space-y-6 pt-5">
           {/* Filtros e tabela para aulas normais */}
-          <AulaNormalContent/>
+          <AulaNormalContent
+            isPostGraduationAttendance={isPostGraduationAttendance}
+            degreeId={degreeId}
+            topFiltersSlot={topFiltersSlot}
+          />
         </TabsContent>
         <TabsContent value="campo">
                {/* Filtros e tabela para aulas de campo */}
-          <AulaCampoContent />
+          <AulaCampoContent
+            isPostGraduationAttendance={isPostGraduationAttendance}
+            degreeId={degreeId}
+            topFiltersSlot={topFiltersSlot}
+          />
         </TabsContent>
         <TabsContent value="provas">
               {/* Filtros e tabela para provas */}
-         <ProvaContent />
+         <ProvaContent
+           isPostGraduationAttendance={isPostGraduationAttendance}
+           degreeId={degreeId}
+           topFiltersSlot={topFiltersSlot}
+         />
         </TabsContent>
 
 

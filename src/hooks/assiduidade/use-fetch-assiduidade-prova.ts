@@ -32,7 +32,10 @@ export const useQueryProvaAssiduidade = (
     !isNaN(Date.parse(dataInicio)) &&
     !isNaN(Date.parse(dataFim));
 
-  const enabled = hasAno && hasBothDates;
+  const enabled =
+    typeof options?.enabled === "boolean"
+      ? options.enabled && hasAno && hasBothDates
+      : hasAno && hasBothDates;
 
   // Monta o payload somente com os campos definidos
   const payload: ProvaAssiduidadePayload = {

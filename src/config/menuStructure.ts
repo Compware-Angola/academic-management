@@ -1013,14 +1013,21 @@ export const postGraduationStructure: MenuStructure = {
       items: [
         {
           title: "Marcação de Assiduidade",
-          url: "/assiduidade/marcacao",
+          url: "/pos-graduacao/assiduidade/marcacao",
           permission: [
             PermissionTypeDetails.MARCACAO_ASSIDUIDADE_POS_GRADUACAO.sigla,
           ],
         },
         {
           title: "Controle de Assiduidade",
-          url: "/assiduidade/controle",
+          url: "/pos-graduacao/assiduidade/controle",
+          permission: [
+            PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Controle Geral por Docente",
+          url: "/pos-graduacao/assiduidade/docente",
           permission: [
             PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO.sigla,
           ],
