@@ -193,8 +193,7 @@ import PostGraduationAulasAgendadas from "./pages/post-graduation/sumario/AulasA
 import PostGraduationControleGeral from "./pages/post-graduation/sumario/ControleGeral";
 import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario/ListagemSumarios";
 import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
-
-
+import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
 
 const App = () => {
   return (
@@ -245,11 +244,7 @@ const App = () => {
                   <Route
                     path="/financas/rel-pagamentos-instituicoes"
                     element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-
-                        ]}
-                      >
+                      <ProtectedRoute allowedPermissions={[]}>
                         <RelPagamentosInstituicoes />
                       </ProtectedRoute>
                     }
@@ -259,7 +254,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla!,
+                          PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO
+                            .sigla!,
                         ]}
                       >
                         <ContratosInstituicao />
@@ -274,7 +270,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/controle-acesso/solicitacoes"
                     element={<SolicitacoesEncaminhadas />}
@@ -282,14 +277,13 @@ const App = () => {
                   <Route
                     path="/financas/listar-pagamentos"
                     element={<ListarPagamentos />}
-                  />``
-
+                  />
+                  ``
                   <Route
                     path="/controle-acesso/all-solicitacoes"
                     element={<Solicitacoes />}
                   />
                   <Route path="/notificacoes" element={<NotificacoesPage />} />
-
                   <Route path="/comunicacao/avisos" element={<Avisos />} />
                   <Route
                     path="/comunicacao/avisos/imagem"
@@ -315,7 +309,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/notas-pagamento"
                     element={
@@ -340,7 +333,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/credito/instituicoes"
                     element={
@@ -369,7 +361,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="pos-graduacao-sumario/aulas-agendadas"
                     element={
@@ -387,14 +378,14 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla!,
+                          PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO
+                            .sigla!,
                         ]}
                       >
                         <PostGraduationAulasListagemSumarios />
                       </ProtectedRoute>
-                    } />
-
-
+                    }
+                  />
                   <Route
                     path="sumario/parametros"
                     element={
@@ -484,30 +475,28 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.MARCAR_ASSIDUIDADE_MSA.sigla,
                           PermissionTypeDetails.MARCAR_ASSIDUIDADE_PROVA.sigla,
-                          PermissionTypeDetails.MARCACAO_ASSIDUIDADE_POS_GRADUACAO
-                            .sigla,
+                          PermissionTypeDetails
+                            .MARCACAO_ASSIDUIDADE_POS_GRADUACAO.sigla,
                         ]}
                       >
                         <MarcarAssiduidade />
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/assiduidade/controle"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.CONTROLE_DE_ASSIDUIDADES.sigla,
-                          PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO
-                            .sigla,
+                          PermissionTypeDetails
+                            .CONTROLE_ASSIDUIDADE_POS_GRADUACAO.sigla,
                         ]}
                       >
                         <ControleAssiduidade />
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/assiduidade/docente"
                     element={
@@ -520,7 +509,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/sumario/controle-geral"
                     element={<ControleGeral />}
@@ -530,7 +518,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
+                          PermissionTypeDetails
+                            .CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
                         ]}
                       >
                         <PostGraduationControleGeral />
@@ -541,10 +530,13 @@ const App = () => {
                     path="/sumario/listar"
                     element={<ListagemSumarios />}
                   />
-
                   <Route
                     path="/gestao-docentes/listagem"
                     element={<GeneralListing />}
+                  />
+                  <Route
+                    path="calendario/fases-lectivas"
+                    element={<AcademicYearPhase />}
                   />
                   <Route
                     path="/docente/programa"
@@ -564,7 +556,9 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC
+                            .sigla,
                         ]}
                       >
                         <PosGraduacaoDocenteLancamentoProgramaUC />
@@ -588,14 +582,14 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla,
                         ]}
                       >
                         <PosGraduacaoValidacaoProgramaValidacaoPrograma />
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/docente/assiduidade"
                     element={
@@ -629,8 +623,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO
-                            .sigla!,
+                          PermissionTypeDetails
+                            .CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <ControlNotes />
@@ -662,7 +656,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/avaliacoes/pauta"
                     element={
@@ -736,8 +729,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS
                             .sigla!,
-                          PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO
-                            .sigla!,
+                          PermissionTypeDetails
+                            .HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <LaunchHistoric />
@@ -762,8 +755,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO
-                            .sigla!,
+                          PermissionTypeDetails
+                            .CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <MarkingAssessment />
@@ -781,8 +774,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO
                             .sigla!,
-                          PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO
-                            .sigla!,
+                          PermissionTypeDetails
+                            .PERMISSAO_FORA_PRAZO_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <Permission />
@@ -832,11 +825,8 @@ const App = () => {
                     path="/estudante/:matricula"
                     element={<PerfilEstudante />}
                   />
-
                   {/* EXAME ACESSO */}
-
                   <Route path="/exame/admitidos" element={<Admitidos />} />
-
                   <Route
                     path="/exame/topicos"
                     element={
@@ -849,7 +839,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/perguntas"
                     element={
@@ -894,17 +883,14 @@ const App = () => {
                     path="/exame/estatisticas"
                     element={<EstatisticasExame />}
                   />
-
                   <Route
                     path="/exame/resultados-finais"
                     element={<ResultadoFinais />}
                   />
-
                   <Route
                     path="/exame/presenca"
                     element={<ListaPresencaExame />}
                   />
-
                   <Route
                     path="/exame/admitir"
                     element={
@@ -942,7 +928,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/provas-candidato"
                     element={
@@ -955,7 +940,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/resetar"
                     element={
@@ -992,7 +976,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/lista-candidatos"
                     element={
@@ -1005,7 +988,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/pauta-geral"
                     element={
@@ -1018,7 +1000,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/candidatos-prova"
                     element={
@@ -1032,7 +1013,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/exame/alterar-senha"
                     element={
@@ -1071,7 +1051,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/acessos/utilizador"
                     element={
@@ -1216,14 +1195,15 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE.sigla
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE
+                            .sigla,
                         ]}
                       >
                         <CalendarioAulasDocente />
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/horarios/movimentar/estudantes"
                     element={
@@ -1232,8 +1212,7 @@ const App = () => {
                           PermissionTypeDetails
                             .MOVIMENTAR_ESTUDANTES_POR_HORARIO.sigla,
                           PermissionTypeDetails
-                            .MOVIMENTAR_ESTUDANTES_HORARIOS_POS_GRADUACAO
-                            .sigla,
+                            .MOVIMENTAR_ESTUDANTES_HORARIOS_POS_GRADUACAO.sigla,
                         ]}
                       >
                         <MovimentarEstudantes />
@@ -1262,17 +1241,15 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails
                             .GESTAO_UNIDADE_CURRICULAR_DEPARTAMENTO.sigla!,
-                          PermissionTypeDetails.GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO
-                            .sigla!,
+                          PermissionTypeDetails
+                            .GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <UcDepartmentManagement />
                       </ProtectedRoute>
                     }
                   />
-
                   {/*SUPORTE*/}
-
                   <Route
                     path="/suporte/solicitacoes"
                     element={
@@ -1297,7 +1274,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/calendario/atividades"
                     element={
@@ -1348,7 +1324,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/calendario-pos/atividades"
                     element={
@@ -1467,7 +1442,6 @@ const App = () => {
                     path="financas/credito/bolsa/estudante"
                     element={<ListaBolseiro />}
                   />
-
                   <Route
                     path="/financas/isencao-servico"
                     element={
@@ -1480,7 +1454,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/descontos"
                     element={
@@ -1494,7 +1467,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/descontos"
                     element={
@@ -1508,7 +1480,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/descontos/atribuicao"
                     element={
@@ -1522,7 +1493,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/caixas"
                     element={
@@ -1535,7 +1505,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/caixas/meu-caixa"
                     element={
@@ -1549,7 +1518,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/financas/caixa/fecho"
                     element={
@@ -1562,7 +1530,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route path="/ajuda" element={<HealpFAQ />} />
                   <Route path="/sem-permissao" element={<AccessDenied />} />
                   <Route
@@ -1606,7 +1573,9 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES.sigla!,
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES
+                            .sigla!,
                         ]}
                       >
                         <GuidanceResearchManagementListarOrientadores />
@@ -1618,7 +1587,9 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS.sigla!,
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS
+                            .sigla!,
                         ]}
                       >
                         <GuidanceResearchManagementVinculos />
@@ -1658,7 +1629,8 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla,
                         ]}
                       >
                         <PosGraduacaoHorasVigilancia />
@@ -1671,8 +1643,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.GESTAO_AFETACOES.sigla!,
-                          PermissionTypeDetails.GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO
-                            .sigla!,
+                          PermissionTypeDetails
+                            .GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <GestaoAfectacao />
@@ -1686,8 +1658,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_UC_SEM_DOCENTES_AFETADOS
                             .sigla,
-                          PermissionTypeDetails.UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO
-                            .sigla,
+                          PermissionTypeDetails
+                            .UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO.sigla,
                         ]}
                       >
                         <ListarUCDocenteSemAfetacao />
@@ -1733,7 +1705,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/inscricoes/estatisticas"
                     element={
@@ -1760,7 +1731,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/inscricoes/estado-horario"
                     element={
@@ -1775,7 +1745,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/inscricoes/inscritos-uc"
                     element={
@@ -1801,7 +1770,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/inscricoes/estado-matricula"
                     element={
@@ -1815,7 +1783,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/inscricoes/colisao"
                     element={
@@ -1829,7 +1796,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/inscricoes/estudantes-diplomados"
                     element={
@@ -1843,7 +1809,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/gestao-docentes/docentes"
                     element={
@@ -1871,7 +1836,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/gestao-docentes/regentes"
                     element={
@@ -1884,17 +1848,14 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/inscricoes/lista-geral"
                     element={<ListaGeralEstudantes />}
                   />
-
                   <Route
                     path="/inscricoes/inscritos-uc"
                     element={<InscritosPorUc />}
                   />
-
                   <Route
                     path="/ministerio/mapa-finalistas"
                     element={
@@ -1908,12 +1869,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/ministerio/registro-exame"
                     element={<RegistoPrimarioExamesAcesso />}
                   />
-
                   <Route
                     path="/ministerio/registro-matricula"
                     element={
@@ -1958,15 +1917,14 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO
-                            .sigla!,
+                          PermissionTypeDetails
+                            .PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <PostGraduationAcademicCalendarParameters />
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/pos-graduacao/calendario/provas"
                     element={
@@ -1983,7 +1941,10 @@ const App = () => {
                     path="/pos-graduacao/inscritos"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.POST_GRADUACAO_CANDIDATOS_INSCRITOS.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_CANDIDATOS_INSCRITOS.sigla!,
+                        ]}
                       >
                         <RegisteredCandidates />
                       </ProtectedRoute>
@@ -1993,7 +1954,11 @@ const App = () => {
                     path="/gestao-orientacao-pesquisa/estudantes"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES
+                            .sigla!,
+                        ]}
                       >
                         <GuidanceResearchManagementStudent />
                       </ProtectedRoute>
@@ -2016,16 +1981,15 @@ const App = () => {
                     path="/pos-graduacao/avaliacoes/marcacao-provas"
                     element={
                       <ProtectedRoute
-                        allowedPermissions={[PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla!]}
+                        allowedPermissions={[
+                          PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO
+                            .sigla!,
+                        ]}
                       >
                         <PostGraduationExamMarkings />
                       </ProtectedRoute>
                     }
                   />
-
-
-
-
                   <Route
                     path="/pos-graduacao/avaliacoes/lancamento-notas"
                     element={
@@ -2039,7 +2003,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/pos-graduacao/avaliacoes/lancamento-pauta"
                     element={
@@ -2053,9 +2016,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
-
-
                   <Route
                     path="/pos-graduacao/avaliacoes/validacao-pauta"
                     element={
@@ -2069,7 +2029,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/pos-graduacao/avaliacoes/formula-ucs"
                     element={
@@ -2083,7 +2042,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/pos-graduacao/avaliacoes/formula-ucs-oral"
                     element={
@@ -2097,7 +2055,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/pos-graduacao/exame-acesso/configurar-vagas"
                     element={
@@ -2111,7 +2068,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/pos-graduacao/exame-acesso/resultados-finais"
                     element={
@@ -2125,8 +2081,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
-
                 </Route>
               </Routes>
             </TooltipProvider>
