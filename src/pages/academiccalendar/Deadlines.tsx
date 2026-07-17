@@ -200,20 +200,20 @@ export default function Deadlines() {
     const anoAcademicoAtivo = anosAcademicos.filter((ano) =>
       ano.estado.toLowerCase().startsWith("activ"),
     );
-    setAnoLetivoId(anoAcademicoAtivo[0].codigo.toString());
+    setAnoLetivoId(anoAcademicoAtivo[0]?.codigo.toString() || "");
   }, [isLoadingAnosAcademicos, anosAcademicos]);
 
   useEffect(() => {
     if (isLoadingTiposPrazo || tiposPrazo.length === 0) return;
     if (tipoPrazoId) return;
 
-    setTipoPrazoId(String(tiposPrazo[0].pk_tipo_prazo));
+    setTipoPrazoId(String(tiposPrazo[0]?.pk_tipo_prazo));
   }, [isLoadingTiposPrazo, tiposPrazo, tipoPrazoId]);
   useEffect(() => {
     if (isLoadingTiposCandidatura || tiposCandidatura.length === 0) return;
     if (tipoCandidaturaId) return;
 
-    setTipoCandidaturaId(String(tiposCandidatura[0].codigo));
+    setTipoCandidaturaId(String(tiposCandidatura[0]?.codigo));
   }, [isLoadingTiposCandidatura, tiposCandidatura, tipoCandidaturaId]);
 
   const totalPages = Math.ceil(prazos.length / itemsPerPage);
