@@ -314,15 +314,11 @@ export const ListaPagamentoModal = ({
                       <TableRow>
                         <TableCell className="font-medium">
                           {item?.descricaoservico}
-                          {item?.mesdescricao
-                            ? " (" +
-                            item?.mesdescricao +
-                            ")"
+                          {item?.mesdescricao && item?.mesid !== 0 && item?.prestacao > 0
+                            ? `(${item.mesdescricao})`
                             : ""}
                           {item?.cadeiras_recurso_epoca_especial
-                            ? " (" +
-                            item?.cadeiras_recurso_epoca_especial +
-                            ")"
+                            ? ` (${item.cadeiras_recurso_epoca_especial})`
                             : ""}
                         </TableCell>
                         <TableCell className="font-mono">
