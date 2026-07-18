@@ -14,7 +14,7 @@ import {
   FileText,
   BookUser,
   Files,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -340,7 +340,7 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
-        // { title: "Prazos de provas + notas", url: "/calendario-lic/prazos" },
+        { title: "Fases Ano lectivo", url: "/calendario/fases-lectivas" },
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
@@ -713,8 +713,6 @@ export const academicStructure: MenuStructure = {
   ],
 };
 
-
-
 export const postGraduationStructure: MenuStructure = {
   items: [
     {
@@ -770,9 +768,7 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Marcação de Provas",
           url: "/pos-graduacao/avaliacoes/marcacao-provas",
-          permission: [
-            PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
-          ],
+          permission: [PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla],
         },
         {
           title: "Controle de Marcação de Provas",
@@ -821,9 +817,7 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Pauta Geral",
           url: "/avaliacoes/pauta-geral",
-          permission: [
-            PermissionTypeDetails.PAUTA_GERAL_POS_GRADUACAO.sigla,
-          ],
+          permission: [PermissionTypeDetails.PAUTA_GERAL_POS_GRADUACAO.sigla],
         },
         {
           title: "Pauta Geral por UC",
@@ -846,7 +840,6 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla,
           ],
         },
-
       ],
       permission: [],
     },
@@ -873,9 +866,7 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Prazos",
           url: "/calendario/prazos",
-          permission: [
-            PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla,
-          ],
+          permission: [PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla],
         },
       ],
 
@@ -950,7 +941,6 @@ export const postGraduationStructure: MenuStructure = {
     },
 
     {
-
       title: "Exame de Acesso",
       url: "/pos-graduacao-exame-acesso",
       icon: Files,
@@ -958,9 +948,7 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Configurar Vagas",
           url: "/pos-graduacao/exame-acesso/configurar-vagas",
-          permission: [
-            PermissionTypeDetails.DEFINIR_VAGAS_POS_GRADUACAO.sigla,
-          ],
+          permission: [PermissionTypeDetails.DEFINIR_VAGAS_POS_GRADUACAO.sigla],
         },
         {
           title: "Resultados Finais",
@@ -974,7 +962,6 @@ export const postGraduationStructure: MenuStructure = {
     },
 
     {
-
       title: "Docente",
       url: "/pos-graduacao-docente",
       icon: GraduationCap,
@@ -983,25 +970,31 @@ export const postGraduationStructure: MenuStructure = {
           title: "Calendário de aulas",
           url: "/pos-graduacao-docente/calendario",
           permission: [
-            PermissionTypeDetails.POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE.sigla,
+            PermissionTypeDetails.POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE
+              .sigla,
           ],
         },
         {
           title: "Horas de vigilância",
           url: "/pos-graduacao-docente/vigilancia",
-          permission: [PermissionTypeDetails.POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla],
+          permission: [
+            PermissionTypeDetails.POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla,
+          ],
         },
         {
           title: "Lançamento do programa da UC",
           url: "/pos-graduacao-docente/programa",
           permission: [
-            PermissionTypeDetails.POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+            PermissionTypeDetails.POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC
+              .sigla,
           ],
         },
         {
           title: "Validação do programa",
           url: "/pos-graduacao-docente/validacao",
-          permission: [PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla],
+          permission: [
+            PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla,
+          ],
         },
       ],
       permission: [],
@@ -1037,21 +1030,24 @@ export const postGraduationStructure: MenuStructure = {
           title: "Estudantes",
           url: "/gestao-orientacao-pesquisa/estudantes",
           permission: [
-            PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES.sigla,
+            PermissionTypeDetails
+              .POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ESTUDANTES.sigla,
           ],
         },
         {
           title: "Orientadores",
           url: "/gestao-orientacao-pesquisa/orientadores",
           permission: [
-            PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES.sigla,
+            PermissionTypeDetails
+              .POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_ORIENTADORES.sigla,
           ],
         },
         {
           title: "Vínculos",
           url: "/gestao-orientacao-pesquisa/vinculos",
           permission: [
-            PermissionTypeDetails.POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS.sigla,
+            PermissionTypeDetails
+              .POST_GRADUACAO_GESTAO_ORIENTACAO_PESQUISA_VINCULOS.sigla,
           ],
         },
       ],
@@ -1077,10 +1073,12 @@ export const postGraduationStructure: MenuStructure = {
         {
           title: "Listar Sumários",
           url: "/pos-graduacao-sumario/listar",
-          permission: [PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla],
-        }
+          permission: [
+            PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla,
+          ],
+        },
       ],
-    }
+    },
   ],
 };
 
@@ -1222,7 +1220,6 @@ export const finaceStructure: MenuStructure = {
           permission: [PermissionTypeDetails.SERVICOS_PRECARIOS.sigla],
         },
 
-
         {
           title: "Negociação de Dívida",
           url: "/financas/negociacao-divida",
@@ -1241,7 +1238,6 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/credito/instituicoes/todas",
           permission: [PermissionTypeDetails.INSTITUICOES.sigla],
         },
-
 
         {
           title: "Credito Educacional",

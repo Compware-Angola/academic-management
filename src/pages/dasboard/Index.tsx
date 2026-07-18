@@ -42,6 +42,8 @@ const Index = () => {
     useQueryConfigurationGeral();
   const canViewStats = haveFullAccess()
 
+  console.log("dashboardStatisticsReports", canViewStats)
+
 
   // encontra o ano activo
 
