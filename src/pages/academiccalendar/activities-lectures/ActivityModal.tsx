@@ -20,6 +20,8 @@ import { Dispatch, SetStateAction } from "react";
 import { Loader2 } from "lucide-react";
 import { FormSelect } from "@/components/common/FormSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 // Tipos esperados pela API
 interface AnoAcademico {
@@ -104,24 +106,6 @@ export function ActivityModal({
             />
           </div>
 
-          <div className="space-y-2">
-            <FormSelect
-
-
-              label="Ano Lectivo"
-              value={form.codigo_ano_lectivo?.toString() || ""}
-              onChange={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
-              options={anosLetivos?.filter(
-                (ay) => ay.estado.toLowerCase() === "activo",
-              )}
-              map={(a) => ({
-                key: a.codigo,
-                label: a.designacao,
-                value: a.codigo,
-              })}
-            />
-          </div>
-
           {/* Tipo de Candidatura */}
 
           <div className="space-y-2">
@@ -148,6 +132,30 @@ export function ActivityModal({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            {/* <FormSelect
+              label="Ano Lectivo"
+              value={form.codigo_ano_lectivo?.toString() || ""}
+              onChange={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
+              options={anosLetivos?.filter(
+                (ay) => ay.estado.toLowerCase() === "activo",
+              )}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
+            /> */}
+            <AcademicYearsAvailableForOperationSelect
+              onChangeValue={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
+              value={form.codigo_ano_lectivo?.toString() || ""}
+              tipoCandidaturaId={parseFilter(
+                form?.codigo_tipo_candidatura?.toString(),
+              )}
+              enableDefaultActiveYear
+              label="Ano Letivo"
+            />
           </div>
 
           {/* Tipo de Calendário */}

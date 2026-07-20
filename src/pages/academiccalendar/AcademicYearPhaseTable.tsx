@@ -206,7 +206,7 @@ function diasDesde(dataISO: string): number {
 
 function dentroJanelaAtivacao(ano: AnoLetivo): boolean {
   const diff = diasDesde(ano.primeiroSemestre.dataInicio);
-  return diff >= -JANELA_ATIVACAO_DIAS && diff <= JANELA_ATIVACAO_DIAS;
+  return diff >= -JANELA_ATIVACAO_DIAS;
 }
 
 function podeEncerrar(ano: AnoLetivo): boolean {
@@ -335,7 +335,7 @@ export default function AcademicYearPhase() {
     }
     if (!janelaAtivacaoOk) {
       toast.error(
-        `Só é possível activar este Ano Lectivo entre ${JANELA_ATIVACAO_DIAS} dias antes e ${JANELA_ATIVACAO_DIAS} dias depois do início do 1º semestre.`,
+        `Só é possível activar este Ano Lectivo a partir de ${JANELA_ATIVACAO_DIAS} dias antes do início do 1.º semestre.`,
       );
       return;
     }
@@ -540,9 +540,9 @@ export default function AcademicYearPhase() {
                     </>
                   ) : (
                     <>
-                      Este Ano Lectivo só pode ser activado entre{" "}
-                      {JANELA_ATIVACAO_DIAS} dias antes e {JANELA_ATIVACAO_DIAS}{" "}
-                      dias depois do início do 1º semestre (
+                      Este Ano Lectivo só pode ser activado a partir de
+                      {JANELA_ATIVACAO_DIAS} dias antes do início do 1.º
+                      semestre. (
                       {new Date(
                         anoAtual.primeiroSemestre.dataInicio,
                       ).toLocaleDateString("pt-AO")}
