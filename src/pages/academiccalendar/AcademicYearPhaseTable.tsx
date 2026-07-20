@@ -74,6 +74,9 @@ const ESTADOS: Record<
       matriculas: boolean;
       inscricoes: boolean;
       podeAtivar: boolean;
+      criarPrazos: boolean;
+      criarActividadesLectivas: boolean;
+      gestaoAfectadoa: boolean;
     };
   }
 > = {
@@ -90,6 +93,9 @@ const ESTADOS: Record<
       matriculas: false,
       inscricoes: false,
       podeAtivar: false,
+      criarActividadesLectivas: false,
+      criarPrazos: false,
+      gestaoAfectadoa: false,
     },
   },
   CONFIGURAVEL: {
@@ -105,6 +111,9 @@ const ESTADOS: Record<
       matriculas: false,
       inscricoes: false,
       podeAtivar: false,
+      criarActividadesLectivas: true,
+      criarPrazos: true,
+      gestaoAfectadoa: true,
     },
   },
   USAVEL: {
@@ -120,6 +129,9 @@ const ESTADOS: Record<
       matriculas: true,
       inscricoes: true,
       podeAtivar: true,
+      criarActividadesLectivas: true,
+      criarPrazos: true,
+      gestaoAfectadoa: true,
     },
   },
   ACTIVO: {
@@ -135,6 +147,9 @@ const ESTADOS: Record<
       matriculas: true,
       inscricoes: true,
       podeAtivar: false,
+      criarActividadesLectivas: true,
+      criarPrazos: true,
+      gestaoAfectadoa: true,
     },
   },
   ENCERRADO: {
@@ -149,6 +164,9 @@ const ESTADOS: Record<
       matriculas: false,
       inscricoes: false,
       podeAtivar: false,
+      criarActividadesLectivas: false,
+      criarPrazos: false,
+      gestaoAfectadoa: false,
     },
   },
 };
@@ -177,6 +195,9 @@ const PERMISSAO_LABELS: Record<
   matriculas: "Receber matrículas",
   inscricoes: "Realizar inscrições",
   podeAtivar: "Pode ser activado como Ano Activo",
+  criarActividadesLectivas: "Criar Actividades Lectivas",
+  criarPrazos: "Criar Prazos",
+  gestaoAfectadoa: "Gestão de Afectação",
 };
 
 interface AnoLetivo {
