@@ -18,7 +18,7 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assiduidade-status-agendamentos";
-import { useQueryControloGeralAssiduidade } from "@/hooks/sumario/use-fetch-controle-geral-assiduidade-sumario";
+import { useQueryPostGraduationSummaryGeneralControl } from "@/hooks/post-graduation/use-query-summary-general-control";
 import { FormSelect } from "@/components/common/FormSelect";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
@@ -64,7 +64,7 @@ export default function PostGraduationControleGeral() {
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
 
-  const { data: controloGeral, isLoading: isLoadingAulasAgendadas } = useQueryControloGeralAssiduidade({
+  const { data: controloGeral, isLoading: isLoadingAulasAgendadas } = useQueryPostGraduationSummaryGeneralControl({
     docente: filters.docente ? Number(filters.docente) : undefined,
     unidadeCurricular: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
     dataInicial: filters.dataInicio || undefined,
@@ -72,6 +72,7 @@ export default function PostGraduationControleGeral() {
     estado: filters.estado ? Number(filters.estado) : undefined,
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    degreeId: parseFilter(filters.tipoCandidatura) ?? undefined,
     page: filters.page,
     limit: filters.limit,
   });

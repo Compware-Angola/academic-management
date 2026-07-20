@@ -16,20 +16,19 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assiduidade-status-agendamentos";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { FormSelect } from "@/components/common/FormSelect";
-import { AgendamentoAulaItem } from "@/services/sumario/fetch-sumario-agendamento-aula.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMutationCreateSumario } from "@/hooks/sumario/use-mutation-create-sumario";
-import { useMutationUpdateSumario } from "@/hooks/sumario/use-mutation-update-sumario";
-import { useQuerySumario } from "@/hooks/sumario/use-fetch-sumario";
-import { SumarioItem } from "@/services/sumario/fetch-sumario.service";
+import { useQueryPostGraduationSummaries } from "@/hooks/post-graduation/use-query-summaries";
+import { PostGraduationSummaryItem } from "@/services/post-graduation/summaries.service";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { useToast } from "@/hooks/use-toast";
-import { useMutationValidarSumario } from "@/hooks/sumario/use-mutation-validar-sumario";
+import { useMutationValidatePostGraduationSummary } from "@/hooks/post-graduation/use-mutation-summary";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 type EstadoAssiduidade = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -76,7 +75,7 @@ export default function PostGraduationAulasListagemSumarios() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const { hasPermission } = usePermission();
-  const [selectedSumario, setSelectedSumario] = useState<SumarioItem | null>(null);
+  const [selectedSumario, setSelectedSumario] = useState<PostGraduationSummaryItem | null>(null);
   const { toast } = useToast();
 
   const [showMoreFilters, setShowMoreFilters] = useState(false);
@@ -127,7 +126,7 @@ export default function PostGraduationAulasListagemSumarios() {
     },
   ];
   const { data: teachersData = [] } = useQueryTeacther();
-  const mutation = useMutationValidarSumario();
+  const mutation = useMutationValidatePostGraduationSummary();
 
 
   const [filters, setFilters] = useState({
@@ -140,6 +139,7 @@ export default function PostGraduationAulasListagemSumarios() {
     anoLectivo: "",
     semestre: "",
     curso: "",
+    tipoCandidatura: "",
     page: 1,
     limit: 10,
   });
@@ -150,7 +150,7 @@ export default function PostGraduationAulasListagemSumarios() {
     classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
 
-  const { data: sumarios, isLoading: isLoadingAulasAgendadas } = useQuerySumario({
+  const { data: sumarios, isLoading: isLoadingAulasAgendadas } = useQueryPostGraduationSummaries({
     docente: filters.docente ? Number(filters.docente) : undefined,
     unidadeCurricular: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
     dataInicial: filters.dataInicio || undefined,
@@ -158,11 +158,11 @@ export default function PostGraduationAulasListagemSumarios() {
     estado_sumario: filters.estado ? Number(filters.estado) : undefined,
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
+    degreeId: parseFilter(filters.tipoCandidatura) ?? undefined,
     page: filters.page,
     limit: filters.limit,
   });
 
-  const { data: cursos } = useCursos();
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
@@ -200,7 +200,7 @@ export default function PostGraduationAulasListagemSumarios() {
     const novoEstado = estados[tipo];
 
     try {
-      await mutation.mutateAsync({ codigo: id, estado: novoEstado });
+      await mutation.mutateAsync({ summaryId: id, statusId: novoEstado });
       toast({
         title: "Sucesso",
         description: `Estado alterado para ${tipo}`,
@@ -271,6 +271,7 @@ export default function PostGraduationAulasListagemSumarios() {
                   curso: "",
                   anoCurricular: "all",
                   unidadeCurricular: "",
+                  tipoCandidatura: "",
                   page: 1,
                   limit: itemsPerPage,
                 });
@@ -351,20 +352,18 @@ export default function PostGraduationAulasListagemSumarios() {
 
           {showMoreFilters && (
             <>
-              <div className="space-y-1.5">
-                <Label>Curso</Label>
-                <FormCommandSelect
-                  width="full"
-                  value={filters.curso}
-                  options={cursos}
-                  map={(c) => ({
-                    key: c.codigo.toString(),
-                    value: c.codigo.toString(),
-                    label: c.designacao,
-                  })}
-                  onChange={(v) => updateFilters({ curso: v, unidadeCurricular: "" })}
-                />
-              </div>
+              <TipoCandidaturaSelect
+                isPostGraduation
+                value={filters.tipoCandidatura}
+                onChangeValue={(v) => updateFilters({ tipoCandidatura: v, curso: "", unidadeCurricular: "" })}
+              />
+
+              <CourseSelect
+                params={{ tipoCandidaturaId: parseFilter(filters.tipoCandidatura) }}
+                value={filters.curso}
+                onChangeValue={(v) => updateFilters({ curso: v, unidadeCurricular: "" })}
+                disabled={!filters.tipoCandidatura}
+              />
 
               <div className="space-y-1.5">
                 <Label>Ano Curricular</Label>

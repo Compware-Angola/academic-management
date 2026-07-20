@@ -19,16 +19,18 @@ import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assiduidade-status-agendamentos";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQuerySumarioAgendamentoAula } from "@/hooks/sumario/use-fetch-sumario-agendamento-aula-aula";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { FormSelect } from "@/components/common/FormSelect";
-import { AgendamentoAulaItem } from "@/services/sumario/fetch-sumario-agendamento-aula.service";
+import { PostGraduationSummaryItem } from "@/services/post-graduation/summaries.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMutationCreateSumario } from "@/hooks/sumario/use-mutation-create-sumario";
-import { useMutationUpdateSumario } from "@/hooks/sumario/use-mutation-update-sumario";
+import {
+    useMutationCreatePostGraduationSummary,
+    useMutationUpdatePostGraduationSummary,
+} from "@/hooks/post-graduation/use-mutation-summary";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryPostGraduationSummaryScheduledClasses } from "@/hooks/post-graduation/use-query-summary-scheduled-classes";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -61,8 +63,8 @@ export default function PostGraduationAulasAgendadas() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const [selectedAula, setSelectedAula] = useState<AgendamentoAulaItem | null>(null);
-    const [sumarioModal, setSumarioModal] = useState<AgendamentoAulaItem | null>(null);
+    const [selectedAula, setSelectedAula] = useState<PostGraduationSummaryItem | null>(null);
+    const [sumarioModal, setSumarioModal] = useState<PostGraduationSummaryItem | null>(null);
     const [sumarioText, setSumarioText] = useState("");
 
     const [showMoreFilters, setShowMoreFilters] = useState(false);
@@ -76,8 +78,8 @@ export default function PostGraduationAulasAgendadas() {
     ];
 
     const { data: teachersData = [] } = useQueryTeacther();
-    const mutationCreateSumario = useMutationCreateSumario();
-    const mutationUpdateSumario = useMutationUpdateSumario();
+    const mutationCreateSumario = useMutationCreatePostGraduationSummary();
+    const mutationUpdateSumario = useMutationUpdatePostGraduationSummary();
 
     const [filters, setFilters] = useState({
         docente: "",
@@ -100,7 +102,7 @@ export default function PostGraduationAulasAgendadas() {
         classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
     });
 
-    const { data: aulasSumarioAgendados, isLoading: isLoadingAulasAgendadas } = useQuerySumarioAgendamentoAula({
+    const { data: aulasSumarioAgendados, isLoading: isLoadingAulasAgendadas } = useQueryPostGraduationSummaryScheduledClasses({
         docente: filters.docente ? Number(filters.docente) : undefined,
         unidadeCurricular: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
         dataInicial: filters.dataInicio || undefined,
@@ -108,6 +110,7 @@ export default function PostGraduationAulasAgendadas() {
         estado: filters.estado ? Number(filters.estado) : undefined,
         anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
         semestre: filters.semestre ? Number(filters.semestre) : undefined,
+        degreeId: parseFilter(filters.tipoCandidatura) ?? undefined,
         page: filters.page,
         limit: filters.limit,
     });
@@ -153,7 +156,7 @@ export default function PostGraduationAulasAgendadas() {
 
         if (sumarioId) {
             mutationUpdateSumario.mutate({
-                codigo: sumarioId,
+                summaryId: sumarioId,
                 payload: {
                     fk_agendamento_aula: sumarioModal.codigo,
                     fk_estado_sumario: 1,
@@ -175,7 +178,7 @@ export default function PostGraduationAulasAgendadas() {
         setSumarioText("");
     };
 
-    const openSumarioModal = (aula: AgendamentoAulaItem) => {
+    const openSumarioModal = (aula: PostGraduationSummaryItem) => {
         setSumarioModal(aula);
         setSumarioText(aula.sumario_descricao || "");
     };
