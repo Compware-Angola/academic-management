@@ -1912,7 +1912,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route
+                  {/* <Route
                     path="/pos-graduacao/calendario/parametros"
                     element={
                       <ProtectedRoute
@@ -1924,7 +1924,7 @@ const App = () => {
                         <PostGraduationAcademicCalendarParameters />
                       </ProtectedRoute>
                     }
-                  />
+                  /> */}
                   <Route
                     path="/pos-graduacao/calendario/provas"
                     element={
