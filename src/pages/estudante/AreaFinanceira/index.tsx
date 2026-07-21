@@ -48,7 +48,7 @@ export function AreaFinanceira({
               </TabsTrigger>
             )
           }
-          {/*
+
           {
             hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
               <TabsTrigger className="w-full justify-start gap-2" value="historico-movimentacoes">
@@ -57,7 +57,7 @@ export function AreaFinanceira({
               </TabsTrigger>
             )
           }
-            */}
+
 
           {
             hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla) && (
@@ -96,7 +96,7 @@ export function AreaFinanceira({
               </TabsContent>
             )
           }
-          {/*
+
           {
             hasPermission(PermissionTypeDetails.HISTORICO_MOVIMENTACOES_ESTUDANTE.sigla) && (
               <TabsContent value="historico-movimentacoes">
@@ -104,7 +104,7 @@ export function AreaFinanceira({
               </TabsContent>
             )
           }
-            */}
+
 
           {
             hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (
