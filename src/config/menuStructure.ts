@@ -340,7 +340,7 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
-        { title: "Fases Ano lectivo", url: "/calendario/fases-lectivas" },
+        { title: "Configurações Ano lectivo", url: "/calendario/fases-lectivas", permission: [PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla] },
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
