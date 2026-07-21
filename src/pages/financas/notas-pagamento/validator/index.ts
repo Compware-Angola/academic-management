@@ -52,15 +52,10 @@ export function validarPagamento(
         })
         .nonempty("Forma de pagamento é obrigatória"),
 
-      valorDepositado: z
-        .number({
-          required_error: "Valor depositado é obrigatório",
-          invalid_type_error: "Valor depositado deve ser numérico",
-        })
-        .refine((val) => val >= valorAPagar, {
-          message: `O valor depositado não pode ser menor que o valor a pagar (${valorAPagar})`,
-        }),
-
+      valorDepositado: z.number({
+        required_error: "Valor depositado é obrigatório",
+        invalid_type_error: "Valor depositado deve ser numérico",
+      }),
       dataRegisto: z
         .string({
           required_error: "Data de registo é obrigatória",
@@ -93,11 +88,26 @@ export function validarPagamento(
 
       anoLectivo: z.number().int(),
 
-      feitoComReserva: z.enum(["S", "N"]),
+      feitoComReserva: z.enum(["Y", "N"]).default("N"),
+      valorReservaUtilizado: z.number().optional().default(0),
     })
 
     // ✅ VALIDAÇÃO CONDICIONAL
     .superRefine((data, ctx) => {
+      console.log(data);
+      const totalPago =
+        data.valorDepositado +
+        (data.feitoComReserva === "Y"
+          ? Number(data.valorReservaUtilizado || 0)
+          : 0);
+
+      if (totalPago < valorAPagar) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["valorDepositado"],
+          message: `O total pago (depósito + reserva) deve ser pelo menos ${valorAPagar}.`,
+        });
+      }
       const pagamentoBancario = isTipoBancario(data.formaPagamento);
 
       if (pagamentoBancario) {
