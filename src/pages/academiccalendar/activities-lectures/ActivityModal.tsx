@@ -148,12 +148,13 @@ export function ActivityModal({
               })}
             /> */}
             <AcademicYearsAvailableForOperationSelect
+              disabled={!!editId}
               onChangeValue={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
               value={form.codigo_ano_lectivo?.toString() || ""}
               tipoCandidaturaId={parseFilter(
                 form?.codigo_tipo_candidatura?.toString(),
               )}
-              enableDefaultActiveYear
+              enableDefaultActiveYear={!editId}
               label="Ano Letivo"
             />
           </div>
