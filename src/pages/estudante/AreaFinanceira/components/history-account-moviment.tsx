@@ -1,101 +1,73 @@
+// components/HistoryAccountMovimentSection.tsx
+
 import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  ArrowUpDown, ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Scale, Receipt,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useGetStudentMovements } from "@/hooks/financas/movimentos-students/query-movimentos-students";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StudentMovement } from "@/services/financas/movimentos-students/movimentos-students.service";
 
-// ---------------------------------------------------------------------------
-// MOCK: histórico de movimentações financeiras de um estudante.
-// Este componente já recebe `codigoMatricula` (o estudante vem do perfil
-// que o envolve), por isso não há pesquisa de estudante aqui — só filtros
-// sobre os movimentos do próprio estudante.
-// ---------------------------------------------------------------------------
+// TODO: confirmar os valores reais de `codigotipomovimento` com o backend
+const TIPO_MOVIMENTO_MAP: Record<number, string> = {
+  1: "FATURA",
+  2: "RECIBO",
+  3: "NOTA_CREDITO",
+  4: "AJUSTE",
+  5: "MULTA",
+};
+
+// TODO: confirmar os valores reais de `estado` com o backend
+const ESTADO_MAP: Record<number, string> = {
+  0: "Ativo",
+  1: "Anulado",
+  2: "Pendente",
+};
 
 type Movement = {
-  codigo: string;
-  referencia: string;
+  codigo: number;
+  referencia: number;
   data: string;
-  tipo: "FATURA" | "RECIBO" | "NOTA_CREDITO" | "AJUSTE" | "MULTA";
+  tipo: string;
   motivo: string;
   credito: number;
   debito: number;
   saldoOperacao: number;
   saldoGeral: number;
-  estado: "Ativo" | "Anulado" | "Pendente";
-  factura: string;
-  utilizador: string;
+  estado: string;
+  factura: number;
+  utilizador: string | null;
   observacao: string;
+  valorExcedente: number;
 };
 
-const TIPO_STYLES: Record<Movement["tipo"], string> = {
+const TIPO_STYLES: Record<string, string> = {
   FATURA: "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200",
   RECIBO: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
   NOTA_CREDITO: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
   AJUSTE: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200",
   MULTA: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200",
+  DEFAULT: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
 };
-const ESTADO_STYLES: Record<Movement["estado"], string> = {
+
+const ESTADO_STYLES: Record<string, string> = {
   Ativo: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
   Anulado: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200",
   Pendente: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
 };
 
-function seededMovements(codigoMatricula: number): Movement[] {
-  const seed = String(codigoMatricula).split("").reduce((s, c) => s + c.charCodeAt(0), 0);
-  const rand = (i: number, min: number, max: number) =>
-    min + ((seed * (i + 7) * 9301 + 49297) % 233280) / 233280 * (max - min) | 0;
-  const motivos = ["Propina Mensal", "Matrícula", "Emolumento", "Certidão de Notas", "Taxa de Exame", "Reposição de Aula"];
-  const users = ["tesouraria1", "tesouraria2", "admin", "caixa.geral"];
-  const tipos: Movement["tipo"][] = ["FATURA", "RECIBO", "FATURA", "NOTA_CREDITO", "FATURA", "RECIBO", "MULTA", "AJUSTE"];
-  const estados: Movement["estado"][] = ["Ativo", "Ativo", "Ativo", "Pendente", "Ativo", "Anulado"];
-  const rows: Movement[] = [];
-  let saldoGeral = 0;
-  for (let i = 0; i < 22; i++) {
-    const tipo = tipos[i % tipos.length];
-    const isCredit = tipo === "RECIBO" || tipo === "NOTA_CREDITO";
-    const valor = rand(i, 25000, 320000);
-    const debito = !isCredit ? valor : 0;
-    const credito = isCredit ? valor : 0;
-    saldoGeral += debito - credito;
-    const mes = String((i % 12) + 1).padStart(2, "0");
-    const dia = String((i * 3) % 27 + 1).padStart(2, "0");
-    const ano = 2025 + (i % 2);
-    rows.push({
-      codigo: `MV${String(codigoMatricula).slice(-4)}${String(i + 1).padStart(3, "0")}`,
-      referencia: `REF-${ano}${mes}-${String(rand(i, 1000, 9999))}`,
-      data: `${ano}-${mes}-${dia}`,
-      tipo,
-      motivo: motivos[i % motivos.length],
-      credito,
-      debito,
-      saldoOperacao: debito - credito,
-      saldoGeral,
-      estado: estados[i % estados.length],
-      factura: tipo === "FATURA" ? `FT ${ano}/${String(i + 1).padStart(4, "0")}` : tipo === "RECIBO" ? `FT ${ano}/${String(Math.max(1, i)).padStart(4, "0")}` : "—",
-      utilizador: users[i % users.length],
-      observacao: i % 4 === 0 ? "Lançamento automático" : i % 5 === 0 ? "Ajuste manual autorizado" : "—",
-    });
-  }
-  return rows;
-}
-
 function formatKz(value: number) {
   return `${value.toLocaleString("pt-AO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kz`;
 }
 
-// Decide quais números de página mostrar, com "…" quando há muitas páginas.
-// Ex: 1 2 3 4 5 | 1 2 3 … 9 10 | 1 … 4 5 6 … 10
 function getPageNumbers(current: number, total: number): (number | "...")[] {
   const delta = 1;
   const pages: (number | "...")[] = [];
-
   const start = Math.max(2, current - delta);
   const end = Math.min(total - 1, current + delta);
 
@@ -106,52 +78,6 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
   if (total > 1) pages.push(total);
 
   return pages;
-}
-
-// Cartão compacto com barra de cor à esquerda — mesmas dimensões dos
-// cartões já usados em "Notas de Pagamento" / "Mensalidades".
-function KpiCard({
-  label,
-  value,
-  icon: Icon,
-  accent = "default",
-  description,
-}: {
-  label: string;
-  value: string;
-  icon: React.ElementType;
-  accent?: "success" | "danger" | "info" | "warning" | "default";
-  description?: string;
-}) {
-  const accentBar: Record<string, string> = {
-    success: "border-l-success",
-    danger: "border-l-destructive",
-    info: "border-l-primary",
-    warning: "border-l-warning",
-    default: "border-l-muted-foreground/30",
-  };
-  const accentText: Record<string, string> = {
-    success: "text-success",
-    danger: "text-destructive",
-    info: "text-primary",
-    warning: "text-warning",
-    default: "text-foreground",
-  };
-
-  return (
-    <Card className={cn("border-l-4 min-w-0", accentBar[accent])}>
-      <CardContent className="p-4 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground truncate">{label}</p>
-          <p className={cn("text-2xl font-bold mt-1", accentText[accent])}>{value}</p>
-          {description && (
-            <p className="text-xs text-muted-foreground mt-1">{description}</p>
-          )}
-        </div>
-        <Icon className={cn("h-4 w-4 mt-0.5 shrink-0", accentText[accent])} />
-      </CardContent>
-    </Card>
-  );
 }
 
 const PAGE_SIZE = 10;
@@ -166,27 +92,62 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
   const [sortDesc, setSortDesc] = useState(true);
   const [page, setPage] = useState(1);
 
-  const allRows = useMemo(() => seededMovements(codigoMatricula), [codigoMatricula]);
+  // === API CALL ===
+  const { data, isLoading, error } = useGetStudentMovements({
+    matricula: codigoMatricula,
+    page,
+    limit: PAGE_SIZE,
+  });
+
+  const movements: Movement[] = useMemo(() => {
+    if (!data?.data) return [];
+    return data.data.map((m: StudentMovement) => ({
+      codigo: m.codigo,
+      referencia: m.referencia,
+      data: new Date(m.data_movimento).toISOString().split("T")[0],
+      tipo: TIPO_MOVIMENTO_MAP[m.codigotipomovimento] ?? `TIPO_${m.codigotipomovimento}`,
+      motivo: m.codigomotivo || m.observacao || "—",
+      credito: m.credito,
+      debito: m.debito,
+      saldoOperacao: m.saldo_operacao,
+      saldoGeral: m.saldo_geral,
+      estado: ESTADO_MAP[m.estado] ?? `Estado ${m.estado}`,
+      factura: m.factura,
+      utilizador: m.codigoutilizador,
+      observacao: m.observacao,
+      valorExcedente: m.valor_excedente,
+    }));
+  }, [data]);
 
   const filtered = useMemo(() => {
-    let r = allRows.filter(
-      (m) => (tipo === "ALL" || m.tipo === tipo) && (estado === "ALL" || m.estado === estado),
+    let r = [...movements];
+
+    if (tipo !== "ALL") {
+      r = r.filter((m) => m.tipo === tipo);
+    }
+    if (estado !== "ALL") {
+      r = r.filter((m) => m.estado === estado);
+    }
+
+    r.sort((a, b) =>
+      sortDesc
+        ? b.data.localeCompare(a.data)
+        : a.data.localeCompare(b.data)
     );
-    r = [...r].sort((a, b) =>
-      sortDesc ? b.data.localeCompare(a.data) : a.data.localeCompare(b.data),
-    );
+
     return r;
-  }, [allRows, tipo, estado, sortDesc]);
+  }, [movements, tipo, estado, sortDesc]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const pageRows = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const totalPages = data?.totalPages ?? 1;
+  const currentPage = page;
 
-  const totals = useMemo(() => {
-    const credito = filtered.reduce((s, r) => s + r.credito, 0);
-    const debito = filtered.reduce((s, r) => s + r.debito, 0);
-    return { credito, debito, saldo: debito - credito };
-  }, [filtered]);
+  if (error) {
+    return (
+      <div className="p-8 text-center text-destructive">
+        Erro ao carregar movimentações financeiras.
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 w-full min-w-0">
@@ -199,44 +160,14 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
         </p>
       </div>
 
-      {/* KPIs no formato compacto (borda colorida à esquerda) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
-        <KpiCard
-          label="Total Crédito"
-          value={formatKz(totals.credito)}
-          icon={TrendingUp}
-          accent="success"
-          description="Recibos e notas de crédito"
-        />
-        <KpiCard
-          label="Total Débito"
-          value={formatKz(totals.debito)}
-          icon={TrendingDown}
-          accent="danger"
-          description="Facturas e multas emitidas"
-        />
-        <KpiCard
-          label="Saldo"
-          value={formatKz(totals.saldo)}
-          icon={Scale}
-          accent={totals.saldo >= 0 ? "warning" : "success"}
-          description={totals.saldo >= 0 ? "Valor em aberto" : "Estudante em crédito"}
-        />
-        <KpiCard
-          label="Movimentos"
-          value={String(filtered.length)}
-          icon={Receipt}
-          accent="info"
-          description="Registos no período filtrado"
-        />
-      </div>
-
       {/* Filtros */}
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <Select value={tipo} onValueChange={(v) => { setTipo(v); setPage(1); }}>
-              <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="Tipo" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Todos os tipos</SelectItem>
                 <SelectItem value="FATURA">Fatura</SelectItem>
@@ -246,8 +177,11 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                 <SelectItem value="MULTA">Multa</SelectItem>
               </SelectContent>
             </Select>
+
             <Select value={estado} onValueChange={(v) => { setEstado(v); setPage(1); }}>
-              <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Estado" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-40">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Todos estados</SelectItem>
                 <SelectItem value="Ativo">Ativo</SelectItem>
@@ -282,6 +216,7 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                   <TableHead className="text-right">Débito</TableHead>
                   <TableHead className="text-right">Saldo Operação</TableHead>
                   <TableHead className="text-right">Saldo Geral</TableHead>
+                  <TableHead className="text-right">Valor Excedente</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Factura</TableHead>
                   <TableHead>Utilizador</TableHead>
@@ -289,21 +224,29 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pageRows.length === 0 ? (
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      {Array.from({ length: 14 }).map((_, j) => (
+                        <TableCell key={j}><Skeleton className="h-6 w-full" /></TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={13} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={14} className="h-24 text-center text-muted-foreground">
                       Nenhum movimento encontrado
                     </TableCell>
                   </TableRow>
                 ) : (
-                  pageRows.map((r) => (
+                  filtered.map((r) => (
                     <TableRow key={r.codigo}>
                       <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
                       <TableCell className="font-mono text-xs">{r.referencia}</TableCell>
                       <TableCell>{r.data}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={`border-0 ${TIPO_STYLES[r.tipo]}`}>
-                          {r.tipo.replace("_", " ")}
+                        <Badge variant="outline" className={`border-0 ${TIPO_STYLES[r.tipo] || TIPO_STYLES.DEFAULT}`}>
+                          {r.tipo}
                         </Badge>
                       </TableCell>
                       <TableCell>{r.motivo}</TableCell>
@@ -317,32 +260,37 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                         {formatKz(r.saldoOperacao)}
                       </TableCell>
                       <TableCell className="text-right font-bold">{formatKz(r.saldoGeral)}</TableCell>
+                      <TableCell className="text-right">
+                        {r.valorExcedente ? formatKz(r.valorExcedente) : "—"}
+                      </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={`border-0 ${ESTADO_STYLES[r.estado]}`}>
+                        <Badge variant="outline" className={`border-0 ${ESTADO_STYLES[r.estado] || ""}`}>
                           {r.estado}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono text-xs">{r.factura}</TableCell>
-                      <TableCell className="text-sm">{r.utilizador}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate">{r.observacao}</TableCell>
+                      <TableCell className="text-sm">{r.utilizador || "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate">
+                        {r.observacao}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
-
             </Table>
           </div>
 
+          {/* Paginação */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t">
             <p className="text-sm text-muted-foreground">
-              Página {currentPage} de {totalPages} • {filtered.length} movimentos
+              Página {currentPage} de {totalPages} • {data?.total ?? 0} movimentos
             </p>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
+                disabled={currentPage === 1 || isLoading}
               >
                 <ChevronLeft className="h-4 w-4" />
                 <span className="hidden sm:inline ml-1">Anterior</span>
@@ -351,9 +299,7 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
               <div className="flex items-center gap-1 mx-1">
                 {getPageNumbers(currentPage, totalPages).map((p, idx) =>
                   p === "..." ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 text-sm text-muted-foreground">
-                      …
-                    </span>
+                    <span key={`ellipsis-${idx}`} className="px-2 text-sm text-muted-foreground">…</span>
                   ) : (
                     <Button
                       key={p}
@@ -361,10 +307,11 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                       size="sm"
                       className="w-9 px-0"
                       onClick={() => setPage(p as number)}
+                      disabled={isLoading}
                     >
                       {p}
                     </Button>
-                  ),
+                  )
                 )}
               </div>
 
@@ -372,7 +319,7 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                 variant="outline"
                 size="sm"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
+                disabled={currentPage === totalPages || isLoading}
               >
                 <span className="hidden sm:inline mr-1">Próxima</span>
                 <ChevronRight className="h-4 w-4" />
