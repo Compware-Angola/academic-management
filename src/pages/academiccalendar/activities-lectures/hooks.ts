@@ -77,7 +77,7 @@ export function useActivitiesLectures() {
     const filtrados = anosLetivos.filter(
       (a) =>
         !a.designacao.toLowerCase().includes("doutoramento") &&
-        !a.designacao.toLowerCase().includes("mestrado")
+        !a.designacao.toLowerCase().includes("mestrado"),
     );
 
     const ativo =
@@ -170,11 +170,9 @@ export function useActivitiesLectures() {
         description: "Atividade criada com sucesso",
       });
 
-
       setOpenModal(false);
       resetForm();
       refetchAtividades();
-
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         toast({
@@ -192,7 +190,6 @@ export function useActivitiesLectures() {
         description: "Verifique os dados e tente novamente",
         variant: "destructive",
       });
-      
     } finally {
       setIsSubmitting(false);
     }
@@ -214,7 +211,7 @@ export function useActivitiesLectures() {
   const totalPages = Math.ceil(atividades.length / itemsPerPage);
   const paginatedData = atividades.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const nextPage = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
@@ -222,14 +219,12 @@ export function useActivitiesLectures() {
   const handleEdit = (item: Atividade) => {
     setForm({
       designacao: item.descricao,
-      codigo_ano_lectivo: anosLetivos.find(
-        (ano) => ano.designacao === item?.ano_lectivo
-      )?.codigo,
+      codigo_ano_lectivo: item?.cod_ano_lectivo,
       codigo_tipo_candidatura: tiposCandidatura.find(
-        (cand) => cand.designacao === item.tipo_candidatura
+        (cand) => cand.designacao === item.tipo_candidatura,
       )?.codigo,
       codigo_tipo_calendario: tiposCalendario.find(
-        (cale) => cale.designacao === item.tipo_calendario
+        (cale) => cale.designacao === item.tipo_calendario,
       )?.codigo,
       data_inicio: formatDateForInput(item.data_inicio),
       data_fim: formatDateForInput(item.data_termino),
