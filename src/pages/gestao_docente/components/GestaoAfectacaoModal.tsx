@@ -29,6 +29,8 @@ import { Loader2 } from "lucide-react";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 interface GestaoAfectacaoModalProps {
   isModalOpen: boolean;
   setIsModalOpen: () => void;
@@ -48,11 +50,22 @@ export const GestaoAfectacaoModal = ({
     semestre: undefined,
     categoria: undefined,
     anoLectivo: undefined,
+    tipoCandidatura: "1",
   });
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+  // const { data: academicYear, isLoading: isLoadingAcademicYear } =
+  //   useQueryAnoAcademico();
   const handleChangeInput = (key: string, v: any) => {
     setParams((prev) => {
+      if (key == "tipoCandidatura") {
+        return {
+          ...prev,
+          tipoCandidatura: v,
+          curso: undefined,
+          anoLectivo: undefined,
+          anoCurricular: undefined,
+          unidadeCurricular: undefined,
+        };
+      }
       if (key === "curso") {
         return {
           ...prev,
@@ -90,7 +103,7 @@ export const GestaoAfectacaoModal = ({
 
   const handleSubmit = async () => {
     const payload = {
-      anoLectivo: activeAcademicYearId,
+      anoLectivo: parseFilter(params.anoLectivo),
       docente: parseFilter(params.docente),
       unidadeCurricular: parseFilter(params.unidadeCurricular),
       semestre: parseFilter(params.semestre),
@@ -114,17 +127,17 @@ export const GestaoAfectacaoModal = ({
       },
     });
   };
-  const activeAcademicYear = academicYear?.find(
-    (year) => year.estado.toLowerCase() === "activo",
-  );
+  // const activeAcademicYear = academicYear?.find(
+  //   (year) => year.estado.toLowerCase() === "activo",
+  // );
 
-  const activeAcademicYearId = activeAcademicYear?.codigo;
-  useEffect(() => {
-    setParams((prev) => ({
-      ...prev,
-      anoLectivo: activeAcademicYearId?.toString() || "",
-    }));
-  }, [activeAcademicYearId]);
+  // const activeAcademicYearId = activeAcademicYear?.codigo;
+  // useEffect(() => {
+  //   setParams((prev) => ({
+  //     ...prev,
+  //     anoLectivo: activeAcademicYearId?.toString() || "",
+  //   }));
+  // }, [activeAcademicYearId]);
 
   return (
     <>
@@ -138,7 +151,13 @@ export const GestaoAfectacaoModal = ({
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
-            <FormSelect
+            <TipoCandidaturaSelect
+              value={params?.tipoCandidatura?.toString()}
+              onChangeValue={(v) => handleChangeInput("tipoCandidatura", v)}
+            />
+          </div>
+          <div className="space-y-2">
+            {/* <FormSelect
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
               label="Ano Letivo"
@@ -150,6 +169,13 @@ export const GestaoAfectacaoModal = ({
                 label: a.designacao,
                 value: a.codigo,
               })}
+            /> */}
+            <AcademicYearsAvailableForOperationSelect
+              onChangeValue={(v) => setParams({ ...params, anoLectivo: v })}
+              tipoCandidaturaId={parseFilter(params.tipoCandidatura)}
+              value={params.anoLectivo}
+              enableDefaultActiveYear
+              label="Ano Letivo"
             />
             <Label>Docente</Label>
             <FormCommandSelect
@@ -162,6 +188,9 @@ export const GestaoAfectacaoModal = ({
           </div>
           <CourseSelect
             value={params.curso}
+            params={{
+              tipoCandidaturaId: parseFilter(params.tipoCandidatura),
+            }}
             onChangeValue={(v) => handleChangeInput("curso", v)}
           />
           <AnoCurricularSelect

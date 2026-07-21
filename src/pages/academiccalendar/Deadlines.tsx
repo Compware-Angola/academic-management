@@ -52,6 +52,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { FormSelect } from "@/components/common/FormSelect";
 import { set } from "date-fns";
 import { MCALTipoAvaliacoesSelectSelect } from "@/components/common/global-selects/MCALTipoAvaliacoesSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function Deadlines() {
   const pk_utilizador = useAuth()?.user?.user?.pk_utilizador;
@@ -486,25 +488,6 @@ export default function Deadlines() {
                 />
               </div>
             )}
-
-            {/* Ano Letivo */}
-            <div className="space-y-2">
-              <FormSelect
-                disabled={isEditing ? true : false}
-                label="Ano Letivo"
-                value={form.anoletivo}
-                onChange={(v) => setForm({ ...form, anoletivo: v })}
-                options={anosAcademicos?.filter(
-                  (ay) => ay.estado.toLowerCase() === "activo",
-                )}
-                map={(a) => ({
-                  key: a.codigo,
-                  label: a.designacao,
-                  value: a.codigo,
-                })}
-              />
-            </div>
-
             {/* Tipo de Candidatura */}
             <div className="space-y-2">
               <Label>Tipo de Candidatura</Label>
@@ -531,6 +514,32 @@ export default function Deadlines() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Ano Letivo */}
+            <div className="space-y-2">
+              {/* <FormSelect
+                disabled={isEditing ? true : false}
+                label="Ano Letivo"
+                value={form.anoletivo}
+                onChange={(v) => setForm({ ...form, anoletivo: v })}
+                options={anosAcademicos?.filter(
+                  (ay) => ay.estado.toLowerCase() === "activo",
+                )}
+                map={(a) => ({
+                  key: a.codigo,
+                  label: a.designacao,
+                  value: a.codigo,
+                })}
+              /> */}
+              <AcademicYearsAvailableForOperationSelect
+                disabled={isEditing ? true : false}
+                onChangeValue={(v) => setForm({ ...form, anoletivo: v })}
+                tipoCandidaturaId={parseFilter(form.tipoCandidaturaId)}
+                value={form.anoletivo}
+                enableDefaultActiveYear
+                label="Ano Letivo"
+              />
             </div>
 
             {/* Semestre - AGORA DA API */}
