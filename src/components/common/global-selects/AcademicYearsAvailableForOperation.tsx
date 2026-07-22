@@ -68,6 +68,7 @@ const AcademicYearsAvailableForOperationSelect = ({
         ESTADOS_DISPONIVEIS.includes(a.fase_anolectivo as EstadoAno),
       );
     }
+    return academicYear;
   }, [academicYear, onlyActive, onlyConfigurable]);
 
   useEffect(() => {
