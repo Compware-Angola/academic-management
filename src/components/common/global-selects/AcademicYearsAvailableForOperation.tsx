@@ -17,6 +17,7 @@ interface AcademicYearsAvailableForOperationSelectProps {
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
   onlyActive?: boolean;
+  onlyConfigurable?: boolean;
   enableDefaultActiveYear?: boolean;
   tipoCandidaturaId?: number;
   label?: string;
@@ -27,6 +28,7 @@ const AcademicYearsAvailableForOperationSelect = ({
   value,
   disabled,
   enableDefaultSelectItem = false,
+  onlyConfigurable = true,
   onlyActive = false,
   enableDefaultActiveYear = false,
   tipoCandidaturaId = 1,
@@ -38,7 +40,6 @@ const AcademicYearsAvailableForOperationSelect = ({
     isError,
   } = useAcademicYears({
     tipoCandidatura: tipoCandidaturaId,
-    limit: 50,
   });
   const id = useId();
   const hasSetDefault = useRef(false);
