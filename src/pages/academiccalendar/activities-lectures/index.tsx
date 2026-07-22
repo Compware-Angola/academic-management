@@ -44,6 +44,8 @@ import { useState } from "react";
 import { useMutationfetchDeleteActivity } from "@/hooks/academiccalendar/use-mutation-delete-activity";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function ActivitiesLecturesLic() {
   const {
@@ -80,6 +82,16 @@ export default function ActivitiesLecturesLic() {
   } | null>(null);
   const { mutate: deleteSala, isPending: deleting } =
     useMutationfetchDeleteActivity();
+  const { hasPermission } = usePermission();
+  const tiposCandidatura_Filtrados = tiposCandidatura?.filter((tp) => {
+    if (
+      !hasPermission(PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla) &&
+      (tp.codigo.toString() === "2" || tp.codigo.toString() === "3")
+    ) {
+      return false;
+    }
+    return tp;
+  });
 
   const handleOpenDelete = (item: any) => {
     setSelectedSala({
@@ -137,7 +149,7 @@ export default function ActivitiesLecturesLic() {
               </SelectTrigger>
 
               <SelectContent>
-                {tiposCandidatura.map((tipo) => (
+                {tiposCandidatura_Filtrados?.map((tipo) => (
                   <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
                     {tipo.designacao}
                   </SelectItem>
