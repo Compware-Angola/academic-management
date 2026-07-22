@@ -247,32 +247,39 @@ export default function Deadlines() {
       <div className="bg-card rounded-lg border p-6 space-y-4">
         <h3 className="text-sm font-semibold">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Ano Letivo */}
+          {/* Tipo de Candidatura */}
           <div className="space-y-2">
-            <Label>Ano Letivo</Label>
-            <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
+            <Label>Tipo de Candidatura</Label>
+            <Select
+              value={tipoCandidaturaId}
+              onValueChange={setTipoCandidaturaId}
+            >
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    isLoadingAnosAcademicos ? "Carregando..." : "Selecione"
+                    isLoadingTiposCandidatura ? "Carregando..." : "Selecione"
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {anosAcademicos?.map((a) => (
-                  <SelectItem key={a.codigo} value={a.codigo.toString()}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{a.designacao}</span>
-                      {!a.estado.toLowerCase().includes("desactiv") && (
-                        <span className="text-xs text-green-600 font-medium ml-4">
-                          (Ativo)
-                        </span>
-                      )}
-                    </div>
+                {tiposCandidatura.map((t) => (
+                  <SelectItem key={t.codigo} value={t.codigo.toString()}>
+                    {t.designacao}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Ano Letivo */}
+          <div className="space-y-2">
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Letivo"
+              value={anoLetivoId}
+              onChangeValue={setAnoLetivoId}
+              tipoCandidaturaId={parseFilter(tipoCandidaturaId) ?? 1}
+              onlyConfigurable={false}
+            />
           </div>
 
           {/* Tipo de Prazo */}
@@ -298,30 +305,6 @@ export default function Deadlines() {
                     key={t.pk_tipo_prazo}
                     value={t.pk_tipo_prazo.toString()}
                   >
-                    {t.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Tipo de Candidatura */}
-          <div className="space-y-2">
-            <Label>Tipo de Candidatura</Label>
-            <Select
-              value={tipoCandidaturaId}
-              onValueChange={setTipoCandidaturaId}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    isLoadingTiposCandidatura ? "Carregando..." : "Selecione"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {tiposCandidatura.map((t) => (
-                  <SelectItem key={t.codigo} value={t.codigo.toString()}>
                     {t.designacao}
                   </SelectItem>
                 ))}
