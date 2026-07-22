@@ -73,6 +73,9 @@ export default function FormulaUC() {
     semestre: formData.semestre ? Number(formData.semestre) : undefined,
     anoLectivoId: formData.anoLetivo ? Number(formData.anoLetivo) : undefined,
     cursoId: formData.curso ? Number(formData.curso) : undefined,
+    tipoCandidatura: formData.tipoCandidatura
+      ? Number(formData.tipoCandidatura)
+      : undefined,
   });
 
   // ─── Preparação dos dados para PDF ────────────────────────────────────────
@@ -264,6 +267,7 @@ export default function FormulaUC() {
             tipoCandidaturaId={parseFilter(formData.tipoCandidatura) ?? 0}
             enableDefaultActiveYear
             disabled={!formData.tipoCandidatura}
+            onlyConfigurable={false}
           />
 
           {/* SEMESTRE */}

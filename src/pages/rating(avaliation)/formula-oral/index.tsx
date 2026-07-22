@@ -150,6 +150,7 @@ useEffect(() => {
             tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 0}
             enableDefaultActiveYear
             disabled={!filters.tipoCandidatura}
+            onlyConfigurable={false}
           />
           <FormSelect
             label="Semestre"
