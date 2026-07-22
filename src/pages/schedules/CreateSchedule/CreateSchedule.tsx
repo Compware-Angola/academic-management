@@ -353,6 +353,7 @@ export default function CreateSchedule() {
       docente: "",
       tipoAula: "",
       sala: "",
+      tipoCandidatura: "",
     });
     setAulas([]);
   };

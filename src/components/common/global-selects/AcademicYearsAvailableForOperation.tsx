@@ -63,11 +63,12 @@ const AcademicYearsAvailableForOperationSelect = ({
           (a.fase_anolectivo.toLocaleUpperCase() as EstadoAno) === "ACTIVO",
       );
     }
-
-    return academicYear.filter((a) =>
-      ESTADOS_DISPONIVEIS.includes(a.fase_anolectivo as EstadoAno),
-    );
-  }, [academicYear, onlyActive]);
+    if (onlyConfigurable) {
+      return academicYear.filter((a) =>
+        ESTADOS_DISPONIVEIS.includes(a.fase_anolectivo as EstadoAno),
+      );
+    }
+  }, [academicYear, onlyActive, onlyConfigurable]);
 
   useEffect(() => {
     if (
