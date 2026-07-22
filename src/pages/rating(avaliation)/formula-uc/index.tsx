@@ -19,7 +19,6 @@ import { ModalFormulaUC, FormulaUC as FormulaUCType } from "./modal-formulaUC";
 
 import { useQueryFormulaUC } from "@/hooks/avaliacao/use-queries-formula-uc";
 import { FormSelect } from "@/components/common/FormSelect";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
@@ -28,12 +27,17 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
+import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-years";
 
 export default function FormulaUC() {
   // ===========================
   // STATES
   // ===========================
   const [formData, setFormData] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
 
@@ -48,11 +52,14 @@ export default function FormulaUC() {
   );
 
   const [openModal, setOpenModal] = useState(false);
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
   const { data: semestres, isLoading: isLoadingSemestres } =
     useQuerySemestres();
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { data: academicYearResponse } = useAcademicYears({
+    tipoCandidatura: parseFilter(formData.tipoCandidatura) ?? 0,
+    
+  });
+  const academicYear = academicYearResponse?.data ?? [];
 
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
@@ -88,7 +95,7 @@ export default function FormulaUC() {
       cursos?.find((c) => c.codigo === Number(formData.curso))?.designacao ||
       "—";
     const anoLetivoNome =
-      academicYear?.find((a) => a.codigo === Number(formData.anoLetivo))
+      academicYear.find((a) => a.codigo === Number(formData.anoLetivo))
         ?.designacao || "—";
     const semestreNome =
       semestres?.find((s) => s.codigo === Number(formData.semestre))
@@ -237,18 +244,26 @@ export default function FormulaUC() {
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
+          <TipoCandidaturaSelect
+            value={formData.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFormData({
+                ...formData,
+                tipoCandidatura: v,
+                anoLetivo: "",
+                curso: "",
+                classes: "",
+              })
+            }
+          />
+
+          <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={formData.anoLetivo}
-            onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
-            options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            onChangeValue={(v) => setFormData({ ...formData, anoLetivo: v })}
+            tipoCandidaturaId={parseFilter(formData.tipoCandidatura) ?? 0}
+            enableDefaultActiveYear
+            disabled={!formData.tipoCandidatura}
           />
 
           {/* SEMESTRE */}
@@ -267,7 +282,13 @@ export default function FormulaUC() {
           />
           <CourseSelect
             value={formData.curso}
-            onChangeValue={(v) => setFormData({ ...formData, curso: v })}
+            onChangeValue={(v) =>
+              setFormData({ ...formData, curso: v, classes: "" })
+            }
+            params={{
+              tipoCandidaturaId: parseFilter(formData.tipoCandidatura),
+            }}
+            disabled={!formData.tipoCandidatura}
           />
           <FormSelect
             label="Ano Curricular"

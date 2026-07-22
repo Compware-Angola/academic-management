@@ -22,9 +22,7 @@ import { ChevronLeft, ChevronRight, RefreshCw, Shield } from "lucide-react";
 
 import { FormSelect } from "@/components/common/FormSelect";
 
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 
 import { useQueryDefinirOral } from "@/hooks/avaliacao/use-query-definir-oral";
@@ -33,12 +31,16 @@ import { DefinirOral } from "@/services/avaliacao/fetch-oral";
 import { Switch } from "@/components/ui/switch";
 import { useMutationUpdateDefinirOral } from "@/hooks/avaliacao/use-mutation-update-definir-oral";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function FormulaOral() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
   const [filters, setFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
     curso: "",
@@ -48,11 +50,7 @@ export default function FormulaOral() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-
   const { data: semestres } = useQuerySemestres();
-  const { data: cursos } = useCursos();
 
   const { data: classes = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -132,18 +130,26 @@ useEffect(() => {
       {/* ========== FILTROS ========== */}
       <div className="bg-card border rounded-lg p-6">
         <div className="grid grid-cols-4 gap-4">
-          <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
+          <TipoCandidaturaSelect
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLetivo: "",
+                curso: "",
+                classes: "",
+              })
+            }
+          />
+
+          <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={filters.anoLetivo}
-            onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-            options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 0}
+            enableDefaultActiveYear
+            disabled={!filters.tipoCandidatura}
           />
           <FormSelect
             label="Semestre"
@@ -163,8 +169,13 @@ useEffect(() => {
               setFilters({
                 ...filters,
                 curso: v,
+                classes: "",
               })
             }
+            params={{
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+            }}
+            disabled={!filters.tipoCandidatura}
           />
 
           <FormSelect
