@@ -155,6 +155,7 @@ export default function ActivitiesLecturesLic() {
               tipoCandidaturaId={parseFilter(tipoCandidaturaId)}
               enableDefaultActiveYear
               label="Ano Letivo"
+              onlyConfigurable={false}
             />
           </div>
 
