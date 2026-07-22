@@ -83,10 +83,10 @@ export default function ActivitiesLecturesLic() {
   const { mutate: deleteSala, isPending: deleting } =
     useMutationfetchDeleteActivity();
   const { hasPermission } = usePermission();
-  const tiposCandidatura_Filtrados = tiposCandidatura?.filter((tp) => {
+  const tiposCandidaturaFiltered = tiposCandidatura?.filter((tp) => {
     if (
       !hasPermission(PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla) &&
-      (tp.codigo.toString() === "2" || tp.codigo.toString() === "3")
+      (tp.sigla === "DTR" || tp.sigla === "MST")
     ) {
       return false;
     }
@@ -149,7 +149,7 @@ export default function ActivitiesLecturesLic() {
               </SelectTrigger>
 
               <SelectContent>
-                {tiposCandidatura_Filtrados?.map((tipo) => (
+                {tiposCandidaturaFiltered.map((tipo) => (
                   <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
                     {tipo.designacao}
                   </SelectItem>
