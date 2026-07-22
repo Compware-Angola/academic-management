@@ -851,36 +851,36 @@ export const postGraduationStructure: MenuStructure = {
       permission: [],
     },
 
-    {
-      title: "Calendário Académico ",
-      url: "/pos-graduacao-calendario",
-      icon: Calendar,
-      items: [
-        {
-          title: "Atividades Letivas",
-          url: "/pos-graduacao/calendario/atividades",
-          permission: [
-            PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Parâmetros do Calendário",
-          url: "/pos-graduacao/calendario/parametros",
-          permission: [
-            PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Prazos",
-          url: "/calendario/prazos",
-          permission: [
-            PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla,
-          ],
-        },
-      ],
+    // {
+    //   title: "Calendário Académico ",
+    //   url: "/pos-graduacao-calendario",
+    //   icon: Calendar,
+    //   items: [
+    //     {
+    //       title: "Atividades Letivas",
+    //       url: "/pos-graduacao/calendario/atividades",
+    //       permission: [
+    //         PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
+    //       ],
+    //     },
+    //     {
+    //       title: "Parâmetros do Calendário",
+    //       url: "/pos-graduacao/calendario/parametros",
+    //       permission: [
+    //         PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
+    //       ],
+    //     },
+    //     {
+    //       title: "Prazos",
+    //       url: "/calendario/prazos",
+    //       permission: [
+    //         PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla,
+    //       ],
+    //     },
+    //   ],
 
-      permission: [],
-    },
+    //   permission: [],
+    // },
 
     {
       title: "Plano de Estudo",
