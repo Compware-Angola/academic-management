@@ -128,6 +128,22 @@ const baseStyles = StyleSheet.create({
     textAlign: "center" as const,
     color: "#777",
   },
+
+  provaInfo: {
+    marginTop: 8,
+    marginBottom: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 3,
+    fontSize: 9,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  provaInfoLabel: {
+    fontWeight: "bold",
+  },
 });
 
 interface PresenceRow {
@@ -148,6 +164,12 @@ interface GenericPDFProps {
   rows: PresenceRow[];
   horario: string;
   classes: string;
+  uc?: string;
+  tipoAvaliacao?: string;
+  tipoProva?: string;
+  dataProva?: string;
+  horarioProva?: string;
+  duracaoProva?: string;
 }
 
 // ──────────────────────────────────────────────
@@ -163,6 +185,12 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
     rows,
     horario,
     classes,
+    uc,
+    tipoAvaliacao,
+    tipoProva,
+    dataProva,
+    horarioProva,
+    duracaoProva,
   } = props;
   const documentTitle = "Lista de Presença";
   const subtitle = "Universidade Metodista de Angola - Registo de Avaliação";
@@ -178,6 +206,10 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
         `Horário: ${horario}`,
         `Unidade Curricular: ${unidadeCurricular}`,
         `Total de estudantes: ${total}`,
+        `Avaliação: ${tipoAvaliacao}`,
+        `Tipo: ${tipoProva}`,
+        `Data: ${dataProva}`,
+        `Hora: ${horarioProva}`,
       ].filter(Boolean),
     },
   ];
@@ -252,7 +284,11 @@ export function PresenceListPDFDocument(props: GenericPDFProps) {
                   <Text style={{ fontWeight: "bold" }}>
                     {line.split(":")[0]}:
                   </Text>
-                  <Text>{line.split(":")[1]}</Text>
+                  <Text>
+                    {line.split(":")[0] === "Hora"
+                      ? line.substring(line.indexOf(":") + 1).trim()
+                      : line.split(":")[1]?.trim()}
+                  </Text>
                 </View>
               ))
             ) : (
