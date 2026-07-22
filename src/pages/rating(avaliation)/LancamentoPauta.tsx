@@ -50,6 +50,9 @@ import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function LancamentoPauta() {
   const { toast } = useToast();
@@ -74,6 +77,7 @@ export default function LancamentoPauta() {
   const limit = 10;
 
   const [filters, setFilters] = useState({
+    tipoCandidatura: "",
     anoLectivo: "",
     semestre: "",
     curso: "",
@@ -82,7 +86,9 @@ export default function LancamentoPauta() {
     tipoAvaliacao: "",
   });
 
-  const { data: cursos } = useCursos();
+  const { data: cursos } = useCursos({
+    tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+  });
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
@@ -286,14 +292,28 @@ export default function LancamentoPauta() {
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
+          <TipoCandidaturaSelect
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) => {
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLectivo: "",
+                semestre: "",
+                curso: "",
+                anoCurricular: "",
+                unidadeCurricular: "",
+              });
+              setCurrentPage(1);
+            }}
+          />
+          <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={filters.anoLectivo}
-            onChange={(v) => { setFilters({ ...filters, anoLectivo: v }); setCurrentPage(1); }}
-            options={academicYear}
-            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+            onChangeValue={(v) => { setFilters({ ...filters, anoLectivo: v }); setCurrentPage(1); }}
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+            onlyConfigurable={false}
+            disabled={!filters.tipoCandidatura}
           />
           <FormSelect
             disabled={isLoadingSemestres}
@@ -310,6 +330,10 @@ export default function LancamentoPauta() {
               setFilters({ ...filters, curso: v, anoCurricular: "", unidadeCurricular: "" });
               setCurrentPage(1);
             }}
+            params={{
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+            }}
+            disabled={!filters.tipoCandidatura}
           />
           <FormSelect
             label="Ano Curricular"

@@ -53,6 +53,8 @@ import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
 import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import {
   Tooltip,
   TooltipContent,
@@ -91,6 +93,7 @@ export default function LaunchNotes() {
   const [limit, setLimit] = useState(10);
 
   const [formData, setFormData] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -102,7 +105,9 @@ export default function LaunchNotes() {
     tipoProva: "",
     search: "",
   });
-  const { data: cursos, isLoading: loadingCursos } = useCursos();
+  const { data: cursos, isLoading: loadingCursos } = useCursos({
+    tipoCandidaturaId: parseFilter(formData.tipoCandidatura),
+  });
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -360,6 +365,7 @@ export default function LaunchNotes() {
   useEffect(() => {
     setPage(1);
   }, [
+    formData.tipoCandidatura,
     formData.anoLetivo,
     formData.semestre,
     formData.periodo,
@@ -680,12 +686,27 @@ export default function LaunchNotes() {
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
+          <TipoCandidaturaSelect
+            value={formData.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFormData({
+                ...formData,
+                tipoCandidatura: v,
+                anoLetivo: "",
+                classes: "",
+                unidadeCurricular: "",
+                periodo: "",
+                curso: "",
+                semestre: "",
+                horarioId: "",
+              })
+            }
+          />
+
+          <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={formData.anoLetivo}
-            onChange={(v) =>
+            onChangeValue={(v) =>
               setFormData({
                 ...formData,
                 anoLetivo: v,
@@ -696,12 +717,9 @@ export default function LaunchNotes() {
                 semestre: "",
               })
             }
-            options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            tipoCandidaturaId={parseFilter(formData.tipoCandidatura) ?? 1}
+            onlyConfigurable={false}
+            disabled={!formData.tipoCandidatura}
           />
 
           <FormSelect
@@ -742,6 +760,7 @@ export default function LaunchNotes() {
               isLoadingSemestres ||
               isLoadingPeriodos ||
               isLoadingAcademicYear ||
+              !formData.tipoCandidatura ||
               !formData.semestre
             }
             value={formData.curso}
@@ -850,6 +869,7 @@ export default function LaunchNotes() {
               className="w-full"
               disabled={
                 loadingNoteRelease ||
+                !formData.tipoCandidatura ||
                 !formData.anoLetivo ||
                 !formData.periodo ||
                 !formData.semestre ||
