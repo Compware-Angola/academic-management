@@ -25,16 +25,19 @@ import { AcademicYearSelect } from "@/components/common/global-selects/AcademicY
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryStudentNotes } from "@/hooks/students/use-query-student-notes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 
 type NotesProps = {
   codigoMatricula: number;
   value?: string;
 };
 const Notes = ({ codigoMatricula, value }: NotesProps) => {
-  const [academicYear, setAcademicYear] = useState<string>("23");
+  const [anoLetivo, setAnoLetivo] = useState<string>("");
+  const { data: student } = useStudentDetail(codigoMatricula);
   const { data: pautaResponse, isLoading: loadingPauta } = useQueryStudentNotes(
     {
-      anoLectivo: parseFilter(academicYear),
+      anoLectivo: parseFilter(anoLetivo),
       codigoMatricula,
     },
   );
@@ -64,9 +67,15 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
     <>
       <TabsContent value={value} className="space-y-4">
         <div className="grid grid-cols-4">
-          <AcademicYearSelect
-            value={academicYear}
-            onChangeValue={(v) => setAcademicYear(v)}
+          <AcademicYearsAvailableForOperationSelect
+            enableDefaultSelectItem={false}
+            onlyConfigurable={false}
+
+            enableDefaultActiveYear={false}
+            value={anoLetivo}
+            onChangeValue={(v) => setAnoLetivo(v)}
+            tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+
           />
         </div>
         <div className="py-6">

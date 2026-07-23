@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { CalendarDays, Loader2 } from "lucide-react";
-import { FormSelect } from "@/components/common/FormSelect";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+
 import GerarCertidao from "@/components/views/docs-students/GerarCertidao";
 import { useStudentClassInfo } from "@/hooks/students/use-query-students-class-info";
 import { useGenerateDocumentCode } from "@/hooks/documents/use-generate-code";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 
 
 type Props = {
@@ -15,40 +16,40 @@ export function CertidoesSection({ codigoMatricula }: Props) {
     const [anoLectivo, setAnoLectivo] = useState<string>("");
     const [codigoValidacao, setCodigoValidacao] = useState<string | null>(null);
 
-    const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-        useQueryAnoAcademico();
+    const { data: student } = useStudentDetail(codigoMatricula);
+
 
     const { data: studentClassInfo, isLoading: isLoadingClassInfo } =
-  useStudentClassInfo(
-    {
-      numeroDeMatricula: codigoMatricula,
-      anoLectivo: anoLectivo ? Number(anoLectivo) : undefined,
-    },
-    !!codigoMatricula && !!anoLectivo
-  );
+        useStudentClassInfo(
+            {
+                numeroDeMatricula: codigoMatricula,
+                anoLectivo: anoLectivo ? Number(anoLectivo) : undefined,
+            },
+            !!codigoMatricula && !!anoLectivo
+        );
 
     const { mutate: gerarCodigo, isPending: isGeneratingCode } = useGenerateDocumentCode();
 
     const dadosProntos = !isLoadingClassInfo && !!studentClassInfo;
 
- const handleExportar = (onReady: (codigo: string) => void) => {
-  gerarCodigo(
-    {
-      codigoMatricula: codigoMatricula, 
-      tipoDocumento: 6,     
-     
-      documento: "Certidão",
-      anoLetivo: anoLectivo,
-      status: "Ativo",
-    },
-    {
-      onSuccess: (data) => {
-        setCodigoValidacao(data.codigo);
-        onReady(data.codigo);
-      },
-    }
-  );
-};
+    const handleExportar = (onReady: (codigo: string) => void) => {
+        gerarCodigo(
+            {
+                codigoMatricula: codigoMatricula,
+                tipoDocumento: 6,
+
+                documento: "Certidão",
+                anoLetivo: anoLectivo,
+                status: "Ativo",
+            },
+            {
+                onSuccess: (data) => {
+                    setCodigoValidacao(data.codigo);
+                    onReady(data.codigo);
+                },
+            }
+        );
+    };
     return (
         <div className="space-y-8">
             {/* Cabeçalho Interno */}
@@ -68,20 +69,15 @@ export function CertidoesSection({ codigoMatricula }: Props) {
                         <CalendarDays className="h-3 w-3" />
                         Ano Lectivo
                     </label>
-                    <FormSelect
-                        disabled={isLoadingAcademicYear}
-                        loading={isLoadingAcademicYear}
-                        value={anoLectivo ?? ""}
-                        onChange={(v) => {
-                            setAnoLectivo(v);
-                            setCodigoValidacao(null); // reset código ao mudar ano
-                        }}
-                        options={anosAcademicos}
-                        map={(a) => ({
-                            key: a.codigo,
-                            label: a.designacao,
-                            value: a.codigo,
-                        })}
+                    <AcademicYearsAvailableForOperationSelect
+                        enableDefaultSelectItem={false}
+                        onlyConfigurable={false}
+
+                        enableDefaultActiveYear={false}
+                        value={anoLectivo}
+                        onChangeValue={(v) => setAnoLectivo(v)}
+                        tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+                        label="Ano Letivo"
                     />
                 </div>
 

@@ -36,6 +36,8 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 
 type Props = {
   codigoMatricula: number;
@@ -51,6 +53,7 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
   const [servicoSelecionado, setServicoSelecionado] =
     useState<ServicoItem | null>(null);
 
+  const { data: student } = useStudentDetail(codigoMatricula);
   const algumServicoExigeUC = servicosItens.some((item) =>
     servicoExigeSelecaoUC(item.sigla),
   );
@@ -135,10 +138,10 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
       prev.map((item) =>
         item.codigo === servicoSelecionado.codigo
           ? {
-              ...item,
-              quantidade: cadeirasSelecionadas.length,
-              cadeirasRecursoIds: cadeirasSelecionadas,
-            }
+            ...item,
+            quantidade: cadeirasSelecionadas.length,
+            cadeirasRecursoIds: cadeirasSelecionadas,
+          }
           : item,
       ),
     );
@@ -193,10 +196,15 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
 
       <div className="flex flex-col lg:flex-row items-end gap-4">
         <div className="w-full lg:w-80">
-          <AcademicYearSelect
-            enableDefaultActiveYear
+          <AcademicYearsAvailableForOperationSelect
+            enableDefaultSelectItem={false}
+            onlyConfigurable={false}
+
+            enableDefaultActiveYear={false}
             value={anoLetivo}
             onChangeValue={(v) => setAnoLetivo(v)}
+            tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+            label="Ano Letivo"
           />
         </div>
 
@@ -266,7 +274,7 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
                   <TableCell>
                     {servicoExigeSelecaoUC(item.sigla) ? (
                       item.cadeirasRecursoIds &&
-                      item.cadeirasRecursoIds.length > 0 ? (
+                        item.cadeirasRecursoIds.length > 0 ? (
                         item.cadeirasRecursoIds.map((c: Cadeira) => (
                           <span
                             key={c.codigoGradeAluno}

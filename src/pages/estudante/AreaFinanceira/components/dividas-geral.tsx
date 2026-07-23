@@ -19,6 +19,7 @@ import { DebtMensalidade, DebtOutroServico } from "@/services/financas/dividas/g
 import { parseFilter } from "@/util/parse-filter";
 import Lottie from "lottie-react";
 import Notallowed from "@/assets/Notallowed.json";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,6 +40,8 @@ export function DividasSection({ codigoMatricula }: Props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedMensalidade, setSelectedMensalidade] = useState<DebtMensalidade | null>(null);
     const [selectedOutroServico, setSelectedOutroServico] = useState<DebtOutroServico | null>(null);
+
+    const { data: student } = useStudentDetail(codigoMatricula);
 
     const { data: debtData, isLoading } = useGetDebtsInformation(
         searchParams?.matricula ?? "",
@@ -67,6 +70,62 @@ export function DividasSection({ codigoMatricula }: Props) {
         setIsModalOpen(true);
     };
 
+    // Se o estudante nao for de Licenciatura a pagina de negociacao de divida nao aparece
+    // Se o estudante nao for de Licenciatura a pagina de negociacao de divida nao aparece
+    const isLicenciatura = student?.sigla_grau === "LIC";
+
+    if (!isLicenciatura) {
+        const grauLabels: Record<string, string> = {
+            MST: "Mestrado",
+            DTR: "Doutoramento",
+        };
+        const grauAtual = student?.sigla_grau
+            ? grauLabels[student.sigla_grau] ?? student.sigla_grau
+            : null;
+
+        return (
+            <div className="space-y-6">
+                {/* Header */}
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Negociação de Dívidas em Aberto</h1>
+                    <p className="text-muted-foreground">
+                        Informe seus dados para consultar as dívidas pendentes
+                    </p>
+                </div>
+
+                <Card className="border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-14 gap-4 text-center">
+                        <div className="rounded-full bg-muted p-4">
+                            <GraduationCap className="h-8 w-8 text-muted-foreground" />
+                        </div>
+
+                        <div className="space-y-1.5 max-w-sm">
+                            <p className="text-base font-semibold text-foreground">
+                                Negociação indisponível para este curso
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                A negociação de dívidas está disponível apenas para estudantes de{" "}
+                                <span className="font-medium text-foreground">Licenciatura</span>.
+                            </p>
+                        </div>
+
+                        {grauAtual && (
+                            <Badge
+                                variant="outline"
+                                className="text-xs font-medium border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400"
+                            >
+                                Grau atual: {grauAtual}
+                            </Badge>
+                        )}
+
+                        <p className="text-xs text-muted-foreground max-w-sm">
+                            Para questões relacionadas com dívidas deste grau académico, contacte a Secretaria.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
     return (
         <div className="space-y-6">
             {/* Header */}

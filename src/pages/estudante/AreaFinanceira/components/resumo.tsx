@@ -46,6 +46,7 @@ import { useQueryFinanceMonthlyFee } from "@/hooks/financas/isencao-servico/use-
 import { FacturaDetalhesModal } from "@/components/financas/factura-detalhes-modal";
 import { StatusBadge } from "@/components/financas/status-badge";
 import { formatCurrency, formatDate, truncate } from "@/util/finance-format";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -195,13 +196,12 @@ export function Resumo({
             </p>
             <span
               className={`mt-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md
-  ${
-    student?.saldo_atual > 0
-      ? "bg-green-100 text-green-700"
-      : student?.saldo_atual < 0
-        ? "bg-red-100 text-destructive"
-        : "bg-muted text-muted-foreground"
-  }`}
+  ${student?.saldo_atual > 0
+                  ? "bg-green-100 text-green-700"
+                  : student?.saldo_atual < 0
+                    ? "bg-red-100 text-destructive"
+                    : "bg-muted text-muted-foreground"
+                }`}
             >
               {student?.saldo_atual > 0
                 ? "Crédito disponível"
@@ -296,10 +296,15 @@ export function Resumo({
         <CardContent className="space-y-6">
           <div className="flex flex-wrap gap-4 items-end">
             <div className="min-w-[200px]">
-              <AcademicYearSelect
-                enableDefaultActiveYear
+              <AcademicYearsAvailableForOperationSelect
+                enableDefaultSelectItem={false}
+                onlyConfigurable={false}
+
+                enableDefaultActiveYear={false}
                 value={filters.anoLetivo}
                 onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
+                tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+
               />
             </div>
 

@@ -68,6 +68,7 @@ export type StudentDetail = {
   estado_civil: string;
   periodo_codigo: number;
   sigla_grau: string;
+  tipo_canditatura_codigo: number;
 
 };
 

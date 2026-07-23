@@ -46,13 +46,16 @@ const AcademicYearsAvailableForOperationSelect = ({
   const academicYear = academicYearResponse?.data ?? [];
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-        {
-          label: "Todos os anos letivos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos os anos letivos",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
+
+  // 👇 label dinâmica com base no tipo de candidatura
+  const defaultLabel = tipoCandidaturaId === 1 ? "Ano Letivo" : "Ciclo";
 
   const filteredYears = useMemo(() => {
     if (!academicYear) return academicYear;
@@ -91,7 +94,7 @@ const AcademicYearsAvailableForOperationSelect = ({
     <FormSelect
       disabled={isLoadingAcademicYear || disabled}
       loading={isLoadingAcademicYear}
-      label={label ? label : "Ano Letivo"}
+      label={label ? label : defaultLabel}
       value={value}
       defaultSelectItem={defaultSelectItem}
       onChange={(v) => onChangeValue(v)}
@@ -100,5 +103,7 @@ const AcademicYearsAvailableForOperationSelect = ({
     />
   );
 };
+
+
 
 export { AcademicYearsAvailableForOperationSelect };

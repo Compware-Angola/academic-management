@@ -5,13 +5,14 @@ import { Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
-import { useActiveRegistration } from "@/hooks/students/use-query-students";
+import { useActiveRegistration, useStudentDetail } from "@/hooks/students/use-query-students";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { useState } from "react";
 import { parseFilter } from "@/util/parse-filter";
 import { toast } from "sonner";
 import Lottie from "lottie-react";
 import UnlockedLock from "@/assets/unlock.json";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 export function AtivarMatricula({
   codigoMatricula,
@@ -22,6 +23,8 @@ export function AtivarMatricula({
 }) {
   const activeRegistration = useActiveRegistration();
   const [anoLectivoId, setAnoLectivoId] = useState<string>("");
+  const { data: student } = useStudentDetail(codigoMatricula);
+
 
   async function onSubmit() {
     if (!parseFilter(anoLectivoId)) {
@@ -55,10 +58,15 @@ export function AtivarMatricula({
 
       <div className="flex gap-2 items-end">
         <div className="flex-1">
-          <AcademicYearSelect
+          <AcademicYearsAvailableForOperationSelect
+            enableDefaultSelectItem={false}
+            onlyConfigurable={false}
+
+            enableDefaultActiveYear={false}
             value={anoLectivoId}
-            enableDefaultActiveYear
-            onChangeValue={(value) => setAnoLectivoId(value)}
+            onChangeValue={(v) => setAnoLectivoId(v)}
+            tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+            label="Ano Letivo"
           />
         </div>
         <Button
