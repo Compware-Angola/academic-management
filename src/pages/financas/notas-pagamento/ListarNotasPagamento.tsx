@@ -49,7 +49,6 @@ import {
   useReactivateInvoice,
   useAnnulInvoice,
 } from "@/hooks/horario/use-query-invoice";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
 // import { Separator } from "@/components/ui/separator";
 // import { FacturaItem } from "@/services/finance/listar-facturas.service";
@@ -59,6 +58,9 @@ import { PermissionTypeDetails } from "@/constants/permission.type";
 import { usePermission } from "@/auth/permission.helper";
 import { Textarea } from "@/components/ui/textarea";
 import { FacturaDetalhesModal } from "@/components/financas/factura-detalhes-modal";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 const estados = [
   { id: undefined, label: "Todos" },
@@ -102,14 +104,15 @@ export default function ListarNotasPagamento() {
     "codigoMatricula" | "reference" | "codigoFatura" | "biEstudante"
   >("codigoMatricula");
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLetivo: "23",
     estado: undefined as string | undefined,
   });
 
   const limit = 10;
 
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   const { mutate: annulInvoice } = useAnnulInvoice();
   const { mutate: reactivateInvoice } = useReactivateInvoice();
@@ -260,20 +263,38 @@ export default function ListarNotasPagamento() {
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-4 items-end">
+            {/* Tipo de Candidatura */}
+            <div className="min-w-[220px]">
+              <FormSelect
+                label="Tipo de Candidatura"
+                value={filters.tipoCandidatura}
+                onChange={(v) => {
+                  setFilters({ ...filters, tipoCandidatura: v, anoLetivo: "" });
+                  setPage(1);
+                }}
+                options={tiposCandidatura}
+                loading={isLoadingTiposCandidatura}
+                map={(tipo) => ({
+                  key: tipo.codigo,
+                  label: tipo.designacao,
+                  value: tipo.codigo,
+                })}
+                placeholder="Selecione o tipo..."
+              />
+            </div>
+
             {/* Ano Lectivo */}
             <div className="min-w-[200px]">
-              <FormSelect
+              <AcademicYearsAvailableForOperationSelect
                 label="Ano Letivo"
-                disabled={isLoadingAcademicYear}
-                loading={isLoadingAcademicYear}
                 value={filters.anoLetivo}
-                onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-                options={anosAcademicos}
-                map={(a) => ({
-                  key: a.codigo,
-                  label: a.designacao,
-                  value: a.codigo,
-                })}
+                onChangeValue={(v) => {
+                  setFilters({ ...filters, anoLetivo: v });
+                  setPage(1);
+                }}
+                tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+                onlyConfigurable={false}
+                disabled={!filters.tipoCandidatura}
               />
             </div>
 

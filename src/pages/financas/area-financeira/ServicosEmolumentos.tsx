@@ -42,6 +42,9 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 import {
   useQueryMonthlyFeeTipoServico,
   useQueryTiposServicoAll,
@@ -107,16 +110,17 @@ const initialForm: ServicoFormData = {
 
 export default function ServicosEmolumentos() {
   const { toast } = useToast();
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+  const { data: anosAcademicos } = useQueryAnoAcademico();
 
   // Filtros SEPARADOS para cada aba
   const [servicosFilters, setServicosFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     descricao: "",
     polo: "",
   });
   const [mensalidadesFilters, setMensalidadesFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     descricao: "",
     polo: "",
@@ -160,6 +164,8 @@ export default function ServicosEmolumentos() {
       page: mensalidadesPage,
       limit: pageLimit,
     });
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
   //Query Polo
   const { data: polos, isLoading: LoadingPolo } = usePoloDropdown();
 
@@ -384,20 +390,39 @@ export default function ServicosEmolumentos() {
               <div className="flex flex-col gap-4 md:flex-row md:items-end flex-wrap">
                 <div className="min-w-[220px]">
                   <FormSelect
+                    label="Tipo de Candidatura"
+                    value={servicosFilters.tipoCandidatura}
+                    onChange={(v) => {
+                      setServicosFilters((prev) => ({
+                        ...prev,
+                        tipoCandidatura: v,
+                        anoLetivo: "",
+                      }));
+                      setServicosPage(1);
+                    }}
+                    options={tiposCandidatura}
+                    loading={isLoadingTiposCandidatura}
+                    map={(tipo) => ({
+                      key: tipo.codigo,
+                      label: tipo.designacao,
+                      value: tipo.codigo,
+                    })}
+                    placeholder="Selecione o tipo..."
+                  />
+                </div>
+                <div className="min-w-[220px]">
+                  <AcademicYearsAvailableForOperationSelect
                     label="Ano Letivo"
                     value={servicosFilters.anoLetivo}
-                    onChange={(v) => {
+                    onChangeValue={(v) => {
                       setServicosFilters((prev) => ({ ...prev, anoLetivo: v }));
                       setServicosPage(1);
                     }}
-                    options={anosAcademicos ?? []}
-                    map={(a) => ({
-                      key: String(a.codigo),
-                      label: a.designacao,
-                      value: String(a.codigo),
-                    })}
-                    disabled={isLoadingAcademicYear}
-                    placeholder="Selecione o ano..."
+                    tipoCandidaturaId={
+                      parseFilter(servicosFilters.tipoCandidatura) ?? 1
+                    }
+                    onlyConfigurable={false}
+                    disabled={!servicosFilters.tipoCandidatura}
                   />
                 </div>
                 <div className="min-w-[220px]">
@@ -541,22 +566,42 @@ export default function ServicosEmolumentos() {
               <div className="flex flex-col gap-4 md:flex-row md:items-end flex-wrap">
                 <div className="min-w-[220px]">
                   <FormSelect
+                    label="Tipo de Candidatura"
+                    value={mensalidadesFilters.tipoCandidatura}
+                    onChange={(v) => {
+                      setMensalidadesFilters((prev) => ({
+                        ...prev,
+                        tipoCandidatura: v,
+                        anoLetivo: "",
+                      }));
+                      setMensalidadesPage(1);
+                    }}
+                    options={tiposCandidatura}
+                    loading={isLoadingTiposCandidatura}
+                    map={(tipo) => ({
+                      key: tipo.codigo,
+                      label: tipo.designacao,
+                      value: tipo.codigo,
+                    })}
+                    placeholder="Selecione o tipo..."
+                  />
+                </div>
+                <div className="min-w-[220px]">
+                  <AcademicYearsAvailableForOperationSelect
                     label="Ano Letivo"
                     value={mensalidadesFilters.anoLetivo}
-                    onChange={(v) => {
+                    onChangeValue={(v) => {
                       setMensalidadesFilters((prev) => ({
                         ...prev,
                         anoLetivo: v,
                       }));
                       setMensalidadesPage(1);
                     }}
-                    options={anosAcademicos ?? []}
-                    map={(a) => ({
-                      key: String(a.codigo),
-                      label: a.designacao,
-                      value: String(a.codigo),
-                    })}
-                    disabled={isLoadingAcademicYear}
+                    tipoCandidaturaId={
+                      parseFilter(mensalidadesFilters.tipoCandidatura) ?? 1
+                    }
+                    onlyConfigurable={false}
+                    disabled={!mensalidadesFilters.tipoCandidatura}
                   />
                 </div>
                 <div className="min-w-[220px]">
@@ -826,22 +871,41 @@ export default function ServicosEmolumentos() {
 
                 {/* Ano Letivo */}
                 <div>
-                  <Label>Ano Letivo *</Label>
                   <FormSelect
+                    label="Tipo de Candidatura"
+                    value={String(formData.tipoCandidatura || "")}
+                    onChange={(v) => {
+                      const tipoCandidatura = Number(v) || 1;
+                      setFormData((prev) => ({
+                        ...prev,
+                        tipoCandidatura,
+                        codigoAnoLectivo: 0,
+                        mestrado: tipoCandidatura === 2,
+                      }));
+                    }}
+                    options={tiposCandidatura}
+                    loading={isLoadingTiposCandidatura}
+                    map={(tipo) => ({
+                      key: tipo.codigo,
+                      label: tipo.designacao,
+                      value: tipo.codigo,
+                    })}
+                    placeholder="Selecione o tipo de candidatura"
+                  />
+                </div>
+
+                <div>
+                  <AcademicYearsAvailableForOperationSelect
+                    label="Ano Letivo"
                     value={String(formData.codigoAnoLectivo || "")}
-                    onChange={(v) =>
+                    onChangeValue={(v) =>
                       setFormData((prev) => ({
                         ...prev,
                         codigoAnoLectivo: Number(v) || 0,
                       }))
                     }
-                    options={anosAcademicos ?? []}
-                    map={(a) => ({
-                      key: String(a.codigo),
-                      label: a.designacao,
-                      value: String(a.codigo),
-                    })}
-                    placeholder="Selecione o ano letivo"
+                    tipoCandidaturaId={formData.tipoCandidatura || 1}
+                    onlyConfigurable={false}
                   />
                 </div>
 
