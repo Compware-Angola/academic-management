@@ -22,6 +22,8 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 // Tipos esperados pela API
 interface AnoAcademico {
@@ -33,6 +35,7 @@ interface AnoAcademico {
 interface TipoCandidatura {
   codigo: number;
   designacao: string;
+  sigla: string;
 }
 
 interface TipoCalendario {
@@ -83,6 +86,19 @@ export function ActivityModal({
   tiposCalendario,
   editId,
 }: ActivityModalProps) {
+  const { hasPermission } = usePermission();
+  const tiposCandidaturaFiltered = tiposCandidatura?.filter((tipo) => {
+    if (
+      !hasPermission(
+        PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
+      ) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="">
@@ -125,7 +141,7 @@ export function ActivityModal({
                 />
               </SelectTrigger>
               <SelectContent>
-                {tiposCandidatura?.map((tipo) => (
+                {tiposCandidaturaFiltered?.map((tipo) => (
                   <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
                     {tipo.designacao}
                   </SelectItem>

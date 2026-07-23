@@ -47,9 +47,11 @@ import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
 import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 type Filters = {
   tipoCandidatura: string;
@@ -97,6 +99,18 @@ export default function PautaGeralPorUC() {
     useQuerySemestres();
   const { data: cursos = [], isLoading: loadingCursos } = useCursos({
     tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+  });
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
   });
 
   const { data: classes = [], isLoading: loadingClasses } =
@@ -253,9 +267,10 @@ export default function PautaGeralPorUC() {
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <TipoCandidaturaSelect
+          <FormSelect
+            label="Tipo de Candidatura"
             value={filters.tipoCandidatura}
-            onChangeValue={(v) =>
+            onChange={(v) =>
               setFilters({
                 ...filters,
                 tipoCandidatura: v,
@@ -270,6 +285,13 @@ export default function PautaGeralPorUC() {
                 gradeCurricularTurma: "",
               })
             }
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
           />
 
           <AcademicYearsAvailableForOperationSelect

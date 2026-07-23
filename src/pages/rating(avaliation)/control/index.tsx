@@ -40,10 +40,12 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
 import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-years";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 
 type SelectedNotas = {
@@ -79,6 +81,18 @@ export default function ControlNotes() {
   });
 
   const [searchParams, setSearchParams] = useState<typeof formData | null>(null);
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   // =======================================
   // API QUERIES
@@ -304,9 +318,10 @@ export default function ControlNotes() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <TipoCandidaturaSelect
+          <FormSelect
+            label="Tipo de Candidatura"
             value={formData.tipoCandidatura}
-            onChangeValue={(v) =>
+            onChange={(v) =>
               setFormData({
                 ...formData,
                 tipoCandidatura: v,
@@ -316,6 +331,13 @@ export default function ControlNotes() {
                 unidadeCurricular: "",
               })
             }
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
           />
 
           <AcademicYearsAvailableForOperationSelect

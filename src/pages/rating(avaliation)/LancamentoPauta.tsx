@@ -50,9 +50,11 @@ import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function LancamentoPauta() {
   const { toast } = useToast();
@@ -88,6 +90,18 @@ export default function LancamentoPauta() {
 
   const { data: cursos } = useCursos({
     tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+  });
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
   });
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
@@ -292,9 +306,10 @@ export default function LancamentoPauta() {
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <TipoCandidaturaSelect
+          <FormSelect
+            label="Tipo de Candidatura"
             value={filters.tipoCandidatura}
-            onChangeValue={(v) => {
+            onChange={(v) => {
               setFilters({
                 ...filters,
                 tipoCandidatura: v,
@@ -306,6 +321,13 @@ export default function LancamentoPauta() {
               });
               setCurrentPage(1);
             }}
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
           />
           <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"

@@ -536,7 +536,18 @@ const App = () => {
                   />
                   <Route
                     path="calendario/fases-lectivas"
-                    element={<AcademicYearPhase />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO
+                            .sigla!,
+                          PermissionTypeDetails
+                            .PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla!,
+                        ]}
+                      >
+                        <AcademicYearPhase />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/docente/programa"
@@ -612,6 +623,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <LaunchNotes />
@@ -623,6 +636,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla!,
                           PermissionTypeDetails
                             .CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla!,
                         ]}
@@ -638,6 +652,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails
                             .DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+                          PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <FormulaUC />
@@ -650,6 +666,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_PRESENCA.sigla!,
+                          PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <PresenceList />
@@ -662,6 +680,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LANCAMENTO_PAUTA.sigla!,
+                          PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <LancamentoPauta />
@@ -703,6 +723,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA
                             .sigla!,
+                          PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <ValidationTeacherAgenda />
@@ -716,6 +738,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails
                             .DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+                          PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <FormulaOral />
@@ -1280,6 +1304,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla!,
+                          PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <ActivitiesLecturesLic />
@@ -1305,6 +1331,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO
                             .sigla!,
+                          PermissionTypeDetails
+                            .PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <Parameters />
@@ -1317,7 +1345,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla!,
-                          PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla!,
+                          PermissionTypeDetails.PRAZOS_ACADEMICOS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <Deadlines />
