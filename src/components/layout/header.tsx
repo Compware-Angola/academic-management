@@ -121,7 +121,35 @@ export function Header() {
     setOpen(false);
     navigate(`/estudante/${aluno.codigo_matricula}`);
   };
+  function getGrauBadge(student: any, size: "sm" | "default" = "default") {
+    const sigla = (student.sigla_grau || student.tipo_curso || "").toUpperCase();
 
+    const mapa: Record<string, { label: string; className: string }> = {
+      LIC: {
+        label: "Licenciatura",
+        className: "border-sky-200 text-sky-700 dark:border-sky-800 dark:text-sky-400",
+      },
+      MST: {
+        label: "Mestrado",
+        className: "border-purple-200 text-purple-700 dark:border-purple-800 dark:text-purple-400",
+      },
+      DTR: {
+        label: "Doutoramento",
+        className: "border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400",
+      },
+    };
+
+    const grau = mapa[sigla];
+    if (!grau) return null;
+
+    const sizeClass = size === "sm" ? "text-[10px] px-1.5 py-0" : "text-xs font-medium";
+
+    return (
+      <Badge variant="outline" className={`${grau.className} ${sizeClass}`}>
+        {grau.label}
+      </Badge>
+    );
+  }
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
@@ -210,6 +238,9 @@ export function Header() {
                                       Créd. Edu.
                                     </Badge>
                                   )}
+
+                                  {getGrauBadge(aluno, "sm")}
+
                                   <Badge
                                     variant="outline"
                                     className="text-[10px] px-1.5 py-0"
