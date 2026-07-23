@@ -1,6 +1,6 @@
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { TabsContent } from "@/components/ui/tabs";
-import { useStudentAcademicHistory } from "@/hooks/students/use-query-students";
+import { useStudentAcademicHistory, useStudentDetail } from "@/hooks/students/use-query-students";
 import { parseFilter } from "@/util/parse-filter";
 import { useState } from "react";
 import {
@@ -16,6 +16,7 @@ import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 export function FiltrarPorAvaliacoes({
   codigoMatricula,
@@ -24,11 +25,12 @@ export function FiltrarPorAvaliacoes({
   codigoMatricula: number;
   value?: string;
 }) {
-  const [academicYear, setAcademicYear] = useState<string | undefined>("23");
+  const [academicYear, setAcademicYear] = useState<string | undefined>("");
   const [search, setSearch] = useState("");
   const searchDebounce = useDebounce(search, 500);
   const [page, setPage] = useState(1);
   const limit = 10;
+  const { data: student } = useStudentDetail(codigoMatricula);
 
   const { data: response, isLoading } = useStudentAcademicHistory({
     matriculaId: codigoMatricula,
@@ -43,12 +45,15 @@ export function FiltrarPorAvaliacoes({
       <div className="flex flex-col gap-2 py-4">
         <div className="flex justify-between items-center w-full">
           <div className="w-full max-w-xs">
-            <AcademicYearSelect
+            <AcademicYearsAvailableForOperationSelect
+              enableDefaultSelectItem={false}
+              onlyConfigurable={false}
+
+              enableDefaultActiveYear={false}
               value={academicYear}
-              onChangeValue={(val) => {
-                setAcademicYear(val);
-                setPage(1);
-              }}
+              onChangeValue={(v) => setAcademicYear(v)}
+              tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+
             />
           </div>
         </div>
@@ -137,11 +142,10 @@ export function FiltrarPorAvaliacoes({
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap px-4">
                       <span
-                        className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          item.nota < 10
-                            ? "bg-red-100 text-red-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
+                        className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${item.nota < 10
+                          ? "bg-red-100 text-red-700"
+                          : "bg-green-100 text-green-700"
+                          }`}
                       >
                         {item.nota}
                       </span>

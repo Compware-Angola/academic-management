@@ -398,6 +398,7 @@ export function LaunchMigration({
                         {plan.duracao}
                       </TableCell>
                       <TableCell className="text-center">
+
                         <AnoLectivoConfirmadoSelect
                           value={getAnoLectivo(plan)}
                           codigoMatricula={codigoMatricula}
