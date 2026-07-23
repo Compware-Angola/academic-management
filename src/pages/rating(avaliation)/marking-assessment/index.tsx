@@ -1,5 +1,5 @@
 // src/pages/SchedulesByUC.tsx
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -37,7 +37,6 @@ import {
   Printer,
 } from "lucide-react";
 
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
@@ -59,10 +58,15 @@ import {
   exportMarkingAssessmentPdfService,
 } from "@/services/avaliacao/export-marking-assessment.service";
 import { toast } from "sonner";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 type ExportAction = "excel" | "pdf" | "print";
 
 export default function MarkingAssessment() {
+  const { hasPermission } = usePermission();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [guards, setGuards] = useState<string[]>([]);
 
@@ -70,6 +74,7 @@ export default function MarkingAssessment() {
 
   // filtros
   const [filters, setFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
     periodo: "all",
@@ -89,7 +94,22 @@ export default function MarkingAssessment() {
   );
 
   // === Dados base ===
-  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = useMemo(() => {
+    return tiposCandidatura.filter((tipo) => {
+      if (
+        !hasPermission(
+          PermissionTypeDetails.CONTROLE_MARCACAO_PROVAS_POS_GRADUACAO.sigla,
+        ) &&
+        (tipo.sigla === "DTR" || tipo.sigla === "MST")
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [hasPermission, tiposCandidatura]);
+  const tipoCandidaturaId = parseFilter(filters.tipoCandidatura);
   const { data: semestres } = useQuerySemestres();
   const { data: periodos } = useQueryPeriod();
   const { data: cursos } = useCursos();
@@ -98,6 +118,7 @@ export default function MarkingAssessment() {
     useQueryMarcacaoProvaPrazo({
       anoLectivo: parseFilter(filters.anoLetivo),
       semestre: parseFilter(filters.semestre),
+      tipoCandidatura: tipoCandidaturaId ?? undefined,
     });
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
@@ -105,6 +126,7 @@ export default function MarkingAssessment() {
   });
 
   const canLoadTurmas =
+    !!filters.tipoCandidatura &&
     !!filters.anoLetivo &&
     !!filters.semestre &&
     !!filters.curso &&
@@ -231,24 +253,50 @@ export default function MarkingAssessment() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={filters.tipoCandidatura}
+              onChange={(v) => {
+                setPage(1);
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "",
+                  anoCurricular: "all",
+                  unidadeCurricular: "",
+                  prazoId: "",
+                });
+              }}
+              options={tiposCandidaturaFiltered}
+              loading={isLoadingTiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+            />
+
             {/* Ano Letivo */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Letivo</label>
-              <Select
+              <AcademicYearsAvailableForOperationSelect
+                label="Ano Letivo"
                 value={filters.anoLetivo}
-                onValueChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosAcademicos?.map((a) => (
-                    <SelectItem key={a.codigo} value={a.codigo.toString()}>
-                      {a.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChangeValue={(v) => {
+                  setPage(1);
+                  setFilters({
+                    ...filters,
+                    anoLetivo: v,
+                    curso: "",
+                    anoCurricular: "all",
+                    unidadeCurricular: "",
+                    prazoId: "",
+                  });
+                }}
+                tipoCandidaturaId={tipoCandidaturaId ?? 1}
+                onlyConfigurable={false}
+                disabled={!filters.tipoCandidatura}
+              />
             </div>
 
             {/* Semestre */}
@@ -310,6 +358,10 @@ export default function MarkingAssessment() {
                     anoCurricular: "all",
                   })
                 }
+                params={{
+                  tipoCandidaturaId: tipoCandidaturaId ?? undefined,
+                }}
+                disabled={!filters.tipoCandidatura}
               />
             </div>
 

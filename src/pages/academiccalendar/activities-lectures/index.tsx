@@ -85,7 +85,7 @@ export default function ActivitiesLecturesLic() {
   const { hasPermission } = usePermission();
   const tiposCandidaturaFiltered = tiposCandidatura?.filter((tp) => {
     if (
-      !hasPermission(PermissionTypeDetails.ACTIVIDADES_LECTIVAS_MPGS.sigla) &&
+      !hasPermission(PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla) &&
       (tp.sigla === "DTR" || tp.sigla === "MST")
     ) {
       return false;

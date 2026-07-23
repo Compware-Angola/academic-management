@@ -31,9 +31,11 @@ import { DefinirOral } from "@/services/avaliacao/fetch-oral";
 import { Switch } from "@/components/ui/switch";
 import { useMutationUpdateDefinirOral } from "@/hooks/avaliacao/use-mutation-update-definir-oral";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function FormulaOral() {
   const [search, setSearch] = useState("");
@@ -51,6 +53,18 @@ export default function FormulaOral() {
   const itemsPerPage = 10;
 
   const { data: semestres } = useQuerySemestres();
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   const { data: classes = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -130,9 +144,10 @@ useEffect(() => {
       {/* ========== FILTROS ========== */}
       <div className="bg-card border rounded-lg p-6">
         <div className="grid grid-cols-4 gap-4">
-          <TipoCandidaturaSelect
+          <FormSelect
+            label="Tipo de Candidatura"
             value={filters.tipoCandidatura}
-            onChangeValue={(v) =>
+            onChange={(v) =>
               setFilters({
                 ...filters,
                 tipoCandidatura: v,
@@ -141,6 +156,13 @@ useEffect(() => {
                 classes: "",
               })
             }
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
           />
 
           <AcademicYearsAvailableForOperationSelect

@@ -53,8 +53,9 @@ import Lottie from "lottie-react";
 import BlockDocument from "@/assets/blockdocument.json";
 import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 import {
   Tooltip,
   TooltipContent,
@@ -86,7 +87,7 @@ export interface Roles {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function LaunchNotes() {
-  const { haveFullAccess } = usePermission();
+  const { haveFullAccess, hasPermission } = usePermission();
 
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [page, setPage] = useState(1);
@@ -107,6 +108,17 @@ export default function LaunchNotes() {
   });
   const { data: cursos, isLoading: loadingCursos } = useCursos({
     tipoCandidaturaId: parseFilter(formData.tipoCandidatura),
+  });
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
   });
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
@@ -686,9 +698,10 @@ export default function LaunchNotes() {
       <div className="bg-card border rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <TipoCandidaturaSelect
+          <FormSelect
+            label="Tipo de Candidatura"
             value={formData.tipoCandidatura}
-            onChangeValue={(v) =>
+            onChange={(v) =>
               setFormData({
                 ...formData,
                 tipoCandidatura: v,
@@ -701,6 +714,13 @@ export default function LaunchNotes() {
                 horarioId: "",
               })
             }
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
           />
 
           <AcademicYearsAvailableForOperationSelect

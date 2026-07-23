@@ -320,12 +320,18 @@ export const academicStructure: MenuStructure = {
         {
           title: "Actividades lectivas",
           url: "/calendario/atividades",
-          permission: [PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla],
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla,
+            PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Prazos",
           url: "/calendario/prazos",
-          permission: [PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla],
+          permission: [
+            PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla,
+            PermissionTypeDetails.PRAZOS_ACADEMICOS_POS_GRADUACAO.sigla,
+          ],
         },
         //{ title: "Calendário de provas", url: "/calendario/provas" },
         {
@@ -338,9 +344,17 @@ export const academicStructure: MenuStructure = {
           url: "/calendario/parametros",
           permission: [
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+            PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
           ],
         },
-        { title: "Configurações Ano lectivo", url: "/calendario/fases-lectivas", permission: [PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla] },
+        {
+          title: "Configurações Ano lectivo",
+          url: "/calendario/fases-lectivas",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+            PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
+          ],
+        },
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
@@ -529,7 +543,10 @@ export const academicStructure: MenuStructure = {
         {
           title: "Controle de lançamento de notas",
           url: "/avaliacoes/controle",
-          permission: [PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla],
+          permission: [
+            PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla,
+            PermissionTypeDetails.CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+          ],
         },
 
         {
@@ -537,6 +554,7 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/formula-uc",
           permission: [
             PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+            PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO.sigla,
           ],
         },
         {
@@ -544,6 +562,7 @@ export const academicStructure: MenuStructure = {
           url: "/avaliacoes/formula-oral",
           permission: [
             PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+            PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO.sigla,
           ],
         },
         {
@@ -561,45 +580,68 @@ export const academicStructure: MenuStructure = {
         {
           title: "Histórico de lançamentos",
           url: "/avaliacoes/historico",
-          permission: [PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!],
+          permission: [
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!,
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO
+              .sigla,
+          ],
         },
         {
           title: "Lançamento de pauta",
           url: "/avaliacoes/pauta",
-          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_PAUTA.sigla,
+            PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Lançamento de notas",
           url: "/avaliacoes/notas",
-          permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
+            PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Lista de presença",
           url: "/avaliacoes/presenca",
-          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+          permission: [
+            PermissionTypeDetails.LISTA_PRESENCA.sigla,
+            PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO.sigla,
+          ],
         },
 
         {
           title: "Pauta geral",
           url: "/avaliacoes/pauta-geral",
-          permission: [PermissionTypeDetails.PAUTA_GERAL.sigla],
+          permission: [
+            PermissionTypeDetails.PAUTA_GERAL.sigla,
+            PermissionTypeDetails.PAUTA_GERAL_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Pauta por UC",
           url: "/avaliacoes/pauta-uc",
-          permission: [PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!],
+          permission: [
+            PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!,
+            PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Permissão fora do prazo",
           url: "/avaliacoes/permissao",
           permission: [
             PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO.sigla,
+            PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO.sigla,
           ],
         },
         {
           title: "Validação",
           url: "/avaliacoes/validacao",
-          permission: [PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla],
+          permission: [
+            PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla,
+            PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Visualizar notas",

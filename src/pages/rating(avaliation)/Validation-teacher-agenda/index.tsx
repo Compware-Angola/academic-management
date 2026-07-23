@@ -60,9 +60,11 @@ import { useQueryEstadoPauta } from "@/hooks/avaliacao/use-query-estado-pauta";
 import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 import { useAuth } from "@/hooks/use-auth";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function ValidationTeacherAgenda() {
   const { toast } = useToast();
@@ -97,6 +99,18 @@ export default function ValidationTeacherAgenda() {
 
   // ─── Queries ───────────────────────────────────────────────────────────────
   const { data: cursos } = useCursos();
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
   const { data: classes = [] } = useQueryClassFilterByCurso({
     curso: filtersSubmetidas.curso,
   });
@@ -348,9 +362,10 @@ export default function ValidationTeacherAgenda() {
 
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                <TipoCandidaturaSelect
+                <FormSelect
+                  label="Tipo de Candidatura"
                   value={filtersSubmetidas.tipoCandidatura}
-                  onChangeValue={(v) =>
+                  onChange={(v) =>
                     setFiltersSubmetidas((prev) => ({
                       ...prev,
                       tipoCandidatura: v,
@@ -360,6 +375,13 @@ export default function ValidationTeacherAgenda() {
                       unidadeCurricular: "",
                     }))
                   }
+                  options={tiposCandidaturaFiltered}
+                  loading={isLoadingTiposCandidatura}
+                  map={(tipo) => ({
+                    key: tipo.codigo,
+                    label: tipo.designacao,
+                    value: tipo.codigo,
+                  })}
                 />
 
                 <AcademicYearsAvailableForOperationSelect
@@ -680,9 +702,10 @@ export default function ValidationTeacherAgenda() {
 
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                <TipoCandidaturaSelect
+                <FormSelect
+                  label="Tipo de Candidatura"
                   value={filtersPendentes.tipoCandidatura}
-                  onChangeValue={(v) =>
+                  onChange={(v) =>
                     setFiltersPendentes((prev) => ({
                       ...prev,
                       tipoCandidatura: v,
@@ -691,6 +714,13 @@ export default function ValidationTeacherAgenda() {
                       anoCurricular: "",
                     }))
                   }
+                  options={tiposCandidaturaFiltered}
+                  loading={isLoadingTiposCandidatura}
+                  map={(tipo) => ({
+                    key: tipo.codigo,
+                    label: tipo.designacao,
+                    value: tipo.codigo,
+                  })}
                 />
 
                 <AcademicYearsAvailableForOperationSelect

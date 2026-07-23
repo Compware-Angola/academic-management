@@ -27,10 +27,12 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
 import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-years";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function FormulaUC() {
   // ===========================
@@ -55,6 +57,18 @@ export default function FormulaUC() {
   const { data: semestres, isLoading: isLoadingSemestres } =
     useQuerySemestres();
   const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
   const { data: academicYearResponse } = useAcademicYears({
     tipoCandidatura: parseFilter(formData.tipoCandidatura) ?? 0,
     
@@ -247,9 +261,10 @@ export default function FormulaUC() {
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <TipoCandidaturaSelect
+          <FormSelect
+            label="Tipo de Candidatura"
             value={formData.tipoCandidatura}
-            onChangeValue={(v) =>
+            onChange={(v) =>
               setFormData({
                 ...formData,
                 tipoCandidatura: v,
@@ -258,6 +273,13 @@ export default function FormulaUC() {
                 classes: "",
               })
             }
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
           />
 
           <AcademicYearsAvailableForOperationSelect

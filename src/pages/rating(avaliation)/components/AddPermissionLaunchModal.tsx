@@ -30,8 +30,10 @@ import { Label } from "@/components/ui/label";
 import { useMutationCreatePermissionLaunch } from "@/hooks/avaliacao/use-mutation-create-permission-launch";
 import { AssessmentPermissionPayload } from "@/services/avaliacao/create-permission-launch.service";
 import { Loader } from "lucide-react";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -64,6 +66,18 @@ export default function AddPermissionLaunchModal({
   const { data: semestres } = useQuerySemestres();
   const { data: cursos } = useCursos({
     tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+  });
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
   });
   const { data: docentes, isLoading: isLoadingDocente } =
     useQueryTeacherByUcAndAcademicYear({
@@ -117,9 +131,10 @@ export default function AddPermissionLaunchModal({
 
         <div className="flex-1 overflow-y-auto py-6 min-h-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            <TipoCandidaturaSelect
+            <FormSelect
+              label="Tipo de Candidatura"
               value={filters.tipoCandidatura}
-              onChangeValue={(v) =>
+              onChange={(v) =>
                 setFilters({
                   ...filters,
                   tipoCandidatura: v,
@@ -130,6 +145,13 @@ export default function AddPermissionLaunchModal({
                   docente: "",
                 })
               }
+              options={tiposCandidaturaFiltered}
+              loading={isLoadingTiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
             />
 
             <AcademicYearsAvailableForOperationSelect

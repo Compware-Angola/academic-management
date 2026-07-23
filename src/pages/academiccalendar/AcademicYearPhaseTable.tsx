@@ -50,7 +50,10 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-years";
 import { useUpdateAcademicYearPhase } from "@/hooks/academiccalendar/use-update-academic-year-phase";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 const JANELA_ATIVACAO_DIAS = 10;
 
@@ -248,7 +251,23 @@ function EstadoBadge({ estado }: { estado: EstadoAno }) {
 export default function AcademicYearPhase() {
   const { mutate: updatePhase, isPending: isSaving } =
     useUpdateAcademicYearPhase();
+  const { hasPermission } = usePermission();
   const [tipoCandidatura, setTipoCandidatura] = useState<number>(1);
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = useMemo(() => {
+    return tiposCandidatura?.filter((tp) => {
+      if (
+        !hasPermission(
+          PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
+        ) &&
+        (tp.sigla === "DTR" || tp.sigla === "MST")
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [hasPermission, tiposCandidatura]);
   const { data, isLoading, isError } = useAcademicYears({
     tipoCandidatura: tipoCandidatura,
   });
@@ -272,6 +291,19 @@ export default function AcademicYearPhase() {
   const [selectedId, setSelectedId] = useState<string>("");
   const [novoEstado, setNovoEstado] = useState<EstadoAno | null>(null);
   const [confirmAtivar, setConfirmAtivar] = useState(false);
+
+  useEffect(() => {
+    if (isLoadingTiposCandidatura || tiposCandidaturaFiltered.length === 0)
+      return;
+
+    const tipoCandidaturaValido = tiposCandidaturaFiltered.some(
+      (tipo) => tipo.codigo === tipoCandidatura,
+    );
+
+    if (!tipoCandidaturaValido) {
+      setTipoCandidatura(Number(tiposCandidaturaFiltered[0]?.codigo));
+    }
+  }, [isLoadingTiposCandidatura, tiposCandidaturaFiltered, tipoCandidatura]);
 
   useEffect(() => {
     if (anos.length === 0) return;
@@ -406,9 +438,17 @@ export default function AcademicYearPhase() {
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <TipoCandidaturaSelect
+              <FormSelect
+                label="Tipo de Candidatura"
                 value={tipoCandidatura?.toString()}
-                onChangeValue={(v) => setTipoCandidatura(Number(v))}
+                onChange={(v) => setTipoCandidatura(Number(v))}
+                options={tiposCandidaturaFiltered}
+                loading={isLoadingTiposCandidatura}
+                map={(tp) => ({
+                  key: tp.codigo,
+                  label: tp.designacao,
+                  value: tp.codigo,
+                })}
               />
             </div>
             <div className="space-y-2">

@@ -32,9 +32,11 @@ import AddPermissionLaunchModal from "../components/AddPermissionLaunchModal";
 import { useMutationUpdatePermissionAssessment } from "@/hooks/avaliacao/use-mutation-update-permission-launch";
 import UpdatePermissionLaunchModal from "../components/UpdatePermissionLaunchModal";
 import { AssessmentPermissionItem } from "@/services/avaliacao/fetch-permission-assessment";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function Permission() {
   const [filters, setFilters] = useState({
@@ -53,6 +55,18 @@ export default function Permission() {
 
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   const openAddPermissionLaunchModal = () => {
     setIsModalOpen(true);
@@ -194,15 +208,23 @@ const pdfContent = pdfData ? (
             <div className="flex justify-between">
               <CardTitle>Permissões Encontradas</CardTitle>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-[520px]">
-                <TipoCandidaturaSelect
+                <FormSelect
+                  label="Tipo de Candidatura"
                   value={filters.tipoCandidatura}
-                  onChangeValue={(v) =>
+                  onChange={(v) =>
                     setFilters({
                       ...filters,
                       tipoCandidatura: v,
                       anoLetivo: "",
                     })
                   }
+                  options={tiposCandidaturaFiltered}
+                  loading={isLoadingTiposCandidatura}
+                  map={(tipo) => ({
+                    key: tipo.codigo,
+                    label: tipo.designacao,
+                    value: tipo.codigo,
+                  })}
                 />
                 <AcademicYearsAvailableForOperationSelect
                   label="Ano Lectivo"
