@@ -1,14 +1,14 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-
 /* ---------- PAYLOAD ---------- */
 export type GetSchedulesByUcPayload = {
-  anoLectivo: number;      // ex: 22
-  semestre: number;        // ex: 1
-  periodo: number;         // ex: 5
-  curso: number;           // ex: 18
+  anoLectivo: number; // ex: 22
+  semestre: number; // ex: 1
+  periodo: number; // ex: 5
+  curso: number; // ex: 18
   unidadeCurricular: number; // ex: 6
   docente?: number;
+  tipo_avaliacao?: number;
   page?: number;
   limit?: number;
 };
@@ -16,22 +16,22 @@ export type GetSchedulesByUcPayload = {
 /* ---------- RESPONSE ---------- */
 export type TurmaItem = {
   codigo: number;
-  designacao: string;              // "AGT.1.TAS.D-H1"
+  designacao: string; // "AGT.1.TAS.D-H1"
   unidadecurricularid: number;
-  unidadecurricular: string;       // "Território, Ambiente e Sociedade"
-  curso: string;                   // "AGT"
-  ano: string;                     // "1º ano"
+  unidadecurricular: string; // "Território, Ambiente e Sociedade"
+  curso: string; // "AGT"
+  ano: string; // "1º ano"
   capacidade: number;
-  reservado: string;               // "Não"
-  periodo: string;                 // "5"
-  semestre: string;                // "1"
-  estado: string;                  // "Concluído/Disponível"
+  reservado: string; // "Não"
+  periodo: string; // "5"
+  semestre: string; // "1"
+  estado: string; // "Concluído/Disponível"
   estadocor: string | null;
   estadoid: number;
-  disponibilidade: string;         // "Disponivel"
+  disponibilidade: string; // "Disponivel"
   criadopor: string;
   atualizadopor: string | null;
-  dataultimaatualizacao: string;   // "23/09/2024 00:27"
+  dataultimaatualizacao: string; // "23/09/2024 00:27"
   datacriacao: string;
 };
 
@@ -45,7 +45,7 @@ export type GetSchedulesByUcResponse = {
 
 /* ---------- SERVICE ---------- */
 export async function getSchedulesByUcService(
-  payload: GetSchedulesByUcPayload
+  payload: GetSchedulesByUcPayload,
 ): Promise<GetSchedulesByUcResponse> {
   const {
     anoLectivo,
@@ -71,7 +71,42 @@ export async function getSchedulesByUcService(
         page,
         limit,
       },
-    }
+    },
+  );
+
+  return data;
+}
+
+export async function getSchedulesByUcService2(
+  payload: GetSchedulesByUcPayload,
+): Promise<GetSchedulesByUcResponse> {
+  const {
+    anoLectivo,
+    semestre,
+    periodo,
+    curso,
+    unidadeCurricular,
+    docente,
+    tipo_avaliacao,
+    page = 1,
+    limit = 999,
+  } = payload;
+
+  const { data } = await axiosNestGa.get<GetSchedulesByUcResponse>(
+    "/schedule/by-uc2",
+    {
+      params: {
+        anoLectivo,
+        semestre,
+        periodo,
+        curso,
+        unidadeCurricular: unidadeCurricular,
+        docente,
+        tipo_avaliacao,
+        page,
+        limit,
+      },
+    },
   );
 
   return data;
