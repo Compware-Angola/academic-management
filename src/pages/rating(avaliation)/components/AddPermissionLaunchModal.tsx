@@ -30,6 +30,8 @@ import { Label } from "@/components/ui/label";
 import { useMutationCreatePermissionLaunch } from "@/hooks/avaliacao/use-mutation-create-permission-launch";
 import { AssessmentPermissionPayload } from "@/services/avaliacao/create-permission-launch.service";
 import { Loader } from "lucide-react";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -45,6 +47,7 @@ export default function AddPermissionLaunchModal({
     useMutationCreatePermissionLaunch();
   // filtros
   const [filters, setFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -59,7 +62,9 @@ export default function AddPermissionLaunchModal({
 
   const { data: anosAcademicos } = useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
-  const { data: cursos } = useCursos();
+  const { data: cursos } = useCursos({
+    tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+  });
   const { data: docentes, isLoading: isLoadingDocente } =
     useQueryTeacherByUcAndAcademicYear({
       anoLectivo: parseFilter(filters.anoLetivo),
@@ -112,24 +117,29 @@ export default function AddPermissionLaunchModal({
 
         <div className="flex-1 overflow-y-auto py-6 min-h-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Letivo</label>
-              <Select
-                value={filters.anoLetivo}
-                onValueChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosAcademicos?.map((a) => (
-                    <SelectItem key={a.codigo} value={a.codigo.toString()}>
-                      {a.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: "",
+                  curso: "",
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                  docente: "",
+                })
+              }
+            />
+
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Letivo"
+              value={filters.anoLetivo}
+              onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
+              tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!filters.tipoCandidatura}
+            />
 
             {/* Semestre */}
             <div className="space-y-2">

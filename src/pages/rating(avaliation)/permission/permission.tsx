@@ -32,9 +32,13 @@ import AddPermissionLaunchModal from "../components/AddPermissionLaunchModal";
 import { useMutationUpdatePermissionAssessment } from "@/hooks/avaliacao/use-mutation-update-permission-launch";
 import UpdatePermissionLaunchModal from "../components/UpdatePermissionLaunchModal";
 import { AssessmentPermissionItem } from "@/services/avaliacao/fetch-permission-assessment";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function Permission() {
   const [filters, setFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
   });
 
@@ -189,19 +193,28 @@ const pdfContent = pdfData ? (
           <CardHeader>
             <div className="flex justify-between">
               <CardTitle>Permissões Encontradas</CardTitle>
-              <FormSelect
-                disabled={isLoadingAcademicYear}
-                loading={isLoadingAcademicYear}
-                label="Ano Lectivo"
-                value={filters.anoLetivo}
-                onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-                options={academicYear}
-                map={(a) => ({
-                  key: a.codigo,
-                  label: a.designacao,
-                  value: a.codigo,
-                })}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-[520px]">
+                <TipoCandidaturaSelect
+                  value={filters.tipoCandidatura}
+                  onChangeValue={(v) =>
+                    setFilters({
+                      ...filters,
+                      tipoCandidatura: v,
+                      anoLetivo: "",
+                    })
+                  }
+                />
+                <AcademicYearsAvailableForOperationSelect
+                  label="Ano Lectivo"
+                  value={filters.anoLetivo}
+                  onChangeValue={(v) =>
+                    setFilters({ ...filters, anoLetivo: v })
+                  }
+                  tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+                  onlyConfigurable={false}
+                  disabled={!filters.tipoCandidatura}
+                />
+              </div>
             </div>
           </CardHeader>
 

@@ -32,7 +32,6 @@ import { Link } from "react-router-dom";
 
 import { useQueryDisciplinasProva } from "@/hooks/avaliacao/use-query-disciplinas-prova";
 import { ModalNotasDisciplina } from "./modal-notas-disciplina";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
@@ -41,6 +40,10 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
+import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-years";
 
 
 type SelectedNotas = {
@@ -65,6 +68,7 @@ export default function ControlNotes() {
 
   // Filtros
   const [formData, setFormData] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
     curso: "",
@@ -106,11 +110,13 @@ export default function ControlNotes() {
       : undefined,
   });
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
   const { data: semestres, isLoading: isLoadingSemestres } =
     useQuerySemestres();
-  const { data: cursos, isLoading: isLoadingCurso } = useCursos();
+  const { data: cursos } = useCursos();
+  const { data: academicYearResponse } = useAcademicYears({
+    tipoCandidatura: parseFilter(formData.tipoCandidatura) ?? 0
+  });
+  const academicYear = academicYearResponse?.data ?? [];
 
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
@@ -221,6 +227,7 @@ export default function ControlNotes() {
   // VALIDAÇÃO E PESQUISA
   // =======================================
   const isFormValid =
+    formData.tipoCandidatura &&
     formData.anoLetivo &&
     formData.semestre &&
     formData.curso &&
@@ -297,18 +304,28 @@ export default function ControlNotes() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <FormSelect
+          <TipoCandidaturaSelect
+            value={formData.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFormData({
+                ...formData,
+                tipoCandidatura: v,
+                anoLetivo: "",
+                curso: "",
+                classes: "",
+                unidadeCurricular: "",
+              })
+            }
+          />
+
+          <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={formData.anoLetivo}
-            onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
-            options={academicYear}
-            loading={isLoadingAcademicYear}
-            disabled={isLoadingAcademicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            onChangeValue={(v) => setFormData({ ...formData, anoLetivo: v })}
+            tipoCandidaturaId={parseFilter(formData.tipoCandidatura) ?? 0}
+            enableDefaultActiveYear
+            disabled={!formData.tipoCandidatura}
+            onlyConfigurable={false}
           />
 
           <FormSelect
@@ -342,6 +359,10 @@ export default function ControlNotes() {
                 unidadeCurricular: "",
               })
             }
+            params={{
+              tipoCandidaturaId: parseFilter(formData.tipoCandidatura),
+            }}
+            disabled={!formData.tipoCandidatura}
           />
 
           <FormSelect

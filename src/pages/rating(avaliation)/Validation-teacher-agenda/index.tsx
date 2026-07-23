@@ -60,6 +60,9 @@ import { useQueryEstadoPauta } from "@/hooks/avaliacao/use-query-estado-pauta";
 import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 import { useAuth } from "@/hooks/use-auth";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function ValidationTeacherAgenda() {
   const { toast } = useToast();
@@ -68,6 +71,7 @@ export default function ValidationTeacherAgenda() {
 
   // Filtros para pautas submetidas
   const [filtersSubmetidas, setFiltersSubmetidas] = useState({
+    tipoCandidatura: "",
     anoLectivo: "",
     semestre: "",
     curso: "",
@@ -79,6 +83,7 @@ export default function ValidationTeacherAgenda() {
 
   // Filtros para unidades sem pauta (apenas os campos que pediste)
   const [filtersPendentes, setFiltersPendentes] = useState({
+    tipoCandidatura: "",
     anoLectivo: "",
     semestre: "",
     curso: "",
@@ -251,6 +256,7 @@ export default function ValidationTeacherAgenda() {
   const limparFiltros = () => {
     if (activeTab === "submetidas") {
       setFiltersSubmetidas({
+        tipoCandidatura: "",
         anoLectivo: "",
         semestre: "",
         curso: "",
@@ -262,6 +268,7 @@ export default function ValidationTeacherAgenda() {
       setCurrentPageSubmetidas(1);
     } else {
       setFiltersPendentes({
+        tipoCandidatura: "",
         anoLectivo: "",
         semestre: "",
         curso: "",
@@ -341,18 +348,29 @@ export default function ValidationTeacherAgenda() {
 
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                <FormSelect
+                <TipoCandidaturaSelect
+                  value={filtersSubmetidas.tipoCandidatura}
+                  onChangeValue={(v) =>
+                    setFiltersSubmetidas((prev) => ({
+                      ...prev,
+                      tipoCandidatura: v,
+                      anoLectivo: "",
+                      curso: "",
+                      anoCurricular: "",
+                      unidadeCurricular: "",
+                    }))
+                  }
+                />
+
+                <AcademicYearsAvailableForOperationSelect
                   label="Ano Lectivo"
                   value={filtersSubmetidas.anoLectivo}
-                  onChange={(v) =>
+                  onChangeValue={(v) =>
                     setFiltersSubmetidas((prev) => ({ ...prev, anoLectivo: v }))
                   }
-                  options={academicYear}
-                  map={(a) => ({
-                    value: a.codigo,
-                    label: a.designacao,
-                    key: a.codigo,
-                  })}
+                  tipoCandidaturaId={parseFilter(filtersSubmetidas.tipoCandidatura) ?? 1}
+                  onlyConfigurable={false}
+                  disabled={!filtersSubmetidas.tipoCandidatura}
                 />
 
                 <FormSelect
@@ -379,6 +397,10 @@ export default function ValidationTeacherAgenda() {
                       unidadeCurricular: "",
                     }))
                   }
+                  params={{
+                    tipoCandidaturaId: parseFilter(filtersSubmetidas.tipoCandidatura),
+                  }}
+                  disabled={!filtersSubmetidas.tipoCandidatura}
                 />
 
                 <FormSelect
@@ -658,18 +680,28 @@ export default function ValidationTeacherAgenda() {
 
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                <FormSelect
+                <TipoCandidaturaSelect
+                  value={filtersPendentes.tipoCandidatura}
+                  onChangeValue={(v) =>
+                    setFiltersPendentes((prev) => ({
+                      ...prev,
+                      tipoCandidatura: v,
+                      anoLectivo: "",
+                      curso: "",
+                      anoCurricular: "",
+                    }))
+                  }
+                />
+
+                <AcademicYearsAvailableForOperationSelect
                   label="Ano Lectivo"
                   value={filtersPendentes.anoLectivo}
-                  onChange={(v) =>
+                  onChangeValue={(v) =>
                     setFiltersPendentes((prev) => ({ ...prev, anoLectivo: v }))
                   }
-                  options={academicYear}
-                  map={(a) => ({
-                    value: a.codigo,
-                    label: a.designacao,
-                    key: a.codigo,
-                  })}
+                  tipoCandidaturaId={parseFilter(filtersPendentes.tipoCandidatura) ?? 1}
+                  onlyConfigurable={false}
+                  disabled={!filtersPendentes.tipoCandidatura}
                 />
 
                 <FormSelect
@@ -695,6 +727,10 @@ export default function ValidationTeacherAgenda() {
                       anoCurricular: "",
                     }))
                   }
+                  params={{
+                    tipoCandidaturaId: parseFilter(filtersPendentes.tipoCandidatura),
+                  }}
+                  disabled={!filtersPendentes.tipoCandidatura}
                 />
 
                 <FormSelect
