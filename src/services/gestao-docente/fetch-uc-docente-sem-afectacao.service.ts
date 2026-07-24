@@ -1,4 +1,4 @@
-export type UCDocenteSemAfectacao= {
+export type UCDocenteSemAfectacao = {
   curso: string;
   codigo_disciplina: number;
   disciplina: string;
@@ -23,9 +23,10 @@ export type UCDocenteSemAfectacaoPayload = {
   cursoId?: number;
   semestreId?: number;
   classeId?: number;
+  tipoCandidaturaId?: number;
   page?: number;
   limit?: number;
-  search?:string
+  search?: string
 };
 
 
@@ -39,6 +40,7 @@ export async function fetchUCDocenteSemAfectacaoService(
     cursoId,
     semestreId,
     classeId,
+    tipoCandidaturaId,
     page = 1,
     limit = 10,
     search
@@ -52,6 +54,7 @@ export async function fetchUCDocenteSemAfectacaoService(
         cursoId,
         semestreId,
         classeId,
+        tipoCandidaturaId,
         page,
         limit,
         search
