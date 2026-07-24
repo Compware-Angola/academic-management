@@ -121,7 +121,6 @@ export default function UCManagementPlan() {
     });
   };
 
-  console.log("Grade Curricular", gradeResponses);
 
   const { mutate: createUC, isPending: isCreating } = useAddUCToPlan();
 
@@ -379,9 +378,8 @@ export default function UCManagementPlan() {
 
                 mensagem = `Selecione ${faltantes.join(", ")} para visualizar as unidades curriculares`;
               } else if (estado !== undefined) {
-                mensagem = `Nenhuma unidade curricular ${
-                  estado === 1 ? "ativa" : "inativa"
-                } encontrada para os filtros selecionados`;
+                mensagem = `Nenhuma unidade curricular ${estado === 1 ? "ativa" : "inativa"
+                  } encontrada para os filtros selecionados`;
               } else {
                 mensagem =
                   "Nenhuma unidade curricular encontrada para os filtros selecionados";

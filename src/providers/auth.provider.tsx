@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useIsPublicRoute } from "./helpers/verify-public.routes";
-import { useBlockMyCashRegister } from "@/hooks/financa/use-cash-register";
 
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 min
 const WARNING_TIME = 10 * 1000; // 10 s
@@ -49,10 +48,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["current-user", "GA"],
-    queryFn: () => getCurrentUserService("GA"),
+    queryKey: ["current-user"],
+    queryFn: () => getCurrentUserService(),
     enabled: !!token && !isPublicRoute,
   });
+
 
   useEffect(() => {
     if (!isLoading && isError) {
@@ -97,8 +97,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     timeout: INACTIVITY_TIMEOUT,
     warningTime: WARNING_TIME,
     enabled: !!token && isPublicRoute,
-    onIdle: useCallback(() => {}, []),
-    onContinue: useCallback(() => {}, []),
+    onIdle: useCallback(() => { }, []),
+    onContinue: useCallback(() => { }, []),
   });
 
   // ─── VISIBILITY CONTROL ───────────────────────────────
@@ -187,7 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     >
       {children}
 
-      <Dialog open={openWarning} onOpenChange={() => {}}>
+      <Dialog open={openWarning} onOpenChange={() => { }}>
         <DialogContent
           className="max-w-md"
           onPointerDownOutside={(e) => e.preventDefault()}
@@ -202,13 +202,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           <div className="flex flex-col items-center justify-center gap-2 py-6">
             <span
-              className={`text-7xl font-bold tabular-nums transition-colors duration-500 ${
-                secondsLeft <= 2
-                  ? "text-red-500 animate-pulse"
-                  : secondsLeft <= 4
-                    ? "text-orange-400"
-                    : "text-yellow-500"
-              }`}
+              className={`text-7xl font-bold tabular-nums transition-colors duration-500 ${secondsLeft <= 2
+                ? "text-red-500 animate-pulse"
+                : secondsLeft <= 4
+                  ? "text-orange-400"
+                  : "text-yellow-500"
+                }`}
             >
               {secondsLeft}
             </span>

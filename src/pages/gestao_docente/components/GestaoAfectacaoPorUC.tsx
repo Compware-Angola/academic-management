@@ -29,6 +29,8 @@ import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mut
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 const GestaoAfectacaoPorUC = () => {
   const unidadeCurricularKey = useId();
@@ -36,15 +38,15 @@ const GestaoAfectacaoPorUC = () => {
   const [limit, setLimit] = useState(10);
   const { mutateAsync, isPending } = useMutationUpdateAfectacaoStatus();
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "",
     semestre: "",
     docente: "",
     curso: "",
     anoCurricular: "all",
     unidadeCurricular: "all",
+    tipoCandidaturaId: "",
   });
 
-  const { data: teachersData = [] } = useQueryTeacther();
   const { data: afectacoesResponse, isLoading } =
     useQueryGestaoAfectacaoDocentes({
       anoLectivo: parseFilter(filters.anoLectivo),
@@ -83,14 +85,32 @@ const GestaoAfectacaoPorUC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 grid-cols-3">
-            <AcademicYearSelect
-              value={filters.anoLectivo}
-              onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
-            />
-            <SemestreSelect
-              value={filters.semestre}
-              onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
-            />
+            <div className="space-y-2">
+              <TipoCandidaturaSelect
+                value={filters.tipoCandidaturaId}
+                onChangeValue={(v) => setFilters({ ...filters, tipoCandidaturaId: v })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <AcademicYearsAvailableForOperationSelect
+                value={filters.anoLectivo}
+                onlyConfigurable={false}
+
+                onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
+
+                tipoCandidaturaId={Number(filters.tipoCandidaturaId)}
+
+              />
+            </div>
+            {
+              Number(filters.tipoCandidaturaId) === 1 ? (
+                <SemestreSelect
+                  value={filters.semestre}
+                  onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
+                />
+              ) : null
+            }
             <CourseSelect
               value={filters.curso}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}

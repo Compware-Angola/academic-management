@@ -28,15 +28,16 @@ import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryListDocentesRegentes } from "@/hooks/gestao_docente/use-query-list-docentes-regentes";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useDefinirRegente } from "@/hooks/gestao_docente/use-definir-regente";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 
 type DocenteRegente = {
@@ -57,6 +58,7 @@ const ESTADOS = [
 export default function Regentes() {
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
   const [anoLectivo, setAnoLectivo] = useState("");
   const [curso, setCurso] = useState("");
   const [classe, setClasse] = useState("");
@@ -72,6 +74,8 @@ export default function Regentes() {
   const [docenteSelecionado, setDocenteSelecionado] = useState("");
 
   const { data: teachersData = [] } = useQueryTeacther();
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   const [filtrosAplicados, setFiltrosAplicados] = useState({
     anoLectivo: "",
@@ -80,9 +84,6 @@ export default function Regentes() {
     semestre: "0",
     estado: "0",
   });
-
-  const { data: anosLectivos } = useQueryAnoAcademico();
-  const { data: cursos } = useCursos();
 
   const { data: semestres } = useQuerySemestres();
   const { data: classes = [], isLoading: isLoadingClasses } =
@@ -292,28 +293,44 @@ export default function Regentes() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Lectivo</label>
-              <Select value={anoLectivo} onValueChange={setAnoLectivo}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ano lectivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosLectivos?.map((ano: any) => (
-                    <SelectItem
-                      key={ano.codigo ?? ano.CODIGO}
-                      value={String(ano.codigo ?? ano.CODIGO)}
-                    >
-                      {ano.designacao ?? ano.DESIGNACAO}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormSelect
+                label="Tipo de Candidatura"
+                value={tipoCandidatura}
+                loading={isLoadingTiposCandidatura}
+                onChange={(v) => {
+                  setTipoCandidatura(v);
+                  setAnoLectivo("");
+                  setCurso("");
+                  setClasse("0");
+                  setCurrentPage(1);
+                }}
+                options={tiposCandidatura}
+                map={(tipo) => ({
+                  key: tipo.codigo,
+                  label: tipo.designacao,
+                  value: tipo.codigo,
+                })}
+                placeholder="Selecione o tipo..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <AcademicYearsAvailableForOperationSelect
+                value={anoLectivo}
+                onChangeValue={(v) => setAnoLectivo(v)}
+                tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+                onlyConfigurable={false}
+                disabled={!tipoCandidatura}
+              />
             </div>
 
             <div className="space-y-2">
 
               <CourseSelect
                 value={curso}
+                params={{
+                  tipoCandidaturaId: parseFilter(tipoCandidatura),
+                }}
                 onChangeValue={(v) => {
                   setCurso(String(v));
                   setClasse("0");
@@ -444,4 +461,3 @@ export default function Regentes() {
     </div>
   );
 }
-

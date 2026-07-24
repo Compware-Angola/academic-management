@@ -38,11 +38,11 @@ import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function AssiduidadeDocente() {
-  const { data: userDate } = useCurrentUser("GA");
+  const { data: userDate } = useCurrentUser();
   const isDocente = userDate?.roles?.docente;
   const { user } = useAuth();
   const userData = user?.user;
-  const { data: teacherInfoData } = useQueryTeacherProfile(userData?.pk_utilizador);
+  const { data: teacherInfoData } = useQueryTeacherProfile(userData?.pk_utilizador.toString());
 
   const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } =
@@ -245,9 +245,9 @@ export default function AssiduidadeDocente() {
               map={(u) => ({ key: u.codigo, value: u.codigo, label: u.nome_cadeira })}
               placeholder={
                 !filters.curso ? "Selecione curso"
-                : !filters.semestre ? "Selecione semestre"
-                : isLoadingUC ? "Carregando UCs..."
-                : "Selecionar UC"
+                  : !filters.semestre ? "Selecione semestre"
+                    : isLoadingUC ? "Carregando UCs..."
+                      : "Selecionar UC"
               }
               onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
             />

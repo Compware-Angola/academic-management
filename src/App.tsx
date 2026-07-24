@@ -156,7 +156,6 @@ import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
 import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
-import PostGraduationPrimaryRecords from "./pages/post-graduation/PrimaryRecords";
 import PostGraduationAcademicActivities from "./pages/post-graduation/AcademicActivities";
 import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/AcademicCalendarParameters";
 import PostGraduationVacancies from "./pages/post-graduation/Vacancies";
@@ -1915,19 +1914,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route
-                    path="/pos-graduacao/registos-primarios"
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails
-                            .REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla!,
-                        ]}
-                      >
-                        <PostGraduationPrimaryRecords />
-                      </ProtectedRoute>
-                    }
-                  />
+              
                   <Route
                     path="/pos-graduacao/calendario/atividades"
                     element={

@@ -45,15 +45,18 @@ import type {
   IsencaoServico,
   UpdateIsencaoServicoBody,
 } from "@/services/financas/isencao-servicos/isencao-servico.service.ts";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CreateIsencaoDialog } from "./CreateIsencaoDialog";
 import { CreateIsencaoMesDialog } from "./CreateIsencaoMesDialog";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 export default function IsencaoServicoItem() {
   const [matriculaInput, setMatriculaInput] = useState("");
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
   const [filters, setFilters] = useState({
     matricula: null,
     anoLectivo: "",
@@ -72,6 +75,8 @@ export default function IsencaoServicoItem() {
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   const { data, refetch, isFetching } = useQueryFetchIsencaoServico({
     codigoMatricula: parseFilter(filtersApplied.matricula),
@@ -110,7 +115,6 @@ export default function IsencaoServicoItem() {
       estadoIsencao: item.estado_isensao ?? "",
       codigo: item.codigo,
     };
-    console.log(initial);
     setEditForm(initial);
     setOriginalEditForm(initial);
     setIsEditOpen(true);
@@ -232,9 +236,29 @@ export default function IsencaoServicoItem() {
           <CardTitle>Filtros de Pesquisa</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <AcademicYearSelect
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setTipoCandidatura(v);
+                setFilters({ ...filters, anoLectivo: "", curso: "" });
+                setPage(1);
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+            <AcademicYearsAvailableForOperationSelect
               value={filters.anoLectivo}
+              tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidatura}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <FacultySelect
@@ -248,6 +272,7 @@ export default function IsencaoServicoItem() {
               placeholder="Cursos"
               params={{
                 faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(tipoCandidatura),
               }}
               value={filters.curso}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}

@@ -22,6 +22,7 @@ import { TeachersItem } from "@/services/gestao-docente/fetch-list-teachers.serv
 import { useMutationUpdateDocente } from "@/hooks/gestao_docente/use-mutation-update-docente";
 import { UpdateDocentePayload } from "@/services/gestao-docente/update-docente.service";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryFetchGrauAcademico } from "@/hooks/shared/use-query-fetch-grau-academico";
 
 interface GestaoAfectacaoModalProps {
   isModalOpen: boolean;
@@ -35,6 +36,8 @@ export const EditarDocenteModal = ({
 }: GestaoAfectacaoModalProps) => {
   const { data: categoriaDocente = [] } = useQueryCategoriaDocente();
   const { data: escaloes = [] } = useQueryEscalao();
+  const { data: grauAcademicoResponse = [], isLoading: grauAcademicoLoading } =
+    useQueryFetchGrauAcademico();
   const { toast } = useToast();
   const { mutateAsync, isPending } = useMutationUpdateDocente();
   const [params, setParams] = useState({
@@ -86,7 +89,6 @@ export const EditarDocenteModal = ({
     }));
   }, [docente]);
 
-  console.log(docente);
 
   const handleSubmit = async () => {
     if (!docente) return;
@@ -206,12 +208,16 @@ export const EditarDocenteModal = ({
                 }
               />
             </div>
-            <TipoCandidaturaSelect
-              temporarilyUnavailable={true}
-              disabled={true}
-              value={params.tipoCandidatura}
-              onChangeValue={(v) => handleChangeInput("tipoCandidatura", v)}
-            />
+            <div className="space-y-2">
+              <Label>Tipo de Candidatura</Label>
+              <FormCommandSelect
+                width="full"
+                value={params.tipoCandidatura}
+                options={grauAcademicoResponse}
+                map={(t) => ({ key: t.codigo, value: String(t.codigo), label: t.label })}
+                onChange={(codigo) => handleChangeInput("tipoCandidatura", codigo)}
+              />
+            </div>
             <div className="space-y-2">
               <Label>Anos de Experiência</Label>
               <Input

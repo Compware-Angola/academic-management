@@ -19,9 +19,10 @@ import PDFActions, {
 
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { useQueryRegistoPrimarioMatriculados } from "@/hooks/students/use-query-registo-primario-matriculados";
 import { useClasses } from "@/hooks/use-classes";
+import { parseFilter } from "@/util/parse-filter";
 
 type RegistoPrimarioMatriculado = {
   numero: number;
@@ -42,7 +43,6 @@ type RegistoPrimarioMatriculado = {
 };
 
 const GRAUS = [
-  { value: "0", label: "Todos" },
   { value: "1", label: "Licenciatura" },
   { value: "2", label: "Mestrado" },
   { value: "3", label: "Doutoramento" },
@@ -64,7 +64,7 @@ type FiltersState = {
 
 const initialFilters: FiltersState = {
   anoLectivo: "",
-  grau: "0",
+  grau: "1",
   anoCurricular: "0",
   estado: "2",
   search: "",
@@ -77,7 +77,6 @@ export default function RegistoPrimarioMatriculados() {
   const [filtrosAplicados, setFiltrosAplicados] =
     useState<FiltersState>(initialFilters);
 
-  const { data: anosLectivos = [] } = useQueryAnoAcademico();
   const { data: anosCurriculares = [] } = useClasses();
 
   const anosFiltrados = anosCurriculares.filter(
@@ -323,34 +322,17 @@ export default function RegistoPrimarioMatriculados() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Lectivo</label>
-              <Select
-                value={filters.anoLectivo}
-                onValueChange={(value) =>
-                  handleFilterChange("anoLectivo", value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ano lectivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosLectivos.map((ano: any) => (
-                    <SelectItem
-                      key={ano.codigo ?? ano.CODIGO}
-                      value={String(ano.codigo ?? ano.CODIGO)}
-                    >
-                      {ano.designacao ?? ano.DESIGNACAO}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <label className="text-sm font-medium">Grau</label>
               <Select
                 value={filters.grau}
-                onValueChange={(value) => handleFilterChange("grau", value)}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    grau: value,
+                    anoLectivo: "",
+                    anoCurricular: "0",
+                  }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o grau" />
@@ -363,6 +345,19 @@ export default function RegistoPrimarioMatriculados() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <AcademicYearsAvailableForOperationSelect
+                key={filters.grau}
+                tipoCandidaturaId={parseFilter(filters.grau) ?? 1}
+                value={filters.anoLectivo}
+                onChangeValue={(value) =>
+                  handleFilterChange("anoLectivo", value)
+                }
+                onlyConfigurable={false}
+                disabled={!filters.grau}
+              />
             </div>
 
             <div className="space-y-2">

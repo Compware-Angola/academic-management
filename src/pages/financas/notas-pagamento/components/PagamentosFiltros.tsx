@@ -3,8 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Search, X } from "lucide-react";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FormSelect } from "@/components/common/FormSelect";
+import { useState } from "react";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 type SearchByType =
     | "codigoMatricula"
@@ -63,6 +66,10 @@ export function PagamentosFiltros({
     onSearch,
     onClear,
 }: PagamentosFiltrosProps) {
+    const [tipoCandidatura, setTipoCandidatura] = useState("1");
+    const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+        useQueryTipoCandidatura();
+
     const handleClear = () => {
         const clearedFilters: Filters = {
             anoLectivo: "23",
@@ -73,6 +80,7 @@ export function PagamentosFiltros({
         };
 
         // Atualiza os filtros locais
+        setTipoCandidatura("1");
         setFilters(clearedFilters);
         setSearchTerm("");
         setSearchBy("codigoMatricula");
@@ -115,9 +123,30 @@ export function PagamentosFiltros({
                 </div>
 
                 {/* Filtros principais */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <AcademicYearSelect
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <FormSelect
+                        label="Tipo de Candidatura"
+                        value={tipoCandidatura}
+                        loading={isLoadingTiposCandidatura}
+                        onChange={(v) => {
+                            setTipoCandidatura(v);
+                            setFilters({ ...filters, anoLectivo: "" });
+                            setPage(1);
+                        }}
+                        options={tiposCandidatura}
+                        map={(tipo) => ({
+                            key: tipo.codigo,
+                            label: tipo.designacao,
+                            value: tipo.codigo,
+                        })}
+                        placeholder="Selecione o tipo..."
+                    />
+
+                    <AcademicYearsAvailableForOperationSelect
                         value={filters.anoLectivo}
+                        tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+                        onlyConfigurable={false}
+                        disabled={!tipoCandidatura}
                         onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
                     />
 

@@ -86,11 +86,10 @@ export async function loginService(
 
 
 export async function getCurrentUserService(
-  platform: 'GA',
+
 ): Promise<CurrentUserResponse> {
-  const { data } = await axiosNestAuth.get<CurrentUserResponse>("/auth/current-user", {
-    params: { platform },
-  });
+  const { data } = await axiosNestAuth.get<CurrentUserResponse>("/auth/current-user");
+
 
   return data;
 }

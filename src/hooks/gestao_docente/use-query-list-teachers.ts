@@ -6,10 +6,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 export function useQueryListDocentes(payload: ListTeachersPayload) {
-  const { area, search, page, limit } = payload;
+  const { area, search, page, limit, grauAcademico } = payload;
 
   return useQuery<ListDocentesResponse>({
-    queryKey: ["docentes-list", area, search, page, limit],
+    queryKey: ["docentes-list", area, search, page, limit, grauAcademico],
     queryFn: () => getListTeachersService(payload),
   });
 }

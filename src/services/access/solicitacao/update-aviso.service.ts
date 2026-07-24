@@ -53,8 +53,6 @@ export async function updateAvisoService(
 ): Promise<UpdateAvisoResponse> {
   const { codigo, ...rest } = payload;
 
-   console.log("codigo da URL:", codigo);
-  console.log("body enviado:", rest);
 
   const { data } = await axiosNestGa.put(
     `/solicitacoa/aviso/${codigo}`,

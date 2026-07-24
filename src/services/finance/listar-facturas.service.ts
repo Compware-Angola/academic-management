@@ -170,7 +170,6 @@ export async function listarFacturaItensService(
 export async function buscarFacturaService(
   facturaId: number | string,
 ): Promise<FacturaDetalhe> {
-  console.log(facturaId);
   const { data } = await axiosNestFinance.get<FacturaDetalhe>(
     `/invoices/${facturaId}`,
   );

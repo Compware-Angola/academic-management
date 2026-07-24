@@ -83,7 +83,7 @@ export const ListaPagamentoModal = ({
   );
   const isLoading =
     isLoadingFacturaItens || isLoadingFactura || isLoadingStudent;
-  console.log("factura", factura);
+
   const baseFileName = `Detalhes_Pagamento_${factura?.codigo || factureId}_${new Date()
     .toISOString()
     .slice(0, 10)}`;

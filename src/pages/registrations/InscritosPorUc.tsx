@@ -86,9 +86,6 @@ export default function InscritosPorUc() {
   const { data: anosAcademicos = [] } = useQueryAnoAcademico();
   const { data: semestres = [] } = useQuerySemestres();
   const { data: periodos = [] } = useQueryPeriod();
-  const { data: cursos = [] } = useCursos();
-
-  console.log("PERIODOS: ", periodos);
 
   const { data: anosCurriculares = [], isLoading: isLoadingAnoCurricular } =
     useQueryClassFilterByCurso({
@@ -124,11 +121,11 @@ export default function InscritosPorUc() {
 
   const horariosOptions = Array.isArray(horarios)
     ? horarios
-        .map((item: any) => ({
-          codigo: item.codigo ?? item.CODIGO,
-          designacao: item.designacao ?? item.DESIGNACAO,
-        }))
-        .filter((item) => item.codigo)
+      .map((item: any) => ({
+        codigo: item.codigo ?? item.CODIGO,
+        designacao: item.designacao ?? item.DESIGNACAO,
+      }))
+      .filter((item) => item.codigo)
     : [];
 
   const canLoadHorarios =
@@ -212,26 +209,26 @@ export default function InscritosPorUc() {
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Lista de Inscritos por UC",
-          subtitle: "Listagem de estudantes inscritos por unidade curricular",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${inscritosResponse?.total ?? exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "matricula", label: "Matrícula", width: 20 },
-              { key: "nome", label: "Nome", width: 40 },
-              { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
-              { key: "curso", label: "Curso", width: 25 },
-              { key: "estado", label: "Estado", width: 18 },
-            ],
-            rows: exportRows,
+        documentTitle: "Lista de Inscritos por UC",
+        subtitle: "Listagem de estudantes inscritos por unidade curricular",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${inscritosResponse?.total ?? exportRows.length}`,
           },
-          primaryColor: "#0D1B48",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Matrícula", width: 20 },
+            { key: "nome", label: "Nome", width: 40 },
+            { key: "tipo_aluno", label: "Tipo Aluno", width: 18 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "estado", label: "Estado", width: 18 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   const columns = [
@@ -247,17 +244,7 @@ export default function InscritosPorUc() {
     setAppliedFilters(filters);
   }
 
-  console.log("PARAMS HORARIO:", {
-    anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : 0,
-    curso: filters.curso ? Number(filters.curso) : 0,
-    anoCurricular:
-      filters.anoCurricular && filters.anoCurricular !== "all"
-        ? Number(filters.anoCurricular)
-        : 0,
-    semestre: filters.semestre ? Number(filters.semestre) : 0,
-    periodo: filters.periodo ? Number(filters.periodo) : 0,
-    cadeira: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : 0,
-  });
+
 
   return (
     <div className="p-6 space-y-8">

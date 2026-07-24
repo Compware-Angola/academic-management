@@ -78,12 +78,12 @@ export function CandidateDetailsDialog({
 
     function handleApproveCandidate() {
         if (!candidate) return;
-        console.log("aprovar candidato", candidate.codigo_preinscricao);
+
     }
 
     function handleRejectCandidate() {
         if (!candidate) return;
-        console.log("reprovar candidato", candidate.codigo_preinscricao);
+
     }
 
     return (

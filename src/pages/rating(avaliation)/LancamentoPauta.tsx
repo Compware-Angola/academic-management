@@ -63,7 +63,7 @@ export default function LancamentoPauta() {
   const { user: userData } = useAuth();
 
   // Verificação de role
-  const { data: userDate } = useCurrentUser("GA");
+  const { data: userDate } = useCurrentUser();
   const isDocente = userDate?.roles?.docente;
 
   const [isModalOpen, setIsModalOpen] = useState(false);

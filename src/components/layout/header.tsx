@@ -39,7 +39,7 @@ import { useStudentSugestoes } from "@/hooks/students/use-query-students";
 import { useQueryAvisosPorGrupos } from "@/hooks/acess/use-query-avisos-por-grupo";
 
 export function Header() {
-  const { data: user } = useCurrentUser("GA");
+  const { data: user } = useCurrentUser();
   const { mutate: logoutUser } = useMutationLogout();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
