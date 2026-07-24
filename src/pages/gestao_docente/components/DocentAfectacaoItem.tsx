@@ -37,6 +37,7 @@ import { formatarData } from "@/util/date-formate";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
 
 const DocentAfectacaoItem = () => {
   const id = useId();
@@ -150,7 +151,7 @@ const DocentAfectacaoItem = () => {
               onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
             />
             <div className="space-y-1.5">
-              <Label>Docente</Label>
+              {/* <Label>Docente</Label>
               <FormCommandSelect
                 width="full"
                 value={filters.docente}
@@ -159,6 +160,13 @@ const DocentAfectacaoItem = () => {
                 onChange={(codigo) =>
                   setFilters({ ...filters, docente: codigo })
                 }
+              /> */}
+              <TeacherSelectList
+                value={filters.docente}
+                onChangeValue={(codigo) =>
+                  setFilters({ ...filters, docente: codigo })
+                }
+                tipoCandidatura={parseFilter(tipoCandidatura)}
               />
             </div>
             <div>

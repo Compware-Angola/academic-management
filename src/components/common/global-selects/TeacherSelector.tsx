@@ -44,8 +44,10 @@ const TeacherSelectList = ({
       map={(teacher) => ({
         key: teacher.codigo,
         value: teacher.codigo.toString(),
-        label: teacher.nome,
+        label: `${teacher.nome.toString()} ${teacher?.descricaograuacademico ? `(${teacher?.descricaograuacademico})` : ""}`,
       })}
     />
   );
 };
+
+export { TeacherSelectList };

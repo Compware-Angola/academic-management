@@ -1,4 +1,4 @@
-import { axiosApexGa } from "@/lib/axios-apex-ga";
+import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type Teacher = {
   codigo: number;
   codigo_utilizador: number;
@@ -7,7 +7,7 @@ export type Teacher = {
   n_mecanografico: string;
   codigo_escalao: number;
   codigo_categoria: number;
-  descricao_grau_academico: string;
+  descricaograuacademico: string;
   descricao_escalao: string;
   descricao_categoria: string;
 };
@@ -16,7 +16,7 @@ export interface TeacherParams {
   nome?: string;
 }
 export async function fetchTeacher(params?: TeacherParams): Promise<Teacher[]> {
-  const { data: response } = await axiosApexGa.get(
+  const { data: response } = await axiosNestGa.get(
     "/dropdown-filters/docentes",
     {
       params,
