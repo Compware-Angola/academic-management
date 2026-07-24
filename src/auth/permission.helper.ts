@@ -6,7 +6,7 @@ import { PermissionTypeDetails } from "@/constants/permission.type";
 
 
 export function usePermission() {
-  const { data: user } = useCurrentUser("GA");
+  const { data: user } = useCurrentUser();
 
   const userPermissions: string[] = user?.permissions || [];
 

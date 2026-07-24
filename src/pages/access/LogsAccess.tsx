@@ -134,84 +134,84 @@ export default function LogsAcessos() {
 
 
   const pdfData = useMemo(() => {
-  if (!logs.length) return null;
+    if (!logs.length) return null;
 
-  return {
-    filtros: [
-      filters.dataInicio && `Data início: ${filters.dataInicio}`,
-      filters.dataFim && `Data fim: ${filters.dataFim}`,
-      filters.search && `Pesquisa: ${filters.search}`,
-    ]
-      .filter(Boolean)
-      .join(" | ") || "Sem filtros",
+    return {
+      filtros: [
+        filters.dataInicio && `Data início: ${filters.dataInicio}`,
+        filters.dataFim && `Data fim: ${filters.dataFim}`,
+        filters.search && `Pesquisa: ${filters.search}`,
+      ]
+        .filter(Boolean)
+        .join(" | ") || "Sem filtros",
 
-    total: logs.length,
+      total: logs.length,
 
-    rows: logs.map((l) => ({
-      id: l.pkLogAcesso,
-      descricao: l.descricao,
-      utilizador: l.nomeUtilizadorResponsavel ?? "—",
-      funcionalidade: l.nomeFuncionalidade ?? "—",
-      ip: l.ip,
-      data: formatDate(l.createdAt),
-    })),
-  };
-}, [logs, filters]);
+      rows: logs.map((l) => ({
+        id: l.pkLogAcesso,
+        descricao: l.descricao,
+        utilizador: l.nomeUtilizadorResponsavel ?? "—",
+        funcionalidade: l.nomeFuncionalidade ?? "—",
+        ip: l.ip,
+        data: formatDate(l.createdAt),
+      })),
+    };
+  }, [logs, filters]);
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Logs de Acessos"
-    subtitle="Registo de atividades e acessos do sistema"
-    infoSections={[
-      { title: "Filtros Aplicados", content: pdfData.filtros },
-      { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "id", label: "ID", width: "8%" },
-        { key: "descricao", label: "Descrição", width: "32%" },
-        { key: "utilizador", label: "Utilizador", width: "18%" },
-        { key: "funcionalidade", label: "Funcionalidade", width: "18%" },
-        { key: "ip", label: "IP", width: "12%" },
-        { key: "data", label: "Data/Hora", width: "12%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Logs de Acessos"
+      subtitle="Registo de atividades e acessos do sistema"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "id", label: "ID", width: "8%" },
+          { key: "descricao", label: "Descrição", width: "32%" },
+          { key: "utilizador", label: "Utilizador", width: "18%" },
+          { key: "funcionalidade", label: "Funcionalidade", width: "18%" },
+          { key: "ip", label: "IP", width: "12%" },
+          { key: "data", label: "Data/Hora", width: "12%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const excelProps = {
-  documentTitle: "Logs de Acessos",
-  subtitle: "Registo de atividades e acessos do sistema",
-  infoSections: [
-    { title: "Filtros Aplicados", content: pdfData?.filtros ?? "Sem filtros" },
-    { title: "Resumo", content: [`Total de registos: ${logs.length}`] },
-  ],
-  mainTable: {
-    headers: [
-      { key: "id", label: "ID", width: 10 },
-      { key: "descricao", label: "Descrição", width: 50 },
-      { key: "utilizador", label: "Utilizador", width: 25 },
-      { key: "funcionalidade", label: "Funcionalidade", width: 25 },
-      { key: "ip", label: "IP", width: 20 },
-      { key: "data", label: "Data/Hora", width: 22 },
+  const excelProps = {
+    documentTitle: "Logs de Acessos",
+    subtitle: "Registo de atividades e acessos do sistema",
+    infoSections: [
+      { title: "Filtros Aplicados", content: pdfData?.filtros ?? "Sem filtros" },
+      { title: "Resumo", content: [`Total de registos: ${logs.length}`] },
     ],
-    rows: logs.map(l => ({
-      id: l.pkLogAcesso,
-      descricao: l.descricao,
-      utilizador: l.nomeUtilizadorResponsavel ?? "—",
-      funcionalidade: l.nomeFuncionalidade ?? "—",
-      ip: l.ip,
-      data: formatDate(l.createdAt),
-    })),
-  },
-  footerNotice: "Documento gerado automaticamente pelo sistema.",
-  primaryColor: "#0D1B48",
-};
+    mainTable: {
+      headers: [
+        { key: "id", label: "ID", width: 10 },
+        { key: "descricao", label: "Descrição", width: 50 },
+        { key: "utilizador", label: "Utilizador", width: 25 },
+        { key: "funcionalidade", label: "Funcionalidade", width: 25 },
+        { key: "ip", label: "IP", width: 20 },
+        { key: "data", label: "Data/Hora", width: 22 },
+      ],
+      rows: logs.map(l => ({
+        id: l.pkLogAcesso,
+        descricao: l.descricao,
+        utilizador: l.nomeUtilizadorResponsavel ?? "—",
+        funcionalidade: l.nomeFuncionalidade ?? "—",
+        ip: l.ip,
+        data: formatDate(l.createdAt),
+      })),
+    },
+    footerNotice: "Documento gerado automaticamente pelo sistema.",
+    primaryColor: "#0D1B48",
+  };
 
-const baseFileName = `Logs_Acessos_${new Date().toISOString().slice(0, 10)}`;
+  const baseFileName = `Logs_Acessos_${new Date().toISOString().slice(0, 10)}`;
 
 
   // Handlers
@@ -263,23 +263,23 @@ const baseFileName = `Logs_Acessos_${new Date().toISOString().slice(0, 10)}`;
         </div>
 
         {logs.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {pdfContent && (
-            <PDFActions
-              document={pdfContent}
-              fileName={`${baseFileName}.pdf`}
-              showDownload
-              showPrint
-            />
-          )}
-
-          <ExcelActions
-            excelProps={excelProps}
-            fileName={`${baseFileName}.xlsx`}
-            showDownload
-          />
-              </div>
+          <div className="flex flex-wrap gap-2">
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`${baseFileName}.pdf`}
+                showDownload
+                showPrint
+              />
             )}
+
+            <ExcelActions
+              excelProps={excelProps}
+              fileName={`${baseFileName}.xlsx`}
+              showDownload
+            />
+          </div>
+        )}
 
       </div>
 
@@ -350,8 +350,10 @@ const baseFileName = `Logs_Acessos_${new Date().toISOString().slice(0, 10)}`;
             <TableRow className="bg-muted/60 hover:bg-muted/60">
               <TableHead className="w-[35%]">Descrição</TableHead>
               <TableHead>Utilizador</TableHead>
+              {/*
               <TableHead>Funcionalidade</TableHead>
               <TableHead>Operação</TableHead>
+              */}
               <TableHead>IP</TableHead>
               <TableHead>Data/Hora</TableHead>
               <TableHead className="text-right">ID Log</TableHead>
@@ -412,6 +414,7 @@ const baseFileName = `Logs_Acessos_${new Date().toISOString().slice(0, 10)}`;
                       </span>
                     </div>
                   </TableCell>
+                  {/*
 
                   <TableCell>{item.nomeFuncionalidade || "—"}</TableCell>
 
@@ -420,6 +423,7 @@ const baseFileName = `Logs_Acessos_${new Date().toISOString().slice(0, 10)}`;
                       {item.fkOperacaoLog}
                     </span>
                   </TableCell>
+                  */}
 
                   <TableCell className="font-mono text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
