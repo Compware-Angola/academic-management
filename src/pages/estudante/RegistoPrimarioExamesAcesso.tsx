@@ -18,8 +18,9 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryRegistoPrimarioExamesAcesso } from "@/hooks/students/use-query-registo-primario-exames-acesso";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 
 type RegistoPrimarioExameAcesso = {
@@ -65,8 +66,6 @@ export default function RegistoPrimarioExamesAcesso() {
     grau: "1",
     search: "",
   });
-
-  const { data: anosLectivos = [] } = useQueryAnoAcademico();
 
   const { data, isLoading, isFetching } = useQueryRegistoPrimarioExamesAcesso({
     page: currentPage,
@@ -282,35 +281,15 @@ export default function RegistoPrimarioExamesAcesso() {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Lectivo</label>
-              <Select
-                value={filters.anoLectivo}
-                onValueChange={(v) =>
-                  setFilters((prev) => ({ ...prev, anoLectivo: v }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o ano lectivo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosLectivos.map((ano: any) => (
-                    <SelectItem
-                      key={ano.codigo ?? ano.CODIGO}
-                      value={String(ano.codigo ?? ano.CODIGO)}
-                    >
-                      {ano.designacao ?? ano.DESIGNACAO}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <label className="text-sm font-medium">Grau</label>
               <Select
                 value={filters.grau}
                 onValueChange={(v) =>
-                  setFilters((prev) => ({ ...prev, grau: v }))
+                  setFilters((prev) => ({
+                    ...prev,
+                    grau: v,
+                    anoLectivo: "",
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -324,6 +303,18 @@ export default function RegistoPrimarioExamesAcesso() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <AcademicYearsAvailableForOperationSelect
+                value={filters.anoLectivo}
+                onChangeValue={(v) =>
+                  setFilters((prev) => ({ ...prev, anoLectivo: v }))
+                }
+                tipoCandidaturaId={parseFilter(filters.grau) ?? 1}
+                onlyConfigurable={false}
+                disabled={!filters.grau}
+              />
             </div>
 
             <div className="space-y-2">
