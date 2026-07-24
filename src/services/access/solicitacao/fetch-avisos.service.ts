@@ -33,23 +33,22 @@ export async function AvisosService({
   limit,
   assunto
 }: {
-    page: number;
+  page: number;
   limit: number;
   assunto?: string;
-  }): Promise<AvisosResponse> {
-  
-    const { data } = await axiosNestGa.get<AvisosResponse>(
+}): Promise<AvisosResponse> {
+
+  const { data } = await axiosNestGa.get<AvisosResponse>(
     "/solicitacoa/avisos",
-         {
+    {
       params: {
         page,
         limit,
         assunto: normalizeParam(assunto),
       },
     }
-);
+  );
 
-    //console.log("RESPOSTA BACKEND:", data);
 
   return data;
 }

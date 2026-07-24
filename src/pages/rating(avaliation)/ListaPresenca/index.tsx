@@ -91,8 +91,8 @@ export default function PresenceList() {
     unidadeCurricular: "",
     situacaoFinanceira: "2",
   });
-  const { data: users = [] } = useCurrentUser("GA");
-  console.log(users);
+  const { data: users = [] } = useCurrentUser();
+
   const { data: semestre = [] } = useQuerySemestres();
   const { data: periodos = [] } = useQueryPeriod();
   const { data: cursos = [] } = useCursos();
@@ -267,25 +267,21 @@ export default function PresenceList() {
 
     return {
       filtros: [
-        `Ano Letivo: ${
-          academicYear.find(
-            (y) => y.codigo === parseFilter(appliedFilters.anoLetivo),
-          )?.designacao
+        `Ano Letivo: ${academicYear.find(
+          (y) => y.codigo === parseFilter(appliedFilters.anoLetivo),
+        )?.designacao
         }`,
         `Semestre: ${appliedFilters.semestre}`,
-        `Curso: ${
-          cursos.find((c) => c.codigo === parseFilter(appliedFilters.curso))
-            ?.designacao
+        `Curso: ${cursos.find((c) => c.codigo === parseFilter(appliedFilters.curso))
+          ?.designacao
         }`,
-        `UC: ${
-          unidadesCurriculares.find(
-            (u) => u.pk === parseFilter(appliedFilters.unidadeCurricular),
-          )?.descricao
+        `UC: ${unidadesCurriculares.find(
+          (u) => u.pk === parseFilter(appliedFilters.unidadeCurricular),
+        )?.descricao
         }`,
-        `Situação Financeira: ${
-          appliedFilters.situacaoFinanceira === "1"
-            ? "Situação Regularizada de Pagamento"
-            : "Situação Irregular (Pagamento Pendente)"
+        `Situação Financeira: ${appliedFilters.situacaoFinanceira === "1"
+          ? "Situação Regularizada de Pagamento"
+          : "Situação Irregular (Pagamento Pendente)"
         }`,
         searchApplied.searchTerm && `Pesquisa: ${searchApplied.searchTerm}`,
       ]
@@ -357,25 +353,25 @@ export default function PresenceList() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Lista de Presença",
-        subtitle: "Presenças em Avaliações Académicas",
-        infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros },
-          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      documentTitle: "Lista de Presença",
+      subtitle: "Presenças em Avaliações Académicas",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "curso", label: "Curso", width: 25 },
+          { key: "classe", label: "Ano Curricular", width: 20 },
+          { key: "periodo", label: "Período", width: 20 },
+          { key: "numero_matricula", label: "Matrícula", width: 25 },
+          { key: "nome", label: "Nome Completo", width: 40 },
         ],
-        mainTable: {
-          headers: [
-            { key: "curso", label: "Curso", width: 25 },
-            { key: "classe", label: "Ano Curricular", width: 20 },
-            { key: "periodo", label: "Período", width: 20 },
-            { key: "numero_matricula", label: "Matrícula", width: 25 },
-            { key: "nome", label: "Nome Completo", width: 40 },
-          ],
-          rows: pdfData.rows,
-        },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Lista_Presenca_${new Date()

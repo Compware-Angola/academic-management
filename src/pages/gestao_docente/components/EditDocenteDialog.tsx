@@ -86,7 +86,6 @@ export const EditarDocenteModal = ({
     }));
   }, [docente]);
 
-  console.log(docente);
 
   const handleSubmit = async () => {
     if (!docente) return;

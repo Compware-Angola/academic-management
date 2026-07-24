@@ -67,7 +67,6 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
     },
     { enabled: !!anoLetivo },
   );
-  console.log(services);
   // ---------- Métodos de manipulação da lista ----------
   const adicionarServico = () => {
     const servico = services.find((t) => t.codigo.toString() === servicoSel);

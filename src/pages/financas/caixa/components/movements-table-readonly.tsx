@@ -55,7 +55,7 @@ export function MovementsTableReadOnly() {
     endDate: "",
   });
 
-  const { data: currentUser } = useCurrentUser("GA");
+  const { data: currentUser } = useCurrentUser();
 
   const { data, isLoading, refetch, isFetching } =
     useQueryCashRegisterMovements({
@@ -244,7 +244,7 @@ export function MovementsTableReadOnly() {
           search={filters.search}
           onSearchChange={(v) => updateFilter("search", v)}
           operatorId={String(currentUser?.user?.pk_utilizador)}
-          onOperatorChange={(v) => {}}
+          onOperatorChange={(v) => { }}
           caixa={filters.caixa}
           onCaixaChange={(v) => updateFilter("caixa", v)}
           startDate={filters.startDate}

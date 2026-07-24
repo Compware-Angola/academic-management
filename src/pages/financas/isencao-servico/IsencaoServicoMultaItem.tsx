@@ -118,7 +118,7 @@ export default function IsencaoServicoMultaItem() {
       estadoIsencao: item.estado_isensao ?? "",
       codigo: item.codigo,
     };
-    console.log(initial);
+
     setEditForm(initial);
     setOriginalEditForm(initial);
     setIsEditOpen(true);
@@ -370,7 +370,7 @@ export default function IsencaoServicoMultaItem() {
                         : "-"}
                     </TableCell>
                     <TableCell>
-                      <Button size="sm" variant="ghost" onClick={() => {}}>
+                      <Button size="sm" variant="ghost" onClick={() => { }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </TableCell>

@@ -55,7 +55,6 @@ export async function getPaymentReferencesService(
     limit = 10,
   } = payload;
 
-  console.log("payload", payload);
 
   const { data } =
     await axiosNestFinance.get<ObterReferenciasPagamentoResponse>(

@@ -202,7 +202,6 @@ export function LaunchMigration({
         });
 
       if (itens.length === 0) return;
-      console.log("Itens: ", itens);
       await mutateAsync({
         matriculaId: codigoMatricula,
         equivalencia: 1,

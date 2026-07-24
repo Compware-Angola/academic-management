@@ -90,6 +90,7 @@ export async function getCurrentUserService(
 ): Promise<CurrentUserResponse> {
   const { data } = await axiosNestAuth.get<CurrentUserResponse>("/auth/current-user");
 
+
   return data;
 }
 export async function logout(variables: { platform: 'GA' }): Promise<logoutResponse> {

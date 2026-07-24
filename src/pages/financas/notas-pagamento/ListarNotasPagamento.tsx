@@ -227,7 +227,6 @@ export default function ListarNotasPagamento() {
   };
 
   const placeholderText = placeholders[searchBy] || "Pesquisar...";
-  console.log(data);
   return (
     <div className="p-6 space-y-6">
       {/* Breadcrumb */}
@@ -321,10 +320,10 @@ export default function ListarNotasPagamento() {
                 onChange={(v) => {
                   setSearchBy(
                     v as
-                      | "codigoMatricula"
-                      | "reference"
-                      | "codigoFatura"
-                      | "biEstudante",
+                    | "codigoMatricula"
+                    | "reference"
+                    | "codigoFatura"
+                    | "biEstudante",
                   );
                   setSearchTerm("");
                   setPage(1);

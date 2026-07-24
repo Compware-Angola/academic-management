@@ -83,7 +83,6 @@ export function PagamentosTable({
     setSelectedPagId(pagId);
     setAnularPagamentoModal(true);
   };
-  console.log("payments", payments);
   function truncate(text: string, max = 10) {
     if (!text) return "";
     return text.length > max ? text.slice(0, max) + "..." : text;

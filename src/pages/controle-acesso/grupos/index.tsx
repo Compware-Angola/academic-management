@@ -26,7 +26,6 @@ export default function Grupos() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const deleteMutation = useDeleteGrupo();
   const handleUserView = (grupo: Grupo) => {
-    console.log("here!!");
     setGrupoSelecionado({
       id: grupo.codigo,
       designacao: grupo.designacao,

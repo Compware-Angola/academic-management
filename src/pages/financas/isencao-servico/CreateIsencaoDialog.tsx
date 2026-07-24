@@ -132,7 +132,6 @@ export function CreateIsencaoDialog({
       },
       {
         onSuccess(response) {
-          console.log(response);
           const sucessos = response?.sucessos ?? [];
           const erros = response?.erros ?? [];
           setSelectedStudents([]);
@@ -214,7 +213,7 @@ export function CreateIsencaoDialog({
                 onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
               />
               <CourseSelect
-                enableDefaultSelectItem
+
                 width="sm"
                 showLabel={false}
                 params={{

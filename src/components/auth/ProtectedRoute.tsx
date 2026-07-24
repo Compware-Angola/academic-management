@@ -11,7 +11,7 @@ export function ProtectedRoute({
   allowedPermissions,
   children,
 }: ProtectedRouteProps) {
-  const { data: user, isError, isLoading } = useCurrentUser("GA");
+  const { data: user, isError, isLoading } = useCurrentUser();
 
   // 🔄 Enquanto está a carregar, não faz nada
   if (isLoading) {

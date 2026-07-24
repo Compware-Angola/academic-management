@@ -245,7 +245,7 @@ export default function Deadlines() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  console.log(paginated);
+
   return (
     <div className="space-y-6">
       <PageHeader

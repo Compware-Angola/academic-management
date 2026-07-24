@@ -11,7 +11,7 @@ type CreatePersonUserMutationInput = {
 
 
 export function useCreatePersonUser() {
- 
+
   const { toast } = useToast()
 
 
@@ -23,12 +23,11 @@ export function useCreatePersonUser() {
         title: "Utilizador criado com sucesso!",
       })
 
-     
+
     },
 
     onError: (error) => {
-      console.log(error);
-      
+
       toast({
         title: "Erro ao criar utilizador",
         variant: "destructive",

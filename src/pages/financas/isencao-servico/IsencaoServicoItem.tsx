@@ -115,7 +115,6 @@ export default function IsencaoServicoItem() {
       estadoIsencao: item.estado_isensao ?? "",
       codigo: item.codigo,
     };
-    console.log(initial);
     setEditForm(initial);
     setOriginalEditForm(initial);
     setIsEditOpen(true);
