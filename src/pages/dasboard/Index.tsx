@@ -28,12 +28,13 @@ import { PaymentComparisonChart } from "./components/payment-comparison-chart";
 import { PaymentDailyStatsCard } from "./components/paymentt-daily-Stats-card";
 import { usePermission } from "@/auth/permission.helper";
 import { StudentEnrollmentStatsCard } from "./components/student-enrollment-stats-card";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 
 
 const Index = () => {
 
   const { haveFullAccess } = usePermission();
-  const { user: userData } = useAuth();
+  const { data: currentUser } = useCurrentUser();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
   const { data: dashboardStatisticsReports, isLoading: isLoadingDashboardStatisticsReports } =
@@ -73,7 +74,9 @@ const Index = () => {
       permission: [],
     },
   ];
-  const { user } = userData || {};
+  const { user } = currentUser || {};
+  console.log(user, "USerrrr");
+
 
 
   const allowedQuickLinks = useFilterMenuByPermission(quickLinks);
