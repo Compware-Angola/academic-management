@@ -37,7 +37,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc";
+import { useQuerySchedulesByUc2 } from "@/hooks/horario/use-query-schedules-by-uc";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { PeriodoSelect } from "@/components/common/global-selects/PeriodoSelect";
@@ -56,6 +56,16 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
+import {
+  formatDataProva,
+  formatDuracaoProva,
+  formatIntervaloProva,
+  formatHoraProva,
+} from "@/util/format-data-lista-presenca";
+import { useUsers } from "@/hooks/acess/use-query-users";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
+import { MCALTipoAvaliacoesSelectSelect } from "@/components/common/global-selects/MCALTipoAvaliacoesSelect";
 
 type Filters = {
   anoLetivo: string;
@@ -68,6 +78,7 @@ type Filters = {
   unidadeCurricular: string;
   situacaoFinanceira: string;
 };
+
 export default function PresenceList() {
   const [formData, setFormData] = useState<Filters>({
     anoLetivo: "",
@@ -80,12 +91,25 @@ export default function PresenceList() {
     unidadeCurricular: "",
     situacaoFinanceira: "2",
   });
+  const { data: users = [] } = useCurrentUser("GA");
+  console.log(users);
   const { data: semestre = [] } = useQuerySemestres();
   const { data: periodos = [] } = useQueryPeriod();
   const { data: cursos = [] } = useCursos();
   const { data: classes = [] } = useQueryClassFilterByCurso({
     curso: formData.curso,
   });
+  const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
+    useQueryTipoAvaliacao();
+
+  const filtrosCompletos =
+    !isNaN(parseInt(formData.anoLetivo)) &&
+    !isNaN(parseInt(formData.semestre)) &&
+    !isNaN(parseInt(formData.periodo)) &&
+    !isNaN(parseInt(formData.curso)) &&
+    !isNaN(parseInt(formData.unidadeCurricular)) &&
+    !isNaN(parseInt(formData.tiposAvaliacao));
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
@@ -137,6 +161,7 @@ export default function PresenceList() {
       horarioPk: parseFilter(appliedFilters?.horarioId),
       situacao_financeira: parseFilter(appliedFilters?.situacaoFinanceira),
       semestre: parseFilter(appliedFilters?.semestre),
+      tipo_avaliacao: parseFilter(appliedFilters?.tiposAvaliacao),
       codigoMatricula:
         searchApplied.searchBy === "codigoMatricula"
           ? parseFilter(searchApplied.searchTerm)
@@ -145,6 +170,29 @@ export default function PresenceList() {
       nome: searchApplied.searchBy === "nome" ? searchApplied.searchTerm : null,
       page,
       limit,
+    },
+    !!appliedFilters,
+  );
+
+  const {
+    data: presenceAttendanceListPDF,
+    isLoading: loadingPresenceAttendanceListPDF,
+    error: errorPDF,
+  } = usePresenceAttendance(
+    {
+      anoLectivo: parseFilter(appliedFilters?.anoLetivo),
+      horarioPk: parseFilter(appliedFilters?.horarioId),
+      situacao_financeira: parseFilter(appliedFilters?.situacaoFinanceira),
+      semestre: parseFilter(appliedFilters?.semestre),
+      tipo_avaliacao: parseFilter(appliedFilters?.tiposAvaliacao),
+      codigoMatricula:
+        searchApplied.searchBy === "codigoMatricula"
+          ? parseFilter(searchApplied.searchTerm)
+          : null,
+
+      nome: searchApplied.searchBy === "nome" ? searchApplied.searchTerm : null,
+      page,
+      limit: 500,
     },
     !!appliedFilters,
   );
@@ -175,16 +223,32 @@ export default function PresenceList() {
   const canLoadUcs = !!formData.curso && !!formData.semestre;
 
   const { data: scheduleResponse, isLoading: loadingSchedule } =
-    useQuerySchedulesByUc({
-      anoLectivo: parseInt(formData.anoLetivo),
-      semestre: parseInt(formData.semestre),
-      periodo: parseInt(formData.periodo),
-      curso: parseInt(formData.curso),
-      unidadeCurricular: parseInt(formData.unidadeCurricular),
-      page: 1,
-      limit: 100,
-    });
+    useQuerySchedulesByUc2(
+      {
+        anoLectivo: parseInt(formData.anoLetivo),
+        semestre: parseInt(formData.semestre),
+        periodo: parseInt(formData.periodo),
+        curso: parseInt(formData.curso),
+        unidadeCurricular: parseInt(formData.unidadeCurricular),
+        tipo_avaliacao: parseInt(formData.tiposAvaliacao),
+        page: 1,
+        limit: 100,
+      },
+      {
+        enabled: filtrosCompletos, // só dispara a query quando os filtros estiverem completos
+      },
+    );
+
   const schedules = scheduleResponse?.data || [];
+  // useEffect(() => {
+  //   if (!loadingSchedule && schedules.length === 0) {
+  //     toast({
+  //       title: "Sem horário para o filtro selecionado.",
+
+  //       variant: "destructive",
+  //     });
+  //   }
+  // }, [filtrosCompletos, loadingSchedule, schedules.length]);
 
   const parameters = parameterResponse?.[0];
 
@@ -195,20 +259,40 @@ export default function PresenceList() {
   const mesDescricao = mesTemp[0]?.designacao;
 
   const students = presenceAttendanceList?.data || [];
+  const studentsPDF = presenceAttendanceListPDF?.data || [];
+
+  const prova: any = presenceAttendanceList?.prova || [];
   const pdfData = useMemo(() => {
-    if (!students.length || !appliedFilters) return null;
+    if (!studentsPDF.length || !appliedFilters) return null;
 
     return {
       filtros: [
-        `Ano Letivo: ${appliedFilters.anoLetivo}`,
+        `Ano Letivo: ${
+          academicYear.find(
+            (y) => y.codigo === parseFilter(appliedFilters.anoLetivo),
+          )?.designacao
+        }`,
         `Semestre: ${appliedFilters.semestre}`,
-        `Curso: ${appliedFilters.curso}`,
+        `Curso: ${
+          cursos.find((c) => c.codigo === parseFilter(appliedFilters.curso))
+            ?.designacao
+        }`,
+        `UC: ${
+          unidadesCurriculares.find(
+            (u) => u.pk === parseFilter(appliedFilters.unidadeCurricular),
+          )?.descricao
+        }`,
+        `Situação Financeira: ${
+          appliedFilters.situacaoFinanceira === "1"
+            ? "Situação Regularizada de Pagamento"
+            : "Situação Irregular (Pagamento Pendente)"
+        }`,
         searchApplied.searchTerm && `Pesquisa: ${searchApplied.searchTerm}`,
       ]
         .filter(Boolean)
         .join(" | "),
-      total: students.length,
-      rows: students.map((s) => ({
+      total: studentsPDF.length,
+      rows: studentsPDF.map((s) => ({
         curso: s.curso,
         classe: s.classe,
         periodo: s.periodo,
@@ -216,7 +300,7 @@ export default function PresenceList() {
         nome: s.nome,
       })),
     };
-  }, [students, appliedFilters, searchApplied]);
+  }, [studentsPDF, appliedFilters, searchApplied]);
 
   const pdfContent = appliedFilters ? (
     <PresenceListPDFDocument
@@ -252,12 +336,22 @@ export default function PresenceList() {
           (c) => c.codigo === parseFilter(appliedFilters.anoCurricular),
         )?.designacao
       }
-      total={students.length}
-      rows={students.map((s, index) => ({
+      total={studentsPDF.length}
+      rows={studentsPDF.map((s, index) => ({
         numero: index + 1,
         matricula: s.numero_matricula,
         nome: s.nome,
       }))}
+      // --- dados da prova ---
+      uc={prova.uc}
+      tipoAvaliacao={prova.tipo_avaliacao}
+      tipoProva={prova.tipo_prova}
+      dataProva={formatDataProva(prova?.data_prova)}
+      horarioProva={formatIntervaloProva(
+        prova?.hora_prova,
+        prova?.hora_termino,
+      )}
+      duracaoProva={formatDuracaoProva(prova?.duracao_prova)}
     />
   ) : null;
 
@@ -414,6 +508,12 @@ export default function PresenceList() {
                 </SelectContent>
               </Select>
             </div>
+            <MCALTipoAvaliacoesSelectSelect
+              onChangeValue={(v) =>
+                setFormData({ ...formData, tiposAvaliacao: v })
+              }
+              value={formData.tiposAvaliacao}
+            />
             <FormSelect
               label="Horario"
               value={formData.horarioId}
@@ -441,6 +541,7 @@ export default function PresenceList() {
                 label: `${u.label}`,
               })}
             />
+
             {/* Tipo de Pesquisa */}
             <div className="min-w-[220px]">
               <FormSelect
@@ -558,5 +659,10 @@ export default function PresenceList() {
   );
 }
 export function isValidFilters(filters?: Filters): filters is Filters {
-  return !!(filters && filters.anoLetivo && filters.horarioId);
+  return !!(
+    filters &&
+    filters.anoLetivo &&
+    filters.horarioId &&
+    filters.tiposAvaliacao
+  );
 }

@@ -109,7 +109,7 @@ export function ModalCadeirasRecurso({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] sm:w-full">
+      <DialogContent className="max-w-4xl min-w-3xl sm:w-full">
         <DialogHeader className="flex-row items-center justify-between space-y-0">
           <DialogTitle>Seleciona a(s) Cadeira(s)</DialogTitle>
         </DialogHeader>

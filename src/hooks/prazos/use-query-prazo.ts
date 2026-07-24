@@ -8,7 +8,8 @@ type PrazosParams = {
 };
 
 export function useQueryPrazos(params: PrazosParams) {
-  const enabled = !!params.anoLetivoId && !!params.tipoPrazoId;
+  const enabled =
+    !!params.anoLetivoId && !!params.tipoPrazoId && !!params.tipoCandidaturaId;
 
   return useQuery({
     queryKey: ["prazos", params],

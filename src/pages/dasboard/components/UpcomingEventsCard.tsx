@@ -20,6 +20,8 @@ import { formatarData } from "@/util/date-formate";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { useQueryAtividades } from "@/hooks/queries/use-query-atividades";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 export default function UpcomingEventsCard() {
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -75,65 +77,19 @@ export default function UpcomingEventsCard() {
           {/* Ano Letivo + Tipo de Candidatura */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Ano Letivo</label>
-              <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      loadingAnosLetivos ? "Carregando..." : "Selecione"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosLetivos.map((ano) => (
-                    <SelectItem
-                      key={ano.codigo}
-                      value={ano.codigo.toString()}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span>{ano.designacao}</span>
-                        {!ano.estado
-                          .toLowerCase()
-                          .includes("desactiv") && (
-                          <span className="text-xs text-green-600 font-medium ml-2">
-                            (Ativo)
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <TipoCandidaturaSelect
+                value={tipoCandidaturaId}
+                onChangeValue={setTipoCandidaturaId}
+              />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Tipo de Candidatura
-              </label>
-              <Select
-                value={tipoCandidaturaId}
-                onValueChange={setTipoCandidaturaId}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      loadingTiposCandidatura
-                        ? "Carregando..."
-                        : "Selecione"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {tiposCandidatura.map((tipo) => (
-                    <SelectItem
-                      key={tipo.codigo}
-                      value={tipo.codigo.toString()}
-                    >
-                      {tipo.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AcademicYearsAvailableForOperationSelect
+                value={anoLetivoId}
+                onChangeValue={setAnoLetivoId}
+                enableDefaultActiveYear
+                label="Ano Letivo"
+              />
             </div>
           </div>
 

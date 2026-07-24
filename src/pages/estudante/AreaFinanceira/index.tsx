@@ -1,6 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Contact, FileText, Key, DollarSign, Package, BanknoteIcon, Activity } from "lucide-react";
+import {
+  Contact,
+  FileText,
+  Key,
+  DollarSign,
+  Package,
+  BanknoteIcon,
+  Activity,
+} from "lucide-react";
 
 import { Resumo } from "./components/resumo";
 import { MensalidadesSection } from "./components/mensalidade";
@@ -28,107 +36,88 @@ export function AreaFinanceira({
         className="flex flex-row gap-6 min-w-0"
       >
         <TabsList className="flex justify-start flex-col h-fit w-64 shrink-0">
-          {
-            hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
-              <TabsTrigger className="w-full justify-start gap-2" value="resumo">
-                <BanknoteIcon className="h-4 w-4" />
-                <span className="hidden md:inline">Notas de Pagamento</span>
-              </TabsTrigger>
-            )
-          }
+          {hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
+            <TabsTrigger className="w-full justify-start gap-2" value="resumo">
+              <BanknoteIcon className="h-4 w-4" />
+              <span className="hidden md:inline">Notas de Pagamento</span>
+            </TabsTrigger>
+          )}
 
-          {
-            hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (
-              <TabsTrigger
-                className="w-full justify-start gap-2"
-                value="mensalidades"
-              >
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden md:inline">Mensalidades</span>
-              </TabsTrigger>
-            )
-          }
-
-          {
-            hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
-              <TabsTrigger className="w-full justify-start gap-2" value="historico-movimentacoes">
-                <Activity className="h-4 w-4" />
-                <span className="hidden md:inline">Hist. Movimentações</span>
-              </TabsTrigger>
-            )
-          }
-
-
-          {
-            hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla) && (
-              <TabsTrigger
-                className="w-full justify-start gap-2"
-                value="outros-servicos"
-              >
-                <Package className="h-4 w-4" />
-                <span className="hidden md:inline">Outros Serviços</span>
-              </TabsTrigger>
-            )
-          }
-
-          {
+          {hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (
             <TabsTrigger
               className="w-full justify-start gap-2"
-              value="dividas"
+              value="mensalidades"
             >
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden md:inline">Mensalidades</span>
+            </TabsTrigger>
+          )}
+
+          {hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="historico-movimentacoes"
+            >
+              <Activity className="h-4 w-4" />
+              <span className="hidden md:inline">Hist. Movimentações</span>
+            </TabsTrigger>
+          )}
+
+          {hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla) && (
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="outros-servicos"
+            >
+              <Package className="h-4 w-4" />
+              <span className="hidden md:inline">Outros Serviços</span>
+            </TabsTrigger>
+          )}
+
+          {
+            <TabsTrigger className="w-full justify-start gap-2" value="dividas">
               <BanknoteIcon className="h-4 w-4" />
               <span className="hidden md:inline">Negociação de Dívidas</span>
             </TabsTrigger>
           }
-
-
-
         </TabsList>
 
         {/* min-w-0 é essencial aqui: sem isto, um item flex por defeito não
             encolhe abaixo do tamanho do seu conteúdo (ex: a tabela larga do
             histórico), o que empurra a página inteira para os lados. */}
         <Card className="flex-1 min-w-0 p-6">
-          {
-            hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
-              <TabsContent value="resumo">
-                <Resumo codigoMatricula={codigoMatricula} />
-              </TabsContent>
-            )
-          }
+          {hasPermission(PermissionTypeDetails.FACTURAS.sigla) && (
+            <TabsContent value="resumo">
+              <Resumo codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          )}
 
-          {
-            hasPermission(PermissionTypeDetails.HISTORICO_MOVIMENTACOES_ESTUDANTE.sigla) && (
-              <TabsContent value="historico-movimentacoes">
-                <HistoryAccountMovimentSection codigoMatricula={codigoMatricula} />
-              </TabsContent>
-            )
-          }
+          {hasPermission(
+            PermissionTypeDetails.HISTORICO_MOVIMENTACOES_ESTUDANTE.sigla,
+          ) && (
+            <TabsContent value="historico-movimentacoes">
+              <HistoryAccountMovimentSection
+                codigoMatricula={codigoMatricula}
+              />
+            </TabsContent>
+          )}
 
+          {hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (
+            <TabsContent value="mensalidades">
+              <MensalidadesSection codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          )}
 
-          {
-            hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (
-              <TabsContent value="mensalidades">
-                <MensalidadesSection codigoMatricula={codigoMatricula} />
-              </TabsContent>
-            )
-          }
-
-          {
-            hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla) && (
-              <TabsContent value="outros-servicos">
-                <OutrosServicosSection codigoMatricula={codigoMatricula} />
-
-              </TabsContent>
-            )
-          }
+          {hasPermission(PermissionTypeDetails.GERAR_OUTROS_SERVICOS.sigla) && (
+            <TabsContent value="outros-servicos">
+              <OutrosServicosSection codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          )}
           {
             <TabsContent value="dividas">
               <DividasSection codigoMatricula={codigoMatricula} />
             </TabsContent>
           }
         </Card>
-
       </Tabs>
     </TabsContent>
   );
