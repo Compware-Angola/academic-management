@@ -28,6 +28,8 @@ import { Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useId, useState } from "react";
 import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mutation-update-afectacao-status";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 const GestaoAfectacaoPorDocente = () => {
   const id = useId();
@@ -35,9 +37,11 @@ const GestaoAfectacaoPorDocente = () => {
   const [limit, setLimit] = useState(10);
   const { mutateAsync, isPending } = useMutationUpdateAfectacaoStatus();
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "",
     semestre: "",
     docente: "",
+    tipoCandidaturaId: "",
+
   });
   const defaultSelectItem = [
     {
@@ -100,15 +104,36 @@ const GestaoAfectacaoPorDocente = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 grid-cols-3">
-            <AcademicYearSelect
-              value={filters.anoLectivo}
-              onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
-            />
-            <SemestreSelect
-              enableDefaultSelectItem
-              value={filters.semestre}
-              onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
-            />
+            <div className="space-y-2">
+              <TipoCandidaturaSelect
+                value={filters.tipoCandidaturaId}
+                onChangeValue={(v) => setFilters({ ...filters, tipoCandidaturaId: v })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <AcademicYearsAvailableForOperationSelect
+                value={filters.anoLectivo}
+                onlyConfigurable={false}
+
+                onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
+
+                tipoCandidaturaId={Number(filters.tipoCandidaturaId)}
+
+              />
+            </div>
+            {
+              Number(filters.tipoCandidaturaId) === 1 ? (
+                <div className="space-y-2">
+                  <SemestreSelect
+                    enableDefaultSelectItem
+                    value={filters.semestre}
+                    onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
+                  />
+                </div>
+              ) : null
+            }
+
             <div className="space-y-1.5">
               <Label>Docente</Label>
               <FormCommandSelect
