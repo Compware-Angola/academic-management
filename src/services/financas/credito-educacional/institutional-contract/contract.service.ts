@@ -77,6 +77,7 @@ export type paramsGetInstitutionalContracts = {
     codigoInstituicao: string | number;
     page?: number;
     limit?: number;
+    estado?: number;
     codigoContrato?: string;
     situacao?: number | null;
 }

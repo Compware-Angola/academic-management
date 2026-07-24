@@ -74,6 +74,9 @@ const ESTADOS: Record<
       matriculas: boolean;
       inscricoes: boolean;
       podeAtivar: boolean;
+      criarPrazos: boolean;
+      criarActividadesLectivas: boolean;
+      gestaoAfectadoa: boolean;
     };
   }
 > = {
@@ -90,6 +93,9 @@ const ESTADOS: Record<
       matriculas: false,
       inscricoes: false,
       podeAtivar: false,
+      criarActividadesLectivas: false,
+      criarPrazos: false,
+      gestaoAfectadoa: false,
     },
   },
   CONFIGURAVEL: {
@@ -105,6 +111,9 @@ const ESTADOS: Record<
       matriculas: false,
       inscricoes: false,
       podeAtivar: false,
+      criarActividadesLectivas: true,
+      criarPrazos: true,
+      gestaoAfectadoa: true,
     },
   },
   USAVEL: {
@@ -120,6 +129,9 @@ const ESTADOS: Record<
       matriculas: true,
       inscricoes: true,
       podeAtivar: true,
+      criarActividadesLectivas: true,
+      criarPrazos: true,
+      gestaoAfectadoa: true,
     },
   },
   ACTIVO: {
@@ -135,6 +147,9 @@ const ESTADOS: Record<
       matriculas: true,
       inscricoes: true,
       podeAtivar: false,
+      criarActividadesLectivas: true,
+      criarPrazos: true,
+      gestaoAfectadoa: true,
     },
   },
   ENCERRADO: {
@@ -149,6 +164,9 @@ const ESTADOS: Record<
       matriculas: false,
       inscricoes: false,
       podeAtivar: false,
+      criarActividadesLectivas: false,
+      criarPrazos: false,
+      gestaoAfectadoa: false,
     },
   },
 };
@@ -177,6 +195,9 @@ const PERMISSAO_LABELS: Record<
   matriculas: "Receber matrículas",
   inscricoes: "Realizar inscrições",
   podeAtivar: "Pode ser activado como Ano Activo",
+  criarActividadesLectivas: "Criar Actividades Lectivas",
+  criarPrazos: "Criar Prazos",
+  gestaoAfectadoa: "Gestão de Afectação",
 };
 
 interface AnoLetivo {
@@ -206,7 +227,7 @@ function diasDesde(dataISO: string): number {
 
 function dentroJanelaAtivacao(ano: AnoLetivo): boolean {
   const diff = diasDesde(ano.primeiroSemestre.dataInicio);
-  return diff >= -JANELA_ATIVACAO_DIAS && diff <= JANELA_ATIVACAO_DIAS;
+  return diff >= -JANELA_ATIVACAO_DIAS;
 }
 
 function podeEncerrar(ano: AnoLetivo): boolean {
@@ -335,7 +356,7 @@ export default function AcademicYearPhase() {
     }
     if (!janelaAtivacaoOk) {
       toast.error(
-        `Só é possível activar este Ano Lectivo entre ${JANELA_ATIVACAO_DIAS} dias antes e ${JANELA_ATIVACAO_DIAS} dias depois do início do 1º semestre.`,
+        `Só é possível activar este Ano Lectivo a partir de ${JANELA_ATIVACAO_DIAS} dias antes do início do 1.º semestre.`,
       );
       return;
     }
@@ -540,9 +561,9 @@ export default function AcademicYearPhase() {
                     </>
                   ) : (
                     <>
-                      Este Ano Lectivo só pode ser activado entre{" "}
-                      {JANELA_ATIVACAO_DIAS} dias antes e {JANELA_ATIVACAO_DIAS}{" "}
-                      dias depois do início do 1º semestre (
+                      Este Ano Lectivo só pode ser activado a partir de
+                      {JANELA_ATIVACAO_DIAS} dias antes do início do 1.º
+                      semestre. (
                       {new Date(
                         anoAtual.primeiroSemestre.dataInicio,
                       ).toLocaleDateString("pt-AO")}
