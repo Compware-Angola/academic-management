@@ -73,6 +73,8 @@ export function CartaConclusaoSection({ codigoMatricula }: Props) {
                                 dados={studentClassInfo}
                                 cargoDiretor="Directora dos Serviços Académicos"
                                 nomeDiretor="Margarida da Silva Rodrigues"
+                                cargoReitor="Reitor"
+                                nomeReitor="Tiago Caungo Mutombo"
                                 codigo_validacao={codigoValidacao ?? ""}
                                 showDownload={true}
                                 logoSrc="/logo_uma.png"
