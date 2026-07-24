@@ -76,6 +76,7 @@ export function MensalidadesStep(props: MensalidadesStepProps) {
                                         <Input
                                             type="date"
                                             value={item.data_limite?.split("T")[0] || ""}
+                                            disabled={item.activo === 0}
                                             onChange={(e) => {
                                                 const newValue = e.target.value;
                                                 setMensalidadesEditadas((prev) =>
