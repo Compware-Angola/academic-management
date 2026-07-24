@@ -1,5 +1,5 @@
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useToast } from "@/hooks/use-toast";
 
 interface DocenteSelectProps {

@@ -11,7 +11,16 @@ export type Teacher = {
   descricao_escalao: string;
   descricao_categoria: string;
 };
-export async function fetchTeacher(): Promise<Teacher[]> {
-  const { data } = await axiosApexGa.get("/ga/teacher/list-teachers");
-  return data.docentes ?? [];
+export interface TeacherParams {
+  tipoCandidatura?: number;
+  nome?: string;
+}
+export async function fetchTeacher(params?: TeacherParams): Promise<Teacher[]> {
+  const { data: response } = await axiosApexGa.get(
+    "/dropdown-filters/docentes",
+    {
+      params,
+    },
+  );
+  return response.data ?? [];
 }
