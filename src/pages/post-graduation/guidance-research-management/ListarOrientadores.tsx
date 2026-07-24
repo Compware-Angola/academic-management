@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
@@ -82,7 +82,7 @@ export default function GuidanceResearchManagementListarOrientadores() {
     anoLectivo: "",
     curso: "",
     estado: "",
-    tipoCandidatura: "",
+    tipoCandidatura: "2",
     faculdade: "",
   });
   const [orientandoModal, setOrientandoModal] = useState(false);
@@ -147,7 +147,7 @@ export default function GuidanceResearchManagementListarOrientadores() {
       anoLectivo: "",
       curso: "",
       estado: "",
-      tipoCandidatura: "",
+      tipoCandidatura: "2",
       faculdade: "",
     });
     setPage(1);
@@ -227,11 +227,29 @@ export default function GuidanceResearchManagementListarOrientadores() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <AcademicYearSelect
+            <TipoCandidaturaSelect
+              isPostGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLectivo: "",
+                  curso: "",
+                })
+              }
+            />
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Lectivo"
               enableDefaultActiveYear
               enableDefaultSelectItem
+              onlyConfigurable={false}
+              disabled={!filters.tipoCandidatura}
+              tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 2}
               value={filters.anoLectivo}
-              onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, anoLectivo: v, curso: "" })
+              }
             />
             <FacultySelect
               allOption
@@ -239,11 +257,6 @@ export default function GuidanceResearchManagementListarOrientadores() {
               onChangeValue={(v) =>
                 setFilters({ ...filters, faculdade: v, curso: "" })
               }
-            />
-            <TipoCandidaturaSelect
-              isPostGraduation
-              value={filters.tipoCandidatura}
-              onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
             />
             <CourseSelect
               disabled={!filters.faculdade || !filters.tipoCandidatura}

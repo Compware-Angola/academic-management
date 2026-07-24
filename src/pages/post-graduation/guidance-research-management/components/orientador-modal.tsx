@@ -1,5 +1,5 @@
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
@@ -21,11 +21,11 @@ export function OrientadorModal({
   const mutation = useMutationCreateOrientadorTfc();
   const { data: teachersData = [] } = useQueryTeacther();
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "",
     curso: "",
     docente: "",
     faculdade: "",
-    tipoCandidatura: "",
+    tipoCandidatura: "2",
   });
   const handleClose = () => {
     setOpen(false);
@@ -34,7 +34,7 @@ export function OrientadorModal({
       curso: "",
       docente: "",
       faculdade: "",
-      tipoCandidatura: "",
+      tipoCandidatura: "2",
     });
   };
   const handleOpenChange = (open: boolean) => {
@@ -61,18 +61,35 @@ export function OrientadorModal({
       >
         <DialogTitle>Adicionar Orientador</DialogTitle>
         <div className="grid gap-4 py-4 grid-cols-3">
-          <AcademicYearSelect
+          <TipoCandidaturaSelect
+            isPostGraduation
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLectivo: "",
+                curso: "",
+              })
+            }
+          />
+          <AcademicYearsAvailableForOperationSelect
+            label="Ano Lectivo"
             value={filters.anoLectivo}
-            onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
+            enableDefaultActiveYear
+            onlyConfigurable={false}
+            disabled={!filters.tipoCandidatura}
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 2}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, anoLectivo: v, curso: "" })
+            }
           />
 
           <FacultySelect
             value={filters.faculdade}
-            onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
-          />
-          <TipoCandidaturaSelect
-            value={filters.tipoCandidatura}
-            onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, faculdade: v, curso: "" })
+            }
           />
           <CourseSelect
             disabled={!filters.faculdade || !filters.tipoCandidatura}
@@ -80,6 +97,7 @@ export function OrientadorModal({
             onChangeValue={(v) => setFilters({ ...filters, curso: v })}
             params={{
               faculdadeId: parseFilter(filters.faculdade),
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
             }}
           />
           <div className="space-y-1.5">
