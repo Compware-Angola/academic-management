@@ -75,7 +75,6 @@ const Index = () => {
     },
   ];
   const { user } = currentUser || {};
-  console.log(user, "USerrrr");
 
 
 
