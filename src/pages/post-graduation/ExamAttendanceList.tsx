@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Loader2, RefreshCw, Search, Users } from "lucide-react";
 
 import { FormSelect } from "@/components/common/FormSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -28,9 +29,9 @@ import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-discip
 import { useQueryAttendanceList } from "@/hooks/post-graduation/use-query-exam-attendance-list";
 import { useQueryExamMarkingOptions } from "@/hooks/post-graduation/use-query-exam-marking-options";
 import { useQueryPostGraduationDegrees } from "@/hooks/post-graduation/use-query-degrees";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { PostGraduationDegree } from "@/services/post-graduation/fetch-degrees.service";
+import { parseFilter } from "@/util/parse-filter";
 
 type FilterState = {
   academicYearId: string;
@@ -66,11 +67,6 @@ export default function PostGraduationExamAttendanceList() {
   const [appliedSearch, setAppliedSearch] = useState("");
 
   const {
-    data: academicYears = [],
-    isLoading: isLoadingAcademicYears,
-    isError: isAcademicYearsError,
-  } = useQueryAnoAcademico();
-  const {
     data: degreesResponse,
     isLoading: isLoadingDegrees,
     isError: isDegreesError,
@@ -96,23 +92,6 @@ export default function PostGraduationExamAttendanceList() {
       ),
     [semestersResponse],
   );
-
-  useEffect(() => {
-    if (filters.academicYearId || academicYears.length === 0) return;
-
-    const activeAcademicYear = academicYears.find((academicYear) =>
-      ["activo", "ativo"].includes(
-        academicYear.estado?.trim().toLowerCase(),
-      ),
-    );
-
-    if (activeAcademicYear) {
-      setFilters((current) => ({
-        ...current,
-        academicYearId: String(activeAcademicYear.codigo),
-      }));
-    }
-  }, [academicYears, filters.academicYearId]);
 
   useEffect(() => {
     if (filters.degreeId || degrees.length === 0) return;
@@ -296,7 +275,6 @@ export default function PostGraduationExamAttendanceList() {
   }
 
   const hasFilterError =
-    isAcademicYearsError ||
     isDegreesError ||
     isSemestersError ||
     isOptionsError ||
@@ -332,22 +310,6 @@ export default function PostGraduationExamAttendanceList() {
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <FormSelect
-              label="Ano Lectivo"
-              value={filters.academicYearId}
-              options={academicYears}
-              loading={isLoadingAcademicYears}
-              disabled={isLoadingAcademicYears || isAcademicYearsError}
-              map={(item) => ({
-                key: item.codigo,
-                value: item.codigo,
-                label: item.designacao,
-              })}
-              onChange={(value) =>
-                handleFilterChange("academicYearId", value)
-              }
-            />
-
-            <FormSelect
               label="Grau"
               value={filters.degreeId}
               options={degrees}
@@ -359,6 +321,19 @@ export default function PostGraduationExamAttendanceList() {
                 label: item.designation,
               })}
               onChange={(value) => handleFilterChange("degreeId", value)}
+            />
+
+            <AcademicYearsAvailableForOperationSelect
+              key={filters.degreeId}
+              label="Ano Lectivo"
+              value={filters.academicYearId}
+              tipoCandidaturaId={parseFilter(filters.degreeId) ?? 2}
+              onlyConfigurable={false}
+              enableDefaultActiveYear
+              disabled={!filters.degreeId}
+              onChangeValue={(value) =>
+                handleFilterChange("academicYearId", value)
+              }
             />
 
             <FormSelect
