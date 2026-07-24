@@ -121,7 +121,6 @@ export default function UCManagementPlan() {
     });
   };
 
-
   const { mutate: createUC, isPending: isCreating } = useAddUCToPlan();
 
   useEffect(() => {
@@ -378,8 +377,9 @@ export default function UCManagementPlan() {
 
                 mensagem = `Selecione ${faltantes.join(", ")} para visualizar as unidades curriculares`;
               } else if (estado !== undefined) {
-                mensagem = `Nenhuma unidade curricular ${estado === 1 ? "ativa" : "inativa"
-                  } encontrada para os filtros selecionados`;
+                mensagem = `Nenhuma unidade curricular ${
+                  estado === 1 ? "ativa" : "inativa"
+                } encontrada para os filtros selecionados`;
               } else {
                 mensagem =
                   "Nenhuma unidade curricular encontrada para os filtros selecionados";
@@ -405,7 +405,7 @@ export default function UCManagementPlan() {
               <TableBody>
                 {grades.map((uc) => (
                   <TableRow
-                    key={uc.codigo}
+                    key={uc.codigo_grade_curricular}
                     className="hover:bg-muted/50 transition-colors"
                   >
                     <TableCell className="font-mono font-semibold text-sm">
