@@ -81,15 +81,20 @@ export default function GuidanceResearchManagementVinculos() {
     data: vinculosResponse,
     refetch,
     isFetching,
-  } = useQueryVinculos({
-    anoLectivoId:
-      filters.anoLectivo === "all"
-        ? undefined
-        : parseFilter(filters.anoLectivo),
-    cursoId: parseFilter(filters.curso),
-    page,
-    limit,
-  });
+  } = useQueryVinculos(
+    {
+      anoLectivoId:
+        filters.anoLectivo === "all"
+          ? undefined
+          : parseFilter(filters.anoLectivo),
+      cursoId: parseFilter(filters.curso),
+      page,
+      limit,
+    },
+    {
+      enabled: !!parseFilter(filters.anoLectivo),
+    },
+  );
   const tableData = vinculosResponse?.data || [];
   const total = vinculosResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
