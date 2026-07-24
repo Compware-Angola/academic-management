@@ -15,14 +15,25 @@ import { AlertCircle, GraduationCap } from "lucide-react";
 import { useMutationDiplomarAluno } from "@/hooks/students/use-mutation-diplomar-aluno";
 import { useMutationDesdiplomarAluno } from "@/hooks/students/use-mutation-desdiplomar-aluno";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { Input } from "@/components/ui/input";
 
 type DiplomarProps = {
   value: string;
   codigoMatricula: number;
 };
+const today = new Date();
 
 export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
+  const [dataActa, setDataActa] = useState<Date | undefined>(undefined);
+
+  const formatDateForInput = (date: Date | undefined) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
   const [motivo, setMotivo] = useState("");
 
   const { mutate: diplomarAluno, isPending } = useMutationDiplomarAluno();
@@ -74,7 +85,8 @@ export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
                     <>
                       Esta ação irá anular a diplomação do estudante, remover o
                       registo de conclusão do curso e voltar o estado da
-                      matrícula para <span className="font-medium">activo</span>.
+                      matrícula para <span className="font-medium">activo</span>
+                      .
                     </>
                   ) : (
                     <>
@@ -86,21 +98,44 @@ export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
                 </p>
               </div>
             </div>
-
-            <div className="flex justify-end">
-              {isDiplomado ? (
-                <Button
-                  variant="destructive"
-                  onClick={() => setConfirmacaoAberta(true)}
-                  disabled={isFetching || isDesdiplomando}
-                >
-                  {isDesdiplomando ? "Anulando..." : "Anular Diploma"}
-                </Button>
+            <div className="w-full flex justify-between items-end">
+              {!isDiplomado ? (
+                <div>
+                  <label className="text-sm font-medium">Data da Acta</label>
+                  <Input
+                    type="date"
+                    value={formatDateForInput(dataActa)}
+                    onChange={(e) => {
+                      setDataActa(
+                        e.target.value
+                          ? new Date(e.target.value + "T00:00:00")
+                          : undefined,
+                      );
+                    }}
+                  />
+                </div>
               ) : (
-                <Button onClick={handleDiplomar} disabled={isPending || isFetching}>
-                  {isPending ? "Diplomando..." : "Diplomar Estudante"}
-                </Button>
+                <div />
               )}
+
+              <div>
+                {isDiplomado ? (
+                  <Button
+                    variant="destructive"
+                    onClick={() => setConfirmacaoAberta(true)}
+                    disabled={isFetching || isDesdiplomando}
+                  >
+                    {isDesdiplomando ? "Anulando..." : "Anular Diploma"}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleDiplomar}
+                    disabled={isPending || isFetching || !dataActa}
+                  >
+                    {isPending ? "Diplomando..." : "Diplomar Estudante"}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ import {
 
   logoutResponse,
   makLoggedOut,
-  
+
 } from "@/services/auth/login.service";
 import { AuthStorage } from "@/util/auth-storage";
 import { useNavigate } from "react-router-dom";
@@ -24,26 +24,26 @@ export function useMutationLogin() {
   return useMutation<AuthResponse, Error, LoginPayload>({
     mutationKey: ["login"],
     mutationFn: loginService,
-  onSuccess: (data) => {
-  
+    onSuccess: (data) => {
 
-  if (data?.user?.primeiro_log != 0) {
-    toast({
-      title: "Primeiro acesso detectado",
-      description: "Vamos configurar a sua senha. Verifique o seu email em seguida.",
-      duration: 6000,
-    });
-    navigate("/primeiro-acesso", { replace: true });
-  } else {
-    login(data);
-    toast({
-      title: data.mensagem || "Login realizado com sucesso",
-      description: `Bem-vindo, ${data.user?.username ?? "Utilizador"}!`,
-    });
-     navigate("/boas-vindas",{ replace: true });
-   
-  }
-},
+
+      if (data?.user?.primeiro_log != 0) {
+        toast({
+          title: "Primeiro acesso detectado",
+          description: "Vamos configurar a sua senha. Verifique o seu email em seguida.",
+          duration: 6000,
+        });
+        navigate("/primeiro-acesso", { replace: true });
+      } else {
+        login(data);
+        toast({
+          title: data.mensagem || "Login realizado com sucesso",
+          description: `Bem-vindo, ${data.user?.username ?? "Utilizador"}!`,
+        });
+        navigate("/boas-vindas", { replace: true });
+
+      }
+    },
     onError: (err: Error) => {
       toast({
         title: "Erro ao fazer login",
@@ -55,10 +55,10 @@ export function useMutationLogin() {
   });
 }
 export function useMutationLogout() {
-  const { logout: authLogout } = useAuth(); 
+  const { logout: authLogout } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();   
+  const queryClient = useQueryClient();
 
   return useMutation<logoutResponse, Error, { platform: 'GA' }>({
     mutationKey: ["logout"],
@@ -66,7 +66,7 @@ export function useMutationLogout() {
 
     onSuccess: (data) => {
       // Limpa a sessão / auth state
-      authLogout(); 
+      authLogout();
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['users-logados'] });
 
@@ -75,7 +75,7 @@ export function useMutationLogout() {
         description: data.mensagem || "Sessão terminada com sucesso.",
       });
 
-      navigate("/", { replace: true }); 
+      navigate("/", { replace: true });
     },
 
     onError: (err: Error) => {
@@ -88,12 +88,12 @@ export function useMutationLogout() {
   });
 }
 
-export function useCurrentUser(platform: "GA") {
+export function useCurrentUser() {
   const token = AuthStorage.getToken();
 
   return useQuery({
-    queryKey: ["current-user", platform],
-    queryFn: () => getCurrentUserService(platform),
+    queryKey: ["current-user"],
+    queryFn: () => getCurrentUserService(),
     enabled: !!token,
     staleTime: 1 * 60 * 1000,
     retry: false,
@@ -119,7 +119,7 @@ export function useMutationMakLoggedOut() {
       makLoggedOut(utilizadorId, platform),
 
     onSuccess: (data) => {
-  
+
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["users-logados"] });
 
