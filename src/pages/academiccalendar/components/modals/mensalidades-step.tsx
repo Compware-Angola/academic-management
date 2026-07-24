@@ -54,7 +54,12 @@ export function MensalidadesStep(props: MensalidadesStepProps) {
                         </TableHeader>
                         <TableBody>
                             {mensalidadesEditadas.map((item, index) => (
-                                <TableRow key={index}>
+                                <TableRow key={index}
+                                    className={
+                                        item.activo === 0
+                                            ? "text-red-600 line-through decoration-red-600 decoration-2"
+                                            : ""
+                                    }>
                                     <TableCell className="font-medium">
                                         {item.designacao}
                                     </TableCell>

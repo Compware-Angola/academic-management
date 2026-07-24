@@ -42,7 +42,7 @@ export function Licenciatura() {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPageMonthly, setCurrentPageMonthly] = useState(1);
-    const [itemsPerPageMonthly, setItemsPerPageMonthly] = useState(6);
+    const [itemsPerPageMonthly, setItemsPerPageMonthly] = useState(5);
     const [openModal, setOpenModal] = useState(false);
     const [vagaSelecionada, setVagaSelecionada] = useState<{
         id: number;
