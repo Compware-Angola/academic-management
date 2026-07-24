@@ -164,6 +164,7 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3">
+            { /* Filter by type of movement 
             <Select value={tipo} onValueChange={(v) => { setTipo(v); setPage(1); }}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Tipo" />
@@ -177,7 +178,7 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                 <SelectItem value="MULTA">Multa</SelectItem>
               </SelectContent>
             </Select>
-
+*/}
             <Select value={estado} onValueChange={(v) => { setEstado(v); setPage(1); }}>
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Estado" />
@@ -210,7 +211,9 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                       Data <ArrowUpDown className="h-3.5 w-3.5" />
                     </button>
                   </TableHead>
+                  {/* TODO: Filter by type of movement 
                   <TableHead>Tipo</TableHead>
+                  */}
                   <TableHead>Motivo</TableHead>
                   <TableHead className="text-right">Crédito</TableHead>
                   <TableHead className="text-right">Débito</TableHead>
@@ -244,11 +247,14 @@ export function HistoryAccountMovimentSection({ codigoMatricula }: Props) {
                       <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
                       <TableCell className="font-mono text-xs">{r.referencia}</TableCell>
                       <TableCell>{r.data}</TableCell>
+
+                      {/* TODO: Filter by type of movement 
                       <TableCell>
                         <Badge variant="outline" className={`border-0 ${TIPO_STYLES[r.tipo] || TIPO_STYLES.DEFAULT}`}>
                           {r.tipo}
                         </Badge>
                       </TableCell>
+                      */}
                       <TableCell>{r.motivo}</TableCell>
                       <TableCell className="text-right text-emerald-600 font-medium">
                         {r.credito ? formatKz(r.credito) : "—"}
