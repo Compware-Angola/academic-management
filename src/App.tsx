@@ -645,7 +645,7 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/avaliacoes/formula-uc"
+                    path="/plano/formula-uc"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
@@ -731,7 +731,7 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/avaliacoes/formula-oral"
+                    path="/plano/formula-oral"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
@@ -1914,7 +1914,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-              
+
                   <Route
                     path="/pos-graduacao/calendario/atividades"
                     element={
