@@ -120,7 +120,7 @@ const s = StyleSheet.create({
     color: COR.preto,
   },
   assinaturaWrap: {
-    marginTop: 75,
+    marginTop: 70,
     alignItems: "center" as const,
   },
   cargoDiretora: {
@@ -170,6 +170,8 @@ interface CartaConclusaoDocumentProps {
   dados: StudentClassInfo;
   cargoDiretor: string;
   nomeDiretor: string;
+  cargoReitor: string;
+  nomeReitor: string;
   codigo_validacao: string;
   logoSrc?: string;
   bgSrc?: string;
@@ -180,6 +182,8 @@ export function CertidaoDocument({
   dados,
   cargoDiretor,
   nomeDiretor,
+   cargoReitor,
+  nomeReitor,
   codigo_validacao,
   logoSrc,
   bgSrc,
@@ -271,13 +275,18 @@ return (
               year: "numeric",
             })}
           </Text>
-        </View>
-
         <View style={s.assinaturaWrap}>
+          <Text style={s.cargoDiretora}>{cargoReitor}</Text>
+          <View style={s.linhaAssinatura} />
+          <Text style={s.nomeDiretora}>{nomeReitor}</Text>
+        </View>
+        
+        </View>
+          <View style={s.assinaturaWrap}>
           <Text style={s.cargoDiretora}>{cargoDiretor}</Text>
           <View style={s.linhaAssinatura} />
           <Text style={s.nomeDiretora}>{nomeDiretor}</Text>
-        </View>
+        </View>     
       </View>
 
       <View style={s.rodapeWrap}>
@@ -302,6 +311,8 @@ interface GerarCartaConclusaoProps {
   dados: StudentClassInfo;
   cargoDiretor: string;
   nomeDiretor: string;
+  cargoReitor: string;
+  nomeReitor: string;
   codigo_validacao:string;
   logoSrc?: string;
   bgSrc?: string;
@@ -316,6 +327,8 @@ export function GerarCartaConclusao({
   dados,
   cargoDiretor,
   nomeDiretor,
+  cargoReitor,
+  nomeReitor,
   codigo_validacao,
   logoSrc,
   bgSrc,
@@ -335,6 +348,8 @@ export function GerarCartaConclusao({
       dados={dados}
       cargoDiretor={cargoDiretor}
       nomeDiretor={nomeDiretor}
+         cargoReitor={cargoReitor}
+      nomeReitor={nomeReitor}
       codigo_validacao={codigo}
       logoSrc={logoSrc}
       bgSrc={bgSrc}
