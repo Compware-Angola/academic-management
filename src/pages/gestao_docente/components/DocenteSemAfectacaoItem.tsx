@@ -1,4 +1,3 @@
-import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { parseFilter } from "@/util/parse-filter";
 import { Loader2 } from "lucide-react";
 import { useId, useMemo, useState } from "react";
@@ -35,6 +33,7 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
 
 const DocenteSemAfectacaoItem = () => {
   const id = useId();
@@ -51,7 +50,6 @@ const DocenteSemAfectacaoItem = () => {
     tipoAfectacao: "",
   });
 
-  const { data: teachersData = [] } = useQueryTeacther();
   const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
     useQueryTipoCandidatura();
   const { data: afectacoesResponse, isLoading } = useQueryDocentesAfectacao({
@@ -132,15 +130,12 @@ const DocenteSemAfectacaoItem = () => {
               onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
             />
             <div className="space-y-1.5">
-              <Label>Docente</Label>
-              <FormCommandSelect
-                width="full"
+              <TeacherSelectList
                 value={filters.docente}
-                options={teachersData}
-                map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-                onChange={(codigo) =>
+                onChangeValue={(codigo) =>
                   setFilters({ ...filters, docente: codigo })
                 }
+                tipoCandidatura={parseFilter(tipoCandidatura)}
               />
             </div>
             <div>

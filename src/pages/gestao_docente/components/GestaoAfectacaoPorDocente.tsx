@@ -1,10 +1,8 @@
-import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,7 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useQueryGestaoAfectacaoDocentes } from "@/hooks/gestao_docente/use-query-gestao-afectacao.service";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
 import { Loader2 } from "lucide-react";
@@ -30,6 +27,7 @@ import { useId, useState } from "react";
 import { useMutationUpdateAfectacaoStatus } from "@/hooks/gestao_docente/use-mutation-update-afectacao-status";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
 
 const GestaoAfectacaoPorDocente = () => {
   const id = useId();
@@ -50,7 +48,6 @@ const GestaoAfectacaoPorDocente = () => {
       key: id,
     },
   ];
-  const { data: teachersData = [] } = useQueryTeacther();
   const { data: afectacoesResponse, isLoading } =
     useQueryGestaoAfectacaoDocentes({
       anoLectivo: parseFilter(filters.anoLectivo),
@@ -135,14 +132,12 @@ const GestaoAfectacaoPorDocente = () => {
             }
 
             <div className="space-y-1.5">
-              <Label>Docente</Label>
-              <FormCommandSelect
+              <TeacherSelectList
                 value={filters.docente}
-                options={teachersData}
-                map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-                onChange={(codigo) =>
+                onChangeValue={(codigo) =>
                   setFilters({ ...filters, docente: codigo })
                 }
+                tipoCandidatura={parseFilter(filters.tipoCandidaturaId)}
               />
             </div>
           </div>

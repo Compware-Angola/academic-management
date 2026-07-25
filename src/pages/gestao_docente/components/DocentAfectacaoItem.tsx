@@ -45,7 +45,7 @@ const DocentAfectacaoItem = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const { mutateAsync, isPending } = useMutationUpdateAfectacaoStatus();
+
   const [tipoCandidatura, setTipoCandidatura] = useState("1");
   const [filters, setFilters] = useState({
     anoLectivo: "23",
@@ -53,7 +53,7 @@ const DocentAfectacaoItem = () => {
     docente: "",
   });
 
-  const { data: teachersData = [] } = useQueryTeacther();
+
   const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
     useQueryTipoCandidatura();
   const { data: afectacoesResponse, isLoading } = useQueryDocentesAfectacao({

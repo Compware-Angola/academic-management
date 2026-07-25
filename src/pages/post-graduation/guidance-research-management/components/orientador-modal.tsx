@@ -1,13 +1,11 @@
-import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { useMutationCreateOrientadorTfc } from "@/hooks/defesa-tfc/use-mutation-criar-orientador-tfc";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { parseFilter } from "@/util/parse-filter";
 import { useState } from "react";
 
@@ -19,7 +17,6 @@ export function OrientadorModal({
   setOpen: (open: boolean) => void;
 }) {
   const mutation = useMutationCreateOrientadorTfc();
-  const { data: teachersData = [] } = useQueryTeacther();
   const [filters, setFilters] = useState({
     anoLectivo: "",
     curso: "",
@@ -101,12 +98,12 @@ export function OrientadorModal({
             }}
           />
           <div className="space-y-1.5">
-            <Label>Docente</Label>
-            <FormCommandSelect
+            <TeacherSelectList
               value={filters.docente}
-              options={teachersData}
-              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-              onChange={(codigo) => setFilters({ ...filters, docente: codigo })}
+              onChangeValue={(codigo) =>
+                setFilters({ ...filters, docente: codigo })
+              }
+              tipoCandidatura={parseFilter(filters.tipoCandidatura)}
             />
           </div>
 
