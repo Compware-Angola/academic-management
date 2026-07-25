@@ -83,31 +83,31 @@ export default function FormulaOral() {
   });
 
   // ===========================
-// FILTRO LOCAL (DISCIPLINA)
-// ===========================
-const filteredData = useMemo(() => {
-  if (!debouncedSearch) return data;
+  // FILTRO LOCAL (DISCIPLINA)
+  // ===========================
+  const filteredData = useMemo(() => {
+    if (!debouncedSearch) return data;
 
-  const searchLower = debouncedSearch.toLowerCase();
+    const searchLower = debouncedSearch.toLowerCase();
 
-  return data.filter((item) =>
-  item.disciplina?.toLowerCase().includes(searchLower)
-);
-}, [data, debouncedSearch]);
+    return data.filter((item) =>
+      item.disciplina?.toLowerCase().includes(searchLower)
+    );
+  }, [data, debouncedSearch]);
 
-// ===========================
-// PAGINAÇÃO (COM FILTRO)
-// ===========================
-const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // ===========================
+  // PAGINAÇÃO (COM FILTRO)
+  // ===========================
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-const paginated = filteredData.slice(
-  (currentPage - 1) * itemsPerPage,
-  currentPage * itemsPerPage,
-);
+  const paginated = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
-useEffect(() => {
-  setCurrentPage(1);
-}, [debouncedSearch]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
 
   return (
@@ -174,17 +174,7 @@ useEffect(() => {
             disabled={!filters.tipoCandidatura}
             onlyConfigurable={false}
           />
-          <FormSelect
-            label="Semestre"
-            value={filters.semestre}
-            onChange={(v) => setFilters({ ...filters, semestre: v })}
-            options={semestres}
-            map={(s) => ({
-              key: s.codigo,
-              label: s.designacao,
-              value: s.codigo,
-            })}
-          />
+
 
           <CourseSelect
             value={filters.curso}
@@ -213,6 +203,19 @@ useEffect(() => {
               value: c.codigo,
             })}
           />
+          {Number(filters.tipoCandidatura) === 1 && (
+            <FormSelect
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) => setFilters({ ...filters, semestre: v })}
+              options={semestres}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
+            />
+          )}
         </div>
       </div>
 
@@ -221,7 +224,7 @@ useEffect(() => {
         [...Array(5)].map((_, i) => (
           <Skeleton key={i} className="h-10 w-full" />
         ))
-      ) :  filteredData.length === 0 ? (
+      ) : filteredData.length === 0 ? (
         <div className="bg-card border rounded-lg text-center py-10">
           <Shield className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
           <p>Nenhum registro encontrado</p>
@@ -229,54 +232,54 @@ useEffect(() => {
       ) : (
 
 
-            <div  className="space-y-4">
+        <div className="space-y-4">
 
 
-               <div className="flex justify-end max-w-md ml-auto">
-                <Input
-                  placeholder="Filtrar por Unidade Curricular..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+          <div className="flex justify-end max-w-md ml-auto">
+            <Input
+              placeholder="Filtrar por Unidade Curricular..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
           <div className="bg-card border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Disciplina</TableHead>
-                <TableHead className="text-center">Oral</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {paginated.map((item) => (
-                <TableRow key={item.codigoGrade}>
-
-                  <TableCell>{item.disciplina}</TableCell>
-
-                  {/* STATUS + SWITCH */}
-                  <TableCell className="flex justify-center">
-                    <Switch
-                      checked={item.habilitar}
-                      disabled={mutation.isPending}
-                      onCheckedChange={(checked) => {
-                        mutation.mutate({
-                          codigoGrade: item.codigoGrade,
-                          habilitar: checked,
-                        });
-                      }}
-                    />
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Disciplina</TableHead>
+                  <TableHead className="text-center">Oral</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+
+              <TableBody>
+                {paginated.map((item) => (
+                  <TableRow key={item.codigoGrade}>
+
+                    <TableCell>{item.disciplina}</TableCell>
+
+                    {/* STATUS + SWITCH */}
+                    <TableCell className="flex justify-center">
+                      <Switch
+                        checked={item.habilitar}
+                        disabled={mutation.isPending}
+                        onCheckedChange={(checked) => {
+                          mutation.mutate({
+                            codigoGrade: item.codigoGrade,
+                            habilitar: checked,
+                          });
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+
+
         </div>
-
-
-
-            </div>
 
       )}
 
