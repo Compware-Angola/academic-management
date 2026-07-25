@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookText, Plus, X } from "lucide-react";
+import { BookText, DownloadCloud, Plus, X } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -60,6 +60,8 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { ImportUCModal } from "./components/ImportModalUC";
+import { useNavigate } from "react-router-dom";
 
 export default function UCManagementPlan() {
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
@@ -74,6 +76,13 @@ export default function UCManagementPlan() {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalImportOpen, setIsModalImportOpen] = useState<boolean>(false);
+
+  const onOpenModalImport = () => setIsModalImportOpen(true);
+  const onCloseModalImport = () => setIsModalImportOpen(false);
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     codigo_disciplina: "",
     codigo_semestre: "",
@@ -91,9 +100,7 @@ export default function UCManagementPlan() {
     setCursoId("");
     setClasseId("");
     setEstado(undefined);
-    setPage(1); // importante: volta à primeira página ao limpar
-    // mantém anoLetivoId se for um filtro "base" obrigatório,
-    // ou reseta também se fizer sentido no teu fluxo
+    setPage(1);
   };
 
   const { data: anosLetivos = [] } = useQueryAnoAcademico();
@@ -146,7 +153,10 @@ export default function UCManagementPlan() {
   };
 
   const handleCreateUC = () => {
-    if (!formData.codigo_disciplina || (isGraduation && !formData.codigo_semestre)) {
+    if (
+      !formData.codigo_disciplina ||
+      (isGraduation && !formData.codigo_semestre)
+    ) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
@@ -210,10 +220,20 @@ export default function UCManagementPlan() {
         title="Gestão de Unidades Curriculares no Plano"
         subtitle="Visualizar e gerir todas as UCs por ano letivo, curso e ano curricular"
         actions={
-          <Button onClick={handleOpenModal} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar UC ao Plano
-          </Button>
+          <div className="flex space-x-2">
+            <Button onClick={handleOpenModal} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar UC
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/plano/import-uc")}
+              size="sm"
+            >
+              <DownloadCloud className="h-4 w-4 mr-2" />
+              Importar UC
+            </Button>
+          </div>
         }
       />
 
@@ -520,6 +540,10 @@ export default function UCManagementPlan() {
           unidade(s) curricular(es) no plano
         </div>
       )}
+      <ImportUCModal
+        open={isModalImportOpen}
+        onOpenChange={(V) => setIsModalImportOpen(false)}
+      />
 
       {/* Modal de Criação */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -577,7 +601,10 @@ export default function UCManagementPlan() {
                         </SelectItem>
                       ) : (
                         semestres.map((sem) => (
-                          <SelectItem key={sem.codigo} value={String(sem.codigo)}>
+                          <SelectItem
+                            key={sem.codigo}
+                            value={String(sem.codigo)}
+                          >
                             <div className="flex items-center gap-3">
                               <span className="font-mono font-semibold text-sm">
                                 {sem.codigo}

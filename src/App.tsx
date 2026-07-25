@@ -193,6 +193,7 @@ import PostGraduationControleGeral from "./pages/post-graduation/sumario/Control
 import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario/ListagemSumarios";
 import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
 import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
+import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
 
 const App = () => {
   return (
@@ -467,6 +468,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="/plano/import-uc" element={<ImportUCPage />} />
                   <Route
                     path="/assiduidade/marcacao"
                     element={
@@ -1914,7 +1916,6 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-
                   <Route
                     path="/pos-graduacao/calendario/atividades"
                     element={
