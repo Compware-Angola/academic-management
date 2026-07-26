@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { toast, useToast } from "@/components/ui/use-toast";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
@@ -31,6 +30,7 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
 interface GestaoAfectacaoModalProps {
   isModalOpen: boolean;
   setIsModalOpen: () => void;
@@ -40,7 +40,6 @@ export const GestaoAfectacaoModal = ({
   setIsModalOpen,
 }: GestaoAfectacaoModalProps) => {
   const { mutateAsync, isPending } = useMutationCreateDocenteAfectacao();
-  const { data: teachersData = [] } = useQueryTeacther();
   const { data: categoriaDocente = [] } = useQueryCategoriaDocente();
   const [params, setParams] = useState({
     docente: undefined,
@@ -177,13 +176,10 @@ export const GestaoAfectacaoModal = ({
               enableDefaultActiveYear
               label="Ano Letivo"
             />
-            <Label>Docente</Label>
-            <FormCommandSelect
-              width="full"
+            <TeacherSelectList
               value={params.docente}
-              options={teachersData}
-              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-              onChange={(codigo) => handleChangeInput("docente", codigo)}
+              onChangeValue={(codigo) => handleChangeInput("docente", codigo)}
+              tipoCandidatura={parseFilter(params.tipoCandidatura)}
             />
           </div>
           <CourseSelect

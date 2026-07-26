@@ -1,5 +1,3 @@
-import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { parseFilter } from "@/util/parse-filter";
 import { Loader2 } from "lucide-react";
 import { useId, useMemo, useState } from "react";
@@ -34,6 +31,9 @@ import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
 
 const DocenteSemAfectacaoItem = () => {
   const id = useId();
@@ -42,6 +42,7 @@ const DocenteSemAfectacaoItem = () => {
   const [search, setSearch] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const { mutateAsync, isPending } = useMutationUpdateAfectacaoStatus();
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     semestre: "",
@@ -49,7 +50,8 @@ const DocenteSemAfectacaoItem = () => {
     tipoAfectacao: "",
   });
 
-  const { data: teachersData = [] } = useQueryTeacther();
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
   const { data: afectacoesResponse, isLoading } = useQueryDocentesAfectacao({
     anoLectivo: parseFilter(filters.anoLectivo),
     docente: parseFilter(filters.docente),
@@ -96,9 +98,30 @@ const DocenteSemAfectacaoItem = () => {
           <CardTitle>Filtros de Pesquisa</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 grid-cols-3">
-            <AcademicYearSelect
+          <div className="grid gap-3 grid-cols-4">
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setTipoCandidatura(v);
+                setFilters({ ...filters, anoLectivo: "" });
+                setPage(1);
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+
+            <AcademicYearsAvailableForOperationSelect
               value={filters.anoLectivo}
+              tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidatura}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <SemestreSelect
@@ -107,15 +130,12 @@ const DocenteSemAfectacaoItem = () => {
               onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
             />
             <div className="space-y-1.5">
-              <Label>Docente</Label>
-              <FormCommandSelect
-                width="full"
+              <TeacherSelectList
                 value={filters.docente}
-                options={teachersData}
-                map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-                onChange={(codigo) =>
+                onChangeValue={(codigo) =>
                   setFilters({ ...filters, docente: codigo })
                 }
+                tipoCandidatura={parseFilter(tipoCandidatura)}
               />
             </div>
             <div>

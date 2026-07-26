@@ -10,16 +10,30 @@ export type GradeCurricularPayload = {
 };
 
 export type GradeCurricularItem = {
-  codigo: number;
-  codigo_disciplina: number;
+  codigo_plano_curricular: number;
+  descricao_plano_curricular: string;
+
   codigo_grade_curricular: number;
+  codigo_disciplina: number;
+
   descricao_disciplina: string;
   descricao_curso: string;
   codigo_curso: number;
+
   descricao_classe: string;
   codigo_classe: number;
+
   codigo_semestre: number;
   designacao_semestre: string;
+
+  peso_primeira_freq: number | null;
+  peso_segunda_freq: number | null;
+  peso_pratica: number | null;
+
+  nota_min_primeira_freq: number | null;
+  nota_min_segunda_freq: number | null;
+  nota_min_pratica: number | null;
+
   status: number;
 };
 

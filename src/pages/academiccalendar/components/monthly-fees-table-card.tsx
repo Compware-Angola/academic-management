@@ -168,7 +168,7 @@ export function MonthlyFeesTableCard({
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {[6, 12, 24].map((size) => (
+                                        {[5, 10, 20].map((size) => (
                                             <SelectItem key={size} value={size.toString()}>
                                                 {size}
                                             </SelectItem>

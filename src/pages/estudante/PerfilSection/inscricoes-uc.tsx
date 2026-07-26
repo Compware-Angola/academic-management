@@ -108,7 +108,7 @@ export function InscricoesUC({
       },
       {
         onSuccess(response) {
-          console.log(response);
+
           const sucessos = response?.sucessos ?? [];
           const erros = response?.erros ?? [];
           setSelectedGrades([]);

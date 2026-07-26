@@ -15,6 +15,8 @@ import { useMutationChangeShift } from "@/hooks/students/use-mutation-change-shi
 import { toast } from "sonner";
 import Lottie from "lottie-react";
 import ChangeShift from "@/assets/ChangeShift.json";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 
 type Props = {
   codigoMatricula: number;
@@ -26,8 +28,7 @@ export function ChangeShiftStudentPage({
   value = "mudar-turno",
 }: Props) {
   const { data: periodos = [] } = useQueryPeriod();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
+  const { data: student } = useStudentDetail(codigoMatricula);
 
   const mutationChangeShift = useMutationChangeShift();
   const {
@@ -121,21 +122,17 @@ export function ChangeShiftStudentPage({
 
       <div className="shift-form-wrap grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="shift-select-col">
-          <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
-            label="Ano Letivo"
+          <AcademicYearsAvailableForOperationSelect
+            enableDefaultSelectItem={false}
+            onlyConfigurable={false}
+
+            enableDefaultActiveYear={false}
             value={anoLetivo}
-            onChange={(v) => setAnoLetivo(v)}
-            options={academicYear?.filter(
-              (ay) => ay.estado.toLowerCase() === "activo"
-            )}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo.toString(),
-            })}
+            onChangeValue={(v) => setAnoLetivo(v)}
+            tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+            label="Ano Letivo"
           />
+
         </div>
 
         <div className="shift-select-col">

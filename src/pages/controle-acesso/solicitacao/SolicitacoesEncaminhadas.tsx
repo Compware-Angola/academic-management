@@ -44,49 +44,47 @@ export default function SolicitacoesEncaminhadas() {
   const [showDetails, setShowDetails] = useState(false);
 
   /* ---------- QUERY ---------- */
-const { data: anosAcademicos } = useQueryAnoAcademico();
-const { data: servicos } = useQueryServicos({codigo_ano_lectivo: 23});
+  const { data: anosAcademicos } = useQueryAnoAcademico();
+  const { data: servicos } = useQueryServicos({ codigo_ano_lectivo: 23 });
 
 
-const { data, isLoading, isFetching } = useQueryListarSolicitacoes({
-  serviceId:
-    serviceId && serviceId !== "all"
-      ? Number(serviceId)
-      : undefined,
-  estado: estado === "all" ? undefined : estado,
-  page: currentPage,
-  limit: 10,
-});
+  const { data, isLoading, isFetching } = useQueryListarSolicitacoes({
+    serviceId:
+      serviceId && serviceId !== "all"
+        ? Number(serviceId)
+        : undefined,
+    estado: estado === "all" ? undefined : estado,
+    page: currentPage,
+    limit: 10,
+  });
 
 
-//console.log("SOLICITACAO: ", data)
+  const { mutate: rejectMutate } = useRejectSolicitacao()
+  const { mutate: approveMutate } = useAprovarSolicitacao()
 
-const { mutate: rejectMutate } = useRejectSolicitacao()
-const { mutate: approveMutate } = useAprovarSolicitacao()
+  const { user: userData } = useAuth()
+  const userIdLogado = userData.user.pk_utilizador
 
-const {user:userData} = useAuth()
-const userIdLogado =userData.user.pk_utilizador
+  function handleAprovar(row: Solicitacao) {
 
-function handleAprovar(row: Solicitacao) {
+    approveMutate({
+      solicitacaoId: row.codigo_solicitacao,
+      userId: userIdLogado,
+      descricao: String(row.descricao ?? row.descricao_servico ?? "")
+    })
 
-  approveMutate({
-    solicitacaoId: row.codigo_solicitacao,
-    userId: userIdLogado,
-    descricao:  String(row.descricao ?? row.descricao_servico ?? "")
-  })
- 
-}
+  }
 
-function handleRejeitar(row: Solicitacao) {
+  function handleRejeitar(row: Solicitacao) {
 
-  
-  rejectMutate({
-    solicitacaoId: row.codigo_solicitacao,
-    userId: userIdLogado,
-    descricao:  String(row.descricao ?? row.descricao_servico ?? "")
-  })
 
-}
+    rejectMutate({
+      solicitacaoId: row.codigo_solicitacao,
+      userId: userIdLogado,
+      descricao: String(row.descricao ?? row.descricao_servico ?? "")
+    })
+
+  }
 
 
   /* ---------- MAP DATA ---------- */
@@ -117,53 +115,53 @@ function handleRejeitar(row: Solicitacao) {
     {
       header: "Ações",
       accessor: "acoes",
-     cell: (row: Solicitacao) => (
-  <div className="flex items-center gap-2">
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() => {
-        setSelectedSolicitacao(row);
-        setShowDetails(true);
-      }}
-    >
-      <Eye className="h-4 w-4 mr-1" />
-      Ver
-    </Button>
-
-      { row.estado === "solicitacao encaminhada" && (
-        <>
-
+      cell: (row: Solicitacao) => (
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
               setSelectedSolicitacao(row);
-              handleAprovar(row);
+              setShowDetails(true);
             }}
           >
-          <Check className="h-4 w-4 mr-1 text-green-600" />
-          Aprovar
-        </Button>
+            <Eye className="h-4 w-4 mr-1" />
+            Ver
+          </Button>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setSelectedSolicitacao(row);
-            handleRejeitar(row);
-          }}
-        >
-          <X className="h-4 w-4 mr-1 text-red-600" />
-          Rejeitar
-        </Button>
+          {row.estado === "solicitacao encaminhada" && (
+            <>
 
-        </>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedSolicitacao(row);
+                  handleAprovar(row);
+                }}
+              >
+                <Check className="h-4 w-4 mr-1 text-green-600" />
+                Aprovar
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedSolicitacao(row);
+                  handleRejeitar(row);
+                }}
+              >
+                <X className="h-4 w-4 mr-1 text-red-600" />
+                Rejeitar
+              </Button>
+
+            </>
           )
-        }
+          }
 
-  </div>
-),
+        </div>
+      ),
 
     },
   ];
@@ -183,44 +181,44 @@ function handleRejeitar(row: Solicitacao) {
               <label className="text-sm font-medium">Serviço</label>
 
               <Select value={serviceId} onValueChange={setServiceId}>
-  <SelectTrigger>
-    <SelectValue placeholder="Todos os serviços" />
-  </SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os serviços" />
+                </SelectTrigger>
 
-  <SelectContent>
-    <SelectItem value="all">Todos</SelectItem>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
 
-    {servicos?.map((servico) => (
-      <SelectItem
-        key={servico.CODIGO}
-        value={String(servico.CODIGO)}
-      >
-        {servico.DESCRICAO}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+                  {servicos?.map((servico) => (
+                    <SelectItem
+                      key={servico.CODIGO}
+                      value={String(servico.CODIGO)}
+                    >
+                      {servico.DESCRICAO}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
 
             </div>
 
             <div className="space-y-2">
-                          <label className="text-sm font-medium">Estado</label>
+              <label className="text-sm font-medium">Estado</label>
               <Select value={estado} onValueChange={setEstado}>
-              <SelectTrigger>
-                <SelectValue placeholder="Todos os estados" />
-              </SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os estados" />
+                </SelectTrigger>
 
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
 
-                {ESTADOS.map((e) => (
-                  <SelectItem key={e.value} value={e.value}>
-                    {e.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  {ESTADOS.map((e) => (
+                    <SelectItem key={e.value} value={e.value}>
+                      {e.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
 
             </div>

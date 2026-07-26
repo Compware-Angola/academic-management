@@ -38,7 +38,7 @@ import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function PosGraduacaoAssiduidadeDocente() {
-  const { data: userDate } = useCurrentUser("GA");
+  const { data: userDate } = useCurrentUser();
   const isDocente = userDate?.roles?.docente;
   const { user } = useAuth();
   const userData = user?.user;

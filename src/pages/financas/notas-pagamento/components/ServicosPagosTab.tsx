@@ -19,11 +19,13 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Search, Loader2 } from "lucide-react";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { formatNumber } from "@/util/format-number";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryServicosPagosAluno } from "@/hooks/financas/pagamentos-mensais/use-query-servicos-pagos-aluno";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 type TipoServico = "TODOS" | "MENSALIDADES" | "SERVICOS";
 
@@ -34,6 +36,7 @@ type ServicosParams = {
 };
 
 export function ServicosPagosTab() {
+    const [tipoCandidatura, setTipoCandidatura] = useState("1");
     const [tipoServicoPago, setTipoServicoPago] = useState<TipoServico>("TODOS");
     const [mostrarServicosPagos, setMostrarServicosPagos] = useState(false);
     const [servicosParams, setServicosParams] = useState<ServicosParams>({
@@ -49,6 +52,8 @@ export function ServicosPagosTab() {
                 !!servicosParams.anoLectivo &&
                 !!servicosParams.codigoMatricula,
         });
+    const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+        useQueryTipoCandidatura();
 
     return (
         <div className="space-y-6">
@@ -57,9 +62,33 @@ export function ServicosPagosTab() {
                     <CardTitle>Consulta de serviços pagos do aluno</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <AcademicYearSelect
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <FormSelect
+                            label="Tipo de Candidatura"
+                            value={tipoCandidatura}
+                            loading={isLoadingTiposCandidatura}
+                            onChange={(v) => {
+                                setTipoCandidatura(v);
+                                setMostrarServicosPagos(false);
+                                setServicosParams((prev) => ({
+                                    ...prev,
+                                    anoLectivo: 0,
+                                }));
+                            }}
+                            options={tiposCandidatura}
+                            map={(tipo) => ({
+                                key: tipo.codigo,
+                                label: tipo.designacao,
+                                value: tipo.codigo,
+                            })}
+                            placeholder="Selecione o tipo..."
+                        />
+
+                        <AcademicYearsAvailableForOperationSelect
                             value={String(servicosParams.anoLectivo || "")}
+                            tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+                            onlyConfigurable={false}
+                            disabled={!tipoCandidatura}
                             onChangeValue={(v) =>
                                 setServicosParams((prev) => ({
                                     ...prev,

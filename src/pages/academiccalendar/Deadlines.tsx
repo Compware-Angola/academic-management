@@ -31,7 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Edit } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { formatarData } from "@/util/date-formate";
@@ -54,13 +54,29 @@ import { set } from "date-fns";
 import { MCALTipoAvaliacoesSelectSelect } from "@/components/common/global-selects/MCALTipoAvaliacoesSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function Deadlines() {
   const pk_utilizador = useAuth()?.user?.user?.pk_utilizador;
+  const { hasPermission } = usePermission();
 
   const [prazoId, setPrazoId] = useState<number>(0);
   const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
     useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = useMemo(() => {
+    return tiposCandidatura?.filter((tp) => {
+      if (
+        !hasPermission(
+          PermissionTypeDetails.PRAZOS_ACADEMICOS_POS_GRADUACAO.sigla,
+        ) &&
+        (tp.sigla === "DTR" || tp.sigla === "MST")
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [hasPermission, tiposCandidatura]);
   const { mutateAsync: criarPrazo, isPending: isCreating } = useCreatePrazo();
 
   const { mutateAsync: actualizarPrazo, isPending: isUpdating } =
@@ -212,18 +228,24 @@ export default function Deadlines() {
     setTipoPrazoId(String(tiposPrazo[0]?.pk_tipo_prazo));
   }, [isLoadingTiposPrazo, tiposPrazo, tipoPrazoId]);
   useEffect(() => {
-    if (isLoadingTiposCandidatura || tiposCandidatura.length === 0) return;
-    if (tipoCandidaturaId) return;
+    if (isLoadingTiposCandidatura || tiposCandidaturaFiltered.length === 0)
+      return;
 
-    setTipoCandidaturaId(String(tiposCandidatura[0]?.codigo));
-  }, [isLoadingTiposCandidatura, tiposCandidatura, tipoCandidaturaId]);
+    const tipoCandidaturaValido = tiposCandidaturaFiltered.some(
+      (tipo) => String(tipo.codigo) === tipoCandidaturaId,
+    );
+
+    if (!tipoCandidaturaId || !tipoCandidaturaValido) {
+      setTipoCandidaturaId(String(tiposCandidaturaFiltered[0]?.codigo));
+    }
+  }, [isLoadingTiposCandidatura, tiposCandidaturaFiltered, tipoCandidaturaId]);
 
   const totalPages = Math.ceil(prazos.length / itemsPerPage);
   const paginated = prazos.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  console.log(paginated);
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -247,32 +269,29 @@ export default function Deadlines() {
       <div className="bg-card rounded-lg border p-6 space-y-4">
         <h3 className="text-sm font-semibold">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Tipo de Candidatura */}
+          <FormSelect
+            label="Tipo de Candidatura"
+            value={tipoCandidaturaId}
+            onChange={setTipoCandidaturaId}
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tp) => ({
+              key: tp.codigo,
+              label: tp.designacao,
+              value: tp.codigo,
+            })}
+          />
+
           {/* Ano Letivo */}
           <div className="space-y-2">
-            <Label>Ano Letivo</Label>
-            <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    isLoadingAnosAcademicos ? "Carregando..." : "Selecione"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {anosAcademicos?.map((a) => (
-                  <SelectItem key={a.codigo} value={a.codigo.toString()}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{a.designacao}</span>
-                      {!a.estado.toLowerCase().includes("desactiv") && (
-                        <span className="text-xs text-green-600 font-medium ml-4">
-                          (Ativo)
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Letivo"
+              value={anoLetivoId}
+              onChangeValue={setAnoLetivoId}
+              tipoCandidaturaId={parseFilter(tipoCandidaturaId) ?? 1}
+              onlyConfigurable={false}
+            />
           </div>
 
           {/* Tipo de Prazo */}
@@ -298,30 +317,6 @@ export default function Deadlines() {
                     key={t.pk_tipo_prazo}
                     value={t.pk_tipo_prazo.toString()}
                   >
-                    {t.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Tipo de Candidatura */}
-          <div className="space-y-2">
-            <Label>Tipo de Candidatura</Label>
-            <Select
-              value={tipoCandidaturaId}
-              onValueChange={setTipoCandidaturaId}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    isLoadingTiposCandidatura ? "Carregando..." : "Selecione"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {tiposCandidatura.map((t) => (
-                  <SelectItem key={t.codigo} value={t.codigo.toString()}>
                     {t.designacao}
                   </SelectItem>
                 ))}
@@ -489,32 +484,18 @@ export default function Deadlines() {
               </div>
             )}
             {/* Tipo de Candidatura */}
-            <div className="space-y-2">
-              <Label>Tipo de Candidatura</Label>
-              <Select
-                value={form.tipoCandidaturaId}
-                onValueChange={(v) =>
-                  setForm({ ...form, tipoCandidaturaId: v })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      tiposCandidatura.length === 0
-                        ? "Carregando..."
-                        : "Selecione"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {tiposCandidatura.map((t) => (
-                    <SelectItem key={t.codigo} value={t.codigo.toString()}>
-                      {t.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={form.tipoCandidaturaId}
+              onChange={(v) => setForm({ ...form, tipoCandidaturaId: v })}
+              options={tiposCandidaturaFiltered}
+              loading={isLoadingTiposCandidatura}
+              map={(tp) => ({
+                key: tp.codigo,
+                label: tp.designacao,
+                value: tp.codigo,
+              })}
+            />
 
             {/* Ano Letivo */}
             <div className="space-y-2">

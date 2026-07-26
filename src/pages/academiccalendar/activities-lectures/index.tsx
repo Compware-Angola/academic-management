@@ -42,6 +42,10 @@ import {
 import { useState } from "react";
 
 import { useMutationfetchDeleteActivity } from "@/hooks/academiccalendar/use-mutation-delete-activity";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function ActivitiesLecturesLic() {
   const {
@@ -78,6 +82,16 @@ export default function ActivitiesLecturesLic() {
   } | null>(null);
   const { mutate: deleteSala, isPending: deleting } =
     useMutationfetchDeleteActivity();
+  const { hasPermission } = usePermission();
+  const tiposCandidaturaFiltered = tiposCandidatura?.filter((tp) => {
+    if (
+      !hasPermission(PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla) &&
+      (tp.sigla === "DTR" || tp.sigla === "MST")
+    ) {
+      return false;
+    }
+    return tp;
+  });
 
   const handleOpenDelete = (item: any) => {
     setSelectedSala({
@@ -119,32 +133,6 @@ export default function ActivitiesLecturesLic() {
         <h3 className="text-sm font-semibold">Filtros</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Ano letivo */}
-          <div className="space-y-2">
-            <Label>Ano Letivo</Label>
-            <Select
-              value={anoLetivoId}
-              onValueChange={setAnoLetivoId}
-              disabled={loadingAnosLetivos}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    loadingAnosLetivos ? "Carregando anos..." : "Selecione"
-                  }
-                />
-              </SelectTrigger>
-
-              <SelectContent>
-                {anosLetivos.map((ano) => (
-                  <SelectItem key={ano.codigo} value={ano.codigo.toString()}>
-                    {ano.designacao}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Tipo de candidatura */}
           <div className="space-y-2">
             <Label>Tipo de Candidatura</Label>
@@ -161,13 +149,26 @@ export default function ActivitiesLecturesLic() {
               </SelectTrigger>
 
               <SelectContent>
-                {tiposCandidatura.map((tipo) => (
+                {tiposCandidaturaFiltered.map((tipo) => (
                   <SelectItem key={tipo.codigo} value={tipo.codigo.toString()}>
                     {tipo.designacao}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Ano letivo */}
+          <div className="space-y-2">
+            <AcademicYearsAvailableForOperationSelect
+              key={tipoCandidaturaId || "tipo-candidatura-padrao"}
+              value={anoLetivoId}
+              onChangeValue={setAnoLetivoId}
+              tipoCandidaturaId={parseFilter(tipoCandidaturaId)}
+              enableDefaultActiveYear
+              label="Ano Letivo"
+              onlyConfigurable={false}
+            />
           </div>
 
           {/* Botão aplicar */}

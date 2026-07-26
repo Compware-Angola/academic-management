@@ -76,7 +76,7 @@ export const useStudentInfoBolsa = (codigoMatricula?: number | string) => {
 export const useStudentDisciplinas = (
   params: FetchDisciplinasMatriculadasParams,
 ) => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes,ignorarEliminados } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes, ignorarEliminados } = params;
 
 
   const queryKey = [
@@ -85,7 +85,7 @@ export const useStudentDisciplinas = (
     anoLectivo ? String(anoLectivo) : null,
     semestre ? String(semestre) : null,
     classes ? String(classes) : null,
-    ignorarEliminados? String(ignorarEliminados) : null,
+    ignorarEliminados ? String(ignorarEliminados) : null,
     page,
     limit,
   ].filter(Boolean);
@@ -93,7 +93,7 @@ export const useStudentDisciplinas = (
   return useQuery<DisciplinasResponse, Error>({
     queryKey,
     queryFn: () => fetchDisciplinasMatriculadas(params),
-    enabled: !!matriculaId && String(matriculaId).trim().length > 0,
+    enabled: !!matriculaId && String(matriculaId).trim().length > 0 && !!anoLectivo,
     staleTime: 5 * 60 * 1000, // 5 minutos (disciplinas mudam pouco)
     gcTime: 30 * 60 * 1000,
     retry: 1,

@@ -35,7 +35,7 @@ export function PeriodoStep({
 
     const isDraft = useMemo(() => !!ano, [ano]);
     useEffect(() => {
-        console.log("DRAFT RAW:", draft);
+
     }, [draft]);
     useEffect(() => {
         if (!ano) return;

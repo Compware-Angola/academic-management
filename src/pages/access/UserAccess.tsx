@@ -86,7 +86,6 @@ export default function UserAccess() {
   const handleToggleStatus = (userId: number) => {
     toggleMutation.mutate(userId, {
       onSuccess: (result) => {
-        console.log(result.message);
       },
       onError: (error: any) => {
         alert(`Erro ao alterar estado: ${error.message}`);
@@ -156,29 +155,29 @@ export default function UserAccess() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Acessos por Utilizador",
-        subtitle: "Listagem de utilizadores do sistema",
-        infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros },
-          {
-            title: "Resumo",
-            content: [`Total de utilizadores: ${pdfData.total}`],
-          },
-        ],
-        mainTable: {
-          headers: [
-            { key: "codigo", label: "Código", width: 10 },
-            { key: "nome", label: "Nome", width: 30 },
-            { key: "username", label: "Username", width: 20 },
-            { key: "email", label: "Email", width: 30 },
-            { key: "telefone1", label: "Telefone", width: 20 },
-            { key: "telefone2", label: "Telefone (2)", width: 20 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Acessos por Utilizador",
+      subtitle: "Listagem de utilizadores do sistema",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        {
+          title: "Resumo",
+          content: [`Total de utilizadores: ${pdfData.total}`],
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+      ],
+      mainTable: {
+        headers: [
+          { key: "codigo", label: "Código", width: 10 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "username", label: "Username", width: 20 },
+          { key: "email", label: "Email", width: 30 },
+          { key: "telefone1", label: "Telefone", width: 20 },
+          { key: "telefone2", label: "Telefone (2)", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Utilizadores_${new Date().toISOString().slice(0, 10)}`;

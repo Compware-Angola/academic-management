@@ -67,6 +67,8 @@ export type StudentDetail = {
   nacionalidade: string;
   estado_civil: string;
   periodo_codigo: number;
+  sigla_grau: string;
+  tipo_canditatura_codigo: number;
 
 };
 
@@ -172,7 +174,7 @@ export type FetchDisciplinasMatriculadasParams = {
 export const fetchDisciplinasMatriculadas = async (
   params: FetchDisciplinasMatriculadasParams,
 ): Promise<DisciplinasResponse> => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes,ignorarEliminados } = params;
+  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes, ignorarEliminados } = params;
 
   const queryParams: Record<string, string | number> = {
     matriculaId: String(matriculaId).trim(),

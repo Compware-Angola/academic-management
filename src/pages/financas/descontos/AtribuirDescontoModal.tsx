@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label.tsx";
 import { Search } from "lucide-react";
 import { useQueryAlunoMatricula } from "@/hooks/financas/alunos/use-query-fecth-aluno";
 import { ConfirmarAlunoModal } from "@/pages/financas/credito-educacional/AtribuirCredito/components/ConfirmarAlunoModal";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CreateDescontoAddBody } from "@/services/financas/descontos/descontos.service.ts";
 import { AxiosError } from "axios";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect.tsx";
@@ -21,6 +20,8 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { DescontoSelect } from "@/components/common/global-selects/DescontoSelect.tsx";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 type Props = {
   open: boolean;
@@ -58,10 +59,13 @@ export default function AtribuirDescontoModal({
     initial?.semestre ? String(initial?.semestre) : "",
   );
   const [afectacao, setAfectacao] = useState<string>("1");
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
 
   const [pesquisar, setPesquisar] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [alunoConfirmado, setAlunoConfirmado] = useState(false);
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   const {
     data: aluno,
@@ -92,6 +96,7 @@ export default function AtribuirDescontoModal({
       );
       setCodigoAnoStr(initial?.codigoAno ? String(initial.codigoAno) : "");
       setSemestre(initial?.semestre ? String(initial.semestre) : "");
+      setTipoCandidatura("1");
       setPesquisar(false);
       setModalAberto(false);
       setAlunoConfirmado(false);
@@ -208,8 +213,31 @@ export default function AtribuirDescontoModal({
           </div>
 
           <div>
-            <AcademicYearSelect
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setTipoCandidatura(v);
+                setCodigoAnoStr("");
+                setSemestre("");
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+          </div>
+
+          <div>
+            <AcademicYearsAvailableForOperationSelect
               value={codigoAnoStr}
+              tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidatura}
               onChangeValue={(v) => setCodigoAnoStr(v)}
             />
           </div>

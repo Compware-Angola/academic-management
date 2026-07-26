@@ -23,6 +23,33 @@ type Props = {
   matricula: string;
 };
 
+function getGrauBadge(student: any) {
+  const sigla = (student.sigla_grau || student.tipo_curso || "").toUpperCase();
+
+  const mapa: Record<string, { label: string; className: string }> = {
+    LIC: {
+      label: "Licenciatura",
+      className: "border-sky-200 text-sky-700 dark:border-sky-800 dark:text-sky-400",
+    },
+    MST: {
+      label: "Mestrado",
+      className: "border-purple-200 text-purple-700 dark:border-purple-800 dark:text-purple-400",
+    },
+    DTR: {
+      label: "Doutoramento",
+      className: "border-amber-200 text-amber-700 dark:border-amber-800 dark:text-amber-400",
+    },
+  };
+
+  const grau = mapa[sigla];
+  if (!grau) return null;
+
+  return (
+    <Badge variant="outline" className={`font-medium ${grau.className}`}>
+      {grau.label}
+    </Badge>
+  );
+}
 function getEstadoBadge(estado: string) {
   switch (estado) {
     case "Activo":
@@ -37,11 +64,9 @@ function getEstadoBadge(estado: string) {
 }
 
 export function StudentProfileHeader({ matricula }: Props) {
-  console.log("matricula", matricula);
+
   const { data: student, isLoading } = useStudentDetail(matricula);
   const { data: bolsaInfo, isLoading: isLoadingInfoBolsa } = useStudentInfoBolsa(matricula);
-  console.log("student", student);
-  console.log("bolsaInfo", bolsaInfo);
   if (isLoading || !student || isLoadingInfoBolsa) {
     return (
       <Card className="flex-1">
@@ -87,9 +112,9 @@ export function StudentProfileHeader({ matricula }: Props) {
 
           <div className="flex-1 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-wrap">
-
               <h1 className="text-2xl font-bold">{student.nome_completo}</h1>
               {getEstadoBadge(student.estado)}
+
               {student.regime && (
                 <Badge
                   variant="outline"
@@ -98,6 +123,9 @@ export function StudentProfileHeader({ matricula }: Props) {
                   {student.regime}
                 </Badge>
               )}
+
+              {/* 👇 novo badge do grau académico, logo a seguir ao regime */}
+              {getGrauBadge(student)}
 
               {isBolseiro && (
                 <Badge
@@ -108,9 +136,7 @@ export function StudentProfileHeader({ matricula }: Props) {
                   Créd. Edu.
                 </Badge>
               )}
-
             </div>
-
 
 
 
