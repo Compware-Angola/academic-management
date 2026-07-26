@@ -672,7 +672,6 @@ export default function ImportUCPage() {
         </div>
         <div className="flex-1 max-w-xs">
           <AcademicYearsAvailableForOperationSelect
-            onlyConfigurable={false}
             onChangeValue={(v) => setAnoLectivoDestino(Number(v))}
             value={anoLectivoDestino?.toString()}
             tipoCandidaturaId={tipoCandidatura}
