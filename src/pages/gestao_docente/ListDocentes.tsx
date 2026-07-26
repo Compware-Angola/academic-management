@@ -45,6 +45,8 @@ import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { EditarDocenteModal } from "./components/EditDocenteDialog";
 import { TeachersItem } from "@/services/gestao-docente/fetch-list-teachers.service";
 import { NovoDocenteModal } from "../docente/components/NovoDocenteModal";
+import { useQueryFetchGrauAcademico } from "@/hooks/shared/use-query-fetch-grau-academico";
+import { parseFilter } from "@/util/parse-filter";
 
 interface AreaFormacao {
   codigo: number;
@@ -79,11 +81,12 @@ interface FiltersState {
   page: number;
   limit: number;
   area: number;
+  grauAcademico: string;
   search: string;
 }
 
 export default function ListagemDocentes() {
-  const [areaFormacaoOpen, setAreaFormacaoOpen] = useState(false);
+
   const [selectedDocente, setSelectedDocente] = useState<TeachersItem | null>(
     null,
   );
@@ -94,18 +97,29 @@ export default function ListagemDocentes() {
     page: 1,
     limit: 25,
     area: 0,
+    grauAcademico: '',
     search: "",
   });
 
   const { data: formacaoResponse, isLoading: formacaoLoading } =
     useQueryAreaFormacaoDocentes();
 
+  const { data: grauAcademicoResponse = [], isLoading: grauAcademicoLoading } =
+    useQueryFetchGrauAcademico();
+
+
   const {
     data: docentesResponse,
     isLoading: docenteLoading,
     isFetching: isFetchingDocentes,
     refetch: refetchDocentes,
-  } = useQueryListDocentes(filters);
+  } = useQueryListDocentes({
+    area: filters.area,
+    grauAcademico: parseFilter(filters.grauAcademico),
+    search: filters.search,
+    page: filters.page,
+    limit: filters.limit,
+  });
 
   const [isShowModal, setIsShowModal] = useState<boolean>(false);
   const openModal = () => setIsShowModal(true);
@@ -159,7 +173,7 @@ export default function ListagemDocentes() {
     filters.area === 0
       ? "Todas"
       : (areasFormacao.find((area) => area.codigo === filters.area)
-          ?.designacao ?? "Selecionar");
+        ?.designacao ?? "Selecionar");
 
   const exportRows = docentes.map((item) => ({
     numeroMec: item.numeroMec,
@@ -173,15 +187,15 @@ export default function ListagemDocentes() {
 
   const pdfData = exportRows.length
     ? {
-        filtros: [
-          `Área de Formação: ${selectedAreaLabel}`,
-          filters.search ? `Pesquisa: ${filters.search}` : null,
-        ]
-          .filter(Boolean)
-          .join(" | "),
-        total: exportRows.length,
-        rows: exportRows,
-      }
+      filtros: [
+        `Área de Formação: ${selectedAreaLabel}`,
+        filters.search ? `Pesquisa: ${filters.search}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -213,30 +227,30 @@ export default function ListagemDocentes() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Lista de Docentes",
-        subtitle: "Gestão completa do corpo docente",
-        infoSections: [
-          {
-            title: "Filtros Aplicados",
-            content: pdfData.filtros || "Sem filtros",
-          },
-          { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
-        ],
-        mainTable: {
-          headers: [
-            { key: "numeroMec", label: "Nº Mec", width: 15 },
-            { key: "nome", label: "Nome", width: 30 },
-            { key: "escalao", label: "Escalão", width: 18 },
-            { key: "categoria", label: "Categoria", width: 22 },
-            { key: "grauAcademico", label: "Grau", width: 20 },
-            { key: "email", label: "Email", width: 32 },
-            { key: "areaFormacao", label: "Área de Formação", width: 28 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Lista de Docentes",
+      subtitle: "Gestão completa do corpo docente",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        { title: "Resumo", content: [`Total de registos: ${totalRegistos}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroMec", label: "Nº Mec", width: 15 },
+          { key: "nome", label: "Nome", width: 30 },
+          { key: "escalao", label: "Escalão", width: 18 },
+          { key: "categoria", label: "Categoria", width: 22 },
+          { key: "grauAcademico", label: "Grau", width: 20 },
+          { key: "email", label: "Email", width: 32 },
+          { key: "areaFormacao", label: "Área de Formação", width: 28 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Lista_Docentes_${new Date().toISOString().slice(0, 10)}`;
@@ -258,6 +272,7 @@ export default function ListagemDocentes() {
       limit: 25,
       area: 0,
       search: "",
+      grauAcademico: ""
     });
   };
 
@@ -339,8 +354,9 @@ export default function ListagemDocentes() {
       </div>
 
       <div className="rounded-lg border bg-card p-6">
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr_auto_auto] lg:items-end">
-          <div className="space-y-1.5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-12">
+          {/* Área de Formação */}
+          <div className="space-y-1.5 xl:col-span-3">
             <Label>Área de Formação</Label>
             <FormCommandSelect
               value={String(filters.area)}
@@ -356,7 +372,26 @@ export default function ListagemDocentes() {
             />
           </div>
 
-          <div className="space-y-2">
+          {/* Grau Académico */}
+          <div className="space-y-1.5 xl:col-span-3">
+            <Label>Grau académico</Label>
+            <FormCommandSelect
+              value={String(filters.grauAcademico)}
+              disabled={!!grauAcademicoLoading}
+              options={[{ codigo: 0, label: "Todos" }, ...grauAcademicoResponse]}
+              map={(grau) => ({
+                key: grau.codigo,
+                value: String(grau.codigo),
+                label: grau.label,
+              })}
+              onChange={(value) => {
+                handleFilterChange("grauAcademico", value);
+              }}
+            />
+          </div>
+
+          {/* Pesquisa */}
+          <div className="space-y-1.5 xl:col-span-4">
             <Label>Pesquisa geral</Label>
             <Input
               placeholder="Pesquisar por nome, email, categoria, escalão, grau ou Nº Mec"
@@ -365,19 +400,22 @@ export default function ListagemDocentes() {
             />
           </div>
 
-          <Button onClick={handleRefresh} disabled={isFetchingDocentes}>
-            <RefreshCw
-              className={cn(
-                "mr-2 h-4 w-4",
-                isFetchingDocentes && "animate-spin",
-              )}
-            />
-            Listar
-          </Button>
+          {/* Botões */}
+          <div className="flex flex-col gap-2 xl:col-span-2 xl:justify-end">
+            <Button onClick={handleRefresh} disabled={isFetchingDocentes}>
+              <RefreshCw
+                className={cn(
+                  "mr-2 h-4 w-4",
+                  isFetchingDocentes && "animate-spin",
+                )}
+              />
+              Listar
+            </Button>
 
-          <Button variant="outline" onClick={handleResetFilters}>
-            Limpar filtros
-          </Button>
+            <Button variant="outline" onClick={handleResetFilters}>
+              Limpar filtros
+            </Button>
+          </div>
         </div>
       </div>
 

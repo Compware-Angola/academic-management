@@ -44,7 +44,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useQueryFetchBolsaEstudante } from "@/hooks/financas/bolsa/use-query-fetch-bolsa-estudante";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
@@ -77,6 +76,10 @@ import {
   exportBolsaEstudantePdfService,
 } from "@/services/financas/bolsa/export-bolsa-estudante.service";
 import { toast } from "sonner";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 type ExportAction = "pdf" | "print" | "excel";
 
@@ -98,6 +101,7 @@ export default function ListarBolsaEstudante() {
     useState<BolsaEstudante | null>(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState("10");
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
   const [filters, setFilters] = useState<FetchBolsaEstudanteParams>({
     page: 1,
     limit: 10,
@@ -120,6 +124,8 @@ export default function ListarBolsaEstudante() {
 
   const debouncedNome = useDebounce(filters.nome, 500);
   const debouncedMatricula = useDebounce(filters.codigoMatricula, 500);
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -190,6 +196,7 @@ export default function ListarBolsaEstudante() {
 
   // Limpar todos os filtros
   const clearFilters = () => {
+    setTipoCandidatura("1");
     setFilters({
       page: 1,
       limit: Number(limit),
@@ -365,8 +372,31 @@ export default function ListarBolsaEstudante() {
               </div>
             </div>
 
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setTipoCandidatura(v);
+                setPage(1);
+                setFilters((prev) => ({
+                  ...prev,
+                  codigoAnoLectivo: undefined,
+                  cursoId: undefined,
+                }));
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+
             <CourseSelect
               value={filters.cursoId?.toString() || "0"}
+              params={{ tipoCandidaturaId: parseFilter(tipoCandidatura) }}
               onChangeValue={(v) => {
                 setPage(1);
                 setFilters((prev) => ({
@@ -376,8 +406,11 @@ export default function ListarBolsaEstudante() {
               }}
             />
 
-            <AcademicYearSelect
+            <AcademicYearsAvailableForOperationSelect
               value={filters.codigoAnoLectivo?.toString() ?? ""}
+              tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidatura}
               onChangeValue={(v) => {
                 setPage(1);
                 setFilters((prev) => ({

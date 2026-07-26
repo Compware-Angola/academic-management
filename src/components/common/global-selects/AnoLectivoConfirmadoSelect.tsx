@@ -23,17 +23,16 @@ const AnoLectivoConfirmadoSelect = ({
 
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-        {
-          label: "Todos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
 
   const { data: anosLectivos, isLoading } =
     useDropDownAnoLectivoConfirmados(codigoMatricula);
-  console.log("&&", anosLectivos);
   return (
     <FormSelect
       disabled={isLoading || disabled || !codigoMatricula}

@@ -30,11 +30,12 @@ import { formatNumber } from "@/util/format-number";
 import { Button } from "@/components/ui/button";
 import { useQueryMonthlyFeesValue } from "@/hooks/financas/use-query-monthly-value";
 import { parseFilter } from "@/util/parse-filter";
-import { useStudentDetail, useStudentInfoBolsa } from "@/hooks/students/use-query-students";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { createInvoice, createItem } from "@/util/create-item";
 import { toast } from "sonner";
 import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
 import { useMutationRecalculatePayments } from "@/hooks/financas/pagamentos-mensais/use-mutation-recalculate";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 type SelectedPayment = {
   mesTempId: number;
@@ -295,10 +296,15 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
           </div>
           {/* Seletor de Ano Letivo */}
           <div className="min-w-[220px] sm:w-auto sm:flex-shrink-0">
-            <AcademicYearSelect
-              enableDefaultActiveYear
+            <AcademicYearsAvailableForOperationSelect
+              enableDefaultSelectItem={false}
+              onlyConfigurable={false}
+
+              enableDefaultActiveYear={false}
               value={anoLetivo}
               onChangeValue={(v) => setAnoLetivo(v)}
+              tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+              label="Ano Letivo"
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type ListTeachersPayload = {
+  grauAcademico?: number;
   area?: number;
   search?: string;
   page?: number;
@@ -42,7 +43,7 @@ export type ListDocentesResponse = {
 };
 
 export async function getListTeachersService(payload: ListTeachersPayload) {
-  const { area = 0, search, page = 1, limit = 25 } = payload;
+  const { area = 0, search, page = 1, limit = 25, grauAcademico } = payload;
 
   const { data } = await axiosNestGa.get<ListDocentesResponse>(
     "/docente-gestao/docentes",
@@ -52,6 +53,7 @@ export async function getListTeachersService(payload: ListTeachersPayload) {
         search: search?.trim() || undefined,
         page,
         limit,
+        grauAcademico: grauAcademico || undefined,
       },
     },
   );

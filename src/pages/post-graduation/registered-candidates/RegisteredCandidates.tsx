@@ -24,7 +24,7 @@ import { FacultySelect } from "@/components/common/global-selects/FacultySelect"
 import { parseFilter } from "@/util/parse-filter";
 import { PosGraduationCandidate, PostGraduationCandidateStatus, PostGraduationPaymentStatus } from "@/services/post-graduation/candidates.service";
 import { useQueryCandidatesPosGraduation } from "@/hooks/post-graduation/use-query-candidates";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -90,13 +90,13 @@ export function RegisteredCandidates() {
           academicYearId: value,
           faculdadeId: "",
           courseId: "",
-          degreeId: "2",
         };
       }
       if (field === "degreeId") {
         return {
           ...current,
           degreeId: value,
+          academicYearId: "",
           faculdadeId: "",
           courseId: "",
         };
@@ -174,17 +174,21 @@ export function RegisteredCandidates() {
       < Card >
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <AcademicYearSelect
-              enableDefaultActiveYear
-              enableDefaultSelectItem
-              value={filters.academicYearId}
-              onChangeValue={(value) => handleFilterChange("academicYearId", value)}
-            />
             <TipoCandidaturaSelect
               label="Grau Acadêmico"
               value={filters.degreeId}
               isPostGraduation
               onChangeValue={(value) => handleFilterChange("degreeId", value)}
+            />
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Lectivo"
+              enableDefaultActiveYear
+              enableDefaultSelectItem
+              onlyConfigurable={false}
+              disabled={!filters.degreeId}
+              tipoCandidaturaId={parseFilter(filters.degreeId) ?? 2}
+              value={filters.academicYearId}
+              onChangeValue={(value) => handleFilterChange("academicYearId", value)}
             />
             <FacultySelect
               value={filters.faculdadeId}

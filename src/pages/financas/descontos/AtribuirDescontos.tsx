@@ -42,13 +42,14 @@ import AtribuirDescontoModal from "./AtribuirDescontoModal";
 import { toast } from "sonner";
 import { useMutationUpdateDescontoAdd } from "@/hooks/financas/descontos/use-mutation-update-desconto-add.ts";
 import { DescontoSelect } from "@/components/common/global-selects/DescontoSelect";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { InstituicaoSelect } from "@/components/common/global-selects/InstituicaoSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { useMutationRemoveDiscount } from "@/hooks/financas/descontos/use-mutation-remove-discount";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 interface AtribuirItem {
   codigo_matricula: number;
@@ -79,6 +80,7 @@ export default function AtribuirDescontos() {
   const [codigoDesconto, setCodigoDesconto] = useState<number | null>(null);
   const mutationRemoveDiscount = useMutationRemoveDiscount();
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
 
   const [filters, setFilters] = useState({
     desconto: "",
@@ -103,6 +105,8 @@ export default function AtribuirDescontos() {
   const [items, setItems] = useState<AtribuirItem[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   const startIndex = total === 0 ? 0 : (page - 1) * limit + 1;
   const endIndex = Math.min(page * limit, total);
@@ -250,6 +254,7 @@ export default function AtribuirDescontos() {
   }
 
   const handleClear = () => {
+    setTipoCandidatura("1");
     setFilters({
       desconto: "",
       anoLectivo: "",
@@ -319,8 +324,28 @@ export default function AtribuirDescontos() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <AcademicYearSelect
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setTipoCandidatura(v);
+                setFilters({ ...filters, anoLectivo: "" });
+                setPage(1);
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+            <AcademicYearsAvailableForOperationSelect
               value={filters.anoLectivo}
+              tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidatura}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
             <SemestreSelect

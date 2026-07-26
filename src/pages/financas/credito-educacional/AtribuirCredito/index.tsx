@@ -15,12 +15,14 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useMutationAtribuirBolsa } from "@/hooks/financas/bolsa/use-mutation-atribuir-bolsa";
 import { ConfirmarAlunoModal } from "./components/ConfirmarAlunoModal";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { BolsaSelect } from "@/components/common/global-selects/BolsaSelect";
 import { useQueryValidarEstudanteCredito } from "@/hooks/financas/credito-educacional/use-query-validar-estudante-credito";
 import { FormSelect } from "@/components/common/FormSelect";
 import { IsentarMultaSelect } from "@/components/common/global-selects/insentar-multa-select";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
 
 function validarPayload(payload: {
   codigoAnoLectivo: string;
@@ -44,6 +46,7 @@ export default function AtribuirCredito() {
   const [pesquisar, setPesquisar] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [canAtribuir, setCanAtribuir] = useState(false);
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
 
   const [payload, setPayload] = useState({
     codigoAnoLectivo: "",
@@ -68,12 +71,15 @@ export default function AtribuirCredito() {
 
   const { mutateAsync: atribuirCredito, isPending: isAtribuindo } =
     useMutationAtribuirBolsa();
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   const resetFormulario = () => {
     setMatricula("");
     setPesquisar(false);
     setCanAtribuir(false);
     setModalAberto(false);
+    setTipoCandidatura("1");
     setPayload({
       codigoAnoLectivo: "",
       semestre: "",
@@ -175,10 +181,36 @@ export default function AtribuirCredito() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            <AcademicYearSelect
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setTipoCandidatura(v);
+                setPayload((p) => ({
+                  ...p,
+                  codigoAnoLectivo: "",
+                  semestre: "",
+                }));
+                setPesquisar(false);
+                setCanAtribuir(false);
+                setModalAberto(false);
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+
+            <AcademicYearsAvailableForOperationSelect
               disabled={isLoading}
               value={payload.codigoAnoLectivo}
+              tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
               onChangeValue={(v) => {
                 setPayload((p) => ({ ...p, codigoAnoLectivo: v }));
                 setPesquisar(false);

@@ -320,12 +320,18 @@ export const academicStructure: MenuStructure = {
         {
           title: "Actividades lectivas",
           url: "/calendario/atividades",
-          permission: [PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla],
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla,
+            PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Prazos",
           url: "/calendario/prazos",
-          permission: [PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla],
+          permission: [
+            PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla,
+            PermissionTypeDetails.PRAZOS_ACADEMICOS_POS_GRADUACAO.sigla,
+          ],
         },
         //{ title: "Calendário de provas", url: "/calendario/provas" },
         {
@@ -338,9 +344,17 @@ export const academicStructure: MenuStructure = {
           url: "/calendario/parametros",
           permission: [
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+            PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
           ],
         },
-        { title: "Configurações Ano lectivo", url: "/calendario/fases-lectivas", permission: [PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla] },
+        {
+          title: "Configurações Ano lectivo",
+          url: "/calendario/fases-lectivas",
+          permission: [
+            PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
+            PermissionTypeDetails.PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla,
+          ],
+        },
 
         //{ title: "Criar horário", url: "/calendario-lic/criar-horario" },
       ],
@@ -441,13 +455,13 @@ export const academicStructure: MenuStructure = {
       url: "/plano",
       icon: BookOpen,
       items: [
-        // { title: "Gestão de Curso", url: "/plano/cursos" },
+
         {
           title: "Gestão de disciplinas",
           url: "/plano/disciplinas",
           permission: [PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla],
         },
-        // { title: "Disciplinas sem siglas", url: "/plano/sem-siglas" },
+
 
         {
           title: "Gestão de UC por departamento",
@@ -461,6 +475,22 @@ export const academicStructure: MenuStructure = {
           url: "/plano/uc-plano",
           permission: [
             PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla,
+          ],
+        },
+        {
+          title: "Fórmula por unidade curricular",
+          url: "/plano/formula-uc",
+          permission: [
+            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+            PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
+          title: "Definir unidade curricular com oral",
+          url: "/plano/formula-oral",
+          permission: [
+            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+            PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO.sigla,
           ],
         },
       ],
@@ -529,23 +559,13 @@ export const academicStructure: MenuStructure = {
         {
           title: "Controle de lançamento de notas",
           url: "/avaliacoes/controle",
-          permission: [PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla],
+          permission: [
+            PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla,
+            PermissionTypeDetails.CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+          ],
         },
 
-        {
-          title: "Fórmula por unidade curricular",
-          url: "/avaliacoes/formula-uc",
-          permission: [
-            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
-          ],
-        },
-        {
-          title: "Definir unidade curricular com oral",
-          url: "/avaliacoes/formula-oral",
-          permission: [
-            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
-          ],
-        },
+
         {
           title: "Estatísticas de notas lançadas",
           url: "/avaliacoes/estatisticas",
@@ -561,45 +581,68 @@ export const academicStructure: MenuStructure = {
         {
           title: "Histórico de lançamentos",
           url: "/avaliacoes/historico",
-          permission: [PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!],
+          permission: [
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS.sigla!,
+            PermissionTypeDetails.HISTORICO_LANCAMENTO_NOTAS_POS_GRADUACAO
+              .sigla,
+          ],
         },
         {
           title: "Lançamento de pauta",
           url: "/avaliacoes/pauta",
-          permission: [PermissionTypeDetails.LANCAMENTO_PAUTA.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_PAUTA.sigla,
+            PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Lançamento de notas",
           url: "/avaliacoes/notas",
-          permission: [PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla],
+          permission: [
+            PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
+            PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Lista de presença",
           url: "/avaliacoes/presenca",
-          permission: [PermissionTypeDetails.LISTA_PRESENCA.sigla],
+          permission: [
+            PermissionTypeDetails.LISTA_PRESENCA.sigla,
+            PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO.sigla,
+          ],
         },
 
         {
           title: "Pauta geral",
           url: "/avaliacoes/pauta-geral",
-          permission: [PermissionTypeDetails.PAUTA_GERAL.sigla],
+          permission: [
+            PermissionTypeDetails.PAUTA_GERAL.sigla,
+            PermissionTypeDetails.PAUTA_GERAL_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Pauta por UC",
           url: "/avaliacoes/pauta-uc",
-          permission: [PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!],
+          permission: [
+            PermissionTypeDetails.PAUTA_GERAL_POR_UC.sigla!,
+            PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Permissão fora do prazo",
           url: "/avaliacoes/permissao",
           permission: [
             PermissionTypeDetails.PERMISSAO_LANC_NOTA_FORA_PRAZO.sigla,
+            PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO.sigla,
           ],
         },
         {
           title: "Validação",
           url: "/avaliacoes/validacao",
-          permission: [PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla],
+          permission: [
+            PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA.sigla,
+            PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla,
+          ],
         },
         {
           title: "Visualizar notas",
@@ -725,13 +768,7 @@ export const postGraduationStructure: MenuStructure = {
           title: "Canditatos inscritos",
           url: "/pos-graduacao/inscritos",
         },
-        {
-          title: "Registos Primários",
-          url: "/pos-graduacao/registos-primarios",
-          permission: [
-            PermissionTypeDetails.REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla,
-          ],
-        },
+
         /*
         {
           title: "Atividades Letivas",
@@ -747,7 +784,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
-        */
+        
 
         {
           title: "Fórmula de Definição das UCs",
@@ -792,6 +829,7 @@ export const postGraduationStructure: MenuStructure = {
               .sigla,
           ],
         },
+        */
         {
           title: "Lista de Presença",
           url: "/pos-graduacao/avaliacoes/lista-presenca",
@@ -799,6 +837,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO.sigla,
           ],
         },
+        /*
 
         {
           title: "Lançamento de Notas",
@@ -826,6 +865,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla,
           ],
         },
+        
         {
           title: "Permissão fora do prazo",
           url: "/avaliacoes/permissao",
@@ -840,183 +880,11 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla,
           ],
         },
+         */
       ],
       permission: [],
     },
 
-    {
-      title: "Calendário Académico ",
-      url: "/pos-graduacao-calendario",
-      icon: Calendar,
-      items: [
-        {
-          title: "Atividades Letivas",
-          url: "/pos-graduacao/calendario/atividades",
-          permission: [
-            PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
-          ],
-        },
-
-
-
-        {
-          title: "Prazos",
-          url: "/calendario/prazos",
-          permission: [PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla],
-        },
-      ],
-
-      permission: [],
-    },
-
-    {
-      title: "Plano de Estudo",
-      url: "/pos-graduacao-plano-estudo",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Gestão de Disciplinas",
-          url: "/plano/disciplinas",
-          permission: [
-            PermissionTypeDetails.GESTAO_DISCIPLINAS_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Gestão de UC por departamento",
-          url: "/plano/uc-departamento",
-          permission: [
-            PermissionTypeDetails.GESTAO_UC_DEPARTAMENTO_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Gestão de UC no plano",
-          url: "/plano/uc-plano",
-          permission: [
-            PermissionTypeDetails.GESTAO_UC_PLANO_POS_GRADUACAO.sigla,
-          ],
-        },
-      ],
-      permission: [],
-    },
-
-    {
-      title: "Gestão de Docentes",
-      url: "/pos-graduacao-gestao-docentes",
-      icon: BookUser,
-      items: [
-        {
-          title: "Gestão de Afetação",
-          url: "/gestao-docente/afectacoes",
-          permission: [
-            PermissionTypeDetails.GESTAO_AFETACAO_DOCENTE_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Docentes afetados",
-          url: "/gestao-docente/docente-afectados",
-          permission: [
-            PermissionTypeDetails.DOCENTES_AFETADOS_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Lista de Docentes",
-          url: "/gestao-docentes/docentes",
-          permission: [
-            PermissionTypeDetails.LISTA_DOCENTES_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Lista de UC sem docentes afetados",
-          url: "/gestao-docente/sem-afetacao/uc",
-          permission: [
-            PermissionTypeDetails.UC_SEM_DOCENTES_AFETADOS_POS_GRADUACAO.sigla,
-          ],
-        },
-      ],
-      permission: [],
-    },
-
-    {
-      title: "Exame de Acesso",
-      url: "/pos-graduacao-exame-acesso",
-      icon: Files,
-      items: [
-        {
-          title: "Configurar Vagas",
-          url: "/pos-graduacao/exame-acesso/configurar-vagas",
-          permission: [PermissionTypeDetails.DEFINIR_VAGAS_POS_GRADUACAO.sigla],
-        },
-        {
-          title: "Resultados Finais",
-          url: "/pos-graduacao/exame-acesso/resultados-finais",
-          permission: [
-            PermissionTypeDetails.RESULTADOS_FINAIS_POS_GRADUACAO.sigla,
-          ],
-        },
-      ],
-      permission: [],
-    },
-
-    {
-      title: "Docente",
-      url: "/pos-graduacao-docente",
-      icon: GraduationCap,
-      items: [
-        {
-          title: "Calendário de aulas",
-          url: "/pos-graduacao-docente/calendario",
-          permission: [
-            PermissionTypeDetails.POST_GRADUACAO_VISUALIZAR_HORARIO_POR_DOCENTE
-              .sigla,
-          ],
-        },
-        {
-          title: "Horas de vigilância",
-          url: "/pos-graduacao-docente/vigilancia",
-          permission: [
-            PermissionTypeDetails.POST_GRADUACAO_HORAS_DE_VIGILANCIA.sigla,
-          ],
-        },
-        {
-          title: "Lançamento do programa da UC",
-          url: "/pos-graduacao-docente/programa",
-          permission: [
-            PermissionTypeDetails.POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC
-              .sigla,
-          ],
-        },
-        {
-          title: "Validação do programa",
-          url: "/pos-graduacao-docente/validacao",
-          permission: [
-            PermissionTypeDetails.POST_GRADUACAO_VALIDACAO_PROGRAMA_UC.sigla,
-          ],
-        },
-      ],
-      permission: [],
-    },
-    {
-      title: "Assiduidade",
-      url: "/pos-graduacao-assiduidade",
-      icon: ListChecks,
-      items: [
-        {
-          title: "Marcação de Assiduidade",
-          url: "/assiduidade/marcacao",
-          permission: [
-            PermissionTypeDetails.MARCACAO_ASSIDUIDADE_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Controle de Assiduidade",
-          url: "/assiduidade/controle",
-          permission: [
-            PermissionTypeDetails.CONTROLE_ASSIDUIDADE_POS_GRADUACAO.sigla,
-          ],
-        },
-      ],
-      permission: [],
-    },
     {
       title: "Gestão de Orientação e Pesquisa",
       url: "/gestao-orientacao-pesquisa",
@@ -1049,32 +917,7 @@ export const postGraduationStructure: MenuStructure = {
       ],
     },
 
-    {
-      title: "Sumário",
-      url: "/pos-graduacao-sumario",
-      permission: [],
-      items: [
-        {
-          title: "Aulas Agendadas",
-          url: "/pos-graduacao-sumario/aulas-agendadas",
-          permission: [PermissionTypeDetails.AULAS_AGENDADAS.sigla],
-        },
-        {
-          title: "Controle Geral de Sumário & Assiduidade",
-          url: "/pos-graduacao-sumario/controle-geral",
-          permission: [
-            PermissionTypeDetails.CONTROLE_GERAL_SUMARIOS_ASSIDUIDADE.sigla,
-          ],
-        },
-        {
-          title: "Listar Sumários",
-          url: "/pos-graduacao-sumario/listar",
-          permission: [
-            PermissionTypeDetails.POST_GRADUACAO_LISTAR_SUMARIO.sigla,
-          ],
-        },
-      ],
-    },
+
   ],
 };
 

@@ -1,7 +1,9 @@
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -55,6 +57,7 @@ const ListarUCDocenteSemAfetacao = () => {
     docente: "",
     curso: "0",
     anoCurricular: "",
+    tipoCandidaturaId: "",
   });
 
   const {
@@ -66,6 +69,7 @@ const ListarUCDocenteSemAfetacao = () => {
     cursoId: parseCursoFilter(filters.curso),
     semestreId: parseFilter(filters.semestre),
     classeId: parseFilter(filters.anoCurricular),
+    tipoCandidaturaId: parseFilter(filters.tipoCandidaturaId),
     search: debouncedSearch,
     limit,
     page,
@@ -78,6 +82,7 @@ const ListarUCDocenteSemAfetacao = () => {
       docente: "",
       curso: "0",
       anoCurricular: "",
+      tipoCandidaturaId: "",
     });
     setSearch("");
     setPage(1);
@@ -125,11 +130,24 @@ const ListarUCDocenteSemAfetacao = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 grid-cols-4">
-            <AcademicYearSelect
-              enableDefaultSelectItem
-              value={filters.anoLectivo}
-              onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
-            />
+            <div className="space-y-2">
+              <TipoCandidaturaSelect
+                value={filters.tipoCandidaturaId}
+                onChangeValue={(v) => setFilters({ ...filters, tipoCandidaturaId: v })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <AcademicYearsAvailableForOperationSelect
+                value={filters.anoLectivo}
+                onlyConfigurable={false}
+
+                onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
+
+                tipoCandidaturaId={Number(filters.tipoCandidaturaId)}
+
+              />
+            </div>
             <CourseSelect
               value={filters.curso}
               // enableDefaultSelectItem
@@ -144,11 +162,15 @@ const ListarUCDocenteSemAfetacao = () => {
               }
               curso={filters.curso}
             />
-            <SemestreSelect
-              enableDefaultSelectItem
-              value={filters.semestre}
-              onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
-            />
+            {
+              Number(filters.tipoCandidaturaId) === 1 ? (
+                <SemestreSelect
+                  enableDefaultSelectItem
+                  value={filters.semestre}
+                  onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
+                />
+              ) : null
+            }
           </div>
         </CardContent>
       </Card>
@@ -186,7 +208,11 @@ const ListarUCDocenteSemAfetacao = () => {
                       <TableHead>Curso</TableHead>
                       <TableHead>Unidade Curricular</TableHead>
                       <TableHead>Ano Curricular</TableHead>
-                      <TableHead>Semestre</TableHead>
+                      {
+                        Number(filters.tipoCandidaturaId) === 1 ? (
+                          <TableHead>Semestre</TableHead>
+                        ) : null
+                      }
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -195,7 +221,11 @@ const ListarUCDocenteSemAfetacao = () => {
                         <TableCell>{item.curso}</TableCell>
                         <TableCell>{item.disciplina}</TableCell>
                         <TableCell>{item.classe}</TableCell>
-                        <TableCell>{item.semestre}</TableCell>
+                        {
+                          Number(filters.tipoCandidaturaId) === 1 ? (
+                            <TableCell>{item.semestre}</TableCell>
+                          ) : null
+                        }
                       </TableRow>
                     ))}
                   </TableBody>

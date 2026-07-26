@@ -87,7 +87,8 @@ export default function UpcomingEventsCard() {
               <AcademicYearsAvailableForOperationSelect
                 value={anoLetivoId}
                 onChangeValue={setAnoLetivoId}
-                enableDefaultActiveYear
+
+                tipoCandidaturaId={Number(tipoCandidaturaId)}
                 label="Ano Letivo"
               />
             </div>
@@ -105,59 +106,59 @@ export default function UpcomingEventsCard() {
         </div>
       </CardHeader>
 
-     <CardContent className="pt-4">
-  <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-    {loadingAnosLetivos ? (
-      Array.from({ length: 3 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-4 p-4 rounded-lg border"
-        >
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2 flex-1">
-            <Skeleton className="h-4 w-64" />
-            <Skeleton className="h-3 w-40" />
-          </div>
-        </div>
-      ))
-    ) : !anoLetivoId ? (
-      <p className="text-center text-muted-foreground py-8">
-        Selecione o ano letivo para visualizar as atividades
-      </p>
-    ) : atividades.length === 0 ? (
-      <p className="text-center text-muted-foreground py-8">
-        Nenhuma atividade encontrada para os filtros selecionados
-      </p>
-    ) : (
-      atividades.map((atividade, index) => {
-        const { icon: Icon, bg, text } = getIconAndColor(index);
-        return (
-          <div
-            key={index}
-            className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-all"
-          >
-            <div className={`p-3 rounded-full ${bg}`}>
-              <Icon className={`h-5 w-5 ${text}`} />
-            </div>
+      <CardContent className="pt-4">
+        <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+          {loadingAnosLetivos ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 p-4 rounded-lg border"
+              >
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-64" />
+                  <Skeleton className="h-3 w-40" />
+                </div>
+              </div>
+            ))
+          ) : !anoLetivoId ? (
+            <p className="text-center text-muted-foreground py-8">
+              Selecione o ano letivo para visualizar as atividades
+            </p>
+          ) : atividades.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              Nenhuma atividade encontrada para os filtros selecionados
+            </p>
+          ) : (
+            atividades.map((atividade, index) => {
+              const { icon: Icon, bg, text } = getIconAndColor(index);
+              return (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-all"
+                >
+                  <div className={`p-3 rounded-full ${bg}`}>
+                    <Icon className={`h-5 w-5 ${text}`} />
+                  </div>
 
-            <div className="flex-1">
-              <p className="font-medium text-foreground">
-                {atividade.descricao}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {formatarData(atividade.data_inicio)}
-                {atividade.data_termino &&
-                  atividade.data_inicio !== atividade.data_termino && (
-                    <> → {formatarData(atividade.data_termino)}</>
-                  )}
-              </p>
-            </div>
-          </div>
-        );
-      })
-    )}
-  </div>
-</CardContent>
+                  <div className="flex-1">
+                    <p className="font-medium text-foreground">
+                      {atividade.descricao}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatarData(atividade.data_inicio)}
+                      {atividade.data_termino &&
+                        atividade.data_inicio !== atividade.data_termino && (
+                          <> → {formatarData(atividade.data_termino)}</>
+                        )}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </CardContent>
 
     </Card>
   );

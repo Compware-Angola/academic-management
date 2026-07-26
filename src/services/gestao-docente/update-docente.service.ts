@@ -8,7 +8,7 @@ export interface UpdateDocentePayload {
   faculdade: number;
   codigoValidacao: string;
   valorHora: number;
-  fkCandidatura: number;
+  fkGrauAcademico: number;
   totalAnoExperiencia: number;
   dataInicioDocencia: string;
   propostaDeContratacao: string;

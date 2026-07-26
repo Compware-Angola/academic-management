@@ -97,7 +97,7 @@ export default function ListagemProvas() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<ProvaForm>(EMPTY_FORM);
 
-  const { data: currentUser } = useCurrentUser("GA");
+  const { data: currentUser } = useCurrentUser();
   const { data: academicYears = [], isLoading: isLoadingAcademicYears } =
     useQueryAnoAcademico();
   const { data: cursos = [], isLoading: isLoadingCursos } = useCursos();

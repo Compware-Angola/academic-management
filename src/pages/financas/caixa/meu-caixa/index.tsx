@@ -99,7 +99,7 @@ function SummarySkeleton() {
 }
 
 function MeuCaixaAtualTab() {
-  const { data: user } = useCurrentUser("GA");
+  const { data: user } = useCurrentUser();
   const [confirmClose, setConfirmClose] = useState(false);
 
   const { data: myCaixa, isLoading: isLoadingCaixa } = useQueryMyCashRegister();
@@ -110,7 +110,7 @@ function MeuCaixaAtualTab() {
     if (!myCaixa) return;
 
     const { data: response } = await closeMutation.mutateAsync(myCaixa.id);
-    console.log({ data });
+
     const blob = await pdf(
       <CashClosingPDF
         data={{
@@ -329,7 +329,7 @@ function MeuCaixaAtualTab() {
 }
 
 function MeusMovimentosTab() {
-  const { data: currentUser } = useCurrentUser("GA");
+  const { data: currentUser } = useCurrentUser();
   if (!currentUser) {
     return (
       <Card className="border-dashed">

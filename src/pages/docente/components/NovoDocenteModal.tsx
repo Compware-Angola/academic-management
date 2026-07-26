@@ -17,6 +17,7 @@ import {
 } from "@/services/docentes/types/gestao-docente/docente-wizard.types";
 import { StepCandidatura } from "./novo-docente-wizard/Stepcandidatura";
 import { StepDocente } from "./novo-docente-wizard/StepDocente";
+import { useQueryFetchGrauAcademico } from "@/hooks/shared/use-query-fetch-grau-academico";
 
 interface NovoDocenteModalProps {
   isOpen: boolean;
@@ -27,6 +28,8 @@ const TOTAL_STEPS = 4;
 
 export function NovoDocenteModal({ isOpen, onClose }: NovoDocenteModalProps) {
   const [step, setStep] = useState(0);
+  const { data: grauAcademicoResponse = [], isLoading: grauAcademicoLoading } =
+    useQueryFetchGrauAcademico();
   const [wizardData, setWizardData] =
     useState<DocenteWizardState>(WIZARD_INITIAL_STATE);
 
@@ -79,6 +82,7 @@ export function NovoDocenteModal({ isOpen, onClose }: NovoDocenteModalProps) {
         {step === 1 && (
           <StepCandidatura
             data={wizardData.candidatura}
+            grauAcademicoResponse={grauAcademicoResponse}
             onChange={(data) =>
               setWizardData((prev) => ({
                 ...prev,

@@ -22,9 +22,7 @@ import { ChevronLeft, ChevronRight, RefreshCw, Shield } from "lucide-react";
 
 import { FormSelect } from "@/components/common/FormSelect";
 
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 
 import { useQueryDefinirOral } from "@/hooks/avaliacao/use-query-definir-oral";
@@ -33,12 +31,18 @@ import { DefinirOral } from "@/services/avaliacao/fetch-oral";
 import { Switch } from "@/components/ui/switch";
 import { useMutationUpdateDefinirOral } from "@/hooks/avaliacao/use-mutation-update-definir-oral";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function FormulaOral() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
   const [filters, setFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
     curso: "",
@@ -48,11 +52,19 @@ export default function FormulaOral() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-
   const { data: semestres } = useQuerySemestres();
-  const { data: cursos } = useCursos();
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   const { data: classes = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -71,31 +83,31 @@ export default function FormulaOral() {
   });
 
   // ===========================
-// FILTRO LOCAL (DISCIPLINA)
-// ===========================
-const filteredData = useMemo(() => {
-  if (!debouncedSearch) return data;
+  // FILTRO LOCAL (DISCIPLINA)
+  // ===========================
+  const filteredData = useMemo(() => {
+    if (!debouncedSearch) return data;
 
-  const searchLower = debouncedSearch.toLowerCase();
+    const searchLower = debouncedSearch.toLowerCase();
 
-  return data.filter((item) =>
-  item.disciplina?.toLowerCase().includes(searchLower)
-);
-}, [data, debouncedSearch]);
+    return data.filter((item) =>
+      item.disciplina?.toLowerCase().includes(searchLower)
+    );
+  }, [data, debouncedSearch]);
 
-// ===========================
-// PAGINAÇÃO (COM FILTRO)
-// ===========================
-const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  // ===========================
+  // PAGINAÇÃO (COM FILTRO)
+  // ===========================
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-const paginated = filteredData.slice(
-  (currentPage - 1) * itemsPerPage,
-  currentPage * itemsPerPage,
-);
+  const paginated = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
-useEffect(() => {
-  setCurrentPage(1);
-}, [debouncedSearch]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
 
 
   return (
@@ -133,29 +145,36 @@ useEffect(() => {
       <div className="bg-card border rounded-lg p-6">
         <div className="grid grid-cols-4 gap-4">
           <FormSelect
-            disabled={isLoadingAcademicYear}
-            loading={isLoadingAcademicYear}
+            label="Tipo de Candidatura"
+            value={filters.tipoCandidatura}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLetivo: "",
+                curso: "",
+                classes: "",
+              })
+            }
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
+          />
+
+          <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={filters.anoLetivo}
-            onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-            options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 0}
+            enableDefaultActiveYear
+            disabled={!filters.tipoCandidatura}
+            onlyConfigurable={false}
           />
-          <FormSelect
-            label="Semestre"
-            value={filters.semestre}
-            onChange={(v) => setFilters({ ...filters, semestre: v })}
-            options={semestres}
-            map={(s) => ({
-              key: s.codigo,
-              label: s.designacao,
-              value: s.codigo,
-            })}
-          />
+
 
           <CourseSelect
             value={filters.curso}
@@ -163,8 +182,13 @@ useEffect(() => {
               setFilters({
                 ...filters,
                 curso: v,
+                classes: "",
               })
             }
+            params={{
+              tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+            }}
+            disabled={!filters.tipoCandidatura}
           />
 
           <FormSelect
@@ -179,6 +203,19 @@ useEffect(() => {
               value: c.codigo,
             })}
           />
+          {Number(filters.tipoCandidatura) === 1 && (
+            <FormSelect
+              label="Semestre"
+              value={filters.semestre}
+              onChange={(v) => setFilters({ ...filters, semestre: v })}
+              options={semestres}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: s.codigo,
+              })}
+            />
+          )}
         </div>
       </div>
 
@@ -187,7 +224,7 @@ useEffect(() => {
         [...Array(5)].map((_, i) => (
           <Skeleton key={i} className="h-10 w-full" />
         ))
-      ) :  filteredData.length === 0 ? (
+      ) : filteredData.length === 0 ? (
         <div className="bg-card border rounded-lg text-center py-10">
           <Shield className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
           <p>Nenhum registro encontrado</p>
@@ -195,54 +232,54 @@ useEffect(() => {
       ) : (
 
 
-            <div  className="space-y-4">
+        <div className="space-y-4">
 
 
-               <div className="flex justify-end max-w-md ml-auto">
-                <Input
-                  placeholder="Filtrar por Unidade Curricular..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
+          <div className="flex justify-end max-w-md ml-auto">
+            <Input
+              placeholder="Filtrar por Unidade Curricular..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
           <div className="bg-card border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Disciplina</TableHead>
-                <TableHead className="text-center">Oral</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {paginated.map((item) => (
-                <TableRow key={item.codigoGrade}>
-
-                  <TableCell>{item.disciplina}</TableCell>
-
-                  {/* STATUS + SWITCH */}
-                  <TableCell className="flex justify-center">
-                    <Switch
-                      checked={item.habilitar}
-                      disabled={mutation.isPending}
-                      onCheckedChange={(checked) => {
-                        mutation.mutate({
-                          codigoGrade: item.codigoGrade,
-                          habilitar: checked,
-                        });
-                      }}
-                    />
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Disciplina</TableHead>
+                  <TableHead className="text-center">Oral</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+
+              <TableBody>
+                {paginated.map((item) => (
+                  <TableRow key={item.codigoGrade}>
+
+                    <TableCell>{item.disciplina}</TableCell>
+
+                    {/* STATUS + SWITCH */}
+                    <TableCell className="flex justify-center">
+                      <Switch
+                        checked={item.habilitar}
+                        disabled={mutation.isPending}
+                        onCheckedChange={(checked) => {
+                          mutation.mutate({
+                            codigoGrade: item.codigoGrade,
+                            habilitar: checked,
+                          });
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+
+
         </div>
-
-
-
-            </div>
 
       )}
 

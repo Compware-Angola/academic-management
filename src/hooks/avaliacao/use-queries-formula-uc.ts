@@ -8,6 +8,7 @@ type Params = {
   cursoId?: number;
   anoLectivoId?: number;
   semestre?: number;
+  tipoCandidatura?: number;
 };
 
 export function useQueryFormulaUC(params: Params) {
@@ -16,9 +17,10 @@ export function useQueryFormulaUC(params: Params) {
 
     enabled:
       !!params.anoCurricular &&
+      !!params.cursoId &&
       !!params.anoLectivoId &&
-      !!params.anoLectivoId &&
-      !!params.semestre,
+      !!params.semestre &&
+      !!params.tipoCandidatura,
 
 
     queryFn: () =>
@@ -27,6 +29,7 @@ export function useQueryFormulaUC(params: Params) {
         cursoId: params.cursoId!,
         anoLectivoId: params.anoLectivoId!,
         semestre:params.semestre!,
+        tipoCandidatura: params.tipoCandidatura!,
       }),
 
     staleTime: 5 * 60 * 1000,

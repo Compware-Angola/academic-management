@@ -1,12 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -20,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 
 import { useQueryAcademicYearParams } from "@/hooks/academiccalendar/use-query-academic-years-params";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryAcademicYearVacancies } from "@/hooks/academiccalendar/use-query-academic-year-vacancies";
 import { useQueryAcademicYearMonthlyFees } from "@/hooks/academiccalendar/use-query-academic-year-monthly-fees";
 import { formatarData } from "@/util/date-formate";
@@ -31,6 +22,7 @@ import { VacanciesTableCard } from "./vacancies-Card";
 import { MonthlyFeesTableCard } from "./monthly-fees-table-card";
 import { ParametersModal } from "./modals/parameters-modal";
 import { EditVagaModal } from "./modals/EditVagaModal";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 const TIPO_CANDIDATURA_LICENCIATURA = 1
 
@@ -50,22 +42,14 @@ export function Licenciatura() {
     } | null>(null);
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const {
-        data: academicYears = [],
-
-    } = useQueryAnoAcademico({ tipo_candidatura: TIPO_CANDIDATURA_LICENCIATURA });
-
-
     const updateEstadoMutation = useMutationUpdateAcademicYearState();
 
 
     const selectedCodigo = useMemo(() => {
-        if (!anoLetivoSelecionado || academicYears.length === 0) return undefined;
-        const ano = academicYears.find(
-            (a) => a.designacao === anoLetivoSelecionado
-        );
-        return ano?.codigo ?? undefined;
-    }, [anoLetivoSelecionado, academicYears]);
+        if (!anoLetivoSelecionado) return undefined;
+        const codigo = Number(anoLetivoSelecionado);
+        return Number.isNaN(codigo) ? undefined : codigo;
+    }, [anoLetivoSelecionado]);
 
     // Parâmetros do ano selecionado
     const {
@@ -103,22 +87,6 @@ export function Licenciatura() {
 
         setOpenModal(true);
     };
-
-    useEffect(() => {
-        if (academicYears.length > 0 && !anoLetivoSelecionado) {
-            const anoAtivo = academicYears.find(
-                (a) =>
-                    a.estado?.toLowerCase().includes("activo") ||
-                    a.estado?.toLowerCase().includes("ativo")
-            );
-            if (anoAtivo) setAnoLetivoSelecionado(anoAtivo.designacao);
-        }
-
-    }, [
-        academicYears,
-        anoLetivoSelecionado,
-        tipoCandidaturaSelecionado,
-    ]);
 
     // Resetar página ao mudar filtros
     useEffect(() => {
@@ -175,29 +143,14 @@ export function Licenciatura() {
             {/* Header */}
             <div className="flex justify-between gap-4">
                 <div className="space-y-2 min-w-44">
-                    <Label>Ano Letivo</Label>
-                    <Select
+                    <AcademicYearsAvailableForOperationSelect
                         value={anoLetivoSelecionado}
-                        onValueChange={setAnoLetivoSelecionado}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecione o ano letivo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {academicYears.map((ano) => (
-                                <SelectItem key={ano.codigo} value={ano.designacao}>
-                                    <div className="flex items-center justify-between w-full">
-                                        <span>{ano.designacao}</span>
-                                        {ano.estado?.toLowerCase() === "activo" && (
-                                            <span className="text-xs text-green-600 font-medium ml-2">
-                                                (Ativo)
-                                            </span>
-                                        )}
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                        onChangeValue={setAnoLetivoSelecionado}
+                        tipoCandidaturaId={TIPO_CANDIDATURA_LICENCIATURA}
+                        enableDefaultActiveYear
+                        label="Ano Letivo"
+                        onlyConfigurable={false}
+                    />
                 </div>
                 <Button
                     size="sm"

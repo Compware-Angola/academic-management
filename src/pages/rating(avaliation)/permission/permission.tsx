@@ -32,9 +32,15 @@ import AddPermissionLaunchModal from "../components/AddPermissionLaunchModal";
 import { useMutationUpdatePermissionAssessment } from "@/hooks/avaliacao/use-mutation-update-permission-launch";
 import UpdatePermissionLaunchModal from "../components/UpdatePermissionLaunchModal";
 import { AssessmentPermissionItem } from "@/services/avaliacao/fetch-permission-assessment";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 export default function Permission() {
   const [filters, setFilters] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
   });
 
@@ -49,6 +55,18 @@ export default function Permission() {
 
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.PERMISSAO_FORA_PRAZO_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   const openAddPermissionLaunchModal = () => {
     setIsModalOpen(true);
@@ -189,19 +207,36 @@ const pdfContent = pdfData ? (
           <CardHeader>
             <div className="flex justify-between">
               <CardTitle>Permissões Encontradas</CardTitle>
-              <FormSelect
-                disabled={isLoadingAcademicYear}
-                loading={isLoadingAcademicYear}
-                label="Ano Lectivo"
-                value={filters.anoLetivo}
-                onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-                options={academicYear}
-                map={(a) => ({
-                  key: a.codigo,
-                  label: a.designacao,
-                  value: a.codigo,
-                })}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-[520px]">
+                <FormSelect
+                  label="Tipo de Candidatura"
+                  value={filters.tipoCandidatura}
+                  onChange={(v) =>
+                    setFilters({
+                      ...filters,
+                      tipoCandidatura: v,
+                      anoLetivo: "",
+                    })
+                  }
+                  options={tiposCandidaturaFiltered}
+                  loading={isLoadingTiposCandidatura}
+                  map={(tipo) => ({
+                    key: tipo.codigo,
+                    label: tipo.designacao,
+                    value: tipo.codigo,
+                  })}
+                />
+                <AcademicYearsAvailableForOperationSelect
+                  label="Ano Lectivo"
+                  value={filters.anoLetivo}
+                  onChangeValue={(v) =>
+                    setFilters({ ...filters, anoLetivo: v })
+                  }
+                  tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+                  onlyConfigurable={false}
+                  disabled={!filters.tipoCandidatura}
+                />
+              </div>
             </div>
           </CardHeader>
 

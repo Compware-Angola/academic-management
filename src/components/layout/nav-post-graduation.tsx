@@ -45,7 +45,7 @@ export function NavPostGraduation({
   return (
     <SidebarGroup>
       {hasAnyItem && (
-        <SidebarGroupLabel>Pós-Graduação</SidebarGroupLabel>
+        <SidebarGroupLabel>Pós-Graduação (Core)</SidebarGroupLabel>
       )}
 
       <SidebarMenu>

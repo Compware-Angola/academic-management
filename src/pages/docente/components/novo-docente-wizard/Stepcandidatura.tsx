@@ -9,37 +9,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CandidaturaWizardData } from "@/services/docentes/types/gestao-docente/docente-wizard.types";
+import { GrauAcademicoResponse } from "@/services/shared/fetch-grau-academico.service";
 
 interface StepCandidaturaProps {
   data: CandidaturaWizardData;
+  grauAcademicoResponse: GrauAcademicoResponse;
   onChange: (data: Partial<CandidaturaWizardData>) => void;
 }
 
-// TODO: substituir por hooks reais assim que a origem dos dados for definida
-// (ex: useQueryGrauAcademico, useQueryCanal, useQueryFaculdade, etc.)
-const GRAU_ACADEMICO_OPTIONS = [
-  { value: "2", label: "Doutor/a" },
-  { value: "3", label: "Mestre" },
-  { value: "1", label: "Licenciado" },
-];
 
-// const CANAL_OPTIONS = [
-//   { value: "1", label: "Presencial" },
-//   { value: "2", label: "Online" },
-//   { value: "3", label: "Recomendação" },
-// ];
 
-const ESTADO_CANDIDATURA_OPTIONS = [
-  { value: "6", label: "Aprovada" },
-  { value: "10", label: "Em análise" },
-];
-
-const FACULDADE_OPTIONS = [
-  { value: "1", label: "Faculdade A" },
-  { value: "2", label: "Faculdade B" },
-];
-
-export function StepCandidatura({ data, onChange }: StepCandidaturaProps) {
+export function StepCandidatura({ data, onChange, grauAcademicoResponse }: StepCandidaturaProps) {
   const handleSelectChange = (
     field: keyof CandidaturaWizardData,
     value: string,
@@ -59,8 +39,8 @@ export function StepCandidatura({ data, onChange }: StepCandidaturaProps) {
             <SelectValue placeholder="Selecionar grau académico" />
           </SelectTrigger>
           <SelectContent>
-            {GRAU_ACADEMICO_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
+            {grauAcademicoResponse.map((option) => (
+              <SelectItem key={option.codigo} value={String(option.codigo)}>
                 {option.label}
               </SelectItem>
             ))}

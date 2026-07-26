@@ -50,6 +50,7 @@ import {
   useMutationRestoreGradeCurricularAluno,
 } from "@/hooks/students/use-mutation-student-grade";
 import { FormSelect } from "@/components/common/FormSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 type Props = {
   codigoMatricula: number;
@@ -64,7 +65,7 @@ export function InscricoesSection({
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const [filter, setFilter] = useState({
-    anoLetivo: "23",
+    anoLetivo: "",
     semestre: "1",
     classes: "",
     ignorarEliminados: "1",
@@ -166,16 +167,27 @@ export function InscricoesSection({
 
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <AcademicYearSelect
-              value={filter.anoLetivo}
-              onChangeValue={(v) => setFilter({ ...filter, anoLetivo: v })}
-            />
-            <SemestreSelect
-              label="Semestre"
-              enableDefaultSelectItem
-              value={filter.semestre}
-              onChangeValue={(v) => setFilter({ ...filter, semestre: v })}
-            />
+            <div className="space-y-2">
+              <AcademicYearsAvailableForOperationSelect
+                enableDefaultSelectItem={false}
+                onlyConfigurable={false}
+
+                enableDefaultActiveYear={false}
+                value={filter.anoLetivo}
+                onChangeValue={(v) => setFilter({ ...filter, anoLetivo: v })}
+                tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
+                label="Ano Letivo"
+              />
+            </div>
+            {student?.sigla_grau?.toUpperCase() === "LIC" && (
+              <SemestreSelect
+                label="Semestre"
+                enableDefaultSelectItem
+                value={filter.semestre}
+                onChangeValue={(v) => setFilter({ ...filter, semestre: v })}
+              />
+            )}
+
             <AnoCurricularSelect
               enableDefaultSelectItem
               value={filter.classes}

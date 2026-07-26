@@ -218,7 +218,6 @@ export default function AcademicYearPhase() {
   const [tipoCandidatura, setTipoCandidatura] = useState<number>(1);
   const { data, isLoading, isError } = useAcademicYears({
     tipoCandidatura: tipoCandidatura,
-    limit: 50,
   });
   const anos: AnoLetivo[] = useMemo(() => {
     return (data?.data ?? []).map((a) => ({

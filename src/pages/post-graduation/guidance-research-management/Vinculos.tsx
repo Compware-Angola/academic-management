@@ -25,7 +25,7 @@ import {
 import { Home, Loader2, RefreshCcw, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientadores-tfc";
@@ -33,6 +33,7 @@ import { useQueryVinculos } from "@/hooks/defesa-tfc/use-query-vinculos";
 import { FormSelect } from "@/components/common/FormSelect";
 import { VinculosModal } from "./components/vinculos-modal";
 import { ApagarVinculoAlert } from "./components/apagar-vinculo-alert.tfc";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 const statusConfig = {
   activo: {
     label: "Activo",
@@ -61,11 +62,12 @@ export default function GuidanceResearchManagementVinculos() {
   const [openApagar, setOpenApagar] = useState(false);
   const [vinculoId, setVinculoId] = useState<number | null>(null);
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "",
     curso: "",
     faculdade: "",
     orientador: "",
     estado: "",
+    tipoCandidatura: "2",
   });
 
   const { data: orientadoresResponse } = useQueryOrientadoresTFC({
@@ -79,15 +81,20 @@ export default function GuidanceResearchManagementVinculos() {
     data: vinculosResponse,
     refetch,
     isFetching,
-  } = useQueryVinculos({
-    anoLectivoId:
-      filters.anoLectivo === "all"
-        ? undefined
-        : parseFilter(filters.anoLectivo),
-    cursoId: parseFilter(filters.curso),
-    page,
-    limit,
-  });
+  } = useQueryVinculos(
+    {
+      anoLectivoId:
+        filters.anoLectivo === "all"
+          ? undefined
+          : parseFilter(filters.anoLectivo),
+      cursoId: parseFilter(filters.curso),
+      page,
+      limit,
+    },
+    {
+      enabled: !!parseFilter(filters.anoLectivo),
+    },
+  );
   const tableData = vinculosResponse?.data || [];
   const total = vinculosResponse?.total || 0;
   const totalPages = Math.ceil(total / limit);
@@ -131,15 +138,45 @@ export default function GuidanceResearchManagementVinculos() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <AcademicYearSelect
+            <TipoCandidaturaSelect
+              isPostGraduation
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLectivo: "",
+                  curso: "",
+                  orientador: "",
+                })
+              }
+            />
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Lectivo"
               value={filters.anoLectivo}
               enableDefaultActiveYear
-              onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
+              onlyConfigurable={false}
+              disabled={!filters.tipoCandidatura}
+              tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 2}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  anoLectivo: v,
+                  curso: "",
+                  orientador: "",
+                })
+              }
             />
 
             <CourseSelect
-              onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, curso: v, orientador: "" })
+              }
               value={filters.curso}
+              disabled={!filters.tipoCandidatura}
+              params={{
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
             />
             <FormSelect
               label="Orientador"
@@ -162,11 +199,12 @@ export default function GuidanceResearchManagementVinculos() {
                 className="cursor-pointer"
                 onClick={() => {
                   setFilters({
-                    anoLectivo: "23",
+                    anoLectivo: "",
                     curso: "",
                     orientador: "",
                     estado: "",
                     faculdade: "",
+                    tipoCandidatura: "2",
                   });
                   setPage(1);
                   setLimit(25);

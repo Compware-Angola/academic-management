@@ -156,7 +156,6 @@ import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
 import MapaAnualEstudantesFinalistas from "./pages/estudante/MapaAnualEstudantesFinalista";
 import RegistoPrimarioExamesAcesso from "./pages/estudante/RegistoPrimarioExamesAcesso";
 import RegistoPrimarioMatriculados from "./pages/estudante/RegistoPrimarioMatriculados";
-import PostGraduationPrimaryRecords from "./pages/post-graduation/PrimaryRecords";
 import PostGraduationAcademicActivities from "./pages/post-graduation/AcademicActivities";
 import PostGraduationAcademicCalendarParameters from "./pages/post-graduation/AcademicCalendarParameters";
 import PostGraduationVacancies from "./pages/post-graduation/Vacancies";
@@ -194,6 +193,7 @@ import PostGraduationControleGeral from "./pages/post-graduation/sumario/Control
 import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario/ListagemSumarios";
 import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
 import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
+import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
 
 const App = () => {
   return (
@@ -468,6 +468,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="/plano/import-uc" element={<ImportUCPage />} />
                   <Route
                     path="/assiduidade/marcacao"
                     element={
@@ -536,7 +537,18 @@ const App = () => {
                   />
                   <Route
                     path="calendario/fases-lectivas"
-                    element={<AcademicYearPhase />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO
+                            .sigla!,
+                          PermissionTypeDetails
+                            .PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla!,
+                        ]}
+                      >
+                        <AcademicYearPhase />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/docente/programa"
@@ -612,6 +624,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LANCAMENTO_NOTAS_MPGS.sigla,
+                          PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <LaunchNotes />
@@ -623,6 +637,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
+                          PermissionTypeDetails.CONTROLE_LANCAMENTO.sigla!,
                           PermissionTypeDetails
                             .CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla!,
                         ]}
@@ -632,12 +647,14 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/avaliacoes/formula-uc"
+                    path="/plano/formula-uc"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails
                             .DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
+                          PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <FormulaUC />
@@ -650,6 +667,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LISTA_PRESENCA.sigla!,
+                          PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <PresenceList />
@@ -662,6 +681,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.LANCAMENTO_PAUTA.sigla!,
+                          PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <LancamentoPauta />
@@ -703,6 +724,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.VALIDACAO_LANCAMENTO_PAUTA
                             .sigla!,
+                          PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <ValidationTeacherAgenda />
@@ -710,12 +733,14 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/avaliacoes/formula-oral"
+                    path="/plano/formula-oral"
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails
                             .DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
+                          PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <FormulaOral />
@@ -1280,6 +1305,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla!,
+                          PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <ActivitiesLecturesLic />
@@ -1305,6 +1332,8 @@ const App = () => {
                         allowedPermissions={[
                           PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO
                             .sigla!,
+                          PermissionTypeDetails
+                            .PARAMETROS_ACADEMICOS_POS_GRADUACAO.sigla!,
                         ]}
                       >
                         <Parameters />
@@ -1317,7 +1346,8 @@ const App = () => {
                       <ProtectedRoute
                         allowedPermissions={[
                           PermissionTypeDetails.CRIAR_PRAZO_ACADEMICO.sigla!,
-                          PermissionTypeDetails.PRAZOS_POS_GRADUACAO.sigla!,
+                          PermissionTypeDetails.PRAZOS_ACADEMICOS_POS_GRADUACAO
+                            .sigla!,
                         ]}
                       >
                         <Deadlines />
@@ -1883,19 +1913,6 @@ const App = () => {
                         ]}
                       >
                         <RegistoPrimarioMatriculados />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/pos-graduacao/registos-primarios"
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails
-                            .REGISTRO_PRIMARIO_BD_POS_GRADUACAO.sigla!,
-                        ]}
-                      >
-                        <PostGraduationPrimaryRecords />
                       </ProtectedRoute>
                     }
                   />
