@@ -832,7 +832,7 @@ const TeacherProfile = () => {
   const { user } = useAuth();
   const { mutateAsync: updatePassword, isPending: isUpdatingPassword } = useUpdatePassword();
   const { mutateAsync: updateUser, isPending: isUpdatingUser } = useUpdatePersonUser();
-  const { data: userDate } = useCurrentUser("GA");
+  const { data: userDate } = useCurrentUser();
 
   const isDocente = userDate?.roles?.docente ?? false;
   const isSaving = isUpdatingPassword || isUpdatingUser;

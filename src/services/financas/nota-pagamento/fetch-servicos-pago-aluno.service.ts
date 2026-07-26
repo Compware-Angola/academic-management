@@ -23,7 +23,7 @@ export async function fetchServicosPagosAlunoService({
   codigoMatricula,
   tipo = "TODOS",
 }: FetchServicosPagosAlunoParams): Promise<ServicoPagoAluno[]> {
-  const  response = await axiosNestFinance.get<ServicoPagoAluno[]>(
+  const response = await axiosNestFinance.get<ServicoPagoAluno[]>(
     "/payment/servicos-pagos-aluno",
     {
       params: {
@@ -34,7 +34,6 @@ export async function fetchServicosPagosAlunoService({
     }
   );
 
-  console.log("TESTANDO URL", response.request.responseURL);
 
   return response.data;
 }

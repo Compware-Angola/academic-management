@@ -1,5 +1,5 @@
 import { FormSelect } from "@/components/common/FormSelect";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { EstudanteFinalistaCommandSelect } from "@/components/common/global-selects/EstudanteFinalistaCommandSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
@@ -13,8 +13,6 @@ import { useQueryOrientadoresTFC } from "@/hooks/defesa-tfc/use-query-orientador
 import { parseFilter } from "@/util/parse-filter";
 import { useState } from "react";
 
-const TIPO_CANDIDATURA_LICENCIATURA_CODIGO = 1;
-
 export function VinculosModal({
   open,
   setOpen,
@@ -25,13 +23,13 @@ export function VinculosModal({
   const mutation = useMutationVincularOrientadorAluno();
 
   const [filters, setFilters] = useState({
-    anoLectivo: "23",
+    anoLectivo: "",
     curso: "",
     faculdade: "",
     orientador: "",
     estudante: "",
     tema: "",
-    tipoCandidatura: "",
+    tipoCandidatura: "2",
   });
 
   const { data: orientadoresResponse, isFetching: loadingOrientadores } =
@@ -44,13 +42,13 @@ export function VinculosModal({
   const handleClose = () => {
     setOpen(false);
     setFilters({
-      anoLectivo: "23",
+      anoLectivo: "",
       curso: "",
       faculdade: "",
       orientador: "",
       estudante: "",
       tema: "",
-      tipoCandidatura: "",
+      tipoCandidatura: "2",
     });
   };
 
@@ -88,18 +86,48 @@ export function VinculosModal({
 
         <div className="grid gap-6 py-4 grid-cols-1 md:grid-cols-3">
           {/* Filtros de Localização Acadêmica */}
-          <AcademicYearSelect
+          <TipoCandidaturaSelect
+            isPostGraduation
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLectivo: "",
+                curso: "",
+                orientador: "",
+                estudante: "",
+              })
+            }
+          />
+          <AcademicYearsAvailableForOperationSelect
+            label="Ano Lectivo"
             value={filters.anoLectivo}
-            onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
-            onlyActive
+            enableDefaultActiveYear
+            onlyConfigurable={false}
+            disabled={!filters.tipoCandidatura}
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 2}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                anoLectivo: v,
+                curso: "",
+                orientador: "",
+                estudante: "",
+              })
+            }
           />
           <FacultySelect
             value={filters.faculdade}
-            onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}
-          />
-          <TipoCandidaturaSelect
-            value={filters.tipoCandidatura}
-            onChangeValue={(v) => setFilters({ ...filters, tipoCandidatura: v })}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                faculdade: v,
+                curso: "",
+                orientador: "",
+                estudante: "",
+              })
+            }
           />
 
           <CourseSelect
@@ -109,7 +137,14 @@ export function VinculosModal({
             }}
             disabled={!filters.faculdade || !filters.tipoCandidatura}
             value={filters.curso}
-            onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                curso: v,
+                orientador: "",
+                estudante: "",
+              })
+            }
           />
 
           {/* Seleção de Pessoas */}
@@ -134,7 +169,7 @@ export function VinculosModal({
             params={{
               anoLectivo: parseFilter(filters.anoLectivo),
               curso: parseFilter(filters.curso),
-              tipoCandidatura: TIPO_CANDIDATURA_LICENCIATURA_CODIGO,
+              tipoCandidatura: parseFilter(filters.tipoCandidatura),
             }}
           />
 

@@ -17,11 +17,12 @@ import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQueryEscalao } from "@/hooks/escalao/use-query-escalao";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+
 import { TeachersItem } from "@/services/gestao-docente/fetch-list-teachers.service";
 import { useMutationUpdateDocente } from "@/hooks/gestao_docente/use-mutation-update-docente";
 import { UpdateDocentePayload } from "@/services/gestao-docente/update-docente.service";
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryFetchGrauAcademico } from "@/hooks/shared/use-query-fetch-grau-academico";
 
 interface GestaoAfectacaoModalProps {
   isModalOpen: boolean;
@@ -35,13 +36,15 @@ export const EditarDocenteModal = ({
 }: GestaoAfectacaoModalProps) => {
   const { data: categoriaDocente = [] } = useQueryCategoriaDocente();
   const { data: escaloes = [] } = useQueryEscalao();
+  const { data: grauAcademicoResponse = [], isLoading: grauAcademicoLoading } =
+    useQueryFetchGrauAcademico();
   const { toast } = useToast();
   const { mutateAsync, isPending } = useMutationUpdateDocente();
   const [params, setParams] = useState({
     escalao: "",
     categoria: "",
     faculdade: "",
-    tipoCandidatura: "",
+    fkGrauAcademico: "",
     nMecanografico: "",
     apreciacao: "",
     valor_hora: 0,
@@ -63,7 +66,7 @@ export const EditarDocenteModal = ({
     const categoria = docente?.categoriaid?.toString() ?? "";
     const faculdade = docente?.faculdadeid?.toString() ?? "";
     const escalao = docente?.escalaoid?.toString() ?? "";
-    const tipoCandidatura = docente?.candidaturaid?.toString() ?? "";
+    const fkGrauAcademico = docente?.candidaturaid?.toString() ?? "";
 
     // input type="date" só aceita "YYYY-MM-DD"
     const dataInicioDocencia = docente?.data_inicio_docencia
@@ -82,11 +85,10 @@ export const EditarDocenteModal = ({
       data_inicio_docencia: dataInicioDocencia,
       proposta_contratacao: docente?.proposta_contratacao ?? "",
       valor_hora: docente?.valor_hora ?? 0,
-      tipoCandidatura,
+      fkGrauAcademico,
     }));
   }, [docente]);
 
-  console.log(docente);
 
   const handleSubmit = async () => {
     if (!docente) return;
@@ -96,7 +98,7 @@ export const EditarDocenteModal = ({
       codigoValidacao: params?.codigo_validacao,
       dataInicioDocencia: params?.data_inicio_docencia,
       faculdade: parseFilter(params?.faculdade),
-      fkCandidatura: parseFilter(params?.tipoCandidatura),
+      fkGrauAcademico: parseFilter(params?.fkGrauAcademico),
       fkEscalao: parseFilter(params?.escalao),
       nMecanografico: params?.nMecanografico,
       propostaDeContratacao: params?.proposta_contratacao,
@@ -206,12 +208,16 @@ export const EditarDocenteModal = ({
                 }
               />
             </div>
-            <TipoCandidaturaSelect
-              temporarilyUnavailable={true}
-              disabled={true}
-              value={params.tipoCandidatura}
-              onChangeValue={(v) => handleChangeInput("tipoCandidatura", v)}
-            />
+            <div className="space-y-2">
+              <Label>Tipo de Candidatura</Label>
+              <FormCommandSelect
+                width="full"
+                value={params.fkGrauAcademico}
+                options={grauAcademicoResponse}
+                map={(t) => ({ key: t.codigo, value: String(t.codigo), label: t.label })}
+                onChange={(codigo) => handleChangeInput("fkGrauAcademico", codigo)}
+              />
+            </div>
             <div className="space-y-2">
               <Label>Anos de Experiência</Label>
               <Input

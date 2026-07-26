@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookText, Plus, X } from "lucide-react";
+import { BookText, DownloadCloud, Plus, X } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -43,7 +43,6 @@ import { Label } from "@/components/ui/label";
 
 // Hooks
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useClasses } from "@/hooks/use-classes";
 import { useCursos } from "@/hooks/use-cursos";
 import {
   useAddUCToPlan,
@@ -58,8 +57,14 @@ import { useQueryDropdownDisciplines } from "@/hooks/study_plan/use-query-dropdo
 import { useMutationUpdateDiscipline } from "@/hooks/study_plan/use-mutation-update-discipline";
 import { Switch } from "@/components/ui/switch";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { ImportUCModal } from "./components/ImportModalUC";
+import { useNavigate } from "react-router-dom";
 
 export default function UCManagementPlan() {
+  const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
   const [classeId, setClasseId] = useState<string>("7");
@@ -71,29 +76,37 @@ export default function UCManagementPlan() {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalImportOpen, setIsModalImportOpen] = useState<boolean>(false);
+
+  const onOpenModalImport = () => setIsModalImportOpen(true);
+  const onCloseModalImport = () => setIsModalImportOpen(false);
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     codigo_disciplina: "",
     codigo_semestre: "",
   });
 
   const hasActiveFilters =
+    tipoCandidaturaId !== "1" ||
     !!cursoId ||
     (classeId !== undefined && classeId !== "7") ||
     estado !== undefined;
 
   const limparFiltros = () => {
+    setTipoCandidaturaId("1");
+    setAnoLetivoId("");
     setCursoId("");
     setClasseId("");
     setEstado(undefined);
-    setPage(1); // importante: volta à primeira página ao limpar
-    // mantém anoLetivoId se for um filtro "base" obrigatório,
-    // ou reseta também se fizer sentido no teu fluxo
+    setPage(1);
   };
 
-  const { data: anosLetivos = [], isLoading: loadingAnos } =
-    useQueryAnoAcademico();
+  const { data: anosLetivos = [] } = useQueryAnoAcademico();
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
-  const { data: classes = [], isLoading: loadingClasses } = useClasses();
+  const { data: classes = [], isLoading: loadingClasses } =
+    useQueryClassFilterByCurso({ curso: cursoId });
   const { data: disciplines = [], isLoading: loadingDisciplines } =
     useQueryDropdownDisciplines();
 
@@ -113,6 +126,7 @@ export default function UCManagementPlan() {
   });
 
   const { mutate: update, isPending: updating } = useMutationUpdateDiscipline();
+  const isGraduation = tipoCandidaturaId === "1";
 
   const handleStatusChange = (codigo: number, status: boolean) => {
     update({
@@ -121,14 +135,12 @@ export default function UCManagementPlan() {
     });
   };
 
-  console.log("Grade Curricular", gradeResponses);
-
   const { mutate: createUC, isPending: isCreating } = useAddUCToPlan();
 
   useEffect(() => {
     setClasseId("");
     setPage(1);
-  }, [cursoId, anoLetivoId]);
+  }, [cursoId, anoLetivoId, tipoCandidaturaId]);
 
   const handleOpenModal = () => {
     if (!anoLetivoId || !cursoId || !classeId) {
@@ -141,7 +153,10 @@ export default function UCManagementPlan() {
   };
 
   const handleCreateUC = () => {
-    if (!formData.codigo_disciplina || !formData.codigo_semestre) {
+    if (
+      !formData.codigo_disciplina ||
+      (isGraduation && !formData.codigo_semestre)
+    ) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
@@ -155,7 +170,7 @@ export default function UCManagementPlan() {
       {
         codigoDisciplina: Number(formData.codigo_disciplina),
         codigoAnoLectivo: Number(anoLetivoId),
-        codigoSemestre: Number(formData.codigo_semestre),
+        codigoSemestre: isGraduation ? Number(formData.codigo_semestre) : 1,
         codigoClasse: Number(classeId),
         codigoCurso: Number(cursoId),
       },
@@ -205,10 +220,20 @@ export default function UCManagementPlan() {
         title="Gestão de Unidades Curriculares no Plano"
         subtitle="Visualizar e gerir todas as UCs por ano letivo, curso e ano curricular"
         actions={
-          <Button onClick={handleOpenModal} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar UC ao Plano
-          </Button>
+          <div className="flex space-x-2">
+            <Button onClick={handleOpenModal} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar UC
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/plano/import-uc")}
+              size="sm"
+            >
+              <DownloadCloud className="h-4 w-4 mr-2" />
+              Importar UC
+            </Button>
+          </div>
         }
       />
 
@@ -230,27 +255,32 @@ export default function UCManagementPlan() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <TipoCandidaturaSelect
+            value={tipoCandidaturaId}
+            onChangeValue={(v) => {
+              setTipoCandidaturaId(v);
+              setAnoLetivoId("");
+              setCursoId("");
+              setClasseId("");
+              setPage(1);
+            }}
+          />
+
           {/* Ano Letivo */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
-              Ano Letivo
-            </label>
-            {loadingAnos ? (
-              <Skeleton className="h-10 w-full rounded-md" />
-            ) : (
-              <Select value={anoLetivoId} onValueChange={setAnoLetivoId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione o ano letivo..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {anosLetivos.map((ano) => (
-                    <SelectItem key={ano.codigo} value={String(ano.codigo)}>
-                      {ano.designacao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Letivo"
+              value={anoLetivoId}
+              onChangeValue={(v) => {
+                setAnoLetivoId(v);
+                setCursoId("");
+                setClasseId("");
+                setPage(1);
+              }}
+              tipoCandidaturaId={parseFilter(tipoCandidaturaId) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidaturaId}
+            />
           </div>
 
           {/* Curso */}
@@ -277,6 +307,10 @@ export default function UCManagementPlan() {
             label="Curso"
             value={cursoId}
             onChangeValue={(v) => setCursoId(v)}
+            disabled={!tipoCandidaturaId}
+            params={{
+              tipoCandidaturaId: parseFilter(tipoCandidaturaId),
+            }}
           />
 
           {/* Classe */}
@@ -287,7 +321,11 @@ export default function UCManagementPlan() {
             {loadingClasses ? (
               <Skeleton className="h-10 w-full rounded-md" />
             ) : (
-              <Select value={classeId} onValueChange={setClasseId}>
+              <Select
+                value={classeId}
+                onValueChange={setClasseId}
+                disabled={!cursoId}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o ano curricular..." />
                 </SelectTrigger>
@@ -407,7 +445,7 @@ export default function UCManagementPlan() {
               <TableBody>
                 {grades.map((uc) => (
                   <TableRow
-                    key={uc.codigo}
+                    key={uc.codigo_grade_curricular}
                     className="hover:bg-muted/50 transition-colors"
                   >
                     <TableCell className="font-mono font-semibold text-sm">
@@ -502,6 +540,10 @@ export default function UCManagementPlan() {
           unidade(s) curricular(es) no plano
         </div>
       )}
+      <ImportUCModal
+        open={isModalImportOpen}
+        onOpenChange={(V) => setIsModalImportOpen(false)}
+      />
 
       {/* Modal de Criação */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -533,43 +575,50 @@ export default function UCManagementPlan() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="semestre">Semestre</Label>
-              <Select
-                value={formData.codigo_semestre}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, codigo_semestre: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o semestre" />
-                </SelectTrigger>
-                <SelectContent className="max-h-96">
-                  {loadingSemestres ? (
-                    <SelectItem value="loading" disabled>
-                      <span className="flex items-center gap-2">
-                        <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                        Carregando Semestre...
-                      </span>
-                    </SelectItem>
-                  ) : semestres.length === 0 ? (
-                    <SelectItem value="empty" disabled>
-                      Nenhum Semestre disponível
-                    </SelectItem>
-                  ) : (
-                    semestres.map((sem) => (
-                      <SelectItem key={sem.codigo} value={String(sem.codigo)}>
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono font-semibold text-sm">
-                            {sem.codigo}
+              {isGraduation && (
+                <>
+                  <Label htmlFor="semestre">Semestre</Label>
+                  <Select
+                    value={formData.codigo_semestre}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, codigo_semestre: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o semestre" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-96">
+                      {loadingSemestres ? (
+                        <SelectItem value="loading" disabled>
+                          <span className="flex items-center gap-2">
+                            <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                            Carregando Semestre...
                           </span>
-                          <span className="text-muted-foreground">–</span>
-                          <span>{sem.designacao}</span>
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                        </SelectItem>
+                      ) : semestres.length === 0 ? (
+                        <SelectItem value="empty" disabled>
+                          Nenhum Semestre disponível
+                        </SelectItem>
+                      ) : (
+                        semestres.map((sem) => (
+                          <SelectItem
+                            key={sem.codigo}
+                            value={String(sem.codigo)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono font-semibold text-sm">
+                                {sem.codigo}
+                              </span>
+                              <span className="text-muted-foreground">–</span>
+                              <span>{sem.designacao}</span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </>
+              )}
             </div>
 
             {/* Campos ocultos (pré-preenchidos) */}

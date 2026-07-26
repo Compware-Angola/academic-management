@@ -25,7 +25,6 @@ import {
 import { Home, Search, Loader2, Download, Printer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useId, useState } from "react";
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
@@ -38,6 +37,8 @@ import { useQueryMonthlyInstallments } from "@/hooks/avaliacao/use-query-monthly
 import { useDebounce } from "@/hooks/use-debounce"; // ← adicionar este hook
 import { exportPagamentosMensaisService } from "@/services/financas/pagamentos-mensais/fetch-pagamentos-mensais";
 import { toast } from "sonner";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 type SearchByType = "codigoMatricula" | "nome" | "pagamentoId";
 type ExportAction = "excel" | "pdf" | "print";
@@ -65,12 +66,15 @@ export default function PagamentoMensal() {
     useState<ExportAction | null>(null);
 
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     anoLectivo: "23",
     curso: "all",
     faculdade: "all",
     periodo: "all",
     mes: "all",
   });
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
 
   const placeholders: Record<string, string> = {
     codigoMatricula: "Pesquisar por código da matrícula...",
@@ -205,9 +209,34 @@ export default function PagamentoMensal() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <AcademicYearSelect
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={filters.tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setFilters((prev) => ({
+                  ...prev,
+                  tipoCandidatura: v,
+                  anoLectivo: "",
+                  curso: "all",
+                  mes: "all",
+                }));
+                setPage(1);
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+            <AcademicYearsAvailableForOperationSelect
               value={filters.anoLectivo}
               onChangeValue={(v) => handleFilterChange("anoLectivo", v)}
+              tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!filters.tipoCandidatura}
             />
             <FacultySelect
               allOption
@@ -216,7 +245,10 @@ export default function PagamentoMensal() {
             />
             <CourseSelect
               enableDefaultSelectItem
-              params={{ faculdadeId: parseFilter(filters.faculdade) }}
+              params={{
+                faculdadeId: parseFilter(filters.faculdade),
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
               onChangeValue={(v) => handleFilterChange("curso", v)}
               value={filters.curso}
             />

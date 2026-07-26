@@ -17,6 +17,7 @@ interface AcademicYearsAvailableForOperationSelectProps {
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
   onlyActive?: boolean;
+  onlyConfigurable?: boolean;
   enableDefaultActiveYear?: boolean;
   tipoCandidaturaId?: number;
   label?: string;
@@ -27,6 +28,7 @@ const AcademicYearsAvailableForOperationSelect = ({
   value,
   disabled,
   enableDefaultSelectItem = false,
+  onlyConfigurable = true,
   onlyActive = false,
   enableDefaultActiveYear = false,
   tipoCandidaturaId = 1,
@@ -38,20 +40,22 @@ const AcademicYearsAvailableForOperationSelect = ({
     isError,
   } = useAcademicYears({
     tipoCandidatura: tipoCandidaturaId,
-    limit: 50,
   });
   const id = useId();
   const hasSetDefault = useRef(false);
   const academicYear = academicYearResponse?.data ?? [];
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-        {
-          label: "Todos os anos letivos",
-          value: "all",
-          key: id,
-        },
-      ]
+      {
+        label: "Todos os anos letivos",
+        value: "all",
+        key: id,
+      },
+    ]
     : undefined;
+
+  // 👇 label dinâmica com base no tipo de candidatura
+  const defaultLabel = tipoCandidaturaId === 1 ? "Ano Letivo" : "Ciclo";
 
   const filteredYears = useMemo(() => {
     if (!academicYear) return academicYear;
@@ -62,11 +66,13 @@ const AcademicYearsAvailableForOperationSelect = ({
           (a.fase_anolectivo.toLocaleUpperCase() as EstadoAno) === "ACTIVO",
       );
     }
-
-    return academicYear.filter((a) =>
-      ESTADOS_DISPONIVEIS.includes(a.fase_anolectivo as EstadoAno),
-    );
-  }, [academicYear, onlyActive]);
+    if (onlyConfigurable) {
+      return academicYear.filter((a) =>
+        ESTADOS_DISPONIVEIS.includes(a.fase_anolectivo as EstadoAno),
+      );
+    }
+    return academicYear;
+  }, [academicYear, onlyActive, onlyConfigurable]);
 
   useEffect(() => {
     if (
@@ -88,7 +94,7 @@ const AcademicYearsAvailableForOperationSelect = ({
     <FormSelect
       disabled={isLoadingAcademicYear || disabled}
       loading={isLoadingAcademicYear}
-      label={label ? label : "Ano Letivo"}
+      label={label ? label : defaultLabel}
       value={value}
       defaultSelectItem={defaultSelectItem}
       onChange={(v) => onChangeValue(v)}
@@ -97,5 +103,7 @@ const AcademicYearsAvailableForOperationSelect = ({
     />
   );
 };
+
+
 
 export { AcademicYearsAvailableForOperationSelect };

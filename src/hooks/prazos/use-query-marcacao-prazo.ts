@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 type MarcacaoProvaPrazoParams = {
   anoLectivo?: number;
   semestre?: number;
+  tipoCandidatura?: number;
 };
 
 export function useQueryMarcacaoProvaPrazo(params: MarcacaoProvaPrazoParams) {
@@ -15,6 +16,7 @@ export function useQueryMarcacaoProvaPrazo(params: MarcacaoProvaPrazoParams) {
       fetchMarcacaoProvaPrazo({
         anoLectivo: params.anoLectivo!,
         semestre: params.semestre!,
+        tipoCandidatura: params.tipoCandidatura,
       }),
     enabled,
   });

@@ -94,12 +94,12 @@ export function AreaFinanceira({
           {hasPermission(
             PermissionTypeDetails.HISTORICO_MOVIMENTACOES_ESTUDANTE.sigla,
           ) && (
-            <TabsContent value="historico-movimentacoes">
-              <HistoryAccountMovimentSection
-                codigoMatricula={codigoMatricula}
-              />
-            </TabsContent>
-          )}
+              <TabsContent value="historico-movimentacoes">
+                <HistoryAccountMovimentSection
+                  codigoMatricula={codigoMatricula}
+                />
+              </TabsContent>
+            )}
 
           {hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (
             <TabsContent value="mensalidades">

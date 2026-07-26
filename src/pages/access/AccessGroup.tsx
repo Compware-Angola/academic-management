@@ -2,7 +2,7 @@ import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
-import { useMemo } from "react"; 
+import { useMemo } from "react";
 
 import { useState } from "react";
 import {
@@ -90,10 +90,6 @@ export default function AccessGroup() {
       return unique;
     }, [] as typeof accesses);
 
-  // Debug temporário (remova depois de testar)
-  // console.log("Acessos crus:", accesses.length);
-  // console.log("Acessos únicos após filtro:", activeAccesses.length);
-  // console.table(activeAccesses);
 
   // Paginação
   const totalItems = activeAccesses.length;
@@ -103,51 +99,51 @@ export default function AccessGroup() {
     currentPage * itemsPerPage
   );
 
-const pdfData = useMemo(() => {
-  if (!selectedGroup || activeAccesses.length === 0) return null;
+  const pdfData = useMemo(() => {
+    if (!selectedGroup || activeAccesses.length === 0) return null;
 
-  return {
-    filtros: [
-      `Grupo: ${selectedGroup.descricao}`,
-    ].join(" | "),
+    return {
+      filtros: [
+        `Grupo: ${selectedGroup.descricao}`,
+      ].join(" | "),
 
-    total: activeAccesses.length,
+      total: activeAccesses.length,
 
-    rows: activeAccesses.map((a) => ({
-      codigo: a.codigo,
-      descricao: a.descricao,
-      estado: "Ativo",
-      atualizadoEm: a["Update at"]
-        ? formatarData(a["Update at"])
-        : "—",
-    })),
-  };
-}, [selectedGroup, activeAccesses]);
+      rows: activeAccesses.map((a) => ({
+        codigo: a.codigo,
+        descricao: a.descricao,
+        estado: "Ativo",
+        atualizadoEm: a["Update at"]
+          ? formatarData(a["Update at"])
+          : "—",
+      })),
+    };
+  }, [selectedGroup, activeAccesses]);
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Permissões por Grupo"
-    subtitle="Acessos atribuídos a grupos"
-    infoSections={[
-      { title: "Grupo", content: selectedGroup?.descricao ?? "—" },
-      { title: "Resumo", content: [`Total de permissões: ${pdfData.total}`] },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "codigo", label: "Código", width: "15%" },
-        { key: "descricao", label: "Funcionalidade", width: "45%" },
-        { key: "estado", label: "Estado", width: "15%" },
-        { key: "atualizadoEm", label: "Última Atualização", width: "25%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Permissões por Grupo"
+      subtitle="Acessos atribuídos a grupos"
+      infoSections={[
+        { title: "Grupo", content: selectedGroup?.descricao ?? "—" },
+        { title: "Resumo", content: [`Total de permissões: ${pdfData.total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "codigo", label: "Código", width: "15%" },
+          { key: "descricao", label: "Funcionalidade", width: "45%" },
+          { key: "estado", label: "Estado", width: "15%" },
+          { key: "atualizadoEm", label: "Última Atualização", width: "25%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
 
-const excelProps = pdfData
-  ? {
+  const excelProps = pdfData
+    ? {
       documentTitle: "Permissões por Grupo",
       subtitle: "Acessos atribuídos a grupos",
       infoSections: [
@@ -166,13 +162,13 @@ const excelProps = pdfData
       footerNotice: "Documento gerado automaticamente pelo sistema.",
       primaryColor: "#0D1B48",
     }
-  : null;
+    : null;
 
   const baseFileName = selectedGroup
-  ? `Acessos_Grupo_${selectedGroup.codigo}_${new Date()
+    ? `Acessos_Grupo_${selectedGroup.codigo}_${new Date()
       .toISOString()
       .slice(0, 10)}`
-  : "Acessos_Grupo";
+    : "Acessos_Grupo";
 
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
@@ -180,7 +176,7 @@ const excelProps = pdfData
 
   return (
     <div className="flex-1 space-y-6 p-8">
-      
+
       {/* Breadcrumb + Título + Ações */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -239,18 +235,18 @@ const excelProps = pdfData
       {/* Select + Botões */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <FormCommandSelect
-  disabled={loadingGroups}
-  value={selectedGroupId}
-  label="Selecionar Grupo"
-  width="md"
-  options={sortedGroups}
-  map={(group) => ({
-    key: String(group.codigo),
-    value: String(group.codigo),
-    label: `[${group.codigo}] ${group.descricao}`,
-  })}
-  onChange={handleGroupChange}
-/>
+          disabled={loadingGroups}
+          value={selectedGroupId}
+          label="Selecionar Grupo"
+          width="md"
+          options={sortedGroups}
+          map={(group) => ({
+            key: String(group.codigo),
+            value: String(group.codigo),
+            label: `[${group.codigo}] ${group.descricao}`,
+          })}
+          onChange={handleGroupChange}
+        />
 
         <div className="flex flex-wrap gap-2">
           <Button
@@ -359,7 +355,7 @@ const excelProps = pdfData
                       <DeleteAccessButton
                         acessoCodigo={access.codigo}
                         grupoId={Number(selectedGroupId)}
-                        nomeAcesso={access.descricao} 
+                        nomeAcesso={access.descricao}
                       />
                     </div>
                   </TableCell>

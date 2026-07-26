@@ -67,7 +67,6 @@ export default function ListaUtilizadoresActiveOrInactive() {
   const { data: users, isLoading } = usersQueryActive(filtro);
   const { mutateAsync: updatePassword } = useUpdateUserPassword();
 
-  //console.log("Users Filters: ", users)
 
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
@@ -111,14 +110,11 @@ export default function ListaUtilizadoresActiveOrInactive() {
       return;
     }
 
-    //console.log("New Password: ",novaSenha)
-
     await updatePassword({
       utilizadorId: pk_utilizador,
       novaSenha: novaSenha,
     });
 
-    //console.log("Response: ", response)
 
     toast({
       title: "Sucesso",

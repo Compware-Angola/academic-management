@@ -19,6 +19,7 @@ export type FilterFormulaUCParams = {
   anoCurricular?: number;
   semestre?: number;
   anoLectivoId?: number;
+  tipoCandidatura?: number;
 };
 
 

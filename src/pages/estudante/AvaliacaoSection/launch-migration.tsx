@@ -202,7 +202,6 @@ export function LaunchMigration({
         });
 
       if (itens.length === 0) return;
-      console.log("Itens: ", itens);
       await mutateAsync({
         matriculaId: codigoMatricula,
         equivalencia: 1,
@@ -398,6 +397,7 @@ export function LaunchMigration({
                         {plan.duracao}
                       </TableCell>
                       <TableCell className="text-center">
+
                         <AnoLectivoConfirmadoSelect
                           value={getAnoLectivo(plan)}
                           codigoMatricula={codigoMatricula}

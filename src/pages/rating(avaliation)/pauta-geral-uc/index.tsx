@@ -47,8 +47,14 @@ import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc
 import { usePautasGeral } from "@/hooks/avaliacao/use-quert-pautas-geral";
 import { useTeamOldRules, useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 type Filters = {
+  tipoCandidatura: string;
   anoLetivo: string;
   periodo: string;
   semestre: string;
@@ -68,6 +74,7 @@ export default function PautaGeralPorUC() {
   const [shouldFetch, setShouldFetch] = useState(false);
 
   const [filters, setFilters] = useState<Filters>({
+    tipoCandidatura: "",
     anoLetivo: "",
     periodo: "",
     semestre: "",
@@ -90,7 +97,21 @@ export default function PautaGeralPorUC() {
   const { data: periodos = [], isLoading: loadingPeriodos } = useQueryPeriod();
   const { data: semestres = [], isLoading: loadingSemestres } =
     useQuerySemestres();
-  const { data: cursos = [], isLoading: loadingCursos } = useCursos();
+  const { data: cursos = [], isLoading: loadingCursos } = useCursos({
+    tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+  });
+  const { hasPermission } = usePermission();
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+  const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
+    if (
+      !hasPermission(PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla) &&
+      (tipo.sigla === "DTR" || tipo.sigla === "MST")
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   const { data: classes = [], isLoading: loadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
@@ -247,17 +268,39 @@ export default function PautaGeralPorUC() {
         <h3 className="text-lg font-semibold mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <FormSelect
-            disabled={loadingYear}
-            loading={loadingYear}
+            label="Tipo de Candidatura"
+            value={filters.tipoCandidatura}
+            onChange={(v) =>
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLetivo: "",
+                periodo: "",
+                semestre: "",
+                curso: "",
+                classes: "",
+                unidadeCurricular: "",
+                horarioId: "",
+                turma: "",
+                gradeCurricularTurma: "",
+              })
+            }
+            options={tiposCandidaturaFiltered}
+            loading={isLoadingTiposCandidatura}
+            map={(tipo) => ({
+              key: tipo.codigo,
+              label: tipo.designacao,
+              value: tipo.codigo,
+            })}
+          />
+
+          <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={filters.anoLetivo}
-            onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-            options={academicYear}
-            map={(a) => ({
-              key: a.codigo,
-              label: a.designacao,
-              value: a.codigo,
-            })}
+            onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+            onlyConfigurable={false}
+            disabled={!filters.tipoCandidatura}
           />
 
           <FormSelect
@@ -300,6 +343,10 @@ export default function PautaGeralPorUC() {
                 });
                 setCurrentPage(1);
               }}
+              params={{
+                tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+              }}
+              disabled={!filters.tipoCandidatura}
             />
 
           <FormSelect

@@ -18,9 +18,9 @@ import { Input } from "@/components/ui/input";
 
 export default function Avisos() {
   const [assunto, setAssunto] = useState("");
-const [modalOpen, setModalOpen] = useState(false);
-const [mode, setMode] = useState<"create" | "edit">("create");
-const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
 
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,19 +32,18 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
   });
 
   const { mutateAsync: alterarStatusAviso, isPending: alterandoStatus } =
-  useMutateStatusAviso();
-  
-  //console.log("AVISO: ", data)  
+    useMutateStatusAviso();
+
 
   useEffect(() => {
-  setCurrentPage(1);
-}, [assunto]);
+    setCurrentPage(1);
+  }, [assunto]);
 
   useEffect(() => {
-  if (data?.totalPages && currentPage > data.totalPages) {
-    setCurrentPage(data.totalPages);
-  }
-}, [data?.totalPages, currentPage]);
+    if (data?.totalPages && currentPage > data.totalPages) {
+      setCurrentPage(data.totalPages);
+    }
+  }, [data?.totalPages, currentPage]);
 
   function formatDate(dateString: string) {
     if (!dateString) return "-";
@@ -64,11 +63,11 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       descricao: item.DESCRICAO,
       name: item.NOME,
       curso: item.CURSO,
-      periodo: item.PERIODO,       
+      periodo: item.PERIODO,
       destinoId: item.DESTINO_ID,
       destino: item.DESTINO_NOME,
       date_expiracao: item.DATE_EXPIRACAO,
-      status: item.STATUS_, 
+      status: item.STATUS_,
     }));
   }, [data]);
 
@@ -116,43 +115,43 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
   const excelProps =
     exportRows.length > 0
       ? {
-          documentTitle: "Lista de Avisos",
-          subtitle: "Listagem completa de avisos",
-          infoSections: [
-            {
-              title: "Resumo",
-              content: `Total de registos: ${exportRows.length}`,
-            },
-          ],
-          mainTable: {
-            headers: [
-              { key: "assunto", label: "Assunto", width: 30 },
-              { key: "descricao", label: "Descrição", width: 40 },
-              { key: "autor", label: "Autor", width: 25 },
-              { key: "curso", label: "Curso", width: 20 },
-              { key: "expiracao", label: "Data Expiração", width: 20 },
-            ],
-            rows: exportRows,
+        documentTitle: "Lista de Avisos",
+        subtitle: "Listagem completa de avisos",
+        infoSections: [
+          {
+            title: "Resumo",
+            content: `Total de registos: ${exportRows.length}`,
           },
-          primaryColor: "#0D1B48",
-        }
+        ],
+        mainTable: {
+          headers: [
+            { key: "assunto", label: "Assunto", width: 30 },
+            { key: "descricao", label: "Descrição", width: 40 },
+            { key: "autor", label: "Autor", width: 25 },
+            { key: "curso", label: "Curso", width: 20 },
+            { key: "expiracao", label: "Data Expiração", width: 20 },
+          ],
+          rows: exportRows,
+        },
+        primaryColor: "#0D1B48",
+      }
       : null;
 
   /* ================= COLUNAS ================= */
 
   async function handleToggleStatus(aviso: any) {
-  const novoStatus = aviso.status === 1 ? 0 : 1;
+    const novoStatus = aviso.status === 1 ? 0 : 1;
 
-  
-  try {
-    await alterarStatusAviso({
-      id: aviso.codigo,
-      status: novoStatus,
-    });
-  } catch (error) {
-    console.error("Erro ao alterar status do aviso:", error);
+
+    try {
+      await alterarStatusAviso({
+        id: aviso.codigo,
+        status: novoStatus,
+      });
+    } catch (error) {
+      console.error("Erro ao alterar status do aviso:", error);
+    }
   }
-}
 
   const columns = [
     { header: "Assunto", accessor: "assunto" },
@@ -182,40 +181,40 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       cell: (row) => row.destino,
     },
     {
-    header: "Editar",                // nova coluna
-    accessor: "editar",
-    cell: ( row ) => (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {
-          // coloca o diálogo em modo de edição com os dados do aviso
-          setMode("edit");
-          setAvisoSelecionado(row);
-          setModalOpen(true);
-        }}
-      >
-        {/* pode ser um ícone de lápis ou texto "Editar" */}
-        <Plus className="h-4 w-4 mr-2" />
-            Editar
-      </Button>
-    ),
-  },
+      header: "Editar",                // nova coluna
+      accessor: "editar",
+      cell: (row) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            // coloca o diálogo em modo de edição com os dados do aviso
+            setMode("edit");
+            setAvisoSelecionado(row);
+            setModalOpen(true);
+          }}
+        >
+          {/* pode ser um ícone de lápis ou texto "Editar" */}
+          <Plus className="h-4 w-4 mr-2" />
+          Editar
+        </Button>
+      ),
+    },
 
-  {
-  header: "Status",
-  accessor: "status",
-  cell: (row) => (
-    <Button
-      variant={row.status === 1 ? "destructive" : "default"}
-      size="sm"
-      disabled={alterandoStatus}
-      onClick={() => handleToggleStatus(row)}
-    >
-      {row.status === 1 ? "Desativar" : "Ativar"}
-    </Button>
-  ),
-},
+    {
+      header: "Status",
+      accessor: "status",
+      cell: (row) => (
+        <Button
+          variant={row.status === 1 ? "destructive" : "default"}
+          size="sm"
+          disabled={alterandoStatus}
+          onClick={() => handleToggleStatus(row)}
+        >
+          {row.status === 1 ? "Desativar" : "Ativar"}
+        </Button>
+      ),
+    },
 
   ];
 
@@ -261,21 +260,21 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
       />
 
       <div className="flex items-center gap-3">
-  <Input
-    placeholder="Pesquisar por assunto..."
-    value={assunto}
-    onChange={(e) => setAssunto(e.target.value)}
-    className="max-w-sm"
-  />
+        <Input
+          placeholder="Pesquisar por assunto..."
+          value={assunto}
+          onChange={(e) => setAssunto(e.target.value)}
+          className="max-w-sm"
+        />
 
-  <Button
-    variant="outline"
-    onClick={() => setAssunto("")}
-    disabled={!assunto}
-  >
-    Limpar
-  </Button>
-</div>
+        <Button
+          variant="outline"
+          onClick={() => setAssunto("")}
+          disabled={!assunto}
+        >
+          Limpar
+        </Button>
+      </div>
 
       <DataTable
         columns={columns}
@@ -284,17 +283,17 @@ const [avisoSelecionado, setAvisoSelecionado] = useState<any>(null);
         currentPage={currentPage}
         totalPages={data?.totalPages ?? 1}
         onPageChange={(page) => {
-            if (page < 1) return;
-            if (data?.totalPages && page > data.totalPages) return;
-            setCurrentPage(page);
-          }}
+          if (page < 1) return;
+          if (data?.totalPages && page > data.totalPages) return;
+          setCurrentPage(page);
+        }}
       />
 
-          <AvisoFormDialog
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            mode={mode}
-            initialData={avisoSelecionado}
+      <AvisoFormDialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        mode={mode}
+        initialData={avisoSelecionado}
       />
     </div>
   );

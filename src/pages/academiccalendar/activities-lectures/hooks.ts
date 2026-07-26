@@ -13,6 +13,8 @@ import { Atividade } from "@/services/fetch-atividade";
 import { Edit } from "lucide-react";
 import { useMutationActivity } from "@/hooks/academiccalendar/use-mutation-update-activity";
 import { useAuth } from "@/hooks/use-auth";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
 
 interface FormActivity {
   designacao: string;
@@ -60,6 +62,7 @@ export function useActivitiesLectures() {
     useQueryTipoCandidatura();
   const { data: tiposCalendario = [], isLoading: loadingTiposCalendario } =
     useQueryTypeCalendar();
+
 
   const {
     data: atividades = [],

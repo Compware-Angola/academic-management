@@ -20,16 +20,10 @@ export type AcademicYear = {
 
 export type AcademicYearResponse = {
   data: AcademicYear[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 };
 
 export type FetchAcademicYearsParams = {
   tipoCandidatura?: number;
-  page?: number;
-  limit?: number;
 };
 
 export async function fetchAcademicYears(

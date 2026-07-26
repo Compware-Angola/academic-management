@@ -37,10 +37,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { FormSelect } from "@/components/common/FormSelect";
-import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryEstatisticaAssiduidadeDocente } from "@/hooks/assiduidade/use-fetch-EstatisticaAssiduidadeDocente";
 import { useCursos } from "@/hooks/use-cursos";
 import {
@@ -50,6 +47,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { parseFilter } from "@/util/parse-filter";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
 type SortField = "n_mecanografico" | "nome" | "grau_academico" | "escalao";
 
 const SEMESTRE = [
@@ -62,6 +63,7 @@ export default function SalarioDocente() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortField, setSortField] = useState<SortField>("n_mecanografico");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [tipoCandidatura, setTipoCandidatura] = useState("1");
 
   const [filters, setFilters] = useState({
     docente: "",
@@ -79,9 +81,8 @@ export default function SalarioDocente() {
     limit: 10,
   });
 
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } =
-    useQueryAnoAcademico();
-  const { data: teachersData = [] } = useQueryTeacther();
+  const { data: tiposCandidatura, isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
   const { data: cursos = [] } = useCursos();
   const {
     data: response,
@@ -243,6 +244,7 @@ export default function SalarioDocente() {
                 page: 1,
                 limit: itemsPerPage,
               });
+              setTipoCandidatura("1");
               setCurrentPage(1);
             }}
           >
@@ -252,18 +254,34 @@ export default function SalarioDocente() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
-            <Label>Ano Letivo</Label>
             <FormSelect
-              disabled={isLoadingAcademicYear}
-              value={filters.anoLectivo}
-              onChange={(v) => updateFilters({ anoLectivo: v })}
-              options={anosAcademicos ?? []}
-              map={(a) => ({
-                key: a.codigo,
-                label: a.designacao,
-                value: String(a.codigo),
+              label="Tipo de Candidatura"
+              value={tipoCandidatura}
+              loading={isLoadingTiposCandidatura}
+              onChange={(v) => {
+                setTipoCandidatura(v);
+                updateFilters({
+                  anoLectivo: "",
+                  curso: "",
+                });
+              }}
+              options={tiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
               })}
-              placeholder="Selecione o ano..."
+              placeholder="Selecione o tipo..."
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <AcademicYearsAvailableForOperationSelect
+              value={filters.anoLectivo}
+              onChangeValue={(v) => updateFilters({ anoLectivo: v })}
+              tipoCandidaturaId={parseFilter(tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidatura}
             />
           </div>
 
@@ -279,12 +297,10 @@ export default function SalarioDocente() {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Docente</Label>
-            <FormCommandSelect
+            <TeacherSelectList
               value={filters.docente}
-              options={teachersData}
-              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-              onChange={(codigo) => updateFilters({ docente: codigo })}
+              onChangeValue={(codigo) => updateFilters({ docente: codigo })}
+              tipoCandidatura={parseFilter(tipoCandidatura)}
             />
           </div>
 
@@ -304,6 +320,9 @@ export default function SalarioDocente() {
 
           <CourseSelect
             value={filters.curso}
+            params={{
+              tipoCandidaturaId: parseFilter(tipoCandidatura),
+            }}
             // enableDefaultSelectItem
             onChangeValue={(v) => setFilters({ ...filters, curso: v })}
           />

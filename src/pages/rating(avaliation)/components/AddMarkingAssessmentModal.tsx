@@ -11,8 +11,6 @@ import { Button } from "@/components/ui/button";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
@@ -34,6 +32,9 @@ import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-pr
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryExamCreationPrompt } from "@/hooks/academiccalendar/use-query-exam-creation-prompt";
 import { calcularDuracao } from "@/util/calcular-duracao";
+import { usePermission } from "@/auth/permission.helper";
+import { PermissionTypeDetails } from "@/constants/permission.type";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import {
   DocenteSelected,
   DocenteVigilantePicker,
@@ -70,13 +71,12 @@ export default function AddMarkingAssessmentModal({
   onClose,
 }: AddPermissionLaunchModalProps) {
   const { toast } = useToast();
+  const { hasPermission } = usePermission();
   const { mutate: createCalendar, isPending: isCreateLoadingCalendar } =
     useMutationCreateCalendar();
   // filtros
   const [filters, setFilters] = useState<Filters>({});
   const [teacher, setTeacher] = useState<DocenteSelected[]>([]);
-  const { data: anosAcademicos, isLoading: isLoadingAnosAcademicos } =
-    useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
   const { data: modalidade = [], isLoading: isLoadingModalidade } =
     useQueryModalidade();
@@ -89,6 +89,18 @@ export default function AddMarkingAssessmentModal({
 
   const { data: tipoCandidatura = [], isLoading: isLoadingTipoCandidatura } =
     useQueryTipoCandidatura();
+  const tipoCandidaturaFiltered = useMemo(() => {
+    return tipoCandidatura.filter((tipo) => {
+      if (
+        !hasPermission(PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla) &&
+        (tipo.sigla === "DTR" || tipo.sigla === "MST")
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [hasPermission, tipoCandidatura]);
+  const tipoCandidaturaId = parseFilter(filters.tipoCandidatura);
   const { data: tipoProva = [], isLoading: isLoadingTipoProva } =
     useQueryTipoProva();
   const { data: salas = [], isLoading: isLoadingSala } = useQuerySalas();
@@ -103,6 +115,7 @@ export default function AddMarkingAssessmentModal({
     useQueryMarcacaoProvaPrazo({
       anoLectivo: parseFilter(filters.anoLetivo),
       semestre: parseFilter(filters.semestre),
+      tipoCandidatura: tipoCandidaturaId ?? undefined,
     });
   const { data: markingResponse, isLoading: loadingMarking } =
     useQueryMarkingAssessment({
@@ -313,17 +326,44 @@ export default function AddMarkingAssessmentModal({
         <div className="flex-1 min-w-full    py-6 min-h-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  gap-4">
             <FormSelect
-              label="Ano Letivo"
-              value={filters.anoLetivo}
-              onChange={(v) => setFilters({ ...filters, anoLetivo: v })}
-              options={anosAcademicos}
-              loading={isLoadingAnosAcademicos}
-              disabled={isLoadingAnosAcademicos}
+              label="Tipo Candidatura"
+              value={filters.tipoCandidatura}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  tipoCandidatura: v,
+                  anoLetivo: undefined,
+                  curso: undefined,
+                  anoCurricular: undefined,
+                  unidadeCurricular: undefined,
+                  prazoId: undefined,
+                  horarioId: undefined,
+                })
+              }
+              options={tipoCandidaturaFiltered}
+              loading={isLoadingTipoCandidatura}
               map={(u) => ({
                 key: u.codigo,
                 label: u.designacao,
                 value: u.codigo,
               })}
+            />
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Letivo"
+              value={filters.anoLetivo}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  anoLetivo: v,
+                  curso: undefined,
+                  anoCurricular: undefined,
+                  unidadeCurricular: undefined,
+                  prazoId: undefined,
+                  horarioId: undefined,
+                })
+              }
+              tipoCandidaturaId={tipoCandidaturaId ?? 1}
+              disabled={!filters.tipoCandidatura}
             />
 
             {/* Semestre */}
@@ -336,6 +376,8 @@ export default function AddMarkingAssessmentModal({
                   semestre: v,
                   anoCurricular: undefined,
                   unidadeCurricular: undefined,
+                  prazoId: undefined,
+                  horarioId: undefined,
                 })
               }
               options={semestres}
@@ -372,8 +414,14 @@ export default function AddMarkingAssessmentModal({
                   ...filters,
                   curso: v,
                   anoCurricular: "all",
+                  unidadeCurricular: undefined,
+                  horarioId: undefined,
                 })
               }
+              params={{
+                tipoCandidaturaId: tipoCandidaturaId ?? undefined,
+              }}
+              disabled={!filters.tipoCandidatura}
             />
 
             {/* Ano Curricular */}
@@ -427,10 +475,21 @@ export default function AddMarkingAssessmentModal({
             <FormSelect
               label="Tipo de Epoca"
               value={filters.prazoId}
-              onChange={(v) => setFilters({ ...filters, prazoId: v })}
+              onChange={(v) =>
+                setFilters({
+                  ...filters,
+                  prazoId: v,
+                  horarioId: undefined,
+                })
+              }
               options={prazos}
               loading={isLoadingPrazos}
-              disabled={isLoadingPrazos}
+              disabled={
+                isLoadingPrazos ||
+                !filters.tipoCandidatura ||
+                !filters.anoLetivo ||
+                !filters.semestre
+              }
               map={(u) => ({
                 key: u.prazoid,
                 label: u.designacao,
@@ -449,19 +508,6 @@ export default function AddMarkingAssessmentModal({
                 value: u.codigo,
               })}
               loading={isLoadingTipoProva}
-            />
-            <FormSelect
-              label="Tipo Candidatura"
-              value={filters.tipoCandidatura}
-              onChange={(v) => setFilters({ ...filters, tipoCandidatura: v })}
-              options={tipoCandidatura}
-              loading={isLoadingTipoCandidatura}
-              disabled={loadingMarking && !filters.unidadeCurricular}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.designacao,
-                value: u.codigo,
-              })}
             />
             <FormSelect
               label="Horarios"
