@@ -80,6 +80,7 @@ import { i } from "node_modules/framer-motion/dist/types.d-BJcRxCew";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type EditForm = {
   fkDocenteOriginal: string;
@@ -575,6 +576,7 @@ export default function DocenteSubstitutoList() {
               </Select>
             </div>
 
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <FormCommandSelect
               value={filters.unidadeCurricular}
               label="Unidade Curricular"
@@ -595,6 +597,18 @@ export default function DocenteSubstitutoList() {
                 label: u.descricao,
               })}
               onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
+            /> */}
+
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUcs}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+              onChangeValue={(u) =>
+                setFilters({ ...filters, unidadeCurricular: u })
+              }
             />
 
             <div className="space-y-2">

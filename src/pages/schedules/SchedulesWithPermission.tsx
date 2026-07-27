@@ -50,6 +50,7 @@ import { ScheduleWithPermissao } from "@/services/horario/fetch-schedule-with-pe
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 export default function SchedulesWithPermission() {
   const navigate = useNavigate();
@@ -315,6 +316,7 @@ export default function SchedulesWithPermission() {
               }
               disabled={!filters.curso}
             />
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <FormSelect
               label="Unidade Curricular"
               value={filters.unidadeCurricular}
@@ -322,6 +324,17 @@ export default function SchedulesWithPermission() {
               map={(uc) => ({ key: uc.pk, label: uc.descricao, value: uc.pk })}
               onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
               disabled={!canLoadUCs}
+            /> */}
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUCs}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
+              }
             />
             <FormSelect
               label="Estado"
