@@ -188,7 +188,7 @@ export function ProvaDetailsDialog({
                             Enunciado
                           </p>
                           <div className="min-w-0">
-                            <QuestionContent value={pergunta.pergunta_texto} />
+                            <p className="text-wrap text-justify wrap-break-word">{pergunta.pergunta_texto}</p>
                           </div>
                         </div>
                       </div>

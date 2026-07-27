@@ -81,7 +81,7 @@ export function ProvasTable({
                     {plainTextFromHtml(prova.descricao)}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    <p className="text-wrap text-justify break-words">{plainTextFromHtml(prova.texto) || "Sem texto/instruções"}</p>
+                    <p className="text-wrap text-justify wrap-break-word">{plainTextFromHtml(prova.texto) || "Sem texto/instruções"}</p>
                     
                   </div>
                 </TableCell>
