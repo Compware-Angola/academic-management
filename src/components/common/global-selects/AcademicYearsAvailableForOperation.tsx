@@ -46,12 +46,12 @@ const AcademicYearsAvailableForOperationSelect = ({
   const academicYear = academicYearResponse?.data ?? [];
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-      {
-        label: "Todos os anos letivos",
-        value: "all",
-        key: id,
-      },
-    ]
+        {
+          label: "Todos os anos letivos",
+          value: "all",
+          key: id,
+        },
+      ]
     : undefined;
 
   // 👇 label dinâmica com base no tipo de candidatura
@@ -78,6 +78,7 @@ const AcademicYearsAvailableForOperationSelect = ({
     if (
       enableDefaultActiveYear &&
       !hasSetDefault.current &&
+      !value &&
       filteredYears?.length
     ) {
       const activeYear = filteredYears.find(
@@ -88,7 +89,7 @@ const AcademicYearsAvailableForOperationSelect = ({
         onChangeValue(activeYear.codigo.toString());
       }
     }
-  }, [enableDefaultActiveYear, filteredYears, onChangeValue]);
+  }, [enableDefaultActiveYear, filteredYears, value, onChangeValue]);
 
   return (
     <FormSelect
@@ -103,7 +104,5 @@ const AcademicYearsAvailableForOperationSelect = ({
     />
   );
 };
-
-
 
 export { AcademicYearsAvailableForOperationSelect };
