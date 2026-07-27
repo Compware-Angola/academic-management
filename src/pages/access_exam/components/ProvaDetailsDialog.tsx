@@ -31,7 +31,7 @@ export function ProvaDetailsDialog({
 }: ProvaDetailsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DialogContent className="max-w-4xl! max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[90%]! max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detalhes da prova</DialogTitle>
           <DialogDescription>

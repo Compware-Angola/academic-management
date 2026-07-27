@@ -80,8 +80,9 @@ export function ProvasTable({
                   <div className="font-medium">
                     {plainTextFromHtml(prova.descricao)}
                   </div>
-                  <div className="line-clamp-1 text-xs text-muted-foreground">
-                    {plainTextFromHtml(prova.texto) || "Sem texto/instruções"}
+                  <div className="text-xs text-muted-foreground">
+                    <p className="text-wrap text-justify break-words">{plainTextFromHtml(prova.texto) || "Sem texto/instruções"}</p>
+                    
                   </div>
                 </TableCell>
                 <TableCell>{prova.ano_letivo}</TableCell>
