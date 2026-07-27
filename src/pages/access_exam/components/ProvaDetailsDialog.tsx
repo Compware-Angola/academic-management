@@ -14,7 +14,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { ProvaDetalhe } from "@/services/access_exam/provas.service";
 import { formatarData, formatDateTimePt } from "@/util/date-formate";
-import { HtmlContent, QuestionContent } from "@/util/prova-text-format";
+import { HtmlContent, plainTextFromHtml, QuestionContent } from "@/util/prova-text-format";
+import { LatexText } from "@/util/LatexText";
 
 type ProvaDetailsDialogProps = {
   open: boolean;
@@ -29,6 +30,9 @@ export function ProvaDetailsDialog({
   isLoading,
   onClose,
 }: ProvaDetailsDialogProps) {
+
+  console.log(provaDetalhe);
+
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogContent className="max-w-[90%]! max-h-[90vh] overflow-y-auto">
@@ -47,7 +51,7 @@ export function ProvaDetailsDialog({
             </p>
           </div>
         ) : provaDetalhe ? (
-          <div className="space-y-5">
+          <div className="space-y-5 w-full">
             <div className="grid gap-3 md:grid-cols-3">
               <Card>
                 <CardContent className="pt-4">
@@ -187,9 +191,11 @@ export function ProvaDetailsDialog({
                           <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">
                             Enunciado
                           </p>
-                          <div className="min-w-0">
-                            <p className="text-wrap text-justify wrap-break-word">{pergunta.pergunta_texto}</p>
-                          </div>
+                          <div className="max-w-full">
+  <p className="text-wrap text-justify wrap-break-word">
+    <LatexText text={pergunta.pergunta_texto} />
+  </p>
+</div>
                         </div>
                       </div>
                     ))}

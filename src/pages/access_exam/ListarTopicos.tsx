@@ -289,20 +289,20 @@ export default function ListarTopicos() {
 
   // EXPORT
   const exportRows = useMemo(
-  () =>
-    topicos.map((t) => ({
-      id: t.id,
-      designacao: t.designacao,
-      anoLetivo: t.ano_letivo,
-     
-      criadoEm: t.created_at
-        ? new Date(t.created_at).toLocaleDateString("pt-AO")
-        : "—",
-    })),
-  [topicos]
-);
-const pdfData = exportRows.length
-  ? {
+    () =>
+      topicos.map((t) => ({
+        id: t.id,
+        designacao: t.designacao,
+        anoLetivo: t.ano_letivo,
+
+        criadoEm: t.created_at
+          ? new Date(t.created_at).toLocaleDateString("pt-AO")
+          : "—",
+      })),
+    [topicos]
+  );
+  const pdfData = exportRows.length
+    ? {
       filtros: [
         search ? `Pesquisa: ${search}` : null,
         filtroAno && filtroAno !== "all"
@@ -314,34 +314,34 @@ const pdfData = exportRows.length
       total: exportRows.length,
       rows: exportRows,
     }
-  : null;
+    : null;
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Lista de Tópicos"
-    subtitle="Tópicos dos exames de acesso"
-    infoSections={[
-      {
-        title: "Filtros Aplicados",
-        content: pdfData.filtros || "Sem filtros",
-      },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "id", label: "ID", width: "10%" },
-        { key: "designacao", label: "Designação", width: "30%" },
-        { key: "anoLetivo", label: "Ano Letivo", width: "20%" },
-     
-        { key: "criadoEm", label: "Criado Em", width: "20%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
-const excelProps = pdfData
-  ? {
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lista de Tópicos"
+      subtitle="Tópicos dos exames de acesso"
+      infoSections={[
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "id", label: "ID", width: "10%" },
+          { key: "designacao", label: "Designação", width: "30%" },
+          { key: "anoLetivo", label: "Ano Letivo", width: "20%" },
+
+          { key: "criadoEm", label: "Criado Em", width: "20%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+  const excelProps = pdfData
+    ? {
       documentTitle: "Lista de Tópicos",
       subtitle: "Tópicos dos exames de acesso",
       infoSections: [
@@ -356,7 +356,7 @@ const excelProps = pdfData
           { key: "id", label: "ID", width: 10 },
           { key: "designacao", label: "Designação", width: 30 },
           { key: "anoLetivo", label: "Ano Letivo", width: 20 },
-          
+
           { key: "criadoEm", label: "Criado Em", width: 20 },
         ],
         rows: pdfData.rows,
@@ -364,42 +364,42 @@ const excelProps = pdfData
       footerNotice: "Documento gerado automaticamente pelo sistema.",
       primaryColor: "#0D1B48",
     }
-  : null;
-const baseFileName = `Topicos_${new Date()
-  .toISOString()
-  .slice(0, 10)}`;
+    : null;
+  const baseFileName = `Topicos_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
   // ── render ────────────────────────────────────────────
   return (
     <div className="space-y-6">
-   <PageHeader
-  title="Listar Tópicos"
-  subtitle="Gestão de tópicos para os exames de acesso"
-  actions={
-    <div className="flex gap-2">
-      <Button onClick={openCreate}>
-        <Plus className="h-4 w-4 mr-2" />
-        Novo Tópico
-      </Button>
+      <PageHeader
+        title="Listar Tópicos"
+        subtitle="Gestão de tópicos para os exames de acesso"
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={openCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Tópico
+            </Button>
 
-      {pdfContent && (
-        <PDFActions
-          document={pdfContent}
-          fileName={`${baseFileName}.pdf`}
-          showDownload
-          showPrint
-        />
-      )}
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`${baseFileName}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
 
-      {excelProps && (
-        <ExcelActions
-          excelProps={excelProps}
-          fileName={`${baseFileName}.xlsx`}
-          showDownload
-        />
-      )}
-    </div>
-  }
-/>
+            {excelProps && (
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            )}
+          </div>
+        }
+      />
 
       <Card>
         <CardContent className="pt-6">
@@ -509,47 +509,47 @@ const baseFileName = `Topicos_${new Date()
                       ? new Date(t.created_at).toLocaleDateString("pt-AO")
                       : "—"}
                   </TableCell>
-                 <TableCell className="text-right">
-  <div className="flex items-center justify-end gap-1">
-    <Button
-      variant="ghost"
-      size="icon"
-      disabled={!t.arquivo}
-      onClick={() => openPdf(t)}
-      title="Ver PDF"
-    >
-      <Eye className="h-4 w-4" />
-    </Button>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={!t.arquivo}
+                        onClick={() => openPdf(t)}
+                        title="Ver PDF"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
 
-    <Button
-      variant="ghost"
-      size="icon"
-      disabled={!t.arquivo}
-      onClick={() => downloadPdf(t)}
-      title="Baixar PDF"
-    >
-      <Download className="h-4 w-4" />
-    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={!t.arquivo}
+                        onClick={() => downloadPdf(t)}
+                        title="Baixar PDF"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
 
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => openEdit(t)}
-      title="Editar"
-    >
-      <Edit className="h-4 w-4" />
-    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEdit(t)}
+                        title="Editar"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
 
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setConfirmDeleteId(t.id)}
-      title="Remover"
-    >
-      <Trash2 className="h-4 w-4 text-destructive" />
-    </Button>
-  </div>
-</TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setConfirmDeleteId(t.id)}
+                        title="Remover"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
