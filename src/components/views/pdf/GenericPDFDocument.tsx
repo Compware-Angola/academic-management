@@ -303,20 +303,6 @@ export function GenericPDFDocument(props: GenericPDFProps) {
               <Text style={baseStyles.infoLabel}>Período:</Text>
               <Text style={baseStyles.infoValue}>{student.period}</Text>
             </View>
-
-            <View style={baseStyles.infoRow}>
-              <Text style={baseStyles.infoLabel}>Total de Disciplinas:</Text>
-              <Text style={baseStyles.infoValue}>
-                {student.totalSubject}
-              </Text>
-            </View>
-
-            {/* <View style={baseStyles.infoRow}>
-              <Text style={baseStyles.infoLabel}>Total de Planos:</Text>
-              <Text style={baseStyles.infoValue}>
-                {student.totalPlan}
-              </Text>
-            </View> */}
           </View>
         )}
 

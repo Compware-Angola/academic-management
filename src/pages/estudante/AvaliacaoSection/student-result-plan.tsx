@@ -82,7 +82,7 @@ export function StudentResultPlan({
       buildExport({
         data: filteredPlans,
         title: "Resultados do Plano de Estudos",
-        subtitle: "Lista de Plano de Estudos (s)",
+        subtitle: "Lista de Unidades Corriculares",
         student: {
           studenteName: student?.nome_completo,
           enrolmemntCode: student?.codigo_matricula,
@@ -91,7 +91,7 @@ export function StudentResultPlan({
           totalSubject: totalGradesCurso,
           totalPlan: plans.length,
         },
-        content: [`Total de Plano de Estudos (s): ${plans.length}`],
+        content: [`Total de Unidades Corriculares: ${plans.length}`],
         headers: [
           { key: "ano", label: "Ano", pdfWidth: 30, excelWidth: 30 },
           { key: "semestre", label: "Semestre", pdfWidth: 30, excelWidth: 30 },
