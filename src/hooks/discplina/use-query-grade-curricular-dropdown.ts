@@ -32,6 +32,7 @@ export function useQueryGradeCurricularDropDown(
       if (!params.curso) {
         return [];
       }
+
       return fetchGradeCurricularDropDown({
         curso: params.curso,
         semestre: params.semestre,

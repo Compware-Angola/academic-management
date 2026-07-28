@@ -30,6 +30,7 @@ const GradeCurricularSelect = ({
     classe,
     anoLectivo,
   });
+
   const gradeCurricular = data ?? [];
   const defaultSelectItem = enabledDefaultSelectItem
     ? [
@@ -40,19 +41,22 @@ const GradeCurricularSelect = ({
         },
       ]
     : undefined;
+
   return (
-    <>
-      <FormSelect
-        disabled={disabled || isLoading}
-        loading={isLoading}
-        label="Unidade Curricular"
-        defaultSelectItem={defaultSelectItem}
-        value={value}
-        onChange={(v) => onChangeValue(v)}
-        options={gradeCurricular}
-        map={(g) => ({ key: g.pk, label: g.descricao, value: g.pk })}
-      />
-    </>
+    <FormSelect
+      disabled={disabled || isLoading}
+      loading={isLoading}
+      label="Unidade Curricular"
+      defaultSelectItem={defaultSelectItem}
+      value={value}
+      onChange={(v) => onChangeValue(v)}
+      options={gradeCurricular}
+      map={(g) => ({
+        key: g.pk.toString(),
+        label: g.descricao,
+        value: g.pk.toString(),
+      })}
+    />
   );
 };
 
