@@ -84,7 +84,7 @@ export function InscricoesUC({
     isLoading,
     isError,
   } = useQueryResultPlan(codigoMatricula);
-
+  console.log(pendentUcResponse);
   if (!codigoMatricula) {
     return <div>Matrícula inválida</div>;
   }
@@ -108,7 +108,6 @@ export function InscricoesUC({
       },
       {
         onSuccess(response) {
-
           const sucessos = response?.sucessos ?? [];
           const erros = response?.erros ?? [];
           setSelectedGrades([]);
