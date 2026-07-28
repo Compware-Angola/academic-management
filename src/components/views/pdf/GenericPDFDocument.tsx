@@ -139,9 +139,46 @@ const baseStyles = StyleSheet.create({
     textAlign: "center" as const,
     color: "#777",
   },
+
+  infoSection: {
+    marginBottom: 16,
+  },
+
+  infoBox: {
+    borderLeftWidth: 3,
+    borderLeftColor: "#2563EB",
+    paddingLeft: 6,
+    marginBottom: 16,
+
+  },
+
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+
+  infoLabel: {
+    width: 120,
+    fontSize: 11,
+    color: "#555",
+  },
+
+  infoValue: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#222",
+    textAlign: "left",
+  },
+
 });
 
 // ──────────────────────────────────────────────
+export interface InfoItem {
+  label: string;
+  value: React.ReactNode;
+}
 // Props do documento
 interface GenericPDFProps {
   header?: EntityHeader;
@@ -150,7 +187,7 @@ interface GenericPDFProps {
   orientation?: "vertical" | "horizontal";
   infoSections?: Array<{
     title?: string;
-    content: React.ReactNode | string[];
+    content: React.ReactNode | Array<string>;
   }>;
   mainTable?: TableData;
   totals?: Array<{ label: string; value: string | number }>;
@@ -158,6 +195,14 @@ interface GenericPDFProps {
   customFooter?: string;
   children?: React.ReactNode;
   primaryColor?: string;
+  student?: {
+    studenteName: string;
+    enrolmemntCode: number;
+    course: string;
+    period: string;
+    totalSubject: number;
+    totalPlan: number;
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -169,6 +214,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     subtitle,
     orientation = "horizontal",
     infoSections = [],
+    student,
     mainTable,
     totals = [],
     footerNotice,
@@ -185,8 +231,14 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     title: { ...baseStyles.title, color },
     noticeBox: { ...baseStyles.noticeBox, borderColor: color },
     noticeTitle: { ...baseStyles.noticeTitle, color },
+
+    infoBox: {
+      ...baseStyles.infoBox,
+      borderLeftColor: color,
+    },
   };
 
+  console.log(infoSections)
   return (
     <Document>
       <Page
@@ -227,6 +279,49 @@ export function GenericPDFDocument(props: GenericPDFProps) {
             )}
           </View>
         ))}
+
+        {student && (
+          <View style={dynamicStyles.infoBox}>
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Nome:</Text>
+              <Text style={baseStyles.infoValue}>{student.studenteName}</Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Código de Matrícula:</Text>
+              <Text style={baseStyles.infoValue}>
+                {student.enrolmemntCode}
+              </Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Curso:</Text>
+              <Text style={baseStyles.infoValue}>{student.course}</Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Período:</Text>
+              <Text style={baseStyles.infoValue}>{student.period}</Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Total de Disciplinas:</Text>
+              <Text style={baseStyles.infoValue}>
+                {student.totalSubject}
+              </Text>
+            </View>
+
+            {/* <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Total de Planos:</Text>
+              <Text style={baseStyles.infoValue}>
+                {student.totalPlan}
+              </Text>
+            </View> */}
+          </View>
+        )}
+
+
+
 
         {children}
 
