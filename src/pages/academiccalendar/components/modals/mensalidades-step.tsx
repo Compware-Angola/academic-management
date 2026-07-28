@@ -53,54 +53,56 @@ export function MensalidadesStep(props: MensalidadesStepProps) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {mensalidadesEditadas.map((item, index) => (
-                                <TableRow key={index}
-                                    className={
-                                        item.activo === 0
-                                            ? "text-red-600 line-through decoration-red-600 decoration-2"
-                                            : ""
-                                    }>
-                                    <TableCell className="font-medium">
-                                        {item.designacao}
-                                    </TableCell>
-                                    <TableCell>{item.ordem_mes}</TableCell>
-                                    <TableCell>{item.prestacao}ª</TableCell>
-                                    <TableCell>{item.semestre}º</TableCell>
-                                    <TableCell>
-                                        {item.data_inicial?.split("T")[0] || "-"}
-                                    </TableCell>
-                                    <TableCell>
-                                        {item.data_final?.split("T")[0] || "-"}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Input
-                                            type="date"
-                                            value={item.data_limite?.split("T")[0] || ""}
-                                            disabled={item.activo === 0}
-                                            onChange={(e) => {
-                                                const newValue = e.target.value;
-                                                setMensalidadesEditadas((prev) =>
-                                                    prev.map((mes, i) =>
-                                                        i === index
-                                                            ? { ...mes, data_limite: newValue }
-                                                            : mes,
-                                                    ),
-                                                );
-                                            }}
-                                            className="w-[150px]"
-                                        />
-                                    </TableCell>
-                                    <TableCell>
-                                        {item.isencao === 1 ? "Sim" : "Não"}
-                                    </TableCell>
-                                    <TableCell>
-                                        {item.activo === 1 ? "Activo" : "Inactivo"}
-                                    </TableCell>
-                                    <TableCell>
-                                        {item.activo_posgraduacao === 1 ? "Sim" : "Não"}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {mensalidadesEditadas
+                                .filter((item) => item.activo === 1)
+                                .map((item, index) => (
+                                    <TableRow key={index}
+                                        className={
+                                            item.activo === 0
+                                                ? "text-red-600 line-through decoration-red-600 decoration-2"
+                                                : ""
+                                        }>
+                                        <TableCell className="font-medium">
+                                            {item.designacao}
+                                        </TableCell>
+                                        <TableCell>{item.ordem_mes}</TableCell>
+                                        <TableCell>{item.prestacao}ª</TableCell>
+                                        <TableCell>{item.semestre}º</TableCell>
+                                        <TableCell>
+                                            {item.data_inicial?.split("T")[0] || "-"}
+                                        </TableCell>
+                                        <TableCell>
+                                            {item.data_final?.split("T")[0] || "-"}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Input
+                                                type="date"
+                                                value={item.data_limite?.split("T")[0] || ""}
+                                                disabled={item.activo === 0}
+                                                onChange={(e) => {
+                                                    const newValue = e.target.value;
+                                                    setMensalidadesEditadas((prev) =>
+                                                        prev.map((mes, i) =>
+                                                            i === index
+                                                                ? { ...mes, data_limite: newValue }
+                                                                : mes,
+                                                        ),
+                                                    );
+                                                }}
+                                                className="w-[150px]"
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            {item.isencao === 1 ? "Sim" : "Não"}
+                                        </TableCell>
+                                        <TableCell>
+                                            {item.activo === 1 ? "Activo" : "Inactivo"}
+                                        </TableCell>
+                                        <TableCell>
+                                            {item.activo_posgraduacao === 1 ? "Sim" : "Não"}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
                         </TableBody>
                     </Table>
                 </div>

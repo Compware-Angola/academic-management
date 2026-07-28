@@ -191,11 +191,9 @@ export function ProvaDetailsDialog({
                           <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">
                             Enunciado
                           </p>
-                          <div className="max-w-full">
-                            <p className="text-wrap text-justify wrap-break-word">
-                              <LatexText text={pergunta.pergunta_texto} />
-                            </p>
-                          </div>
+                          <p className="text-justify wrap-break-word">
+                            <LatexText text={pergunta.pergunta_texto} />
+                          </p>
                         </div>
                       </div>
                     ))}
