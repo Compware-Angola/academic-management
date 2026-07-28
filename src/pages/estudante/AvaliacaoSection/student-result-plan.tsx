@@ -83,22 +83,15 @@ export function StudentResultPlan({
         data: filteredPlans,
         title: "Resultados do Plano de Estudos",
         subtitle: "Lista de Plano de Estudos (s)",
-         student:{
-          studenteName:student?.nome_completo,
-          enrolmemntCode:student?.codigo_matricula,
-          course:student?.curso,
-          period:student?.regime,
-          totalSubject:totalGradesCurso,
-          totalPlan:plans.length,
+        student: {
+          studenteName: student?.nome_completo,
+          enrolmemntCode: student?.codigo_matricula,
+          course: student?.curso,
+          period: student?.regime,
+          totalSubject: totalGradesCurso,
+          totalPlan: plans.length,
         },
-        content: [
-          `Total de Plano de Estudos (s): ${plans.length}`,
-          `Aluno: ${student?.nome_completo ?? ""}`,
-          `Matricula: ${student?.codigo_matricula ?? ""}`,
-          `Curso: ${student?.curso ?? ""}`,
-          `Periodo: ${student?.regime ?? ""}`,
-          `Total Cadeiras: ${totalGradesCurso ?? ""}`,
-        ],
+        content: [`Total de Plano de Estudos (s): ${plans.length}`],
         headers: [
           { key: "ano", label: "Ano", pdfWidth: 30, excelWidth: 30 },
           { key: "semestre", label: "Semestre", pdfWidth: 30, excelWidth: 30 },
@@ -136,11 +129,11 @@ export function StudentResultPlan({
           duracao: plan.duracao,
           resultado: plan.nota ? "Concluido" : "",
         }),
-        
+
       }),
     [filteredPlans],
   );
-  
+
   const enabledExportPdf =
     exportData?.excelProps && exportData?.excelProps && exportData?.fileName;
   if (!codigoMatricula) {

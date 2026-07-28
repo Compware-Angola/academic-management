@@ -159,7 +159,7 @@ const baseStyles = StyleSheet.create({
   },
 
   infoLabel: {
-    width: 170,
+    width: 120,
     fontSize: 11,
     color: "#555",
   },
@@ -187,7 +187,7 @@ interface GenericPDFProps {
   orientation?: "vertical" | "horizontal";
   infoSections?: Array<{
     title?: string;
-    content: React.ReactNode | Array<string | InfoItem>;
+    content: React.ReactNode | Array<string>;
   }>;
   mainTable?: TableData;
   totals?: Array<{ label: string; value: string | number }>;
@@ -263,6 +263,23 @@ export function GenericPDFDocument(props: GenericPDFProps) {
         <Text style={dynamicStyles.title}>{documentTitle}</Text>
         {subtitle && <Text style={baseStyles.subtitle}>{subtitle}</Text>}
 
+        {infoSections.map((section, idx) => (
+          <View key={idx} style={{ marginBottom: 12 }}>
+            {section.title && (
+              <Text style={baseStyles.sectionTitle}>{section.title}</Text>
+            )}
+            {Array.isArray(section.content) ? (
+              section.content.map((line, i) => (
+                <Text key={i} style={{ marginBottom: 4 }}>
+                  {line}
+                </Text>
+              ))
+            ) : (
+              <Text>{section.content}</Text>
+            )}
+          </View>
+        ))}
+
         {student && (
           <View style={dynamicStyles.infoBox}>
             <View style={baseStyles.infoRow}>
@@ -294,67 +311,17 @@ export function GenericPDFDocument(props: GenericPDFProps) {
               </Text>
             </View>
 
-            <View style={baseStyles.infoRow}>
+            {/* <View style={baseStyles.infoRow}>
               <Text style={baseStyles.infoLabel}>Total de Planos:</Text>
               <Text style={baseStyles.infoValue}>
                 {student.totalPlan}
               </Text>
-            </View>
+            </View> */}
           </View>
         )}
 
-        {/* {infoSections.map((section, idx) => (
-          <View key={idx} style={baseStyles.infoSection}>
-            {section.title && (
-              <Text style={baseStyles.sectionTitle}>{section.title}</Text>
-            )}
 
-            <View style={dynamicStyles.infoBox}>
-              {Array.isArray(section.content)
-                ? section.content.map((item, i) => {
-                  if (typeof item === "string") {
-                    return (
-                      <Text key={i} style={{ marginBottom: 4 }}>
-                        {item}
-                      </Text>
-                    );
-                  }
 
-                  return (
-                   <View
-  key={i}
-  style={{
-    flexDirection: "row",
-    marginBottom: 4,
-    alignItems: "center",
-  }}
->
-  <Text
-    style={{
-      marginRight: 8,
-      fontSize: 10,
-    }}
-  >
-    {item.label}:
-  </Text>
-
-  <Text
-    style={{
-      fontSize: 10,
-      fontWeight: "bold",
-    }}
-  >
-    {item.value}
-  </Text>
-</View>
-                  );
-                })
-                : (
-                  <Text>{section.content}</Text>
-                )}
-            </View>
-          </View>
-        ))} */}
 
         {children}
 
