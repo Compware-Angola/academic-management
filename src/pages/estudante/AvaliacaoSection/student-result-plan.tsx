@@ -24,11 +24,12 @@ import PDFActions, {
   GenericPDFDocument,
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
 
 type Props = {
   codigoMatricula: number;
   value?: string;
-};
+}
 
 export function StudentResultPlan({
   codigoMatricula,
@@ -52,6 +53,9 @@ export function StudentResultPlan({
   const plans = planResponse?.grades ?? [];
   const totalGradesCurso = planResponse?.totalGradesCurso;
   const totalGradesAluno = planResponse?.totalGrasesAluno;
+
+  const { data: student } = useStudentDetail(codigoMatricula);
+  // console.log(student);
 
   const filteredPlans = useMemo(() => {
     const term = search.toLowerCase().trim();
@@ -79,7 +83,14 @@ export function StudentResultPlan({
         data: filteredPlans,
         title: "Resultados do Plano de Estudos",
         subtitle: "Lista de Plano de Estudos (s)",
-        content: [`Total de Plano de Estudos (s): ${plans.length}`],
+        content: [
+          `Total de Plano de Estudos (s): ${plans.length}`,
+          `Aluno: ${student?.nome_completo ?? ""}`,
+          `Matricula: ${student?.codigo_matricula ?? ""}`,
+          `Curso: ${student?.curso ?? ""}`,
+          `Periodo: ${student?.regime ?? ""}`,
+          `Total Cadeiras: ${totalGradesCurso ?? ""}`,
+        ],
         headers: [
           { key: "ano", label: "Ano", pdfWidth: 30, excelWidth: 30 },
           { key: "semestre", label: "Semestre", pdfWidth: 30, excelWidth: 30 },
@@ -117,6 +128,7 @@ export function StudentResultPlan({
           duracao: plan.duracao,
           resultado: plan.nota ? "Concluido" : "",
         }),
+        
       }),
     [filteredPlans],
   );

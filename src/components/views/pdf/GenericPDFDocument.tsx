@@ -139,9 +139,38 @@ const baseStyles = StyleSheet.create({
     textAlign: "center" as const,
     color: "#777",
   },
+
+  infoSection: {
+    marginBottom: 16,
+  },
+
+  infoBox: {
+    borderLeftWidth: 3,
+    borderLeftColor: "#2563EB", // or use `color` below
+    paddingLeft: 10,
+  },
+
+ infoRow: {
+  flexDirection: "row",
+  marginBottom: 4,
+  alignItems: "center",
+},
+
+infoLabel: {
+  marginRight: 8, // spacing between label and value
+},
+
+infoValue: {
+  fontWeight: "bold",
+},
+
 });
 
 // ──────────────────────────────────────────────
+export interface InfoItem {
+  label: string;
+  value: React.ReactNode;
+}
 // Props do documento
 interface GenericPDFProps {
   header?: EntityHeader;
@@ -150,7 +179,7 @@ interface GenericPDFProps {
   orientation?: "vertical" | "horizontal";
   infoSections?: Array<{
     title?: string;
-    content: React.ReactNode | string[];
+    content: React.ReactNode | Array<string | InfoItem>;
   }>;
   mainTable?: TableData;
   totals?: Array<{ label: string; value: string | number }>;
@@ -185,6 +214,11 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     title: { ...baseStyles.title, color },
     noticeBox: { ...baseStyles.noticeBox, borderColor: color },
     noticeTitle: { ...baseStyles.noticeTitle, color },
+
+    infoBox: {
+      ...baseStyles.infoBox,
+      borderLeftColor: color,
+    },
   };
 
   return (
@@ -212,19 +246,55 @@ export function GenericPDFDocument(props: GenericPDFProps) {
         {subtitle && <Text style={baseStyles.subtitle}>{subtitle}</Text>}
 
         {infoSections.map((section, idx) => (
-          <View key={idx} style={{ marginBottom: 12 }}>
+          <View key={idx} style={baseStyles.infoSection}>
             {section.title && (
               <Text style={baseStyles.sectionTitle}>{section.title}</Text>
             )}
-            {Array.isArray(section.content) ? (
-              section.content.map((line, i) => (
-                <Text key={i} style={{ marginBottom: 4 }}>
-                  {line}
-                </Text>
-              ))
-            ) : (
-              <Text>{section.content}</Text>
-            )}
+
+            <View style={dynamicStyles.infoBox}>
+              {Array.isArray(section.content)
+                ? section.content.map((item, i) => {
+                  if (typeof item === "string") {
+                    return (
+                      <Text key={i} style={{ marginBottom: 4 }}>
+                        {item}
+                      </Text>
+                    );
+                  }
+
+                  return (
+                   <View
+  key={i}
+  style={{
+    flexDirection: "row",
+    marginBottom: 4,
+    alignItems: "center",
+  }}
+>
+  <Text
+    style={{
+      marginRight: 8,
+      fontSize: 10,
+    }}
+  >
+    {item.label}:
+  </Text>
+
+  <Text
+    style={{
+      fontSize: 10,
+      fontWeight: "bold",
+    }}
+  >
+    {item.value}
+  </Text>
+</View>
+                  );
+                })
+                : (
+                  <Text>{section.content}</Text>
+                )}
+            </View>
           </View>
         ))}
 
