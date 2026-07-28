@@ -1,6 +1,7 @@
 import { FormSelect } from "../FormSelect";
 import { useEffect, useId, useMemo, useRef } from "react";
 import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-years";
+import { AcademicYear } from "@/services/academiccalendar/fetch-academic-years";
 
 type EstadoAno =
   | "RASCUNHO"
@@ -14,6 +15,7 @@ const ESTADOS_DISPONIVEIS: EstadoAno[] = ["CONFIGURAVEL", "USAVEL", "ACTIVO"];
 interface AcademicYearsAvailableForOperationSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
+  onSelectItem?: (item: AcademicYear | undefined) => void; // opcional
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
   onlyActive?: boolean;
