@@ -80,7 +80,7 @@ const AcademicYearsAvailableForOperationSelect = ({
     if (
       enableDefaultActiveYear &&
       !hasSetDefault.current &&
-      !value &&
+      !value && // 👈 só aplica default se ainda não há valor selecionado
       filteredYears?.length
     ) {
       const activeYear = filteredYears.find(

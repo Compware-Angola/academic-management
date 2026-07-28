@@ -3,6 +3,8 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type DiplomarAlunoPayload = {
   codigoMatricula: number;
   dataConclusao?: string;
+  dataActa?: string;
+  fileName?: string;
   imprimeCartaConclusao?: boolean;
 };
 
