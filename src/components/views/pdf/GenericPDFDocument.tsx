@@ -146,23 +146,31 @@ const baseStyles = StyleSheet.create({
 
   infoBox: {
     borderLeftWidth: 3,
-    borderLeftColor: "#2563EB", // or use `color` below
-    paddingLeft: 10,
+    borderLeftColor: "#2563EB",
+    paddingLeft: 6,
+    marginBottom: 16,
+
   },
 
- infoRow: {
-  flexDirection: "row",
-  marginBottom: 4,
-  alignItems: "center",
-},
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
 
-infoLabel: {
-  marginRight: 8, // spacing between label and value
-},
+  infoLabel: {
+    width: 170,
+    fontSize: 11,
+    color: "#555",
+  },
 
-infoValue: {
-  fontWeight: "bold",
-},
+  infoValue: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#222",
+    textAlign: "left",
+  },
 
 });
 
@@ -187,6 +195,14 @@ interface GenericPDFProps {
   customFooter?: string;
   children?: React.ReactNode;
   primaryColor?: string;
+  student?: {
+    studenteName: string;
+    enrolmemntCode: number;
+    course: string;
+    period: string;
+    totalSubject: number;
+    totalPlan: number;
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -198,6 +214,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     subtitle,
     orientation = "horizontal",
     infoSections = [],
+    student,
     mainTable,
     totals = [],
     footerNotice,
@@ -245,7 +262,47 @@ export function GenericPDFDocument(props: GenericPDFProps) {
         <Text style={dynamicStyles.title}>{documentTitle}</Text>
         {subtitle && <Text style={baseStyles.subtitle}>{subtitle}</Text>}
 
-        {infoSections.map((section, idx) => (
+        {student && (
+          <View style={dynamicStyles.infoBox}>
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Nome:</Text>
+              <Text style={baseStyles.infoValue}>{student.studenteName}</Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Código de Matrícula:</Text>
+              <Text style={baseStyles.infoValue}>
+                {student.enrolmemntCode}
+              </Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Curso:</Text>
+              <Text style={baseStyles.infoValue}>{student.course}</Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Período:</Text>
+              <Text style={baseStyles.infoValue}>{student.period}</Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Total de Disciplinas:</Text>
+              <Text style={baseStyles.infoValue}>
+                {student.totalSubject}
+              </Text>
+            </View>
+
+            <View style={baseStyles.infoRow}>
+              <Text style={baseStyles.infoLabel}>Total de Planos:</Text>
+              <Text style={baseStyles.infoValue}>
+                {student.totalPlan}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* {infoSections.map((section, idx) => (
           <View key={idx} style={baseStyles.infoSection}>
             {section.title && (
               <Text style={baseStyles.sectionTitle}>{section.title}</Text>
@@ -296,7 +353,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
                 )}
             </View>
           </View>
-        ))}
+        ))} */}
 
         {children}
 

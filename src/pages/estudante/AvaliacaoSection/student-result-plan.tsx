@@ -83,6 +83,14 @@ export function StudentResultPlan({
         data: filteredPlans,
         title: "Resultados do Plano de Estudos",
         subtitle: "Lista de Plano de Estudos (s)",
+         student:{
+          studenteName:student?.nome_completo,
+          enrolmemntCode:student?.codigo_matricula,
+          course:student?.curso,
+          period:student?.regime,
+          totalSubject:totalGradesCurso,
+          totalPlan:plans.length,
+        },
         content: [
           `Total de Plano de Estudos (s): ${plans.length}`,
           `Aluno: ${student?.nome_completo ?? ""}`,
@@ -132,6 +140,7 @@ export function StudentResultPlan({
       }),
     [filteredPlans],
   );
+  
   const enabledExportPdf =
     exportData?.excelProps && exportData?.excelProps && exportData?.fileName;
   if (!codigoMatricula) {
