@@ -49,6 +49,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { useAuth } from "@/hooks/use-auth";
 import { usePermission } from "@/auth/permission.helper";
 import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 export interface Roles {
@@ -468,6 +469,7 @@ export function EditSchedule() {
               onChange={(v) => setFormData((p) => ({ ...p, classes: v, unidadeCurricular: "" }))}
             />
 
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <FormSelect
               label="Unidade Curricular"
               value={formData.unidadeCurricular}
@@ -475,6 +477,17 @@ export function EditSchedule() {
               loading={isLoadingUC}
               map={(u) => ({ key: u.pk, label: u.descricao, value: String(u.pk) })}
               onChange={(v) => setFormData((p) => ({ ...p, unidadeCurricular: v }))}
+            /> */}
+
+            <GradeCurricularSelect
+              value={formData.unidadeCurricular}
+              curso={parseFilter(formData.curso)}
+              semestre={parseFilter(formData.semestre)}
+              classe={parseFilter(formData.classes)}
+              anoLectivo={parseFilter(formData.anoLetivo)}
+              onChangeValue={(v) =>
+                setFormData((p) => ({ ...p, unidadeCurricular: v }))
+              }
             />
 
             <FormSelect
