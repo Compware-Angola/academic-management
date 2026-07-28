@@ -6,12 +6,21 @@ export function buildExport({
   content,
   headers,
   subtitle,
+  student,
   mapRow,
 }: {
   data: any[];
   title: string;
   subtitle: string;
-  content: any[];
+  content: any[] ;
+  student?: {
+    studenteName: string;
+    enrolmemntCode: number;
+    course: string;
+    period: string;
+    totalSubject: number;
+    totalPlan: number;
+}
   headers: {
     key: string;
     label: string;
@@ -44,6 +53,8 @@ export function buildExport({
         headerBackground: "#0D1B48",
       },
       footerNotice: "Documento gerado automaticamente.",
+      student:student
+
     },
 
     excelProps: {

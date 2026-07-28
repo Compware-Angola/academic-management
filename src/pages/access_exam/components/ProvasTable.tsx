@@ -80,9 +80,6 @@ export function ProvasTable({
                   <div className="font-medium">
                     {plainTextFromHtml(prova.descricao)}
                   </div>
-                  <div className="line-clamp-1 text-xs text-muted-foreground">
-                    {plainTextFromHtml(prova.texto) || "Sem texto/instruções"}
-                  </div>
                 </TableCell>
                 <TableCell>{prova.ano_letivo}</TableCell>
                 <TableCell>{prova.duracao} min</TableCell>
