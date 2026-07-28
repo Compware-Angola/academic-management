@@ -44,6 +44,7 @@ import { useQuerySchedulesByUc } from "@/hooks/horario/use-query-schedules-by-uc
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 export default function SchedulesByUC() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -272,7 +273,7 @@ const openDetails = (turmaId: number) => {
               </Select>
             </div>
 
-            {/* Unidade Curricular */}
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
@@ -298,7 +299,18 @@ const openDetails = (turmaId: number) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUcs}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
+              }
+            />
           </div>
         </CardContent>
       </Card>

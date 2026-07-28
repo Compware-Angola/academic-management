@@ -27,14 +27,16 @@ import { ChevronDown, ChevronUp, Home, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { FormSelect } from "@/components/common/FormSelect";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryStateLesson } from "@/hooks/use-fetch-state-lesson";
 import { useQueryControleAssiduidade } from "@/hooks/assiduidade/use-fetch-controle-assiduidade";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useCursos } from "@/hooks/use-cursos";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 function SummaryCard({
   title,
@@ -62,14 +64,11 @@ function SummaryCard({
 export default function ControleAssiduidade() {
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
-  const { data: anosAcademicos, isLoading: loadingAno } =
-    useQueryAnoAcademico();
   const { data: semestres } = useQuerySemestres();
-  const { data: teachersData = [] } = useQueryTeacther();
   const { data: lessonState = [] } = useQueryStateLesson();
-  const { data: cursos = [] } = useCursos();
 
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     docente: "",
     dataInicial: "",
     dataFinal: "",
@@ -307,6 +306,7 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
               size="sm"
               onClick={() =>
                 setFilters({
+                  tipoCandidatura: "1",
                   docente: "",
                   dataInicial: "",
                   dataFinal: "",
@@ -329,17 +329,27 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-5">
             {/* Filtros principais - sempre visíveis */}
-            <FormSelect
-              label="Ano Letivo"
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  tipoCandidatura: v,
+                  anoLectivo: "",
+                  docente: "",
+                  curso: "",
+                  gradeCurricular: "",
+                  page: 1,
+                }))
+              }
+            />
+
+            <AcademicYearsAvailableForOperationSelect
               value={filters.anoLectivo}
-              onChange={(v) => handleFilterChange("anoLectivo", v)}
-              options={anosAcademicos ?? []}
-              map={(a) => ({
-                key: String(a.codigo),
-                label: a.designacao,
-                value: String(a.codigo),
-              })}
-              disabled={loadingAno}
+              onChangeValue={(v) => handleFilterChange("anoLectivo", v)}
+              tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!filters.tipoCandidatura}
             />
 
             <FormSelect
@@ -374,17 +384,11 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             />
 
             <div className="space-y-1.5">
-              <FormCommandSelect
-                label="Docente"
+              <TeacherSelectList
                 value={filters.docente}
-                options={teachersData ?? []}
-                map={(t) => ({
-                  key: String(t.codigo),
-                  label: t.nome,
-                  value: String(t.codigo),
-                })}
                 placeholder="Selecionar docente..."
-                onChange={(v) => handleFilterChange("docente", v)}
+                onChangeValue={(v) => handleFilterChange("docente", v)}
+                tipoCandidatura={parseFilter(filters.tipoCandidatura)}
               />
             </div>
 
@@ -417,20 +421,17 @@ Faltas Marcadas: ${resumo.faltasMarcadas}
             {showMoreFilters && (
               <>
                 <div className="space-y-1.5">
-                  <FormCommandSelect
-                    label="Curso"
+                  <CourseSelect
                     value={filters.curso}
-                    options={cursos}
-                    map={(c) => ({
-                      key: String(c.codigo),
-                      value: String(c.codigo),
-                      label: c.designacao,
-                    })}
                     placeholder="Selecionar curso..."
-                    onChange={(v) =>
+                    params={{
+                      tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+                    }}
+                    disabled={!filters.tipoCandidatura}
+                    onChangeValue={(v) =>
                       setFilters((prev) => ({
                         ...prev,
-                        curso: v,
+                        curso: v === "0" ? "" : v,
                         gradeCurricular: "",
                         page: 1,
                       }))
