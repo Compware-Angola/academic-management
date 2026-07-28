@@ -50,6 +50,7 @@ import { Roles } from "./EditSchedule";
 import { usePermission } from "@/auth/permission.helper";
 import { useAuth } from "@/hooks/use-auth";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 export default function ScheduleListEliminated() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -295,6 +296,7 @@ export default function ScheduleListEliminated() {
             })}
           />
 
+          {/* Componente antigo mantido como referencia, conforme solicitado.
           <FormSelect
             label="Unidade Curricular"
             value={filters.unidadeCurricular}
@@ -314,6 +316,23 @@ export default function ScheduleListEliminated() {
               label: u.descricao,
               value: u.pk,
             })}
+          /> */}
+
+          <GradeCurricularSelect
+            value={filters.unidadeCurricular}
+            disabled={
+              !filters.curso || !filters.semestre || !filters.anoCurricular
+            }
+            curso={parseFilter(filters.curso)}
+            semestre={parseFilter(filters.semestre)}
+            classe={parseFilter(filters.anoCurricular)}
+            anoLectivo={parseFilter(filters.anoLectivo)}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                unidadeCurricular: v,
+              })
+            }
           />
 
           <Input

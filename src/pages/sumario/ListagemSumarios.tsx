@@ -12,9 +12,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { FileText, Eye, Plus, ChevronLeft, ChevronRight, Calendar, Clock, ChevronUp, ChevronDown, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assiduidade-status-agendamentos";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
@@ -30,6 +27,11 @@ import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { useToast } from "@/hooks/use-toast";
 import { useMutationValidarSumario } from "@/hooks/sumario/use-mutation-validar-sumario";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
+import { parseFilter } from "@/util/parse-filter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type EstadoAssiduidade = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -81,9 +83,6 @@ const { toast } = useToast();
 
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-
-
   const SEMESTRE = [
     { key: "1", label: "1º Semestre", value: "1" },
     { key: "2", label: "2º Semestre", value: "2" },
@@ -126,11 +125,11 @@ const { toast } = useToast();
       className: "bg-blue-500/10 text-blue-700 border-blue-500/30",
     },
   ];
-  const { data: teachersData = [] } = useQueryTeacther();
   const mutation = useMutationValidarSumario();
 
 
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     docente: "",
     anoCurricular: "all",
     unidadeCurricular: "",
@@ -142,12 +141,6 @@ const { toast } = useToast();
     curso: "",
     page: 1,
     limit: 10,
-  });
-
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
-    curso: filters.curso,
-    semestre: filters.semestre,
-    classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
   });
 
   const { data: sumarios, isLoading: isLoadingAulasAgendadas } = useQuerySumario({
@@ -162,7 +155,9 @@ const { toast } = useToast();
     limit: filters.limit,
   });
 
-  const { data: cursos } = useCursos();
+  const { data: cursos } = useCursos({
+    tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+  });
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
   });
@@ -262,6 +257,7 @@ const { toast } = useToast();
               size="sm"
               onClick={() => {
                 setFilters({
+                  tipoCandidatura: "1",
                   docente: "",
                   anoLectivo: "",
                   semestre: "",
@@ -285,20 +281,31 @@ const { toast } = useToast();
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {/* Filtros sempre visíveis */}
           <div className="space-y-1.5">
-            <Label>Ano Letivo</Label>
-            <FormSelect
-              disabled={isLoadingAcademicYear}
-              value={filters.anoLectivo}
-              onChange={(v) => updateFilters({ anoLectivo: v })}
-              options={anosAcademicos ?? []}
-              map={(a) => ({ key: a.codigo, label: a.designacao, value: String(a.codigo) })}
-              placeholder="Selecione o ano..."
+            <TipoCandidaturaSelect
+              value={filters.tipoCandidatura}
+              onChangeValue={(v) =>
+                updateFilters({
+                  tipoCandidatura: v,
+                  anoLectivo: "",
+                  docente: "",
+                  curso: "",
+                  anoCurricular: "all",
+                  unidadeCurricular: "",
+                })
+              }
             />
           </div>
+
+          <AcademicYearsAvailableForOperationSelect
+            value={filters.anoLectivo}
+            onChangeValue={(v) => updateFilters({ anoLectivo: v })}
+            tipoCandidaturaId={parseFilter(filters.tipoCandidatura)}
+            onlyConfigurable={false}
+          />
+
             <div className="space-y-1.5">
               <Label>Estado Sumário</Label>
           <FormSelect
-            disabled={isLoadingAcademicYear}
             value={filters.estado ?? ""}
             onChange={(v) => updateFilters({ estado: v === "" ? "" : v })}
             options={[
@@ -321,12 +328,17 @@ const { toast } = useToast();
           </div>
 
           <div className="space-y-1.5">
-            <Label>Docente</Label>
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <FormCommandSelect
               value={filters.docente}
               options={teachersData}
               map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
               onChange={(codigo) => updateFilters({ docente: codigo })}
+            /> */}
+            <TeacherSelectList
+              value={filters.docente}
+              onChangeValue={(codigo) => updateFilters({ docente: codigo })}
+              tipoCandidatura={parseFilter(filters.tipoCandidatura)}
             />
           </div>
 
@@ -386,7 +398,7 @@ const { toast } = useToast();
               </div>
 
               <div className="space-y-1.5">
-                <Label>Unidade Curricular</Label>
+                {/* Componente antigo mantido como referencia.
                 <FormCommandSelect
                   value={filters.unidadeCurricular}
                   options={unidadesCurriculares}
@@ -401,6 +413,19 @@ const { toast } = useToast();
                           : "Selecionar UC"
                   }
                   onChange={(u) => updateFilters({ unidadeCurricular: u })}
+                /> */}
+                <GradeCurricularSelect
+                  value={filters.unidadeCurricular}
+                  onChangeValue={(u) => updateFilters({ unidadeCurricular: u })}
+                  curso={parseFilter(filters.curso)}
+                  semestre={parseFilter(filters.semestre)}
+                  classe={
+                    filters.anoCurricular === "all"
+                      ? undefined
+                      : parseFilter(filters.anoCurricular)
+                  }
+                  anoLectivo={parseFilter(filters.anoLectivo)}
+                  disabled={!filters.curso}
                 />
               </div>
             </>

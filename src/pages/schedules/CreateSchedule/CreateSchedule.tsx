@@ -62,6 +62,8 @@ import BlockDocument from "@/assets/blockdocument.json";
 import { CourseSelectTestIsaac } from "@/components/common/global-selects/isaac-teste";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useQueryGradeCurricularDropDown } from "@/hooks/discplina/use-query-grade-curricular-dropdown";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -170,11 +172,18 @@ export default function CreateSchedule() {
   });
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     classe: formData.classes,
+  //     curso: formData.curso,
+  //     semestre: formData.semestre,
+  //   });
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: formData.classes,
-      curso: formData.curso,
-      semestre: formData.semestre,
+    useQueryGradeCurricularDropDown({
+      classe: parseFilter(formData.classes),
+      curso: parseFilter(formData.curso),
+      semestre: parseFilter(formData.semestre),
+      anoLectivo: parseFilter(formData.anoLetivo),
     });
 
   const { filteredCursos, filteredClasses, allowedCursoIds } = useMemo(() => {
@@ -612,6 +621,7 @@ export default function CreateSchedule() {
               loading={isLoadingClasses}
             />
 
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <FormSelect
               label="Unidade Curricular"
               value={formData.unidadeCurricular}
@@ -626,6 +636,22 @@ export default function CreateSchedule() {
               options={unidadesCurriculares}
               map={(u) => ({ key: u.pk, label: u.descricao, value: u.pk })}
               loading={isLoadingUC}
+            /> */}
+
+            <GradeCurricularSelect
+              value={formData.unidadeCurricular}
+              disabled={isDisabledForm}
+              curso={parseFilter(formData.curso)}
+              semestre={parseFilter(formData.semestre)}
+              classe={parseFilter(formData.classes)}
+              anoLectivo={parseFilter(formData.anoLetivo)}
+              onChangeValue={(v) =>
+                setFormData({
+                  ...formData,
+                  unidadeCurricular: v,
+                  designacao: "",
+                })
+              }
             />
 
             <FormSelect
