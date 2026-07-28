@@ -1004,7 +1004,7 @@ export default function ListarPerguntas() {
 
       {/* ── Pergunta Create / Edit ─────────────────────────────────────────── */}
       <Dialog open={pDialogOpen} onOpenChange={setPDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-5xl! max-h-[90vh]!">
           <DialogHeader>
             <DialogTitle>
               {editingPergunta ? "Editar Pergunta" : "Nova Pergunta"}
