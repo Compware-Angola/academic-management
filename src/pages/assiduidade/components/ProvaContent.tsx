@@ -39,9 +39,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-
-
 import { FormSelect } from "@/components/common/FormSelect";
 import { ProvaAssiduidadeItem } from "@/services/assiduidade/fetch-assiduidade.service";
 import {
@@ -55,9 +52,7 @@ import { Separator } from "@/components/ui/separator";
 import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assiduidade-status-agendamentos";
 
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
-import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 
 import { useQueryProvaAssiduidade } from "@/hooks/assiduidade/use-fetch-assiduidade-prova";
@@ -65,6 +60,11 @@ import { useMutationMarcarProva } from "@/hooks/assiduidade/use-mutation-marcar-
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { usePermission } from "@/auth/permission.helper";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -98,20 +98,15 @@ export default function ProvaContent() {
   const { hasPermission } = usePermission();
   const [selectedRegisto, setSelectedRegisto] = useState<ProvaAssiduidadeItem | null>(null);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
-  const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
   const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } = useQueryStatusAgendamento({ enabled: true });
  const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const SEMESTRE = [
     { key: "1", label: "1º Semestre", value: "1" },
     { key: "2", label: "2º Semestre", value: "2" },
   ];
-  const {
-    data: teachersData = [],
-
-
-  } = useQueryTeacther();
   const mutarion = useMutationMarcarProva();
   const [filters, setFilters] = useState({
+    tipoCandidatura: "1",
     docente: "",
     anoCurricular: "all",
     codigoTurno: "",
@@ -150,8 +145,6 @@ export default function ProvaContent() {
       ...(filters.limit && { limit: filters.limit }),
     }
   );
-
-  const { data: cursos } = useCursos();
 
   const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
     curso: filters.curso,
@@ -226,6 +219,7 @@ export default function ProvaContent() {
               variant="destructive"
               size="sm"
               onClick={() => setFilters({
+                tipoCandidatura: "1",
                 docente: "",
                 anoLectivo: "",
                 semestre: "",
@@ -247,19 +241,29 @@ export default function ProvaContent() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {/* Sempre visíveis */}
+          <TipoCandidaturaSelect
+            value={filters.tipoCandidatura}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                tipoCandidatura: v,
+                anoLectivo: "",
+                docente: "",
+                curso: "",
+                anoCurricular: "all",
+                unidadeCurricular: "",
+                page: 1,
+              })
+            }
+          />
+
           <div className="space-y-1.5">
-            <Label>Ano Letivo</Label>
-            <FormSelect
-              disabled={isLoadingAcademicYear}
+            <AcademicYearsAvailableForOperationSelect
               value={filters.anoLectivo}
-              onChange={(v) => setFilters({ ...filters, anoLectivo: v, page: 1 })}
-              options={anosAcademicos ?? []}
-              map={(a) => ({
-                key: a.codigo,
-                label: a.designacao,
-                value: String(a.codigo),
-              })}
-              placeholder="Selecione o ano..."
+              onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v, page: 1 })}
+              tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+              onlyConfigurable={false}
+              disabled={!filters.tipoCandidatura}
             />
           </div>
 
@@ -304,17 +308,15 @@ export default function ProvaContent() {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Docente</Label>
-            <FormCommandSelect
+            <TeacherSelectList
               value={filters.docente}
-              options={teachersData}
-              map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
-              onChange={(codigo) => setFilters({ ...filters, docente: codigo, page: 1 })}
+              onChangeValue={(codigo) => setFilters({ ...filters, docente: codigo, page: 1 })}
+              tipoCandidatura={parseFilter(filters.tipoCandidatura)}
             />
           </div>
             <div className="space-y-2">
                       <FormSelect
-                        disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.anoLectivo === ""}
+                        disabled={isLoadingPeriodos || filters.anoLectivo === ""}
                         loading={isLoadingPeriodos}
                         label="Período"
                         value={filters.codigoTurno?.toString() ?? "all"}
@@ -346,19 +348,17 @@ export default function ProvaContent() {
           {showMoreFilters && (
             <>
               <div className="space-y-1.5">
-                <Label>Curso</Label>
-                <FormCommandSelect
+                <CourseSelect
                   value={filters.curso}
-                  options={cursos}
-                  map={(c) => ({
-                    key: c.codigo.toString(),
-                    value: c.codigo.toString(),
-                    label: c.designacao,
-                  })}
-                  onChange={(v) =>
+                  params={{
+                    tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+                  }}
+                  disabled={!filters.tipoCandidatura}
+                  onChangeValue={(v) =>
                     setFilters({
                       ...filters,
-                      curso: v,
+                      curso: v === "0" ? "" : v,
+                      anoCurricular: "all",
                       unidadeCurricular: "",
                     })
                   }

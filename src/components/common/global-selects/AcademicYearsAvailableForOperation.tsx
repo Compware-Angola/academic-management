@@ -1,6 +1,7 @@
 import { FormSelect } from "../FormSelect";
 import { useEffect, useId, useMemo, useRef } from "react";
 import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-years";
+import { AcademicYear } from "@/services/academiccalendar/fetch-academic-years";
 
 type EstadoAno =
   | "RASCUNHO"
@@ -14,6 +15,7 @@ const ESTADOS_DISPONIVEIS: EstadoAno[] = ["CONFIGURAVEL", "USAVEL", "ACTIVO"];
 interface AcademicYearsAvailableForOperationSelectProps {
   value: string;
   onChangeValue: (v: string) => void;
+  onSelectItem?: (item: AcademicYear | undefined) => void; // opcional
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
   onlyActive?: boolean;
@@ -46,12 +48,12 @@ const AcademicYearsAvailableForOperationSelect = ({
   const academicYear = academicYearResponse?.data ?? [];
   const defaultSelectItem = enableDefaultSelectItem
     ? [
-      {
-        label: "Todos os anos letivos",
-        value: "all",
-        key: id,
-      },
-    ]
+        {
+          label: "Todos os anos letivos",
+          value: "all",
+          key: id,
+        },
+      ]
     : undefined;
 
   // 👇 label dinâmica com base no tipo de candidatura
@@ -78,6 +80,7 @@ const AcademicYearsAvailableForOperationSelect = ({
     if (
       enableDefaultActiveYear &&
       !hasSetDefault.current &&
+      !value && // 👈 só aplica default se ainda não há valor selecionado
       filteredYears?.length
     ) {
       const activeYear = filteredYears.find(
@@ -88,7 +91,7 @@ const AcademicYearsAvailableForOperationSelect = ({
         onChangeValue(activeYear.codigo.toString());
       }
     }
-  }, [enableDefaultActiveYear, filteredYears, onChangeValue]);
+  }, [enableDefaultActiveYear, filteredYears, value, onChangeValue]);
 
   return (
     <FormSelect
@@ -103,7 +106,5 @@ const AcademicYearsAvailableForOperationSelect = ({
     />
   );
 };
-
-
 
 export { AcademicYearsAvailableForOperationSelect };

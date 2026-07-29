@@ -32,6 +32,7 @@ import { useQuerySchedulesByDayOfWeek } from "@/hooks/horario/use-query-schedule
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 const DIAS_SEMANA = [
   { id: 1, label: "Domingo" },
@@ -274,7 +275,7 @@ const HorariosSemanais = () => {
               </SelectContent>
             </Select>
 
-            {/* Unidade Curricular */}
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <Select
               value={filters.unidadeCurricular}
               disabled={!canLoadUcs}
@@ -296,7 +297,19 @@ const HorariosSemanais = () => {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+            </Select> */}
+
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUcs}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
+              }
+            />
 
             {/* Dia da Semana - Obrigatório */}
             <Select

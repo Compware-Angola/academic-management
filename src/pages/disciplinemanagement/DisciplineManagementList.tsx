@@ -101,13 +101,12 @@ export default function DisciplineManagementList() {
         [
           search && `Pesquisa: ${search}`,
           filters.natureza !== "all" &&
-            `Natureza: ${
-              filters.natureza === "TP"
-                ? "Teórico-Prática"
-                : filters.natureza === "T"
-                  ? "Teórica"
-                  : "Prática"
-            }`,
+          `Natureza: ${filters.natureza === "TP"
+            ? "Teórico-Prática"
+            : filters.natureza === "T"
+              ? "Teórica"
+              : "Prática"
+          }`,
           filters.tipo !== "all" && `Tipo UC: ${filters.tipo}`,
         ]
           .filter(Boolean)
@@ -151,27 +150,27 @@ export default function DisciplineManagementList() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Gestão de Disciplinas",
-        subtitle: "Lista de disciplinas e unidades curriculares",
-        infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros },
-          {
-            title: "Resumo",
-            content: [`Total de disciplinas: ${pdfData.total}`],
-          },
-        ],
-        mainTable: {
-          headers: [
-            { key: "codigo", label: "Código", width: 10 },
-            { key: "nome", label: "Nome da Disciplina", width: 40 },
-            { key: "tipo", label: "Tipo", width: 25 },
-            { key: "natureza", label: "Natureza", width: 20 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Gestão de Disciplinas",
+      subtitle: "Lista de disciplinas e unidades curriculares",
+      infoSections: [
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        {
+          title: "Resumo",
+          content: [`Total de disciplinas: ${pdfData.total}`],
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+      ],
+      mainTable: {
+        headers: [
+          { key: "codigo", label: "Código", width: 10 },
+          { key: "nome", label: "Nome da Disciplina", width: 40 },
+          { key: "tipo", label: "Tipo", width: 25 },
+          { key: "natureza", label: "Natureza", width: 20 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Disciplinas_${new Date().toISOString().slice(0, 10)}`;
@@ -242,7 +241,7 @@ export default function DisciplineManagementList() {
             </div>
           )}
 
-          <Button size="sm" onClick={() => setCreateModalOpen(true)}>
+          <Button disabled size="sm" onClick={() => setCreateModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova disciplina
           </Button>
@@ -455,6 +454,7 @@ export default function DisciplineManagementList() {
                             type="button"
                             variant="ghost"
                             size="icon"
+                            disabled
                             onClick={() => {
                               handleOpenEdit(item);
                             }}

@@ -80,6 +80,8 @@ import Lottie from "lottie-react";
 import Notallowed from "@/assets/Notallowed.json";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
+import { parseFilter } from "@/util/parse-filter";
 
 export default function ScheduleList() {
   const { user: userData } = useAuth();
@@ -541,7 +543,7 @@ export default function ScheduleList() {
               </Select>
             </div>
 
-            <FormCommandSelect
+            {/* <FormCommandSelect
               value={filters.unidadeCurricular}
               label="Unidade Curricular"
               placeholder={
@@ -561,6 +563,16 @@ export default function ScheduleList() {
                 label: u.descricao,
               })}
               onChange={(u) => setFilters({ ...filters, unidadeCurricular: u })}
+            /> */}
+            <GradeCurricularSelect
+              onChangeValue={(u) =>
+                setFilters({ ...filters, unidadeCurricular: u })
+              }
+              value={filters.unidadeCurricular}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+              classe={parseFilter(filters.anoCurricular)}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
             />
 
             <FormSelect

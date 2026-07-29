@@ -12,10 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Search, FileText, Download, Printer, Eye, Plus, ChevronLeft, ChevronRight, Calendar, Clock, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useMutationMarcarAula } from "@/hooks/assiduidade/use-mutation-marcar-assiduidade-aula";
-import { useQueryTeacther } from "@/hooks/teacher/use-query-teacher";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQueryStatusAgendamento } from "@/hooks/assiduidade/use-fetch-assiduidade-status-agendamentos";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
@@ -26,6 +23,11 @@ import { AgendamentoAulaItem } from "@/services/sumario/fetch-sumario-agendament
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMutationCreateSumario } from "@/hooks/sumario/use-mutation-create-sumario";
 import { useMutationUpdateSumario } from "@/hooks/sumario/use-mutation-update-sumario";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
+import { parseFilter } from "@/util/parse-filter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type EstadoAssiduidade = 1 | 2 | 3;
 
@@ -64,7 +66,6 @@ export default function AulasAgendadas() {
 
     const [showMoreFilters, setShowMoreFilters] = useState(false);
 
-    const { data: anosAcademicos, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
     const { data: statusAgendamentos, isLoading: isLoadingStatusAgendamento } = useQueryStatusAgendamento({ enabled: true });
 
     const SEMESTRE = [
@@ -72,11 +73,11 @@ export default function AulasAgendadas() {
         { key: "2", label: "2º Semestre", value: "2" },
     ];
 
-    const { data: teachersData = [] } = useQueryTeacther();
     const mutationCreateSumario = useMutationCreateSumario();
     const mutationUpdateSumario = useMutationUpdateSumario();
 
     const [filters, setFilters] = useState({
+        tipoCandidatura: "1",
         docente: "",
         anoCurricular: "all",
         unidadeCurricular: "",
@@ -88,12 +89,6 @@ export default function AulasAgendadas() {
         curso: "",
         page: 1,
         limit: 10,
-    });
-
-    const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
-        curso: filters.curso,
-        semestre: filters.semestre,
-        classe: filters.anoCurricular === "all" ? undefined : filters.anoCurricular,
     });
 
     const { data: aulasSumarioAgendados, isLoading: isLoadingAulasAgendadas } = useQuerySumarioAgendamentoAula({
@@ -108,7 +103,9 @@ export default function AulasAgendadas() {
         limit: filters.limit,
     });
 
-    const { data: cursos } = useCursos();
+    const { data: cursos } = useCursos({
+        tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
+    });
     const { data: anosCurriculares = [] } = useQueryClassFilterByCurso({
         curso: filters.curso,
     });
@@ -230,6 +227,7 @@ export default function AulasAgendadas() {
                                     unidadeCurricular: "",
                                     page: 1,
                                     limit: itemsPerPage,
+                                    tipoCandidatura: "1",
                                 });
                                 setCurrentPage(1);
                             }}
@@ -242,16 +240,27 @@ export default function AulasAgendadas() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {/* Filtros sempre visíveis */}
                     <div className="space-y-1.5">
-                        <Label>Ano Letivo</Label>
-                        <FormSelect
-                            disabled={isLoadingAcademicYear}
-                            value={filters.anoLectivo}
-                            onChange={(v) => updateFilters({ anoLectivo: v })}
-                            options={anosAcademicos ?? []}
-                            map={(a) => ({ key: a.codigo, label: a.designacao, value: String(a.codigo) })}
-                            placeholder="Selecione o ano..."
+                        <TipoCandidaturaSelect
+                            value={filters.tipoCandidatura}
+                            onChangeValue={(v) =>
+                                updateFilters({
+                                    tipoCandidatura: v,
+                                    anoLectivo: "",
+                                    docente: "",
+                                    curso: "",
+                                    anoCurricular: "all",
+                                    unidadeCurricular: "",
+                                })
+                            }
                         />
                     </div>
+
+                    <AcademicYearsAvailableForOperationSelect
+                        value={filters.anoLectivo}
+                        onChangeValue={(v) => updateFilters({ anoLectivo: v })}
+                        tipoCandidaturaId={parseFilter(filters.tipoCandidatura)}
+                        onlyConfigurable={false}
+                    />
 
                     <div className="space-y-1.5">
                         <Label>Estado</Label>
@@ -284,12 +293,17 @@ export default function AulasAgendadas() {
                     </div>
 
                     <div className="space-y-1.5">
-                        <Label>Docente</Label>
+                        {/* Componente antigo mantido como referencia, conforme solicitado.
                         <FormCommandSelect
                             value={filters.docente}
                             options={teachersData}
                             map={(t) => ({ key: t.codigo, value: t.codigo, label: t.nome })}
                             onChange={(codigo) => updateFilters({ docente: codigo })}
+                        /> */}
+                        <TeacherSelectList
+                            value={filters.docente}
+                            onChangeValue={(codigo) => updateFilters({ docente: codigo })}
+                            tipoCandidatura={parseFilter(filters.tipoCandidatura)}
                         />
                     </div>
 
@@ -349,7 +363,7 @@ export default function AulasAgendadas() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Unidade Curricular</Label>
+                                {/* Componente antigo mantido como referencia.
                                 <FormCommandSelect
                                     value={filters.unidadeCurricular}
                                     options={unidadesCurriculares}
@@ -364,6 +378,19 @@ export default function AulasAgendadas() {
                                                     : "Selecionar UC"
                                     }
                                     onChange={(u) => updateFilters({ unidadeCurricular: u })}
+                                /> */}
+                                <GradeCurricularSelect
+                                    value={filters.unidadeCurricular}
+                                    onChangeValue={(u) => updateFilters({ unidadeCurricular: u })}
+                                    curso={parseFilter(filters.curso)}
+                                    semestre={parseFilter(filters.semestre)}
+                                    classe={
+                                        filters.anoCurricular === "all"
+                                            ? undefined
+                                            : parseFilter(filters.anoCurricular)
+                                    }
+                                    anoLectivo={parseFilter(filters.anoLectivo)}
+                                    disabled={!filters.curso}
                                 />
                             </div>
                         </>

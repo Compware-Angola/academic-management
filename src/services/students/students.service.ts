@@ -1,12 +1,9 @@
 import { axiosNestFinance } from "@/lib/axios-nest-finance";
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-
-
 export type StudentSugestoesParams = {
   search?: string;
 };
-
 
 export type StudentSugestao = {
   codigo_matricula: number;
@@ -17,7 +14,6 @@ export type StudentSugestao = {
   estado: string;
   is_bolseiro?: number;
 };
-
 
 export const fetchStudentsSugestoes = async (
   params: StudentSugestoesParams = {},
@@ -33,7 +29,6 @@ export const fetchStudentsSugestoes = async (
 
   return response.data;
 };
-
 
 export type StudentDetail = {
   codigo_matricula: number;
@@ -69,9 +64,9 @@ export type StudentDetail = {
   periodo_codigo: number;
   sigla_grau: string;
   tipo_canditatura_codigo: number;
-
+  acta_filename: string;
+  data_acta: string;
 };
-
 
 export const fetchStudentEstatisticas = async (
   codigoMatricula: number | string,
@@ -84,8 +79,6 @@ export const fetchStudentEstatisticas = async (
 
   return response.data;
 };
-
-
 
 export type InfoBolsaEstudante = {
   isBolseiro: boolean;
@@ -120,7 +113,7 @@ export type InfoBolsaEstudante = {
   bolsa: string;
   isentar_multa: string | null;
   instituicao_pagou: boolean;
-}
+};
 
 export const fetchInfoBolsaEstudante = async (
   codigoMatricula: number | string,
@@ -159,7 +152,6 @@ export type DisciplinasResponse = {
   totalPages: number;
 };
 
-
 export type FetchDisciplinasMatriculadasParams = {
   matriculaId: number | string;
   anoLectivo?: string | number;
@@ -170,11 +162,18 @@ export type FetchDisciplinasMatriculadasParams = {
   ignorarEliminados?: number;
 };
 
-
 export const fetchDisciplinasMatriculadas = async (
   params: FetchDisciplinasMatriculadasParams,
 ): Promise<DisciplinasResponse> => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes, ignorarEliminados } = params;
+  const {
+    matriculaId,
+    anoLectivo,
+    semestre,
+    page = 1,
+    limit = 25,
+    classes,
+    ignorarEliminados,
+  } = params;
 
   const queryParams: Record<string, string | number> = {
     matriculaId: String(matriculaId).trim(),
@@ -204,7 +203,6 @@ export const fetchDisciplinasMatriculadas = async (
 
   return response.data;
 };
-
 
 export type ListStudentsPayload = {
   anoLectivo?: number;
@@ -257,7 +255,6 @@ export async function getListStudentsService(
   return data;
 }
 
-
 export type UpdatePersonalDataPayload = {
   codigoMatricula: number;
   nomeCompleto?: string;
@@ -285,8 +282,13 @@ export type UpdateGradeCurricularHorarioAlunoPayload = {
   horarioID: number;
 };
 
-export async function updateGradeCurricularHorarioAluno(params: UpdateGradeCurricularHorarioAlunoPayload): Promise<{ message: string }> {
-  const { data } = await axiosNestGa.put(`/students/horario-grade-curricular`, params);
+export async function updateGradeCurricularHorarioAluno(
+  params: UpdateGradeCurricularHorarioAlunoPayload,
+): Promise<{ message: string }> {
+  const { data } = await axiosNestGa.put(
+    `/students/horario-grade-curricular`,
+    params,
+  );
   return data;
 }
 
@@ -294,8 +296,12 @@ export type RestoreGradeCurricularAlunoPayload = {
   codigoGradeCurricularAluno: number;
 };
 
-export async function restoreGradeCurricularAluno(params: RestoreGradeCurricularAlunoPayload): Promise<{ message: string }> {
-  const { data } = await axiosNestGa.put(`/students/restore-grade-curricular/${params.codigoGradeCurricularAluno}`);
+export async function restoreGradeCurricularAluno(
+  params: RestoreGradeCurricularAlunoPayload,
+): Promise<{ message: string }> {
+  const { data } = await axiosNestGa.put(
+    `/students/restore-grade-curricular/${params.codigoGradeCurricularAluno}`,
+  );
   return data;
 }
 
@@ -303,8 +309,12 @@ export type DeleteGradeCurricularAlunoPayload = {
   codigoGradeCurricularAluno: number;
 };
 
-export async function deleteGradeCurricularAluno(params: DeleteGradeCurricularAlunoPayload): Promise<{ message: string }> {
-  const { data } = await axiosNestGa.delete(`/students/grade-curricular/${params.codigoGradeCurricularAluno}`);
+export async function deleteGradeCurricularAluno(
+  params: DeleteGradeCurricularAlunoPayload,
+): Promise<{ message: string }> {
+  const { data } = await axiosNestGa.delete(
+    `/students/grade-curricular/${params.codigoGradeCurricularAluno}`,
+  );
   return data;
 }
 
@@ -313,7 +323,12 @@ export type DefinirEspecialidadePayload = {
   codigoCursoEspecialidade: number;
 };
 
-export async function definirEspecialidade(params: DefinirEspecialidadePayload): Promise<{ message: string }> {
-  const { data } = await axiosNestGa.put(`/students/definir-especialidade`, params);
+export async function definirEspecialidade(
+  params: DefinirEspecialidadePayload,
+): Promise<{ message: string }> {
+  const { data } = await axiosNestGa.put(
+    `/students/definir-especialidade`,
+    params,
+  );
   return data;
 }

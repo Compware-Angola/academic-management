@@ -11,11 +11,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertCircle, GraduationCap } from "lucide-react";
+import { AlertCircle, CheckCheck, GraduationCap } from "lucide-react";
 import { useMutationDiplomarAluno } from "@/hooks/students/use-mutation-diplomar-aluno";
 import { useMutationDesdiplomarAluno } from "@/hooks/students/use-mutation-desdiplomar-aluno";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { Input } from "@/components/ui/input";
+import { useTypedFile, useTypedUpload } from "@/hooks/upload/use-upload-single";
+import { toast } from "sonner";
+import { useUploadSingle } from "@/hooks/upload/use-upload2-single";
+import { viewFile } from "@/services/upload/upload-single.service";
 
 type DiplomarProps = {
   value: string;
@@ -25,7 +29,6 @@ const today = new Date();
 
 export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
-  const [dataActa, setDataActa] = useState<Date | undefined>(undefined);
 
   const formatDateForInput = (date: Date | undefined) => {
     if (!date) return "";
@@ -39,15 +42,55 @@ export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
   const { mutate: diplomarAluno, isPending } = useMutationDiplomarAluno();
   const { mutateAsync: desdiplomarAluno, isPending: isDesdiplomando } =
     useMutationDesdiplomarAluno();
-  const { data: student, isFetching } = useStudentDetail(codigoMatricula);
+  const { mutateAsync: uploadFile, isPending: isUploading } = useUploadSingle();
 
+  const [actaFile, setActaFile] = useState<File | null>(null);
+  const [dataActa, setDataActa] = useState<string>("");
+  const { data: student, isFetching } = useStudentDetail(codigoMatricula);
   const isDiplomado = student?.estado?.toLowerCase() === "diplomado";
 
-  function handleDiplomar() {
-    diplomarAluno({
-      codigoMatricula,
-      imprimeCartaConclusao: false,
-    });
+  const [isLoadingDocumento, setIsLoadingDocumento] = useState(false);
+
+  const handleVerDocumento = async () => {
+    const fileName = student?.acta_filename;
+
+    if (!fileName) {
+      toast.error("Nenhum documento de acta encontrado para este estudante.");
+      return;
+    }
+
+    setIsLoadingDocumento(true);
+    try {
+      const blob = await viewFile(fileName);
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      console.error("Erro ao buscar documento:", error);
+      toast.error("Erro ao carregar o documento da acta.");
+    } finally {
+      setIsLoadingDocumento(false);
+    }
+  };
+  async function handleDiplomar() {
+    if (!dataActa) {
+      toast.error("Informe a data da acta.");
+      return;
+    }
+
+    try {
+      const uploaded = await uploadFile(actaFile);
+
+      diplomarAluno({
+        codigoMatricula,
+        imprimeCartaConclusao: false,
+        dataActa,
+        fileName: uploaded.file.filename,
+      });
+    } catch (err: any) {
+      const message = err?.message ?? "Erro ao enviar ficheiro da acta.";
+      toast.error(message);
+    }
   }
 
   async function handleDesdiplomar() {
@@ -62,81 +105,104 @@ export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
 
   return (
     <TabsContent value={value} className="mt-0">
-      <div className="space-y-6">
-        <div className="border rounded-lg overflow-hidden">
-          <div className="bg-muted/40 px-4 py-3 border-b">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Diplomar Estudante
-            </h3>
-          </div>
-
-          <div className="p-6 space-y-6">
-            <div className="flex items-start gap-3 rounded-md border border-amber-500/30 bg-amber-500/10 p-4">
-              <AlertCircle className="h-5 w-5 mt-0.5 text-amber-500" />
-              <div className="space-y-1">
-                <p className="font-medium">
-                  {isDiplomado
-                    ? "Atenção antes de anular diploma"
-                    : "Atenção antes de diplomar"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {isDiplomado ? (
-                    <>
-                      Esta ação irá anular a diplomação do estudante, remover o
-                      registo de conclusão do curso e voltar o estado da
-                      matrícula para <span className="font-medium">activo</span>
-                      .
-                    </>
-                  ) : (
-                    <>
-                      Esta ação irá alterar o estado da matrícula para{" "}
-                      <span className="font-medium">diplomado</span>, registar a
-                      conclusão do curso e criar o log da operação.
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className="w-full flex justify-between items-end">
-              {!isDiplomado ? (
-                <div>
-                  <label className="text-sm font-medium">Data da Acta</label>
-                  <Input
-                    type="date"
-                    value={formatDateForInput(dataActa)}
-                    onChange={(e) => {
-                      setDataActa(
-                        e.target.value
-                          ? new Date(e.target.value + "T00:00:00")
-                          : undefined,
-                      );
-                    }}
-                  />
-                </div>
+      <div className="p-6 space-y-6">
+        <div className="flex items-start gap-3 rounded-md border border-amber-500/30 bg-amber-500/10 p-4">
+          <AlertCircle className="h-5 w-5 mt-0.5 text-amber-500" />
+          <div className="space-y-1">
+            <p className="font-medium">
+              {isDiplomado
+                ? "Atenção antes de anular diploma"
+                : "Atenção antes de diplomar"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {isDiplomado ? (
+                <>
+                  Esta ação irá anular a diplomação do estudante, remover o
+                  registo de conclusão do curso e voltar o estado da matrícula
+                  para <span className="font-medium">activo</span>.
+                </>
               ) : (
-                <div />
+                <>
+                  Esta ação irá alterar o estado da matrícula para{" "}
+                  <span className="font-medium">diplomado</span>, registar a
+                  conclusão do curso e criar o log da operação.
+                </>
               )}
+            </p>
+          </div>
+        </div>
 
-              <div>
-                {isDiplomado ? (
-                  <Button
-                    variant="destructive"
-                    onClick={() => setConfirmacaoAberta(true)}
-                    disabled={isFetching || isDesdiplomando}
-                  >
-                    {isDesdiplomando ? "Anulando..." : "Anular Diploma"}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleDiplomar}
-                    disabled={isPending || isFetching || !dataActa}
-                  >
-                    {isPending ? "Diplomando..." : "Diplomar Estudante"}
-                  </Button>
+        <div className="w-full flex justify-between items-end">
+          {!isDiplomado ? (
+            <div className="flex gap-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="dataActa">Data da Acta</Label>
+                <Input
+                  id="dataActa"
+                  type="date"
+                  value={dataActa}
+                  onChange={(e) => setDataActa(e.target.value)}
+                  className="w-48"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="actaFile">Ficheiro da Acta</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="actaFile"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setActaFile(e.target.files?.[0] ?? null)}
+                    className="max-w-xs"
+                  />
+                  {!!actaFile && (
+                    <span className="flex items-center gap-1 text-sm text-green-600 whitespace-nowrap">
+                      <CheckCheck className="h-4 w-4" />
+                      Selecionado
+                    </span>
+                  )}
+                </div>
+                {!!actaFile && (
+                  <p className="text-xs text-muted-foreground truncate max-w-xs">
+                    {actaFile.name}
+                  </p>
                 )}
               </div>
             </div>
+          ) : (
+            <div>
+              <Button
+                variant="outline"
+                onClick={handleVerDocumento}
+                disabled={isLoadingDocumento}
+              >
+                {isLoadingDocumento ? "Carregando..." : "Visualizar Acta"}
+              </Button>
+            </div>
+          )}
+
+          <div>
+            {isDiplomado ? (
+              <Button
+                variant="destructive"
+                onClick={() => setConfirmacaoAberta(true)}
+                disabled={isFetching || isDesdiplomando}
+              >
+                {isDesdiplomando ? "Anulando..." : "Anular Diploma"}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleDiplomar}
+                disabled={isPending || isUploading || isFetching || !dataActa}
+              >
+                {isUploading
+                  ? "Enviando ficheiro..."
+                  : isPending
+                    ? "Diplomando..."
+                    : "Diplomar Estudante"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
