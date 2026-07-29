@@ -1,5 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { LatexText } from "@/util/LatexText";
 
 function parseIdValues(value: string) {
   return value
@@ -56,8 +57,8 @@ export function SelectionList<T>({
   }
 
   return (
-    <div className="rounded-md border">
-      <ScrollArea className="h-44">
+    <div className="rounded-md border h-44 w-full overflow-auto">
+      {/* <ScrollArea className="h-44"> */}
         <div className="space-y-1 p-2">
           {items.map((item) => {
             const id = getId(item);
@@ -74,12 +75,13 @@ export function SelectionList<T>({
                     onChange(toggleDelimitedId(value, id, nextChecked === true))
                   }
                 />
-                <span className="leading-5">{getLabel(item)}</span>
+                <LatexText text={getLabel(item)} />
+                {/* <span className="leading-5">{getLabel(item)}</span> */}
               </label>
             );
           })}
         </div>
-      </ScrollArea>
+      {/* </ScrollArea> */}
     </div>
   );
 }
