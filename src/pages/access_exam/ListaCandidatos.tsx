@@ -58,11 +58,11 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
-import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 import { useToast } from "@/hooks/use-toast";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { parseFilter } from "@/util/parse-filter";
+import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
 
 export default function ListaCandidatos() {
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
@@ -214,6 +214,8 @@ export default function ListaCandidatos() {
 
   const baseFileName = `Lista_Candidatos_${new Date().toISOString().slice(0, 10)}`;
 
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
   function parseFaculdadeFilter(v: string): number | undefined {
     return v === "0" ? undefined : Number(v);
   }
@@ -267,19 +269,25 @@ export default function ListaCandidatos() {
   }
 
   const handleDownload = async (ficheiroName: string) => {
-    if (!ficheiroName) return;
+    const key = ficheiroName;
+
+    if (!key) {
+      toast({
+        title: "Formato inválido",
+        description: "Nenhum documento encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const blob = await viewFile(ficheiroName);
-      const fileUrl = URL.createObjectURL(blob);
-      window.open(fileUrl, "_blank");
-      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+      const { url } = await getFileUrl({ key, expiry: 3600 });
+      window.open(url, "_blank");
     } catch (error) {
+      console.error("Erro ao buscar documento:", error);
       toast({
         title: "Erro",
-        description:
-          error instanceof ApiError
-            ? error.message
-            : "Erro ao abrir o ficheiro.",
+        description: "Erro ao buscar documento",
         variant: "destructive",
       });
     }
