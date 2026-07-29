@@ -37,6 +37,7 @@ import {
   Trash2,
   FileText,
   GraduationCap,
+  DownloadCloud,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -60,6 +61,7 @@ import {
 import { usePoloDropdown } from "@/hooks/shared/use-query-fetch-polo";
 import { useTipoTaxaDropdown } from "@/hooks/shared/use-query-fetch-tipo-taxa";
 import { useMotivoIsencaoDropdown } from "@/hooks/shared/use-query-fetch-motivo-insencao";
+import ImportarServicos from "./components/Importar-servicos";
 
 type ServicoFormData = {
   descricao: string;
@@ -371,12 +373,15 @@ export default function ServicosEmolumentos() {
       </div>
 
       <Tabs defaultValue="servicos" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-3xl grid-cols-3">
           <TabsTrigger value="servicos" className="gap-2">
             <FileText className="h-4 w-4" /> Serviços
           </TabsTrigger>
           <TabsTrigger value="mensalidades" className="gap-2">
             <GraduationCap className="h-4 w-4" /> Mensalidades por Curso
+          </TabsTrigger>
+          <TabsTrigger value="import-servico" className="gap-2">
+            <DownloadCloud className="h-4 w-4" /> Importação de Serviços
           </TabsTrigger>
         </TabsList>
 
@@ -732,6 +737,9 @@ export default function ServicosEmolumentos() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        <TabsContent value="import-servico" className="space-y-6 mt-6">
+          <ImportarServicos />
         </TabsContent>
       </Tabs>
 

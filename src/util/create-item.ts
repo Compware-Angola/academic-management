@@ -44,6 +44,7 @@ interface CreateInvoiceParams {
   canal?: number;
   totalMulta: number;
   totalDesconto: number;
+  codigo_anoLectivo?: number;
 }
 
 export interface CreateInvoiceBody {
@@ -60,6 +61,7 @@ export interface CreateInvoiceBody {
   codigo_preinscricao: number;
   Descricao: string;
   tipo_documento_factura_id: number;
+  codigo_anoLectivo?: number;
   canal: number;
   DataFactura: string;
   itens: any[];
@@ -77,6 +79,7 @@ export const createInvoice = ({
   canal = 3,
   totalDesconto,
   totalMulta,
+  codigo_anoLectivo,
 }: CreateInvoiceParams): CreateInvoiceBody => {
   return {
     polo_id: poloid,
@@ -88,6 +91,7 @@ export const createInvoice = ({
     CodigoMatricula: codigoMatricula,
     codigo_preinscricao: null,
     Desconto: totalDesconto,
+    codigo_anoLectivo,
     totalIVA: 0,
     TotalMulta: totalMulta,
     Descricao: descricao.substring(0, 44),

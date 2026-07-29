@@ -30,6 +30,7 @@ import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
 import { ReactQueryProvider } from "./providers/react-query.provider";
 import Deadlines from "./pages/academiccalendar/Deadlines";
 import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
+import GradeCurso from "./pages/disciplinemanagement/GradeCurso";
 import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentManagement";
 import ControlNotes from "./pages/rating(avaliation)/control";
 import FormulaUC from "./pages/rating(avaliation)/formula-uc";
@@ -1256,6 +1257,21 @@ const App = () => {
                         ]}
                       >
                         <UCManagementPlan />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/plano/grade-curso"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO
+                            .sigla!,
+                          PermissionTypeDetails.GESTAO_UC_PLANO_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <GradeCurso />
                       </ProtectedRoute>
                     }
                   />

@@ -42,6 +42,7 @@ import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 export default function SchedulesByRoom() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -300,7 +301,7 @@ export default function SchedulesByRoom() {
               </Select>
             </div>
 
-            {/* Unidade Curricular */}
+            {/* Componente antigo mantido como referencia, conforme solicitado.
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
@@ -331,7 +332,18 @@ export default function SchedulesByRoom() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUcs}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
+              }
+            />
           </div>
         </CardContent>
       </Card>

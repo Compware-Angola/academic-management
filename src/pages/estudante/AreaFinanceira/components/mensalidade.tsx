@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { useCreateInvoiceNoJob } from "@/hooks/financas/invoice/use-create-no-job-mutation";
 import { useMutationRecalculatePayments } from "@/hooks/financas/pagamentos-mensais/use-mutation-recalculate";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { TipoCandidaturaSigla } from "@/enums/tipo_candidatura.sigla";
 
 type SelectedPayment = {
   mesTempId: number;
@@ -85,9 +86,14 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     Map<number, SelectedPayment>
   >(new Map());
 
-  const { mutate: recalculatePayments, isPending: isPendingRecalculatePayments } = useMutationRecalculatePayments();
+  const {
+    mutate: recalculatePayments,
+    isPending: isPendingRecalculatePayments,
+  } = useMutationRecalculatePayments();
 
-  const [recalculatingIds, setRecalculatingIds] = useState<Set<number>>(new Set());
+  const [recalculatingIds, setRecalculatingIds] = useState<Set<number>>(
+    new Set(),
+  );
 
   const totalSelecionado = useMemo(() => {
     return Array.from(selectedPayments.values()).reduce(
@@ -160,11 +166,11 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
     page: 1,
   });
   const handleRecalculate = (invoiceId: number) => {
-    setRecalculatingIds(prev => new Set(prev).add(invoiceId));
+    setRecalculatingIds((prev) => new Set(prev).add(invoiceId));
 
     recalculatePayments(invoiceId, {
       onSettled: () => {
-        setRecalculatingIds(prev => {
+        setRecalculatingIds((prev) => {
           const next = new Set(prev);
           next.delete(invoiceId);
           return next;
@@ -234,14 +240,20 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
         mesTempId: payment.mesTempId,
       }),
     );
+    const isPosgraduation =
+      student?.sigla_grau == TipoCandidaturaSigla.DOUTORAMENTO ||
+      student?.sigla_grau == TipoCandidaturaSigla.MESTRADO;
     const invoice = createInvoice({
-      codigoMatricula: codigoMatricula,
+      codigoMatricula,
       poloid: 1,
-      totalPreco: totalPreco,
-      totalDesconto: totalDesconto,
+      totalPreco,
+      totalDesconto,
       valorApagar: totalSelecionado,
-      totalMulta: totalMulta,
+      totalMulta,
       itens: items,
+      ...(isPosgraduation && {
+        codigo_anoLectivo: parseFilter(anoLetivo),
+      }),
     });
 
     criarFactura(invoice, {
@@ -270,7 +282,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
               Histórico de pagamentos, mensalidades pendentes e recibos
             </p>
 
-
             {/* FIX: mostrar loader enquanto carrega o valor mensal */}
             {isMonthValueLoading ? (
               <div className="flex items-center gap-1 mt-1">
@@ -285,8 +296,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                   {monthFee.descricao}{" "}
                   <span className="font-bold">{monthFee.preco} kz</span>
                 </p>
-
-
               </div>
             ) : anoLetivo ? (
               <p className="text-sm mt-1 text-muted-foreground italic">
@@ -299,7 +308,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
             <AcademicYearsAvailableForOperationSelect
               enableDefaultSelectItem={false}
               onlyConfigurable={false}
-
               enableDefaultActiveYear={false}
               value={anoLetivo}
               onChangeValue={(v) => setAnoLetivo(v)}
@@ -312,7 +320,7 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
       {/* Área de Conteúdo */}
       <div className="space-y-4">
-        {(isMonthLoading || isMonthFetching) ? (
+        {isMonthLoading || isMonthFetching ? (
           <div className="h-[300px]">
             <div className="flex justify-center items-center">
               <Lottie
@@ -365,7 +373,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           desconto: payment.desconto ?? 0,
                         })
                       }
-
                       // FIX: title só quando há motivo real, sem passar null
                       title={
                         payment.id_item !== 0
@@ -375,7 +382,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             : undefined
                       }
                     />
-
                   </div>
                   <div>
                     <p className="font-medium">{payment.month}</p>
@@ -386,7 +392,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                 </div>
 
                 <div className="flex items-center gap-4">
-
                   <div className="text-right">
                     <p className="font-bold">
                       {formatNumber(Number(payment.valorAPagar))}
@@ -394,24 +399,34 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
 
                     <div className="flex items-center justify-end gap-2 mt-2">
                       {getStatusBadge(payment.status)}
-                      {payment.id_item !== 0 && payment.status == 0 && payment.codigo_factura && (
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-1.5 text-warning border-warning/40 hover:bg-warning/10 hover:text-warning"
-                            disabled={recalculatingIds.has(payment.codigo_factura) || isPendingRecalculatePayments || isMonthLoading || isMonthFetching || isMonthValueLoading}
-                            onClick={() => handleRecalculate(payment.codigo_factura)}
-                          >
-                            {recalculatingIds.has(payment.codigo_factura) ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <RefreshCw className="h-3.5 w-3.5" />
-                            )}
-                            Recalcular
-                          </Button>
-                        </div>
-                      )}
+                      {payment.id_item !== 0 &&
+                        payment.status == 0 &&
+                        payment.codigo_factura && (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 text-warning border-warning/40 hover:bg-warning/10 hover:text-warning"
+                              disabled={
+                                recalculatingIds.has(payment.codigo_factura) ||
+                                isPendingRecalculatePayments ||
+                                isMonthLoading ||
+                                isMonthFetching ||
+                                isMonthValueLoading
+                              }
+                              onClick={() =>
+                                handleRecalculate(payment.codigo_factura)
+                              }
+                            >
+                              {recalculatingIds.has(payment.codigo_factura) ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <RefreshCw className="h-3.5 w-3.5" />
+                              )}
+                              Recalcular
+                            </Button>
+                          </div>
+                        )}
                     </div>
                   </div>
 
@@ -420,8 +435,6 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                   ) : (
                     <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
                   )}
-
-
                 </div>
               </div>
 
@@ -509,8 +522,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                             {isNaN(new Date(payment.dueDate).getTime())
                               ? "—"
                               : new Date(payment.dueDate).toLocaleDateString(
-                                "pt-AO",
-                              )}
+                                  "pt-AO",
+                                )}
                           </p>
                         </div>
                       </div>
@@ -557,8 +570,8 @@ export function MensalidadesSection({ codigoMatricula }: Props) {
                           {isNaN(new Date(payment.data_operacao).getTime())
                             ? "—"
                             : new Date(
-                              payment.data_operacao,
-                            ).toLocaleDateString("pt-AO")}
+                                payment.data_operacao,
+                              ).toLocaleDateString("pt-AO")}
                         </p>
                       </div>
                     </div>
