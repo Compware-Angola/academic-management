@@ -55,7 +55,6 @@ export function StudentResultPlan({
   const totalGradesAluno = planResponse?.totalGrasesAluno;
 
   const { data: student } = useStudentDetail(codigoMatricula);
-  // console.log(student);
 
   const filteredPlans = useMemo(() => {
     const term = search.toLowerCase().trim();

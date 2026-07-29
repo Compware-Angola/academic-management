@@ -238,7 +238,6 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     },
   };
 
-  console.log(infoSections)
   return (
     <Document>
       <Page
