@@ -195,6 +195,8 @@ import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario
 import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
 import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
 import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
+import { ConciliacaoDivida } from "./pages/financas/area-financeira/ConciliacaoDivida";
+import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/ConciliacaoAprovacao";
 
 const App = () => {
   return (
@@ -1433,6 +1435,14 @@ const App = () => {
                         <NegociacaoDivida />
                       </ProtectedRoute>
                     }
+                  />
+                  <Route
+                    path="/financas/conciliacao-divida"
+                    element={<ConciliacaoDivida />}
+                  />
+                  <Route
+                    path="/financas/conciliacao-aprovacao"
+                    element={<ConciliacaoAprovacao />}
                   />
                   <Route
                     path="financas/credito/tipos"
