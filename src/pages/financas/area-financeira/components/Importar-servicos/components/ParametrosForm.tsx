@@ -63,6 +63,7 @@ export function ParametrosForm({
 
           <AcademicYearsAvailableForOperationSelect
             label="Início"
+            onlyConfigurable={false}
             value={origemAno}
             onChangeValue={onChangeOrigemAno}
             tipoCandidaturaId={tipoCandidatura}

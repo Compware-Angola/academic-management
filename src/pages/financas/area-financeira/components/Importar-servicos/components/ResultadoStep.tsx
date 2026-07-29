@@ -78,7 +78,7 @@ export function ResultadoStep({
           titulo: "Duplicados",
           icon: AlertTriangle,
           cls: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
-          badge: "Duplicado",
+          badge: "Serviço já cadastrado neste ano lectivo",
         },
       ].map((sec) => {
         const itens = resultado[sec.key];
