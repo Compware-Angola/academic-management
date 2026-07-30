@@ -40,10 +40,12 @@ export async function uploadSingleFile(
   if (options?.folder) formData.append("folder", options.folder);
   if (options?.fileName) formData.append("fileName", options.fileName);
 
-  return uploadApi<ResponseUpload>("upload-s3/single", {
-    method: "POST",
-    body: formData,
-  }).json();
+  const { data } = await uploadApi.post<ResponseUpload>(
+    "upload-s3/single",
+    formData,
+  );
+
+  return data;
 }
 
 export async function uploadMultipleFiles(
@@ -54,10 +56,12 @@ export async function uploadMultipleFiles(
   files.forEach((file) => formData.append("files", file));
   if (options?.folder) formData.append("folder", options.folder);
 
-  return uploadApi<ResponseUploadMultiple>("upload-s3/multiple", {
-    method: "POST",
-    body: formData,
-  }).json();
+  const { data } = await uploadApi.post<ResponseUploadMultiple>(
+    "upload-s3/multiple",
+    formData,
+  );
+
+  return data;
 }
 
 // ---------- Visualização ----------
@@ -65,20 +69,19 @@ export async function uploadMultipleFiles(
 // Gera uma URL assinada temporária para o arquivo (a url retornada
 // no upload NÃO é acessível diretamente, pois o bucket não é público).
 export async function getFileUrl(key: string, expiry?: number) {
-  const params = new URLSearchParams({ key });
-  if (expiry) params.append("expiry", String(expiry));
+  const { data } = await uploadApi.get<ResponseView>("upload-s3/view", {
+    params: { key, ...(expiry ? { expiry } : {}) },
+  });
 
-  return uploadApi<ResponseView>(`upload-s3/view?${params.toString()}`, {
-    method: "GET",
-  }).json();
+  return data;
 }
 
 // ---------- Delete ----------
 
 export async function deleteFile(key: string) {
-  return uploadApi<ResponseDelete>("upload-s3", {
-    method: "DELETE",
-    body: JSON.stringify({ key }),
-    headers: { "Content-Type": "application/json" },
-  }).json();
+  const { data } = await uploadApi.delete<ResponseDelete>("upload-s3", {
+    data: { key },
+  });
+
+  return data;
 }
