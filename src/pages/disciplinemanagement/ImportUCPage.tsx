@@ -39,6 +39,7 @@ import {
   Download,
   FilterX,
   ArrowRight,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -357,7 +358,7 @@ function ImportResultDialog({
             <p className="text-2xl font-bold text-amber-600">
               {result.totalDuplicadas}
             </p>
-            <p className="text-xs text-muted-foreground">Duplicadas</p>
+            <p className="text-xs text-muted-foreground">Ja existentes</p>
           </div>
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-center">
             <p className="text-2xl font-bold text-destructive">
@@ -479,7 +480,7 @@ export default function ImportUCPage() {
   const estado = 1;
 
   const { data: cursos, isLoading: loadingCursos } = useCursos();
-  const { data: classes, isLoading: loadingClasses } = useClasses();
+
 
   const filtrosCompletos = !!anoLectivo && !!curso;
 
@@ -498,7 +499,14 @@ export default function ImportUCPage() {
   });
 
   const items = filtrosCompletos ? (gradeResponse?.data ?? []) : [];
-
+  const resetState = () => {
+    setSelected(new Set());
+    setExpandedGroups(new Set());
+    setFieldOverrides({});
+    setImportResult(null);
+    setResultDialogOpen(false);
+    refetch();
+  };
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
   const [fieldOverrides, setFieldOverrides] = useState<
@@ -658,7 +666,6 @@ export default function ImportUCPage() {
           disponível para importação.
         </p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 rounded-lg border bg-card p-3">
         <div className="space-y-2">
           <TipoCandidaturaSelect
@@ -694,6 +701,27 @@ export default function ImportUCPage() {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refetch()}
+          disabled={!filtrosCompletos || isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              A buscar...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Buscar as UCs
+            </>
+          )}
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
@@ -878,7 +906,13 @@ export default function ImportUCPage() {
 
       <ImportResultDialog
         open={resultDialogOpen}
-        onOpenChange={setResultDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            resetState();
+          } else {
+            setResultDialogOpen(open);
+          }
+        }}
         result={importResult}
       />
     </div>
