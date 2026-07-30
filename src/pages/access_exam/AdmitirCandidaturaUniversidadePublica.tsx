@@ -54,10 +54,10 @@ function CandidatoDocumentoUniversidadePublica({
   const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
     useGetFileUrl();
   const jaValidado = candidato.doc_universidade_valido === 1;
-
-  const handleVerDocumento = async (ficheiroName: string) => {
-    const key = ficheiroName;
-
+  console.log(candidato);
+  const handleVerDocumento = async () => {
+    const key = documentoUniversidadePublica.link;
+    console.log(key);
     if (!key) {
       toast({
         title: "Formato inválido",
