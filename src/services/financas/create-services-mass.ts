@@ -31,6 +31,7 @@ export interface ServiceMassRegistered {
   codigoAnoLectivo: number;
   poloId: number;
   status: string;
+  motivo?: string;
 }
 export interface CreateServicesMassResponse {
   message: string;

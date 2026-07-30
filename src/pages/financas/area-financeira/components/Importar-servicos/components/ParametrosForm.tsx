@@ -62,11 +62,12 @@ export function ParametrosForm({
           </div>
 
           <AcademicYearsAvailableForOperationSelect
-            label="Início"
+            label="Origem"
             value={origemAno}
             onChangeValue={onChangeOrigemAno}
             tipoCandidaturaId={tipoCandidatura}
-            enableDefaultActiveYear
+            onlyConfigurable={false}
+
           />
 
           <AcademicYearsAvailableForOperationSelect

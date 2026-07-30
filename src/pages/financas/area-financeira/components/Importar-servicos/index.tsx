@@ -141,8 +141,8 @@ export default function ImportarServicos() {
             Importação de Serviços
           </h1>
           <p className="text-muted-foreground mt-1">
-            Copie serviços e emolumentos de um ano lectivo de início para um ano
-            lectivo de destino.
+            Transfira serviços e emolumentos de um ano lectivo de origem para um
+            ano lectivo de destino.
           </p>
         </div>
         {etapa !== 1 && (
@@ -160,13 +160,12 @@ export default function ImportarServicos() {
           return (
             <div key={s} className="flex items-center gap-3">
               <div
-                className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${
-                  active
+                className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${active
                     ? "border-primary bg-primary/10 text-primary font-medium"
                     : done
                       ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
                       : "text-muted-foreground"
-                }`}
+                  }`}
               >
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background text-xs font-semibold">
                   {done ? "✓" : n}

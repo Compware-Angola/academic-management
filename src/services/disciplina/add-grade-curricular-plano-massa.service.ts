@@ -18,11 +18,18 @@ export interface AddGradeCurricularPlanoMassaPayload {
 
 export interface PlanoMassaDuplicado {
   codigoGradeCurricular: number;
+  nomeDisciplina?: string | null;
   motivo: string;
+}
+export interface Adicionados {
+  codigoGradeCurricular: number;
+  nomeDisciplina?: string | null;
+
 }
 
 export interface PlanoMassaErro {
   codigoGradeCurricular: number;
+  nomeDisciplina?: string | null;
   motivo: string;
 }
 
@@ -33,7 +40,7 @@ export interface AddGradeCurricularPlanoMassaResponse {
   totalAdicionadas: number;
   totalDuplicadas: number;
   totalErros: number;
-  adicionados: number[];
+  adicionados: Adicionados[];
   duplicados: PlanoMassaDuplicado[];
   erros: PlanoMassaErro[];
 }
