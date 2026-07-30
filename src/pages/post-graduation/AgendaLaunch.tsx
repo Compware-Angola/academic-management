@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Download,
-  FileText,
-  Loader2,
-  Plus,
-  RefreshCw,
-} from "lucide-react";
+import { Download, FileText, Loader2, Plus, RefreshCw } from "lucide-react";
 
 import { FormSelect } from "@/components/common/FormSelect";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -35,9 +29,9 @@ import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useToast } from "@/hooks/use-toast";
 import type { PostGraduationDegree } from "@/services/post-graduation/fetch-degrees.service";
-import { viewFile } from "@/services/upload/upload-single.service";
 import { formatDateTimePt } from "@/util/date-formate";
 import { CreateAgendaLaunchModal } from "./components/CreateAgendaLaunchModal";
+import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
 
 type FilterState = {
   academicYearId: string;
@@ -71,6 +65,8 @@ export default function PostGraduationAgendaLaunch() {
   const [limit, setLimit] = useState(10);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { toast } = useToast();
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
 
   const {
     data: academicYears = [],
@@ -91,8 +87,7 @@ export default function PostGraduationAgendaLaunch() {
   const degrees = useMemo(
     () =>
       (degreesResponse?.data ?? []).filter(
-        (degree): degree is DegreeOption =>
-          degree.id === 2 || degree.id === 3,
+        (degree): degree is DegreeOption => degree.id === 2 || degree.id === 3,
       ),
     [degreesResponse],
   );
@@ -108,9 +103,7 @@ export default function PostGraduationAgendaLaunch() {
     if (filters.academicYearId || academicYears.length === 0) return;
 
     const activeAcademicYear = academicYears.find((academicYear) =>
-      ["activo", "ativo"].includes(
-        academicYear.estado?.trim().toLowerCase(),
-      ),
+      ["activo", "ativo"].includes(academicYear.estado?.trim().toLowerCase()),
     );
 
     if (activeAcademicYear) {
@@ -187,34 +180,28 @@ export default function PostGraduationAgendaLaunch() {
     return [...unique.values()];
   }, [options?.terms]);
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    isError,
-    error,
-    refetch,
-  } = useQueryAgendaLaunches({
-    ...baseParams,
-    courseId:
-      filters.courseId === "all" ? undefined : Number(filters.courseId),
-    curricularYearId:
-      filters.curricularYearId === "all"
-        ? undefined
-        : Number(filters.curricularYearId),
-    curricularGradeId:
-      filters.curricularGradeId === "all"
-        ? undefined
-        : Number(filters.curricularGradeId),
-    assessmentTypeId:
-      filters.assessmentTypeId === "all"
-        ? undefined
-        : Number(filters.assessmentTypeId),
-    statusId:
-      filters.statusId === "all" ? undefined : Number(filters.statusId),
-    page,
-    limit,
-  });
+  const { data, isLoading, isFetching, isError, error, refetch } =
+    useQueryAgendaLaunches({
+      ...baseParams,
+      courseId:
+        filters.courseId === "all" ? undefined : Number(filters.courseId),
+      curricularYearId:
+        filters.curricularYearId === "all"
+          ? undefined
+          : Number(filters.curricularYearId),
+      curricularGradeId:
+        filters.curricularGradeId === "all"
+          ? undefined
+          : Number(filters.curricularGradeId),
+      assessmentTypeId:
+        filters.assessmentTypeId === "all"
+          ? undefined
+          : Number(filters.assessmentTypeId),
+      statusId:
+        filters.statusId === "all" ? undefined : Number(filters.statusId),
+      page,
+      limit,
+    });
 
   const records = data?.data ?? [];
   const total = data?.total ?? 0;
@@ -241,18 +228,23 @@ export default function PostGraduationAgendaLaunch() {
   }
 
   async function handleDownload(fileName: string) {
-    try {
-      const blob = await viewFile(fileName);
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank", "noopener,noreferrer");
-      window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
-    } catch (downloadError) {
+    const key = fileName;
+    if (!key) {
       toast({
         title: "Não foi possível abrir a pauta.",
-        description:
-          downloadError instanceof Error
-            ? downloadError.message
-            : "Ocorreu um erro ao buscar o ficheiro.",
+        description: "Nenhum documento encontrado.",
+        variant: "destructive",
+      });
+    }
+
+    try {
+      const { url } = await getFileUrl({ key, expiry: 3600 });
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Erro ao buscar documento:", error);
+      toast({
+        title: "Não foi possível abrir a pauta.",
+        description: "Ocorreu um erro ao buscar o ficheiro.",
         variant: "destructive",
       });
     }
@@ -294,9 +286,7 @@ export default function PostGraduationAgendaLaunch() {
               onClick={() => refetch()}
             >
               <RefreshCw
-                className={`mr-2 h-4 w-4 ${
-                  isFetching ? "animate-spin" : ""
-                }`}
+                className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
               />
               Actualizar
             </Button>
@@ -345,9 +335,7 @@ export default function PostGraduationAgendaLaunch() {
                 value: item.id,
                 label: item.designation,
               })}
-              onChange={(value) =>
-                handleBaseFilterChange("degreeId", value)
-              }
+              onChange={(value) => handleBaseFilterChange("degreeId", value)}
             />
 
             <FormSelect
@@ -361,9 +349,7 @@ export default function PostGraduationAgendaLaunch() {
                 value: item.codigo,
                 label: item.designacao,
               })}
-              onChange={(value) =>
-                handleBaseFilterChange("semesterId", value)
-              }
+              onChange={(value) => handleBaseFilterChange("semesterId", value)}
             />
 
             <FormSelect

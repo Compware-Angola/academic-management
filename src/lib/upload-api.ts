@@ -1,61 +1,45 @@
-import axios, {
-  type AxiosError,
-  type AxiosInstance,
-  type AxiosResponse,
-} from "axios";
-import { ApiError, type ApiErrorResponse } from "@/error";
+import { ApiError, type ApiErrorResponse } from '@/error'
+import { AuthStorage } from '@/util/auth-storage'
+import ky from 'ky'
 
-const VITE_API_URL_UPLOAD = import.meta.env.VITE_API_URL_UPLOAD;
+const VITE_API_URL_UPLOAD = import.meta.env.VITE_API_URL_UPLOAD
+export const uploadApi = ky.create({
+  retry: 0,
+  prefixUrl: VITE_API_URL_UPLOAD,
+  hooks: {
+    beforeRequest: [
+      (request) => {
+        const token = AuthStorage.getToken()
 
-
-export const uploadApi: AxiosInstance = axios.create({
-  baseURL: VITE_API_URL_UPLOAD,
-  timeout: 0, // sem retry / sem timeout forçado
-});
-
-
-uploadApi.interceptors.response.use(
-  (response: AxiosResponse) => {
-    // Resposta OK → devolve normalmente
-    return response;
-  },
-  async (error: AxiosError) => {
-    // Erro sem resposta (network, CORS, DNS, timeout, etc)
-    if (!error.response) {
-      throw new ApiError(
-        "Erro de conexão com o servidor.",
-        0,
-        undefined
-      );
-    }
-
-    const { status, statusText, data } = error.response;
-
-    let errorData: ApiErrorResponse | undefined;
-    let message = `Erro ${status}: ${statusText}`;
-
-
-    if (data) {
-      // Axios já parseia JSON automaticamente
-      if (typeof data === "object") {
-        const parsed = data as ApiErrorResponse;
-        errorData = parsed;
-        message = parsed.message || parsed.error || message;
-      }
-
-      // Caso venha como texto simples
-      if (typeof data === "string") {
-        try {
-          const parsed = JSON.parse(data) as ApiErrorResponse;
-          errorData = parsed;
-          message = parsed.message || parsed.error || message;
-        } catch {
-          message = data.trim() || message;
+        if (token) {
+          request.headers.set('Authorization', `Bearer ${token}`)
         }
-      }
-    }
+      },
+    ],
+    afterResponse: [
+      async (_request, _options, response) => {
+        if (!response.ok) {
+          let errorData: ApiErrorResponse | undefined
+          let message = `Erro ${response.status}: ${response.statusText}`
 
+          // PRIMEIRO: tenta ler como text (sempre funciona)
+          const text = await response.text()
 
-    throw new ApiError(message, status ?? 0, errorData);
-  }
-);
+          if (text) {
+            try {
+              // SEGUNDO: tenta parsear como JSON
+              const json = JSON.parse(text) as ApiErrorResponse
+              errorData = json
+              message = json.message || json.error || message
+            } catch {
+              // Se não for JSON válido, usa o texto puro
+              message = text.trim() || message
+            }
+          }
+
+          throw new ApiError(message, response.status, errorData)
+        }
+      },
+    ],
+  },
+})

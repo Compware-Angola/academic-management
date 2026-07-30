@@ -2,7 +2,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type GradeCurricularPayload = {
   classe: number;
-  semestre: number;
+  semestre?: number;
   curso: number;
   anoLectivo: number;
   estado: number;

@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Loader2, Paperclip } from "lucide-react";
-import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
 
 interface DownloadFileProps {
   path: string;
@@ -11,17 +11,25 @@ interface DownloadFileProps {
 const DownloadFileButton = ({ path }: DownloadFileProps) => {
   const [loadingFile, setLoadingFile] = useState<boolean>(false);
   const { toast } = useToast();
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
+  const handleDownload = async (ficheiroName: string) => {
+    const key = ficheiroName;
 
-  const handleDownload = async (path: string) => {
-    if (!path) return;
-    setLoadingFile(true);
+    if (!key) {
+      toast({
+        title: "Formato inválido",
+        description: "Nenhum documento encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const blob = await viewFile(path);
-      const fileUrl = URL.createObjectURL(blob);
-      window.open(fileUrl, "_blank");
-      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+      const { url } = await getFileUrl({ key });
+      window.open(url, "_blank");
     } catch (error) {
-      setLoadingFile(false);
+      console.error("Erro ao buscar documento:", error);
       toast({
         title: "Erro",
         description:
@@ -31,7 +39,6 @@ const DownloadFileButton = ({ path }: DownloadFileProps) => {
         variant: "destructive",
       });
     }
-    setLoadingFile(false);
   };
   return (
     <Button
