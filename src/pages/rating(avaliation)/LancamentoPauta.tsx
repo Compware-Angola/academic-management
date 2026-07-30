@@ -55,6 +55,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 export default function LancamentoPauta() {
   const { toast } = useToast();
@@ -109,7 +110,7 @@ export default function LancamentoPauta() {
     useQueryTipoAvaliacao();
   const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
   const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  const { data: unidadesCurriculares = [] } =
     useQueryDisciplinaWithFilter({
       classe: filters.anoCurricular,
       curso: filters.curso,
@@ -369,6 +370,7 @@ export default function LancamentoPauta() {
             options={classes}
             map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
           />
+          {/* Select antigo de Unidade Curricular:
           <FormSelect
             label="Unidade Curricular"
             value={filters.unidadeCurricular}
@@ -377,6 +379,18 @@ export default function LancamentoPauta() {
             onChange={(v) => { setFilters({ ...filters, unidadeCurricular: v }); setCurrentPage(1); }}
             options={unidadesCurriculares}
             map={(u) => ({ key: u.pk, label: u.descricao, value: u.pk })}
+          /> */}
+          <GradeCurricularSelect
+            value={filters.unidadeCurricular}
+            disabled={!filters.semestre || !filters.curso || !filters.anoCurricular}
+            onChangeValue={(v) => {
+              setFilters({ ...filters, unidadeCurricular: v });
+              setCurrentPage(1);
+            }}
+            curso={parseFilter(filters.curso)}
+            semestre={parseFilter(filters.semestre)}
+            classe={parseFilter(filters.anoCurricular)}
+            anoLectivo={parseFilter(filters.anoLectivo)}
           />
           <FormSelect
             label="Tipo de Avaliação"

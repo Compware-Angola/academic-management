@@ -40,6 +40,7 @@ import {
   DocenteVigilantePicker,
 } from "./DocenteVigilantePicker";
 import { buildVigilantesPayloads } from "./helpers";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -105,12 +106,13 @@ export default function AddMarkingAssessmentModal({
     useQueryTipoProva();
   const { data: salas = [], isLoading: isLoadingSala } = useQuerySalas();
   const { data: period = [], isLoading: isLoadingPeriod } = useQueryPeriod();
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe: filters.anoCurricular,
-    });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     curso: filters.curso,
+  //     semestre: filters.semestre,
+  //     classe: filters.anoCurricular,
+  //   });
   const { data: prazos = [], isLoading: isLoadingPrazos } =
     useQueryMarcacaoProvaPrazo({
       anoLectivo: parseFilter(filters.anoLetivo),
@@ -444,7 +446,7 @@ export default function AddMarkingAssessmentModal({
               })}
             />
 
-            {/* Unidade Curricular */}
+            {/* Select antigo de Unidade Curricular:
             <FormSelect
               label="Unidade Curricular"
               value={filters.unidadeCurricular}
@@ -457,6 +459,15 @@ export default function AddMarkingAssessmentModal({
                 label: uc.descricao,
                 value: uc.pk,
               })}
+            /> */}
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!filters.curso || !filters.semestre}
+              onChangeValue={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
             />
 
             <FormSelect

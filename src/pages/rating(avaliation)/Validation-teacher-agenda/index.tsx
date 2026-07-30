@@ -65,6 +65,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 export default function ValidationTeacherAgenda() {
   const { toast } = useToast();
@@ -117,11 +118,12 @@ export default function ValidationTeacherAgenda() {
   const { data: tipoAvaliacao = [] } = useQueryTipoAvaliacao();
   const { data: semestres } = useQuerySemestres();
   const { data: academicYear } = useQueryAnoAcademico();
-  const { data: unidadesCurriculares = [] } = useQueryDisciplinaWithFilter({
-    classe: filtersSubmetidas.anoCurricular,
-    curso: filtersSubmetidas.curso,
-    semestre: filtersSubmetidas.semestre,
-  });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [] } = useQueryDisciplinaWithFilter({
+  //   classe: filtersSubmetidas.anoCurricular,
+  //   curso: filtersSubmetidas.curso,
+  //   semestre: filtersSubmetidas.semestre,
+  // });
   const { data: estadosPauta = [] } = useQueryEstadoPauta();
 
   // Pautas submetidas
@@ -444,6 +446,7 @@ export default function ValidationTeacherAgenda() {
                   }
                 />
 
+                {/* Select antigo de Unidade Curricular:
                 <FormSelect
                   label="Unidade Curricular"
                   value={filtersSubmetidas.unidadeCurricular}
@@ -464,6 +467,24 @@ export default function ValidationTeacherAgenda() {
                       unidadeCurricular: v,
                     }))
                   }
+                /> */}
+                <GradeCurricularSelect
+                  value={filtersSubmetidas.unidadeCurricular}
+                  disabled={
+                    !filtersSubmetidas.curso ||
+                    !filtersSubmetidas.semestre ||
+                    !filtersSubmetidas.anoCurricular
+                  }
+                  onChangeValue={(v) =>
+                    setFiltersSubmetidas((prev) => ({
+                      ...prev,
+                      unidadeCurricular: v,
+                    }))
+                  }
+                  curso={parseFilter(filtersSubmetidas.curso)}
+                  semestre={parseFilter(filtersSubmetidas.semestre)}
+                  classe={parseFilter(filtersSubmetidas.anoCurricular)}
+                  anoLectivo={parseFilter(filtersSubmetidas.anoLectivo)}
                 />
 
                 <FormSelect
