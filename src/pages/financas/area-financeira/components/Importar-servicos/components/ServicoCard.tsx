@@ -23,11 +23,10 @@ function EstadoBadge({
   return (
     <Badge
       variant="outline"
-      className={`border-0 text-[11px] ${
-        ok
+      className={`border-0 text-[11px] ${ok
           ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200"
           : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
-      }`}
+        }`}
     >
       {children}
     </Badge>
@@ -55,11 +54,10 @@ export function ServicoCard({
 
   return (
     <div
-      className={`group rounded-xl border bg-card p-4 transition-all duration-200 hover:shadow-md hover:border-primary/40 ${
-        selecionado
+      className={`group rounded-xl border bg-card p-4 transition-all duration-200 hover:shadow-md hover:border-primary/40 ${selecionado
           ? "border-primary/60 ring-1 ring-primary/20 bg-primary/[0.03]"
           : ""
-      }`}
+        }`}
     >
       <div className="flex items-start gap-3">
         <Checkbox
@@ -70,7 +68,7 @@ export function ServicoCard({
         <div className="min-w-0 flex-1 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-semibold text-foreground truncate">
-              {servico.descricao}
+              {servico.descricao.replace(/propina/gi, "Mensalidade")}
             </span>
             <span className="text-xs text-muted-foreground font-mono">
               {servico.codigo}
