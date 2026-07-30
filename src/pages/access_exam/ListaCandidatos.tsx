@@ -847,7 +847,11 @@ export default function ListaCandidatos() {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Sexo</span>
                   <span className="font-semibold font-mono">
-                    {modal.candidato?.sexo ?? "—"}
+                    {modal.candidato?.sexo === "1"
+                      ? "Masculino"
+                      : modal.candidato?.sexo === "2"
+                        ? "Feminino"
+                        : "---"}
                   </span>
                 </div>
                 <div className="flex justify-between">
