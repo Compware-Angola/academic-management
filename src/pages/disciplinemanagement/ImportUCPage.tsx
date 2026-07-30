@@ -172,8 +172,8 @@ function DisciplinaImportCard({
         "p-4 transition-all hover:shadow-md cursor-pointer",
         selected && "border-primary ring-1 ring-primary/30",
         selected &&
-          validationError &&
-          "border-destructive ring-1 ring-destructive/30",
+        validationError &&
+        "border-destructive ring-1 ring-destructive/30",
       )}
       onClick={onToggle}
     >
@@ -371,18 +371,29 @@ function ImportResultDialog({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <p className="text-sm font-semibold">Disciplinas duplicadas</p>
+              <p className="text-sm font-semibold">Disciplinas Ja existentes</p>
             </div>
             <div className="space-y-1.5">
               {result.duplicados.map((d) => (
                 <div
                   key={d.codigoGradeCurricular}
-                  className="flex items-center justify-between rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm transition-colors hover:bg-amber-500/10"
                 >
-                  <span className="font-mono text-xs text-muted-foreground">
-                    Grade #{d.codigoGradeCurricular}
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="shrink-0 rounded-md bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs text-amber-700 dark:text-amber-400">
+                      #{d.codigoGradeCurricular}
+                    </span>
+                    {d.nomeDisciplina && (
+                      <span className="truncate font-medium text-foreground">
+                        {d.nomeDisciplina}
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    {d.motivo}
                   </span>
-                  <span className="text-amber-700">{d.motivo}</span>
                 </div>
               ))}
             </div>
@@ -399,12 +410,23 @@ function ImportResultDialog({
               {result.erros.map((e) => (
                 <div
                   key={e.codigoGradeCurricular}
-                  className="flex items-center justify-between rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm transition-colors hover:bg-amber-500/10"
                 >
-                  <span className="font-mono text-xs text-muted-foreground">
-                    Grade #{e.codigoGradeCurricular}
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="shrink-0 rounded-md bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs text-amber-700 dark:text-amber-400">
+                      #{e.codigoGradeCurricular}
+                    </span>
+                    {e.nomeDisciplina && (
+                      <span className="truncate font-medium text-foreground">
+                        {e.nomeDisciplina}
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    {e.motivo}
                   </span>
-                  <span className="text-destructive">{e.motivo}</span>
                 </div>
               ))}
             </div>
@@ -416,15 +438,24 @@ function ImportResultDialog({
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-success" />
               <p className="text-sm font-semibold">Adicionadas com sucesso</p>
+              <span className="text-xs text-muted-foreground">
+                ({result.adicionados.length})
+              </span>
             </div>
+
             <div className="flex flex-wrap gap-1.5">
               {result.adicionados.map((item) => (
                 <Badge
                   key={item.codigoGradeCurricular}
                   variant="outline"
-                  className="bg-success/5 text-success border-success/20 font-mono text-xs"
+                  className="gap-1.5 border-success/20 bg-success/5 font-normal text-success"
                 >
-                  #{item.codigoGradeCurricular}
+                  <span className="font-mono text-xs">
+                    #{item.codigoGradeCurricular}
+                  </span>
+                  {item.nomeDisciplina && (
+                    <span className="text-xs">{item.nomeDisciplina}</span>
+                  )}
                 </Badge>
               ))}
             </div>
@@ -615,7 +646,7 @@ export default function ImportUCPage() {
       const result = await addPlanoMassa(payload);
       setImportResult(result);
       setResultDialogOpen(true);
-    } catch {}
+    } catch { }
   };
 
   return (

@@ -16,7 +16,7 @@ export function useGradeCurricular({
   estado,
   limit,
   page,
-}: GradeCurricularPayload) {
+}: Omit<GradeCurricularPayload, "semestre">) {
   return useQuery<GradeCurricularResponse, Error>({
     queryKey: [
       "grade-curricular",
