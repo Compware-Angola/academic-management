@@ -645,6 +645,10 @@ export default function ImportUCPage() {
       );
       return;
     }
+    if (anoLectivoDestino === anoLectivo) {
+      toast.error("O ano lectivo de destino deve ser diferente do ano lectivo de origem.");
+      return;
+    }
 
     try {
       const payload: AddGradeCurricularPlanoMassaPayload = {
