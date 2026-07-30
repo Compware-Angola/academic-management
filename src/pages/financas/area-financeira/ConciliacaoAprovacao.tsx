@@ -310,10 +310,15 @@ export function ConciliacaoAprovacao() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Conciliação de Prova</BreadcrumbPage>
+            <BreadcrumbPage>Aprovação Conciliação</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+
+      <h1 className="text-2xl font-bold">Aprovação Conciliação de Divida</h1>
+      <p className="text-muted-foreground">
+        Aprovar ou Rejeitar uma conciliação de divida.
+      </p>
       {/* ── Cabeçalho ── */}
 
       <Card className="p-8">
