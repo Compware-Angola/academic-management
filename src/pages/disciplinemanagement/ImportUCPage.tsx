@@ -40,6 +40,7 @@ import {
   FilterX,
   ArrowRight,
   RefreshCw,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -54,6 +55,7 @@ import {
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { useAddGradeCurricularPlanoMassa } from "@/hooks/discplina/use-add-grade-curricular-plano-massa";
+import { parseFilter } from "@/util/parse-filter";
 
 interface ImportUCPageProps {
   onSuccess?: () => void;
@@ -472,11 +474,11 @@ function ImportResultDialog({
 }
 
 export default function ImportUCPage() {
-  const [anoLectivo, setAnoLectivo] = useState<number>();
-  const [anoLectivoDestino, setAnoLectivoDestino] = useState<number>();
-  const [curso, setCurso] = useState<number>();
-  const [classe, setClasse] = useState<number>();
-  const [tipoCandidatura, setTipoCandidatura] = useState<number>();
+  const [anoLectivo, setAnoLectivo] = useState<number | string>();
+  const [anoLectivoDestino, setAnoLectivoDestino] = useState<number | string>();
+  const [curso, setCurso] = useState<number | string>();
+  const [classe, setClasse] = useState<number | string>();
+  const [tipoCandidatura, setTipoCandidatura] = useState<number | string>();
   const estado = 1;
 
   const { data: cursos, isLoading: loadingCursos } = useCursos();
@@ -490,9 +492,9 @@ export default function ImportUCPage() {
     isError,
     refetch,
   } = useGradeCurricular({
-    anoLectivo: anoLectivo as number,
-    curso: curso as number,
-    classe: classe as number,
+    anoLectivo: parseFilter(anoLectivo?.toString()),
+    curso: parseFilter(curso?.toString()),
+    classe: parseFilter(classe?.toString()),
     estado,
     page: 1,
     limit: 100,
@@ -506,6 +508,18 @@ export default function ImportUCPage() {
     setImportResult(null);
     setResultDialogOpen(false);
     refetch();
+  };
+  const clearAllFilters = () => {
+    setAnoLectivo('');
+    setAnoLectivoDestino('');
+    setCurso('');
+    setClasse('');
+    setTipoCandidatura('');
+    setSelected(new Set());
+    setExpandedGroups(new Set());
+    setFieldOverrides({});
+    setImportResult(null);
+    setResultDialogOpen(false);
   };
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
@@ -634,8 +648,8 @@ export default function ImportUCPage() {
 
     try {
       const payload: AddGradeCurricularPlanoMassaPayload = {
-        codigoCurso: curso as number,
-        codigoAnoLectivo: anoLectivoDestino,
+        codigoCurso: parseFilter(curso?.toString()),
+        codigoAnoLectivo: parseFilter(anoLectivoDestino?.toString()),
         itens: selectedItems.map((item) => {
           const overrides = fieldOverrides[item.codigo_disciplina] ?? {};
           const merged = { ...item, ...overrides };
@@ -678,18 +692,19 @@ export default function ImportUCPage() {
             onlyConfigurable={false}
             onChangeValue={(v) => setAnoLectivo(Number(v))}
             value={anoLectivo?.toString()}
-            tipoCandidaturaId={tipoCandidatura}
+            tipoCandidaturaId={Number(tipoCandidatura)}
             label="Ano Letivo (Origem)"
           />
         </div>
         <div>
           <label className="text-sm font-medium mb-2 block">Curso</label>
           <Select
-            value={curso ? String(curso) : undefined}
+            disabled={loadingCursos || !anoLectivo || !tipoCandidatura}
+            value={curso ? String(curso) : ''}
             onValueChange={(v) => setCurso(Number(v))}
-            disabled={loadingCursos}
+
           >
-            <SelectTrigger>
+            <SelectTrigger disabled={loadingCursos || !anoLectivo || !tipoCandidatura}>
               <SelectValue placeholder="Selecione..." />
             </SelectTrigger>
             <SelectContent>
@@ -722,6 +737,15 @@ export default function ImportUCPage() {
             </>
           )}
         </Button>
+        <Button
+          size="sm"
+
+          onClick={clearAllFilters}
+          className="shrink-0"
+        >
+          <X className="h-4 w-4 mr-2" />
+          Limpar Filtros
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
@@ -733,7 +757,7 @@ export default function ImportUCPage() {
           <AcademicYearsAvailableForOperationSelect
             onChangeValue={(v) => setAnoLectivoDestino(Number(v))}
             value={anoLectivoDestino?.toString()}
-            tipoCandidaturaId={tipoCandidatura}
+            tipoCandidaturaId={Number(tipoCandidatura)}
             label="Ano Lectivo (Destino)"
           />
         </div>
