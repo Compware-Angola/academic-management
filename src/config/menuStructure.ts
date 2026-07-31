@@ -429,6 +429,7 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/eliminados",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS_ELIMINADOS.sigla],
         },
+
         {
           title: "Horários por sala",
           url: "/horarios/sala",
@@ -788,7 +789,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
-        
+
 
         {
           title: "Fórmula de Definição das UCs",
@@ -869,7 +870,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla,
           ],
         },
-        
+
         {
           title: "Permissão fora do prazo",
           url: "/avaliacoes/permissao",

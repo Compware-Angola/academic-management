@@ -5,14 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   Clock,
   CalendarDays,
   Search,
@@ -25,9 +17,6 @@ import {
   ArrowRightLeft,
   RefreshCw,
   Download,
-  CheckCircle2,
-  XCircle,
-  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -45,11 +34,6 @@ import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurri
 import { useQueryImportSchedules } from "@/hooks/horario/use-query-import-schedules";
 import { useCreateImportSchedules } from "@/hooks/horario/use-create-import-schedules";
 import { Switch } from "@/components/ui/switch";
-import {
-  ImportResultResponse,
-  ImportResultStatus,
-} from "@/services/horario/create-import-horario";
-import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 
 // ─────────────────────────────────────────────────────────────
 // Config
@@ -65,16 +49,6 @@ const DIAS_SEMANA: { key: keyof Aulas; label: string }[] = [
   { key: "domingo", label: "Domingo" },
 ];
 
-const DIA_LABEL_BY_NUMBER: Record<number, string> = {
-  1: "Segunda",
-  2: "Terça",
-  3: "Quarta",
-  4: "Quinta",
-  5: "Sexta",
-  6: "Sábado",
-  7: "Domingo",
-};
-
 interface ImportFilters {
   fkanoLectivoOrigem?: number;
   fkanoLectivoDestino?: number;
@@ -82,47 +56,20 @@ interface ImportFilters {
   fkClasse?: number;
   fksemestre?: number;
   fkperiodo?: number;
-  tipoCandidatura?: number;
 }
 
-const STATUS_CONFIG: Record<
-  ImportResultStatus,
-  {
-    label: string;
-    icon: typeof CheckCircle2;
-    badgeClass: string;
-    dotClass: string;
-  }
-> = {
-  inserido: {
-    label: "Inserido",
-    icon: CheckCircle2,
-    badgeClass:
-      "bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400",
-    dotClass: "bg-emerald-500",
-  },
-  colisao_parcial: {
-    label: "Colisão Parcial",
-    icon: AlertTriangle,
-    badgeClass:
-      "bg-amber-500/10 text-amber-600 border-amber-500/30 dark:text-amber-400",
-    dotClass: "bg-amber-500",
-  },
-  colisao_total: {
-    label: "Colisão Total",
-    icon: XCircle,
-    badgeClass:
-      "bg-red-500/10 text-red-600 border-red-500/30 dark:text-red-400",
-    dotClass: "bg-red-500",
-  },
-  erro: {
-    label: "Erro",
-    icon: AlertCircle,
-    badgeClass:
-      "bg-red-600/10 text-red-700 border-red-600/30 dark:text-red-400",
-    dotClass: "bg-red-600",
-  },
-};
+// ─────────────────────────────────────────────────────────────
+// Serviço de importação — endpoint ainda não fornecido, mantido
+// mockado até existir o endpoint/hook real (ex.: useMutation).
+// ─────────────────────────────────────────────────────────────
+
+// async function importSchedulesService(payload: {
+//   anoLectivoDestino: number;
+//   horariosIds: number[];
+// }): Promise<void> {
+//   await new Promise((resolve) => setTimeout(resolve, 800));
+//   console.log("Importando horários (mock):", payload);
+// }
 
 // ─────────────────────────────────────────────────────────────
 // Estados visuais
@@ -363,242 +310,6 @@ function DisciplinaHorariosCard({
 }
 
 // ─────────────────────────────────────────────────────────────
-// Modal de resultado da importação
-// ─────────────────────────────────────────────────────────────
-
-function ImportResultSummaryCard({
-  label,
-  value,
-  icon: Icon,
-  className,
-  active,
-  onClick,
-}: {
-  label: string;
-  value: number;
-  icon: typeof CheckCircle2;
-  className?: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex flex-col items-start gap-1.5 rounded-lg border p-3 text-left transition-colors",
-        active ? "border-primary bg-primary/5" : "hover:border-primary/40",
-      )}
-    >
-      <div
-        className={cn(
-          "flex items-center gap-1.5 text-xs font-medium",
-          className,
-        )}
-      >
-        <Icon className="h-3.5 w-3.5" />
-        {label}
-      </div>
-      <span className="text-2xl font-bold tabular-nums">{value}</span>
-    </button>
-  );
-}
-
-function ImportResultDialog({
-  result,
-  open,
-  onOpenChange,
-}: {
-  result: ImportResultResponse | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const [statusFilter, setStatusFilter] = useState<
-    "todos" | ImportResultStatus
-  >("todos");
-
-  const filteredDetalhes = useMemo(() => {
-    if (!result) return [];
-    if (statusFilter === "todos") return result.detalhes;
-    return result.detalhes.filter((d) => d.status === statusFilter);
-  }, [result, statusFilter]);
-
-  if (!result) return null;
-
-  const taxaSucesso =
-    result.totalProcessados > 0
-      ? Math.round((result.totalInseridos / result.totalProcessados) * 100)
-      : 0;
-
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        onOpenChange(v);
-        if (!v) setStatusFilter("todos");
-      }}
-    >
-      <DialogContent className="max-w-4xl!">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-primary" />
-            Resultado da Importação
-          </DialogTitle>
-          <DialogDescription>
-            {result.totalInseridos} de {result.totalProcessados} horário
-            {result.totalProcessados !== 1 ? "s" : ""} importado
-            {result.totalInseridos !== 1 ? "s" : ""} com sucesso ({taxaSucesso}
-            %).
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Barra de progresso */}
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className={cn(
-              "h-full rounded-full transition-all",
-              taxaSucesso === 100
-                ? "bg-emerald-500"
-                : taxaSucesso === 0
-                  ? "bg-red-500"
-                  : "bg-amber-500",
-            )}
-            style={{ width: `${taxaSucesso}%` }}
-          />
-        </div>
-
-        {/* Cards de resumo (clicáveis para filtrar) */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          <ImportResultSummaryCard
-            label="Processados"
-            value={result.totalProcessados}
-            icon={ClipboardList}
-            className="text-foreground"
-            active={statusFilter === "todos"}
-            onClick={() => setStatusFilter("todos")}
-          />
-          <ImportResultSummaryCard
-            label="Inseridos"
-            value={result.totalInseridos}
-            icon={CheckCircle2}
-            className="text-emerald-600 dark:text-emerald-400"
-            active={statusFilter === "inserido"}
-            onClick={() => setStatusFilter("inserido")}
-          />
-          <ImportResultSummaryCard
-            label="Colisão Parcial"
-            value={result.totalColisaoParcial}
-            icon={AlertTriangle}
-            className="text-amber-600 dark:text-amber-400"
-            active={statusFilter === "colisao_parcial"}
-            onClick={() => setStatusFilter("colisao_parcial")}
-          />
-          <ImportResultSummaryCard
-            label="Colisão Total"
-            value={result.totalColisaoTotal}
-            icon={XCircle}
-            className="text-red-600 dark:text-red-400"
-            active={statusFilter === "colisao_total"}
-            onClick={() => setStatusFilter("colisao_total")}
-          />
-          <ImportResultSummaryCard
-            label="Erros"
-            value={result.totalErros}
-            icon={AlertCircle}
-            className="text-red-700 dark:text-red-400"
-            active={statusFilter === "erro"}
-            onClick={() => setStatusFilter("erro")}
-          />
-        </div>
-
-        {/* Lista detalhada */}
-        <div className="max-h-[340px] overflow-y-auto space-y-2 pr-1 -mr-1">
-          {filteredDetalhes.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              Nenhum item para este filtro.
-            </p>
-          ) : (
-            filteredDetalhes.map((item) => {
-              const config = STATUS_CONFIG[item.status];
-              const Icon = config.icon;
-              return (
-                <div
-                  key={item.scheduleId}
-                  className="flex items-start gap-3 rounded-lg border p-3"
-                >
-                  <span
-                    className={cn(
-                      "mt-1 h-2 w-2 shrink-0 rounded-full",
-                      config.dotClass,
-                    )}
-                  />
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm font-medium truncate">
-                        {item.designacaoOrigem}
-                        {item.designacaoDestino &&
-                          item.designacaoDestino !== item.designacaoOrigem && (
-                            <span className="text-muted-foreground">
-                              {" "}
-                              → {item.designacaoDestino}
-                            </span>
-                          )}
-                      </p>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "gap-1 text-xs shrink-0",
-                          config.badgeClass,
-                        )}
-                      >
-                        <Icon className="h-3 w-3" />
-                        {config.label}
-                      </Badge>
-                    </div>
-
-                    {(item.diasInseridos.length > 0 ||
-                      item.diasColididos.length > 0) && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.diasInseridos.map((dia) => (
-                          <span
-                            key={`ins-${dia}`}
-                            className="text-xs rounded-full px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          >
-                            {DIA_LABEL_BY_NUMBER[dia] ?? dia}
-                          </span>
-                        ))}
-                        {item.diasColididos.map((dia) => (
-                          <span
-                            key={`col-${dia}`}
-                            className="text-xs rounded-full px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400"
-                          >
-                            {DIA_LABEL_BY_NUMBER[dia] ?? dia}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {item.mensagem && (
-                      <p className="text-xs text-muted-foreground">
-                        {item.mensagem}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Fechar</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
 // Componente principal
 // ─────────────────────────────────────────────────────────────
 
@@ -609,11 +320,6 @@ export function ImportSchedules() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [isImporting, setIsImporting] = useState(false);
   const [hasColision, setHasCosilion] = useState<boolean>(false);
-
-  const [importResult, setImportResult] = useState<ImportResultResponse | null>(
-    null,
-  );
-  const [resultDialogOpen, setResultDialogOpen] = useState(false);
 
   const { mutateAsync: importSchedulesService } = useCreateImportSchedules();
   const filtrosCompletos =
@@ -706,14 +412,16 @@ export function ImportSchedules() {
         };
       });
 
-      const result = (await importSchedulesService({
+      await importSchedulesService({
         fkanoLectivoDestino: filters.fkanoLectivoDestino,
         schedulesImported: schedulesImported,
         permitiColisao: hasColision,
-      })) as ImportResultResponse;
-
-      setImportResult(result);
-      setResultDialogOpen(true);
+      });
+      toast.success(
+        `${selected.size} horário${selected.size !== 1 ? "s" : ""} importado${
+          selected.size !== 1 ? "s" : ""
+        } com sucesso!`,
+      );
       setSelected(new Set());
       refetch();
     } catch {
@@ -755,14 +463,7 @@ export function ImportSchedules() {
 
           <CardContent className="p-4 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              <TipoCandidaturaSelect
-                value={filters.tipoCandidatura?.toString()}
-                onChangeValue={(v) =>
-                  setFilters((f) => ({ ...f, fkanoLectivoOrigem: Number(v) }))
-                }
-              />
               <AcademicYearsAvailableForOperationSelect
-                tipoCandidaturaId={filters.tipoCandidatura}
                 onlyConfigurable={false}
                 label="Ano Lectivo Origem"
                 value={filters.fkanoLectivoOrigem?.toString()}
@@ -772,7 +473,6 @@ export function ImportSchedules() {
               />
               <AcademicYearsAvailableForOperationSelect
                 onlyConfigurable
-                tipoCandidaturaId={filters.tipoCandidatura}
                 label="Ano Lectivo Destino"
                 value={filters.fkanoLectivoDestino?.toString()}
                 onChangeValue={(v) =>
@@ -901,12 +601,6 @@ export function ImportSchedules() {
           </div>
         </div>
       )}
-
-      <ImportResultDialog
-        result={importResult}
-        open={resultDialogOpen}
-        onOpenChange={setResultDialogOpen}
-      />
     </div>
   );
 }

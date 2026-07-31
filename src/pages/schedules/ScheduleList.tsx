@@ -35,6 +35,7 @@ import {
   Check,
   Pencil,
   UserCheck,
+  DownloadCloudIcon,
 } from "lucide-react";
 
 import ScheduleDetailsModal from "./components/ScheduleDetailsModal";
@@ -402,37 +403,45 @@ export default function ScheduleList() {
           </div>
 
           {/* Botão Limpar Filtros */}
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => {
-              setFilters({
-                tipoCandidatura: "1",
-                anoLetivo: "",
-                semestre: "",
-                periodo: "",
-                curso: "",
-                anoCurricular: "",
-                unidadeCurricular: "",
-                estado: "",
-                afetacaoDocente: "",
-              });
+          <div className="flex space-x-1">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => {
+                setFilters({
+                  tipoCandidatura: "1",
+                  anoLetivo: "",
+                  semestre: "",
+                  periodo: "",
+                  curso: "",
+                  anoCurricular: "",
+                  unidadeCurricular: "",
+                  estado: "",
+                  afetacaoDocente: "",
+                });
 
-              setPage(1);
-            }}
-            className=" hover:text-foreground hover:bg-muted/50"
-            disabled={
-              filters.tipoCandidatura === "1" &&
-              !filters.anoLetivo &&
-              !filters.semestre &&
-              !filters.periodo &&
-              !filters.curso &&
-              !filters.anoCurricular &&
-              !filters.unidadeCurricular
-            }
-          >
-            Limpar Filtros
-          </Button>
+                setPage(1);
+              }}
+              className=" hover:text-foreground hover:bg-muted/50"
+              disabled={
+                filters.tipoCandidatura === "1" &&
+                !filters.anoLetivo &&
+                !filters.semestre &&
+                !filters.periodo &&
+                !filters.curso &&
+                !filters.anoCurricular &&
+                !filters.unidadeCurricular
+              }
+            >
+              Limpar Filtros
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/horarios/import")}
+            >
+              <DownloadCloudIcon /> Importar Horário
+            </Button>
+          </div>
         </CardHeader>
 
         <CardContent>
