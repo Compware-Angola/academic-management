@@ -30,12 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutationUpdateAgendaValidationStatus } from "@/hooks/post-graduation/use-mutation-update-agenda-validation-status";
 import { useQueryAgendaValidationOptions } from "@/hooks/post-graduation/use-query-agenda-validation-options";
 import { useQueryAgendaValidations } from "@/hooks/post-graduation/use-query-agenda-validations";
@@ -46,12 +41,12 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useToast } from "@/hooks/use-toast";
 import type { PostGraduationDegree } from "@/services/post-graduation/fetch-degrees.service";
 import type { PostGraduationAgendaValidation } from "@/services/post-graduation/fetch-agenda-validations.service";
-import { viewFile } from "@/services/upload/upload-single.service";
 import { formatDateTimePt } from "@/util/date-formate";
 import {
   AgendaValidationDecision,
   AgendaValidationDecisionDialog,
 } from "./components/AgendaValidationDecisionDialog";
+import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
 
 type ActiveTab = "submitted" | "missing";
 
@@ -177,8 +172,9 @@ export default function PostGraduationAgendaValidation() {
   const [missingLimit, setMissingLimit] = useState(10);
   const [selectedRecord, setSelectedRecord] =
     useState<PostGraduationAgendaValidation | null>(null);
-  const [decision, setDecision] =
-    useState<AgendaValidationDecision | null>(null);
+  const [decision, setDecision] = useState<AgendaValidationDecision | null>(
+    null,
+  );
   const { toast } = useToast();
 
   const {
@@ -200,8 +196,7 @@ export default function PostGraduationAgendaValidation() {
   const degrees = useMemo(
     () =>
       (degreesResponse?.data ?? []).filter(
-        (degree): degree is DegreeOption =>
-          degree.id === 2 || degree.id === 3,
+        (degree): degree is DegreeOption => degree.id === 2 || degree.id === 3,
       ),
     [degreesResponse],
   );
@@ -213,13 +208,14 @@ export default function PostGraduationAgendaValidation() {
     [semestersResponse],
   );
 
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
+
   useEffect(() => {
     if (filters.academicYearId || academicYears.length === 0) return;
 
     const activeAcademicYear = academicYears.find((academicYear) =>
-      ["activo", "ativo"].includes(
-        academicYear.estado?.trim().toLowerCase(),
-      ),
+      ["activo", "ativo"].includes(academicYear.estado?.trim().toLowerCase()),
     );
 
     if (activeAcademicYear) {
@@ -287,8 +283,7 @@ export default function PostGraduationAgendaValidation() {
 
   const commonFilters = {
     ...baseParams,
-    courseId:
-      filters.courseId === "all" ? undefined : Number(filters.courseId),
+    courseId: filters.courseId === "all" ? undefined : Number(filters.courseId),
     curricularYearId:
       filters.curricularYearId === "all"
         ? undefined
@@ -327,10 +322,7 @@ export default function PostGraduationAgendaValidation() {
 
   const submittedRecords = submittedQuery.data?.data ?? [];
   const submittedTotal = submittedQuery.data?.total ?? 0;
-  const submittedTotalPages = Math.max(
-    1,
-    submittedQuery.data?.totalPages ?? 1,
-  );
+  const submittedTotalPages = Math.max(1, submittedQuery.data?.totalPages ?? 1);
   const missingRecords = missingQuery.data?.data ?? [];
   const missingTotal = missingQuery.data?.total ?? 0;
   const missingTotalPages = Math.max(1, missingQuery.data?.totalPages ?? 1);
@@ -369,18 +361,23 @@ export default function PostGraduationAgendaValidation() {
   }
 
   async function handleDownload(fileName: string) {
-    try {
-      const blob = await viewFile(fileName);
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank", "noopener,noreferrer");
-      window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
-    } catch (downloadError) {
+    const key = fileName;
+    if (!key) {
       toast({
         title: "Não foi possível abrir a pauta.",
-        description:
-          downloadError instanceof Error
-            ? downloadError.message
-            : "Ocorreu um erro ao buscar o ficheiro.",
+        description: "Nenhum documento encontrado.",
+        variant: "destructive",
+      });
+    }
+
+    try {
+      const { url } = await getFileUrl({ key, expiry: 3600 });
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Erro ao buscar documento:", error);
+      toast({
+        title: "Não foi possível abrir a pauta.",
+        description: "Ocorreu um erro ao buscar o ficheiro.",
         variant: "destructive",
       });
     }
@@ -487,9 +484,7 @@ export default function PostGraduationAgendaValidation() {
                 value: item.id,
                 label: item.designation,
               })}
-              onChange={(value) =>
-                handleBaseFilterChange("degreeId", value)
-              }
+              onChange={(value) => handleBaseFilterChange("degreeId", value)}
             />
 
             <FormSelect
@@ -503,9 +498,7 @@ export default function PostGraduationAgendaValidation() {
                 value: item.codigo,
                 label: item.designacao,
               })}
-              onChange={(value) =>
-                handleBaseFilterChange("semesterId", value)
-              }
+              onChange={(value) => handleBaseFilterChange("semesterId", value)}
             />
 
             <FormSelect

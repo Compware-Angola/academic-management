@@ -16,76 +16,77 @@ import { useMutationDiplomarAluno } from "@/hooks/students/use-mutation-diplomar
 import { useMutationDesdiplomarAluno } from "@/hooks/students/use-mutation-desdiplomar-aluno";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { Input } from "@/components/ui/input";
-import { useTypedFile, useTypedUpload } from "@/hooks/upload/use-upload-single";
 import { toast } from "sonner";
-import { useUploadSingle } from "@/hooks/upload/use-upload2-single";
-import { viewFile } from "@/services/upload/upload-single.service";
+import {
+  useUploadSingle,
+  useGetFileUrl,
+} from "@/hooks/upload/use-upload-single";
+import { FileFolder } from "@/enums/file-folder";
+import { ResponseUpload } from "@/services/upload/upload-single.service";
 
 type DiplomarProps = {
   value: string;
   codigoMatricula: number;
 };
-const today = new Date();
 
 export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
-
-  const formatDateForInput = (date: Date | undefined) => {
-    if (!date) return "";
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
   const [motivo, setMotivo] = useState("");
+  const [actaFile, setActaFile] = useState<File | null>(null);
+  const [dataActa, setDataActa] = useState<string>("");
 
   const { mutate: diplomarAluno, isPending } = useMutationDiplomarAluno();
   const { mutateAsync: desdiplomarAluno, isPending: isDesdiplomando } =
     useMutationDesdiplomarAluno();
-  const { mutateAsync: uploadFile, isPending: isUploading } = useUploadSingle();
 
-  const [actaFile, setActaFile] = useState<File | null>(null);
-  const [dataActa, setDataActa] = useState<string>("");
+  const { mutateAsync: uploadFile, isPending: isUploading } = useUploadSingle();
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
+
   const { data: student, isFetching } = useStudentDetail(codigoMatricula);
   const isDiplomado = student?.estado?.toLowerCase() === "diplomado";
 
-  const [isLoadingDocumento, setIsLoadingDocumento] = useState(false);
-
+  // `student.acta_filename` aqui deve guardar o `key` do S3, não o nome
+  // original do ficheiro — é o que a rota /view precisa para gerar a URL assinada.
   const handleVerDocumento = async () => {
-    const fileName = student?.acta_filename;
+    const key = student?.acta_filename;
 
-    if (!fileName) {
+    if (!key) {
       toast.error("Nenhum documento de acta encontrado para este estudante.");
       return;
     }
 
-    setIsLoadingDocumento(true);
     try {
-      const blob = await viewFile(fileName);
-      const url = URL.createObjectURL(blob);
+      const { url } = await getFileUrl({ key, expiry: 3600 });
       window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (error) {
       console.error("Erro ao buscar documento:", error);
       toast.error("Erro ao carregar o documento da acta.");
-    } finally {
-      setIsLoadingDocumento(false);
     }
   };
+
   async function handleDiplomar() {
     if (!dataActa) {
       toast.error("Informe a data da acta.");
       return;
     }
-
+    // if (!actaFile) {
+    //   toast.error("Selecione o ficheiro da acta.");
+    //   return;
+    // }
     try {
-      const uploaded = await uploadFile(actaFile);
-
+      let uploaded: ResponseUpload;
+      if (!!actaFile) {
+        uploaded = await uploadFile({
+          file: actaFile,
+          options: { folder: FileFolder.ACTAS_DIPLOMA },
+        });
+      }
       diplomarAluno({
         codigoMatricula,
         imprimeCartaConclusao: false,
         dataActa,
-        fileName: uploaded.file.filename,
+        fileName: uploaded?.key ?? null, // guardamos o key, não o filename
       });
     } catch (err: any) {
       const message = err?.message ?? "Erro ao enviar ficheiro da acta.";
