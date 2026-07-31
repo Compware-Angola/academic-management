@@ -98,11 +98,10 @@ export function ResultadoStep({
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-
-                      <span className="font-medium leading-tight">{it.descricao.replace(/propina/gi, "Mensalidade")}</span>
+                      <span className="font-medium leading-tight">
+                        {it.descricao.replace(/propina/gi, "Mensalidade")}
+                      </span>
                     </div>
-
-
 
                     {it.motivo && (
                       <p className="mt-2 flex items-start gap-1.5 rounded-md bg-amber-50 px-2 py-1.5 text-xs text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
