@@ -26,6 +26,7 @@ import { PermissionTypeDetails } from "@/constants/permission.type";
 import { ChangeShiftStudentPage } from "./change-shift";
 import { StudentMessages } from "./StudentMessages";
 import { Situacao } from "./situacao";
+import { GradesDuplicadasSection } from "./grades-duplicadas";
 
 type PerfilSectionProps = {
   value?: string;
@@ -98,6 +99,13 @@ export function PerfilSection({
       component: InscricoesSection,
     },
     {
+      value: "grades-duplicadas",
+      label: "Disciplinas Duplicadas",
+      icon: Ban, // ou outro ícone à tua escolha
+      permission: hasPermission(PermissionTypeDetails.VER_INSCRICOES.sigla), // ajusta à permissão correcta
+      component: GradesDuplicadasSection,
+    },
+    {
       value: "inscricoes-uc",
       label: "Fazer Inscrições em UC",
       icon: Book,
@@ -140,7 +148,9 @@ export function PerfilSection({
       value: "student-messages",
       label: "Mensagens",
       icon: Mail,
-      permission: hasPermission(PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla),
+      permission: hasPermission(
+        PermissionTypeDetails.SOLICITACOES_ENCAMINHADAS.sigla,
+      ),
       component: StudentMessages,
     },
     {
@@ -149,7 +159,7 @@ export function PerfilSection({
       icon: Book,
       permission: true,
       component: Situacao,
-    }
+    },
   ] as const;
   return (
     <TabsContent value={value}>
