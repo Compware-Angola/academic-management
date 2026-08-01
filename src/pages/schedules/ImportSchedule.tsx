@@ -273,10 +273,11 @@ function DisciplinaHorariosCard({
             onClick={() => onToggleAll(disciplina.horarios)}
           >
             {todosSelecionados ? (
-              <Square className="h-3.5 w-3.5 mr-1.5" />
-            ) : (
               <CheckSquare className="h-3.5 w-3.5 mr-1.5" />
+            ) : (
+              <Square className="h-3.5 w-3.5 mr-1.5" />
             )}
+
             {todosSelecionados
               ? "Desmarcar todos"
               : "Seleccionar todos os horários"}
@@ -558,25 +559,25 @@ function ImportResultDialog({
 
                     {(item.diasInseridos.length > 0 ||
                       item.diasColididos.length > 0) && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.diasInseridos.map((dia) => (
-                          <span
-                            key={`ins-${dia}`}
-                            className="text-xs rounded-full px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          >
-                            {DIA_LABEL_BY_NUMBER[dia] ?? dia}
-                          </span>
-                        ))}
-                        {item.diasColididos.map((dia) => (
-                          <span
-                            key={`col-${dia}`}
-                            className="text-xs rounded-full px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400"
-                          >
-                            {DIA_LABEL_BY_NUMBER[dia] ?? dia}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                        <div className="flex flex-wrap gap-1.5">
+                          {item.diasInseridos.map((dia) => (
+                            <span
+                              key={`ins-${dia}`}
+                              className="text-xs rounded-full px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            >
+                              {DIA_LABEL_BY_NUMBER[dia] ?? dia}
+                            </span>
+                          ))}
+                          {item.diasColididos.map((dia) => (
+                            <span
+                              key={`col-${dia}`}
+                              className="text-xs rounded-full px-2 py-0.5 bg-red-500/10 text-red-600 dark:text-red-400"
+                            >
+                              {DIA_LABEL_BY_NUMBER[dia] ?? dia}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                     {item.mensagem && (
                       <p className="text-xs text-muted-foreground">
@@ -893,9 +894,8 @@ export function ImportSchedules() {
                 )}
                 {isImporting
                   ? "A importar..."
-                  : `Importar Horários${
-                      selected.size > 0 ? ` (${selected.size})` : ""
-                    }`}
+                  : `Importar Horários${selected.size > 0 ? ` (${selected.size})` : ""
+                  }`}
               </Button>
             </div>
           </div>
