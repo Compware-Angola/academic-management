@@ -759,7 +759,12 @@ export function ImportSchedules() {
               <TipoCandidaturaSelect
                 value={filters.tipoCandidatura?.toString()}
                 onChangeValue={(v) =>
-                  setFilters((f) => ({ ...f, fkanoLectivoOrigem: Number(v) }))
+                  setFilters((f) => ({
+                    ...f,
+                    tipoCandidatura: Number(v),
+                    fkanoLectivoOrigem: undefined,
+                    fkanoLectivoDestino: undefined,
+                  }))
                 }
               />
               <AcademicYearsAvailableForOperationSelect
