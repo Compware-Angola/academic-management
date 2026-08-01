@@ -67,7 +67,6 @@ export function ParametrosForm({
             onChangeValue={onChangeOrigemAno}
             tipoCandidaturaId={tipoCandidatura}
             onlyConfigurable={false}
-
           />
 
           <AcademicYearsAvailableForOperationSelect
