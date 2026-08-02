@@ -30,16 +30,21 @@ import { useCursos } from "@/hooks/use-cursos";
 import { DisciplinaCommandSelect } from "./Disciplinacommandselect";
 import { SelectionList } from "./SelectionList";
 import { LatexText } from "@/util/LatexText";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
+import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 
 export type ProvaForm = {
   descricao: string;
   senhaProva: string;
   anoLetivoId: string;
+  data: string;
+  inicio: string;
   duracao: string;
   texto: string;
   perguntas: string;
   disciplinas: string;
   cursos: string;
+  local: string;
 };
 
 function parseIdValues(value: string) {
@@ -86,7 +91,7 @@ export function ProvaFormDialog({
     const termo = searchCurso.trim().toLowerCase();
     if (!termo) return todosOsCursos;
     return todosOsCursos.filter((c) =>
-      c.designacao.toLowerCase().includes(termo)
+      c.designacao.toLowerCase().includes(termo),
     );
   }, [todosOsCursos, searchCurso]);
 
@@ -96,15 +101,22 @@ export function ProvaFormDialog({
   const [page, setPage] = useState(1);
   const search = useDebounce(searchInput, 400);
 
-  const { data: perguntasResponse, isLoading: isLoadingPerguntas } = usePerguntas({
-    descricao: search || undefined,
-    disciplinaId: parseFilter(filtroDisciplina),
-    page,
-    limit: 10,
-  });
-
+  const { data: perguntasResponse, isLoading: isLoadingPerguntas } =
+    usePerguntas({
+      descricao: search || undefined,
+      disciplinaId: parseFilter(filtroDisciplina),
+      page,
+      limit: 10,
+    });
+  console.log("Console", form);
   const perguntas = perguntasResponse?.data ?? [];
   const pagination = perguntasResponse?.pagination;
+
+  const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
+    anoLectivo: Number(23),
+    tipoAula: Number(7),
+    periodo: Number(5),
+  });
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
@@ -164,6 +176,55 @@ export function ProvaFormDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Data da Prova {isEditing ? "" : "*"}</Label>
+            <Input
+              type="date"
+              value={form.data}
+              min={new Date().toISOString().split("T")[0]}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  data: event.target.value,
+                }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Início da Prova {isEditing ? "" : "*"}</Label>
+            <Input
+              type="time"
+              value={form.inicio}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  inicio: event.target.value,
+                }))
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormCommandSelect
+              label="Local da Prova*"
+              width="full"
+              value={form.local}
+              isLoading={isLoadingSala}
+              placeholder={isLoadingSala ? "Carregando..." : "Selecione a Sala"}
+              options={salas ?? []}
+              map={(sala) => ({
+                key: sala.salaid,
+                value: sala.salaid.toString(),
+                label: sala.sala,
+              })}
+              onChange={(v) =>
+                setForm((current) => ({
+                  ...current,
+                  local: v,
+                }))
+              }
+            />
           </div>
 
           <div className="space-y-2">
@@ -225,7 +286,8 @@ export function ProvaFormDialog({
               }
             />
             <p className="text-xs text-muted-foreground">
-              {parseIdValues(form.disciplinas).length} disciplina(s) selecionada(s)
+              {parseIdValues(form.disciplinas).length} disciplina(s)
+              selecionada(s)
             </p>
           </div>
 
@@ -273,7 +335,6 @@ export function ProvaFormDialog({
                 setForm((current) => ({ ...current, perguntas: value }))
               }
             />
-
 
             {pagination && pagination.totalPages > 1 && (
               <div className="flex items-center justify-between text-sm text-muted-foreground pt-1">
