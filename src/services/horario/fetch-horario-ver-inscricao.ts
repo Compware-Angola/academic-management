@@ -8,22 +8,24 @@ export type HorarioVerInscricao = {
   disciplina: string;
 };
 
-type FindHorarioVerInscricaoParams = {
-  curso: string;
-  gradeCurricular: string;
-  anoLectivo: string;
+export type FindHorarioVerInscricaoParams = {
+  curso: number;
+  gradeCurricular: number;
+  anoLectivo: number;
+  periodo?: number;
 };
 
 export async function fetchHorarioVerInscricao(
   params: FindHorarioVerInscricaoParams,
 ): Promise<HorarioVerInscricao[]> {
-  const { curso, gradeCurricular, anoLectivo } = params;
+  const { curso, gradeCurricular, anoLectivo, periodo } = params;
 
   const { data } = await axiosNestGa.get("dropdown-filters/horario-ver-inscricao", {
     params: {
       curso,
       gradeCurricular,
       anoLectivo,
+      periodo,
     },
   });
 

@@ -142,6 +142,7 @@ export const ModalHorario = ({
                 anoLectivo={horarionDetails?.anoLectivo ?? ""}
                 curso={horarionDetails?.curso ?? ""}
                 gradeCurricular={horarionDetails?.codigoGradeCurricular ?? ""}
+                periodo={filters.periodo ?? ""}
               />
             </div>
           </div>

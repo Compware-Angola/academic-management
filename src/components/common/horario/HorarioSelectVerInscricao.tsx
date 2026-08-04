@@ -10,6 +10,7 @@ type Props = {
   curso: string;
   gradeCurricular: string;
   labelMode?: LabelMode;
+  periodo?: string;
 };
 
 export function HorarioVerInscricaoSelect({
@@ -18,11 +19,13 @@ export function HorarioVerInscricaoSelect({
   anoLectivo,
   curso,
   gradeCurricular,
+  periodo
 }: Props) {
   const { data: horarios, isLoading } = useQueryHorarioVerInscricao({
-    anoLectivo: anoLectivo,
-    curso: curso,
-    gradeCurricular: gradeCurricular,
+    anoLectivo: parseFilter(anoLectivo),
+    curso: parseFilter(curso),
+    gradeCurricular: parseFilter(gradeCurricular),
+    periodo: parseFilter(periodo)
   });
 
   // sempre que a grade curricular mudar, limpa o horário selecionado
