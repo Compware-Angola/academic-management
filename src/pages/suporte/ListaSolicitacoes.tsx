@@ -1,25 +1,11 @@
 // pages/suporte/solicitacoes.tsx
-import { useState } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   useSolicitacoesSuporte,
   useSolicitacaoDetail,
   useResponderSolicitacao,
 } from "@/hooks/suporte/use-query-solicitacao-suporte";
 import { useAllTiposSuporte } from "@/hooks/suporte/use-query-tipo-suporte";
-import { useUploadSingle } from "@/hooks/upload/use-upload-single";
-import { ResponderSolicitacaoPayload } from "@/services/suporte/solicitacao-suporte.service";
-import { viewFile } from "@/services/upload/upload-single.service";
-import { ApiError } from "@/error";
-import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FiltrosSolicitacoes } from "./components/FiltrosSolicitacoes";
 import { TabelaSolicitacoes } from "./components/TabelaSolicitacoes";
 import { BadgeStatus } from "./components/BadgeStatus";
@@ -27,13 +13,9 @@ import { Paginacao } from "./components/Paginacao";
 import { ModalDetalhesSolicitacao } from "./components/ModalDetalhesSolicitacao";
 import { ModalAnexos } from "./components/ModalAnexos";
 import { SolicitacoesSuporteHeader } from "./components/SolicitacoesSuporteHeader";
-import { useDebounce } from "@/hooks/use-debounce";
-
 import { RotateCw } from "lucide-react";
 import { useSolicitacoesSuporteLogic } from "./components/use-solicitacoes-suporte";
 import { Button } from "@/components/ui/button";
-
-const ITEMS_PER_PAGE = 10;
 
 export default function ListaSolicitacoes() {
   const {
@@ -51,8 +33,8 @@ export default function ListaSolicitacoes() {
     solicitacaoDetail,
     respostaTexto,
     setRespostaTexto,
-    files,
-    uploading,
+    selectedFiles,
+    isUploading,
     showAnexos,
     solicitacaoAnexos,
     isLoadingList,
@@ -64,19 +46,15 @@ export default function ListaSolicitacoes() {
     handleLimpar,
     handleVerDetalhes,
     handleVerAnexos,
-    handleUploadFile,
+    handleUploadFiles,
+    handleRemoveFile,
     handleEnviarResposta,
     handleDownload,
-    setFiles,
-    setFileNames,
     setShowAnexos,
     listError,
     fileNames,
     responderMutationIsPending,
-
   } = useSolicitacoesSuporteLogic();
-
-
 
   const solicitacoes = paginatedResponse?.data ?? [];
   const totalPages = paginatedResponse?.totalPages ?? 1;
@@ -84,7 +62,6 @@ export default function ListaSolicitacoes() {
 
   return (
     <div className="container mx-auto space-y-6 py-6">
-      {/* Cabeçalho */}
       <SolicitacoesSuporteHeader />
       <FiltrosSolicitacoes
         searchTerm={searchTerm}
@@ -97,17 +74,26 @@ export default function ListaSolicitacoes() {
         onFiltrar={handleFiltrar}
         onLimpar={handleLimpar}
       />
-      {
-        isLoadingList ? (
-          <div className="space-y-6 p-6">
-            <Skeleton className="h-[500px] w-full rounded-md" />
-          </div>
-        ) : (
-          <>
-            {listError ? <div className="p-10 text-center text-destructive">
-              <p className="text-lg font-medium">Erro ao carregar as solicitações</p>
-              <Button className="text-sm mt-2" onClick={() => refetchSolicitacoes()}><RotateCw /> Tentar novamente</Button>
-            </div> : <>
+      {isLoadingList ? (
+        <div className="space-y-6 p-6">
+          <Skeleton className="h-[500px] w-full rounded-md" />
+        </div>
+      ) : (
+        <>
+          {listError ? (
+            <div className="p-10 text-center text-destructive">
+              <p className="text-lg font-medium">
+                Erro ao carregar as solicitações
+              </p>
+              <Button
+                className="text-sm mt-2"
+                onClick={() => refetchSolicitacoes()}
+              >
+                <RotateCw /> Tentar novamente
+              </Button>
+            </div>
+          ) : (
+            <>
               <TabelaSolicitacoes
                 solicitacoes={solicitacoes}
                 onVerDetalhes={handleVerDetalhes}
@@ -129,16 +115,11 @@ export default function ListaSolicitacoes() {
                 solicitacaoDetail={solicitacaoDetail}
                 respostaTexto={respostaTexto}
                 setRespostaTexto={setRespostaTexto}
-                files={files}
+                selectedFiles={selectedFiles}
                 fileNames={fileNames}
-                uploading={uploading}
-                onUploadFile={handleUploadFile}
-                onRemoveFile={(slot) => {
-                  const fileKey = `file${slot}` as keyof typeof files;
-                  const nameKey = `fileName${slot}` as keyof typeof fileNames;
-                  setFiles((prev) => ({ ...prev, [fileKey]: null }));
-                  setFileNames((prev) => ({ ...prev, [nameKey]: null }));
-                }}
+                isUploading={isUploading}
+                onUploadFiles={handleUploadFiles}
+                onRemoveFile={handleRemoveFile}
                 onEnviarResposta={handleEnviarResposta}
                 isPending={responderMutationIsPending}
                 onDownload={handleDownload}
@@ -150,12 +131,10 @@ export default function ListaSolicitacoes() {
                 solicitacao={solicitacaoAnexos}
                 onDownload={handleDownload}
               />
-            </>}
-
-          </>
-
-        )
-      }
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

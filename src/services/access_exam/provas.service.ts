@@ -29,6 +29,9 @@ export type ProvaResumo = {
   disciplinas: ProvaRef[];
   cursos: ProvaRef[];
   id: number;
+  data: string | null;
+  inicio: string | null;
+  local: string | null;
 };
 
 export type ProvaPerguntaDetalhe = {
@@ -95,6 +98,9 @@ export type CreateProvaPayload = {
   perguntas?: ProvaRef[];
   disciplinas?: ProvaRef[];
   cursos?: ProvaRef[];
+  data: string;
+  inicio: string;
+  local: string;
 };
 
 export type UpdateProvaPayload = {
@@ -105,10 +111,13 @@ export type UpdateProvaPayload = {
   perguntas?: ProvaRef[];
   cursos?: ProvaRef[];
   disciplinas?: ProvaRef[];
+  data?: string;
+  inicio?: string;
+  local?: string;
 };
 
 export async function fetchProvas(
-  params: ProvasParams
+  params: ProvasParams,
 ): Promise<ProvasResponse> {
   const { data } = await axiosNestGa.get("/exames-de-acesso/provas", {
     params,
@@ -122,7 +131,7 @@ export async function fetchProvaById(id: number): Promise<ProvaDetalhe> {
 }
 
 export async function createProva(
-  payload: CreateProvaPayload
+  payload: CreateProvaPayload,
 ): Promise<MessageResponse> {
   const { data } = await axiosNestGa.post("/exames-de-acesso/provas", payload);
   return data;
@@ -130,11 +139,11 @@ export async function createProva(
 
 export async function updateProva(
   id: number,
-  payload: UpdateProvaPayload
+  payload: UpdateProvaPayload,
 ): Promise<MessageResponse> {
   const { data } = await axiosNestGa.patch(
     `/exames-de-acesso/provas/${id}`,
-    payload
+    payload,
   );
   return data;
 }

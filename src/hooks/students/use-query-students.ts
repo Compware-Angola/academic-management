@@ -1,8 +1,25 @@
 // hooks/useStudents.ts
-import { GetAcademicHistoryEquivalencyParams, GetAcademicHistoryMigrationParams, GetAcademicHistoryParams, studentAcademicHistoryEquivalencyService, studentAcademicHistoryMigrationService, studentAcademicHistoryService, } from "@/services/students/academic-history.service";
-import { activeConfirmation, ActiveConfirmationPayload } from "@/services/students/active-confirmation.service";
-import { activeRegistration, ActiveRegistrationPayload } from "@/services/students/active-registration.service";
-import { resetPassword, ResetPasswordPayload } from "@/services/students/reset-password.service";
+import { GradeCurricularDuplicada } from "@/components/views/docs-students/certificado-notas/types";
+import {
+  GetAcademicHistoryEquivalencyParams,
+  GetAcademicHistoryMigrationParams,
+  GetAcademicHistoryParams,
+  studentAcademicHistoryEquivalencyService,
+  studentAcademicHistoryMigrationService,
+  studentAcademicHistoryService,
+} from "@/services/students/academic-history.service";
+import {
+  activeConfirmation,
+  ActiveConfirmationPayload,
+} from "@/services/students/active-confirmation.service";
+import {
+  activeRegistration,
+  ActiveRegistrationPayload,
+} from "@/services/students/active-registration.service";
+import {
+  resetPassword,
+  ResetPasswordPayload,
+} from "@/services/students/reset-password.service";
 import {
   fetchStudentEstatisticas,
   fetchStudentsSugestoes,
@@ -17,6 +34,9 @@ import {
   DefinirEspecialidadePayload,
   InfoBolsaEstudante,
   fetchInfoBolsaEstudante,
+  FetchGradesDuplicadasParams,
+  updateEstadoGradeCurricularAluno,
+  fetchGradesCurricularesDuplicadas,
 } from "@/services/students/students.service";
 
 import {
@@ -24,7 +44,10 @@ import {
   ListStudentsPayload,
   ListStudentsResponse,
 } from "@/services/students/students.service";
-import { updateContacts, UpdateContactsPayload } from "@/services/students/update-contacts";
+import {
+  updateContacts,
+  UpdateContactsPayload,
+} from "@/services/students/update-contacts";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -76,8 +99,15 @@ export const useStudentInfoBolsa = (codigoMatricula?: number | string) => {
 export const useStudentDisciplinas = (
   params: FetchDisciplinasMatriculadasParams,
 ) => {
-  const { matriculaId, anoLectivo, semestre, page = 1, limit = 25, classes, ignorarEliminados } = params;
-
+  const {
+    matriculaId,
+    anoLectivo,
+    semestre,
+    page = 1,
+    limit = 25,
+    classes,
+    ignorarEliminados,
+  } = params;
 
   const queryKey = [
     "student-disciplinas",
@@ -93,11 +123,11 @@ export const useStudentDisciplinas = (
   return useQuery<DisciplinasResponse, Error>({
     queryKey,
     queryFn: () => fetchDisciplinasMatriculadas(params),
-    enabled: !!matriculaId && String(matriculaId).trim().length > 0 && !!anoLectivo,
+    enabled:
+      !!matriculaId && String(matriculaId).trim().length > 0 && !!anoLectivo,
     staleTime: 5 * 60 * 1000, // 5 minutos (disciplinas mudam pouco)
     gcTime: 30 * 60 * 1000,
     retry: 1,
-
   });
 };
 
@@ -157,13 +187,12 @@ export function useUpdateContacts() {
   });
 }
 
-
-
 export function useUpdatePersonalData() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: UpdatePersonalDataPayload) => updatePersonalData(payload),
+    mutationFn: (payload: UpdatePersonalDataPayload) =>
+      updatePersonalData(payload),
     onSuccess: () => {
       toast.success("Dados pessoais atualizados com sucesso!");
       queryClient.invalidateQueries({
@@ -213,26 +242,47 @@ export function useActiveConfirmacao() {
 
 export const useStudentAcademicHistory = (params: GetAcademicHistoryParams) => {
   return useQuery({
-    queryKey: ['student-academic-history', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryKey: [
+      "student-academic-history",
+      params.matriculaId,
+      params.anoLectivoId,
+      params.page,
+      params.search,
+    ],
     queryFn: () => studentAcademicHistoryService(params),
     enabled: !!params.matriculaId && !!params.anoLectivoId,
     staleTime: 1000 * 60 * 5,
   });
 };
 
-
-export const useStudentAcademicHistoryEquivalency = (params: GetAcademicHistoryEquivalencyParams) => {
+export const useStudentAcademicHistoryEquivalency = (
+  params: GetAcademicHistoryEquivalencyParams,
+) => {
   return useQuery({
-    queryKey: ['student-academic-history-equivalency', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryKey: [
+      "student-academic-history-equivalency",
+      params.matriculaId,
+      params.anoLectivoId,
+      params.page,
+      params.search,
+    ],
     queryFn: () => studentAcademicHistoryEquivalencyService(params),
     enabled: !!params.matriculaId,
     staleTime: 1000 * 60 * 5,
   });
 };
 
-export const useStudentAcademicHistoryMigration = (params: GetAcademicHistoryMigrationParams) => {
+export const useStudentAcademicHistoryMigration = (
+  params: GetAcademicHistoryMigrationParams,
+) => {
   return useQuery({
-    queryKey: ['student-academic-history-migration', params.matriculaId, params.anoLectivoId, params.page, params.search],
+    queryKey: [
+      "student-academic-history-migration",
+      params.matriculaId,
+      params.anoLectivoId,
+      params.page,
+      params.search,
+    ],
     queryFn: () => studentAcademicHistoryMigrationService(params),
     enabled: !!params.matriculaId,
     staleTime: 1000 * 60 * 5,
@@ -242,7 +292,8 @@ export const useStudentAcademicHistoryMigration = (params: GetAcademicHistoryMig
 export function useDefinirEspecialidade() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: DefinirEspecialidadePayload) => definirEspecialidade(payload),
+    mutationFn: (payload: DefinirEspecialidadePayload) =>
+      definirEspecialidade(payload),
     onSuccess: () => {
       toast.success("Especialidade definida com sucesso!");
       queryClient.invalidateQueries({
@@ -251,3 +302,43 @@ export function useDefinirEspecialidade() {
     },
   });
 }
+
+export const useGradesCurricularesDuplicadas = (
+  params: FetchGradesDuplicadasParams,
+) => {
+  const { numeroDeMatricula, anoLectivo } = params;
+
+  return useQuery<GradeCurricularDuplicada[], Error>({
+    queryKey: [
+      "grades-curriculares-duplicadas",
+      String(numeroDeMatricula ?? ""),
+      anoLectivo ? String(anoLectivo) : null,
+    ].filter(Boolean),
+    queryFn: () => fetchGradesCurricularesDuplicadas(params),
+    enabled: !!numeroDeMatricula && !!anoLectivo,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+    retry: 1,
+  });
+};
+
+export const useMutationAtualizarEstadoGradeCurricular = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateEstadoGradeCurricularAluno,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["grades-curriculares-duplicadas"],
+      });
+      toast.success(
+        variables.estado === 1
+          ? "Disciplina activada com sucesso"
+          : "Disciplina desactivada com sucesso",
+      );
+    },
+    onError: () => {
+      toast.error("Erro ao actualizar o estado da disciplina");
+    },
+  });
+};

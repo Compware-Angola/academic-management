@@ -21,7 +21,6 @@ import { useResultadoProva } from "@/hooks/access_exam/use-resultado-prova";
 import { ResultadoProva } from "@/services/access_exam/fetch-resultado-prova.service";
 import { useLancarNotaArquitecturaEUrbanismo } from "@/hooks/access_exam/use-lancar-nota-arquitetura-urbanismo";
 
-
 export default function LancarNotaArquitectura() {
   const [searchInput, setSearchInput] = useState("");
   const [activeSearch, setActiveSearch] = useState<string>("");
@@ -35,7 +34,7 @@ export default function LancarNotaArquitectura() {
     },
     {
       enabled: !!activeSearch,
-    }
+    },
   );
 
   const { mutate: lancarNota, isPending: isLancando } =
@@ -99,7 +98,7 @@ export default function LancarNotaArquitectura() {
           setTimeout(() => setActiveSearch(searchInput.trim()), 100);
           setNotaPratica("");
         },
-      }
+      },
     );
   }
 
@@ -121,7 +120,9 @@ export default function LancarNotaArquitectura() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Lançar Nota — Arquitectura e Urbanismo</BreadcrumbPage>
+            <BreadcrumbPage>
+              Lançar Nota — Arquitectura e Urbanismo
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -183,8 +184,8 @@ export default function LancarNotaArquitectura() {
             <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-lg font-medium">Nenhum resultado encontrado</p>
             <p className="text-muted-foreground mt-1">
-              Nenhum candidato encontrado para "
-              <strong>{activeSearch}</strong>".
+              Nenhum candidato encontrado para "<strong>{activeSearch}</strong>
+              ".
             </p>
           </CardContent>
         </Card>
@@ -198,7 +199,6 @@ export default function LancarNotaArquitectura() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-
               {/* Informações Pessoais */}
               <div>
                 <Label className="text-muted-foreground">Nº de Inscrição</Label>
@@ -211,7 +211,9 @@ export default function LancarNotaArquitectura() {
                 <p className="font-medium text-lg mt-1">{candidato.nome}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Bilhete de Identidade</Label>
+                <Label className="text-muted-foreground">
+                  Bilhete de Identidade
+                </Label>
                 <p className="font-mono mt-1">{candidato.numero_bilhete}</p>
               </div>
 
@@ -235,19 +237,26 @@ export default function LancarNotaArquitectura() {
                 <p className="mt-1">{candidato.sala || "—"}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Data de Realização</Label>
+                <Label className="text-muted-foreground">
+                  Data de Realização
+                </Label>
                 <p className="mt-1">{candidato.data_realizacao || "—"}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Horário da Prova</Label>
+                <Label className="text-muted-foreground">
+                  Horário da Prova
+                </Label>
                 <p className="font-medium mt-1">
-                  {candidato.hora_inicio || "--:--"} — {candidato.hora_fim || "--:--"}
+                  {candidato.hora_inicio || "--:--"} —{" "}
+                  {candidato.hora_fim || "--:--"}
                 </p>
               </div>
 
               {/* Nota actual */}
               <div>
-                <Label className="text-muted-foreground">Nota da prova teórica</Label>
+                <Label className="text-muted-foreground">
+                  Nota da prova teórica
+                </Label>
                 <div className="mt-2">
                   {candidato.nota != null ? (
                     <Badge
@@ -256,24 +265,28 @@ export default function LancarNotaArquitectura() {
                         candidato.nota >= 14
                           ? "bg-green-500/10 text-green-700 border-green-500"
                           : candidato.nota >= 10
-                          ? "bg-yellow-500/10 text-yellow-700 border-yellow-500"
-                          : "bg-red-500/10 text-red-700 border-red-500"
+                            ? "bg-yellow-500/10 text-yellow-700 border-yellow-500"
+                            : "bg-red-500/10 text-red-700 border-red-500"
                       }`}
                     >
-                      {candidato.nota.toFixed(1)}
+                      {candidato?.nota?.toFixed(1)}
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-base px-4 py-1 text-muted-foreground">
+                    <Badge
+                      variant="outline"
+                      className="text-base px-4 py-1 text-muted-foreground"
+                    >
                       Sem nota
                     </Badge>
                   )}
                 </div>
               </div>
 
-     
               {/* Separador + Input para lançar nota */}
               <div className="lg:col-span-3 pt-6 border-t">
-                <Label className="text-base font-semibold">Lançar Nota Prática</Label>
+                <Label className="text-base font-semibold">
+                  Lançar Nota Prática
+                </Label>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
                   Introduza a nota prática do candidato (0 a 20) e confirme.
                 </p>
@@ -301,7 +314,6 @@ export default function LancarNotaArquitectura() {
                   </Button>
                 </div>
               </div>
-
             </div>
           </CardContent>
         </Card>

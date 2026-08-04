@@ -195,6 +195,7 @@ import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario
 import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
 import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
 import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
+import { ImportSchedules } from "./pages/schedules/ImportSchedule";
 import { ConciliacaoDivida } from "./pages/financas/area-financeira/ConciliacaoDivida";
 import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/ConciliacaoAprovacao";
 
@@ -1667,6 +1668,10 @@ const App = () => {
                   <Route
                     path="/documentos/validar"
                     element={<ValidarDocumento />}
+                  />
+                  <Route
+                    path="/horarios/import"
+                    element={<ImportSchedules />}
                   />
                   <Route
                     path="/docente/vigilancia"

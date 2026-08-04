@@ -39,6 +39,8 @@ import {
   Download,
   FilterX,
   ArrowRight,
+  RefreshCw,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -53,6 +55,7 @@ import {
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { useAddGradeCurricularPlanoMassa } from "@/hooks/discplina/use-add-grade-curricular-plano-massa";
+import { parseFilter } from "@/util/parse-filter";
 
 interface ImportUCPageProps {
   onSuccess?: () => void;
@@ -172,8 +175,8 @@ function DisciplinaImportCard({
         "p-4 transition-all hover:shadow-md cursor-pointer",
         selected && "border-primary ring-1 ring-primary/30",
         selected &&
-          validationError &&
-          "border-destructive ring-1 ring-destructive/30",
+        validationError &&
+        "border-destructive ring-1 ring-destructive/30",
       )}
       onClick={onToggle}
     >
@@ -357,7 +360,7 @@ function ImportResultDialog({
             <p className="text-2xl font-bold text-amber-600">
               {result.totalDuplicadas}
             </p>
-            <p className="text-xs text-muted-foreground">Duplicadas</p>
+            <p className="text-xs text-muted-foreground">Ja existentes</p>
           </div>
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-center">
             <p className="text-2xl font-bold text-destructive">
@@ -371,18 +374,29 @@ function ImportResultDialog({
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <p className="text-sm font-semibold">Disciplinas duplicadas</p>
+              <p className="text-sm font-semibold">Disciplinas Ja existentes</p>
             </div>
             <div className="space-y-1.5">
               {result.duplicados.map((d) => (
                 <div
                   key={d.codigoGradeCurricular}
-                  className="flex items-center justify-between rounded-md border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm transition-colors hover:bg-amber-500/10"
                 >
-                  <span className="font-mono text-xs text-muted-foreground">
-                    Grade #{d.codigoGradeCurricular}
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="shrink-0 rounded-md bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs text-amber-700 dark:text-amber-400">
+                      #{d.codigoGradeCurricular}
+                    </span>
+                    {d.nomeDisciplina && (
+                      <span className="truncate font-medium text-foreground">
+                        {d.nomeDisciplina}
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    {d.motivo}
                   </span>
-                  <span className="text-amber-700">{d.motivo}</span>
                 </div>
               ))}
             </div>
@@ -399,12 +413,23 @@ function ImportResultDialog({
               {result.erros.map((e) => (
                 <div
                   key={e.codigoGradeCurricular}
-                  className="flex items-center justify-between rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm transition-colors hover:bg-amber-500/10"
                 >
-                  <span className="font-mono text-xs text-muted-foreground">
-                    Grade #{e.codigoGradeCurricular}
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="shrink-0 rounded-md bg-amber-500/10 px-1.5 py-0.5 font-mono text-xs text-amber-700 dark:text-amber-400">
+                      #{e.codigoGradeCurricular}
+                    </span>
+                    {e.nomeDisciplina && (
+                      <span className="truncate font-medium text-foreground">
+                        {e.nomeDisciplina}
+                      </span>
+                    )}
+                  </div>
+
+                  <span className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    {e.motivo}
                   </span>
-                  <span className="text-destructive">{e.motivo}</span>
                 </div>
               ))}
             </div>
@@ -416,15 +441,24 @@ function ImportResultDialog({
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-success" />
               <p className="text-sm font-semibold">Adicionadas com sucesso</p>
+              <span className="text-xs text-muted-foreground">
+                ({result.adicionados.length})
+              </span>
             </div>
+
             <div className="flex flex-wrap gap-1.5">
               {result.adicionados.map((item) => (
                 <Badge
                   key={item.codigoGradeCurricular}
                   variant="outline"
-                  className="bg-success/5 text-success border-success/20 font-mono text-xs"
+                  className="gap-1.5 border-success/20 bg-success/5 font-normal text-success"
                 >
-                  #{item.codigoGradeCurricular}
+                  <span className="font-mono text-xs">
+                    #{item.codigoGradeCurricular}
+                  </span>
+                  {item.nomeDisciplina && (
+                    <span className="text-xs">{item.nomeDisciplina}</span>
+                  )}
                 </Badge>
               ))}
             </div>
@@ -440,15 +474,15 @@ function ImportResultDialog({
 }
 
 export default function ImportUCPage() {
-  const [anoLectivo, setAnoLectivo] = useState<number>();
-  const [anoLectivoDestino, setAnoLectivoDestino] = useState<number>();
-  const [curso, setCurso] = useState<number>();
-  const [classe, setClasse] = useState<number>();
-  const [tipoCandidatura, setTipoCandidatura] = useState<number>();
+  const [anoLectivo, setAnoLectivo] = useState<number | string>();
+  const [anoLectivoDestino, setAnoLectivoDestino] = useState<number | string>();
+  const [curso, setCurso] = useState<number | string>();
+  const [classe, setClasse] = useState<number | string>();
+  const [tipoCandidatura, setTipoCandidatura] = useState<number | string>();
   const estado = 1;
 
   const { data: cursos, isLoading: loadingCursos } = useCursos();
-  const { data: classes, isLoading: loadingClasses } = useClasses();
+
 
   const filtrosCompletos = !!anoLectivo && !!curso;
 
@@ -458,16 +492,35 @@ export default function ImportUCPage() {
     isError,
     refetch,
   } = useGradeCurricular({
-    anoLectivo: anoLectivo as number,
-    curso: curso as number,
-    classe: classe as number,
+    anoLectivo: parseFilter(anoLectivo?.toString()),
+    curso: parseFilter(curso?.toString()),
+    classe: parseFilter(classe?.toString()),
     estado,
     page: 1,
     limit: 100,
   });
 
   const items = filtrosCompletos ? (gradeResponse?.data ?? []) : [];
-
+  const resetState = () => {
+    setSelected(new Set());
+    setExpandedGroups(new Set());
+    setFieldOverrides({});
+    setImportResult(null);
+    setResultDialogOpen(false);
+    refetch();
+  };
+  const clearAllFilters = () => {
+    setAnoLectivo('');
+    setAnoLectivoDestino('');
+    setCurso('');
+    setClasse('');
+    setTipoCandidatura('');
+    setSelected(new Set());
+    setExpandedGroups(new Set());
+    setFieldOverrides({});
+    setImportResult(null);
+    setResultDialogOpen(false);
+  };
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
   const [fieldOverrides, setFieldOverrides] = useState<
@@ -592,11 +645,15 @@ export default function ImportUCPage() {
       );
       return;
     }
+    if (anoLectivoDestino === anoLectivo) {
+      toast.error("O ano lectivo de destino deve ser diferente do ano lectivo de origem.");
+      return;
+    }
 
     try {
       const payload: AddGradeCurricularPlanoMassaPayload = {
-        codigoCurso: curso as number,
-        codigoAnoLectivo: anoLectivoDestino,
+        codigoCurso: parseFilter(curso?.toString()),
+        codigoAnoLectivo: parseFilter(anoLectivoDestino?.toString()),
         itens: selectedItems.map((item) => {
           const overrides = fieldOverrides[item.codigo_disciplina] ?? {};
           const merged = { ...item, ...overrides };
@@ -615,7 +672,7 @@ export default function ImportUCPage() {
       const result = await addPlanoMassa(payload);
       setImportResult(result);
       setResultDialogOpen(true);
-    } catch {}
+    } catch { }
   };
 
   return (
@@ -627,7 +684,6 @@ export default function ImportUCPage() {
           disponível para importação.
         </p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 rounded-lg border bg-card p-3">
         <div className="space-y-2">
           <TipoCandidaturaSelect
@@ -640,18 +696,19 @@ export default function ImportUCPage() {
             onlyConfigurable={false}
             onChangeValue={(v) => setAnoLectivo(Number(v))}
             value={anoLectivo?.toString()}
-            tipoCandidaturaId={tipoCandidatura}
+            tipoCandidaturaId={Number(tipoCandidatura)}
             label="Ano Letivo (Origem)"
           />
         </div>
         <div>
           <label className="text-sm font-medium mb-2 block">Curso</label>
           <Select
-            value={curso ? String(curso) : undefined}
+            disabled={loadingCursos || !anoLectivo || !tipoCandidatura}
+            value={curso ? String(curso) : ''}
             onValueChange={(v) => setCurso(Number(v))}
-            disabled={loadingCursos}
+
           >
-            <SelectTrigger>
+            <SelectTrigger disabled={loadingCursos || !anoLectivo || !tipoCandidatura}>
               <SelectValue placeholder="Selecione..." />
             </SelectTrigger>
             <SelectContent>
@@ -665,6 +722,36 @@ export default function ImportUCPage() {
         </div>
       </div>
 
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refetch()}
+          disabled={!filtrosCompletos || isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              A buscar...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Buscar as UCs
+            </>
+          )}
+        </Button>
+        <Button
+          size="sm"
+
+          onClick={clearAllFilters}
+          className="shrink-0"
+        >
+          <X className="h-4 w-4 mr-2" />
+          Limpar Filtros
+        </Button>
+      </div>
+
       <div className="flex flex-col md:flex-row md:items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
         <div className="flex items-center gap-2 text-sm font-medium text-primary shrink-0">
           <ArrowRight className="h-4 w-4" />
@@ -674,7 +761,7 @@ export default function ImportUCPage() {
           <AcademicYearsAvailableForOperationSelect
             onChangeValue={(v) => setAnoLectivoDestino(Number(v))}
             value={anoLectivoDestino?.toString()}
-            tipoCandidaturaId={tipoCandidatura}
+            tipoCandidaturaId={Number(tipoCandidatura)}
             label="Ano Lectivo (Destino)"
           />
         </div>
@@ -847,7 +934,13 @@ export default function ImportUCPage() {
 
       <ImportResultDialog
         open={resultDialogOpen}
-        onOpenChange={setResultDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            resetState();
+          } else {
+            setResultDialogOpen(open);
+          }
+        }}
         result={importResult}
       />
     </div>
