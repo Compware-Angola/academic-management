@@ -25,6 +25,7 @@ export type PosGraduationCandidate = {
   pagamento_realizado: number;
   ano_lectivo: string;
   cod_ano_lectivo: number;
+
 };
 
 export type PosGraduationCandidatesResponse = {

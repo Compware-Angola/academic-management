@@ -90,21 +90,21 @@ export default function EstatisticasExame() {
 
   const pdfData = exportRows.length
     ? {
-        filtros: [
-          filters.codigoAnoLetivo
-            ? `Ano Letivo: ${filters.codigoAnoLetivo}`
-            : null,
-          filters.codigoFaculdade
-            ? `Faculdade: ${filters.codigoFaculdade}`
-            : null,
-          filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
-          filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
-        ]
-          .filter(Boolean)
-          .join(" | "),
-        total: estatistica?.total ?? 0,
-        rows: exportRows,
-      }
+      filtros: [
+        filters.codigoAnoLetivo
+          ? `Ano Letivo: ${filters.codigoAnoLetivo}`
+          : null,
+        filters.codigoFaculdade
+          ? `Faculdade: ${filters.codigoFaculdade}`
+          : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: estatistica?.total ?? 0,
+      rows: exportRows,
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -134,27 +134,27 @@ export default function EstatisticasExame() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Estatísticas do Exame de Acesso",
-        subtitle: "Inscrições por data, turno e curso",
-        infoSections: [
-          {
-            title: "Filtros Aplicados",
-            content: pdfData.filtros || "Sem filtros",
-          },
-          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-        ],
-        mainTable: {
-          headers: [
-            { key: "data", label: "Data", width: 20 },
-            { key: "laboral", label: "Laboral (Diurno)", width: 25 },
-            { key: "posLaboral", label: "Pós-Laboral", width: 25 },
-            { key: "totalDia", label: "Total por Dia", width: 25 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Estatísticas do Exame de Acesso",
+      subtitle: "Inscrições por data, turno e curso",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "data", label: "Data", width: 20 },
+          { key: "laboral", label: "Laboral (Diurno)", width: 25 },
+          { key: "posLaboral", label: "Pós-Laboral", width: 25 },
+          { key: "totalDia", label: "Total por Dia", width: 25 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Estatisticas_Exame_Acesso_${new Date().toISOString().slice(0, 10)}`;
@@ -370,39 +370,39 @@ export default function EstatisticasExame() {
               <TableBody>
                 {isLoadingEstatistica
                   ? Array.from({ length: filters.limit }).map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Skeleton className="h-4 w-12 mx-auto" />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Skeleton className="h-4 w-12 mx-auto" />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Skeleton className="h-6 w-16 mx-auto rounded-full" />
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Skeleton className="h-4 w-24" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Skeleton className="h-4 w-12 mx-auto" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Skeleton className="h-4 w-12 mx-auto" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Skeleton className="h-6 w-16 mx-auto rounded-full" />
+                      </TableCell>
+                    </TableRow>
+                  ))
                   : estatistica?.data.map((item, index) => (
-                      <TableRow key={index} className="hover:bg-muted/30">
-                        <TableCell className="font-mono font-medium">
-                          {item.data}
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-primary">
-                          {item.qt_diurno}
-                        </TableCell>
-                        <TableCell className="text-center font-semibold">
-                          {item.qt_noturno}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
-                            {item.total_dia}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    <TableRow key={index} className="hover:bg-muted/30">
+                      <TableCell className="font-mono font-medium">
+                        {item.data}
+                      </TableCell>
+                      <TableCell className="text-center font-semibold text-primary">
+                        {item.qt_diurno}
+                      </TableCell>
+                      <TableCell className="text-center font-semibold">
+                        {item.qt_noturno}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
+                          {item.total_dia}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
               <TableFooter>
                 <TableRow className="font-bold">
