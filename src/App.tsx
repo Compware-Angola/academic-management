@@ -198,6 +198,7 @@ import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
 import { ImportSchedules } from "./pages/schedules/ImportSchedule";
 import { ConciliacaoDivida } from "./pages/financas/area-financeira/ConciliacaoDivida";
 import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/ConciliacaoAprovacao";
+import NegociacaoDividaConciliacao from "./pages/financas/area-financeira/NegociacaoDividaConciliacao";
 
 const App = () => {
   return (
@@ -1438,7 +1439,11 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/financas/conciliacao-divida"
+                    path="/financas/negociacao-conciliacao"
+                    element={<NegociacaoDividaConciliacao />}
+                  />
+                  <Route
+                    path="/financas/conciliacao-divida/:id"
                     element={<ConciliacaoDivida />}
                   />
                   <Route

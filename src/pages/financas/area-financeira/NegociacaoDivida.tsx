@@ -39,8 +39,9 @@ import {
   FileText,
   TrendingUp,
   Eye,
+  Percent,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useNavigation } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -72,6 +73,7 @@ export default function NegociacaoDivida() {
   const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
     "codigoMatricula",
   );
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNegociacao, setSelectedNegociacao] =
     useState<NegociacaoItem>(null);
@@ -419,6 +421,7 @@ export default function NegociacaoDivida() {
                     <TableHead>Valor Prestação</TableHead>
                     <TableHead>Valor Restante</TableHead>
                     <TableHead>Facturas</TableHead>
+                    <TableHead>Acções </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -458,6 +461,17 @@ export default function NegociacaoDivida() {
                           }}
                         >
                           <Eye className="h-4 w-4 mr-2" />
+                        </Button>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          onClick={() =>
+                            navigate(`/financas/conciliacao-divida/${item.id}`)
+                          }
+                        >
+                          <Percent />
                         </Button>
                       </TableCell>
                     </TableRow>
