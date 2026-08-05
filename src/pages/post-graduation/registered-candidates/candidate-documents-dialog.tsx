@@ -1,7 +1,7 @@
+import { useState } from "react";
 import {
   Download,
   Loader2,
-  X,
   FileText,
   GraduationCap,
   Camera,
@@ -18,21 +18,27 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 import { PosGraduationCandidate } from "@/services/post-graduation/candidates.service";
-import { useQueryCandidateDocuments } from "@/hooks/post-graduation/use-query-candidates";
+import {
+  useApproveCandidate,
+  useQueryCandidateDocuments,
+  useRejectCandidate,
+} from "@/hooks/post-graduation/use-query-candidates";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { ApiError } from "@/error";
 import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
 
 type Props = {
@@ -69,11 +75,19 @@ export function CandidateDetailsDialog({
   onOpenChange,
   candidate,
 }: Props) {
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [motivo, setMotivo] = useState("");
+
   const { data: documents, isLoading } = useQueryCandidateDocuments(
     candidate?.codigo_preinscricao,
   );
+
   const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
     useGetFileUrl();
+
+  const approveMutation = useApproveCandidate();
+  const rejectMutation = useRejectCandidate();
+
   const handleDownload = async (ficheiroName: string) => {
     const key = ficheiroName;
     if (!key) return;
@@ -85,22 +99,67 @@ export function CandidateDetailsDialog({
       toast.error("Erro ao carregar o documento.");
     }
   };
+  console.log(candidate);
   const canApprove =
     candidate?.estado === "Pendente" && candidate?.pagamento_realizado === 1;
 
   const isPaid = Boolean(candidate?.pagamento_realizado);
+  const isPending = approveMutation.isPending || rejectMutation.isPending;
 
   function handleApproveCandidate() {
     if (!candidate) return;
+
+    approveMutation.mutate(
+      {
+        preInscricao: candidate.codigo_preinscricao,
+        anoLectivo: Number(candidate.cod_ano_lectivo),
+        approvedBy: 1,
+        resultado: "APROVADO",
+      },
+      { onSuccess: () => onOpenChange(false) },
+    );
   }
 
-  function handleRejectCandidate() {
+  function handleOpenRejectDialog() {
     if (!candidate) return;
+    setRejectDialogOpen(true);
+  }
+
+  function handleConfirmReject() {
+    if (!candidate || !motivo.trim()) {
+      toast.error("Informe o motivo da rejeição.");
+      return;
+    }
+
+    rejectMutation.mutate(
+      {
+        anoLectivo: Number(candidate.cod_ano_lectivo),
+        preInscricao: candidate.codigo_preinscricao,
+        utilizador: 1,
+        motivo: motivo.trim(),
+        estadoRejeicao: 1,
+      },
+      {
+        onSuccess: () => {
+          setRejectDialogOpen(false);
+          onOpenChange(false);
+          setMotivo("");
+        },
+      },
+    );
+  }
+
+  function handleMainDialogOpenChange(open: boolean) {
+    if (!open) {
+      setRejectDialogOpen(false);
+      setMotivo("");
+    }
+    onOpenChange(open);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl! gap-0 p-0 overflow-hidden">
+    <Dialog open={open} onOpenChange={handleMainDialogOpenChange}>
+      <DialogContent className="max-w-4xl! gap-0 p-0 overflow-hidden">
         <DialogHeader className="px-6 py-5 border-b">
           <DialogTitle className="text-sm font-medium">
             Detalhes do candidato
@@ -215,6 +274,7 @@ export function CandidateDetailsDialog({
             )}
           </div>
         </div>
+
         {canApprove && (
           <div className="flex items-center justify-between px-6 py-4 border-t bg-muted/20">
             <p className="text-xs text-muted-foreground">
@@ -225,14 +285,16 @@ export function CandidateDetailsDialog({
               <Button
                 size="sm"
                 variant="outline"
+                disabled={isPending}
                 className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                onClick={handleRejectCandidate}
+                onClick={handleOpenRejectDialog}
               >
                 <CircleX className="h-4 w-4" />
                 Reprovar
               </Button>
               <Button
                 size="sm"
+                disabled={isPending}
                 className="gap-1.5 bg-green-600 hover:bg-green-700 text-white"
                 onClick={handleApproveCandidate}
               >
@@ -243,6 +305,54 @@ export function CandidateDetailsDialog({
           </div>
         )}
       </DialogContent>
+
+      {/* Dialog de confirmação de rejeição */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reprovar Candidato</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja reprovar{" "}
+              <strong>{candidate?.nome_completo}</strong>? Esta ação não poderá
+              ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="motivo">
+                Motivo da rejeição <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="motivo"
+                placeholder="Informe o motivo da rejeição..."
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRejectDialogOpen(false)}
+              disabled={rejectMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmReject}
+              disabled={!motivo.trim() || rejectMutation.isPending}
+            >
+              {rejectMutation.isPending
+                ? "Processando..."
+                : "Confirmar Reprovação"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

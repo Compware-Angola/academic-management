@@ -1,65 +1,62 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 export enum PostGraduationCandidateStatus {
-  TODOS = 'TODOS',
-  ADMITIDO = 'ADMITIDO',
-  REJEITADO = 'REJEITADO',
-  PENDENTE = 'PENDENTE',
+  TODOS = "TODOS",
+  ADMITIDO = "ADMITIDO",
+  REJEITADO = "REJEITADO",
+  PENDENTE = "PENDENTE",
 }
 
 export enum PostGraduationPaymentStatus {
-  TODOS = 'TODOS',
-  PAGO = 'PAGO',
-  NAO_PAGO = 'NAO_PAGO',
+  TODOS = "TODOS",
+  PAGO = "PAGO",
+  NAO_PAGO = "NAO_PAGO",
 }
 export type PosGraduationCandidate = {
-  codigo_preinscricao: number
-  data: string
-  nome_completo: string
-  bilhete_identidade: string
-  sexo: string
-  contactos_telefonicos: string
-  email?: string
-  candidatura: string
-  curso_candidatura: string
-  estado: string
-  pagamento_realizado: number
-  ano_lectivo:string
-}
+  codigo_preinscricao: number;
+  data: string;
+  nome_completo: string;
+  bilhete_identidade: string;
+  sexo: string;
+  contactos_telefonicos: string;
+  email?: string;
+  candidatura: string;
+  curso_candidatura: string;
+  estado: string;
+  pagamento_realizado: number;
+  ano_lectivo: string;
+  cod_ano_lectivo: number;
+};
 
 export type PosGraduationCandidatesResponse = {
-  data: PosGraduationCandidate[]
-  total: number
-  page: number
-  limit: number
-  totalPages: number
-}
+  data: PosGraduationCandidate[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
 
 export type PosGraduationCandidatesParams = {
-  codigoTipoCandidatura?: number,
-  codigoCurso?: number,
-  sortBy?: string
-  sortOrder?: string
-  limit?: number
-  codigoAnoLectivo?: number
-  estado?: PostGraduationCandidateStatus
-  pagamento?:PostGraduationPaymentStatus
-  page?:number
-  
-}
-
+  codigoTipoCandidatura?: number;
+  codigoCurso?: number;
+  sortBy?: string;
+  sortOrder?: string;
+  limit?: number;
+  codigoAnoLectivo?: number;
+  estado?: PostGraduationCandidateStatus;
+  pagamento?: PostGraduationPaymentStatus;
+  page?: number;
+};
 
 export async function fetchPosGraduationCandidates(
   params: PosGraduationCandidatesParams,
 ): Promise<PosGraduationCandidatesResponse> {
-  const { data } =
-    await axiosNestGa.get<PosGraduationCandidatesResponse>(
-      "/post-graduation/candidates",
-      { params },
-    );
+  const { data } = await axiosNestGa.get<PosGraduationCandidatesResponse>(
+    "/post-graduation/candidates",
+    { params },
+  );
 
   return data;
 }
-
 
 export type PosGraduationCandidateDocument = {
   nome_arquivo: string;
@@ -69,11 +66,35 @@ export type PosGraduationCandidateDocument = {
 export async function fetchPosGraduationCandidateDocuments(
   codigoPreinscricao: number,
 ): Promise<PosGraduationCandidateDocument[]> {
-  const { data } = await axiosNestGa.get<
-    PosGraduationCandidateDocument[]
-  >(
+  const { data } = await axiosNestGa.get<PosGraduationCandidateDocument[]>(
     `/post-graduation/candidates/${codigoPreinscricao}/documents`,
   );
 
   return data;
 }
+
+export interface ApproveCandidatePayload {
+  preInscricao: number;
+  anoLectivo: number;
+  mediaFinal?: number;
+  canal?: number;
+  poloId?: number;
+  resultado?: string;
+  approvedBy: number;
+}
+
+export interface RejectCandidatePayload {
+  anoLectivo: number;
+  preInscricao: number;
+  utilizador: number;
+  motivo: string;
+  estadoRejeicao?: number;
+}
+
+export const candidateDecisionApi = {
+  approve: (payload: ApproveCandidatePayload) =>
+    axiosNestGa.post("/post-graduation/candidates/approve", payload),
+
+  reject: (payload: RejectCandidatePayload) =>
+    axiosNestGa.post("/post-graduation/candidates/reject", payload),
+};
