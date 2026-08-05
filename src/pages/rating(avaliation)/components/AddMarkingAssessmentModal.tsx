@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryMarcacaoProvaPrazo } from "@/hooks/prazos/use-query-marcacao-prazo";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useQueryExamCreationPrompt } from "@/hooks/academiccalendar/use-query-exam-creation-prompt";
 import { calcularDuracao } from "@/util/calcular-duracao";
 import { usePermission } from "@/auth/permission.helper";
@@ -445,13 +446,14 @@ export default function AddMarkingAssessmentModal({
             />
 
             {/* Unidade Curricular */}
-            <FormSelect
+            <FormCommandSelect
               label="Unidade Curricular"
               value={filters.unidadeCurricular}
               onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
               options={unidadesCurriculares}
-              loading={isLoadingUC}
+              isLoading={isLoadingUC}
               disabled={!filters.curso || !filters.semestre}
+              width="full"
               map={(uc) => ({
                 key: uc.pk,
                 label: uc.descricao,
