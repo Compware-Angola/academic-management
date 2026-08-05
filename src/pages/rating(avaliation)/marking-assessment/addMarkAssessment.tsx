@@ -45,6 +45,7 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
 import { formatarData } from "@/util/date-formate";
@@ -451,38 +452,29 @@ export default function AddMarkingAssessment() {
               </Select>
             </div>
             {/* Unidade Curricular */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Unidade Curricular</label>
-              <Select
-                value={filters.unidadeCurricular}
-                onValueChange={(v) =>
-                  setFilters({ ...filters, unidadeCurricular: v })
-                }
-                disabled={!canLoadUcs}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione curso"
-                        : !filters.semestre
-                          ? "Selecione semestre"
-                          : isLoadingUC
-                            ? "Carregando UCs..."
-                            : "Selecionar UC"
-                    }
-                  />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {unidadesCurriculares?.map((uc) => (
-                    <SelectItem key={uc.pk} value={uc.pk?.toString()}>
-                      {uc.descricao}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <FormCommandSelect
+              label="Unidade Curricular"
+              value={filters.unidadeCurricular}
+              onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              options={unidadesCurriculares}
+              isLoading={isLoadingUC}
+              disabled={!canLoadUcs}
+              width="full"
+              placeholder={
+                !filters.curso
+                  ? "Selecione curso"
+                  : !filters.semestre
+                    ? "Selecione semestre"
+                    : isLoadingUC
+                      ? "Carregando UCs..."
+                      : "Selecionar UC"
+              }
+              map={(uc) => ({
+                key: uc.pk,
+                label: uc.descricao,
+                value: uc.pk,
+              })}
+            />
             <FormSelect
               label="Horarios"
               value={filters.horarioId}
