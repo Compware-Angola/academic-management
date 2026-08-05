@@ -139,7 +139,11 @@ export default function CreateSchedule() {
     roles?.Coordenador === true ||
     roles?.Decano === true;
 
-  const canOperateInPage: boolean = isPrivilegedUser || isDirector;
+  const hasMghChucPermission: boolean =
+    userData?.permissions?.includes("mgh_chuc") ?? false;
+
+  const canOperateInPage: boolean =
+    isPrivilegedUser || isDirector || hasMghChucPermission;
 
   // ─── Form State ───────────────────────────────────────────────────────────
   const [formData, setFormData] = useState({
@@ -170,6 +174,10 @@ export default function CreateSchedule() {
   const { data: cursos, isLoading: loadingCursos } = useCursos({
     tipoCandidaturaId: parseFilter(formData.tipoCandidatura),
   });
+
+  console.log("Total: ", cursos?.length);
+  console.log("User: ", userData);
+
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
   // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
@@ -245,7 +253,7 @@ export default function CreateSchedule() {
     data: scheduleCreationPrompt,
     isLoading: isLoadingScheduleCreationPrompt,
   } = useQueryScheduleCreationPrompt(
-    activeAcademicYearId!,
+    Number(formData.anoLetivo),
     Number(formData.semestre),
     {
       enabled: !!activeAcademicYearId && !!formData.semestre,
