@@ -82,7 +82,6 @@ export async function fetchNoteReleases(params: {
   }
 }
 
-
 // ==================== NOVO - SUMMARY ====================
 
 export interface NoteSummary {
@@ -109,14 +108,16 @@ export async function fetchNoteSummary(params: {
   try {
     const response = await axiosNestGa.get<NoteSummaryApiResponse>(
       "/assessment/summary",
-      { params }
+      { params },
     );
 
-    return response.data.data ?? {
-      total_estudantes: 0,
-      total_com_nota: 0,
-      total_sem_nota: 0,
-    };
+    return (
+      response.data.data ?? {
+        total_estudantes: 0,
+        total_com_nota: 0,
+        total_sem_nota: 0,
+      }
+    );
   } catch (error) {
     console.error("Erro ao buscar summary das notas:", error);
     return {

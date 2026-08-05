@@ -466,7 +466,8 @@ export default function CreateSchedule() {
               style={{ width: 300, height: 300 }}
             />
             <p className="text-sm text-muted-foreground mt-1">
-              Você não tem permissão para criar horários.
+              Você não tem permissão para criar horários Apenas diretores de
+              cursos e administradores podem criar horários
             </p>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type ListStudentNotesPayload = {
   anoLectivo: number;
   codigoMatricula: number;
+  isPortal?: number;
   page?: number;
   limit?: number;
 };
@@ -45,7 +46,13 @@ export type ListStudentNotesResponse = {
 export async function getStudentNotesService(
   payload: ListStudentNotesPayload,
 ): Promise<ListStudentNotesResponse> {
-  const { anoLectivo, codigoMatricula, page = 1, limit = 25 } = payload;
+  const {
+    anoLectivo,
+    codigoMatricula,
+    isPortal = 0,
+    page = 1,
+    limit = 25,
+  } = payload;
 
   const { data } = await axiosNestGa.get<ListStudentNotesResponse>(
     "/students/notes",
@@ -53,6 +60,7 @@ export async function getStudentNotesService(
       params: {
         anoLectivo,
         codigoMatricula,
+        isPortal,
         page,
         limit,
       },
