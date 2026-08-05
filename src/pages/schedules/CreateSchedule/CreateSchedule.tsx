@@ -213,8 +213,8 @@ export default function CreateSchedule() {
 
     const filteredCursos = allowedCursoIds.length
       ? (cursos ?? []).filter((c) =>
-          allowedCursoIds.includes(c.codigo?.toString()),
-        )
+        allowedCursoIds.includes(c.codigo?.toString()),
+      )
       : (cursos ?? []);
 
     const filteredClasses = allowedClassIds.length
@@ -290,15 +290,15 @@ export default function CreateSchedule() {
     {
       cursoSigla: formData.curso
         ? gerarSiglaCurso(
-            cursos?.find((c) => c.codigo.toString() === formData.curso)
-              ?.designacao || "",
-          )
+          cursos?.find((c) => c.codigo.toString() === formData.curso)
+            ?.designacao || "",
+        )
         : undefined,
       ano: formData.classes,
       codigoUC: formData.unidadeCurricular
         ? unidadesCurriculares.find(
-            (c) => c.pk.toString() === formData.unidadeCurricular,
-          )?.codigo || ""
+          (c) => c.pk.toString() === formData.unidadeCurricular,
+        )?.codigo || ""
         : "",
       periodo: Number(formData.periodo),
       anoLectivo: Number(formData.anoLetivo),
@@ -610,7 +610,7 @@ export default function CreateSchedule() {
             <FormSelect
               label="Ano Curricular"
               value={formData.classes}
-              disabled={isLoadingClasses || isDisabledForm}
+              disabled={isLoadingClasses || isDisabledForm || !formData.curso}
               onChange={(v) => setFormData({ ...formData, classes: v })}
               options={filteredClasses}
               map={(c) => ({
@@ -640,7 +640,7 @@ export default function CreateSchedule() {
 
             <GradeCurricularSelect
               value={formData.unidadeCurricular}
-              disabled={isDisabledForm}
+              disabled={isDisabledForm || !formData.classes}
               curso={parseFilter(formData.curso)}
               semestre={parseFilter(formData.semestre)}
               classe={parseFilter(formData.classes)}

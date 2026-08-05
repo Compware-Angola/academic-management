@@ -15,10 +15,8 @@ export async function fetchClassByCurso(
 ): Promise<Classes[]> {
   const { curso } = params;
 
-  const { data } = await axiosNestGa.get(
-    `dropdown-filters/ano-curricular/${curso}`,
-  );
-  // const { data } = await axiosApexGa.get("classes_horario/filtros", { params: { p_curso: curso } });
+  const { data } = await axiosApexGa.get("classes_horario/filtros", { params: { p_curso: curso } });
 
-  return data ?? [];
+  
+  return data?.anosCurriculares ?? [];
 }
