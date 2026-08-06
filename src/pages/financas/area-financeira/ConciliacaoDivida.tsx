@@ -10,6 +10,7 @@ import {
   Home,
   Layers,
   Loader2,
+  Lock,
   PencilLine,
   Percent,
   Receipt,
@@ -34,6 +35,11 @@ import {
 import { useDebtNegotiationDetailsConciliation } from "@/hooks/financas/dividas/use-debt-negotiation-conciliation";
 import { toast } from "sonner";
 import { useCreateConciliacaoDivida } from "@/hooks/financas/dividas/use-create-conciliacao-divida";
+import {
+  ConciliacaoResultModal,
+  type ConciliacaoDividaErrorResponse,
+  type ConciliacaoDividaResultItem,
+} from "./components/ConciliacaoResultModal";
 
 const NEGOTIATION_TYPE_LABEL: Record<number, string> = {
   1: "Total",
@@ -67,6 +73,24 @@ function formatDate(value?: string | null) {
   return date.toLocaleDateString("pt-AO");
 }
 
+// ALTERADO: bloco de aviso seguindo o modelo do EnrollmentStandardTimeframe,
+// exibido quando a negociação já possui uma conciliação pendente.
+function NegociacaoComConciliacaoPendente() {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/60 p-4 text-sm text-amber-800">
+      <Lock className="h-4 w-4 mt-0.5 shrink-0" />
+      <div>
+        <p className="font-medium">
+          Esta negociação já possui uma conciliação pendente.
+        </p>
+        <p className="text-xs text-amber-700/80 mt-0.5">
+          Aguarda validação da conciliação existente antes de submeter uma nova.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function ConciliacaoDivida() {
   const { id } = useParams<{ id: string }>();
   const negotiationId = id ? Number(id) : undefined;
@@ -86,6 +110,18 @@ export function ConciliacaoDivida() {
   );
   const [itemErrors, setItemErrors] = useState<Map<string, string>>(new Map());
   const [observation, setObservation] = useState("");
+
+  // ALTERADO: estado do modal de resultado da conciliação
+  const [resultModalOpen, setResultModalOpen] = useState(false);
+  const [conciliacaoResult, setConciliacaoResult] = useState<
+    ConciliacaoDividaResultItem[] | null
+  >(null);
+  const [conciliacaoError, setConciliacaoError] =
+    useState<ConciliacaoDividaErrorResponse | null>(null);
+
+  // ALTERADO: constante indicando que esta negociação já tem uma conciliação
+  // TODO: substituir por um campo real vindo da API (ex.: negotiation.temConciliacaoPendente)
+  const jaPossuiConciliacaoPendente = false;
 
   useEffect(() => {
     if (!negotiation) return;
@@ -169,6 +205,7 @@ export function ConciliacaoDivida() {
   );
 
   const canSubmit =
+    !jaPossuiConciliacaoPendente &&
     itemErrors.size === 0 &&
     observation.trim().length > 0 &&
     allItems.length > 0;
@@ -196,7 +233,28 @@ export function ConciliacaoDivida() {
       toast.error("Deves pelo menos mudar o valor de um item");
       return;
     }
-    createConciliacaoDivivda(payload);
+    // ALTERADO: ao concluir a mutação, guarda o resultado (sucesso ou erro)
+    // e abre o modal com os detalhes retornados pela rota.
+    createConciliacaoDivivda(payload, {
+      onSuccess: (data: ConciliacaoDividaResultItem[]) => {
+        setConciliacaoResult(data);
+        setConciliacaoError(null);
+        setResultModalOpen(true);
+      },
+      onError: (error: any) => {
+        const apiError = error?.response?.data as
+          | ConciliacaoDividaErrorResponse
+          | undefined;
+        setConciliacaoResult(null);
+        setConciliacaoError(
+          apiError ?? {
+            message: "Não foi possível concluir a conciliação de dívida.",
+            errors: [],
+          },
+        );
+        setResultModalOpen(true);
+      },
+    });
   };
 
   if (isLoading) {
@@ -352,6 +410,9 @@ export function ConciliacaoDivida() {
           </div>
         </div>
       </Card>
+
+      {/* ALTERADO: aviso quando a negociação já tem uma conciliação pendente */}
+      {jaPossuiConciliacaoPendente && <NegociacaoComConciliacaoPendente />}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
         <Card className="p-5">
@@ -556,14 +617,23 @@ export function ConciliacaoDivida() {
 
             {!canSubmit && allItems.length > 0 && (
               <p className="text-xs text-muted-foreground text-center">
-                {itemErrors.size > 0
-                  ? "Corrige os valores assinalados a vermelho."
-                  : "Preenche as observações para confirmar."}
+                {jaPossuiConciliacaoPendente
+                  ? "Já existe uma conciliação pendente para esta negociação."
+                  : itemErrors.size > 0
+                    ? "Corrige os valores assinalados a vermelho."
+                    : "Preenche as observações para confirmar."}
               </p>
             )}
           </Card>
         </div>
       </div>
+
+      <ConciliacaoResultModal
+        open={resultModalOpen}
+        onOpenChange={setResultModalOpen}
+        result={conciliacaoResult}
+        error={conciliacaoError}
+      />
     </div>
   );
 }
