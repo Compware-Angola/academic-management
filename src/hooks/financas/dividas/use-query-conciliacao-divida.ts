@@ -9,7 +9,6 @@ export const useQueryConciliacaoDividas = (
 ) => {
   return useQuery({
     queryKey: ["conciliacao-dividas", filters],
-
     queryFn: () => getConciliacaoDividas(filters),
   });
 };

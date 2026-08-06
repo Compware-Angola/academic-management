@@ -1447,7 +1447,7 @@ const App = () => {
                     element={<ConciliacaoDivida />}
                   />
                   <Route
-                    path="/financas/conciliacao-aprovacao"
+                    path="/financas/conciliacao-aprovacao/:id"
                     element={<ConciliacaoAprovacao />}
                   />
                   <Route

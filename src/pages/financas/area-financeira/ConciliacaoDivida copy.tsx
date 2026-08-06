@@ -10,7 +10,10 @@ import {
   Home,
   Layers,
   Loader2,
+  PencilLine,
+  Percent,
   Receipt,
+  TrendingDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,17 +32,24 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { useDebtNegotiationDetailsConciliation } from "@/hooks/financas/dividas/use-debt-negotiation-conciliation";
+import { toast } from "sonner";
+import { useCreateConciliacaoDivida } from "@/hooks/financas/dividas/use-create-conciliacao-divida";
 
 const NEGOTIATION_TYPE_LABEL: Record<number, string> = {
   1: "Total",
   2: "Parcial",
 };
 
-// chave única para um item, já que o `codigo` do item pode repetir-se entre facturas
 function itemKey(facturaCodigo: number, itemCodigo: number) {
   return `${facturaCodigo}:${itemCodigo}`;
 }
-
+function getItemKeys(key: string) {
+  const keys = key.split(":");
+  return {
+    facturaCodigo: Number(keys[0]),
+    itemCodigo: Number(keys[1]),
+  };
+}
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -66,6 +76,10 @@ export function ConciliacaoDivida() {
     isLoading,
     isError,
   } = useDebtNegotiationDetailsConciliation(negotiationId);
+  const {
+    mutate: createConciliacaoDivivda,
+    isPending: isPendingConciliacaoDivida,
+  } = useCreateConciliacaoDivida();
 
   const [negotiatedValues, setNegotiatedValues] = useState<Map<string, number>>(
     new Map(),
@@ -138,8 +152,21 @@ export function ConciliacaoDivida() {
       const key = itemKey(factura.codigo, item.codigo);
       return sum + (negotiatedValues.get(key) ?? item.valor_total);
     }, 0);
-    return { original, negotiated };
+    const discount = original - negotiated;
+    const discountPct = original > 0 ? (discount / original) * 100 : 0;
+    const negotiatedPct = original > 0 ? (negotiated / original) * 100 : 100;
+    return { original, negotiated, discount, discountPct, negotiatedPct };
   }, [allItems, negotiatedValues]);
+
+  const changedItemsCount = useMemo(
+    () =>
+      allItems.reduce((count, { factura, item }) => {
+        const key = itemKey(factura.codigo, item.codigo);
+        const value = negotiatedValues.get(key) ?? item.valor_total;
+        return value !== item.valor_total ? count + 1 : count;
+      }, 0),
+    [allItems, negotiatedValues],
+  );
 
   const canSubmit =
     itemErrors.size === 0 &&
@@ -148,38 +175,53 @@ export function ConciliacaoDivida() {
 
   const handleSubmit = () => {
     if (!negotiation) return;
-    // onSubmit({
-    //   id: negotiation.id,
-    //   observation: observation.trim(),
-    //   itens: allItems.map(({ factura, item }) => ({
-    //     facturaCodigo: factura.codigo,
-    //     itemCodigo: item.codigo,
-    //     valorNegociado:
-    //       negotiatedValues.get(itemKey(factura.codigo, item.codigo)) ??
-    //       item.valor_total,
-    //   })),
-    // });
+    const payload = {
+      descricao: observation.trim(),
+      invoices: negotiation.facturas
+        .map((factura) => ({
+          invoiceId: factura.codigo,
+          itens: factura.itens
+            .filter((item) => {
+              const key = itemKey(factura.codigo, item.codigo);
+              return negotiatedValues.get(key) !== item.valor_total;
+            })
+            .map((item) => ({
+              InvoiceItemId: item.codigo,
+              valor: negotiatedValues.get(itemKey(factura.codigo, item.codigo)),
+            })),
+        }))
+        .filter((factura) => factura.itens.length > 0),
+    };
+    if (payload.invoices.length == 0) {
+      toast.error("Deves pelo menos mudar o valor de um item");
+      return;
+    }
+    createConciliacaoDivivda(payload);
   };
 
   if (isLoading) {
     return (
-      <div className="max-w-11/12 mx-auto px-6 py-16 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <p className="text-sm">A carregar negociação…</p>
+      <div className="max-w-11/12 mx-auto px-6 py-16">
+        <Card className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground border-dashed">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <p className="text-sm">A carregar negociação…</p>
+        </Card>
       </div>
     );
   }
 
   if (isError || !negotiation) {
     return (
-      <div className="max-w-11/12 mx-auto px-6 py-16 flex flex-col items-center justify-center gap-3 text-center">
-        <AlertCircle className="h-8 w-8 text-destructive" />
-        <p className="text-sm font-medium">
-          Não foi possível carregar os dados desta negociação.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Verifica se o ID informado é válido.
-        </p>
+      <div className="max-w-11/12 mx-auto px-6 py-16">
+        <Card className="flex flex-col items-center justify-center gap-3 py-16 text-center border-destructive/20 bg-destructive/5">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+          <p className="text-sm font-medium">
+            Não foi possível carregar os dados desta negociação.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Verifica se o ID informado é válido.
+          </p>
+        </Card>
       </div>
     );
   }
@@ -210,18 +252,30 @@ export function ConciliacaoDivida() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div>
-        <h1 className="text-2xl font-bold">Conciliação de Dívida</h1>
-        <p className="text-muted-foreground">
-          Fazer a conciliação de dívida da negociação #{negotiation.id}.
-        </p>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">Conciliação de Dívida</h1>
+          <p className="text-muted-foreground">
+            Fazer a conciliação de dívida da negociação #{negotiation.id}.
+          </p>
+        </div>
+        {/* ALTERADO: badge de estado no topo, dá contexto imediato sem ter de ler o preview */}
+        {changedItemsCount > 0 && (
+          <Badge className="gap-1.5 bg-amber-100 text-amber-800 hover:bg-amber-100 border border-amber-200 px-3 py-1">
+            <PencilLine className="h-3.5 w-3.5" />
+            {changedItemsCount}{" "}
+            {changedItemsCount === 1 ? "item alterado" : "itens alterados"}
+          </Badge>
+        )}
       </div>
 
       {/* ── Cabeçalho da negociação ── */}
-      <Card className="p-8">
+      {/* ALTERADO: fundo em gradiente subtil + borda para destacar do resto da página */}
+      <Card className="p-8 bg-gradient-to-br from-primary/5 via-card to-card border-primary/10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
+            {/* ALTERADO: avatar com anel e sombra suave */}
+            <div className="h-11 w-11 rounded-full bg-primary/10 ring-2 ring-primary/15 flex items-center justify-center text-sm font-semibold text-primary shrink-0 shadow-sm">
               {getInitials(negotiation.nome)}
             </div>
             <div>
@@ -335,21 +389,36 @@ export function ConciliacaoDivida() {
                       const error = itemErrors.get(key);
                       const value =
                         negotiatedValues.get(key) ?? item.valor_total;
+                      const isChanged = value !== item.valor_total;
+                      const itemDiscount = item.valor_total - value;
 
                       return (
                         <div
                           key={key}
-                          className="rounded-lg border p-3 space-y-2"
+                          className={`rounded-lg border p-3 space-y-2 transition-colors ${
+                            isChanged
+                              ? "border-amber-300 bg-amber-50/60"
+                              : "border-border hover:border-primary/30"
+                          }`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-medium">
                               {item.descricao}
                             </p>
-                            {item.mes_designacao && (
-                              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium shrink-0 text-muted-foreground border-border bg-muted/40 shrink-0">
-                                {item.mes_designacao}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {item.mes_designacao && (
+                                <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground border-border bg-muted/40">
+                                  {item.mes_designacao}
+                                </span>
+                              )}
+                              {/* ALTERADO: badge "Alterado" por item, com o valor do desconto */}
+                              {isChanged && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium">
+                                  <TrendingDown className="h-3 w-3" />-
+                                  {formatCurrencyAOA(itemDiscount)}
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           <div className="flex justify-between text-xs text-muted-foreground">
@@ -357,7 +426,13 @@ export function ConciliacaoDivida() {
                               {item.quantidade}x{" "}
                               {formatCurrencyAOA(item.preco_unitario)}
                             </span>
-                            <span className="font-semibold text-foreground">
+                            <span
+                              className={`font-semibold ${
+                                isChanged
+                                  ? "text-muted-foreground line-through decoration-1"
+                                  : "text-foreground"
+                              }`}
+                            >
                               {formatCurrencyAOA(item.valor_total)}
                             </span>
                           </div>
@@ -380,7 +455,12 @@ export function ConciliacaoDivida() {
                                   e.target.value,
                                 )
                               }
-                              className="h-8 text-sm bg-background"
+                              // ALTERADO: input destaca-se visualmente quando o valor foi editado
+                              className={`h-8 text-sm bg-background ${
+                                isChanged
+                                  ? "border-amber-400 focus-visible:ring-amber-400/40"
+                                  : ""
+                              }`}
                             />
                             {error && (
                               <p className="text-xs text-red-600 flex items-center gap-1">
@@ -415,13 +495,39 @@ export function ConciliacaoDivida() {
 
         {/* ── Preview ── */}
         <div className="space-y-3">
-          <Card className="p-4 space-y-3 sticky top-4">
-            <h3 className="font-semibold text-sm">Preview</h3>
+          {/* ALTERADO: card do preview reformulado com barra de progresso e desconto total */}
+          <Card className="p-5 space-y-4 sticky top-4 border-primary/15 shadow-sm">
+            <h3 className="font-semibold text-sm">Resumo</h3>
+
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Valor Original</span>
               <span className="font-medium">
                 {formatCurrencyAOA(totals.original)}
               </span>
+            </div>
+
+            {/* ALTERADO: barra de progresso do valor negociado sobre o original */}
+            <div className="space-y-1.5">
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-300"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, totals.negotiatedPct))}%`,
+                  }}
+                />
+              </div>
+              {totals.discount > 0 && (
+                <div className="flex items-center justify-between text-xs text-amber-700">
+                  <span className="flex items-center gap-1">
+                    <Percent className="h-3 w-3" />
+                    Diferença de <a href="mailto:"></a>
+                  </span>
+                  <span className="font-medium">
+                    -{formatCurrencyAOA(totals.discount)} (
+                    {totals.discountPct.toFixed(1)}%)
+                  </span>
+                </div>
+              )}
             </div>
 
             <Separator />
@@ -438,16 +544,21 @@ export function ConciliacaoDivida() {
             </div>
 
             <Button
-              disabled={!canSubmit}
+              disabled={!canSubmit || isPendingConciliacaoDivida}
               onClick={handleSubmit}
               className="w-full gap-2"
             >
+              {isPendingConciliacaoDivida && (
+                <Loader2 className="animate-spin" />
+              )}
               Confirmar Negociação
             </Button>
 
             {!canSubmit && allItems.length > 0 && (
               <p className="text-xs text-muted-foreground text-center">
-                Preenche as observações para confirmar.
+                {itemErrors.size > 0
+                  ? "Corrige os valores assinalados a vermelho."
+                  : "Preenche as observações para confirmar."}
               </p>
             )}
           </Card>

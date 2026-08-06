@@ -79,9 +79,37 @@ export interface CreateConciliacaoDividaPayload {
   invoices: ConciliacaoDividaInvoicePayload[];
 }
 
-export interface CreateConciliacaoDividaResponse {
+export type ConciliacaoStatus = "PENDENTE" | "APROVADO" | "REJEITADO";
+
+export interface CreateConciliacaoDividaSuccessItem {
+  id: number;
+  facturaOriginal: {
+    Codigo: number;
+  };
+  facturaPropostaAlteracao: {
+    Codigo: number;
+  };
+  descricaoCriacao: string;
+  descricaoValidacao: string | null;
+  status: ConciliacaoStatus;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: number;
+  validatedBy: number | null;
+  validatedAt: string | null;
+}
+
+export type CreateConciliacaoDividaResponse =
+  CreateConciliacaoDividaSuccessItem[];
+
+export interface CreateConciliacaoDividaErrorItem {
+  invoiceId: number;
+  mensagem: string;
+}
+
+export interface CreateConciliacaoDividaErrorResponse {
   message: string;
-  [key: string]: any;
+  errors: CreateConciliacaoDividaErrorItem[];
 }
 
 export const createConciliacaoDivida = async (

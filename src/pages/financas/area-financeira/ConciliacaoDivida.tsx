@@ -548,6 +548,9 @@ export function ConciliacaoDivida() {
               onClick={handleSubmit}
               className="w-full gap-2"
             >
+              {isPendingConciliacaoDivida && (
+                <Loader2 className="animate-spin" />
+              )}
               Confirmar Negociação
             </Button>
 

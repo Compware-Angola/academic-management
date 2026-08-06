@@ -1,5 +1,6 @@
 // src/pages/negotiation/ConciliacaoAprovacao.tsx
 import { useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowDown,
   ArrowRight,
@@ -8,11 +9,10 @@ import {
   FileText,
   Hash,
   Home,
-  Link,
+  Loader2,
   Pencil,
   Receipt,
   TrendingDown,
-  User,
   XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -31,13 +31,6 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrencyAOA } from "@/util/format-currency";
 import {
-  APPROVAL_STATUS_BADGE,
-  APPROVAL_STATUS_LABEL,
-  ApprovalStatus,
-  ConciliationApproval,
-  InvoiceLineItem,
-} from "./types/ConciliacaoAprovacao.types";
-import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
@@ -46,71 +39,20 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 
-export const MOCK_APPROVAL: ConciliationApproval = {
-  id: 1,
-  invoiceCode: "FT 2024/00842",
-  status: ApprovalStatus.PENDENTE,
-  student: {
-    id: 101,
-    name: "Ana Beatriz Sultuane",
-    number: "20231045",
-  },
-  course: {
-    id: 1,
-    name: "Licenciatura em Gestão",
-  },
-  originalItems: [
-    {
-      id: 1,
-      service: "Propina — 1º Semestre",
-      quantity: 1,
-      price: 85000,
-      iva: 1200,
-      total: 86200,
-    },
-    {
-      id: 2,
-      service: "Propina — 2º Semestre",
-      quantity: 1,
-      price: 85000,
-      iva: 1200,
-      total: 86200,
-    },
-    {
-      id: 3,
-      service: "Taxa de Inscrição",
-      quantity: 1,
-      price: 15000,
-      iva: 0,
-      total: 15000,
-    },
-  ],
-  conciliatedItems: [
-    {
-      id: 1,
-      service: "Propina — 1º Semestre",
-      quantity: 1,
-      price: 85000,
-      iva: 1200,
-      total: 86200,
-    },
-    {
-      id: 2,
-      service: "Propina — 2º Semestre",
-      quantity: 1,
-      price: 68000,
-      iva: 1200,
-      total: 69200,
-    },
-    {
-      id: 3,
-      service: "Taxa de Inscrição",
-      quantity: 1,
-      price: 15000,
-      iva: 0,
-      total: 15000,
-    },
-  ],
+import type { ConciliationInvoiceItem } from "@/services/financas/conciliacao-divida/fetch-conciliacao-divida";
+import { useValidateConciliation } from "@/hooks/financas/dividas/use-validate-conciliacao-divida";
+import { useConciliationDetails } from "@/hooks/financas/dividas/use-query-conciliacao-divida-details";
+
+const STATUS_LABEL: Record<string, string> = {
+  PENDENTE: "Pendente",
+  APROVADO: "Aprovado",
+  REJEITADO: "Rejeitado",
+};
+
+const STATUS_BADGE: Record<string, string> = {
+  PENDENTE: "border-warning/40 bg-warning/10 text-warning",
+  APROVADO: "border-success/40 bg-success/10 text-success",
+  REJEITADO: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
 function getInitials(name: string) {
@@ -125,46 +67,46 @@ function getInitials(name: string) {
 
 interface ItemDiff {
   priceChanged: boolean;
-  ivaChanged: boolean;
   totalChanged: boolean;
   changed: boolean;
 }
 
 function diffItem(
-  original: InvoiceLineItem,
-  conciliated: InvoiceLineItem,
+  original: ConciliationInvoiceItem,
+  proposta: ConciliationInvoiceItem,
 ): ItemDiff {
-  const priceChanged = original.price !== conciliated.price;
-  const ivaChanged = original.iva !== conciliated.iva;
-  const totalChanged = original.total !== conciliated.total;
+  const priceChanged = original.preco_unitario !== proposta.preco_unitario;
+  const totalChanged = original.valor_total !== proposta.valor_total;
   return {
     priceChanged,
-    ivaChanged,
     totalChanged,
-    changed: priceChanged || ivaChanged || totalChanged,
+    changed: priceChanged || totalChanged,
   };
 }
 
-function OriginalItemCard({ item }: { item: InvoiceLineItem }) {
+function OriginalItemCard({ item }: { item: ConciliationInvoiceItem }) {
   return (
     <div className="rounded-lg border border-border bg-background p-3 space-y-2">
-      <p className="text-sm font-medium">{item.service}</p>
+      <p className="text-sm font-medium">
+        {item.descricao}
+        {item.mes_designacao && (
+          <span className="ml-1 text-xs text-muted-foreground">
+            ({item.mes_designacao})
+          </span>
+        )}
+      </p>
       <div className="grid grid-cols-2 gap-y-1 text-xs">
         <span className="text-muted-foreground">Quantidade</span>
-        <span className="text-right font-medium">{item.quantity}</span>
-        <span className="text-muted-foreground">Preço</span>
+        <span className="text-right font-medium">{item.quantidade}</span>
+        <span className="text-muted-foreground">Preço Unitário</span>
         <span className="text-right font-medium">
-          {formatCurrencyAOA(item.price)}
-        </span>
-        <span className="text-muted-foreground">IVA</span>
-        <span className="text-right font-medium">
-          {formatCurrencyAOA(item.iva)}
+          {formatCurrencyAOA(item.preco_unitario)}
         </span>
       </div>
       <Separator />
       <div className="flex items-center justify-between text-sm font-semibold">
         <span>Total</span>
-        <span>{formatCurrencyAOA(item.total)}</span>
+        <span>{formatCurrencyAOA(item.valor_total)}</span>
       </div>
     </div>
   );
@@ -172,12 +114,12 @@ function OriginalItemCard({ item }: { item: InvoiceLineItem }) {
 
 function ConciliatedItemCard({
   original,
-  conciliated,
+  proposta,
 }: {
-  original: InvoiceLineItem;
-  conciliated: InvoiceLineItem;
+  original: ConciliationInvoiceItem;
+  proposta: ConciliationInvoiceItem;
 }) {
-  const diff = diffItem(original, conciliated);
+  const diff = diffItem(original, proposta);
 
   return (
     <div
@@ -188,7 +130,14 @@ function ConciliatedItemCard({
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium">{conciliated.service}</p>
+        <p className="text-sm font-medium">
+          {proposta.descricao}
+          {proposta.mes_designacao && (
+            <span className="ml-1 text-xs text-muted-foreground">
+              ({proposta.mes_designacao})
+            </span>
+          )}
+        </p>
         {diff.changed && (
           <span className="inline-flex items-center gap-1 rounded-full border border-warning/40 bg-warning/15 px-2 py-0.5 text-[10px] font-medium text-warning shrink-0">
             Alterado
@@ -198,31 +147,24 @@ function ConciliatedItemCard({
 
       <div className="grid grid-cols-2 gap-y-1 text-xs">
         <span className="text-muted-foreground">Quantidade</span>
-        <span className="text-right font-medium">{conciliated.quantity}</span>
+        <span className="text-right font-medium">{proposta.quantidade}</span>
 
-        <span className="text-muted-foreground">Preço</span>
+        <span className="text-muted-foreground">Preço Unitário</span>
         <span
           className={`text-right font-medium ${diff.priceChanged ? "text-warning" : ""}`}
         >
-          {formatCurrencyAOA(conciliated.price)}
-        </span>
-
-        <span className="text-muted-foreground">IVA</span>
-        <span
-          className={`text-right font-medium ${diff.ivaChanged ? "text-warning" : ""}`}
-        >
-          {formatCurrencyAOA(conciliated.iva)}
+          {formatCurrencyAOA(proposta.preco_unitario)}
         </span>
       </div>
 
       {diff.priceChanged && (
         <div className="flex flex-col items-center gap-0.5 rounded-md bg-warning/10 px-2 py-1.5 text-[11px]">
           <span className="text-muted-foreground line-through">
-            {formatCurrencyAOA(original.price)}
+            {formatCurrencyAOA(original.preco_unitario)}
           </span>
           <ArrowDown className="h-3 w-3 text-warning" />
           <span className="font-semibold text-warning">
-            {formatCurrencyAOA(conciliated.price)}
+            {formatCurrencyAOA(proposta.preco_unitario)}
           </span>
         </div>
       )}
@@ -232,7 +174,7 @@ function ConciliatedItemCard({
       <div className="flex items-center justify-between text-sm font-semibold">
         <span>Total</span>
         <span className={diff.totalChanged ? "text-warning" : ""}>
-          {formatCurrencyAOA(conciliated.total)}
+          {formatCurrencyAOA(proposta.valor_total)}
         </span>
       </div>
     </div>
@@ -240,53 +182,120 @@ function ConciliatedItemCard({
 }
 
 export function ConciliacaoAprovacao() {
-  const approval = MOCK_APPROVAL;
+  const { id } = useParams<{ id: string }>();
+  const conciliationId = id ? Number(id) : undefined;
+  const navigate = useNavigate();
+
+  const {
+    data: conciliation,
+    isLoading,
+    isError,
+  } = useConciliationDetails(conciliationId);
+  const { mutate: validateConciliation, isPending } = useValidateConciliation();
+
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [approveOpen, setApproveOpen] = useState(false);
+  const [approveNote, setApproveNote] = useState("");
 
-  const pairs = useMemo(
-    () =>
-      approval.originalItems.map((original) => {
-        const conciliated = approval.conciliatedItems.find(
-          (c) => c.id === original.id,
-        );
-        return { original, conciliated: conciliated ?? original };
-      }),
-    [approval],
-  );
+  const pairs = useMemo(() => {
+    if (!conciliation) return [];
+    const propostaItens = conciliation.facturaPropostaAlteracao.itens;
+    return conciliation.facturaOriginal.itens.map((original, index) => ({
+      original,
+      proposta: propostaItens[index] ?? original,
+    }));
+  }, [conciliation]);
 
   const summary = useMemo(() => {
-    const totalOriginal = approval.originalItems.reduce(
-      (sum, i) => sum + i.total,
-      0,
-    );
-    const totalConciliated = approval.conciliatedItems.reduce(
-      (sum, i) => sum + i.total,
-      0,
-    );
+    if (!conciliation) {
+      return {
+        totalOriginal: 0,
+        totalConciliado: 0,
+        difference: 0,
+        percentChange: 0,
+        changedCount: 0,
+        unchangedCount: 0,
+      };
+    }
+    const totalOriginal = conciliation.facturaOriginal.totalPreco;
+    const totalConciliado = conciliation.facturaPropostaAlteracao.totalPreco;
     const changedCount = pairs.filter(
-      (p) => diffItem(p.original, p.conciliated).changed,
+      (p) => diffItem(p.original, p.proposta).changed,
     ).length;
-    const difference = totalConciliated - totalOriginal;
+    const difference = totalConciliado - totalOriginal;
     return {
       totalOriginal,
-      totalConciliated,
+      totalConciliado,
       difference,
       percentChange: totalOriginal ? (difference / totalOriginal) * 100 : 0,
       changedCount,
       unchangedCount: pairs.length - changedCount,
     };
-  }, [approval, pairs]);
+  }, [conciliation, pairs]);
 
   const handleApprove = () => {
-    // onApprove({ conciliationId: approval.id });
+    if (!conciliationId) return;
+    validateConciliation(
+      {
+        id: conciliationId,
+        payload: {
+          decisao: "APROVADO",
+          descricaoValidacao: approveNote.trim() || "Conciliação aprovada",
+        },
+      },
+      {
+        onSuccess: () => {
+          setApproveOpen(false);
+          setApproveNote("");
+          navigate(-1);
+        },
+      },
+    );
   };
 
   const handleReject = () => {
-    // onReject({ conciliationId: approval.id, reason: rejectReason.trim() });
-    setRejectOpen(false);
-    setRejectReason("");
+    if (!conciliationId) return;
+    validateConciliation(
+      {
+        id: conciliationId,
+        payload: {
+          decisao: "REJEITADO",
+          descricaoValidacao: rejectReason.trim(),
+        },
+      },
+      {
+        onSuccess: () => {
+          setRejectOpen(false);
+          setRejectReason("");
+          navigate(-1);
+        },
+      },
+    );
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (isError || !conciliation) {
+    return (
+      <div className="max-w-11/12 mx-auto px-6 py-12 text-center space-y-2">
+        <p className="text-sm font-medium">
+          Não foi possível carregar a conciliação.
+        </p>
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          Voltar
+        </Button>
+      </div>
+    );
+  }
+
+  const isDecided = conciliation.status !== "PENDENTE";
 
   return (
     <div className="max-w-11/12 mx-auto px-6 py-6 space-y-6">
@@ -319,8 +328,8 @@ export function ConciliacaoAprovacao() {
       <p className="text-muted-foreground">
         Aprovar ou Rejeitar uma conciliação de divida.
       </p>
-      {/* ── Cabeçalho ── */}
 
+      {/* ── Cabeçalho ── */}
       <Card className="p-8">
         <div className="grid grid-cols-1 sm:grid-cols-[auto_auto_1fr_1fr] gap-6 items-center">
           <div>
@@ -328,23 +337,25 @@ export function ConciliacaoAprovacao() {
               Estado
             </p>
             <span
-              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium mt-1 ${APPROVAL_STATUS_BADGE[approval.status]}`}
+              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium mt-1 ${STATUS_BADGE[conciliation.status]}`}
             >
-              {APPROVAL_STATUS_LABEL[approval.status]}
+              {STATUS_LABEL[conciliation.status]}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary shrink-0">
-              {getInitials(approval.student.name)}
+              {getInitials(conciliation?.estudante?.nome ?? "—")}
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 Aluno
               </p>
-              <p className="text-sm font-semibold">{approval.student.name}</p>
+              <p className="text-sm font-semibold">
+                {conciliation?.estudante?.nome ?? "—"}
+              </p>
               <p className="text-xs text-muted-foreground">
-                Nº {approval.student.number}
+                Nº {conciliation?.estudante?.codigoMatricula ?? "—"}
               </p>
             </div>
           </div>
@@ -353,9 +364,11 @@ export function ConciliacaoAprovacao() {
             <Hash className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                Código da Factura
+                Referência
               </p>
-              <p className="text-sm font-semibold">{approval.invoiceCode}</p>
+              <p className="text-sm font-semibold">
+                {conciliation.facturaOriginal?.referencia}
+              </p>
             </div>
           </div>
 
@@ -365,10 +378,36 @@ export function ConciliacaoAprovacao() {
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 Curso
               </p>
-              <p className="text-sm font-semibold">{approval.course.name}</p>
+              <p className="text-sm font-semibold">
+                {conciliation?.estudante?.curso ?? "—"}
+              </p>
             </div>
           </div>
         </div>
+
+        {conciliation.descricaoCriacao && (
+          <>
+            <Separator className="my-4" />
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                Motivo da Conciliação
+              </p>
+              <p className="text-sm">{conciliation?.descricaoCriacao}</p>
+            </div>
+          </>
+        )}
+
+        {isDecided && conciliation.descricaoValidacao && (
+          <>
+            <Separator className="my-4" />
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                Nota da Validação
+              </p>
+              <p className="text-sm">{conciliation?.descricaoValidacao}</p>
+            </div>
+          </>
+        )}
       </Card>
 
       {/* ── Comparação lado a lado ── */}
@@ -380,7 +419,7 @@ export function ConciliacaoAprovacao() {
           </h3>
           <div className="space-y-3">
             {pairs.map(({ original }) => (
-              <OriginalItemCard key={original.id} item={original} />
+              <OriginalItemCard key={original?.codigo} item={original} />
             ))}
           </div>
         </Card>
@@ -391,11 +430,11 @@ export function ConciliacaoAprovacao() {
             Factura Conciliada
           </h3>
           <div className="space-y-3">
-            {pairs.map(({ original, conciliated }) => (
+            {pairs.map(({ original, proposta }) => (
               <ConciliatedItemCard
-                key={conciliated.id}
+                key={proposta.codigo}
                 original={original}
-                conciliated={conciliated}
+                proposta={proposta}
               />
             ))}
           </div>
@@ -429,7 +468,7 @@ export function ConciliacaoAprovacao() {
               Total Conciliado
             </p>
             <p className="text-2xl font-bold text-primary">
-              {formatCurrencyAOA(summary.totalConciliated)}
+              {formatCurrencyAOA(summary.totalConciliado)}
             </p>
           </div>
         </div>
@@ -481,20 +520,61 @@ export function ConciliacaoAprovacao() {
       </Card>
 
       {/* ── Ações ── */}
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          variant="outline"
-          className="gap-2 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={() => setRejectOpen(true)}
-        >
-          <XCircle className="h-4 w-4" />
-          Rejeitar
-        </Button>
-        <Button className="gap-2" onClick={handleApprove}>
-          <CheckCircle2 className="h-4 w-4" />
-          Aprovar Conciliação
-        </Button>
-      </div>
+      {!isDecided && (
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            className="gap-2 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => setRejectOpen(true)}
+            disabled={isPending}
+          >
+            <XCircle className="h-4 w-4" />
+            Rejeitar
+          </Button>
+          <Button
+            className="gap-2"
+            onClick={() => setApproveOpen(true)}
+            disabled={isPending}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Aprovar Conciliação
+          </Button>
+        </div>
+      )}
+
+      {/* ── Modal de aprovação ── */}
+      <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aprovar Conciliação</DialogTitle>
+            <DialogDescription>
+              Podes adicionar uma nota sobre a aprovação (opcional).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="approve-note">Nota</Label>
+            <Textarea
+              id="approve-note"
+              placeholder="Ex: Conciliação validada conforme acordo com o aluno…"
+              value={approveNote}
+              onChange={(e) => setApproveNote(e.target.value)}
+              rows={4}
+              className="resize-none"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setApproveOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleApprove} disabled={isPending}>
+              {isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
+              Confirmar Aprovação
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Modal de rejeição ── */}
       <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
@@ -527,9 +607,10 @@ export function ConciliacaoAprovacao() {
             </Button>
             <Button
               variant="destructive"
-              disabled={rejectReason.trim().length === 0}
+              disabled={rejectReason.trim().length === 0 || isPending}
               onClick={handleReject}
             >
+              {isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
               Confirmar Rejeição
             </Button>
           </DialogFooter>
