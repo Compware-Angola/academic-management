@@ -315,6 +315,7 @@ export default function PautaGeralExame() {
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="1">Admitido</SelectItem>
                 <SelectItem value="0">Reprovado</SelectItem>
+                <SelectItem value="3">Aguardando</SelectItem>
               </SelectContent>
             </Select>
           </div>
