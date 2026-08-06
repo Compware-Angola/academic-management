@@ -10,13 +10,30 @@ export type CorrigirProvasResponse = {
  * Serviço para processar a correção automática das provas do Exame de Acesso
  * Endpoint: POST /exames-de-acesso/corrigir-provas
  */
-export async function corrigirProvas(): Promise<CorrigirProvasResponse> {
-  const { data } = await axiosNestGa.post<CorrigirProvasResponse>(
-    "/exames-de-acesso/corrigir-provas"
-  );
 
+export type CorrigirProvasFiltros = {
+  codigoAnoLetivo?: number;
+  codigoCurso?: number;
+  codigoTurno?: number;
+  codigoFaculdade?: number;
+  codigoSala?: number;
+  search?: string;
+  dataInicio?: string;
+  dataFim?: string;
+};
+
+export async function corrigirProvas(
+  filtros: CorrigirProvasFiltros,
+): Promise<CorrigirProvasResponse> {
+  console.log(filtros);
+  const { data } = await axiosNestGa.post<CorrigirProvasResponse>(
+    "/exames-de-acesso/corrigir-provas",
+    filtros,
+  );
   return data;
 }
+
+// mantém getStatusJob tal como já está
 
 /**
  * Serviço para verificar o status da correção das provas do Exame de Acesso
@@ -31,7 +48,7 @@ type StatusJobResponse = {
 
 export async function getStatusJob(queueName: string, taskId: string) {
   const { data } = await axiosNestJob.get<StatusJobResponse>(
-    `/jobs/${queueName}/${taskId}/status`
+    `/jobs/${queueName}/${taskId}/status`,
   );
 
   return data;
