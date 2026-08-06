@@ -100,7 +100,8 @@ export type CreateProvaPayload = {
   cursos?: ProvaRef[];
   data: string;
   inicio: string;
-  local: string;
+  local: number;
+  periodo_id: number;
 };
 
 export type UpdateProvaPayload = {
@@ -113,7 +114,8 @@ export type UpdateProvaPayload = {
   disciplinas?: ProvaRef[];
   data?: string;
   inicio?: string;
-  local?: string;
+  local?: number;
+  periodo_id: number;
 };
 
 export async function fetchProvas(
