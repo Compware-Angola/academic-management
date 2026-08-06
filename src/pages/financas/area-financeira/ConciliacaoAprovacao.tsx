@@ -75,8 +75,8 @@ function diffItem(
   original: ConciliationInvoiceItem,
   proposta: ConciliationInvoiceItem,
 ): ItemDiff {
-  const priceChanged = original.preco_unitario !== proposta.preco_unitario;
-  const totalChanged = original.valor_total !== proposta.valor_total;
+  const priceChanged = original.preco !== proposta.preco;
+  const totalChanged = original.total !== proposta.total;
   return {
     priceChanged,
     totalChanged,
@@ -89,9 +89,9 @@ function OriginalItemCard({ item }: { item: ConciliationInvoiceItem }) {
     <div className="rounded-lg border border-border bg-background p-3 space-y-2">
       <p className="text-sm font-medium">
         {item.descricao}
-        {item.mes_designacao && (
+        {item.mes && (
           <span className="ml-1 text-xs text-muted-foreground">
-            ({item.mes_designacao})
+            ({item.mes})
           </span>
         )}
       </p>
@@ -100,13 +100,13 @@ function OriginalItemCard({ item }: { item: ConciliationInvoiceItem }) {
         <span className="text-right font-medium">{item.quantidade}</span>
         <span className="text-muted-foreground">Preço Unitário</span>
         <span className="text-right font-medium">
-          {formatCurrencyAOA(item.preco_unitario)}
+          {formatCurrencyAOA(item.preco)}
         </span>
       </div>
       <Separator />
       <div className="flex items-center justify-between text-sm font-semibold">
         <span>Total</span>
-        <span>{formatCurrencyAOA(item.valor_total)}</span>
+        <span>{formatCurrencyAOA(item.total)}</span>
       </div>
     </div>
   );
@@ -132,9 +132,9 @@ function ConciliatedItemCard({
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium">
           {proposta.descricao}
-          {proposta.mes_designacao && (
+          {proposta.mes && (
             <span className="ml-1 text-xs text-muted-foreground">
-              ({proposta.mes_designacao})
+              ({proposta.mes})
             </span>
           )}
         </p>
@@ -153,18 +153,18 @@ function ConciliatedItemCard({
         <span
           className={`text-right font-medium ${diff.priceChanged ? "text-warning" : ""}`}
         >
-          {formatCurrencyAOA(proposta.preco_unitario)}
+          {formatCurrencyAOA(proposta.preco)}
         </span>
       </div>
 
       {diff.priceChanged && (
         <div className="flex flex-col items-center gap-0.5 rounded-md bg-warning/10 px-2 py-1.5 text-[11px]">
           <span className="text-muted-foreground line-through">
-            {formatCurrencyAOA(original.preco_unitario)}
+            {formatCurrencyAOA(original.preco)}
           </span>
           <ArrowDown className="h-3 w-3 text-warning" />
           <span className="font-semibold text-warning">
-            {formatCurrencyAOA(proposta.preco_unitario)}
+            {formatCurrencyAOA(proposta.preco)}
           </span>
         </div>
       )}
@@ -174,7 +174,7 @@ function ConciliatedItemCard({
       <div className="flex items-center justify-between text-sm font-semibold">
         <span>Total</span>
         <span className={diff.totalChanged ? "text-warning" : ""}>
-          {formatCurrencyAOA(proposta.valor_total)}
+          {formatCurrencyAOA(proposta.total)}
         </span>
       </div>
     </div>
@@ -218,8 +218,8 @@ export function ConciliacaoAprovacao() {
         unchangedCount: 0,
       };
     }
-    const totalOriginal = conciliation.facturaOriginal.totalPreco;
-    const totalConciliado = conciliation.facturaPropostaAlteracao.totalPreco;
+    const totalOriginal = conciliation.facturaOriginal.valorApagar;
+    const totalConciliado = conciliation.facturaPropostaAlteracao.valorApagar;
     const changedCount = pairs.filter(
       (p) => diffItem(p.original, p.proposta).changed,
     ).length;
