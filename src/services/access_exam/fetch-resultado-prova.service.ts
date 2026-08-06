@@ -1,4 +1,3 @@
-
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type ResultadoProvaParams = {
@@ -7,7 +6,7 @@ export type ResultadoProvaParams = {
   codigoTurno?: number;
   codigoFaculdade?: number;
   codigoSala?: number;
-  search?:string;
+  search?: string;
   resultado?: number;
   dataInicio?: string;
   dataFim?: string;
@@ -32,7 +31,7 @@ export type ResultadoProva = {
   faculdade: string;
   nota: number;
   resultado: number;
- 
+
   hora_inicio: string;
   hora_fim: string;
   status_prova: number;
@@ -47,11 +46,11 @@ export type ResultadoProvaResponse = {
 };
 
 export async function fetchResultadoProva(
-  params: ResultadoProvaParams
+  params: ResultadoProvaParams,
 ): Promise<ResultadoProvaResponse> {
   const { data } = await axiosNestGa.get(
     "/exames-de-acesso/candidatos/prova/resultado",
-    { params }
+    { params },
   );
   return data;
 }
