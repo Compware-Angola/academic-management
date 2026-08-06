@@ -49,6 +49,7 @@ export interface DebtNegotiationDetailsConciliation {
   faculdade: string;
   facturas: DebtNegotiationInvoiceconciliation[];
   esta_na_negociacao: boolean;
+  isReconciliado: boolean;
 }
 
 export const getDebtNegotiationDetailsConciliation = async (
@@ -75,6 +76,7 @@ export interface ConciliacaoDividaInvoicePayload {
 }
 
 export interface CreateConciliacaoDividaPayload {
+  codigoNegociacaoDivida: number;
   descricao: string;
   invoices: ConciliacaoDividaInvoicePayload[];
 }

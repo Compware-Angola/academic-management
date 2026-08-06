@@ -119,9 +119,7 @@ export function ConciliacaoDivida() {
   const [conciliacaoError, setConciliacaoError] =
     useState<ConciliacaoDividaErrorResponse | null>(null);
 
-  // ALTERADO: constante indicando que esta negociação já tem uma conciliação
-  // TODO: substituir por um campo real vindo da API (ex.: negotiation.temConciliacaoPendente)
-  const jaPossuiConciliacaoPendente = false;
+  const jaPossuiConciliacaoPendente = negotiation?.isReconciliado ?? false;
 
   useEffect(() => {
     if (!negotiation) return;
@@ -213,6 +211,7 @@ export function ConciliacaoDivida() {
   const handleSubmit = () => {
     if (!negotiation) return;
     const payload = {
+      codigoNegociacaoDivida: Number(id),
       descricao: observation.trim(),
       invoices: negotiation.facturas
         .map((factura) => ({
@@ -242,14 +241,15 @@ export function ConciliacaoDivida() {
         setResultModalOpen(true);
       },
       onError: (error: any) => {
-        const apiError = error?.response?.data as
+        const apiError = error?.data as
           | ConciliacaoDividaErrorResponse
           | undefined;
         setConciliacaoResult(null);
+
         setConciliacaoError(
           apiError ?? {
             message: "Não foi possível concluir a conciliação de dívida.",
-            errors: [],
+            errors: apiError?.errors ?? [],
           },
         );
         setResultModalOpen(true);
