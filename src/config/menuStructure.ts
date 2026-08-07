@@ -1057,6 +1057,11 @@ export const finaceStructure: MenuStructure = {
           permission: [PermissionTypeDetails.FACTURAS.sigla],
         },
         {
+          title: "Conciliação de Negociação de Divida",
+          url: "/financas/negociacao-conciliacao",
+          permission: [],
+        },
+        {
           title: "Serviços e Emolumentos",
           url: "/financas/servicos-emolumentos",
           permission: [PermissionTypeDetails.SERVICOS_PRECARIOS.sigla],
@@ -1103,7 +1108,7 @@ export const finaceStructure: MenuStructure = {
         url: "/financas/contratos-instituicao",
         permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
       },
-    
+
       {
         title: "Rel. Pagamentos Instituições",
         icon: BarChart3,
