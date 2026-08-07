@@ -74,7 +74,7 @@ export default function NegociacaoDividaConciliacao() {
     "codigoMatricula",
   );
 
-  const [statusFilter, setStatusFilter] = useState<string>("PENDENTE");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
   const [filters, setFilters] = useState({
     anoLectivo: "",
@@ -112,7 +112,7 @@ export default function NegociacaoDividaConciliacao() {
 
   const handleClearFilters = () => {
     setSearchTerm("");
-    setStatusFilter("PENDENTE");
+    setStatusFilter("ALL");
     setFilters({ anoLectivo: "", faculdade: "", curso: "" });
     setPage(1);
   };
