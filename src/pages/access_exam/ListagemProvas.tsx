@@ -190,7 +190,7 @@ export default function ListagemProvas() {
       !form.periodo_id
     ) {
       toast.error(
-        "Preencha descrição, senha, ano letivo, duração, data, início e o local.",
+        "Preencha descrição, senha, ano letivo, duração, data, início, local, periodo.",
       );
       return null;
     }
@@ -252,8 +252,8 @@ export default function ListagemProvas() {
       cursos: parseIds(form.cursos),
       data: form.data || undefined,
       inicio: form.inicio || undefined,
-      local: form.local || undefined,
-      periodo_id: form.periodo_id || undefined,
+      local: Number(form.local) || undefined,
+      periodo_id: Number(form.periodo_id) || undefined,
     };
   };
 
