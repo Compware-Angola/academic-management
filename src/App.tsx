@@ -560,7 +560,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC
+                          PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC
                             .sigla,
                         ]}
                       >
