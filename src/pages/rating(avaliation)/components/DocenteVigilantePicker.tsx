@@ -33,8 +33,15 @@ export function DocenteVigilantePicker({ values, onChange, max = 2 }: Props) {
   const [query, setQuery] = useState("");
   const { data: docentes = [], isLoading: loading } = useQueryTeacther();
 
+  const normalize = (text: string) =>
+    text
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .trim();
+
   const filtered = docentes.filter((d) =>
-    d.nome.toLowerCase().includes(query.toLowerCase()),
+    normalize(d.nome).includes(normalize(query))
   );
 
   const ids = docentes.map((d) => d.codigo_utilizador);
