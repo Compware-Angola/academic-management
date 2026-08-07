@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { FilterBar } from "@/components/common/FilterBar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,16 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {
-  RefreshCw,
-  FileDown,
-  Printer,
-  Plus,
-  Edit,
-  Trash2,
-  Users,
-  Shield,
-} from "lucide-react";
+import { Plus, Link2, Shield, Search } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,101 +29,45 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useCursos } from "@/hooks/use-cursos";
-import { useClasses } from "@/hooks/use-classes";
 import { useQueryDepartamento } from "@/hooks/depatamento/use-query-depardamento";
-import { FormSelect } from "@/components/common/FormSelect";
-import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-query-departamento-uc";
-import { CreateUcModal } from "./components/CreateUcModal";
-import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
-import { parseFilter } from "@/util/parse-filter";
-import { Link2 } from "lucide-react";
+import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-query-departamento-uc";
+import { DepartmentDiscipline } from "@/services/departamento/fetch-departamento-uc";
+import { CreateUcModal } from "./components/CreateUcModal";
 import { VincularCursoModal } from "./components/VincularCursoModal";
-
-interface UnidadeCurricular {
-  id: number;
-  sigla: string;
-  nome: string;
-  departamento: string;
-  coordenador: string;
-  creditos: number;
-  semestre: string;
-  cargaHoraria: number;
-  docentesAlocados: number;
-  capacidade: number;
-  status: "Ativa" | "Inativa" | "Em Revisão";
-}
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function UcDepartmentManagement() {
   const [openModal, setOpenModal] = useState(false);
-
-  const { data: cursos = [], isLoading: loadingCursos } = useCursos();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState("");
+  const [departamento, setDepartamento] = useState("");
   const [ucParaVincular, setUcParaVincular] = useState<{
     codigo_grade: number;
     unidade_curricular: string;
   } | null>(null);
 
-  const [formData, setFormData] = useState({
-    departamento: "",
-    curso: "",
-    semestre: "",
-    classes: "",
-  });
-  const { data: departamento = [], isLoading: isLoadingDepartamento } =
+  const { data: departamentos = [], isLoading: isLoadingDepartamento } =
     useQueryDepartamento();
-  const { data: semestres, isLoading: isLoadingSemestres } =
-    useQuerySemestres();
-  const { data: classes = [], isLoading: isLoadingClasses } =
-    useQueryClassFilterByCurso({ curso: formData.curso });
 
   const { data: departamentoUCResponse, isLoading: isLoadingDepartamentoUC } =
     useQueryDepartamentoUC({
-      classe: parseFilter(formData.classes),
-      departamento: parseFilter(formData.departamento),
-      semestre: parseFilter(formData.semestre),
+      departamento: Number(departamento),
+      search: search || undefined,
       limit,
       page,
     });
-  const mockData: UnidadeCurricular[] = [];
 
-  const handleCreate = () => {
-    toast.info("A abrir formulário de criação...");
-  };
-
-  const handleEdit = (id: number) => {
-    toast.info(`A editar UC com ID: ${id}`);
-  };
-
-  const handleDelete = (id: number) => {
-    toast.error(`A eliminar UC com ID: ${id}`);
-  };
-
-  const handleViewDocentes = (id: number) => {
-    toast.info(`A visualizar docentes da UC com ID: ${id}`);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Ativa":
-        return "default";
-      case "Inativa":
-        return "destructive";
-      case "Em Revisão":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
-  const departamentos = departamentoUCResponse?.data ?? [];
+  const disciplinas: DepartmentDiscipline[] =
+    departamentoUCResponse?.data ?? [];
   const total = departamentoUCResponse?.total;
   const totalPages = departamentoUCResponse?.totalPages;
+
+  const getStatusInfo = (status: number) =>
+    status === 1
+      ? { label: "Ativa", variant: "default" as const }
+      : { label: "Inativa", variant: "destructive" as const };
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -155,167 +91,128 @@ export default function UcDepartmentManagement() {
         title="Gestão de UC por Departamento"
         subtitle="Gerir unidades curriculares organizadas por departamento académico"
         actions={
-          <>
-            <Button
-              type="button"
-              variant="default"
-              size="sm"
-              onClick={() => setOpenModal(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova UC
-            </Button>
-          </>
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => setOpenModal(true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nova UC
+          </Button>
         }
       />
 
-      <FilterBar>
-        <FormCommandSelect
-          value={formData.departamento}
-          label="Departamento"
-          options={departamento}
-          map={(c) => ({
-            key: c.codigo.toString(),
-            value: c.codigo.toString(),
-            label: c.designacao,
-          })}
-          onChange={(v) =>
-            setFormData({
-              ...formData,
-              departamento: v,
-            })
-          }
-        />
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            {/* Filtro por Departamento */}
+            <div className="w-full sm:max-w-xs">
+              <FormCommandSelect
+                value={departamento}
+                label={undefined}
+                placeholder="Selecione Departamento"
+                options={departamentos}
+                map={(c) => ({
+                  key: c.codigo.toString(),
+                  value: c.codigo.toString(),
+                  label: c.designacao,
+                })}
+                onChange={(v) => {
+                  setDepartamento(v);
+                  setPage(1);
+                }}
+              />
+            </div>
 
-        <CourseSelect
-          value={formData.curso}
-          onChangeValue={(v) => setFormData({ ...formData, curso: v })}
-        />
-
-        <FormSelect
-          label="Ano Curricular"
-          value={formData.classes}
-          disabled={isLoadingClasses || !formData.curso}
-          onChange={(v) => setFormData({ ...formData, classes: v })}
-          options={classes}
-          map={(c) => ({
-            key: c.codigo,
-            label: c.designacao,
-            value: c.codigo,
-          })}
-          loading={isLoadingClasses}
-        />
-        <FormSelect
-          disabled={isLoadingSemestres}
-          loading={isLoadingSemestres}
-          label="Semestre"
-          value={formData.semestre}
-          onChange={(v) => setFormData({ ...formData, semestre: v })}
-          options={semestres}
-          map={(s) => ({
-            key: s.codigo,
-            label: s.designacao,
-            value: s.codigo,
-          })}
-        />
-      </FilterBar>
+            {/* Campo de Pesquisa */}
+            <div className="relative flex items-center w-full sm:max-w-xs">
+              <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+              <Input
+                placeholder="Pesquisar disciplina..."
+                className="pl-9"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="rounded-md border">
-        {isLoadingDepartamentoUC ? (
-          <div className="space-y-3">
+        {!departamento ? (
+          <div className="text-center py-12 bg-card border rounded-lg">
+            <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-lg font-medium">
+              Selecione um departamento para ver as disciplinas
+            </p>
+          </div>
+        ) : isLoadingDepartamentoUC ? (
+          <div className="space-y-3 p-4">
             {[...Array(5)].map((_, i) => (
               <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
-        ) : departamentos.length === 0 ? (
+        ) : disciplinas.length === 0 ? (
           <div className="text-center py-12 bg-card border rounded-lg">
             <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg font-medium">
-              {" "}
-              <p className="text-lg font-medium">
-                Nenhuma disciplina encontrada
-              </p>
-            </p>
+            <p className="text-lg font-medium">Nenhuma disciplina encontrada</p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>Disciplina</TableHead>
-                <TableHead>Ano Curricular</TableHead>
-                <TableHead>Semestre</TableHead>
-
+                <TableHead>Código Grade</TableHead>
+                <TableHead>Código Disciplina</TableHead>
+                <TableHead>Unidade Curricular</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {departamentos.map((uc) => (
-                <TableRow key={uc.codigo_grade}>
-                  <TableCell className="font-medium">
-                    {uc.codigo_grade}
-                  </TableCell>
-
-                  <TableCell>{uc.unidade_curricular}</TableCell>
-
-                  <TableCell>{uc.ano_curricular}</TableCell>
-
-                  <TableCell>{uc.semestre}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setUcParaVincular({
-                          codigo_grade: uc.codigo_grade,
-                          unidade_curricular: uc.unidade_curricular,
-                        })
-                      }
-                    >
-                      <Link2 className="h-4 w-4 mr-2" />
-                      Vincular
-                    </Button>
-                  </TableCell>
-
-                  {/* <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+              {disciplinas.map((uc) => {
+                const status = getStatusInfo(uc.status);
+                return (
+                  <TableRow key={uc.codigo_grade}>
+                    <TableCell className="font-medium">
+                      {uc.codigo_grade}
+                    </TableCell>
+                    <TableCell>{uc.codigo_disciplina}</TableCell>
+                    <TableCell>{uc.unidade_curricular}</TableCell>
+                    <TableCell>
+                      <Badge variant={status.variant}>{status.label}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleViewDocentes(uc.codigo_grade)}
+                        onClick={() =>
+                          setUcParaVincular({
+                            codigo_grade: uc.codigo_grade,
+                            unidade_curricular: uc.unidade_curricular,
+                          })
+                        }
                       >
-                        <Users className="h-4 w-4" />
+                        <Link2 className="h-4 w-4 mr-2" />
+                        Vincular
                       </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(uc.codigo_grade)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(uc.codigo_grade)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell> */}
-                </TableRow>
-              ))}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
       </div>
 
-      {!isLoadingDepartamentoUC && departamento.length > 0 && (
+      {departamento && !isLoadingDepartamentoUC && disciplinas.length > 0 && (
         <div className="flex items-center justify-between mt-4">
           <p className="text-sm text-muted-foreground">
-            A mostrar {departamentos.length} de {total} registos
+            A mostrar {disciplinas.length} de {total} registos
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -356,14 +253,12 @@ export default function UcDepartmentManagement() {
           </div>
         </div>
       )}
+
       <CreateUcModal open={openModal} onClose={() => setOpenModal(false)} />
       <VincularCursoModal
         open={!!ucParaVincular}
         onClose={() => setUcParaVincular(null)}
         uc={ucParaVincular}
-        onSubmit={(uc, vinculos) => {
-          console.log("vincular", uc, vinculos);
-        }}
       />
     </div>
   );
