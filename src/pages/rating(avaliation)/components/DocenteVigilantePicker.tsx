@@ -126,9 +126,9 @@ export function DocenteVigilantePicker({ values, onChange, max = 2 }: Props) {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{d.nome}</p>
-                    {d.descricao_grau_academico && (
+                    {d.descricaograuacademico && (
                       <p className="text-[11px] text-muted-foreground truncate">
-                        {d.descricao_grau_academico}
+                        {d.descricaograuacademico}
                       </p>
                     )}
                   </div>
