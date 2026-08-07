@@ -715,7 +715,7 @@ export const academicStructure: MenuStructure = {
           title: "Lançamento do programa da UC",
           url: "/docente/programa",
           permission: [
-            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+            PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
         {
