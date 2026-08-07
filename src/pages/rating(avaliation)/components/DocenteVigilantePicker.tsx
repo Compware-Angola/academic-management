@@ -37,6 +37,10 @@ export function DocenteVigilantePicker({ values, onChange, max = 2 }: Props) {
     d.nome.toLowerCase().includes(query.toLowerCase()),
   );
 
+  const ids = docentes.map((d) => d.codigo_utilizador);
+
+  console.log(filtered);
+
   const toggle = (id: number, nome: string) => {
     if (values.some((v) => v.id === id)) {
       onChange(values.filter((v) => v.id !== id));
@@ -86,7 +90,7 @@ export function DocenteVigilantePicker({ values, onChange, max = 2 }: Props) {
             </div>
           )}
 
-          {!loading &&
+          {!loading && filtered.length > 0 && (
             filtered.map((d) => {
               const isSelected = values.some(
                 (v) => v.id === d.codigo_utilizador,
@@ -95,7 +99,7 @@ export function DocenteVigilantePicker({ values, onChange, max = 2 }: Props) {
 
               return (
                 <div
-                  key={d.codigo_utilizador}
+                  key={d?.codigo_utilizador + d?.username + d?.codigo}
                   onClick={() =>
                     !isDisabled && toggle(d.codigo_utilizador, d.nome)
                   }
@@ -153,7 +157,10 @@ export function DocenteVigilantePicker({ values, onChange, max = 2 }: Props) {
                   </div>
                 </div>
               );
-            })}
+            })
+          )
+
+          }
         </div>
 
         {/* Rodapé com chips dos selecionados */}
