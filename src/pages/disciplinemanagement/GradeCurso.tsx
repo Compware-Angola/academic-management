@@ -32,7 +32,7 @@ import { toast } from "sonner";
 
 import { useCursos } from "@/hooks/use-cursos";
 import {
-  useGradeCurricular2,
+  useGradeCurricular,
   useToggleStatusGradeCurricular,
 } from "@/hooks/use-grade-curricular";
 import { useAuth } from "@/hooks/use-auth";
@@ -44,9 +44,13 @@ import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina
 import { ImportUCModal } from "./components/ImportModalUC";
 import { useNavigate } from "react-router-dom";
 import { FormSelect } from "@/components/common/FormSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 export default function GradeCurso() {
-  const [tipoCandidaturaId] = useState<string>("1");
+  const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
+  const [anoLetivoId, setAnoLetivoId] = useState<string>("");
   const [cursoId, setCursoId] = useState<string>("");
   const [classeId, setClasseId] = useState<string>("");
   const [estado, setEstado] = useState<number>();
@@ -66,13 +70,16 @@ export default function GradeCurso() {
     useQuerySemestres();
 
   const hasActiveFilters =
+    tipoCandidaturaId !== "1" ||
     !!cursoId ||
-    !!classeId ||
+    (classeId !== undefined && classeId !== "7") ||
     semestre !== "all" ||
     !!searchUC.trim() ||
     estado !== undefined;
 
   const limparFiltros = () => {
+    setTipoCandidaturaId("1");
+    setAnoLetivoId("");
     setCursoId("");
     setClasseId("");
     setEstado(undefined);
@@ -91,10 +98,10 @@ export default function GradeCurso() {
     isLoading: loadingGrade,
     isError,
     refetch,
-  } = useGradeCurricular2({
+  } = useGradeCurricular({
+    anoLectivo: parseFilter(anoLetivoId),
     curso: parseFilter(cursoId),
-    semestre: semestre === "all" ? undefined : parseFilter(semestre),
-    classe: parseFilter(classeId),
+    classe: classeId !== "7" ? parseFilter(classeId) : undefined,
     estado: estado,
     page,
     limit,
@@ -106,7 +113,7 @@ export default function GradeCurso() {
     setClasseId("");
     setSearchUC("");
     setPage(1);
-  }, [cursoId]);
+  }, [cursoId, anoLetivoId, tipoCandidaturaId]);
 
   const grades = gradeResponses?.data ?? [];
   const total = gradeResponses?.total ?? 0;
@@ -164,6 +171,33 @@ export default function GradeCurso() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <TipoCandidaturaSelect
+            value={tipoCandidaturaId}
+            onChangeValue={(v) => {
+              setTipoCandidaturaId(v);
+              setAnoLetivoId("");
+              setCursoId("");
+              setClasseId("");
+              setPage(1);
+            }}
+          />
+
+          {/* Ano Letivo */}
+          <div className="space-y-2">
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Letivo"
+              value={anoLetivoId}
+              onChangeValue={(v) => {
+                setAnoLetivoId(v);
+                setCursoId("");
+                setClasseId("");
+                setPage(1);
+              }}
+              tipoCandidaturaId={parseFilter(tipoCandidaturaId) ?? 1}
+              onlyConfigurable={false}
+              disabled={!tipoCandidaturaId}
+            />
+          </div>
           <CourseSelect
             label="Curso"
             value={cursoId}

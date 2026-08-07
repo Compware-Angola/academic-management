@@ -47,7 +47,13 @@ export function ChartAreaInteractive({
       .map((item) => {
         const [day, month, year] = item.data.split("/");
         const dateObj = new Date(Number(year), Number(month) - 1, Number(day));
-
+        if (isNaN(dateObj.getTime())) {
+          return {
+            originalDate: item.data,
+            date: "INDISPONIVEL",
+            subtotal: item.total_dia || 0,
+          };
+        }
         return {
           originalDate: item.data,
           date: dateObj.toISOString().split("T")[0],

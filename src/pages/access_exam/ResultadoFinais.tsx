@@ -6,12 +6,41 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { RefreshCw, ChevronLeft, ChevronRight, Home, X, Search, PlayCircle, Loader2 } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  X,
+  Search,
+  PlayCircle,
+  Loader2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
@@ -24,6 +53,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { useCorrigirProvas } from "@/hooks/access_exam/use-corrigir-provas";
 import { BarraDeProgresso } from "./components/BarraDeProgresso";
+import { CorrigirProvasModal } from "./components/CorrigirProvasModal";
 
 type Filters = {
   codigoAnoLetivo: string;
@@ -62,15 +92,20 @@ export default function ResultadoFinais() {
   const [filters, setFilters] = useState<Filters>(FILTERS_INITIAL);
 
   const { data: salas = [] } = useQuerySalas();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   // === Novo Hook ===
   const { data, isLoading, refetch } = useResultadosFinais({
-    codigoAnoLetivo: filters.codigoAnoLetivo ? Number(filters.codigoAnoLetivo) : undefined,
+    codigoAnoLetivo: filters.codigoAnoLetivo
+      ? Number(filters.codigoAnoLetivo)
+      : undefined,
     codigoCurso: filters.codigoCurso ? Number(filters.codigoCurso) : undefined,
     codigoTurno: parseFilter(filters.codigoTurno),
-    codigoFaculdade: filters.codigoFaculdade ? Number(filters.codigoFaculdade) : undefined,
+    codigoFaculdade: filters.codigoFaculdade
+      ? Number(filters.codigoFaculdade)
+      : undefined,
     codigoSala: filters.codigoSala ? Number(filters.codigoSala) : undefined,
 
     search: filters.search || undefined,
@@ -80,7 +115,8 @@ export default function ResultadoFinais() {
     limit: filters.limit,
   });
   const [isProcessando, setIsProcessando] = useState(false);
-  const { mutate: corrigirProvas, isPending, } = useCorrigirProvas(setIsProcessando);
+  const { mutate: corrigirProvas, isPending } =
+    useCorrigirProvas(setIsProcessando);
 
   const seen = new Set<number>();
   const candidatos = (data?.data ?? []).filter((item) => {
@@ -107,24 +143,26 @@ export default function ResultadoFinais() {
         nota: item.nota,
         resultado: item.resultado === 1 ? "Admitido" : "Reprovado",
       })),
-    [candidatos]
+    [candidatos],
   );
 
   const pdfData = exportRows.length
     ? {
-      filtros: [
-        filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
-        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
-        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+        filtros: [
+          filters.codigoAnoLetivo
+            ? `Ano Letivo: ${filters.codigoAnoLetivo}`
+            : null,
+          filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+          filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
 
-        filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
-        filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
-      ]
-        .filter(Boolean)
-        .join(" | "),
-      total: exportRows.length,
-      rows: exportRows,
-    }
+          filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
+          filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        total: exportRows.length,
+        rows: exportRows,
+      }
     : null;
 
   const pdfContent = pdfData ? (
@@ -132,7 +170,10 @@ export default function ResultadoFinais() {
       documentTitle="Resultado Final"
       subtitle="Classificação geral dos candidatos"
       infoSections={[
-        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
         { title: "Resumo", content: [`Total de registos: ${total}`] },
       ]}
       mainTable={{
@@ -155,29 +196,32 @@ export default function ResultadoFinais() {
 
   const excelProps = pdfData
     ? {
-      documentTitle: "Resultado Final",
-      subtitle: "Classificação geral dos candidatos",
-      infoSections: [
-        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
-        { title: "Resumo", content: [`Total de registos: ${total}`] },
-      ],
-      mainTable: {
-        headers: [
-          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
-          { key: "nome", label: "Nome", width: 35 },
-          { key: "numeroBilhete", label: "BI", width: 20 },
-          { key: "curso", label: "Curso", width: 30 },
-          { key: "faculdade", label: "Faculdade", width: 30 },
-          { key: "sala", label: "Sala", width: 15 },
-          { key: "dataRealizacao", label: "Data Realização", width: 18 },
-          { key: "nota", label: "Nota", width: 10 },
-          { key: "resultado", label: "Resultado", width: 15 },
+        documentTitle: "Resultado Final",
+        subtitle: "Classificação geral dos candidatos",
+        infoSections: [
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
+          { title: "Resumo", content: [`Total de registos: ${total}`] },
         ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
+        mainTable: {
+          headers: [
+            { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+            { key: "nome", label: "Nome", width: 35 },
+            { key: "numeroBilhete", label: "BI", width: 20 },
+            { key: "curso", label: "Curso", width: 30 },
+            { key: "faculdade", label: "Faculdade", width: 30 },
+            { key: "sala", label: "Sala", width: 15 },
+            { key: "dataRealizacao", label: "Data Realização", width: 18 },
+            { key: "nota", label: "Nota", width: 10 },
+            { key: "resultado", label: "Resultado", width: 15 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
     : null;
 
   const baseFileName = `Pauta_Geral_Exame_${new Date().toISOString().slice(0, 10)}`;
@@ -194,8 +238,8 @@ export default function ResultadoFinais() {
 
       setFilters((prev) => ({
         ...prev,
-        dataInicioInput: val,        // para o input
-        dataInicio: dataFormatada,   // para a API
+        dataInicioInput: val, // para o input
+        dataInicio: dataFormatada, // para a API
         page: 1,
       }));
     } else {
@@ -234,12 +278,20 @@ export default function ResultadoFinais() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild><Link to="/"><Home className="h-4 w-4" /></Link></BreadcrumbLink>
+            <BreadcrumbLink asChild>
+              <Link to="/">
+                <Home className="h-4 w-4" />
+              </Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbLink>Exame de Acesso</BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink>Exame de Acesso</BreadcrumbLink>
+          </BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>Pauta Geral</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Pauta Geral</BreadcrumbPage>
+          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
@@ -247,7 +299,9 @@ export default function ResultadoFinais() {
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Resultado Final</h1>
-          <p className="text-muted-foreground mt-1">Pauta geral com a classificação de todos os candidatos.</p>
+          <p className="text-muted-foreground mt-1">
+            Pauta geral com a classificação de todos os candidatos.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()}>
@@ -255,21 +309,7 @@ export default function ResultadoFinais() {
             Atualizar
           </Button>
 
-          {candidatos.length > 0
-            && (
-              <Button onClick={() => corrigirProvas()} disabled={isPending || isProcessando} className="gap-2">
-                {isPending || isProcessando ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <PlayCircle className="h-4 w-4" />
-                )}
-                {isPending ? "Corrigindo provas..." : "Corrigir Provas Agora"}
-              </Button>
-
-            )
-
-          }
-
+          <CorrigirProvasModal />
 
           {pdfContent && (
             <PDFActions
@@ -306,7 +346,9 @@ export default function ResultadoFinais() {
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
               value={filters.codigoAnoLetivo}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoAnoLetivo: v, page: 1 }))}
+              onChange={(v) =>
+                setFilters((p) => ({ ...p, codigoAnoLetivo: v, page: 1 }))
+              }
               options={academicYear}
               map={(a) => ({
                 key: a.codigo.toString(),
@@ -316,29 +358,53 @@ export default function ResultadoFinais() {
             />
           </div>
 
-
           <div className="space-y-2">
             <FacultySelect
               allOption
               value={filters.codigoFaculdade}
-              onChangeValue={(v) => setFilters({ ...filters, codigoFaculdade: v, codigoCurso: undefined })}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  codigoFaculdade: v,
+                  codigoCurso: undefined,
+                })
+              }
             />
           </div>
           <div className="space-y-2">
             <CourseSelect
               value={filters.codigoCurso}
-              onChangeValue={(v) => setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))}
+              onChangeValue={(v) =>
+                setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))
+              }
             />
           </div>
           <div className="space-y-2">
             <FormSelect
-              disabled={isLoadingPeriodos || isLoadingAcademicYear || filters.codigoAnoLetivo === ""}
+              disabled={
+                isLoadingPeriodos ||
+                isLoadingAcademicYear ||
+                filters.codigoAnoLetivo === ""
+              }
               loading={isLoadingPeriodos}
               label="Período"
               value={filters.codigoTurno?.toString() ?? "all"}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoTurno: v === "all" ? undefined : v, page: 1 }))}
-              options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
-              map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+              onChange={(v) =>
+                setFilters((p) => ({
+                  ...p,
+                  codigoTurno: v === "all" ? undefined : v,
+                  page: 1,
+                }))
+              }
+              options={[
+                { codigo: "all", designacao: "Todos" },
+                ...(periodos ?? []),
+              ]}
+              map={(p) => ({
+                key: p.codigo.toString(),
+                label: p.designacao,
+                value: p.codigo.toString(),
+              })}
             />
           </div>
 
@@ -354,11 +420,11 @@ export default function ResultadoFinais() {
                 value: sala.pk,
                 label: sala.descricao,
               })}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoSala: v, page: 1 }))}
+              onChange={(v) =>
+                setFilters((p) => ({ ...p, codigoSala: v, page: 1 }))
+              }
             />
           </div>
-
-
 
           <div className="space-y-2">
             <Label>Data Início</Label>
@@ -386,7 +452,9 @@ export default function ResultadoFinais() {
                 className="pl-9"
                 placeholder="Pesquisar por nome ou BI"
                 value={filters.search}
-                onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))}
+                onChange={(e) =>
+                  setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))
+                }
               />
             </div>
           </div>
@@ -410,63 +478,74 @@ export default function ResultadoFinais() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading && Array.from({ length: 5 }).map((_, i) => (
-              <TableRow key={`skeleton-${i}`}>
-                {Array.from({ length: 9 }).map((_, j) => (
-                  <TableCell key={`skeleton-${i}-${j}`}>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+            {isLoading &&
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  {Array.from({ length: 9 }).map((_, j) => (
+                    <TableCell key={`skeleton-${i}-${j}`}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
 
             {!isLoading && candidatos.length === 0 && (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={9}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   Nenhum registo encontrado
                 </TableCell>
               </TableRow>
             )}
 
-            {!isLoading && candidatos.map((item) => (
-              <TableRow key={item.numero_inscricao}>
-                <TableCell className="font-mono font-semibold">{item.numero_inscricao}</TableCell>
-                <TableCell className="font-medium">{item.nome}</TableCell>
-                <TableCell className="font-mono text-sm">{item.bilhete_identidade}</TableCell>
-                <TableCell className="text-sm">{item.curso}</TableCell>
-                <TableCell className="text-sm">{item.faculdade}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{item.sala}</Badge>
-                </TableCell>
-                <TableCell className="text-sm">{item.data_realizacao}</TableCell>
-                <TableCell className="text-center">
-                  <Badge
-                    variant="outline"
-                    className={
-                      item.nota >= 14
-                        ? "bg-green-500/10 text-green-600 border-green-500/20"
-                        : item.nota >= 10
-                          ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+            {!isLoading &&
+              candidatos.map((item) => (
+                <TableRow key={item.numero_inscricao}>
+                  <TableCell className="font-mono font-semibold">
+                    {item.numero_inscricao}
+                  </TableCell>
+                  <TableCell className="font-medium">{item.nome}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {item.bilhete_identidade}
+                  </TableCell>
+                  <TableCell className="text-sm">{item.curso}</TableCell>
+                  <TableCell className="text-sm">{item.faculdade}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{item.sala}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {item.data_realizacao}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge
+                      variant="outline"
+                      className={
+                        item.resultado >= 14
+                          ? "bg-green-500/10 text-green-600 border-green-500/20"
+                          : item.resultado >= 10
+                            ? "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                            : "bg-red-500/10 text-red-600 border-red-500/20"
+                      }
+                    >
+                      {item.resultado}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={
+                        item.resultado >= 10
+                          ? "bg-green-500/10 text-green-600 border-green-500/20"
                           : "bg-red-500/10 text-red-600 border-red-500/20"
-                    }
-                  >
-                    {item.nota}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="outline"
-                    className={
-                      item.resultado === 1
-                        ? "bg-green-500/10 text-green-600 border-green-500/20"
-                        : "bg-red-500/10 text-red-600 border-red-500/20"
-                    }
-                  >
-                    {item.resultado === 1 ? "Admitido" : "Reprovado"}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))}
+                      }
+                    >
+                      {item.resultado >= 10 ? "Admitido" : "Reprovado"}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
@@ -477,9 +556,13 @@ export default function ResultadoFinais() {
           <span className="text-sm text-muted-foreground">Mostrar</span>
           <Select
             value={filters.limit.toString()}
-            onValueChange={(v) => setFilters((p) => ({ ...p, limit: Number(v), page: 1 }))}
+            onValueChange={(v) =>
+              setFilters((p) => ({ ...p, limit: Number(v), page: 1 }))
+            }
           >
-            <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-20">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="25">25</SelectItem>
@@ -488,7 +571,8 @@ export default function ResultadoFinais() {
             </SelectContent>
           </Select>
           <span className="text-sm text-muted-foreground ml-2">
-            Mostrando {total === 0 ? 0 : offset + 1} a {Math.min(offset + filters.limit, total)} de {total} registos
+            Mostrando {total === 0 ? 0 : offset + 1} a{" "}
+            {Math.min(offset + filters.limit, total)} de {total} registos
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -501,7 +585,9 @@ export default function ResultadoFinais() {
             <ChevronLeft className="h-4 w-4" />
             Anterior
           </Button>
-          <span className="text-sm">Página {filters.page} de {totalPages}</span>
+          <span className="text-sm">
+            Página {filters.page} de {totalPages}
+          </span>
           <Button
             variant="outline"
             size="sm"

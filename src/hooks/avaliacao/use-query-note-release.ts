@@ -40,7 +40,10 @@ function isValidParams(params: UseQueryNoteReleasesParams): boolean {
   );
 }
 
-export function useQueryNoteReleases(params: UseQueryNoteReleasesParams, { enabled }: { enabled: boolean }) {
+export function useQueryNoteReleases(
+  params: UseQueryNoteReleasesParams,
+  { enabled }: { enabled: boolean },
+) {
   const isEnabled = isValidParams(params) && enabled;
 
   return useQuery<NoteReleaseApiResponse>({
@@ -60,7 +63,10 @@ export function useQueryNoteReleases(params: UseQueryNoteReleasesParams, { enabl
 }
 
 // ==================== NOVO - HOOK PARA SUMMARY ====================
-export function useQueryNoteSummary(params: UseQueryNoteReleasesParams, { enabled }: { enabled: boolean }) {
+export function useQueryNoteSummary(
+  params: UseQueryNoteReleasesParams,
+  { enabled }: { enabled: boolean },
+) {
   const isEnabled = isValidParams(params) && enabled;
 
   return useQuery<NoteSummary>({

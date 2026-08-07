@@ -27,6 +27,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import { formatarData } from "@/util/date-formate";
 import { useActivitiesLectures } from "./hooks";
@@ -46,7 +47,19 @@ import { AcademicYearsAvailableForOperationSelect } from "@/components/common/gl
 import { parseFilter } from "@/util/parse-filter";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@radix-ui/react-dialog";
+import { DialogHeader } from "@/components/ui/dialog";
+import { DescriptionModal } from "../components/modalDescricao";
 
+interface DescriptionModalProps {
+  title?: string;
+  description: string;
+}
 export default function ActivitiesLecturesLic() {
   const {
     resetForm,
@@ -85,13 +98,18 @@ export default function ActivitiesLecturesLic() {
   const { hasPermission } = usePermission();
   const tiposCandidaturaFiltered = tiposCandidatura?.filter((tp) => {
     if (
-      !hasPermission(PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla) &&
+      !hasPermission(
+        PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
+      ) &&
       (tp.sigla === "DTR" || tp.sigla === "MST")
     ) {
       return false;
     }
     return tp;
   });
+
+  const truncate = (text: string, max = 20) =>
+    text.length > max ? `${text.slice(0, max)}...` : text;
 
   const handleOpenDelete = (item: any) => {
     setSelectedSala({
@@ -223,12 +241,18 @@ export default function ActivitiesLecturesLic() {
                 <TableRow key={item.codigo}>
                   <TableCell>{item.codigo}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="text-xs whitespace-normal"
-                    >
-                      {item.descricao}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="text-xs whitespace-normal"
+                      >
+                        {truncate(item.descricao, 20)}
+                      </Badge>
+
+                      {item.descricao.length > 20 && (
+                        <DescriptionModal description={item.descricao} />
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>{formatarData(item.data_inicio)}</TableCell>
                   <TableCell>{formatarData(item.data_termino)}</TableCell>

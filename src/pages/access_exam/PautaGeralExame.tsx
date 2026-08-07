@@ -315,6 +315,7 @@ export default function PautaGeralExame() {
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="1">Admitido</SelectItem>
                 <SelectItem value="0">Reprovado</SelectItem>
+                <SelectItem value="3">Aguardando</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -419,14 +420,14 @@ export default function PautaGeralExame() {
                 </TableCell>
                 <TableCell>
                   <Badge
-                    variant="outline"
-                    className={
-                      item.resultado === 1
-                        ? "bg-green-500/10 text-green-600 border-green-500/20"
-                        : "bg-red-500/10 text-red-600 border-red-500/20"
-                    }
+                    className={`${item.resultado === 1
+                      ? "bg-green-600 hover:bg-green-700"
+                      : item.resultado === 0
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-amber-600 hover:bg-amber-700"
+                      }`}
                   >
-                    {item.resultado === 1 ? "Admitido" : "Reprovado"}
+                    {item.resultado === 1 ? "Admitido" : item.resultado === 0 ? "Reprovado" : "Aguardando"}
                   </Badge>
                 </TableCell>
               </TableRow>

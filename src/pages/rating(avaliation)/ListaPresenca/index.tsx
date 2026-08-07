@@ -66,6 +66,7 @@ import {
 import { useUsers } from "@/hooks/acess/use-query-users";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import { MCALTipoAvaliacoesSelectSelect } from "@/components/common/global-selects/MCALTipoAvaliacoesSelect";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type Filters = {
   anoLetivo: string;
@@ -214,7 +215,7 @@ export default function PresenceList() {
     });
   };
 
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  const { data: unidadesCurriculares = [] } =
     useQueryDisciplinaWithFilter({
       curso: formData.curso,
       semestre: formData.semestre,
@@ -471,7 +472,7 @@ export default function PresenceList() {
               }
               value={formData.anoCurricular}
             />
-            {/* Unidade Curricular */}
+            {/* Select antigo de Unidade Curricular:
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
@@ -482,17 +483,7 @@ export default function PresenceList() {
                 disabled={!canLoadUcs}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !formData.curso
-                        ? "Selecione curso"
-                        : !formData.semestre
-                          ? "Selecione semestre"
-                          : isLoadingUC
-                            ? "Carregando UCs..."
-                            : "Selecionar UC"
-                    }
-                  />
+                  <SelectValue placeholder="Selecionar UC" />
                 </SelectTrigger>
 
                 <SelectContent>
@@ -503,7 +494,18 @@ export default function PresenceList() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
+            <GradeCurricularSelect
+              value={formData.unidadeCurricular}
+              disabled={!canLoadUcs}
+              onChangeValue={(v) =>
+                setFormData({ ...formData, unidadeCurricular: v })
+              }
+              curso={parseFilter(formData.curso)}
+              semestre={parseFilter(formData.semestre)}
+              classe={parseFilter(formData.anoCurricular)}
+              anoLectivo={parseFilter(formData.anoLetivo)}
+            />
             <MCALTipoAvaliacoesSelectSelect
               onChangeValue={(v) =>
                 setFormData({ ...formData, tiposAvaliacao: v })
