@@ -34,6 +34,7 @@ import { AcademicYearsAvailableForOperationSelect } from "@/components/common/gl
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type AddPermissionLaunchModalProps = {
   isOpen: boolean;
@@ -91,12 +92,13 @@ export default function AddPermissionLaunchModal({
     useQueryTipoAvaliacao();
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe: filters.anoCurricular,
-    });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     curso: filters.curso,
+  //     semestre: filters.semestre,
+  //     classe: filters.anoCurricular,
+  //   });
 
   const closeModal = () => {
     onClose();
@@ -244,7 +246,7 @@ export default function AddPermissionLaunchModal({
               </Select>
             </div>
 
-            {/* Unidade Curricular */}
+            {/* Select antigo de Unidade Curricular:
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
@@ -255,17 +257,7 @@ export default function AddPermissionLaunchModal({
                 disabled={!canLoadUcs}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione curso"
-                        : !filters.semestre
-                        ? "Selecione semestre"
-                        : isLoadingUC
-                        ? "Carregando UCs..."
-                        : "Selecionar UC"
-                    }
-                  />
+                  <SelectValue placeholder="Selecionar UC" />
                 </SelectTrigger>
                 <SelectContent>
                   {unidadesCurriculares.map((uc) => (
@@ -275,7 +267,16 @@ export default function AddPermissionLaunchModal({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUcs}
+              onChangeValue={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+            />
             <FormSelect
               label="Tipo de Avaliação"
               value={filters.tipoAvaliacao}

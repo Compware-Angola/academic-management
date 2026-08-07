@@ -65,6 +65,7 @@ import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidat
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type ExportAction = "excel" | "pdf" | "print";
 import EditMarkingAssessmentModal from "../components/EditMarkingAssessmentModal";
@@ -136,12 +137,13 @@ export default function AddMarkingAssessment() {
     useMutationDeleteMarkingAssessment();
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe: filters.anoCurricular,
-    });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     curso: filters.curso,
+  //     semestre: filters.semestre,
+  //     classe: filters.anoCurricular,
+  //   });
 
   const canLoadTurmas =
     !!filters.tipoCandidatura &&
@@ -451,29 +453,39 @@ export default function AddMarkingAssessment() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Unidade Curricular */}
-            <FormCommandSelect
-              label="Unidade Curricular"
+            {/* Select antigo de Unidade Curricular:
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Unidade Curricular</label>
+              <Select
+                value={filters.unidadeCurricular}
+                onValueChange={(v) =>
+                  setFilters({ ...filters, unidadeCurricular: v })
+                }
+                disabled={!canLoadUcs}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar UC" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {unidadesCurriculares?.map((uc) => (
+                    <SelectItem key={uc.pk} value={uc.pk?.toString()}>
+                      {uc.descricao}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div> */}
+            <GradeCurricularSelect
               value={filters.unidadeCurricular}
-              onChange={(v) => setFilters({ ...filters, unidadeCurricular: v })}
-              options={unidadesCurriculares}
-              isLoading={isLoadingUC}
               disabled={!canLoadUcs}
-              width="full"
-              placeholder={
-                !filters.curso
-                  ? "Selecione curso"
-                  : !filters.semestre
-                    ? "Selecione semestre"
-                    : isLoadingUC
-                      ? "Carregando UCs..."
-                      : "Selecionar UC"
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
               }
-              map={(uc) => ({
-                key: uc.pk,
-                label: uc.descricao,
-                value: uc.pk,
-              })}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
             />
             <FormSelect
               label="Horarios"

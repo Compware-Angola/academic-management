@@ -46,6 +46,7 @@ import { useAcademicYears } from "@/hooks/academiccalendar/use-query-academic-ye
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 
 type SelectedNotas = {
@@ -132,12 +133,13 @@ export default function ControlNotes() {
   });
   const academicYear = academicYearResponse?.data ?? [];
 
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: formData.classes,
-      curso: formData.curso,
-      semestre: formData.semestre,
-    });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     classe: formData.classes,
+  //     curso: formData.curso,
+  //     semestre: formData.semestre,
+  //   });
 
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
@@ -403,6 +405,7 @@ export default function ControlNotes() {
             })}
           />
 
+          {/* Select antigo de Unidade Curricular:
           <FormSelect
             label="Unidade Curricular"
             value={formData.unidadeCurricular}
@@ -416,6 +419,15 @@ export default function ControlNotes() {
               !formData.classes
             }
             map={(u) => ({ key: u.codigo, label: u.descricao, value: u.pk })}
+          /> */}
+          <GradeCurricularSelect
+            value={formData.unidadeCurricular}
+            disabled={!formData.semestre || !formData.curso || !formData.classes}
+            onChangeValue={(v) => setFormData({ ...formData, unidadeCurricular: v })}
+            curso={parseFilter(formData.curso)}
+            semestre={parseFilter(formData.semestre)}
+            classe={parseFilter(formData.classes)}
+            anoLectivo={parseFilter(formData.anoLetivo)}
           />
 
           <FormSelect

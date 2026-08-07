@@ -23,7 +23,6 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { useQueryListInscricaoSemUc } from "@/hooks/registrations/use-query-inscricao-sem-uc";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 const InscricaoSemUc = () => {
   const [page, setPage] = useState(1);
@@ -55,19 +55,8 @@ const InscricaoSemUc = () => {
     page,
   });
 
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter(
-      {
-        curso: filters.curso,
-        semestre: filters.semestre == "all" ? null : filters.semestre,
-        classe: filters.anoCurricular,
-      },
-      {
-        enabled: !!filters.curso && !!filters.anoCurricular,
-      },
-    );
-
-  const canLoadUcs = !!filters.curso && !!filters.semestre;
+  const canLoadUcs =
+    !!filters.anoLectivo && !!filters.curso && !!filters.semestre;
   const students = studentsResponse?.data ?? [];
   const total = studentsResponse?.total;
   const totalPages = studentsResponse?.totalPages;
@@ -127,6 +116,22 @@ const InscricaoSemUc = () => {
               curso={filters.curso}
             />
             <div className="space-y-2">
+              <GradeCurricularSelect
+                value={filters.unidadeCurricular}
+                onChangeValue={(v) =>
+                  setFilters({ ...filters, unidadeCurricular: v })
+                }
+                anoLectivo={parseFilter(filters.anoLectivo)}
+                curso={parseFilter(filters.curso)}
+                classe={parseFilter(filters.anoCurricular)}
+                semestre={
+                  filters.semestre === "all"
+                    ? undefined
+                    : parseFilter(filters.semestre)
+                }
+                disabled={!canLoadUcs}
+              />
+              {/*
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
                 value={filters.unidadeCurricular}
@@ -157,6 +162,7 @@ const InscricaoSemUc = () => {
                   ))}
                 </SelectContent>
               </Select>
+              */}
             </div>
           </div>
         </CardContent>
