@@ -71,17 +71,17 @@ const SemInscricaoCurso = () => {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink>Inscrições e Matrículas</BreadcrumbLink>
+            <BreadcrumbLink>Confirações e Matrículas</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Inscrições Sem Uc</BreadcrumbPage>
+            <BreadcrumbPage>Confirmações Sem Uc</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold mb-6 text-foreground">
-          Estudantes Sem Inscrições em Cursos
+          Estudantes Sem Confirmações em Cursos
         </h1>
       </div>
       <Card className="mb-6">
@@ -111,7 +111,7 @@ const SemInscricaoCurso = () => {
       <Card>
         <CardHeader>
           <div className="flex justify-between">
-            <CardTitle>Estudantes Sem Inscrições em Cursos</CardTitle>
+            <CardTitle>Estudantes Sem Confirmações em Cursos</CardTitle>
             <FormInput
               placeholder="Pesquisa por Estudante"
               value={searchValue}

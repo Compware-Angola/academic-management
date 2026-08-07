@@ -64,7 +64,7 @@ export type ProvaForm = {
   disciplinas: string;
   cursos: string;
   local: string;
-  periodo_id: string | number;
+  periodo_id: string;
 };
 
 function parseIdValues(value: string) {
