@@ -1,11 +1,13 @@
-// src/hooks/study_plan/use-grade-curricular.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addUCToPlan,
   getGradeCurricular,
+  getGradeCurricular2,
   GradeCurricularPayload,
   GradeCurricularResponse,
+  toggleStatusGradeCurricular,
 } from "@/services/fetch-gradeCurricularService";
+import { toast } from "sonner";
 
 export function useGradeCurricular({
   anoLectivo,
@@ -14,7 +16,7 @@ export function useGradeCurricular({
   estado,
   limit,
   page,
-}: GradeCurricularPayload) {
+}: Omit<GradeCurricularPayload, "semestre">) {
   return useQuery<GradeCurricularResponse, Error>({
     queryKey: [
       "grade-curricular",
@@ -47,6 +49,51 @@ export const useAddUCToPlan = () => {
     onSuccess: () => {
       // Invalida todas as queries de grade curricular
       queryClient.invalidateQueries({ queryKey: ["grade-curricular"] });
+    },
+  });
+};
+
+export function useGradeCurricular2({
+  classe,
+  curso,
+  semestre,
+  estado,
+  limit,
+  page,
+}: Omit<GradeCurricularPayload, "anoLectivo">) {
+  return useQuery<GradeCurricularResponse, Error>({
+    queryKey: [
+      "grade-curricular",
+      classe,
+      curso,
+      semestre,
+      estado,
+      limit,
+      page,
+    ],
+    queryFn: () =>
+      getGradeCurricular2({
+        classe,
+        semestre,
+        curso,
+        estado,
+        limit,
+        page,
+      }),
+    enabled: !!curso,
+    staleTime: 1000 * 60 * 10,
+  });
+}
+
+export const useToggleStatusGradeCurricular = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: toggleStatusGradeCurricular,
+    onSuccess: () => {
+      // Invalida todas as queries de grade curricular
+      queryClient.invalidateQueries({ queryKey: ["grade-curricular"] });
+      toast.success("Estado actualizado!");
     },
   });
 };

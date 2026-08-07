@@ -38,23 +38,28 @@ import {
   Loader2,
 } from "lucide-react";
 
-
-import { useCreateTopico, useDeleteTopico, useTopicos, useUpdateTopico } from "@/hooks/access_exam/use-exames-de-acesso.hooks";
+import {
+  useCreateTopico,
+  useDeleteTopico,
+  useTopicos,
+  useUpdateTopico,
+} from "@/hooks/access_exam/use-exames-de-acesso.hooks";
 import { Topico } from "@/services/access_exam/topic-exam.service";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { parseFilter } from "@/util/parse-filter";
-import { useUploadSingle } from "@/hooks/upload/use-upload-single";
-import { viewFile } from "@/services/upload/upload-single.service";
+import {
+  useGetFileUrl,
+  useUploadSingle,
+} from "@/hooks/upload/use-upload-single";
 import { toast } from "sonner";
-
-
+import { FileFolder } from "@/enums/file-folder";
 
 const PAGE_SIZE = 10;
 
 export default function ListarTopicos() {
-
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   // ── filtros ──────────────────────────────────────────
   const [search, setSearch] = useState("");
   const [filtroAno, setFiltroAno] = useState("all");
@@ -77,7 +82,8 @@ export default function ListarTopicos() {
   const createMutation = useCreateTopico();
   const updateMutation = useUpdateTopico();
   const deleteMutation = useDeleteTopico();
-
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
   // ── form state ───────────────────────────────────────
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTopico, setEditingTopico] = useState<Topico | null>(null);
@@ -101,13 +107,18 @@ export default function ListarTopicos() {
   // ── handlers ─────────────────────────────────────────
   const openCreate = () => {
     setEditingTopico(null);
-    clearFileInput()
-    setFormData({ designacao: "", anoLetivoId: "", arquivo: null, arquivoNome: "" });
+    clearFileInput();
+    setFormData({
+      designacao: "",
+      anoLetivoId: "",
+      arquivo: null,
+      arquivoNome: "",
+    });
     setDialogOpen(true);
   };
 
   const openEdit = (t: Topico) => {
-    clearFileInput()
+    clearFileInput();
     setEditingTopico(t);
     setFormData({
       designacao: t.designacao,
@@ -122,7 +133,6 @@ export default function ListarTopicos() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type !== "application/pdf") {
-
         toast.error(`Formato inválido`, {
           position: "top-right",
         });
@@ -133,7 +143,6 @@ export default function ListarTopicos() {
       toast.success(`Arquivo selecionado.${file.name} pronto para submissão.`, {
         position: "top-right",
       });
-
     }
   };
   const clearFileInput = () => {
@@ -141,9 +150,8 @@ export default function ListarTopicos() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
   const handleSave = async () => {
-    let uploadResponse: any
+    let uploadResponse: any;
     if (!formData.designacao.trim() || !formData.anoLetivoId) {
-
       toast.error(`Campos obrigatórios.Preencha a designação e o ano letivo.`, {
         position: "top-right",
       });
@@ -157,17 +165,17 @@ export default function ListarTopicos() {
     }
 
     if (selectedFile) {
-
-      uploadResponse = await uploadMutation.mutateAsync(selectedFile);
-      if (!uploadResponse.file?.path) {
+      uploadResponse = await uploadMutation.mutateAsync({
+        file: selectedFile,
+        options: { folder: FileFolder.TOPICO },
+      });
+      if (!uploadResponse.key) {
         toast.error(`Erro ao Fazer upload`, {
           position: "top-right",
         });
         return;
       }
-
     }
-
 
     if (editingTopico) {
       updateMutation.mutate(
@@ -175,7 +183,7 @@ export default function ListarTopicos() {
           id: editingTopico.id,
           payload: {
             designacao: formData.designacao,
-            arquivo: uploadResponse?.file?.filename || editingTopico.arquivo,
+            arquivo: uploadResponse?.key || editingTopico.arquivo,
           },
         },
         {
@@ -190,14 +198,14 @@ export default function ListarTopicos() {
               position: "top-right",
             });
           },
-        }
+        },
       );
     } else {
       createMutation.mutate(
         {
           designacao: formData.designacao,
           anoLetivoId: Number(formData.anoLetivoId),
-          arquivo: uploadResponse?.file?.filename || "documento.pdf",
+          arquivo: uploadResponse?.key || "documento.pdf",
         },
         {
           onSuccess: () => {
@@ -207,61 +215,39 @@ export default function ListarTopicos() {
             setDialogOpen(false);
           },
           onError: () => {
-
             toast.error(`Erro ao Criar`, {
               position: "top-right",
             });
           },
-        }
+        },
       );
     }
   };
 
   const openPdf = async (t: Topico) => {
-    if (!t.arquivo) return;
+    const key = t.arquivo;
+    if (!key) return;
 
     try {
-      const blob = await viewFile(t.arquivo);
-
-      const fileUrl = URL.createObjectURL(blob);
-
-      setPdfPreview({
-        titulo: t.designacao,
-        url: fileUrl,
-      });
-
-      setPdfDialogOpen(true);
-    } catch (error: any) {
-      console.error("Erro ao abrir PDF:", error.message);
-      toast.error(`Documento Não foi encontrado`, {
-        position: "top-right",
-      });
+      const { url } = await getFileUrl({ key, expiry: 3600 });
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Erro ao buscar documento:", error);
+      toast.error("Erro ao carregar o documento.");
     }
   };
 
   const downloadPdf = async (t: Topico) => {
+    const key = t.arquivo;
+    if (!key) return;
+
     try {
-      if (!t.arquivo) return;
-      const blob = await viewFile(t.arquivo);
-      const fileUrl = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = fileUrl;
-      a.download = t.arquivo;
-      a.click();
-
-      toast.success(`Download iniciado`, {
-        position: "top-right",
-      });
-
-    } catch (error: any) {
-      console.error("Erro ao abrir PDF:", error.message);
-      toast.error(`Documento Não foi encontrado`, {
-        position: "top-right",
-      });
-
+      const { url } = await getFileUrl({ key });
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Erro ao buscar documento:", error);
+      toast.error("Erro ao carregar o documento.");
     }
-
   };
 
   const handleDelete = () => {
@@ -274,7 +260,6 @@ export default function ListarTopicos() {
         setConfirmDeleteId(null);
       },
       onError: () => {
-
         toast.error(`Erro ao remover`, {
           position: "top-right",
         });
@@ -286,126 +271,120 @@ export default function ListarTopicos() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
 
-
   // EXPORT
   const exportRows = useMemo(
-  () =>
-    topicos.map((t) => ({
-      id: t.id,
-      designacao: t.designacao,
-      anoLetivo: t.ano_letivo,
-     
-      criadoEm: t.created_at
-        ? new Date(t.created_at).toLocaleDateString("pt-AO")
-        : "—",
-    })),
-  [topicos]
-);
-const pdfData = exportRows.length
-  ? {
-      filtros: [
-        search ? `Pesquisa: ${search}` : null,
-        filtroAno && filtroAno !== "all"
-          ? `Ano Letivo: ${filtroAno}`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" | "),
-      total: exportRows.length,
-      rows: exportRows,
-    }
-  : null;
+    () =>
+      topicos.map((t) => ({
+        id: t.id,
+        designacao: t.designacao,
+        anoLetivo: t.ano_letivo,
 
-const pdfContent = pdfData ? (
-  <GenericPDFDocument
-    documentTitle="Lista de Tópicos"
-    subtitle="Tópicos dos exames de acesso"
-    infoSections={[
-      {
-        title: "Filtros Aplicados",
-        content: pdfData.filtros || "Sem filtros",
-      },
-    ]}
-    mainTable={{
-      headers: [
-        { key: "id", label: "ID", width: "10%" },
-        { key: "designacao", label: "Designação", width: "30%" },
-        { key: "anoLetivo", label: "Ano Letivo", width: "20%" },
-     
-        { key: "criadoEm", label: "Criado Em", width: "20%" },
-      ],
-      rows: pdfData.rows,
-      headerBackground: "#0D1B48",
-    }}
-    footerNotice="Documento gerado automaticamente pelo sistema."
-  />
-) : null;
-const excelProps = pdfData
-  ? {
-      documentTitle: "Lista de Tópicos",
-      subtitle: "Tópicos dos exames de acesso",
-      infoSections: [
+        criadoEm: t.created_at
+          ? new Date(t.created_at).toLocaleDateString("pt-AO")
+          : "—",
+      })),
+    [topicos],
+  );
+  const pdfData = exportRows.length
+    ? {
+        filtros: [
+          search ? `Pesquisa: ${search}` : null,
+          filtroAno && filtroAno !== "all" ? `Ano Letivo: ${filtroAno}` : null,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        total: exportRows.length,
+        rows: exportRows,
+      }
+    : null;
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Lista de Tópicos"
+      subtitle="Tópicos dos exames de acesso"
+      infoSections={[
         {
           title: "Filtros Aplicados",
           content: pdfData.filtros || "Sem filtros",
         },
-        { title: "Resumo", content: [`Total: ${pdfData.total}`] },
-      ],
-      mainTable: {
+      ]}
+      mainTable={{
         headers: [
-          { key: "id", label: "ID", width: 10 },
-          { key: "designacao", label: "Designação", width: 30 },
-          { key: "anoLetivo", label: "Ano Letivo", width: 20 },
-          
-          { key: "criadoEm", label: "Criado Em", width: 20 },
+          { key: "id", label: "ID", width: "10%" },
+          { key: "designacao", label: "Designação", width: "30%" },
+          { key: "anoLetivo", label: "Ano Letivo", width: "20%" },
+
+          { key: "criadoEm", label: "Criado Em", width: "20%" },
         ],
         rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
-  : null;
-const baseFileName = `Topicos_${new Date()
-  .toISOString()
-  .slice(0, 10)}`;
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Lista de Tópicos",
+        subtitle: "Tópicos dos exames de acesso",
+        infoSections: [
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
+          { title: "Resumo", content: [`Total: ${pdfData.total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "id", label: "ID", width: 10 },
+            { key: "designacao", label: "Designação", width: 30 },
+            { key: "anoLetivo", label: "Ano Letivo", width: 20 },
+
+            { key: "criadoEm", label: "Criado Em", width: 20 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
+  const baseFileName = `Topicos_${new Date().toISOString().slice(0, 10)}`;
   // ── render ────────────────────────────────────────────
   return (
     <div className="space-y-6">
-   <PageHeader
-  title="Listar Tópicos"
-  subtitle="Gestão de tópicos para os exames de acesso"
-  actions={
-    <div className="flex gap-2">
-      <Button onClick={openCreate}>
-        <Plus className="h-4 w-4 mr-2" />
-        Novo Tópico
-      </Button>
+      <PageHeader
+        title="Listar Tópicos"
+        subtitle="Gestão de tópicos para os exames de acesso"
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={openCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Tópico
+            </Button>
 
-      {pdfContent && (
-        <PDFActions
-          document={pdfContent}
-          fileName={`${baseFileName}.pdf`}
-          showDownload
-          showPrint
-        />
-      )}
+            {pdfContent && (
+              <PDFActions
+                document={pdfContent}
+                fileName={`${baseFileName}.pdf`}
+                showDownload
+                showPrint
+              />
+            )}
 
-      {excelProps && (
-        <ExcelActions
-          excelProps={excelProps}
-          fileName={`${baseFileName}.xlsx`}
-          showDownload
-        />
-      )}
-    </div>
-  }
-/>
+            {excelProps && (
+              <ExcelActions
+                excelProps={excelProps}
+                fileName={`${baseFileName}.xlsx`}
+                showDownload
+              />
+            )}
+          </div>
+        }
+      />
 
       <Card>
         <CardContent className="pt-6">
           {/* Filtros */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 items-end">
-
             {/* Pesquisa */}
             <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -433,7 +412,7 @@ const baseFileName = `Topicos_${new Date()
                 }}
                 options={[
                   { codigo: "all", designacao: "Todos" },
-                  ...(academicYear ?? [])
+                  ...(academicYear ?? []),
                 ]}
                 map={(a) => ({
                   key: a.codigo,
@@ -442,7 +421,6 @@ const baseFileName = `Topicos_${new Date()
                 })}
               />
             </div>
-
           </div>
 
           {/* Tabela */}
@@ -468,7 +446,10 @@ const baseFileName = `Topicos_${new Date()
 
               {isError && (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-destructive">
+                  <TableCell
+                    colSpan={6}
+                    className="h-24 text-center text-destructive"
+                  >
                     Erro ao carregar tópicos.
                   </TableCell>
                 </TableRow>
@@ -476,7 +457,10 @@ const baseFileName = `Topicos_${new Date()
 
               {!isLoading && !isError && topicos.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="h-24 text-center text-muted-foreground"
+                  >
                     Nenhum tópico encontrado.
                   </TableCell>
                 </TableRow>
@@ -509,47 +493,47 @@ const baseFileName = `Topicos_${new Date()
                       ? new Date(t.created_at).toLocaleDateString("pt-AO")
                       : "—"}
                   </TableCell>
-                 <TableCell className="text-right">
-  <div className="flex items-center justify-end gap-1">
-    <Button
-      variant="ghost"
-      size="icon"
-      disabled={!t.arquivo}
-      onClick={() => openPdf(t)}
-      title="Ver PDF"
-    >
-      <Eye className="h-4 w-4" />
-    </Button>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={!t.arquivo}
+                        onClick={() => openPdf(t)}
+                        title="Ver PDF"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
 
-    <Button
-      variant="ghost"
-      size="icon"
-      disabled={!t.arquivo}
-      onClick={() => downloadPdf(t)}
-      title="Baixar PDF"
-    >
-      <Download className="h-4 w-4" />
-    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={!t.arquivo}
+                        onClick={() => downloadPdf(t)}
+                        title="Baixar PDF"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
 
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => openEdit(t)}
-      title="Editar"
-    >
-      <Edit className="h-4 w-4" />
-    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEdit(t)}
+                        title="Editar"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
 
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setConfirmDeleteId(t.id)}
-      title="Remover"
-    >
-      <Trash2 className="h-4 w-4 text-destructive" />
-    </Button>
-  </div>
-</TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setConfirmDeleteId(t.id)}
+                        title="Remover"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -559,7 +543,8 @@ const baseFileName = `Topicos_${new Date()
           {pagination && pagination.totalPages > 1 && (
             <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
               <span>
-                Página {pagination.page} de {pagination.totalPages} — {pagination.total} resultados
+                Página {pagination.page} de {pagination.totalPages} —{" "}
+                {pagination.total} resultados
               </span>
               <div className="flex gap-2">
                 <Button
@@ -610,18 +595,18 @@ const baseFileName = `Topicos_${new Date()
               />
             </div>
             <div className="space-y-2">
-
-
               <FormSelect
                 label="Ano Letivo"
                 disabled={isLoadingAcademicYear}
                 loading={isLoadingAcademicYear}
                 value={formData.anoLetivoId}
-                onChange={(v) =>
-                  setFormData((p) => ({ ...p, anoLetivoId: v }))
-                }
+                onChange={(v) => setFormData((p) => ({ ...p, anoLetivoId: v }))}
                 options={academicYear}
-                map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+                map={(a) => ({
+                  key: a.codigo,
+                  label: a.designacao,
+                  value: a.codigo,
+                })}
               />
             </div>
             <div className="space-y-2">

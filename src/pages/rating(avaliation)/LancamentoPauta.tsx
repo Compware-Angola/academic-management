@@ -35,8 +35,10 @@ import { useLancamentosPauta } from "@/hooks/avaliacao/use-query-lancamento-paut
 import { useCreateLancamentoPauta } from "@/hooks/avaliacao/use-mutation-create-lancamento-pauta copy";
 import { useAuth } from "@/hooks/use-auth";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
-import { useUploadSingle } from "@/hooks/upload/use-upload-single";
-import { viewFile } from "@/services/upload/upload-single.service";
+import {
+  useGetFileUrl,
+  useUploadSingle,
+} from "@/hooks/upload/use-upload-single";
 import { ApiError } from "@/error";
 import {
   Dialog,
@@ -56,6 +58,7 @@ import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidat
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
+import { FileFolder } from "@/enums/file-folder";
 
 export default function LancamentoPauta() {
   const { toast } = useToast();
@@ -70,7 +73,9 @@ export default function LancamentoPauta() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [acaoTipo, setAcaoTipo] = useState<"aprovar" | "rejeitar" | null>(null);
-  const [pautaIdSelecionada, setPautaIdSelecionada] = useState<number | null>(null);
+  const [pautaIdSelecionada, setPautaIdSelecionada] = useState<number | null>(
+    null,
+  );
   const [pautaInfo, setPautaInfo] = useState<any>(null);
 
   const uploadMutation = useUploadSingle();
@@ -97,7 +102,9 @@ export default function LancamentoPauta() {
     useQueryTipoCandidatura();
   const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
     if (
-      !hasPermission(PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla) &&
+      !hasPermission(
+        PermissionTypeDetails.LANCAMENTO_PAUTA_POS_GRADUACAO.sigla,
+      ) &&
       (tipo.sigla === "DTR" || tipo.sigla === "MST")
     ) {
       return false;
@@ -108,9 +115,11 @@ export default function LancamentoPauta() {
     useQueryClassFilterByCurso({ curso: filters.curso });
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
-  const { data: semestres, isLoading: isLoadingSemestres } = useQuerySemestres();
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
-  const { data: unidadesCurriculares = [] } =
+  const { data: semestres, isLoading: isLoadingSemestres } =
+    useQuerySemestres();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
     useQueryDisciplinaWithFilter({
       classe: filters.anoCurricular,
       curso: filters.curso,
@@ -124,17 +133,26 @@ export default function LancamentoPauta() {
     refetch,
   } = useLancamentosPauta({
     anoLectivo: filters.anoLectivo ? Number(filters.anoLectivo) : undefined,
-    tipoAvaliacao: filters.tipoAvaliacao ? Number(filters.tipoAvaliacao) : undefined,
-    codigoGrade: filters.unidadeCurricular ? Number(filters.unidadeCurricular) : undefined,
+    tipoAvaliacao: filters.tipoAvaliacao
+      ? Number(filters.tipoAvaliacao)
+      : undefined,
+    codigoGrade: filters.unidadeCurricular
+      ? Number(filters.unidadeCurricular)
+      : undefined,
     curso: filters.curso ? Number(filters.curso) : undefined,
-    anoCurricular: filters.anoCurricular ? Number(filters.anoCurricular) : undefined,
+    anoCurricular: filters.anoCurricular
+      ? Number(filters.anoCurricular)
+      : undefined,
     semestre: filters.semestre ? Number(filters.semestre) : undefined,
     page: currentPage,
     limit: limit,
   });
 
-  const { data: teacherInfoData } = useQueryTeacherProfile(userData?.user?.pk_utilizador);
-
+  const { data: teacherInfoData } = useQueryTeacherProfile(
+    userData?.user?.pk_utilizador,
+  );
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
   const pautas = response?.data ?? [];
   const pagination = {
     page: response?.page ?? 1,
@@ -152,22 +170,42 @@ export default function LancamentoPauta() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type !== "application/pdf") {
-        toast({ title: "Formato inválido", description: "Por favor, selecione um arquivo PDF.", variant: "destructive" });
+        toast({
+          title: "Formato inválido",
+          description: "Por favor, selecione um arquivo PDF.",
+          variant: "destructive",
+        });
         e.target.value = "";
         return;
       }
       setSelectedFile(file);
-      toast({ title: "Arquivo selecionado", description: `${file.name} pronto para submissão.` });
+      toast({
+        title: "Arquivo selecionado",
+        description: `${file.name} pronto para submissão.`,
+      });
     }
   };
 
   const handleOpenSubmitModal = () => {
     if (!selectedFile) {
-      toast({ title: "Nenhum arquivo selecionado", description: "Selecione um PDF.", variant: "destructive" });
+      toast({
+        title: "Nenhum arquivo selecionado",
+        description: "Selecione um PDF.",
+        variant: "destructive",
+      });
       return;
     }
-    if (!filters.anoLectivo || !filters.unidadeCurricular || !filters.tipoAvaliacao) {
-      toast({ title: "Campos obrigatórios", description: "Ano letivo, unidade curricular e tipo de avaliação são obrigatórios.", variant: "destructive" });
+    if (
+      !filters.anoLectivo ||
+      !filters.unidadeCurricular ||
+      !filters.tipoAvaliacao
+    ) {
+      toast({
+        title: "Campos obrigatórios",
+        description:
+          "Ano letivo, unidade curricular e tipo de avaliação são obrigatórios.",
+        variant: "destructive",
+      });
       return;
     }
     setIsModalOpen(true);
@@ -176,14 +214,25 @@ export default function LancamentoPauta() {
   const handleConfirmSubmit = async () => {
     setIsModalOpen(false);
     try {
-      const uploadResponse = await uploadMutation.mutateAsync(selectedFile!);
-      if (!uploadResponse.file?.path) {
-        toast({ title: "Erro ao fazer upload", description: "Não foi possível fazer upload do ficheiro.", variant: "destructive" });
+      const uploadResponse = await uploadMutation.mutateAsync({
+        file: selectedFile!,
+        options: { folder: FileFolder.PAUTA },
+      });
+      if (!uploadResponse.key) {
+        toast({
+          title: "Erro ao fazer upload",
+          description: "Não foi possível fazer upload do ficheiro.",
+          variant: "destructive",
+        });
         return;
       }
       const docenteId = teacherInfoData?.codigo_docente;
       if (!docenteId) {
-        toast({ title: "Erro ao fazer upload", description: "Somente professor devem submeter a pauta", variant: "destructive" });
+        toast({
+          title: "Erro ao fazer upload",
+          description: "Somente professor devem submeter a pauta",
+          variant: "destructive",
+        });
         return;
       }
       createMutation.mutate(
@@ -193,22 +242,33 @@ export default function LancamentoPauta() {
           gradeCurricularId: Number(filters.unidadeCurricular),
           fkEstadoLancamentoPauta: 1,
           fkTipoAvaliacao: Number(filters.tipoAvaliacao),
-          ficheiroName: uploadResponse.file.filename,
+          ficheiroName: uploadResponse.key,
         },
         {
           onSuccess: (data) => {
-            toast({ title: "Sucesso!", description: data.message || "Pauta submetida com sucesso." });
+            toast({
+              title: "Sucesso!",
+              description: data.message || "Pauta submetida com sucesso.",
+            });
             clearFileInput();
             setCurrentPage(1);
             refetch();
           },
           onError: (error: any) => {
-            toast({ title: "Erro ao submeter", description: error.message || "Tente novamente.", variant: "destructive" });
+            toast({
+              title: "Erro ao submeter",
+              description: error.message || "Tente novamente.",
+              variant: "destructive",
+            });
           },
         },
       );
     } catch {
-      toast({ title: "Erro inesperado", description: "Ocorreu um erro ao processar o upload.", variant: "destructive" });
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um erro ao processar o upload.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -222,7 +282,10 @@ export default function LancamentoPauta() {
   const confirmarAcao = () => {
     if (!pautaIdSelecionada || !acaoTipo) return;
     atualizarEstadoMutation.mutate(
-      { codigo: pautaIdSelecionada, fkEstadoLancamentoPauta: (acaoTipo === "aprovar" ? 2 : 3) as 2 | 3 },
+      {
+        codigo: pautaIdSelecionada,
+        fkEstadoLancamentoPauta: (acaoTipo === "aprovar" ? 2 : 3) as 2 | 3,
+      },
       {
         onSettled: () => {
           setIsConfirmModalOpen(false);
@@ -235,16 +298,25 @@ export default function LancamentoPauta() {
   };
 
   const handleDownload = async (ficheiroName: string) => {
-    if (!ficheiroName) return;
+    const key = ficheiroName;
+
+    if (!key) {
+      toast({
+        title: "Formato inválido",
+        description: "Nenhum documento encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const blob = await viewFile(ficheiroName);
-      const fileUrl = URL.createObjectURL(blob);
-      window.open(fileUrl, "_blank");
-      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+      const { url } = await getFileUrl({ key, expiry: 3600 });
+      window.open(url, "_blank");
     } catch (error) {
+      console.error("Erro ao buscar documento:", error);
       toast({
         title: "Erro",
-        description: error instanceof ApiError ? error.message : "Erro ao abrir o ficheiro.",
+        description: "Erro ao buscar documento",
         variant: "destructive",
       });
     }
@@ -252,23 +324,49 @@ export default function LancamentoPauta() {
 
   const getEstadoBadge = (estado: number) => {
     switch (estado) {
-      case 1: return <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">Pendente</Badge>;
-      case 2: return <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Aprovado</Badge>;
-      case 3: return <Badge className="bg-red-500/20 text-red-600 border-red-500/30">Rejeitado</Badge>;
-      default: return <Badge variant="secondary">Desconhecido</Badge>;
+      case 1:
+        return (
+          <Badge className="bg-yellow-500/20 text-yellow-600 border-yellow-500/30">
+            Pendente
+          </Badge>
+        );
+      case 2:
+        return (
+          <Badge className="bg-green-500/20 text-green-600 border-green-500/30">
+            Aprovado
+          </Badge>
+        );
+      case 3:
+        return (
+          <Badge className="bg-red-500/20 text-red-600 border-red-500/30">
+            Rejeitado
+          </Badge>
+        );
+      default:
+        return <Badge variant="secondary">Desconhecido</Badge>;
     }
   };
 
-  const getAnoLetivoLabel = () => academicYear?.find((a) => a.codigo === Number(filters.anoLectivo))?.designacao || "";
-  const getCursoLabel = () => cursos?.find((c) => c.codigo === Number(filters.curso))?.designacao || "";
-  const getUnidadeCurricularLabel = () => unidadesCurriculares?.find((u) => u.pk === Number(filters.unidadeCurricular))?.descricao || "";
-  const getTipoAvaliacaoLabel = () => tipoAvaliacao?.find((t) => t.codigo === Number(filters.tipoAvaliacao))?.designacao || "";
+  const getAnoLetivoLabel = () =>
+    academicYear?.find((a) => a.codigo === Number(filters.anoLectivo))
+      ?.designacao || "";
+  const getCursoLabel = () =>
+    cursos?.find((c) => c.codigo === Number(filters.curso))?.designacao || "";
+  const getUnidadeCurricularLabel = () =>
+    unidadesCurriculares?.find(
+      (u) => u.pk === Number(filters.unidadeCurricular),
+    )?.descricao || "";
+  const getTipoAvaliacaoLabel = () =>
+    tipoAvaliacao?.find((t) => t.codigo === Number(filters.tipoAvaliacao))
+      ?.designacao || "";
 
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Início</Link>
+        <Link to="/" className="hover:text-foreground">
+          Início
+        </Link>
         <span>/</span>
         <span className="font-medium">Avaliações</span>
         <span>/</span>
@@ -278,27 +376,42 @@ export default function LancamentoPauta() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Lançamento de Pauta</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Lançamento de Pauta
+          </h1>
           <p className="text-muted-foreground mt-1">
             Consulte as pautas submetidas
             {isDocente && " ou submeta uma nova pauta em formato PDF"}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoadingPautas}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingPautas ? "animate-spin" : ""}`} />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => refetch()}
+          disabled={isLoadingPautas}
+        >
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${isLoadingPautas ? "animate-spin" : ""}`}
+          />
           Atualizar
         </Button>
       </div>
 
       {/* Alerta — apenas se não for docente */}
       {!isDocente && (
-        <Alert variant="destructive" className="border-destructive/50 bg-destructive/10">
+        <Alert
+          variant="destructive"
+          className="border-destructive/50 bg-destructive/10"
+        >
           <AlertTriangle className="h-5 w-5" />
-          <AlertTitle className="font-semibold">Submissão Indisponível</AlertTitle>
+          <AlertTitle className="font-semibold">
+            Submissão Indisponível
+          </AlertTitle>
           <AlertDescription className="mt-1">
-            A submissão de pautas é exclusiva para docentes. Pode consultar as pautas já
-            existentes, mas não tem permissão para carregar novos ficheiros. Contacte a
-            administração caso considere que se trata de um erro.
+            A submissão de pautas é exclusiva para docentes. Pode consultar as
+            pautas já existentes, mas não tem permissão para carregar novos
+            ficheiros. Contacte a administração caso considere que se trata de
+            um erro.
           </AlertDescription>
         </Alert>
       )}
@@ -333,7 +446,10 @@ export default function LancamentoPauta() {
           <AcademicYearsAvailableForOperationSelect
             label="Ano Letivo"
             value={filters.anoLectivo}
-            onChangeValue={(v) => { setFilters({ ...filters, anoLectivo: v }); setCurrentPage(1); }}
+            onChangeValue={(v) => {
+              setFilters({ ...filters, anoLectivo: v });
+              setCurrentPage(1);
+            }}
             tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
             onlyConfigurable={false}
             disabled={!filters.tipoCandidatura}
@@ -343,14 +459,26 @@ export default function LancamentoPauta() {
             loading={isLoadingSemestres}
             label="Semestre"
             value={filters.semestre}
-            onChange={(v) => { setFilters({ ...filters, semestre: v }); setCurrentPage(1); }}
+            onChange={(v) => {
+              setFilters({ ...filters, semestre: v });
+              setCurrentPage(1);
+            }}
             options={semestres}
-            map={(s) => ({ key: s.codigo, label: s.designacao, value: s.codigo })}
+            map={(s) => ({
+              key: s.codigo,
+              label: s.designacao,
+              value: s.codigo,
+            })}
           />
           <CourseSelect
             value={filters.curso}
             onChangeValue={(v) => {
-              setFilters({ ...filters, curso: v, anoCurricular: "", unidadeCurricular: "" });
+              setFilters({
+                ...filters,
+                curso: v,
+                anoCurricular: "",
+                unidadeCurricular: "",
+              });
               setCurrentPage(1);
             }}
             params={{
@@ -364,19 +492,35 @@ export default function LancamentoPauta() {
             disabled={isLoadingClasses || !filters.curso}
             loading={isLoadingClasses}
             onChange={(v) => {
-              setFilters({ ...filters, anoCurricular: v, unidadeCurricular: "" });
+              setFilters({
+                ...filters,
+                anoCurricular: v,
+                unidadeCurricular: "",
+              });
               setCurrentPage(1);
             }}
             options={classes}
-            map={(c) => ({ key: c.codigo, label: c.designacao, value: c.codigo })}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
           />
           {/* Select antigo de Unidade Curricular:
           <FormSelect
             label="Unidade Curricular"
             value={filters.unidadeCurricular}
-            disabled={isLoadingUC || !filters.semestre || !filters.curso || !filters.anoCurricular}
+            disabled={
+              isLoadingUC ||
+              !filters.semestre ||
+              !filters.curso ||
+              !filters.anoCurricular
+            }
             loading={isLoadingUC}
-            onChange={(v) => { setFilters({ ...filters, unidadeCurricular: v }); setCurrentPage(1); }}
+            onChange={(v) => {
+              setFilters({ ...filters, unidadeCurricular: v });
+              setCurrentPage(1);
+            }}
             options={unidadesCurriculares}
             map={(u) => ({ key: u.pk, label: u.descricao, value: u.pk })}
           /> */}
@@ -397,9 +541,16 @@ export default function LancamentoPauta() {
             value={filters.tipoAvaliacao}
             disabled={isLoadingTipoAvaliacao}
             loading={isLoadingTipoAvaliacao}
-            onChange={(v) => { setFilters({ ...filters, tipoAvaliacao: v }); setCurrentPage(1); }}
+            onChange={(v) => {
+              setFilters({ ...filters, tipoAvaliacao: v });
+              setCurrentPage(1);
+            }}
             options={tipoAvaliacao}
-            map={(u) => ({ key: u.codigo, label: u.designacao, value: u.codigo })}
+            map={(u) => ({
+              key: u.codigo,
+              label: u.designacao,
+              value: u.codigo,
+            })}
           />
         </div>
       </div>
@@ -430,10 +581,16 @@ export default function LancamentoPauta() {
             </div>
             <Button
               onClick={handleOpenSubmitModal}
-              disabled={!selectedFile || createMutation.isPending || uploadMutation.isPending}
+              disabled={
+                !selectedFile ||
+                createMutation.isPending ||
+                uploadMutation.isPending
+              }
             >
               <Upload className="h-4 w-4 mr-2" />
-              {createMutation.isPending || uploadMutation.isPending ? "Submetendo..." : "Submeter Pauta"}
+              {createMutation.isPending || uploadMutation.isPending
+                ? "Submetendo..."
+                : "Submeter Pauta"}
             </Button>
           </div>
         </div>
@@ -444,7 +601,9 @@ export default function LancamentoPauta() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Confirmar Submissão de Pauta</DialogTitle>
-            <DialogDescription>Verifique os dados antes de submeter a pauta.</DialogDescription>
+            <DialogDescription>
+              Verifique os dados antes de submeter a pauta.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -462,20 +621,33 @@ export default function LancamentoPauta() {
               </div>
             )}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-medium">Unidade Curricular:</Label>
+              <Label className="text-right font-medium">
+                Unidade Curricular:
+              </Label>
               <span className="col-span-3">{getUnidadeCurricularLabel()}</span>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-medium">Tipo de Avaliação:</Label>
+              <Label className="text-right font-medium">
+                Tipo de Avaliação:
+              </Label>
               <span className="col-span-3">{getTipoAvaliacaoLabel()}</span>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={createMutation.isPending || uploadMutation.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              disabled={createMutation.isPending || uploadMutation.isPending}
+            >
               Cancelar
             </Button>
-            <Button onClick={handleConfirmSubmit} disabled={createMutation.isPending || uploadMutation.isPending}>
-              {createMutation.isPending || uploadMutation.isPending ? "Submetendo..." : "Confirmar Submissão"}
+            <Button
+              onClick={handleConfirmSubmit}
+              disabled={createMutation.isPending || uploadMutation.isPending}
+            >
+              {createMutation.isPending || uploadMutation.isPending
+                ? "Submetendo..."
+                : "Confirmar Submissão"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -485,13 +657,18 @@ export default function LancamentoPauta() {
       <Dialog open={isConfirmModalOpen} onOpenChange={setIsConfirmModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{acaoTipo === "aprovar" ? "Aprovar" : "Rejeitar"} Pauta</DialogTitle>
+            <DialogTitle>
+              {acaoTipo === "aprovar" ? "Aprovar" : "Rejeitar"} Pauta
+            </DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja <strong>{acaoTipo === "aprovar" ? "aprovar" : "rejeitar"}</strong> esta pauta?
+              Tem certeza que deseja{" "}
+              <strong>{acaoTipo === "aprovar" ? "aprovar" : "rejeitar"}</strong>{" "}
+              esta pauta?
               <br />
               {pautaInfo && (
                 <>
-                  <strong>Unidade Curricular:</strong> {pautaInfo.unidade_curricular}
+                  <strong>Unidade Curricular:</strong>{" "}
+                  {pautaInfo.unidade_curricular}
                   <br />
                   <strong>Docente:</strong> {pautaInfo.docente_nome}
                 </>
@@ -501,8 +678,16 @@ export default function LancamentoPauta() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsConfirmModalOpen(false)}>Cancelar</Button>
-            <Button variant={acaoTipo === "aprovar" ? "default" : "destructive"} onClick={confirmarAcao}>
+            <Button
+              variant="outline"
+              onClick={() => setIsConfirmModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant={acaoTipo === "aprovar" ? "default" : "destructive"}
+              onClick={confirmarAcao}
+            >
               Confirmar
             </Button>
           </DialogFooter>
@@ -514,7 +699,9 @@ export default function LancamentoPauta() {
         <h3 className="text-lg font-semibold mb-4">Pautas Submetidas</h3>
         {isLoadingPautas ? (
           <div className="space-y-3">
-            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
           </div>
         ) : errorPautas ? (
           <div className="text-center py-8 text-destructive">
@@ -552,20 +739,32 @@ export default function LancamentoPauta() {
                             <span className="truncate max-w-[200px]">
                               {pauta.ficheiro_name.split("/").pop()}
                             </span>
-                          ) : "-"}
+                          ) : (
+                            "-"
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell>{new Date(pauta.created_at).toLocaleDateString("pt-AO")}</TableCell>
+                      <TableCell>
+                        {new Date(pauta.created_at).toLocaleDateString("pt-AO")}
+                      </TableCell>
                       <TableCell>{pauta.curso}</TableCell>
                       <TableCell>{pauta.unidade_curricular}</TableCell>
                       <TableCell>{pauta.classe}</TableCell>
                       <TableCell>{pauta.docente_nome}</TableCell>
                       <TableCell>{pauta.designacao_av}</TableCell>
-                      <TableCell>{getEstadoBadge(pauta.estado_pauta)}</TableCell>
+                      <TableCell>
+                        {getEstadoBadge(pauta.estado_pauta)}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           {pauta.ficheiro_name && (
-                            <Button variant="outline" size="sm" onClick={() => handleDownload(pauta.ficheiro_name!)}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handleDownload(pauta.ficheiro_name!)
+                              }
+                            >
                               <Download className="h-4 w-4" />
                             </Button>
                           )}
@@ -580,21 +779,34 @@ export default function LancamentoPauta() {
             <div className="flex items-center justify-between mt-6">
               <div className="text-sm text-muted-foreground">
                 Mostrando {(currentPage - 1) * limit + 1} a{" "}
-                {Math.min(currentPage * limit, pagination.total)} de {pagination.total} registos
+                {Math.min(currentPage * limit, pagination.total)} de{" "}
+                {pagination.total} registos
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline" size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
                   disabled={currentPage === 1 || isLoadingPautas}
                 >
                   <ChevronLeft className="h-4 w-4" /> Anterior
                 </Button>
-                <span className="text-sm px-3">Página {currentPage} de {pagination.totalPages}</span>
+                <span className="text-sm px-3">
+                  Página {currentPage} de {pagination.totalPages}
+                </span>
                 <Button
-                  variant="outline" size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.min(pagination.totalPages, prev + 1))}
-                  disabled={currentPage === pagination.totalPages || isLoadingPautas}
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(pagination.totalPages, prev + 1),
+                    )
+                  }
+                  disabled={
+                    currentPage === pagination.totalPages || isLoadingPautas
+                  }
                 >
                   Seguinte <ChevronRight className="h-4 w-4" />
                 </Button>

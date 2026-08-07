@@ -1,62 +1,65 @@
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
-    useResponderSolicitacao,
-    useSolicitacaoDetail,
+  invalidateSolicitacoesQueries,
+  useResponderSolicitacao,
+  useSolicitacaoDetail,
   useSolicitacoesSuporte,
 } from "@/hooks/suporte/use-query-solicitacao-suporte";
 import { useAllTiposSuporte } from "@/hooks/suporte/use-query-tipo-suporte";
-import { useUploadSingle } from "@/hooks/upload/use-upload-single";
+import {
+  useGetFileUrl,
+  useUploadMultiple,
+} from "@/hooks/upload/use-upload-single";
 import { ResponderSolicitacaoPayload } from "@/services/suporte/solicitacao-suporte.service";
-import { viewFile } from "@/services/upload/upload-single.service";
-import { ApiError } from "@/error";
 import { toast } from "sonner";
+import { FileFolder } from "@/enums/file-folder";
 
 const ITEMS_PER_PAGE = 10;
+const MAX_FILES = 3;
 
 export function useSolicitacoesSuporteLogic(enrollmentNumber?: number) {
   const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, 500)
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [tipoSuporte, setTipoSuporte] = useState<number | undefined>(undefined);
   const [status, setStatus] = useState<string | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [respostaTexto, setRespostaTexto] = useState("");
-  const [files, setFiles] = useState<{
-    file1: File | null;
-    file2: File | null;
-    file3: File | null;
-  }>({ file1: null, file2: null, file3: null });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileNames, setFileNames] = useState<{
     fileName1: string | null;
     fileName2: string | null;
     fileName3: string | null;
   }>({ fileName1: null, fileName2: null, fileName3: null });
-  const [uploading, setUploading] = useState<number[]>([]);
 
   const [showAnexos, setShowAnexos] = useState(false);
   const [solicitacaoAnexos, setSolicitacaoAnexos] = useState<any>(null);
 
-
-  const { data: paginatedResponse, isLoading: isLoadingList, isError: listError, refetch: refetchSolicitacoes } =
-    useSolicitacoesSuporte({
-      page: currentPage,
-      limit: ITEMS_PER_PAGE,
-      search:enrollmentNumber? undefined: debouncedSearchTerm.trim() ,
-      tipo_suporte: tipoSuporte,
-      codigo_matricula: enrollmentNumber? enrollmentNumber: undefined ,
-      status,
-    });
-
+  const {
+    data: paginatedResponse,
+    isLoading: isLoadingList,
+    isError: listError,
+    refetch: refetchSolicitacoes,
+  } = useSolicitacoesSuporte({
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+    search: enrollmentNumber ? undefined : debouncedSearchTerm.trim(),
+    tipo_suporte: tipoSuporte,
+    codigo_matricula: enrollmentNumber ? enrollmentNumber : undefined,
+    status,
+  });
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
   const { data: tiposSuporte = [] } = useAllTiposSuporte();
 
   const { data: solicitacaoDetail, isLoading: isLoadingDetail } =
     useSolicitacaoDetail(selectedId ?? undefined);
 
   const responderMutation = useResponderSolicitacao();
-  const uploadMutation = useUploadSingle();
-
+  const uploadMultipleMutation = useUploadMultiple();
 
   const handleFiltrar = () => setCurrentPage(1);
   const handleLimpar = () => {
@@ -69,9 +72,8 @@ export function useSolicitacoesSuporteLogic(enrollmentNumber?: number) {
   const handleVerDetalhes = (id: number) => {
     setSelectedId(id);
     setRespostaTexto("");
-    setFiles({ file1: null, file2: null, file3: null });
+    setSelectedFiles([]);
     setFileNames({ fileName1: null, fileName2: null, fileName3: null });
-    setUploading([]);
     setShowDetails(true);
   };
 
@@ -80,20 +82,64 @@ export function useSolicitacoesSuporteLogic(enrollmentNumber?: number) {
     setShowAnexos(true);
   };
 
-  const handleUploadFile = async (slot: 1 | 2 | 3, selectedFile: File) => {
-    setUploading((prev) => [...prev, slot]);
-    try {
-      const result = await uploadMutation.mutateAsync(selectedFile);
-      const uploadedName = result.file?.filename;
-      const nameKey = `fileName${slot}` as keyof typeof fileNames;
-      setFileNames((prev) => ({ ...prev, [nameKey]: uploadedName }));
-      const fileKey = `file${slot}` as keyof typeof files;
-      setFiles((prev) => ({ ...prev, [fileKey]: selectedFile }));
-    } catch (err) {
-      toast.error("Falha ao enviar o arquivo.");
-    } finally {
-      setUploading((prev) => prev.filter((s) => s !== slot));
+  const handleUploadFiles = async (fileList: FileList | File[]) => {
+    const incoming = Array.from(fileList);
+
+    if (selectedFiles.length + incoming.length > MAX_FILES) {
+      toast.error(`Máximo de ${MAX_FILES} ficheiros por solicitação.`);
+      return;
     }
+
+    try {
+      const response = await uploadMultipleMutation.mutateAsync({
+        files: incoming,
+        options: { folder: FileFolder.REPORTS },
+      });
+
+      // A API devolve o array direto (ver doc /upload-s3/multiple),
+      // apesar do service tipar como { message, files }. Fazemos o cast
+      // aqui em vez de mudar o service, como combinado.
+      const uploadedFiles = response as unknown as {
+        key: string;
+        url: string;
+      }[];
+
+      setSelectedFiles((prev) => [...prev, ...incoming]);
+      setFileNames((prev) => {
+        const next = { ...prev };
+        const slots: (keyof typeof next)[] = [
+          "fileName1",
+          "fileName2",
+          "fileName3",
+        ];
+        let cursor = selectedFiles.length;
+        for (const item of uploadedFiles) {
+          if (cursor >= MAX_FILES) break;
+          next[slots[cursor]] = item.key;
+          cursor++;
+        }
+        return next;
+      });
+    } catch (err) {
+      toast.error("Falha ao enviar os ficheiros.");
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    const slots: (keyof typeof fileNames)[] = [
+      "fileName1",
+      "fileName2",
+      "fileName3",
+    ];
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setFileNames((prev) => {
+      const next = { ...prev };
+      const values = slots.map((s) => next[s]).filter((_, i) => i !== index);
+      slots.forEach((s, i) => {
+        next[s] = values[i] ?? null;
+      });
+      return next;
+    });
   };
 
   const handleEnviarResposta = () => {
@@ -114,33 +160,36 @@ export function useSolicitacoesSuporteLogic(enrollmentNumber?: number) {
       onSuccess: () => {
         toast.success("Resposta enviada com sucesso.");
         setRespostaTexto("");
-        setFiles({ file1: null, file2: null, file3: null });
+        setSelectedFiles([]);
         setFileNames({ fileName1: null, fileName2: null, fileName3: null });
-        setUploading([]);
         setShowDetails(false);
+        invalidateSolicitacoesQueries;
       },
-      onError: (err: any) => {
+      onError: () => {
         toast.error("Falha ao enviar resposta.");
       },
     });
   };
 
   const handleDownload = async (ficheiroName: string) => {
-    if (!ficheiroName) return;
+    const key = ficheiroName;
+
+    if (!key) {
+      toast.error("Nenhum documento encontrado.");
+      return;
+    }
+
     try {
-      const blob = await viewFile(ficheiroName);
-      const fileUrl = URL.createObjectURL(blob);
-      window.open(fileUrl, "_blank");
-      setTimeout(() => URL.revokeObjectURL(fileUrl), 10000);
+      const { url } = await getFileUrl({ key, expiry: 3600 });
+      window.open(url, "_blank");
     } catch (error) {
-      toast.error(
-          error instanceof ApiError ? error.message : "Erro ao abrir o ficheiro.",
-      );
+      console.error("Erro ao buscar documento:", error);
+      toast("Erro ao buscar documento");
     }
   };
 
-return {
- searchTerm,
+  return {
+    searchTerm,
     setSearchTerm,
     tipoSuporte,
     setTipoSuporte,
@@ -154,8 +203,8 @@ return {
     solicitacaoDetail,
     respostaTexto,
     setRespostaTexto,
-    files,
-    uploading,
+    selectedFiles,
+    isUploading: uploadMultipleMutation.isPending,
     showAnexos,
     solicitacaoAnexos,
     isLoadingList,
@@ -167,14 +216,13 @@ return {
     handleLimpar,
     handleVerDetalhes,
     handleVerAnexos,
-    handleUploadFile,
+    handleUploadFiles,
+    handleRemoveFile,
     handleEnviarResposta,
     handleDownload,
-    setFiles,
-    setFileNames,
     setShowAnexos,
     listError,
     fileNames,
-    responderMutationIsPending:responderMutation.isPending,
-     }
+    responderMutationIsPending: responderMutation.isPending,
+  };
 }

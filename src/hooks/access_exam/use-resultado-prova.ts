@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchResultadoProva,
@@ -7,7 +6,7 @@ import {
 
 export function useResultadoProva(
   params: ResultadoProvaParams,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) {
   return useQuery({
     queryKey: ["resultado-prova", params],

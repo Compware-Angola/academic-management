@@ -361,6 +361,7 @@ export const PermissionTypeDetails = {
     designacao: "Lista de Perguntas",
     sigla: "mgea_lpq",
   },
+  GOD_MODE: { designacao: "Todos os acesso Modo Deus", sigla: "god.mode" },
   FULL_ACCESS: { designacao: "Todos os acesso", sigla: "full.access" },
   LSOLICITACAO_SUPORTE: {
     designacao: "Listagem de Solicitação de Suporte",

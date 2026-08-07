@@ -56,8 +56,6 @@ import {
 } from "@/hooks/avaliacao/use-query-lancamento-pauta";
 import { useMutationAtualizarEstadoPauta } from "@/hooks/avaliacao/use-mutation-update-estado-lancamento-pauta";
 import { useQueryEstadoPauta } from "@/hooks/avaliacao/use-query-estado-pauta";
-
-import { viewFile } from "@/services/upload/upload-single.service";
 import { ApiError } from "@/error";
 import { useAuth } from "@/hooks/use-auth";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
@@ -66,6 +64,7 @@ import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidat
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
+import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
 
 export default function ValidationTeacherAgenda() {
   const { toast } = useToast();
@@ -105,7 +104,9 @@ export default function ValidationTeacherAgenda() {
     useQueryTipoCandidatura();
   const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
     if (
-      !hasPermission(PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla) &&
+      !hasPermission(
+        PermissionTypeDetails.VALIDACAO_PAUTA_POS_GRADUACAO.sigla,
+      ) &&
       (tipo.sigla === "DTR" || tipo.sigla === "MST")
     ) {
       return false;
@@ -125,7 +126,8 @@ export default function ValidationTeacherAgenda() {
   //   semestre: filtersSubmetidas.semestre,
   // });
   const { data: estadosPauta = [] } = useQueryEstadoPauta();
-
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
   // Pautas submetidas
   const {
     data: responseSubmetidas,
@@ -235,17 +237,27 @@ export default function ValidationTeacherAgenda() {
     );
   };
 
-  const handleDownload = async (filename: string) => {
-    try {
-      const blob = await viewFile(filename);
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-    } catch (err) {
+  const handleDownload = async (ficheiroName: string) => {
+    const key = ficheiroName;
+
+    if (!key) {
       toast({
+        title: "Formato inválido",
+        description: "Nenhum documento encontrado.",
         variant: "destructive",
-        title: "Erro ao abrir ficheiro",
-        description: err instanceof ApiError ? err.message : "Tente novamente.",
+      });
+      return;
+    }
+
+    try {
+      const { url } = await getFileUrl({ key, expiry: 3600 });
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Erro ao buscar documento:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao buscar documento",
+        variant: "destructive",
       });
     }
   };
@@ -392,7 +404,9 @@ export default function ValidationTeacherAgenda() {
                   onChangeValue={(v) =>
                     setFiltersSubmetidas((prev) => ({ ...prev, anoLectivo: v }))
                   }
-                  tipoCandidaturaId={parseFilter(filtersSubmetidas.tipoCandidatura) ?? 1}
+                  tipoCandidaturaId={
+                    parseFilter(filtersSubmetidas.tipoCandidatura) ?? 1
+                  }
                   onlyConfigurable={false}
                   disabled={!filtersSubmetidas.tipoCandidatura}
                 />
@@ -422,7 +436,9 @@ export default function ValidationTeacherAgenda() {
                     }))
                   }
                   params={{
-                    tipoCandidaturaId: parseFilter(filtersSubmetidas.tipoCandidatura),
+                    tipoCandidaturaId: parseFilter(
+                      filtersSubmetidas.tipoCandidatura,
+                    ),
                   }}
                   disabled={!filtersSubmetidas.tipoCandidatura}
                 />
@@ -750,7 +766,9 @@ export default function ValidationTeacherAgenda() {
                   onChangeValue={(v) =>
                     setFiltersPendentes((prev) => ({ ...prev, anoLectivo: v }))
                   }
-                  tipoCandidaturaId={parseFilter(filtersPendentes.tipoCandidatura) ?? 1}
+                  tipoCandidaturaId={
+                    parseFilter(filtersPendentes.tipoCandidatura) ?? 1
+                  }
                   onlyConfigurable={false}
                   disabled={!filtersPendentes.tipoCandidatura}
                 />
@@ -779,7 +797,9 @@ export default function ValidationTeacherAgenda() {
                     }))
                   }
                   params={{
-                    tipoCandidaturaId: parseFilter(filtersPendentes.tipoCandidatura),
+                    tipoCandidaturaId: parseFilter(
+                      filtersPendentes.tipoCandidatura,
+                    ),
                   }}
                   disabled={!filtersPendentes.tipoCandidatura}
                 />

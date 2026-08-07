@@ -33,7 +33,7 @@ import {
   useValidarDocumentoUniversidadePublica,
 } from "@/hooks/access_exam/use-candidatos";
 import { useAdmitirCandidato } from "@/hooks/access_exam/use-admit-candidate";
-import { viewFile } from "@/services/upload/upload-single.service";
+import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
 
 type Fase = "idle" | "nota_preparada" | "lancado";
 
@@ -50,20 +50,35 @@ function CandidatoDocumentoUniversidadePublica({
   const documentoUniversidadePublica = candidato.documentos?.find(
     (doc) => doc.codigo_documento == 9,
   );
-  const jaValidado = candidato.doc_universidade_valido === 1;
 
+  const { mutateAsync: getFileUrl, isPending: isLoadingDocumento } =
+    useGetFileUrl();
+  const jaValidado = candidato.doc_universidade_valido === 1;
+  console.log(candidato);
   const handleVerDocumento = async () => {
-    if (!documentoUniversidadePublica) return;
+    const key = documentoUniversidadePublica.link;
+    console.log(key);
+    if (!key) {
+      toast({
+        title: "Formato inválido",
+        description: "Nenhum documento encontrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const blob = await viewFile(documentoUniversidadePublica.link);
-      const url = URL.createObjectURL(blob);
+      const { url } = await getFileUrl({ key, expiry: 3600 });
       window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (error) {
       console.error("Erro ao buscar documento:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao buscar documento",
+        variant: "destructive",
+      });
     }
   };
-
   const handleValidar = () => {
     if (!documentoUniversidadePublica || jaValidado) return;
     validarDocumento(candidato.numero_inscricao);

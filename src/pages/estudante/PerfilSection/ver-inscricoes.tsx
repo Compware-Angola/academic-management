@@ -51,6 +51,7 @@ import {
 } from "@/hooks/students/use-mutation-student-grade";
 import { FormSelect } from "@/components/common/FormSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { AnoCurricularSelectFromNestJS } from "@/components/common/global-selects/AnoCurricularSelectFromNestJS";
 
 type Props = {
   codigoMatricula: number;
@@ -188,7 +189,7 @@ export function InscricoesSection({
               />
             )}
 
-            <AnoCurricularSelect
+            <AnoCurricularSelectFromNestJS
               enableDefaultSelectItem
               value={filter.classes}
               curso={student?.curso_codigo?.toString()}

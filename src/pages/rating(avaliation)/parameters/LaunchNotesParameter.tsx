@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMutationUpdateParametrosAvaliacoesAttendance } from "@/hooks/avaliacao/use-mutation-update-parameters-avaliation";
+
 import {
-  Loader,
+
   Loader2,
   Paperclip,
-  Save,
+
   UserPlus,
   History,
   Trash2,

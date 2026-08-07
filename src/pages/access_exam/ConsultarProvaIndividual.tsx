@@ -17,18 +17,17 @@ import { Home, Search, Printer, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 
-import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 
 import { useResultadoProva } from "@/hooks/access_exam/use-resultado-prova";
 import { ResultadoProva } from "@/services/access_exam/fetch-resultado-prova.service";
-
-
 
 export default function ConsultarProva() {
   const [searchInput, setSearchInput] = useState("");
   const [activeSearch, setActiveSearch] = useState<string>("");
 
- 
   const { data, isLoading } = useResultadoProva(
     {
       search: activeSearch || undefined,
@@ -36,33 +35,32 @@ export default function ConsultarProva() {
       limit: 1,
     },
     {
-      enabled: !!activeSearch,   
-    }
+      enabled: !!activeSearch,
+    },
   );
 
   const candidato: ResultadoProva | null = data?.data?.[0] ?? null;
   const pesquisou = !!activeSearch;
 
-
   const pdfData = candidato
     ? {
-        filtros: `Pesquisa: ${activeSearch}`,
-        total: 1,
-        rows: [
-          {
-            numeroInscricao: candidato.numero_inscricao,
-            nome: candidato.nome,
-            numeroBilhete: candidato.numero_bilhete,
-            curso: candidato.curso,
-            faculdade: candidato.faculdade || "",
-            periodo: candidato.periodo,
-            sala: candidato.sala || "",
-            dataRealizacao: candidato.data_realizacao || "",
-            nota: candidato.nota,
-            resultado: candidato.resultado === 1 ? "Admitido" : "Reprovado",
-          },
-        ],
-      }
+      filtros: `Pesquisa: ${activeSearch}`,
+      total: 1,
+      rows: [
+        {
+          numeroInscricao: candidato.numero_inscricao,
+          nome: candidato.nome,
+          numeroBilhete: candidato.numero_bilhete,
+          curso: candidato.curso,
+          faculdade: candidato.faculdade || "",
+          periodo: candidato.periodo,
+          sala: candidato.sala || "",
+          dataRealizacao: candidato.data_realizacao || "",
+          nota: candidato.nota,
+          resultado: candidato.resultado === 1 ? "Admitido" : "Reprovado",
+        },
+      ],
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -100,7 +98,6 @@ export default function ConsultarProva() {
       return;
     }
 
-
     setActiveSearch(searchInput.trim());
   }
 
@@ -128,9 +125,12 @@ export default function ConsultarProva() {
       </Breadcrumb>
 
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Consultar Prova — Exame de Acesso</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Consultar Prova — Exame de Acesso
+        </h1>
         <p className="text-muted-foreground mt-1">
-          Pesquise pelo nome ou BI do candidato para consultar o resultado da prova.
+          Pesquise pelo nome ou BI do candidato para consultar o resultado da
+          prova.
         </p>
       </div>
 
@@ -151,9 +151,9 @@ export default function ConsultarProva() {
               />
             </div>
             <div className="flex items-end">
-              <Button 
-                onClick={handleSearch} 
-                className="gap-2" 
+              <Button
+                onClick={handleSearch}
+                className="gap-2"
                 disabled={isLoading}
               >
                 <Search className="h-4 w-4" />
@@ -182,7 +182,8 @@ export default function ConsultarProva() {
             <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-lg font-medium">Nenhum resultado encontrado</p>
             <p className="text-muted-foreground mt-1">
-              Nenhum candidato encontrado para "<strong>{activeSearch}</strong>".
+              Nenhum candidato encontrado para "<strong>{activeSearch}</strong>
+              ".
             </p>
           </CardContent>
         </Card>
@@ -190,107 +191,114 @@ export default function ConsultarProva() {
 
       {/* Resultado Encontrado */}
       {!isLoading && candidato && (
-      <Card>
-  <CardHeader>
-    <div className="flex items-center justify-between">
-      <CardTitle>Resultado da Prova</CardTitle>
-      <div className="flex gap-2">
-        {pdfContent && (
-          <PDFActions
-            document={pdfContent}
-            fileName={`Prova_${candidato.numero_inscricao}_${new Date().toISOString().slice(0, 10)}.pdf`}
-            showDownload
-            showPrint
-          />
-        )}
-      </div>
-    </div>
-  </CardHeader>
-<CardContent className="pt-6">
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Resultado da Prova</CardTitle>
+              <div className="flex gap-2">
+                {pdfContent && (
+                  <PDFActions
+                    document={pdfContent}
+                    fileName={`Prova_${candidato.numero_inscricao}_${new Date().toISOString().slice(0, 10)}.pdf`}
+                    showDownload
+                    showPrint
+                  />
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+              {/* Informações Pessoais */}
+              <div>
+                <Label className="text-muted-foreground">Nº de Inscrição</Label>
+                <p className="font-mono font-semibold text-lg mt-1">
+                  {candidato.numero_inscricao}
+                </p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Nome Completo</Label>
+                <p className="font-medium text-lg mt-1">{candidato.nome}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">
+                  Bilhete de Identidade
+                </Label>
+                <p className="font-mono mt-1">{candidato.numero_bilhete}</p>
+              </div>
 
-    {/* Informações Pessoais */}
-    <div>
-      <Label className="text-muted-foreground">Nº de Inscrição</Label>
-      <p className="font-mono font-semibold text-lg mt-1">{candidato.numero_inscricao}</p>
-    </div>
-    <div>
-      <Label className="text-muted-foreground">Nome Completo</Label>
-      <p className="font-medium text-lg mt-1">{candidato.nome}</p>
-    </div>
-    <div>
-      <Label className="text-muted-foreground">Bilhete de Identidade</Label>
-      <p className="font-mono mt-1">{candidato.numero_bilhete}</p>
-    </div>
+              {/* Informações Acadêmicas */}
+              <div>
+                <Label className="text-muted-foreground">Curso</Label>
+                <p className="font-medium mt-1">{candidato.curso}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Faculdade</Label>
+                <p className="mt-1">{candidato.faculdade || "—"}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">Período</Label>
+                <p className="mt-1">{candidato.periodo}</p>
+              </div>
 
-    {/* Informações Acadêmicas */}
-    <div>
-      <Label className="text-muted-foreground">Curso</Label>
-      <p className="font-medium mt-1">{candidato.curso}</p>
-    </div>
-    <div>
-      <Label className="text-muted-foreground">Faculdade</Label>
-      <p className="mt-1">{candidato.faculdade || "—"}</p>
-    </div>
-    <div>
-      <Label className="text-muted-foreground">Período</Label>
-      <p className="mt-1">{candidato.periodo}</p>
-    </div>
+              {/* Detalhes da Prova */}
+              <div>
+                <Label className="text-muted-foreground">Sala</Label>
+                <p className="mt-1">{candidato.sala || "—"}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">
+                  Data de Realização
+                </Label>
+                <p className="mt-1">{candidato.data_realizacao || "—"}</p>
+              </div>
+              <div>
+                <Label className="text-muted-foreground">
+                  Horário da Prova
+                </Label>
+                <p className="font-medium mt-1">
+                  {candidato.hora_inicio || "--:--"} —{" "}
+                  {candidato.hora_fim || "--:--"}
+                </p>
+              </div>
 
-    {/* Detalhes da Prova */}
-    <div>
-      <Label className="text-muted-foreground">Sala</Label>
-      <p className="mt-1">{candidato.sala || "—"}</p>
-    </div>
-    <div>
-      <Label className="text-muted-foreground">Data de Realização</Label>
-      <p className="mt-1">{candidato.data_realizacao || "—"}</p>
-    </div>
-    <div>
-      <Label className="text-muted-foreground">Horário da Prova</Label>
-      <p className="font-medium mt-1">
-        {candidato.hora_inicio || "--:--"} — {candidato.hora_fim || "--:--"}
-      </p>
-    </div>
+              {/* Nota */}
+              <div>
+                <Label className="text-muted-foreground">Nota Obtida</Label>
+                <div className="mt-2">
+                  <Badge
+                    variant="outline"
+                    className={`text-xl px-6 py-2 font-semibold ${candidato.nota >= 14
+                      ? "bg-green-500/10 text-green-700 border-green-500"
+                      : candidato.nota >= 10
+                        ? "bg-yellow-500/10 text-yellow-700 border-yellow-500"
+                        : "bg-red-500/10 text-red-700 border-red-500"
+                      }`}
+                  >
+                    {candidato?.nota?.toFixed(1)}
+                  </Badge>
+                </div>
+              </div>
 
-    {/* Nota */}
-    <div>
-      <Label className="text-muted-foreground">Nota Obtida</Label>
-      <div className="mt-2">
-        <Badge
-          variant="outline"
-          className={`text-xl px-6 py-2 font-semibold ${
-            candidato.nota >= 14
-              ? "bg-green-500/10 text-green-700 border-green-500"
-              : candidato.nota >= 10
-              ? "bg-yellow-500/10 text-yellow-700 border-yellow-500"
-              : "bg-red-500/10 text-red-700 border-red-500"
-          }`}
-        >
-          {candidato.nota.toFixed(1)}
-        </Badge>
-      </div>
-    </div>
-
-    {/* Resultado Final - Span completo */}
-    <div className="lg:col-span-3 pt-6 border-t">
-      <Label className="text-muted-foreground">Resultado Final</Label>
-      <div className="mt-3">
-        <Badge
-          className={`text-lg px-10 py-2.5 font-medium ${
-            candidato.resultado === 1 
-              ? "bg-green-600 hover:bg-green-700" 
-              : "bg-red-600 hover:bg-red-700"
-          }`}
-        >
-          {candidato.resultado === 1 ? "ADMITIDO" : " REPROVADO"}
-        </Badge>
-      </div>
-    </div>
-
-  </div>
-</CardContent>
-</Card>
+              {/* Resultado Final - Span completo */}
+              <div className="lg:col-span-3 pt-6 border-t">
+                <Label className="text-muted-foreground">Resultado Final</Label>
+                <div className="mt-3">
+                  <Badge
+                    className={`text-lg px-10 py-2.5 font-medium ${candidato.resultado === 1
+                      ? "bg-green-600 hover:bg-green-700"
+                      : candidato.resultado === 0
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-amber-600 hover:bg-amber-700"
+                      }`}
+                  >
+                    {candidato.resultado === 1 ? "ADMITIDO" : candidato.resultado === 0 ? "REPROVADO" : "AGUARDA CLASSIFICAÇÃO"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

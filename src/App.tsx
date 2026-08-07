@@ -30,6 +30,7 @@ import ExamCalendarPos from "./pages/calendar-pos/ExamCalendar";
 import { ReactQueryProvider } from "./providers/react-query.provider";
 import Deadlines from "./pages/academiccalendar/Deadlines";
 import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
+import GradeCurso from "./pages/disciplinemanagement/GradeCurso";
 import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentManagement";
 import ControlNotes from "./pages/rating(avaliation)/control";
 import FormulaUC from "./pages/rating(avaliation)/formula-uc";
@@ -194,6 +195,7 @@ import PostGraduationAulasListagemSumarios from "./pages/post-graduation/sumario
 import ContratosInstituicao from "./pages/financas/credito-educacional/institutional-contract";
 import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
 import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
+import { ImportSchedules } from "./pages/schedules/ImportSchedule";
 
 const App = () => {
   return (
@@ -1260,6 +1262,21 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/plano/grade-curso"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO
+                            .sigla!,
+                          PermissionTypeDetails.GESTAO_UC_PLANO_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <GradeCurso />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/plano/uc-departamento"
                     element={
                       <ProtectedRoute
@@ -1641,6 +1658,10 @@ const App = () => {
                   <Route
                     path="/documentos/validar"
                     element={<ValidarDocumento />}
+                  />
+                  <Route
+                    path="/horarios/import"
+                    element={<ImportSchedules />}
                   />
                   <Route
                     path="/docente/vigilancia"

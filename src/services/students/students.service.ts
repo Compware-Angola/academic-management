@@ -1,3 +1,4 @@
+import { GradeCurricularDuplicada } from "@/components/views/docs-students/certificado-notas/types";
 import { axiosNestFinance } from "@/lib/axios-nest-finance";
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
@@ -204,6 +205,38 @@ export const fetchDisciplinasMatriculadas = async (
   return response.data;
 };
 
+export interface FetchGradesDuplicadasParams {
+  numeroDeMatricula: number;
+  anoLectivo: number;
+}
+
+export const fetchGradesCurricularesDuplicadas = async (
+  params: FetchGradesDuplicadasParams,
+): Promise<GradeCurricularDuplicada[]> => {
+  const { numeroDeMatricula, anoLectivo } = params;
+
+  const response = await axiosNestGa.get<GradeCurricularDuplicada[]>(
+    `/students/matriculas/${numeroDeMatricula}/ano-lectivo/${anoLectivo}/grades-duplicadas`,
+  );
+
+  return response.data;
+};
+
+export interface AtualizarEstadoGradeCurricularParams {
+  codigo: number;
+  estado: 0 | 1;
+  codigoUtilizador: number;
+}
+
+export const updateEstadoGradeCurricularAluno = async ({
+  codigo,
+  ...body
+}: AtualizarEstadoGradeCurricularParams): Promise<void> => {
+  await axiosNestGa.patch(
+    `/students/grade-curricular-aluno/${codigo}/estado`,
+    body,
+  );
+};
 export type ListStudentsPayload = {
   anoLectivo?: number;
   codigoCurso?: number;

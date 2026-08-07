@@ -2,14 +2,29 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export type GradeCurricularPayload = {
   classe: number;
+  semestre?: number;
   curso: number;
   anoLectivo: number;
   estado: number;
   page?: number;
   limit?: number;
 };
+export type ToggleStatusGradeCurricularPayload = {
+  codigo: number;
+  status: 0 | 1;
+};
+
+export type GradeCurricularItem2 = {
+  codigo: number;
+  codigo_disciplina: number;
+  codigo_curso: number;
+  codigo_classe: number;
+  codigo_semestre: number;
+  status: 0 | 1;
+};
 
 export type GradeCurricularItem = {
+  codigo: number;
   codigo_plano_curricular: number;
   descricao_plano_curricular: string;
 
@@ -75,10 +90,44 @@ export async function getGradeCurricular(
   return data;
 }
 
+export async function getGradeCurricular2(
+  payload: Omit<GradeCurricularPayload, "anoLectivo">,
+): Promise<GradeCurricularResponse> {
+  const { classe, curso, semestre, estado, page = 1, limit = 25 } = payload;
+
+  const { data } = await axiosNestGa.get<GradeCurricularResponse>(
+    "/discipline/grade-curricular2",
+    {
+      params: {
+        classe,
+        semestre,
+        curso,
+        estado,
+        page,
+        limit,
+      },
+    },
+  );
+
+  return data;
+}
+
 export async function addUCToPlan(payload: AddUCToPlanPayload): Promise<any> {
   const response = await axiosNestGa.post(
     `/discipline/plano-curricular`, // a tua rota exata
     payload,
   );
   return response.data;
+}
+
+export async function toggleStatusGradeCurricular({
+  codigo,
+  status,
+}: ToggleStatusGradeCurricularPayload): Promise<GradeCurricularItem2> {
+  const { data } = await axiosNestGa.patch<GradeCurricularItem2>(
+    `/discipline/grade-curricular/${codigo}/status`,
+    { status },
+  );
+
+  return data;
 }

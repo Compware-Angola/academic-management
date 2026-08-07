@@ -51,10 +51,7 @@ import { ProvaResumo } from "@/services/access_exam/provas.service";
 import { parseFilter } from "@/util/parse-filter";
 import { DeleteProvaDialog } from "./components/DeleteProvaDialog";
 import { ProvaDetailsDialog } from "./components/ProvaDetailsDialog";
-import {
-  ProvaFormDialog,
-  type ProvaForm,
-} from "./components/ProvaFormDialog";
+import { ProvaFormDialog, type ProvaForm } from "./components/ProvaFormDialog";
 import { ProvasTable } from "./components/ProvasTable";
 
 const PAGE_SIZE = 10;
@@ -68,6 +65,10 @@ const EMPTY_FORM: ProvaForm = {
   perguntas: "",
   disciplinas: "",
   cursos: "",
+  data: "",
+  inicio: "",
+  local: "",
+  periodo_id: "",
 };
 
 function parseIds(value: string) {
@@ -122,6 +123,7 @@ export default function ListagemProvas() {
   const deleteMutation = useDeleteProva();
 
   const provas = data?.data ?? [];
+
   const perguntas = perguntasResponse?.data ?? [];
   const pagination = data?.pagination;
   const totalPages = pagination?.totalPages ?? 1;
@@ -134,7 +136,7 @@ export default function ListagemProvas() {
       inactivos: provas.filter((prova) => prova.status_ !== 1).length,
       carregadas: provas.length,
     }),
-    [provas, total]
+    [provas, total],
   );
 
   const openCreate = () => {
@@ -146,6 +148,7 @@ export default function ListagemProvas() {
   const openEdit = (prova: ProvaResumo) => {
     setCreating(false);
     setEditing(prova);
+    console.log("Prova: ", prova);
     setForm({
       descricao: prova.descricao ?? "",
       senhaProva: "",
@@ -155,6 +158,10 @@ export default function ListagemProvas() {
       perguntas: refsToText(prova.perguntas),
       disciplinas: refsToText(prova.disciplinas),
       cursos: refsToText(prova.cursos),
+      data: new Date(prova.data_realizacao).toISOString().split("T")[0],
+      inicio: prova.inicio,
+      local: prova.sala_id.toString(),
+      periodo_id: prova.periodo_id.toString(),
     });
   };
 
@@ -176,9 +183,26 @@ export default function ListagemProvas() {
       !form.descricao.trim() ||
       !form.senhaProva.trim() ||
       !form.anoLetivoId ||
-      !form.duracao
+      !form.duracao ||
+      !form.data ||
+      !form.inicio ||
+      !form.local ||
+      !form.periodo_id
     ) {
-      toast.error("Preencha descrição, senha, ano letivo e duração.");
+      toast.error(
+        "Preencha descrição, senha, ano letivo, duração, data, início e o local.",
+      );
+      return null;
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const dataInformada = new Date(`${form.data}T00:00:00`);
+
+    if (dataInformada < hoje) {
+      toast.error(
+        "Não é possível marcar a prova para uma data anterior à atual.",
+      );
       return null;
     }
 
@@ -192,6 +216,10 @@ export default function ListagemProvas() {
       perguntas: parseIds(form.perguntas),
       disciplinas: parseIds(form.disciplinas),
       cursos: parseIds(form.cursos),
+      data: form.data,
+      inicio: form.inicio,
+      local: Number(form.local),
+      periodo_id: Number(form.periodo_id),
     };
   };
 
@@ -199,6 +227,19 @@ export default function ListagemProvas() {
     if (!form.descricao.trim() || !form.anoLetivoId || !form.duracao) {
       toast.error("Preencha descrição, ano letivo e duração.");
       return null;
+    }
+
+    if (form.data) {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const dataInformada = new Date(`${form.data}T00:00:00`);
+
+      if (dataInformada < hoje) {
+        toast.error(
+          "Não é possível marcar a prova para uma data anterior à atual.",
+        );
+        return null;
+      }
     }
 
     return {
@@ -209,6 +250,10 @@ export default function ListagemProvas() {
       perguntas: parseIds(form.perguntas),
       disciplinas: parseIds(form.disciplinas),
       cursos: parseIds(form.cursos),
+      data: form.data || undefined,
+      inicio: form.inicio || undefined,
+      local: form.local || undefined,
+      periodo_id: form.periodo_id || undefined,
     };
   };
 
@@ -224,7 +269,7 @@ export default function ListagemProvas() {
             toast.success("Prova atualizada com sucesso.");
             closeForm();
           },
-        }
+        },
       );
       return;
     }

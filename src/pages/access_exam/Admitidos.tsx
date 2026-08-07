@@ -220,7 +220,7 @@ export default function CandidatosAdmitidos() {
             Candidatos Admitidos
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gestão de candidatos admitidos 
+            Gestão de candidatos admitidos
           </p>
         </div>
 
@@ -415,10 +415,10 @@ export default function CandidatosAdmitidos() {
                     <TableHead>BI</TableHead>
                     <TableHead>Curso</TableHead>
                     <TableHead>Contacto</TableHead>
-                  
+
                     <TableHead className="text-center">Matriculado</TableHead>
                     <TableHead>Local Admissão</TableHead>
-                    <TableHead>Data de Candidatura</TableHead>
+                    <TableHead>Data Pre-inscrição</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -440,7 +440,7 @@ export default function CandidatosAdmitidos() {
                       <TableCell className="text-sm">
                         {candidato.contato}
                       </TableCell>
-                    
+
                       <TableCell className="text-center">
                         <Badge
                           variant="outline"
@@ -628,7 +628,7 @@ export default function CandidatosAdmitidos() {
                       ? new Date(modal.candidato.data_nascimento).toLocaleDateString("pt-AO")
                       : "—",
                   ],
-              
+
                   ["Local Admissão", modal.candidato?.local_admissao],
                   ["Matriculado", modal.candidato?.matriculado],
                 ].map(([label, value]) => (

@@ -429,6 +429,7 @@ export const academicStructure: MenuStructure = {
           url: "/horarios/eliminados",
           permission: [PermissionTypeDetails.LISTAR_HORARIOS_ELIMINADOS.sigla],
         },
+
         {
           title: "Horários por sala",
           url: "/horarios/sala",
@@ -455,13 +456,11 @@ export const academicStructure: MenuStructure = {
       url: "/plano",
       icon: BookOpen,
       items: [
-
         {
           title: "Gestão de disciplinas",
           url: "/plano/disciplinas",
           permission: [PermissionTypeDetails.GESTAO_DISCIPLINAS.sigla],
         },
-
 
         {
           title: "Gestão de UC por departamento",
@@ -473,6 +472,13 @@ export const academicStructure: MenuStructure = {
         {
           title: "Gestão de UC no plano",
           url: "/plano/uc-plano",
+          permission: [
+            PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla,
+          ],
+        },
+        {
+          title: "Gestão de UC na Grade",
+          url: "/plano/grade-curso",
           permission: [
             PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla,
           ],
@@ -564,7 +570,6 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.CONTROLE_LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
           ],
         },
-
 
         {
           title: "Estatísticas de notas lançadas",
@@ -784,7 +789,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PARAMETROS_CALENDARIO_ACADEMICO.sigla,
           ],
         },
-        
+
 
         {
           title: "Fórmula de Definição das UCs",
@@ -865,7 +870,7 @@ export const postGraduationStructure: MenuStructure = {
             PermissionTypeDetails.PAUTA_GERAL_UC_POS_GRADUACAO.sigla,
           ],
         },
-        
+
         {
           title: "Permissão fora do prazo",
           url: "/avaliacoes/permissao",
@@ -916,8 +921,6 @@ export const postGraduationStructure: MenuStructure = {
         },
       ],
     },
-
-
   ],
 };
 
@@ -1094,21 +1097,20 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/credito/atribuir",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-        {
-          title: "Contratos - Instituição",
-          url: "/financas/contratos-instituicao",
-          permission: [
-            PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla,
-          ],
-        },
         /*
-        {
-          title: "Rel. Pagamentos Instituições",
-          icon: BarChart3,
-          url: "/financas/rel-pagamentos-instituicoes",
-          permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
-        },
-       */
+      {
+        title: "Contratos - Instituição",
+        url: "/financas/contratos-instituicao",
+        permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
+      },
+    
+      {
+        title: "Rel. Pagamentos Instituições",
+        icon: BarChart3,
+        url: "/financas/rel-pagamentos-instituicoes",
+        permission: [PermissionTypeDetails.PARAMETROS_MGH.sigla],
+      },
+     */
 
         /* Gestão de Descontos */
         {
