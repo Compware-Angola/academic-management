@@ -44,6 +44,11 @@ type FormCommandSelectProps<T> = {
   onBlur?: () => void;
 };
 
+function truncateLabel(label: string, maxLength = 45) {
+  if (label.length <= maxLength) return label;
+  return `${label.slice(0, maxLength).trimEnd()}...`;
+}
+
 /* ------------------ Utilitário de largura ------------------ */
 
 function resolveWidthClass(width?: WidthPreset | string) {
@@ -141,9 +146,9 @@ export function FormCommandSelect<T>({
               widthClass,
             )}
           >
-            <span className="truncate">
+            <span className="truncate" title={selectedItem?.label}>
               {selectedItem
-                ? selectedItem.label
+                ? truncateLabel(selectedItem.label)
                 : labelMode === "inside"
                   ? label
                   : placeholder}
@@ -195,7 +200,7 @@ export function FormCommandSelect<T>({
                             : "opacity-0",
                         )}
                       />
-                      {item.label}
+                      {truncateLabel(item.label)}
                     </CommandItem>
                   ))}
                   {options.map((item) => {

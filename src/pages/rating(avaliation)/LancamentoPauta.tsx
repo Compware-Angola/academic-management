@@ -57,6 +57,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 import { FileFolder } from "@/enums/file-folder";
 
 export default function LancamentoPauta() {
@@ -505,6 +506,7 @@ export default function LancamentoPauta() {
               value: c.codigo,
             })}
           />
+          {/* Select antigo de Unidade Curricular:
           <FormSelect
             label="Unidade Curricular"
             value={filters.unidadeCurricular}
@@ -521,6 +523,18 @@ export default function LancamentoPauta() {
             }}
             options={unidadesCurriculares}
             map={(u) => ({ key: u.pk, label: u.descricao, value: u.pk })}
+          /> */}
+          <GradeCurricularSelect
+            value={filters.unidadeCurricular}
+            disabled={!filters.semestre || !filters.curso || !filters.anoCurricular}
+            onChangeValue={(v) => {
+              setFilters({ ...filters, unidadeCurricular: v });
+              setCurrentPage(1);
+            }}
+            curso={parseFilter(filters.curso)}
+            semestre={parseFilter(filters.semestre)}
+            classe={parseFilter(filters.anoCurricular)}
+            anoLectivo={parseFilter(filters.anoLectivo)}
           />
           <FormSelect
             label="Tipo de Avaliação"

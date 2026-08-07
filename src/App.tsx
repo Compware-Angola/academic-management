@@ -196,6 +196,9 @@ import ContratosInstituicao from "./pages/financas/credito-educacional/instituti
 import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
 import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
 import { ImportSchedules } from "./pages/schedules/ImportSchedule";
+import { ConciliacaoDivida } from "./pages/financas/area-financeira/ConciliacaoDivida";
+import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/ConciliacaoAprovacao";
+import NegociacaoDividaConciliacao from "./pages/financas/area-financeira/NegociacaoDividaConciliacao";
 
 const App = () => {
   return (
@@ -557,7 +560,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC
+                          PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC
                             .sigla,
                         ]}
                       >
@@ -1434,6 +1437,26 @@ const App = () => {
                         <NegociacaoDivida />
                       </ProtectedRoute>
                     }
+                  />
+                  <Route
+                    path="/financas/negociacao-conciliacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla!,
+                        ]}
+                      >
+                        <NegociacaoDividaConciliacao />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/conciliacao-divida/:id"
+                    element={<ConciliacaoDivida />}
+                  />
+                  <Route
+                    path="/financas/conciliacao-aprovacao/:id"
+                    element={<ConciliacaoAprovacao />}
                   />
                   <Route
                     path="financas/credito/tipos"

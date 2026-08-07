@@ -51,6 +51,7 @@ import { formatarData } from "@/util/date-formate";
 import { Button } from "@/components/ui/button";
 import { useTeamOldRulesTurmas } from "@/hooks/team-Old-rules";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 export default function ViewNotes() {
   // filtros
@@ -85,12 +86,13 @@ export default function ViewNotes() {
     useQueryTipoAvaliacao();
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe: filters.anoCurricular,
-    });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     curso: filters.curso,
+  //     semestre: filters.semestre,
+  //     classe: filters.anoCurricular,
+  //   });
 
   const canLoadTurmas =
     !!filters.anoLetivo &&
@@ -419,7 +421,7 @@ const pdfContent = pdfData ? (
               </Select>
             </div>
 
-            {/* Unidade Curricular */}
+            {/* Select antigo de Unidade Curricular:
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
@@ -430,17 +432,7 @@ const pdfContent = pdfData ? (
                 disabled={!canLoadUcs}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione curso"
-                        : !filters.semestre
-                        ? "Selecione semestre"
-                        : isLoadingUC
-                        ? "Carregando UCs..."
-                        : "Selecionar UC"
-                    }
-                  />
+                  <SelectValue placeholder="Selecionar UC" />
                 </SelectTrigger>
                 <SelectContent>
                   {unidadesCurriculares.map((uc) => (
@@ -450,7 +442,16 @@ const pdfContent = pdfData ? (
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUcs}
+              onChangeValue={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+            />
             {isShowSchedule ? (
               <FormSelect
                 label="Horarios"

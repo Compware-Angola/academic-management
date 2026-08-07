@@ -12,14 +12,16 @@ import {
   GraduationCap,
   BookOpen,
   FileCheck,
-
   Calendar,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import UpcomingEventsCard from "./components/UpcomingEventsCard";
 import QuickActionsCard from "./components/QuickActionsCard";
 import { useAuth } from "@/hooks/use-auth";
-import { useQueryDashboard, useQueryDashboardStatisticsReports } from "@/hooks/dashboard/use-query-dashboard";
+import {
+  useQueryDashboard,
+  useQueryDashboardStatisticsReports,
+} from "@/hooks/dashboard/use-query-dashboard";
 import { formatNumber } from "@/util/format-number";
 import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { useQueryConfigurationGeral } from "@/hooks/academiccalendar/use-query-configuration";
@@ -30,19 +32,18 @@ import { usePermission } from "@/auth/permission.helper";
 import { StudentEnrollmentStatsCard } from "./components/student-enrollment-stats-card";
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 
-
 const Index = () => {
-
   const { haveFullAccess } = usePermission();
   const { data: currentUser } = useCurrentUser();
   const { data: dashboard, isLoading: isLoadingDashboard } =
     useQueryDashboard();
-  const { data: dashboardStatisticsReports, isLoading: isLoadingDashboardStatisticsReports } =
-    useQueryDashboardStatisticsReports();
+  const {
+    data: dashboardStatisticsReports,
+    isLoading: isLoadingDashboardStatisticsReports,
+  } = useQueryDashboardStatisticsReports();
   const { data: configurationGeral, isLoading: isLoadingConfigurationGeral } =
     useQueryConfigurationGeral();
-  const canViewStats = haveFullAccess()
-
+  const canViewStats = haveFullAccess();
 
   // encontra o ano activo
 
@@ -74,8 +75,6 @@ const Index = () => {
   ];
   const { user } = currentUser || {};
 
-
-
   const allowedQuickLinks = useFilterMenuByPermission(quickLinks);
   return (
     <div className="space-y-6">
@@ -95,10 +94,16 @@ const Index = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total de Estudantes"
-          value={formatNumber(dashboardStatisticsReports?.totalAlunosInscritos?.total ?? 0)}
+          value={formatNumber(
+            dashboardStatisticsReports?.totalAlunosInscritos?.total ?? 0,
+          )}
           icon={Users}
-          isAvailable={dashboardStatisticsReports?.totalAlunosInscritos?.total > 0}
-          description={dashboardStatisticsReports?.totalAlunosInscritos?.descricao}
+          isAvailable={
+            dashboardStatisticsReports?.totalAlunosInscritos?.total > 0
+          }
+          description={
+            dashboardStatisticsReports?.totalAlunosInscritos?.descricao
+          }
         />
         <StatCard
           title="Docentes"
@@ -133,7 +138,6 @@ const Index = () => {
           description=""
           configuration={configurationGeral}
           isLoading={isLoadingConfigurationGeral}
-
         />
       </div>
       {/* 
@@ -166,12 +170,8 @@ const Index = () => {
               );
             })}
           </div>
-
-
         </CardContent>
       </Card>
-
-
     </div>
   );
 };

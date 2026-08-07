@@ -56,6 +56,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type Filters = {
   tipoCandidatura: string;
@@ -120,12 +121,13 @@ export default function PautaGeral() {
   const { data: classes = [], isLoading: loadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
 
-  const { data: unidadesCurriculares = [], isLoading: loadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: filters.classes,
-      curso: filters.curso,
-      semestre: filters.semestre,
-    });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [], isLoading: loadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     classe: filters.classes,
+  //     curso: filters.curso,
+  //     semestre: filters.semestre,
+  //   });
 
   /** ================== REGRA DO ANO ================== */
   const academicYearInfo = useMemo(() => {
@@ -452,26 +454,40 @@ const pdfContent = pdfData ? (
             loading={loadingClasses}
           />
           {isNewAcademicFlow && (
-            <FormSelect
-              label="Unidade Curricular"
-              value={filters.unidadeCurricular}
-              disabled={
-                loadingUC ||
-                !filters.semestre ||
-                !filters.curso ||
-                !filters.classes
-              }
-              onChange={(v) =>
-                setFilters({ ...filters, unidadeCurricular: v, horarioId: "" })
-              }
-              options={unidadesCurriculares}
-              map={(u) => ({
-                key: u.codigo,
-                label: u.descricao,
-                value: u.pk,
-              })}
-              loading={loadingUC}
-            />
+            <>
+              {/* Select antigo de Unidade Curricular:
+              <FormSelect
+                label="Unidade Curricular"
+                value={filters.unidadeCurricular}
+                disabled={
+                  loadingUC ||
+                  !filters.semestre ||
+                  !filters.curso ||
+                  !filters.classes
+                }
+                onChange={(v) =>
+                  setFilters({ ...filters, unidadeCurricular: v, horarioId: "" })
+                }
+                options={unidadesCurriculares}
+                map={(u) => ({
+                  key: u.codigo,
+                  label: u.descricao,
+                  value: u.pk,
+                })}
+                loading={loadingUC}
+              /> */}
+              <GradeCurricularSelect
+                value={filters.unidadeCurricular}
+                disabled={!filters.semestre || !filters.curso || !filters.classes}
+                onChangeValue={(v) =>
+                  setFilters({ ...filters, unidadeCurricular: v, horarioId: "" })
+                }
+                curso={parseFilter(filters.curso)}
+                semestre={parseFilter(filters.semestre)}
+                classe={parseFilter(filters.classes)}
+                anoLectivo={parseFilter(filters.anoLetivo)}
+              />
+            </>
           )}
 
           {isNewAcademicFlow && (

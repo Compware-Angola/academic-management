@@ -24,7 +24,7 @@ type SelectionListProps<T> = {
   isLoading: boolean;
   emptyMessage: string;
   getId: (item: T) => number;
-  getLabel: (item: T) => string;
+  getLabel: (item: T) => React.ReactNode;
   onChange: (value: string) => void;
 };
 
@@ -57,7 +57,7 @@ export function SelectionList<T>({
 
   return (
     <div className="rounded-md border">
-      <ScrollArea className="h-44">
+      <ScrollArea className="h-[50vh] min-h-[300px]">
         <div className="space-y-1 p-2">
           {items.map((item) => {
             const id = getId(item);
@@ -74,7 +74,7 @@ export function SelectionList<T>({
                     onChange(toggleDelimitedId(value, id, nextChecked === true))
                   }
                 />
-                <span className="leading-5">{getLabel(item)}</span>
+                <div className="min-w-0 flex-1 leading-5">{getLabel(item)}</div>
               </label>
             );
           })}

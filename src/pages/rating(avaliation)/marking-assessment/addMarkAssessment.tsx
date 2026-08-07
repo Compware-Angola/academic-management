@@ -45,6 +45,7 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
+import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryMarkingAssessment } from "@/hooks/avaliacao/use-query-marking-assessment";
 import { formatarData } from "@/util/date-formate";
@@ -64,6 +65,7 @@ import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidat
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type ExportAction = "excel" | "pdf" | "print";
 import EditMarkingAssessmentModal from "../components/EditMarkingAssessmentModal";
@@ -135,12 +137,13 @@ export default function AddMarkingAssessment() {
     useMutationDeleteMarkingAssessment();
 
   const canLoadUcs = !!filters.curso && !!filters.semestre;
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe: filters.anoCurricular,
-    });
+  // Select antigo de Unidade Curricular mantido como referencia do fluxo anterior.
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     curso: filters.curso,
+  //     semestre: filters.semestre,
+  //     classe: filters.anoCurricular,
+  //   });
 
   const canLoadTurmas =
     !!filters.tipoCandidatura &&
@@ -450,7 +453,7 @@ export default function AddMarkingAssessment() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Unidade Curricular */}
+            {/* Select antigo de Unidade Curricular:
             <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
@@ -461,17 +464,7 @@ export default function AddMarkingAssessment() {
                 disabled={!canLoadUcs}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      !filters.curso
-                        ? "Selecione curso"
-                        : !filters.semestre
-                          ? "Selecione semestre"
-                          : isLoadingUC
-                            ? "Carregando UCs..."
-                            : "Selecionar UC"
-                    }
-                  />
+                  <SelectValue placeholder="Selecionar UC" />
                 </SelectTrigger>
 
                 <SelectContent>
@@ -482,7 +475,18 @@ export default function AddMarkingAssessment() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
+            <GradeCurricularSelect
+              value={filters.unidadeCurricular}
+              disabled={!canLoadUcs}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
+              }
+              curso={parseFilter(filters.curso)}
+              semestre={parseFilter(filters.semestre)}
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLetivo)}
+            />
             <FormSelect
               label="Horarios"
               value={filters.horarioId}

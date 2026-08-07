@@ -23,14 +23,20 @@ import { VagasStep } from "./vagas.step";
 import { useQueryDraftAcademicYear } from "@/hooks/academiccalendar/use-query-academic-years-params";
 import { useMutationConfigureAcademicCalendar } from "@/hooks/academiccalendar/configureAcademicCalendar";
 
-
 type Step = "periodos" | "mensalidades" | "vagas";
+
+const typeCandidateDictionary = {
+  1: "Licenciatura",
+  2: "Pos-Graduacao",
+  3: "Pos-Graduacao",
+} as const;
 
 interface ParametersEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   anoLetivo?: string;
   onSuccess?: () => void;
+  tipo_candidatura: number;
 }
 
 const steps: { id: Step; title: string; icon: React.ReactNode }[] = [
@@ -49,13 +55,13 @@ const steps: { id: Step; title: string; icon: React.ReactNode }[] = [
     title: "Vagas Disponíveis",
     icon: <Users className="h-5 w-5" />,
   },
-
 ];
 
 export function ParametersEditModal({
   open,
   onOpenChange,
   anoLetivo,
+  tipo_candidatura,
   onSuccess,
 }: ParametersEditModalProps) {
   const [currentStep, setCurrentStep] = useState<Step>("periodos");
@@ -81,8 +87,7 @@ export function ParametersEditModal({
   const [vagasEditadas, setVagasEditadas] = useState<any[]>([]);
   const [mensalidadesEditadas, setMensalidadesEditadas] = useState<any[]>([]);
 
-  const { data: vagasOriginais, isLoading: loadingVagas } =
-    useQueryVacancies();
+  const { data: vagasOriginais, isLoading: loadingVagas } = useQueryVacancies();
 
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
@@ -113,14 +118,15 @@ export function ParametersEditModal({
     periodosForm.dataFimSegundoSemestre,
   ]);
 
-
-
   useEffect(() => {
     if (currentStep !== "vagas") return;
     if (vagasOriginais?.vagas.length === 0 || vagasEditadas.length > 0) return;
 
     setVagasEditadas(
-      vagasOriginais?.vagas.map((v) => ({ ...v, numeroVagas: v.numeroVagas || 0 })),
+      vagasOriginais?.vagas.map((v) => ({
+        ...v,
+        numeroVagas: v.numeroVagas || 0,
+      })),
     );
   }, [currentStep, vagasOriginais]);
 
@@ -130,7 +136,11 @@ export function ParametersEditModal({
     isLoading: loadingMeses,
     error: errorMeses,
   } = useQueryGenerateMesTemp(
-    { anoInicial: anoInicioDefinido, anoFinal: anoFimDefinido },
+    {
+      anoInicial: anoInicioDefinido,
+      anoFinal: anoFimDefinido,
+      tipo_candidatura,
+    },
     {
       enabled:
         !!anoInicioDefinido &&
@@ -165,7 +175,7 @@ export function ParametersEditModal({
   const mutationTudo = useMutation({
     mutationFn: async () => {
       if (!isPeriodoValid()) throw new Error("Períodos incompletos");
-      let codigoAnoLectivo: number
+      let codigoAnoLectivo: number;
       const periodoPayload = {
         designacao: periodosForm.designacao,
         data_inicio_primeiro_semestre: periodosForm.dataInicioPrimeiroSemestre,
@@ -173,7 +183,7 @@ export function ParametersEditModal({
         data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
         data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
         codigo_utilizador: user.user?.pk_utilizador,
-        codigo_tipo_candidatura: 1
+        codigo_tipo_candidatura: 1,
       };
       if (!draft?.ano_lectivo?.codigo) {
         const periodoRes = await axiosNestGa.post(
@@ -250,11 +260,12 @@ export function ParametersEditModal({
         variant: "destructive",
       });
     },
-
-
   });
 
-  const { mutateAsync: mutateAcademicCalendar, isPending: isLoadingCreateAcademicCalendar } = useMutationConfigureAcademicCalendar();
+  const {
+    mutateAsync: mutateAcademicCalendar,
+    isPending: isLoadingCreateAcademicCalendar,
+  } = useMutationConfigureAcademicCalendar();
 
   const handleCreate = async () => {
     await mutateAcademicCalendar({
@@ -264,17 +275,8 @@ export function ParametersEditModal({
         data_fim_primeiro_semestre: periodosForm.dataFimPrimeiroSemestre,
         data_inicio_segundo_semestre: periodosForm.dataInicioSegundoSemestre,
         data_fim_segundo_semestre: periodosForm.dataFimSegundoSemestre,
-        codigo_tipo_candidatura: 1
+        codigo_tipo_candidatura: 1,
       },
-      vagas: vagasEditadas
-        .filter((v) => v.numeroVagas > 0)
-        .map((v) => ({
-          codigo_vaga: v?.codigo_vaga,
-          codigo_periodo: v.codigo_periodo,
-          codigo_curso: v.codigoCurso,
-          polo_id: v.codigo_polo,
-          numero_vagas: v.numeroVagas,
-        })),
       meses: mensalidadesEditadas.map((mes) => ({
         designacao: mes.designacao,
         isencao: mes.isencao,
@@ -289,10 +291,8 @@ export function ParametersEditModal({
         semestre: mes.semestre,
         semestre_posgraduacao: mes.semestre_posgraduacao,
       })),
-
-    })
-
-  }
+    });
+  };
 
   const resetForm = () => {
     setPeriodosForm({
@@ -374,7 +374,7 @@ export function ParametersEditModal({
     if (nextIndex < steps.length) {
       setCurrentStep(steps[nextIndex].id);
     } else {
-      handleCreate()
+      handleCreate();
     }
   };
 
@@ -422,10 +422,11 @@ export function ParametersEditModal({
                 className="flex flex-col items-center gap-2 flex-1 relative"
               >
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${index <= currentIndex
-                    ? "bg-primary text-white"
-                    : "bg-muted text-muted-foreground"
-                    }`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                    index <= currentIndex
+                      ? "bg-primary text-white"
+                      : "bg-muted text-muted-foreground"
+                  }`}
                 >
                   {index < currentIndex ? (
                     <CheckCircle className="h-6 w-6" />
@@ -434,17 +435,19 @@ export function ParametersEditModal({
                   )}
                 </div>
                 <span
-                  className={`text-xs font-medium text-center ${index <= currentIndex
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                    }`}
+                  className={`text-xs font-medium text-center ${
+                    index <= currentIndex
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
                 >
                   {step.title}
                 </span>
                 {index < steps.length - 1 && (
                   <div
-                    className={`absolute top-6 left-12 right-0 h-1 -z-10 ${index < currentIndex ? "bg-primary" : "bg-muted"
-                      }`}
+                    className={`absolute top-6 left-12 right-0 h-1 -z-10 ${
+                      index < currentIndex ? "bg-primary" : "bg-muted"
+                    }`}
                   />
                 )}
               </div>
@@ -455,7 +458,10 @@ export function ParametersEditModal({
         {/* Conteúdo */}
         <div className="min-h-96">
           {currentStep === "periodos" && (
-            <PeriodoStep periodosForm={periodosForm} setPeriodosForm={setPeriodosForm} />
+            <PeriodoStep
+              periodosForm={periodosForm}
+              setPeriodosForm={setPeriodosForm}
+            />
           )}
 
           {currentStep === "vagas" && (
@@ -475,6 +481,7 @@ export function ParametersEditModal({
               errorMeses={errorMeses}
               mensalidadesEditadas={mensalidadesEditadas}
               setMensalidadesEditadas={setMensalidadesEditadas}
+              tipoCandidatura={typeCandidateDictionary[tipo_candidatura]}
             />
           )}
         </div>

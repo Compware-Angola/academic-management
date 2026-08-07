@@ -1,4 +1,3 @@
-// src/pages/UCManagementPlan.tsx
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -77,6 +76,26 @@ export default function UCManagementPlan() {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalImportOpen, setIsModalImportOpen] = useState<boolean>(false);
+  // Estado do modal (independente dos filtros da listagem)
+  const [modalTipoCandidaturaId, setModalTipoCandidaturaId] =
+    useState<string>("1");
+  const [modalAnoLetivoId, setModalAnoLetivoId] = useState<string>("");
+  const [modalCursoId, setModalCursoId] = useState<string>("");
+  const [modalClasseId, setModalClasseId] = useState<string>("");
+
+  const isGraduationModal = modalTipoCandidaturaId === "1";
+
+  const { data: modalClasses = [], isLoading: loadingModalClasses } =
+    useQueryClassFilterByCurso({ curso: modalCursoId });
+
+  useEffect(() => {
+    setModalCursoId("");
+    setModalClasseId("");
+  }, [modalTipoCandidaturaId]);
+
+  useEffect(() => {
+    setModalClasseId("");
+  }, [modalCursoId, modalAnoLetivoId]);
 
   const onOpenModalImport = () => setIsModalImportOpen(true);
   const onCloseModalImport = () => setIsModalImportOpen(false);
@@ -94,6 +113,12 @@ export default function UCManagementPlan() {
     (classeId !== undefined && classeId !== "7") ||
     estado !== undefined;
 
+  const hasActiveFiltersMoldal =
+    modalTipoCandidaturaId !== "1" ||
+    modalAnoLetivoId !== "" ||
+    !!modalCursoId ||
+    (modalClasseId !== "" && modalClasseId !== "7");
+
   const limparFiltros = () => {
     setTipoCandidaturaId("1");
     setAnoLetivoId("");
@@ -101,6 +126,12 @@ export default function UCManagementPlan() {
     setClasseId("");
     setEstado(undefined);
     setPage(1);
+  };
+  const limparFiltrosModal = () => {
+    setModalTipoCandidaturaId("1");
+    setModalAnoLetivoId("");
+    setModalCursoId("");
+    setModalClasseId("");
   };
 
   const { data: anosLetivos = [] } = useQueryAnoAcademico();
@@ -143,36 +174,35 @@ export default function UCManagementPlan() {
   }, [cursoId, anoLetivoId, tipoCandidaturaId]);
 
   const handleOpenModal = () => {
-    if (!anoLetivoId || !cursoId || !classeId) {
-      toast.error(
-        "Selecione o ano letivo, o curso e o ano curricular antes de adicionar uma UC.",
-      );
-      return;
-    }
+    setModalTipoCandidaturaId("1");
+    setModalAnoLetivoId("");
+    setModalCursoId("");
+    setModalClasseId("");
+    setFormData({ codigo_disciplina: "", codigo_semestre: "" });
     setIsModalOpen(true);
   };
 
   const handleCreateUC = () => {
-    if (
-      !formData.codigo_disciplina ||
-      (isGraduation && !formData.codigo_semestre)
-    ) {
-      toast.error("Preencha todos os campos obrigatórios.");
+    if (!modalAnoLetivoId || !modalCursoId || !modalClasseId) {
+      toast.error("Selecione o ano letivo, o curso e o ano curricular.");
       return;
     }
-    if (classeId == "7") {
-      toast.error("Selecione um Ano Curricular válido.");
-      setClasseId("");
-      setIsModalOpen(false);
+    if (
+      !formData.codigo_disciplina ||
+      (isGraduationModal && !formData.codigo_semestre)
+    ) {
+      toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
     createUC(
       {
         codigoDisciplina: Number(formData.codigo_disciplina),
-        codigoAnoLectivo: Number(anoLetivoId),
-        codigoSemestre: isGraduation ? Number(formData.codigo_semestre) : 1,
-        codigoClasse: Number(classeId),
-        codigoCurso: Number(cursoId),
+        codigoAnoLectivo: Number(modalAnoLetivoId),
+        codigoSemestre: isGraduationModal
+          ? Number(formData.codigo_semestre)
+          : 1,
+        codigoClasse: Number(modalClasseId),
+        codigoCurso: Number(modalCursoId),
       },
       {
         onSuccess: () => {
@@ -547,15 +577,92 @@ export default function UCManagementPlan() {
 
       {/* Modal de Criação */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-4xl!">
           <DialogHeader>
             <DialogTitle>Adicionar UC ao Plano de Estudos</DialogTitle>
             <DialogDescription>
-              Insira os dados da unidade curricular para o plano atual.
+              <div className="flex items-center justify-between">
+                <div>
+                  Insira os dados da unidade curricular para o plano atual.
+                </div>
+                <div className="">
+                  {hasActiveFiltersMoldal && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={limparFiltrosModal}
+                      className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Limpar Filtros
+                    </Button>
+                  )}
+                </div>
+              </div>
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <TipoCandidaturaSelect
+              value={modalTipoCandidaturaId}
+              onChangeValue={setModalTipoCandidaturaId}
+            />
+
+            <AcademicYearsAvailableForOperationSelect
+              label="Ano Letivo"
+              value={modalAnoLetivoId}
+              onChangeValue={setModalAnoLetivoId}
+              tipoCandidaturaId={parseFilter(modalTipoCandidaturaId) ?? 1}
+              onlyConfigurable={false}
+              disabled={!modalTipoCandidaturaId}
+            />
+
+            <CourseSelect
+              label="Curso"
+              value={modalCursoId}
+              onChangeValue={setModalCursoId}
+              disabled={!modalTipoCandidaturaId}
+              params={{
+                tipoCandidaturaId: parseFilter(modalTipoCandidaturaId),
+              }}
+            />
+
+            <div className="grid gap-2">
+              <Label htmlFor="classe">Ano Curricular</Label>
+              {loadingModalClasses ? (
+                <Skeleton className="h-10 w-full rounded-md" />
+              ) : (
+                <Select
+                  value={modalClasseId}
+                  onValueChange={setModalClasseId}
+                  disabled={!modalCursoId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o ano curricular..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modalClasses
+                      .filter(
+                        (classe) =>
+                          !classe.designacao
+                            ?.toLowerCase()
+                            .normalize("NFD")
+                            .replace(/[\u0300-\u036f]/g, "")
+                            .includes("pos-graduacao"),
+                      )
+                      .map((classe) => (
+                        <SelectItem
+                          key={classe.codigo}
+                          value={String(classe.codigo)}
+                        >
+                          {classe.designacao}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
             <div className="grid gap-2">
               <FormCommandSelect
                 value={formData.codigo_disciplina}
@@ -574,74 +681,43 @@ export default function UCManagementPlan() {
               />
             </div>
 
-            <div className="grid gap-2">
-              {isGraduation && (
-                <>
-                  <Label htmlFor="semestre">Semestre</Label>
-                  <Select
-                    value={formData.codigo_semestre}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, codigo_semestre: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o semestre" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-96">
-                      {loadingSemestres ? (
-                        <SelectItem value="loading" disabled>
-                          <span className="flex items-center gap-2">
-                            <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                            Carregando Semestre...
-                          </span>
+            {isGraduationModal && (
+              <div className="grid gap-2">
+                <Label htmlFor="semestre">Semestre</Label>
+                <Select
+                  value={formData.codigo_semestre}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, codigo_semestre: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o semestre" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-96">
+                    {loadingSemestres ? (
+                      <SelectItem value="loading" disabled>
+                        <span className="flex items-center gap-2">
+                          <div className="h-2 w-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          Carregando Semestre...
+                        </span>
+                      </SelectItem>
+                    ) : semestres?.length === 0 ? (
+                      <SelectItem value="empty" disabled>
+                        Nenhum Semestre disponível
+                      </SelectItem>
+                    ) : (
+                      semestres?.map((sem) => (
+                        <SelectItem key={sem.codigo} value={String(sem.codigo)}>
+                          <div className="flex items-center gap-3">
+                            <span>{sem.designacao}</span>
+                          </div>
                         </SelectItem>
-                      ) : semestres.length === 0 ? (
-                        <SelectItem value="empty" disabled>
-                          Nenhum Semestre disponível
-                        </SelectItem>
-                      ) : (
-                        semestres.map((sem) => (
-                          <SelectItem
-                            key={sem.codigo}
-                            value={String(sem.codigo)}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="font-mono font-semibold text-sm">
-                                {sem.codigo}
-                              </span>
-                              <span className="text-muted-foreground">–</span>
-                              <span>{sem.designacao}</span>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-            </div>
-
-            {/* Campos ocultos (pré-preenchidos) */}
-            <div className="text-xs text-muted-foreground space-y-1 mt-4 pt-4 border-t">
-              <p>
-                <strong>Ano Letivo:</strong>{" "}
-                {
-                  anosLetivos.find((a) => String(a.codigo) === anoLetivoId)
-                    ?.designacao
-                }
-              </p>
-              <p>
-                <strong>Curso:</strong>{" "}
-                {cursos.find((c) => String(c.codigo) === cursoId)?.designacao}
-              </p>
-              <p>
-                <strong>Classe:</strong>{" "}
-                {
-                  classes.find((cl) => String(cl.codigo) === classeId)
-                    ?.designacao
-                }
-              </p>
-            </div>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <DialogFooter>

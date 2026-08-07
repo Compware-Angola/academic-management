@@ -37,6 +37,9 @@ import { useQueryHorariosVigilante } from "@/hooks/docentes/use-query-horarios-v
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatarData } from "@/util/date-formate";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
+import RestrictedAccessAlert from "@/components/common/RestrictedAccessAlert";
+
 
 const HorasVigilancia = () => {
   const [filters, setFilters] = useState({
@@ -46,6 +49,10 @@ const HorasVigilancia = () => {
     periodoId: "",
     semestreId: "",
   });
+  const { data: userDate } = useCurrentUser();
+
+  const isDocente = userDate?.roles?.docente ?? false;
+
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(25);
   const defaultSelectEstadoId = useId();
@@ -166,6 +173,7 @@ const HorasVigilancia = () => {
         <CardContent>
           <div className="grid grid-cols-5 gap-4 mb-4">
             <AcademicYearSelect
+              disabled={!isDocente}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
               value={filters.anoLectivo}
             />
@@ -173,10 +181,12 @@ const HorasVigilancia = () => {
               enabledDefaultSelectItem
               value={filters.periodoId}
               onChangeValue={(v) => setFilters({ ...filters, periodoId: v })}
+              disabled={!isDocente}
             />
             <SemestreSelect
               value={filters.semestreId}
               onChangeValue={(v) => setFilters({ ...filters, semestreId: v })}
+              disabled={!isDocente}
             />
             <FormSelect
               label="Tipo de Epoca"
@@ -184,7 +194,7 @@ const HorasVigilancia = () => {
               onChange={(v) => setFilters({ ...filters, prazoId: v })}
               options={prazos}
               loading={isLoadingPrazos}
-              disabled={isLoadingPrazos}
+              disabled={!isDocente || isLoadingPrazos}
               map={(u) => ({
                 key: u.prazoid,
                 label: u.designacao,
@@ -198,7 +208,7 @@ const HorasVigilancia = () => {
               onChange={(v) => setFilters({ ...filters, estado: v })}
               options={statusAgendamentos}
               loading={isLoadingStatusAgendamento}
-              disabled={isLoadingStatusAgendamento}
+              disabled={!isDocente || isLoadingStatusAgendamento}
               map={(u) => ({
                 key: u.codigo,
                 label: u.designacao,
@@ -210,79 +220,90 @@ const HorasVigilancia = () => {
       </Card>
 
       <div className="bg-card rounded-lg border mt-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Docente</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Horário</TableHead>
-              <TableHead>Hora Início</TableHead>
-              <TableHead>Hora Fim</TableHead>
-              <TableHead>UC</TableHead>
-              <TableHead>Sala</TableHead>
-              <TableHead>Estado</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoadingHorarioVigilantes ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-16" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-16" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-32" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-48" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-20" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-16" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
+        {!isDocente ? (
+          <div className="p-4">
+            <RestrictedAccessAlert section="os seus dados profissionais" />
+
+          </div>
+        )
+          : (
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Docente</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Horário</TableHead>
+                  <TableHead>Hora Início</TableHead>
+                  <TableHead>Hora Fim</TableHead>
+                  <TableHead>UC</TableHead>
+                  <TableHead>Sala</TableHead>
+                  <TableHead>Estado</TableHead>
                 </TableRow>
-              ))
-            ) : vigilancias.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={9}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  Nenhuma vigilância registada
-                </TableCell>
-              </TableRow>
-            ) : (
-              vigilancias.map((item, i) => (
-                <TableRow
-                  key={i}
-                  className={getTableBackgroundColor(item.estado)}
-                >
-                  <TableCell>{item.docente}</TableCell>
-                  <TableCell className="font-medium">
-                    {formatarData(item.dataprova)}
-                  </TableCell>
-                  <TableCell>{item.horario}</TableCell>
-                  <TableCell>{item.horaprova}</TableCell>
-                  <TableCell>{item.horatermino}</TableCell>
-                  <TableCell>{item.disciplina}</TableCell>
-                  <TableCell>{item.sala}</TableCell>
-                  <TableCell>{getStatusBadge(item.estado)}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoadingHorarioVigilantes ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Skeleton className="h-4 w-24" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-16" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-16" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-32" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-48" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-20" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-16" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-24" />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : vigilancias.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={9}
+                      className="text-center py-8 text-muted-foreground"
+                    >
+                      Nenhuma vigilância registada
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  vigilancias.map((item, i) => (
+                    <TableRow
+                      key={i}
+                      className={getTableBackgroundColor(item.estado)}
+                    >
+                      <TableCell>{item.docente}</TableCell>
+                      <TableCell className="font-medium">
+                        {formatarData(item.dataprova)}
+                      </TableCell>
+                      <TableCell>{item.horario}</TableCell>
+                      <TableCell>{item.horaprova}</TableCell>
+                      <TableCell>{item.horatermino}</TableCell>
+                      <TableCell>{item.disciplina}</TableCell>
+                      <TableCell>{item.sala}</TableCell>
+                      <TableCell>{getStatusBadge(item.estado)}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )
+        }
+
       </div>
 
       <div className="flex items-center justify-between mt-4">

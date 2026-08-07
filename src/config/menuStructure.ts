@@ -258,7 +258,7 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Sem inscrição em curso",
+          title: "Sem confirmação em curso",
           url: "/inscricoes/sem-curso",
           permission: [
             PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla,
@@ -715,7 +715,7 @@ export const academicStructure: MenuStructure = {
           title: "Lançamento do programa da UC",
           url: "/docente/programa",
           permission: [
-            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
+            PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC.sigla,
           ],
         },
         {
@@ -1057,6 +1057,11 @@ export const finaceStructure: MenuStructure = {
           permission: [PermissionTypeDetails.FACTURAS.sigla],
         },
         {
+          title: "Conciliação de Negociação de Divida",
+          url: "/financas/negociacao-conciliacao",
+          permission: [],
+        },
+        {
           title: "Serviços e Emolumentos",
           url: "/financas/servicos-emolumentos",
           permission: [PermissionTypeDetails.SERVICOS_PRECARIOS.sigla],
@@ -1103,7 +1108,7 @@ export const finaceStructure: MenuStructure = {
         url: "/financas/contratos-instituicao",
         permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
       },
-    
+
       {
         title: "Rel. Pagamentos Instituições",
         icon: BarChart3,
