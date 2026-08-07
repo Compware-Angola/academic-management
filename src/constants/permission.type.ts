@@ -294,6 +294,8 @@ export enum PermissionType {
 
   ANULAR_PAGAMENTO = "ANULAR_PAGAMENTO",
   ANULAR_MULTA = "ANULAR_MULTA",
+  LISTAR_CONCILIACAO_DIVIDA = "LISTAR_CONCILIACAO_DIVIDA",
+  LISTAR_APROVACAO_CONCILIACAO_DIVIDA = "LISTAR_APROVACAO_CONCILIACAO_DIVIDA",
 }
 
 export const PermissionTypeDetails = {
@@ -1386,7 +1388,10 @@ export const PermissionTypeDetails = {
     designacao: "Visualizar Horário Por Docente",
     sigla: "pg_mgh_vhpd",
   },
-  POST_GRADUACAO_HORAS_DE_VIGILANCIA: { designacao: "Horas De Vigilancia", sigla: "pg_mgd_hv" },
+  POST_GRADUACAO_HORAS_DE_VIGILANCIA: {
+    designacao: "Horas De Vigilancia",
+    sigla: "pg_mgd_hv",
+  },
 
   POST_GRADUACAO_DOCENTE_LANCAMENTO_PROGRAMA_UC: {
     designacao: "Docente lançamento do programa da UC",
@@ -1413,10 +1418,14 @@ export const PermissionTypeDetails = {
     designacao: "Histórico de Movimentações",
     sigla: "mfe_hst_mov",
   },
-
-
-
-
+  LISTAR_CONCILIACAO_DIVIDA: {
+    designacao: "Conciliacão de Divida",
+    sigla: "conc_div",
+  },
+  LISTAR_APROVACAO_CONCILIACAO_DIVIDA: {
+    designacao: "Aprovação Conciliacão de Divida",
+    sigla: "aprov_conc_div",
+  },
 } as const;
 
 export type PermissionDetail = {

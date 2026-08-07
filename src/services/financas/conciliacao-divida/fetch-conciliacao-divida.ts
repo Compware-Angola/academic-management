@@ -320,36 +320,16 @@ export const getConciliacaoDividas = async (
 
 export interface ConciliationInvoiceItem {
   codigo: number;
-  codigoProduto: number;
-  codigoFactura: number;
-
+  descricao: string;
   quantidade: number;
-  preco: number;
-  total: number;
-
-  descricao: string | null;
-  mes: string | null;
-
-  taxaIva: number;
-  valorIva: number;
-  retencao: number;
-  incidencia: number;
-  valorDesconto: number;
-  descontoProduto: number;
-  multa: number;
-
-  mesTempId: number | null;
-  codigoAnoLectivo: number | null;
-
-  valorPago: number;
-  valorATransportar: number;
-
-  estado: number;
+  preco_unitario: number;
+  valor_total: number;
+  mes_designacao: string | null;
 }
 
 export interface ConciliationInvoice {
   codigo: number;
-  descricao: string;
+  descricao: string | null;
   referencia: string;
   estado: number;
   totalPreco: number;
@@ -383,161 +363,12 @@ export interface ConciliationDetails {
   estudante: ConciliationStudent;
 }
 
-interface RawConciliationInvoiceItem {
-  codigo: number;
-  CodigoProduto: number;
-  CodigoFactura: number;
-
-  quantidade: number;
-  preco: number;
-  total: number;
-
-  obs: string | null;
-  mes: string | null;
-
-  taxaIva: number;
-  valorIva: number;
-  retencao: number;
-  incidencia: number;
-  valorDesconto: number;
-  descontoProduto: number;
-  multa: number;
-
-  mesTempId: number | null;
-  codigoAnoLectivo: number | null;
-
-  valorPago: number;
-  valorATransportar: number;
-
-  estado: number;
-
-  [key: string]: unknown;
-}
-
-interface RawConciliationInvoice {
-  codigo: number;
-  descricao: string | null;
-  referencia: string;
-  estado: number;
-  totalPreco: number;
-  valorApagar: number;
-  data: string;
-  anoLectivo?: number;
-
-  itens: RawConciliationInvoiceItem[];
-
-  [key: string]: unknown;
-}
-
-interface RawConciliationStudent {
-  codigoMatricula?: number | null;
-  nome?: string | null;
-  codigoCurso?: number | null;
-  curso?: string | null;
-  faculdade?: string | null;
-}
-
-interface RawConciliationDetails {
-  id: number;
-  status: ConciliacaoDividaStatus;
-  descricaoCriacao: string | null;
-  descricaoValidacao: string | null;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: number;
-  validatedBy: number | null;
-  validatedAt: string | null;
-
-  facturaOriginal: RawConciliationInvoice;
-  facturaPropostaAlteracao: RawConciliationInvoice;
-
-  estudante?: RawConciliationStudent | null;
-}
-
-function mapItem(raw: RawConciliationInvoiceItem): ConciliationInvoiceItem {
-  return {
-    codigo: raw.codigo,
-    codigoProduto: raw.CodigoProduto,
-    codigoFactura: raw.CodigoFactura,
-
-    quantidade: raw.quantidade,
-    preco: raw.preco,
-    total: raw.total,
-
-    descricao: raw.obs,
-    mes: raw.mes,
-
-    taxaIva: raw.taxaIva,
-    valorIva: raw.valorIva,
-    retencao: raw.retencao,
-    incidencia: raw.incidencia,
-    valorDesconto: raw.valorDesconto,
-    descontoProduto: raw.descontoProduto,
-    multa: raw.multa,
-
-    mesTempId: raw.mesTempId,
-    codigoAnoLectivo: raw.codigoAnoLectivo,
-
-    valorPago: raw.valorPago,
-    valorATransportar: raw.valorATransportar,
-
-    estado: raw.estado,
-  };
-}
-
-function mapInvoice(raw: RawConciliationInvoice): ConciliationInvoice {
-  return {
-    codigo: raw.codigo,
-    descricao: raw.descricao ?? "",
-    referencia: raw.referencia,
-    estado: raw.estado,
-    totalPreco: raw.totalPreco,
-    valorApagar: raw.valorApagar,
-    data: raw.data,
-    anoLectivo: raw.anoLectivo,
-    itens: (raw.itens ?? []).map(mapItem),
-  };
-}
-
-function mapStudent(
-  raw: RawConciliationStudent | null | undefined,
-): ConciliationStudent {
-  return {
-    codigoMatricula: raw?.codigoMatricula ?? null,
-    nome: raw?.nome ?? null,
-    codigoCurso: raw?.codigoCurso ?? null,
-    curso: raw?.curso ?? null,
-    faculdade: raw?.faculdade ?? null,
-  };
-}
-
-function mapConciliationDetails(
-  raw: RawConciliationDetails,
-): ConciliationDetails {
-  return {
-    id: raw.id,
-    status: raw.status,
-    descricaoCriacao: raw.descricaoCriacao ?? "",
-    descricaoValidacao: raw.descricaoValidacao,
-    createdAt: raw.createdAt,
-    updatedAt: raw.updatedAt,
-    createdBy: raw.createdBy,
-    validatedBy: raw.validatedBy,
-    validatedAt: raw.validatedAt,
-
-    facturaOriginal: mapInvoice(raw.facturaOriginal),
-    facturaPropostaAlteracao: mapInvoice(raw.facturaPropostaAlteracao),
-
-    estudante: mapStudent(raw.estudante),
-  };
-}
-
 export const getConciliationDetails = async (
   id: number,
 ): Promise<ConciliationDetails> => {
-  const { data } = await axiosNestFinance.get<RawConciliationDetails>(
+  const { data } = await axiosNestFinance.get<ConciliationDetails>(
     `/conciliacao-dividas/${id}`,
   );
 
-  return mapConciliationDetails(data);
+  return data;
 };

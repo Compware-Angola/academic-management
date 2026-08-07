@@ -1440,7 +1440,15 @@ const App = () => {
                   />
                   <Route
                     path="/financas/negociacao-conciliacao"
-                    element={<NegociacaoDividaConciliacao />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla!,
+                        ]}
+                      >
+                        <NegociacaoDividaConciliacao />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/financas/conciliacao-divida/:id"

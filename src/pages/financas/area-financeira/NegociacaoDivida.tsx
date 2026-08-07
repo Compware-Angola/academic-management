@@ -56,6 +56,11 @@ import { NegociacaoDividaModal } from "./components/NegociacaoDividaModal";
 import { NegociacaoItem } from "@/services/financas/area-financeira/fetch-negociacao-dividas.service";
 import { Input } from "@/components/ui/input";
 import { NegociacaoFacturasModal } from "./components/NegociacaoFacturasModal";
+import { HasPermission } from "@/components/common/HasPermission";
+import {
+  PermissionType,
+  PermissionTypeDetails,
+} from "@/constants/permission.type";
 
 export default function NegociacaoDivida() {
   //Options
@@ -464,15 +469,24 @@ export default function NegociacaoDivida() {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          onClick={() =>
-                            navigate(`/financas/conciliacao-divida/${item.id}`)
+                        <HasPermission
+                          permission={
+                            PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
+                              .sigla
                           }
                         >
-                          <Percent />
-                        </Button>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() =>
+                              navigate(
+                                `/financas/conciliacao-divida/${item.id}`,
+                              )
+                            }
+                          >
+                            <Percent />
+                          </Button>
+                        </HasPermission>
                       </TableCell>
                     </TableRow>
                   ))}
