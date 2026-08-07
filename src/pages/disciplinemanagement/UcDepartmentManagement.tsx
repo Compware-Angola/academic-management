@@ -50,6 +50,8 @@ import { CreateUcModal } from "./components/CreateUcModal";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { Link2 } from "lucide-react";
+import { VincularCursoModal } from "./components/VincularCursoModal";
 
 interface UnidadeCurricular {
   id: number;
@@ -71,6 +73,10 @@ export default function UcDepartmentManagement() {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [ucParaVincular, setUcParaVincular] = useState<{
+    codigo_grade: number;
+    unidade_curricular: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     departamento: "",
@@ -240,7 +246,7 @@ export default function UcDepartmentManagement() {
                 <TableHead>Ano Curricular</TableHead>
                 <TableHead>Semestre</TableHead>
 
-                {/* <TableHead className="text-right">Ações</TableHead> */}
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -256,6 +262,21 @@ export default function UcDepartmentManagement() {
                   <TableCell>{uc.ano_curricular}</TableCell>
 
                   <TableCell>{uc.semestre}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setUcParaVincular({
+                          codigo_grade: uc.codigo_grade,
+                          unidade_curricular: uc.unidade_curricular,
+                        })
+                      }
+                    >
+                      <Link2 className="h-4 w-4 mr-2" />
+                      Vincular
+                    </Button>
+                  </TableCell>
 
                   {/* <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -336,6 +357,14 @@ export default function UcDepartmentManagement() {
         </div>
       )}
       <CreateUcModal open={openModal} onClose={() => setOpenModal(false)} />
+      <VincularCursoModal
+        open={!!ucParaVincular}
+        onClose={() => setUcParaVincular(null)}
+        uc={ucParaVincular}
+        onSubmit={(uc, vinculos) => {
+          console.log("vincular", uc, vinculos);
+        }}
+      />
     </div>
   );
 }

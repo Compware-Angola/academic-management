@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -9,28 +10,20 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
-import { FormSelect } from "@/components/common/FormSelect";
-
-import { useCursos } from "@/hooks/use-cursos";
-import { useQueryDepartamento } from "@/hooks/depatamento/use-query-depardamento";
-import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
-import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
-import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
-import { useMutationCreateUcDepartment } from "@/hooks/depatamento/use-mutation-create-uc-department";
-import { AuthStorage } from "@/util/auth-storage";
 import { Form } from "@/components/ui/form";
 import { FormSelectRHF } from "@/components/common/FormSelectRHF";
-import { Curso } from "@/services/fetch-course";
+
+import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useMutationCreateUcDepartment } from "@/hooks/depatamento/use-mutation-create-uc-department";
+
 import { Classes } from "@/services/classes/class-filter-by-curso";
-import { Discipline } from "@/services/study_plan/fect-discipline.serice";
-import { AnoAcademico } from "@/services/fetch-anos-academico";
-import { Semestre } from "@/services/study_plan/semestre/fecth-semestres";
-import { Departamento } from "@/services/departamento/fetch-departamento";
-import { useAuth } from "@/hooks/use-auth";
+
 import { CourseCommandSelectRHF } from "@/components/common/global-selects/CourseCommandSelectRHF";
-import { DisciplineCommandSelectRHF } from "@/components/common/global-selects/DisciplineCommandSelectRHF";
 import { DepartamentoCommandSelectRHF } from "@/components/common/global-selects/DepartamentoCommandSelectRHF";
+import {
+  DisciplinaMultiSelectPicker,
+  DisciplinaSelected,
+} from "./DisciplinaMultiSelectPicker";
 
 interface Props {
   open: boolean;
@@ -38,33 +31,23 @@ interface Props {
 }
 
 interface FormValues {
-  codigo_disciplina: string;
-  codigo_ano_lectivo: string;
-  codigo_semestre: string;
-  codigo_classe: string;
   codigo_curso: string;
+  codigo_classe: string;
   codigo_departamento: string;
 }
 
 export function CreateUcModal({ open, onClose }: Props) {
-  const {
-    user: {
-      user: { pk_utilizador },
-    },
-  } = useAuth();
   const form = useForm<FormValues>({
     mode: "onSubmit",
   });
+
+  const [disciplinas, setDisciplinas] = useState<DisciplinaSelected[]>([]);
 
   const mutation = useMutationCreateUcDepartment();
 
   // =======================
   // QUERIES
   // =======================
-
-  const { data: semestres = [], isLoading: isLoadingSemestres } =
-    useQuerySemestres();
-  const { data: anos = [], isLoading: isLoadingAnos } = useQueryAnoAcademico();
 
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: form.watch("codigo_curso") });
@@ -73,103 +56,58 @@ export function CreateUcModal({ open, onClose }: Props) {
   // SUBMIT
   // =======================
   const onSubmit = (data: FormValues) => {
+    if (disciplinas.length === 0) return;
+
     mutation.mutate(
       {
-        cursos: [{ codigoCurso: Number(data.codigo_curso) }],
-
-        codigoDisciplina: Number(data.codigo_disciplina),
-        codigoAnoLectivo: Number(data.codigo_ano_lectivo),
-        codigoSemestre: Number(data.codigo_semestre),
-        codigoClasse: Number(data.codigo_classe),
         codigoDepartamento: Number(data.codigo_departamento),
-        codigoUtilizador: pk_utilizador,
+        codigoClasse: 999,
+        disciplinas: disciplinas.map((d) => ({ codigoDisciplina: d.id })),
       },
       {
         onSuccess: () => {
           form.reset();
+          setDisciplinas([]);
           onClose();
         },
       },
     );
   };
 
+  const handleClose = () => {
+    form.reset();
+    setDisciplinas([]);
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="max-w-4xl!">
         <DialogHeader>
           <DialogTitle>Cadastrar Nova UC</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-            <CourseCommandSelectRHF<FormValues>
-              control={form.control}
-              name="codigo_curso"
-            />
-
-            <FormSelectRHF<FormValues, Classes>
-              control={form.control}
-              name="codigo_classe"
-              label="Ano Curricular"
-              options={classes}
-              disabled={!form.watch("codigo_curso")}
-              loading={isLoadingClasses}
-              map={(c) => ({
-                key: String(c.codigo),
-                label: c.designacao,
-                value: String(c.codigo),
-              })}
-            />
-
-            <DisciplineCommandSelectRHF<FormValues>
-              control={form.control}
-              name="codigo_disciplina"
-            />
-
-            <FormSelectRHF<FormValues, AnoAcademico>
-              control={form.control}
-              name="codigo_ano_lectivo"
-              label="Ano Letivo"
-              options={anos}
-              loading={isLoadingAnos}
-              map={(a) => ({
-                key: String(a.codigo),
-                label: a.designacao,
-                value: String(a.codigo),
-              })}
-            />
-
-            <FormSelectRHF<FormValues, Semestre>
-              control={form.control}
-              name="codigo_semestre"
-              label="Semestre"
-              options={semestres}
-              loading={isLoadingSemestres}
-              map={(s) => ({
-                key: String(s.codigo),
-                label: s.designacao,
-                value: String(s.codigo),
-              })}
-            />
-
             <DepartamentoCommandSelectRHF<FormValues>
               control={form.control}
               name="codigo_departamento"
             />
 
+            <DisciplinaMultiSelectPicker
+              values={disciplinas}
+              onChange={setDisciplinas}
+            />
+
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  form.reset();
-                  onClose();
-                }}
-              >
+              <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
 
-              <Button type="submit" disabled={mutation.isPending}>
+              <Button
+                type="submit"
+                disabled={mutation.isPending || disciplinas.length === 0}
+              >
                 {mutation.isPending ? "Salvando..." : "Salvar UC"}
               </Button>
             </DialogFooter>
