@@ -9,6 +9,19 @@ export interface FetchEstatisticaDeEstudantesAprovadosEReprovadosParams {
   estadoAprovacao?: number;
   page?: number;
 }
+
+export interface EstatisticaDeEstudante {
+  matricula: number;
+  nome: string;
+  curso: string;
+  genero: string;
+  estadoMatricula: string;
+  cor: string;
+  anoLectivo: string;
+  classe: number;
+  estadoAprovacao: string;
+}
+
 export function fetchEstatisticaDeEstudantesAprovadosEReprovados({
   curso,
   genero,
@@ -19,7 +32,7 @@ export function fetchEstatisticaDeEstudantesAprovadosEReprovados({
   estadoAprovacao,
   page,
 }: FetchEstatisticaDeEstudantesAprovadosEReprovadosParams) {
-  return axiosNestGa.get("/enrollment/estatisticas", {
+  return axiosNestGa.get<EstatisticaDeEstudante[]>("/enrollment/estatisticas", {
     params: {
       curso,
       genero,
@@ -31,7 +44,7 @@ export function fetchEstatisticaDeEstudantesAprovadosEReprovados({
       limit:10, // pesquisa sempre de 10 em 10 pois essa query é muito pesada
       page,
     },
-  });
+  }).then((response) => response.data);
 }
 export interface EstadoMatriculaDropdown {
   codigo: number;
@@ -41,4 +54,3 @@ export async function estadoMatriculaDropdown() {
   const data = await axiosNestGa.get<EstadoMatriculaDropdown[]>("/dropdown-filters/matricula/estado");
   return data.data;
 }
-

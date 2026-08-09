@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { toast } from "sonner";
+import { useQueryGradeCurricularDropDown } from "@/hooks/discplina/use-query-grade-curricular-dropdown";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Roles {
@@ -125,11 +126,13 @@ export default function LaunchNotes() {
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: formData.classes,
-      curso: formData.curso,
-      semestre: formData.semestre,
+    useQueryGradeCurricularDropDown({
+      curso: parseFilter(formData.curso),
+      semestre: parseFilter(formData.semestre),
+      classe: parseFilter(formData.classes),
+      anoLectivo: parseFilter(formData.anoLetivo),
     });
+
   // ─── Auth & roles ─────────────────────────────────────────────────────────
   const { user: userData } = useAuth();
   const roles = userData?.roles as Roles | undefined;
@@ -181,14 +184,14 @@ export default function LaunchNotes() {
 
       const filteredClasses = allowedClassIds?.length
         ? classes.filter((c) =>
-            allowedClassIds?.includes(c?.codigo?.toString()),
-          )
+          allowedClassIds?.includes(c?.codigo?.toString()),
+        )
         : classes;
 
       const filteredUnidadesCurriculares = allowedGradeIds?.length
         ? unidadesCurriculares.filter((g) =>
-            allowedGradeIds?.includes(g?.pk?.toString()),
-          )
+          allowedGradeIds?.includes(g?.pk?.toString()),
+        )
         : unidadesCurriculares;
 
       return {
@@ -1312,9 +1315,8 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${
-        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
-      }. Contacte a administração.`,
+      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+        }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",
