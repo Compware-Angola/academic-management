@@ -54,7 +54,7 @@ const InscricaoSemUc = () => {
     limit,
     page,
   });
-
+  console.log(filters);
   const canLoadUcs =
     !!filters.anoLectivo && !!filters.curso && !!filters.semestre;
   const students = studentsResponse?.data ?? [];
