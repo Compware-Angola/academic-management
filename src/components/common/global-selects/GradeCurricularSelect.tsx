@@ -10,6 +10,7 @@ interface GradeCurricularSelectProps {
   classe?: number;
   anoLectivo?: number;
   enabledDefaultSelectItem?: boolean;
+  enabled?: boolean;
   disabled?: boolean;
 }
 
@@ -21,15 +22,19 @@ const GradeCurricularSelect = ({
   classe,
   anoLectivo,
   enabledDefaultSelectItem,
+  enabled,
   disabled,
 }: GradeCurricularSelectProps) => {
   const id = useId();
-  const { data, isLoading } = useQueryGradeCurricularDropDown({
-    curso,
-    semestre,
-    classe,
-    anoLectivo,
-  });
+  const { data, isLoading } = useQueryGradeCurricularDropDown(
+    {
+      curso,
+      semestre,
+      classe,
+      anoLectivo,
+    },
+    { enabled },
+  );
 
   const gradeCurricular = data ?? [];
   const defaultSelectItem = enabledDefaultSelectItem
