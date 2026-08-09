@@ -31,6 +31,7 @@ import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurri
 import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 const GestaoAfectacaoPorUC = () => {
   const unidadeCurricularKey = useId();
@@ -47,6 +48,8 @@ const GestaoAfectacaoPorUC = () => {
     tipoCandidaturaId: "",
   });
 
+  const isLicenciatura = Number(filters.tipoCandidaturaId) === 1;
+
   const { data: afectacoesResponse, isLoading } =
     useQueryGestaoAfectacaoDocentes({
       anoLectivo: parseFilter(filters.anoLectivo),
@@ -59,12 +62,12 @@ const GestaoAfectacaoPorUC = () => {
       page,
     });
 
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe: filters.anoCurricular == "all" ? null : filters.anoCurricular,
-    });
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     curso: filters.curso,
+  //     semestre: filters.semestre,
+  //     classe: filters.anoCurricular == "all" ? null : filters.anoCurricular,
+  //   });
   const updateAfectacaoStatus = (codigo: number, status: boolean) => {
     mutateAsync({
       codigo,
@@ -73,7 +76,7 @@ const GestaoAfectacaoPorUC = () => {
       },
     });
   };
-  const canLoadUcs = !!filters.curso && !!filters.semestre;
+  const canLoadUcs = !!filters.curso && (!isLicenciatura || !!filters.semestre);
   const afectacoes = afectacoesResponse?.data ?? [];
   const total = afectacoesResponse?.total;
   const totalPages = afectacoesResponse?.totalPages;
@@ -88,7 +91,17 @@ const GestaoAfectacaoPorUC = () => {
             <div className="space-y-2">
               <TipoCandidaturaSelect
                 value={filters.tipoCandidaturaId}
-                onChangeValue={(v) => setFilters({ ...filters, tipoCandidaturaId: v })}
+                onChangeValue={(v) =>
+                  setFilters({
+                    ...filters,
+                    tipoCandidaturaId: v,
+                    anoLectivo: "",
+                    semestre: "",
+                    curso: "",
+                    anoCurricular: "all",
+                    unidadeCurricular: "all",
+                  })
+                }
               />
             </div>
 
@@ -104,26 +117,61 @@ const GestaoAfectacaoPorUC = () => {
               />
             </div>
             {
-              Number(filters.tipoCandidaturaId) === 1 ? (
+              isLicenciatura ? (
                 <SemestreSelect
                   value={filters.semestre}
-                  onChangeValue={(v) => setFilters({ ...filters, semestre: v })}
+                  onChangeValue={(v) =>
+                    setFilters({
+                      ...filters,
+                      semestre: v,
+                      unidadeCurricular: "all",
+                    })
+                  }
                 />
               ) : null
             }
             <CourseSelect
               value={filters.curso}
-              onChangeValue={(v) => setFilters({ ...filters, curso: v })}
+              params={{
+                tipoCandidaturaId: parseFilter(filters.tipoCandidaturaId),
+              }}
+              onChangeValue={(v) =>
+                setFilters({
+                  ...filters,
+                  curso: v,
+                  anoCurricular: "all",
+                  unidadeCurricular: "all",
+                })
+              }
             />
             <AnoCurricularSelect
               enableDefaultSelectItem
               value={filters.anoCurricular}
               onChangeValue={(v) =>
-                setFilters({ ...filters, anoCurricular: v })
+                setFilters({
+                  ...filters,
+                  anoCurricular: v,
+                  unidadeCurricular: "all",
+                })
               }
               curso={filters.curso}
             />
-            <div className="space-y-2">
+            <GradeCurricularSelect
+              enabledDefaultSelectItem
+              value={filters.unidadeCurricular}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
+              }
+              curso={parseFilter(filters.curso)}
+              semestre={
+                isLicenciatura ? parseFilter(filters.semestre) : undefined
+              }
+              classe={parseFilter(filters.anoCurricular)}
+              anoLectivo={parseFilter(filters.anoLectivo)}
+              enabled={canLoadUcs}
+              disabled={!canLoadUcs}
+            />
+            {/* <div className="space-y-2">
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
                 value={filters.unidadeCurricular}
@@ -137,7 +185,7 @@ const GestaoAfectacaoPorUC = () => {
                     placeholder={
                       !filters.curso
                         ? "Selecione curso"
-                        : !filters.semestre
+                        : isLicenciatura && !filters.semestre
                           ? "Selecione semestre"
                           : isLoadingUC
                             ? "Carregando UCs..."
@@ -157,7 +205,7 @@ const GestaoAfectacaoPorUC = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
