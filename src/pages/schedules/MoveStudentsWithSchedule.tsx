@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { parseFilter } from "@/util/parse-filter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 export  function MoveStudentsWithSchedule() {
   //Hooks
@@ -130,11 +131,11 @@ export  function MoveStudentsWithSchedule() {
     !!filters.anoCurricular &&
     !!filters.anoLetivo;
   !!filters.periodo;
-  const { data: unidadesCurriculares = [] } = useQueryDisciplinaWithFilter({
-    curso: filters.curso,
-    semestre: filters.semestre,
-    classe: filters.anoCurricular,
-  });
+  // const { data: unidadesCurriculares = [] } = useQueryDisciplinaWithFilter({
+  //   curso: filters.curso,
+  //   semestre: filters.semestre,
+  //   classe: filters.anoCurricular,
+  // });
 
   // === Consulta API ===
   const canLoadTurmas =
@@ -259,7 +260,21 @@ export  function MoveStudentsWithSchedule() {
               </Select>
 
               {/* Unidade Curricular */}
-              <Select
+              <GradeCurricularSelect
+                showLabel={false}
+                placeholder="Unidade Curricular"
+                value={filters.unidadeCurricular}
+                onChangeValue={(v) =>
+                  setFilters({ ...filters, unidadeCurricular: v })
+                }
+                curso={parseFilter(filters.curso)}
+                semestre={parseFilter(filters.semestre)}
+                classe={parseFilter(filters.anoCurricular)}
+                anoLectivo={parseFilter(filters.anoLetivo)}
+                enabled={canLoadUcs}
+                disabled={!canLoadUcs}
+              />
+              {/* <Select
                 value={filters.unidadeCurricular}
                 onValueChange={(v) =>
                   setFilters({ ...filters, unidadeCurricular: v })
@@ -276,7 +291,7 @@ export  function MoveStudentsWithSchedule() {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
           </CardContent>
         </Card>
