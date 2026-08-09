@@ -12,6 +12,9 @@ interface GradeCurricularSelectProps {
   enabledDefaultSelectItem?: boolean;
   enabled?: boolean;
   disabled?: boolean;
+  showLabel?: boolean;
+  label?: string;
+  placeholder?: string;
 }
 
 const GradeCurricularSelect = ({
@@ -24,6 +27,9 @@ const GradeCurricularSelect = ({
   enabledDefaultSelectItem,
   enabled,
   disabled,
+  showLabel = true,
+  label = "Unidade Curricular",
+  placeholder,
 }: GradeCurricularSelectProps) => {
   const id = useId();
   const { data, isLoading } = useQueryGradeCurricularDropDown(
@@ -51,7 +57,8 @@ const GradeCurricularSelect = ({
     <FormSelect
       disabled={disabled || isLoading}
       loading={isLoading}
-      label="Unidade Curricular"
+      label={showLabel ? label : undefined}
+      placeholder={placeholder}
       defaultSelectItem={defaultSelectItem}
       value={value}
       onChange={(v) => onChangeValue(v)}
