@@ -64,6 +64,10 @@ export function EstatisticaDeEstudantesAprovadosEReprovados() {
       anoLectivo: parseFilter(appliedFilters?.anoLectivo),
       curso: parseFilter(appliedFilters?.curso),
       genero: appliedFilters?.genero,
+      estadoMatricula: parseFilter(appliedFilters?.estadoMatricula),
+      anoCurricular: parseFilter(appliedFilters?.anoCurricular),
+      estadoAprovacao: parseFilter(appliedFilters?.estadoAprovacao),
+      page,
     },
     {
       enabled: !!appliedFilters,
@@ -78,9 +82,9 @@ export function EstatisticaDeEstudantesAprovadosEReprovados() {
     }
   }, [filters.curso]);
 
-  const students = [];
-  const total = 0;
-  const totalPages = 0;
+  const students = estatistica ?? [];
+  const total = students.length;
+  const totalPages = students.length < 10 ? page : page + 1;
   return (
     <>
       <Breadcrumb className="mb-4">
@@ -170,10 +174,13 @@ export function EstatisticaDeEstudantesAprovadosEReprovados() {
             />
             <Button
               onClick={() => {
+                setPage(1);
                 setAppliedFilters({
                   ...filters,
                   genero:
-                    filters.genero === "todos" || filters.genero === ""
+                    filters.genero === "todos" ||
+                    filters.genero === "all" ||
+                    filters.genero === ""
                       ? undefined
                       : filters.genero,
                   estadoAprovacao:
@@ -220,11 +227,19 @@ export function EstatisticaDeEstudantesAprovadosEReprovados() {
                   </TableHeader>
                   <TableBody>
                     {students.map((item) => (
-                      <TableRow key={item.codigo}>
-                        <TableCell>{item.codigo}</TableCell>
-                        <TableCell>{item.nomecompleto}</TableCell>
+                      <TableRow key={item.matricula}>
+                        <TableCell>{item.anoLectivo}</TableCell>
+                        <TableCell>{item.matricula}</TableCell>
+                        <TableCell>{item.nome}</TableCell>
                         <TableCell>{item.curso}</TableCell>
-                        <TableCell>{item.tipo}</TableCell>
+                        <TableCell>{item.genero}</TableCell>
+                        <TableCell>{item.classe}</TableCell>
+                        <TableCell>
+                          <span style={{ color: item.cor }}>
+                            {item.estadoMatricula}
+                          </span>
+                        </TableCell>
+                        <TableCell>{item.estadoAprovacao}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -249,7 +264,7 @@ export function EstatisticaDeEstudantesAprovadosEReprovados() {
                   </span>
                   <Button
                     variant="outline"
-                    disabled={page === totalPages}
+                    disabled={students.length < 10}
                     onClick={() => setPage((p) => p + 1)}
                   >
                     Próxima
