@@ -112,9 +112,26 @@ export async function getGradeCurricular2(
   return data;
 }
 
-export async function addUCToPlan(payload: AddUCToPlanPayload): Promise<any> {
+export interface AddUCsToPlanPayload {
+  codigosDisciplina: number[];
+  codigoAnoLectivo: number;
+  codigoCurso: number;
+  codigoClasse: number;
+  codigoSemestre?: number;
+}
+
+export interface AddUCsToPlanResponse {
+  message: string;
+  adicionadas: { codigoDisciplina: number; codigoGrade: number }[];
+  reativadas: { codigoDisciplina: number; codigoGrade: number }[];
+  falhas: { codigoDisciplina: number; motivo: string }[];
+}
+
+export async function addUCsToPlan(
+  payload: AddUCsToPlanPayload,
+): Promise<AddUCsToPlanResponse> {
   const response = await axiosNestGa.post(
-    `/discipline/plano-curricular`, // a tua rota exata
+    `/discipline/plano-curricular/lote`,
     payload,
   );
   return response.data;

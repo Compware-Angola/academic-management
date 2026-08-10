@@ -44,7 +44,7 @@ type FormCommandSelectProps<T> = {
   onBlur?: () => void;
 };
 
-function truncateLabel(label: string, maxLength = 45) {
+function truncateLabel(label: string, maxLength = 100) {
   if (label.length <= maxLength) return label;
   return `${label.slice(0, maxLength).trimEnd()}...`;
 }
