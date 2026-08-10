@@ -17,3 +17,17 @@ export async function updateComunicadoPortalImage(
 
   return response.data;
 }
+
+export type ComunicadoImageResponse = {
+  codigo: number;
+  sigla: "PORTAL_COMUNICADO";
+  filename: string;
+};
+
+export async function getComunicadoPortalImage(): Promise<ComunicadoImageResponse> {
+  const response = await axiosNestGa.get<ComunicadoImageResponse>(
+    "/solicitacoa/aviso/imagem/PORTAL_COMUNICADO",
+  );
+
+  return response.data;
+}

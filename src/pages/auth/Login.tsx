@@ -2,7 +2,18 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, User, Lock, LogIn, Users, BarChart2, FileCheck, CalendarDays, MessageSquare } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  User,
+  Lock,
+  LogIn,
+  Users,
+  BarChart2,
+  FileCheck,
+  CalendarDays,
+  MessageSquare,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,6 +34,8 @@ import { buildImageAssets } from "@/util/build-image-assets";
 import logo from "@/assets/logo_uma.png";
 import studentsBg from "@/assets/students-bg.jpg";
 import { LogoBackground } from "./components/logo-background";
+import { useGetFileUrl } from "@/hooks/upload/use-upload-single";
+import { useGetGAImage } from "@/hooks/acess/use-mutation-update-login-ga-image";
 
 const loginSchema = z.object({
   username: z
@@ -33,24 +46,69 @@ const loginSchema = z.object({
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
-
 const Login = () => {
   const { setTheme } = useTheme();
+
   const loginMutation = useMutationLogin();
   const { data: loginGaImage } = useQueryLoginGaImage();
+
   const [showPassword, setShowPassword] = useState(false);
   const [loginBackground, setLoginBackground] = useState(studentsBg);
+
+  const { data: gaImage, isLoading: isLoadingImage } = useGetGAImage();
+
+  const {
+    mutate: getFileUrl,
+    data: fileUrl,
+    isPending: isLoadingFileUrl,
+  } = useGetFileUrl();
+
+  // 1. Busca a URL do S3 usando o filename
+  useEffect(() => {
+    if (!gaImage?.filename) return;
+
+    getFileUrl({
+      key: gaImage.filename,
+    });
+  }, [gaImage?.filename, getFileUrl]);
+
+  // 2. Quando a URL do S3 estiver disponível, renderiza-a
+  useEffect(() => {
+    if (!fileUrl?.url) return;
+
+    let cancelled = false;
+
+    const image = new Image();
+
+    image.onload = () => {
+      if (!cancelled) {
+        setLoginBackground(fileUrl.url);
+      }
+    };
+
+    image.onerror = () => {
+      if (!cancelled) {
+        setLoginBackground(studentsBg);
+      }
+    };
+
+    image.src = fileUrl.url;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fileUrl?.url]);
 
   // Força modo light enquanto a página de login está montada
   useEffect(() => {
     setTheme("light");
-  }, []);
+  }, [setTheme]);
 
   useEffect(() => {
-    const imageUrl = buildImageAssets(loginGaImage?.filename);
+    const imageUrl = buildImageAssets(fileUrl?.url || loginGaImage?.filename);
 
     if (!imageUrl) {
-      setLoginBackground(studentsBg);
+      setLoginBackground(fileUrl?.url || studentsBg);
       return;
     }
 
@@ -104,8 +162,14 @@ const Login = () => {
           style={{ backgroundImage: `url(${loginBackground})` }}
           aria-hidden
         />
-        <div className="pointer-events-none absolute inset-0 bg-animated-red opacity-70 mix-blend-multiply" aria-hidden />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/20" aria-hidden />
+        <div
+          className="pointer-events-none absolute inset-0 bg-animated-red opacity-70 mix-blend-multiply"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-black/20"
+          aria-hidden
+        />
         <div className="pointer-events-none absolute -bottom-40 -right-20 h-[28rem] w-[28rem] rounded-full bg-brand-yellow/15 blur-3xl animate-float-slow [animation-delay:-6s]" />
 
         <div className="relative z-10 h-12" />
@@ -120,7 +184,8 @@ const Login = () => {
           </h1>
 
           <p className="max-w-md text-base text-white/85">
-            Gerencie turmas, docentes, pautas e actividades académicas numa plataforma centralizada.
+            Gerencie turmas, docentes, pautas e actividades académicas numa
+            plataforma centralizada.
           </p>
 
           <ul className="mt-8 space-y-3 text-sm text-white/90">
@@ -171,24 +236,18 @@ const Login = () => {
         <div className="w-full max-w-md space-y-8">
           {/* Logo Mobile (em cima) */}
           <div className="flex justify-center lg:hidden absolute top-4 left-1/2 -translate-x-1/2">
-            <img
-              src={logo}
-              alt="Metodista de Angola"
-              className="h-16 w-auto"
-            />
+            <img src={logo} alt="Metodista de Angola" className="h-16 w-auto" />
           </div>
 
           {/* Logo Desktop (normal) */}
           <div className="hidden lg:flex justify-center">
-            <img
-              src={logo}
-              alt="Metodista de Angola"
-              className="h-20 w-auto"
-            />
+            <img src={logo} alt="Metodista de Angola" className="h-20 w-auto" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Entrar na conta</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">
+              Entrar na conta
+            </h2>
             <p className="text-sm text-muted-foreground">
               Digite suas credenciais para acessar o sistema.
             </p>
@@ -241,7 +300,11 @@ const Login = () => {
                           onClick={() => setShowPassword((v) => !v)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </FormControl>
@@ -252,11 +315,15 @@ const Login = () => {
 
               <Button
                 type="submit"
-                disabled={form.formState.isSubmitting || loginMutation.isPending}
+                disabled={
+                  form.formState.isSubmitting || loginMutation.isPending
+                }
                 className="h-11 w-full bg-brand-red text-white hover:bg-brand-red/90 shadow-lg shadow-brand-red/30 transition-all hover:shadow-xl hover:shadow-brand-red/40 hover:-translate-y-0.5"
               >
                 <LogIn className="mr-2 h-4 w-4" />
-                {form.formState.isSubmitting || loginMutation.isPending ? "Entrando..." : "Entrar"}
+                {form.formState.isSubmitting || loginMutation.isPending
+                  ? "Entrando..."
+                  : "Entrar"}
               </Button>
             </form>
           </Form>
