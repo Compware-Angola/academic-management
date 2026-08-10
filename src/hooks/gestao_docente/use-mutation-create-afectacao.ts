@@ -15,6 +15,9 @@ export const useMutationCreateDocenteAfectacao = () => {
       queryClient.invalidateQueries({
         queryKey: ["gestao-docentes-afectacao"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["teachers-by-uc"],
+      });
     },
   });
 };
