@@ -2,13 +2,19 @@
 
 import { Loader2, CheckCircle } from "lucide-react";
 import Lottie from "lottie-react";
-
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { useActiveConfirmacao } from "@/hooks/students/use-query-students";
 import UnlockedLock from "@/assets/unlock.json";
-
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
+import { useState } from "react";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
+const TIPO_CANDIDATURA_POR_GRAU: Record<string, number> = {
+  Licenciatura: 1,
+  Mestrado: 2,
+  Doutoramento: 3,
+};
 export function AtivarConfirmacao({
   codigoMatricula,
   value = "ativar-confirmacao",
@@ -17,9 +23,12 @@ export function AtivarConfirmacao({
   value?: string;
 }) {
   const activeConfirmation = useActiveConfirmacao();
+  const { data: student, isLoading } = useStudentDetail(codigoMatricula);
+
+  const [anoLetivoId, setAnoLetivoId] = useState<number>(0);
 
   async function onSubmit() {
-    await activeConfirmation.mutateAsync({ codigoMatricula });
+    await activeConfirmation.mutateAsync({ codigoMatricula, anoLetivoId });
   }
 
   return (
@@ -38,6 +47,20 @@ export function AtivarConfirmacao({
           animationData={UnlockedLock}
           loop={true}
           style={{ width: 200, height: 200 }}
+        />
+      </div>
+      {/* Ano Letivo */}
+      <div className="space-y-2">
+        <AcademicYearsAvailableForOperationSelect
+          label="Ano Letivo"
+          value={anoLetivoId.toString()}
+          onChangeValue={(v) => {
+            setAnoLetivoId(Number(v));
+          }}
+          tipoCandidaturaId={
+            TIPO_CANDIDATURA_POR_GRAU[student?.grau ?? ""] ?? 1
+          }
+          onlyConfigurable={true}
         />
       </div>
 
