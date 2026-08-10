@@ -268,7 +268,8 @@ export default function ListarTopicos() {
     });
   };
 
-  const isSaving = createMutation.isPending || updateMutation.isPending;
+  const isSaving =
+    uploadMutation.isPending || createMutation.isPending || updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
 
   // EXPORT
