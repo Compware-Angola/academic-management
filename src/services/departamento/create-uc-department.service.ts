@@ -1,19 +1,22 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-export type CreateUcDepartmentPayload = {
-  cursos: {
-    codigoCurso: number;
-  }[];
-  codigoDisciplina: number;
-  codigoAnoLectivo: number;
-  codigoSemestre: number;
-  codigoClasse: number;
+export interface DisciplinaDepartamentoPayload {
   codigoDepartamento: number;
-  codigoUtilizador: number;
-};
+  codigoClasse: number;
+  disciplinas: {
+    codigoDisciplina: number;
+  }[];
+}
 
-export async function createUcDepartmentService(
-  payload: CreateUcDepartmentPayload,
-): Promise<void> {
-  await axiosNestGa.post("/discipline/departamento", payload);
+export interface DisciplinaDepartamentoResponse {
+  message: string;
+  [key: string]: unknown;
+}
+
+export async function createDisciplinasDepartamento(
+  payload: DisciplinaDepartamentoPayload,
+): Promise<DisciplinaDepartamentoResponse> {
+  const { data } = await axiosNestGa.post("/discipline/departamento", payload);
+
+  return data;
 }

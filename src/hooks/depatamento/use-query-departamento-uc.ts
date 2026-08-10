@@ -1,23 +1,23 @@
 import {
-  fetchDepartamentoUC,
-  GetDisciplineDepartmentPayload,
-  GetDisciplineDepartmentResponse,
+  GetDepartmentDisciplineParams,
+  GetDepartmentDisciplineResponse,
+  getDepartmentDisciplinesService,
 } from "@/services/departamento/fetch-departamento-uc";
 import { useQuery } from "@tanstack/react-query";
 
-export function useQueryDepartamentoUC(params: GetDisciplineDepartmentPayload) {
-  const { classe, departamento, semestre, limit, page } = params;
-  return useQuery<GetDisciplineDepartmentResponse, Error>({
-    queryKey: ["departamento-uc", classe, departamento, semestre, limit, page],
+export function useQueryDepartamentoUC(params: GetDepartmentDisciplineParams) {
+  const { departamento, search, page, limit } = params;
+
+  return useQuery<GetDepartmentDisciplineResponse, Error>({
+    queryKey: ["departamento-uc", departamento, search, page, limit],
     queryFn: () =>
-      fetchDepartamentoUC({
-        classe,
+      getDepartmentDisciplinesService({
         departamento,
-        semestre,
-        limit,
+        search,
         page,
+        limit,
       }),
-    enabled: !!departamento && !!semestre && !!classe,
+    enabled: !!departamento,
     staleTime: 5 * 60 * 1000,
   });
 }
