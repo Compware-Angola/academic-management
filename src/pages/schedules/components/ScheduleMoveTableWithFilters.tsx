@@ -29,6 +29,7 @@ import { SemestreSelect } from "@/components/common/global-selects/SemestreSelec
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import { SelectUnidadeCurricularWithFilter } from "@/components/common/global-selects/SelectUnidadeCurricularWithFilter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 import { Label } from "@/components/ui/label";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { parseFilter } from "@/util/parse-filter";
@@ -102,6 +103,11 @@ export const ScheduleMoveTableWithFilters = ({
     !!filters.unidadeCurricular &&
     !!periodo;
   !!filters.anoLetivo;
+  const canLoadUcs =
+    !!filters.anoLetivo &&
+    !!filters.semestre &&
+    !!filters.curso &&
+    !!filters.anoCurricular;
   const { data: turmasResponse, isLoading: loadingTurmas } =
     useQueryRegistrationBySchedule(
       {
@@ -130,7 +136,6 @@ export const ScheduleMoveTableWithFilters = ({
           <TipoCandidaturaSelect
             disabled
             value={filters.tipoCandidatura}
-            label=""
             placeholder="Tipo de Candidatura"
             onChangeValue={() => { }}
           />
@@ -166,7 +171,7 @@ export const ScheduleMoveTableWithFilters = ({
             onChangeValue={() => { }}
           />
 
-          <SelectUnidadeCurricularWithFilter
+          {/* <SelectUnidadeCurricularWithFilter
             onChangeValue={() => { }}
             value={filters.unidadeCurricular}
             filter={{
@@ -174,6 +179,17 @@ export const ScheduleMoveTableWithFilters = ({
               curso: filters.curso,
               semestre: filters.semestre,
             }}
+            disabled
+          /> */}
+          <GradeCurricularSelect
+            placeholder="Unidade Curricular"
+            value={filters.unidadeCurricular}
+            onChangeValue={() => { }}
+            curso={parseFilter(filters.curso)}
+            semestre={parseFilter(filters.semestre)}
+            classe={parseFilter(filters.anoCurricular)}
+            anoLectivo={parseFilter(filters.anoLetivo)}
+            enabled={canLoadUcs}
             disabled
           />
           <div className="space-y-2">

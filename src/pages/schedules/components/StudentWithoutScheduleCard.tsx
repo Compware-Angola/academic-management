@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SelectUnidadeCurricularWithFilter } from "@/components/common/global-selects/SelectUnidadeCurricularWithFilter";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 import {
   Select,
   SelectContent,
@@ -91,6 +92,11 @@ export const StudentWithoutScheduleCard = ({
   const totalPages = Math.ceil(total / limit);
 
   const canLoad =
+    !!filters.anoLetivo &&
+    !!filters.semestre &&
+    !!filters.curso &&
+    !!filters.anoCurricular;
+  const canLoadUcs =
     !!filters.anoLetivo &&
     !!filters.semestre &&
     !!filters.curso &&
@@ -188,7 +194,6 @@ export const StudentWithoutScheduleCard = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <TipoCandidaturaSelect
             value={filters.tipoCandidatura}
-            label=""
             placeholder="Tipo de Candidatura"
             onChangeValue={(v) => {
               onChangeCourse("");
@@ -238,7 +243,7 @@ export const StudentWithoutScheduleCard = ({
             curso={filters.curso}
             onChangeValue={(v) => setFilters({ ...filters, anoCurricular: v })}
           />
-          <SelectUnidadeCurricularWithFilter
+          {/* <SelectUnidadeCurricularWithFilter
             onChangeValue={(v) => {}}
             onSelectItem={(it) =>
               setFilters({
@@ -256,6 +261,29 @@ export const StudentWithoutScheduleCard = ({
             disabled={
               !filters.curso || !filters.semestre || !filters.anoCurricular
             }
+          /> */}
+          <GradeCurricularSelect
+            placeholder="Unidade Curricular"
+            value={filters.unidadeCurricular}
+            onChangeValue={(v) =>
+              setFilters({
+                ...filters,
+                unidadeCurricular: v,
+              })
+            }
+            onSelectItem={(it) =>
+              setFilters({
+                ...filters,
+                unidadeCurricular: it?.pk.toString() ?? "",
+                searchTerm: it?.descricao ?? "",
+              })
+            }
+            curso={parseFilter(filters.curso)}
+            semestre={parseFilter(filters.semestre)}
+            classe={parseFilter(filters.anoCurricular)}
+            anoLectivo={parseFilter(filters.anoLetivo)}
+            enabled={canLoadUcs}
+            disabled={!canLoadUcs}
           />
         </div>
 
