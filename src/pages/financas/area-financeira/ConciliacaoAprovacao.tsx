@@ -88,7 +88,7 @@ function OriginalItemCard({ item }: { item: ConciliationInvoiceItem }) {
   return (
     <div className="rounded-lg border border-border bg-background p-3 space-y-2">
       <p className="text-sm font-medium">
-        {item.descricao}
+        {item.descricao.replace(/propina/gi, "Mensalidade")}
         {item.mes_designacao && (
           <span className="ml-1 text-xs text-muted-foreground">
             ({item.mes_designacao})
@@ -131,7 +131,7 @@ function ConciliatedItemCard({
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium">
-          {proposta.descricao}
+          {proposta.descricao.replace(/propina/gi, "Mensalidade")}
           {proposta.mes_designacao && (
             <span className="ml-1 text-xs text-muted-foreground">
               ({proposta.mes_designacao})

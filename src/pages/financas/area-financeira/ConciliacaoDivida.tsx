@@ -464,7 +464,10 @@ export function ConciliacaoDivida() {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-medium">
-                              {item.descricao}
+                              {item.descricao.replace(
+                                /propina/gi,
+                                "Mensalidade",
+                              )}
                             </p>
                             <div className="flex items-center gap-1.5 shrink-0">
                               {item.mes_designacao && (
