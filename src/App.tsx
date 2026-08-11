@@ -200,6 +200,7 @@ import { ConciliacaoDivida } from "./pages/financas/area-financeira/ConciliacaoD
 import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/ConciliacaoAprovacao";
 import NegociacaoDividaConciliacao from "./pages/financas/area-financeira/NegociacaoDividaConciliacao";
 import PautaExame from "./pages/access_exam/PautaExame";
+import Configuracoes from "./pages/configuracoes/Configuracoes";
 
 const App = () => {
   return (
@@ -620,10 +621,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route
-                  path="/exame/lista-candidatos"
-                  element={<CandidateList />}
-                /> */}
+                  <Route
+                    path="/configuracoes/documentos"
+                    element={<Configuracoes />}
+                  />
                   <Route
                     path="/avaliacoes/notas"
                     element={

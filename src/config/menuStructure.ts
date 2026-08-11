@@ -15,6 +15,7 @@ import {
   BookUser,
   Files,
   BarChart3,
+  Settings,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -1241,4 +1242,24 @@ export const documentStructure: MenuStructure = {
       permission: [],
     },
   ],
+
 };
+export const configSystemStructure: MenuStructure = {
+  items: [
+    {
+      title: "Configurações do sistema",
+      url: "/configuracoes",
+      icon: Settings,
+      items: [
+        {
+          title: "Documentos & Assinaturas",
+          url: "/configuracoes/documentos",
+          permission: [],
+        },
+
+      ],
+      permission: [],
+    },
+  ]
+
+}
