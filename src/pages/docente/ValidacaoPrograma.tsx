@@ -48,7 +48,7 @@ const ValidacaoPrograma = () => {
           </TabsTrigger>
           <TabsTrigger value="sem-uc" className="gap-2">
             <CircleX className="h-4 w-4" />
-            Filtrar sem uc com programa
+            Filtrar uc sem programa
           </TabsTrigger>
         </TabsList>
         <TabsContent value="com-uc">

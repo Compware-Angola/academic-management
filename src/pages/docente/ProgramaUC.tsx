@@ -22,7 +22,7 @@ import {
 import { useQueryDocenteListProgramaUC } from "@/hooks/docentes/use-query-docente-programa-uc";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
-import { File, Loader2, Paperclip, Trash2 } from "lucide-react";
+import { File, Loader2, Trash2 } from "lucide-react";
 import { useId, useState } from "react";
 import {
   Breadcrumb,
@@ -39,7 +39,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useMutationUpdateProgramaUCVisibilidade } from "@/hooks/docentes/use-mutation-docente-programa-visilidade";
 import { DownloadFileButton } from "@/components/common/DownloadFile";
-
 import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
 import RestrictedAccessAlert from "@/components/common/RestrictedAccessAlert";
 
@@ -50,14 +49,12 @@ export default function DocenteLancamentoProgramaUC() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+
   const { user: userData } = useAuth();
-  const { data: teacherInfoData } = useQueryTeacherProfile(
-    userData?.user?.pk_utilizador,
-  );
+  const { data: teacherInfoData } = useQueryTeacherProfile();
   const { mutateAsync, isPending } = useMutationUpdateProgramaUCVisibilidade();
 
   const isDocente = userDate?.roles?.docente ?? false;
-
   const docenteId = teacherInfoData?.codigo_docente;
 
   const [filters, setFilters] = useState({
@@ -69,19 +66,21 @@ export default function DocenteLancamentoProgramaUC() {
     estado: "",
   });
 
-  const closeModal = () => {
-    setIsOpenModal(false);
-  };
-  const openModal = () => {
-    setIsOpenModal(true);
-  };
+  const closeModal = () => setIsOpenModal(false);
+  const openModal = () => setIsOpenModal(true);
+
   const canLoadProgramaUC =
     !!parseFilter(filters.anoCurricular) &&
     !!parseFilter(filters.anoLectivo) &&
     !!parseFilter(filters.curso) &&
     !!parseFilter(filters.semestre) &&
     !!parseFilter(filters.unidadeCurricular);
-  const { data: programaUcResponse, isLoading } = useQueryDocenteListProgramaUC(
+
+  const {
+    data: programaUcResponse,
+    isLoading,
+    refetch,
+  } = useQueryDocenteListProgramaUC(
     {
       anoCurricular: parseFilter(filters.anoCurricular),
       anoLectivo: parseFilter(filters.anoLectivo),
@@ -91,28 +90,23 @@ export default function DocenteLancamentoProgramaUC() {
       page,
       limit,
     },
-    {
-      enabled: canLoadProgramaUC,
-    },
+    { enabled: canLoadProgramaUC },
   );
 
   const updateFilter = (key: string, value: string) => {
     setFilters((prev) => {
       const newFilters = { ...prev, [key]: value };
-
       if (["curso", "semestre", "anoCurricular"].includes(key)) {
         newFilters.unidadeCurricular = "";
       }
-
       return newFilters;
     });
   };
+
   const updateProgramaUCVisilidade = (programaId: number, status: number) => {
     mutateAsync({
       programaUcId: programaId,
-      payload: {
-        estado: status,
-      },
+      payload: { estado: status },
     });
   };
 
@@ -130,7 +124,6 @@ export default function DocenteLancamentoProgramaUC() {
             Aprovado
           </Badge>
         );
-
       case "Regeitado":
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
@@ -141,9 +134,11 @@ export default function DocenteLancamentoProgramaUC() {
         return <Badge>{status}</Badge>;
     }
   };
+
   const programas = programaUcResponse?.data ?? [];
   const total = programaUcResponse?.total;
   const totalPages = programaUcResponse?.totalPages;
+
   return (
     <>
       <div className="min-h-screen bg-background p-6">
@@ -162,11 +157,12 @@ export default function DocenteLancamentoProgramaUC() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
         <div className="flex justify-between">
           <h1 className="text-3xl font-bold mb-6 text-foreground">
             Lançamento de Programa UC
           </h1>
-          <Button size="sm" onClick={() => openModal()}>
+          <Button size="sm" onClick={openModal}>
             <File className="h-4 w-4 mr-2" />
             Novo Programa
           </Button>
@@ -218,9 +214,6 @@ export default function DocenteLancamentoProgramaUC() {
           </CardContent>
         </Card>
 
-
-
-
         <Card>
           <CardHeader>
             <CardTitle>Lista de Programas com UC</CardTitle>
@@ -228,14 +221,15 @@ export default function DocenteLancamentoProgramaUC() {
           {!isDocente ? (
             <div className="p-4">
               <RestrictedAccessAlert section="os seus dados profissionais" />
-
             </div>
           ) : (
             <CardContent>
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16">
                   <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-                  <p className="text-muted-foreground">Carregando Horários...</p>
+                  <p className="text-muted-foreground">
+                    Carregando Horários...
+                  </p>
                 </div>
               ) : programas.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
@@ -265,16 +259,14 @@ export default function DocenteLancamentoProgramaUC() {
                             <TableCell>{item.docente}</TableCell>
                             <TableCell>{item.gradecurricular}</TableCell>
                             <TableCell>
-                              {" "}
                               {formatarData(item.datacriacao)}
                             </TableCell>
                             <TableCell>
                               {formatarData(item.dataactualizacao)}
                             </TableCell>
                             <TableCell>{getStatusBadge(item.estado)}</TableCell>
-
-                            <TableCell className="text-center flex space-x-2">
-                              <div className="flex space-x-2">
+                            <TableCell className="text-center">
+                              <div className="flex justify-center space-x-2">
                                 <DownloadFileButton path={item.arquivo} />
                                 {item.codigo_estado == 1 && (
                                   <Button
@@ -300,7 +292,6 @@ export default function DocenteLancamentoProgramaUC() {
                     </Table>
                   </div>
 
-                  {/* Paginação */}
                   <div className="flex items-center justify-between mt-4">
                     <p className="text-sm text-muted-foreground">
                       A mostrar {programas.length} de {total} registos
@@ -323,7 +314,6 @@ export default function DocenteLancamentoProgramaUC() {
                       >
                         Próxima
                       </Button>
-
                       <Select
                         value={String(limit)}
                         onValueChange={(v) => {
@@ -347,14 +337,20 @@ export default function DocenteLancamentoProgramaUC() {
               )}
             </CardContent>
           )}
-
         </Card>
       </div>
+
       <UploadProgramaComUCModal
         docenteId={docenteId}
+        isDocente={isDocente}
         isModalOpen={isOpenModal}
-        payload={filters}
         setIsModalOpen={closeModal}
+        onSuccess={() => {
+          // Só refetch se a query já estiver habilitada (filtros da página preenchidos)
+          if (canLoadProgramaUC) {
+            refetch();
+          }
+        }}
       />
     </>
   );
