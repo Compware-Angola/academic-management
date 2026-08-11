@@ -18,7 +18,8 @@ import {
   suporteStructure,
   operacionalStructure,
   comunicationStructure,
-  documentStructure
+  documentStructure,
+  configSystemStructure
 } from "@/config/menuStructure";
 import { NavFinance } from "./nav-finance";
 import { NavAcademic } from "./nav-academic";
@@ -30,6 +31,7 @@ import { useFilterMenuByPermission } from "@/util/menuFilter";
 import { NavCommunication } from "./nav-comunication";
 import { NavDocs } from "./nav-documentos";
 import { NavPostGraduation } from "./nav-post-graduation";
+import { NavConfigSystem } from "./nav-config-system";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const adminItems = useFilterMenuByPermission(administracaoStructure?.items ?? []);
@@ -43,6 +45,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const comunicationItems = useFilterMenuByPermission(comunicationStructure?.items ?? []);
   const docsItems = useFilterMenuByPermission(documentStructure?.items ?? []);
   const suporteItems = useFilterMenuByPermission(suporteStructure?.items ?? []);
+  const configSystemItems = useFilterMenuByPermission(configSystemStructure?.items ?? []);
 
   return (
     <Sidebar collapsible="icon" {...props} >
@@ -61,6 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSuporte items={suporteItems} />
         <NavFinance items={financeItems} />
         <NavDocs items={docsItems} />
+        <NavConfigSystem items={configSystemItems} />
       </SidebarContent>
 
 
