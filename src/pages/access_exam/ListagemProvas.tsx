@@ -187,10 +187,12 @@ export default function ListagemProvas() {
       !form.data ||
       !form.inicio ||
       !form.local ||
-      !form.periodo_id
+      !form.periodo_id ||
+      !form.cursos?.trim() ||
+      !form.perguntas?.trim()
     ) {
       toast.error(
-        "Preencha descrição, senha, ano letivo, duração, data, início, local, periodo.",
+        "Preencha descrição, senha, ano letivo, duração, data, início, local, período, curso e pergunta.",
       );
       return null;
     }

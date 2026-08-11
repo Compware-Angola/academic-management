@@ -1,107 +1,10 @@
 import { InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 
-const ENCODING_MAP: Record<string, string> = {
-  // Acentuação e Caracteres Especiais (Formatos ^^xx)
-  "\\^\\^e1": "á",
-  "\\^\\^e9": "é",
-  "\\^\\^ed": "í",
-  "\\^\\^f3": "ó",
-  "\\^\\^fa": "ú",
-  "\\^\\^e0": "à",
-  "\\^\\^e2": "â",
-  "\\^\\^ea": "ê",
-  "\\^\\^f4": "ô",
-  "\\^\\^e3": "ã",
-  "\\^\\^f5": "õ",
-  "\\^\\^e7": "ç",
-  "\\^\\^c1": "Á",
-  "\\^\\^c9": "É",
-  "\\^\\^cd": "Í",
-  "\\^\\^d3": "Ó",
-  "\\^\\^da": "Ú",
-  "\\^\\^c3": "Ã",
-  "\\^\\^c7": "Ç",
-
-  // Símbolos Matemáticos Unicode Especiais que quebram o parser
-  "\\^\\^\\^\\^221b": "\\sqrt[3]", // Raiz Cúbica Unicode
-  "\\^\\^\\^\\^221c": "\\sqrt[4]", // Raiz Quarta Unicode
-  "\\^\\^\\^\\^2061": "", // Invisível (Function Application)
-
-  // Operadores e formatações comuns
-  "\\s\\.\\s": " \\cdot ", // Ponto flutuante entre espaços vira multiplicação
-};
-
-function robustClean(text: string): string {
-  if (!text) return "";
-
-  let cleaned = text;
-
-  // 1. Remove delimitadores redundantes $...$ para evitar conflito com InlineMath
-  // O componente InlineMath já espera o conteúdo interno, não o símbolo $
-  cleaned = cleaned.replace(/^\$/, "").replace(/\$$/, "");
-
-  // 2. Aplica o mapa de encodings
-  Object.entries(ENCODING_MAP).forEach(([pattern, replacement]) => {
-    cleaned = cleaned.replace(new RegExp(pattern, "g"), replacement);
-  });
-
-  // 3. Normalização de Sintaxe para KaTeX
-  return (
-    cleaned
-      // Corrige \sqrt[{3}]{x} para \sqrt[3]{x} (remove chaves desnecessárias no índice)
-      .replace(/\\sqrt\[\{(\d+)\}\]/g, "\\sqrt[$1]")
-
-      // Transforma \sqrt[3]8 em \sqrt[3]{8} e \surd64 em \sqrt{64}
-      .replace(/\\sqrt\[(\d+)\](\d+)/g, "\\sqrt[$1]{$2}")
-      .replace(/\\surd\s*(\d+)/g, "\\sqrt{$1}")
-
-      // Garante blocos em expoentes e subscritos (x^2 -> x^{2}, a_i -> a_{i})
-      .replace(/(\w|\})\s*\^\s*(\w+)/g, "$1^{$2}")
-      .replace(/(\w|\})\s*_\s*(\w+)/g, "$1_{$2}")
-
-      // Corrige comandos de parênteses literais
-      .replace(/\\lparen/g, "(")
-      .replace(/\\rparen/g, ")")
-
-      // Remove barras invertidas triplas \\\ que podem vir de escapes errados
-      .replace(/\\\\\\/g, "\\")
-
-      // Limpeza final de espaços
-      .replace(/\s{2,}/g, " ")
-      .trim()
-  );
-}
-
-function splitTextAndMathSegments(raw: string) {
-  const segments: { type: "text" | "math"; content: string }[] = [];
-  const textBlockRegex = /\\text\{([^{}]*)\}/g;
-
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = textBlockRegex.exec(raw)) !== null) {
-    if (match.index > lastIndex) {
-      const mathChunk = raw.slice(lastIndex, match.index);
-      if (mathChunk.trim()) segments.push({ type: "math", content: mathChunk });
-    }
-    segments.push({ type: "text", content: match[1] });
-    lastIndex = textBlockRegex.lastIndex;
-  }
-
-  if (lastIndex < raw.length) {
-    const tail = raw.slice(lastIndex);
-    if (tail.trim()) segments.push({ type: "math", content: tail });
-  }
-
-  // Se não encontrou nenhum \text{}, a string toda é um único segmento
-  if (segments.length === 0 && raw.trim()) {
-    segments.push({ type: "math", content: raw });
-  }
-
-  return segments;
-}
-
+/* ---------------------------------------------------------
+   1. Decodificação de escapes legados ^^xx (Latin-1 / CP1252)
+   -- Isto já estava correcto no teu ficheiro original.
+------------------------------------------------------------ */
 const CP1252_HIGH_RANGE: Record<number, number> = {
   0x80: 0x20ac,
   0x82: 0x201a,
@@ -140,10 +43,126 @@ export function decodeLegacyHexEscapes(text: string): string {
     try {
       return String.fromCodePoint(codePoint);
     } catch {
-      // Malformed hex somehow slipped through validation — leave the original token untouched.
       return match;
     }
   });
+}
+
+// Casos como "^^^^221b" (raiz cúbica unicode com 4 carets) e "^^^^2061"
+// (invisível "function application") não são bytes CP1252 — são pontos
+// de código Unicode directos, escapados com o dobro dos carets.
+function decodeDoubleCaretUnicode(text: string): string {
+  return text.replace(/\^\^\^\^([0-9a-fA-F]{4})/g, (match, hex: string) => {
+    const code = parseInt(hex, 16);
+    if (code === 0x2061) return ""; // function application — invisível
+    if (code === 0x221b) return "\\sqrt[3]";
+    if (code === 0x221c) return "\\sqrt[4]";
+    try {
+      return String.fromCodePoint(code);
+    } catch {
+      return match;
+    }
+  });
+}
+
+/* ---------------------------------------------------------
+   2. Normalização de escapes redundantes
+   -- Os dados vêm de um processo de export/import que, em
+   parte dos registos, escapou strings mais do que uma vez.
+   Isto produz coisas como:
+     "\\\\\\sqrt{a^2+b^2}"   (6 barras em vez de 1)
+     "\\$H3O+"                ($ escapado — não existe \$ em math mode)
+   Nunca vimos "\\\\" (dupla barra) usado como quebra de linha
+   nestas perguntas, por isso é seguro colapsar qualquer
+   sequência de 2+ barras antes de uma letra para 1 barra.
+------------------------------------------------------------ */
+function normalizeEscaping(text: string): string {
+  return (
+    text
+      // "\$" ou "\\\\$" etc. -> "$"  (o autor escapou o delimitador de
+      // math por engano; tratamos sempre \$ como delimitador real)
+      .replace(/\\+\$/g, "$")
+      // colapsa 2+ barras seguidas de uma letra para 1 barra
+      // (\\\\sqrt -> \sqrt, \\\\lparen -> \lparen, etc.)
+      .replace(/\\{2,}(?=[A-Za-z])/g, "\\")
+      // barra solta antes de uma letra que não forma nenhum comando
+      // LaTeX conhecido (ex.: "\x^2" vindo de "$\\x^2-2x+4=0$") — não
+      // dá para adivinhar todos os comandos válidos, por isso deixamos
+      // o strict:false do KaTeX ignorar isto; ver renderMath() abaixo.
+      .replace(/\s{2,}/g, " ")
+  );
+}
+
+/* ---------------------------------------------------------
+   3. Limpeza de sintaxe LaTeX/KaTeX
+------------------------------------------------------------ */
+function cleanMathSyntax(math: string): string {
+  return math
+    .replace(/\\sqrt\[\{(\d+)\}\]/g, "\\sqrt[$1]")
+    .replace(/\\sqrt\[(\d+)\](\d+)/g, "\\sqrt[$1]{$2}")
+    .replace(/\\surd\s*(\d+)/g, "\\sqrt{$1}")
+    .replace(/(\w|\})\s*\^\s*(\w+)/g, "$1^{$2}")
+    .replace(/(\w|\})\s*_\s*(\w+)/g, "$1_{$2}")
+    .replace(/\\lparen/g, "(")
+    .replace(/\\rparen/g, ")")
+    .trim();
+}
+
+/* ---------------------------------------------------------
+   4. Tokenizador: separa PLAIN TEXT / \text{...} / MATH real
+   -- Esta é a parte que faltava no ficheiro original. Cerca
+   de 65 das ~1080 perguntas do teu FK2_PERGUNTAS misturam
+   texto normal com "$...$" SEM nenhum \text{} a envolver o
+   texto (ex.: 'Resolva a seguinte equação logarítmica: $log_4(5x-1)=2$').
+   O parser antigo só sabia dividir por \text{}; quando isso
+   não existia, a string inteira (incluindo as palavras em
+   português) era empurrada para dentro do InlineMath como
+   se fosse tudo matemática — e o KaTeX rebentava.
+------------------------------------------------------------ */
+type Segment = { type: "text" | "math"; content: string };
+
+function tokenize(raw: string): Segment[] {
+  const segments: Segment[] = [];
+  // Captura $$...$$ ou $...$ (math real) OU \text{...} (texto explícito).
+  // Tudo o resto é texto simples.
+  const tokenRegex = /\$\$([\s\S]*?)\$\$|\$([^$]*?)\$|\\text\{([^{}]*)\}/g;
+
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = tokenRegex.exec(raw)) !== null) {
+    if (match.index > lastIndex) {
+      const plain = raw.slice(lastIndex, match.index);
+      if (plain.trim()) segments.push({ type: "text", content: plain });
+    }
+
+    const [, blockMath, inlineMath, textBlock] = match;
+    if (textBlock !== undefined) {
+      if (textBlock.trim()) segments.push({ type: "text", content: textBlock });
+    } else {
+      const mathContent = (blockMath ?? inlineMath ?? "").trim();
+      if (mathContent) segments.push({ type: "math", content: mathContent });
+    }
+
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  if (lastIndex < raw.length) {
+    const tail = raw.slice(lastIndex);
+    if (tail.trim()) segments.push({ type: "text", content: tail });
+  }
+
+  // Nenhum delimitador encontrado: decide pelo conteúdo. Se "parece"
+  // LaTeX puro (ex.: 'x^3+3x-4=0', sem nenhuma palavra em português),
+  // trata como math; caso contrário é texto simples.
+  if (segments.length === 0 && raw.trim()) {
+    const looksLikePureMath =
+      /^[\s\d+\-*/^_=(){}.,<>a-zA-Z\\√∞∫]*$/.test(raw) &&
+      /[+\-*/^_=]/.test(raw);
+    segments.push({ type: looksLikePureMath ? "math" : "text", content: raw });
+  }
+
+  return segments;
 }
 
 /* ---------------------------------------------------------
@@ -152,16 +171,16 @@ export function decodeLegacyHexEscapes(text: string): string {
 export function LatexText({ text }: { text: string }) {
   if (!text.trim()) return null;
 
-  const decodedText = decodeLegacyHexEscapes(text);
-  const cleanedText = robustClean(decodedText);
+  let processed = decodeLegacyHexEscapes(text);
+  processed = decodeDoubleCaretUnicode(processed);
+  processed = normalizeEscaping(processed);
 
-  const segments = splitTextAndMathSegments(cleanedText);
+  const segments = tokenize(processed);
 
   return (
     <span style={{ whiteSpace: "normal" }}>
       {segments.map((segment, i) => {
         if (segment.type === "text") {
-          // texto normal — quebra livremente
           return (
             <span key={i} style={{ whiteSpace: "normal" }}>
               {segment.content}
@@ -169,40 +188,37 @@ export function LatexText({ text }: { text: string }) {
           );
         }
 
-        // segmento matemático — verifica se realmente parece LaTeX
+        const mathContent = cleanMathSyntax(segment.content);
         const looksLikeMath = /\\|[\^_={}]|[\d][+\-*/=]|√|∞|∫/.test(
-          segment.content,
+          mathContent,
         );
 
         if (!looksLikeMath) {
           return (
             <span key={i} style={{ whiteSpace: "normal" }}>
-              {segment.content}
+              {mathContent}
             </span>
           );
         }
 
-        try {
-          return (
-            <span key={i} style={{ display: "inline-block" }}>
-              <InlineMath math={segment.content} />
-            </span>
-          );
-        } catch (error) {
-          console.warn("KaTeX render issue for:", segment.content, error);
-          return (
-            <span
-              key={i}
-              style={{
-                fontFamily: "serif",
-                whiteSpace: "pre-wrap",
-                fontSize: "1.1em",
+        // IMPORTANTE: o try/catch do ficheiro original NÃO apanhava
+        // erros do KaTeX, porque <InlineMath /> só é executado quando
+        // o React o renderiza a seguir — fora deste try/catch síncrono.
+        // A correcção real é dizer ao próprio KaTeX para nunca lançar
+        // excepção (throwOnError:false) e desenhar o erro a vermelho
+        // em vez de rebentar a árvore de componentes.
+        return (
+          <span key={i} style={{ display: "inline-block" }}>
+            <InlineMath
+              math={mathContent}
+              settings={{
+                throwOnError: false,
+                strict: false,
+                errorColor: "#cc0000",
               }}
-            >
-              {segment.content}
-            </span>
-          );
-        }
+            />
+          </span>
+        );
       })}
     </span>
   );
