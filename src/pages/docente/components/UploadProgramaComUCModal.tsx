@@ -47,8 +47,11 @@ export const UploadProgramaComUCModal = ({
     setFile(null);
   };
   const handleSubmit = async () => {
-    const uploadResponse = await uploadMutation.mutateAsync(file!);
-    const fileName = uploadResponse?.file?.filename;
+    const uploadResponse = await uploadMutation.mutateAsync({
+      file,
+      options: { folder: "programas-uc" },
+    });
+    const fileName = uploadResponse?.key;
 
     if (!fileName) {
       toast({

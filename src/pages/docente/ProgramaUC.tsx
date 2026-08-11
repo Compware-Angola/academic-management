@@ -51,9 +51,9 @@ export default function DocenteLancamentoProgramaUC() {
   const [limit, setLimit] = useState(10);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
   const { user: userData } = useAuth();
-  const { data: teacherInfoData } = useQueryTeacherProfile(
-    userData?.user?.pk_utilizador,
-  );
+  const { data: teacherInfoData } = useQueryTeacherProfile();
+  console.log("User", userData);
+  console.log("teacherInfoData", teacherInfoData);
   const { mutateAsync, isPending } = useMutationUpdateProgramaUCVisibilidade();
 
   const isDocente = userDate?.roles?.docente ?? false;
@@ -218,9 +218,6 @@ export default function DocenteLancamentoProgramaUC() {
           </CardContent>
         </Card>
 
-
-
-
         <Card>
           <CardHeader>
             <CardTitle>Lista de Programas com UC</CardTitle>
@@ -228,14 +225,15 @@ export default function DocenteLancamentoProgramaUC() {
           {!isDocente ? (
             <div className="p-4">
               <RestrictedAccessAlert section="os seus dados profissionais" />
-
             </div>
           ) : (
             <CardContent>
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16">
                   <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-                  <p className="text-muted-foreground">Carregando Horários...</p>
+                  <p className="text-muted-foreground">
+                    Carregando Horários...
+                  </p>
                 </div>
               ) : programas.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
@@ -347,7 +345,6 @@ export default function DocenteLancamentoProgramaUC() {
               )}
             </CardContent>
           )}
-
         </Card>
       </div>
       <UploadProgramaComUCModal

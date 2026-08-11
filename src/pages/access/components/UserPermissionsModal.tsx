@@ -103,34 +103,29 @@ export function UserPermissionsModal({
     LocalGroupAccess[]
   >([]);
 
-  // Sempre que o grupo selecionado mudar → limpa + força refetch + atualiza estado local
+  // Limpa estado quando o modal fecha ou quando não há grupo selecionado
   useEffect(() => {
     if (!open) {
-      // Limpa tudo quando o modal fecha
       setLocalGroupAccesses([]);
       setSelectedGroup(null);
       return;
     }
-
-    if (selectedGroup) {
-      // 1. Limpa imediatamente o estado anterior (evita mistura)
-      setLocalGroupAccesses([]);
-
-      // 2. Força recarregamento fresco dos acessos do grupo atual
-      refetchGroupAccesses().then(() => {
-        // 3. Só atualiza o estado local após o fetch terminar
-        setLocalGroupAccesses(
-          groupAccesses.map((a) => ({
-            ...a,
-            blocking: false,
-          })),
-        );
-      });
-    } else {
-      // Sem grupo selecionado → limpa a lista
+    if (!selectedGroup) {
       setLocalGroupAccesses([]);
     }
-  }, [open, selectedGroup, refetchGroupAccesses, groupAccesses]);
+  }, [open, selectedGroup]);
+
+  // Espelha os acessos do grupo assim que a query resolver/atualizar
+  useEffect(() => {
+    if (!open || !selectedGroup) return;
+
+    setLocalGroupAccesses(
+      groupAccesses.map((a) => ({
+        ...a,
+        blocking: false,
+      })),
+    );
+  }, [open, selectedGroup, groupAccesses]);
 
   /** TODOS os acessos do sistema */
   const { data: allAccesses = [], isLoading: loadingAllAccesses } =
@@ -313,7 +308,7 @@ export function UserPermissionsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl! w-full! max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl! w-full! max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl">
             <Shield className="h-6 w-6 text-primary" />
@@ -481,9 +476,7 @@ export function UserPermissionsModal({
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                onClick={() =>
-                                  handleBlockAccess(access.codigo)
-                                }
+                                onClick={() => handleBlockAccess(access.codigo)}
                                 disabled={access.blocking}
                               >
                                 {access.blocking ? "Removendo..." : "Remover"}
