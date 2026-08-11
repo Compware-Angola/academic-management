@@ -7,9 +7,12 @@ export function LoginGaImageTab() {
   const saveImageMutation = useMutationUpdateLoginGaImage();
 
   const handleUpload = async (file: File) => {
-    const uploadResponse = await uploadFileMutation.mutateAsync(file);
+    const uploadResponse = await uploadFileMutation.mutateAsync({
+      file,
+      options: { folder: "login-ga-image" },
+    });
     const saveResponse = await saveImageMutation.mutateAsync(
-      uploadResponse.file.filename,
+      uploadResponse.key,
     );
 
     return saveResponse.message;
@@ -19,9 +22,7 @@ export function LoginGaImageTab() {
     <ImageUploadTab
       title="Imagem do Login do GA"
       onUpload={handleUpload}
-      isPending={
-        uploadFileMutation.isPending || saveImageMutation.isPending
-      }
+      isPending={uploadFileMutation.isPending || saveImageMutation.isPending}
     />
   );
 }

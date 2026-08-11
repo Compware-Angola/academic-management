@@ -7,9 +7,12 @@ export function ComunicadoPortalImageTab() {
   const saveImageMutation = useMutationUpdateComunicadoPortalImage();
 
   const handleUpload = async (file: File) => {
-    const uploadResponse = await uploadFileMutation.mutateAsync(file);
+    const uploadResponse = await uploadFileMutation.mutateAsync({
+      file,
+      options: { folder: "comunicado-portal-image" },
+    });
     const saveResponse = await saveImageMutation.mutateAsync(
-      uploadResponse.file.filename,
+      uploadResponse.key,
     );
 
     return saveResponse.message;
@@ -19,9 +22,7 @@ export function ComunicadoPortalImageTab() {
     <ImageUploadTab
       title="Banner da Página de Comunicados"
       onUpload={handleUpload}
-      isPending={
-        uploadFileMutation.isPending || saveImageMutation.isPending
-      }
+      isPending={uploadFileMutation.isPending || saveImageMutation.isPending}
     />
   );
 }
