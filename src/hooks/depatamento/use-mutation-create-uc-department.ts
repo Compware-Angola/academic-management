@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useToast } from "@/components/ui/use-toast";
 import {
-  CreateUcDepartmentPayload,
-  createUcDepartmentService,
+  DisciplinaDepartamentoPayload,
+  createDisciplinasDepartamento,
 } from "@/services/departamento/create-uc-department.service";
 
 export const useMutationCreateUcDepartment = () => {
@@ -11,18 +11,18 @@ export const useMutationCreateUcDepartment = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (payload: CreateUcDepartmentPayload) =>
-      createUcDepartmentService(payload),
+    mutationFn: (payload: DisciplinaDepartamentoPayload) =>
+      createDisciplinasDepartamento(payload),
 
     onSuccess: () => {
-      // Atualiza lista das UC
       queryClient.invalidateQueries({
         queryKey: ["departamento-uc"],
       });
 
       toast({
         title: "UC criada!",
-        description: "A unidade curricular foi criada com sucesso.",
+        description:
+          "As unidades curriculares foram vinculadas ao departamento com sucesso.",
       });
     },
 
@@ -31,7 +31,7 @@ export const useMutationCreateUcDepartment = () => {
         title: "Erro ao criar Unidade curricular",
         description:
           error?.response?.data?.message ||
-          "Não foi possível criar a Unidade curricular",
+          "Não foi possível criar a Unidade curricular.",
         variant: "destructive",
       });
     },

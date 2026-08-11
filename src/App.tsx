@@ -120,7 +120,7 @@ import AlterarSenhaExame from "./pages/access_exam/AlterarSenhaExame";
 import InscricaoEpocaEspecial from "./pages/access_exam/InscricaoEpocaEspecial";
 
 import HorariosPorCurso from "./pages/access_exam/HorariosPorCurso";
-import PautaGeralExame from "./pages/access_exam/PautaGeralExame";
+
 import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
@@ -199,6 +199,7 @@ import { ImportSchedules } from "./pages/schedules/ImportSchedule";
 import { ConciliacaoDivida } from "./pages/financas/area-financeira/ConciliacaoDivida";
 import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/ConciliacaoAprovacao";
 import NegociacaoDividaConciliacao from "./pages/financas/area-financeira/NegociacaoDividaConciliacao";
+import PautaExame from "./pages/access_exam/PautaExame";
 
 const App = () => {
   return (
@@ -1026,7 +1027,7 @@ const App = () => {
                           PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla!,
                         ]}
                       >
-                        <PautaGeralExame />
+                        <PautaExame />
                       </ProtectedRoute>
                     }
                   />
