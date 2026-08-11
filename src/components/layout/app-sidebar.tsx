@@ -64,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSuporte items={suporteItems} />
         <NavFinance items={financeItems} />
         <NavDocs items={docsItems} />
-        <NavConfigSystem items={configSystemItems} />
+        {/*<NavConfigSystem items={configSystemItems} />*/}
       </SidebarContent>
 
 
