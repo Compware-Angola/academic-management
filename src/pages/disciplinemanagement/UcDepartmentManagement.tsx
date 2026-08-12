@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Link2, Shield, Search } from "lucide-react";
+import { Plus, Link2, Shield, Search, Eye } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,6 +35,7 @@ import { useQueryDepartamentoUC } from "@/hooks/depatamento/use-query-departamen
 import { DepartmentDiscipline } from "@/services/departamento/fetch-departamento-uc";
 import { CreateUcModal } from "./components/CreateUcModal";
 import { VincularCursoModal } from "./components/VincularCursoModal";
+import { VerVinculosModal } from "./components/VerVinculosModal";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function UcDepartmentManagement() {
@@ -44,6 +45,10 @@ export default function UcDepartmentManagement() {
   const [search, setSearch] = useState("");
   const [departamento, setDepartamento] = useState("");
   const [ucParaVincular, setUcParaVincular] = useState<{
+    codigo_grade: number;
+    unidade_curricular: string;
+  } | null>(null);
+  const [ucParaVerVinculos, setUcParaVerVinculos] = useState<{
     codigo_grade: number;
     unidade_curricular: string;
   } | null>(null);
@@ -187,19 +192,35 @@ export default function UcDepartmentManagement() {
                       <Badge variant={status.variant}>{status.label}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          setUcParaVincular({
-                            codigo_grade: uc.codigo_grade,
-                            unidade_curricular: uc.unidade_curricular,
-                          })
-                        }
-                      >
-                        <Link2 className="h-4 w-4 mr-2" />
-                        Vincular
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setUcParaVerVinculos({
+                              codigo_grade: uc.codigo_grade,
+                              unidade_curricular: uc.unidade_curricular,
+                            })
+                          }
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver Vínculos
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setUcParaVincular({
+                              codigo_grade: uc.codigo_grade,
+                              unidade_curricular: uc.unidade_curricular,
+                            })
+                          }
+                        >
+                          <Link2 className="h-4 w-4 mr-2" />
+                          Vincular
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -259,6 +280,11 @@ export default function UcDepartmentManagement() {
         open={!!ucParaVincular}
         onClose={() => setUcParaVincular(null)}
         uc={ucParaVincular}
+      />
+      <VerVinculosModal
+        open={!!ucParaVerVinculos}
+        onClose={() => setUcParaVerVinculos(null)}
+        uc={ucParaVerVinculos}
       />
     </div>
   );
