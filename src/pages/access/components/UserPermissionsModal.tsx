@@ -308,7 +308,7 @@ export function UserPermissionsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl! w-full! max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl! w-full! max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3 text-xl">
             <Shield className="h-6 w-6 text-primary" />
