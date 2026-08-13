@@ -44,23 +44,23 @@ export default function ConsultarProva() {
 
   const pdfData = candidato
     ? {
-        filtros: `Pesquisa: ${activeSearch}`,
-        total: 1,
-        rows: [
-          {
-            numeroInscricao: candidato.numero_inscricao,
-            nome: candidato.nome,
-            numeroBilhete: candidato.numero_bilhete,
-            curso: candidato.curso,
-            faculdade: candidato.faculdade || "",
-            periodo: candidato.periodo,
-            sala: candidato.sala || "",
-            dataRealizacao: candidato.data_realizacao || "",
-            nota: candidato.nota,
-            resultado: candidato.resultado === 1 ? "Admitido" : "Reprovado",
-          },
-        ],
-      }
+      filtros: `Pesquisa: ${activeSearch}`,
+      total: 1,
+      rows: [
+        {
+          numeroInscricao: candidato.numero_inscricao,
+          nome: candidato.nome,
+          numeroBilhete: candidato.numero_bilhete,
+          curso: candidato.curso,
+          faculdade: candidato.faculdade || "",
+          periodo: candidato.periodo,
+          sala: candidato.sala || "",
+          dataRealizacao: candidato.data_realizacao || "",
+          nota: candidato.nota,
+          resultado: candidato.resultado === 1 ? "Admitido" : "Reprovado",
+        },
+      ],
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -268,13 +268,12 @@ export default function ConsultarProva() {
                 <div className="mt-2">
                   <Badge
                     variant="outline"
-                    className={`text-xl px-6 py-2 font-semibold ${
-                      candidato.nota >= 14
-                        ? "bg-green-500/10 text-green-700 border-green-500"
-                        : candidato.nota >= 10
-                          ? "bg-yellow-500/10 text-yellow-700 border-yellow-500"
-                          : "bg-red-500/10 text-red-700 border-red-500"
-                    }`}
+                    className={`text-xl px-6 py-2 font-semibold ${candidato.nota >= 14
+                      ? "bg-green-500/10 text-green-700 border-green-500"
+                      : candidato.nota >= 10
+                        ? "bg-yellow-500/10 text-yellow-700 border-yellow-500"
+                        : "bg-red-500/10 text-red-700 border-red-500"
+                      }`}
                   >
                     {candidato?.nota?.toFixed(1)}
                   </Badge>
@@ -286,13 +285,14 @@ export default function ConsultarProva() {
                 <Label className="text-muted-foreground">Resultado Final</Label>
                 <div className="mt-3">
                   <Badge
-                    className={`text-lg px-10 py-2.5 font-medium ${
-                      candidato.resultado === 1
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-red-600 hover:bg-red-700"
-                    }`}
+                    className={`text-lg px-10 py-2.5 font-medium ${candidato.resultado === 1
+                      ? "bg-green-600 hover:bg-green-700"
+                      : candidato.resultado === 0
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-amber-600 hover:bg-amber-700"
+                      }`}
                   >
-                    {candidato.resultado === 1 ? "ADMITIDO" : " REPROVADO"}
+                    {candidato.resultado === 1 ? "ADMITIDO" : candidato.resultado === 0 ? "REPROVADO" : "AGUARDA CLASSIFICAÇÃO"}
                   </Badge>
                 </div>
               </div>

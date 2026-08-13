@@ -214,11 +214,13 @@ export default function ListarTopicos() {
             });
             setDialogOpen(false);
           },
-          onError: () => {
-            toast.error(`Erro ao Criar`, {
-              position: "top-right",
-            });
-          },
+          
+          
+          // onError: () => {
+          //   toast.error(`Erro ao Criar`, {
+          //     position: "top-right",
+          //   });
+          // },
         },
       );
     }
@@ -268,7 +270,8 @@ export default function ListarTopicos() {
     });
   };
 
-  const isSaving = createMutation.isPending || updateMutation.isPending;
+  const isSaving =
+    uploadMutation.isPending || createMutation.isPending || updateMutation.isPending;
   const isDeleting = deleteMutation.isPending;
 
   // EXPORT

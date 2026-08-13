@@ -22,7 +22,7 @@ import {
 import { useQueryDocenteListProgramaUC } from "@/hooks/docentes/use-query-docente-programa-uc";
 import { formatarData } from "@/util/date-formate";
 import { parseFilter } from "@/util/parse-filter";
-import { File, Loader2, Paperclip, Trash2 } from "lucide-react";
+import { File, Loader2, Trash2 } from "lucide-react";
 import { useId, useState } from "react";
 import {
   Breadcrumb,
@@ -39,18 +39,22 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQueryTeacherProfile } from "@/hooks/teacher/use-query-teacher-profile";
 import { useMutationUpdateProgramaUCVisibilidade } from "@/hooks/docentes/use-mutation-docente-programa-visilidade";
 import { DownloadFileButton } from "@/components/common/DownloadFile";
+import { useCurrentUser } from "@/hooks/mutations/use-mutation-login";
+import RestrictedAccessAlert from "@/components/common/RestrictedAccessAlert";
 
 export default function DocenteLancamentoProgramaUC() {
   const id = useId();
+  const { data: userDate } = useCurrentUser();
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
+
   const { user: userData } = useAuth();
-  const { data: teacherInfoData } = useQueryTeacherProfile(
-    userData?.user?.pk_utilizador,
-  );
+  const { data: teacherInfoData } = useQueryTeacherProfile();
   const { mutateAsync, isPending } = useMutationUpdateProgramaUCVisibilidade();
 
+  const isDocente = userDate?.roles?.docente ?? false;
   const docenteId = teacherInfoData?.codigo_docente;
 
   const [filters, setFilters] = useState({
@@ -62,19 +66,21 @@ export default function DocenteLancamentoProgramaUC() {
     estado: "",
   });
 
-  const closeModal = () => {
-    setIsOpenModal(false);
-  };
-  const openModal = () => {
-    setIsOpenModal(true);
-  };
+  const closeModal = () => setIsOpenModal(false);
+  const openModal = () => setIsOpenModal(true);
+
   const canLoadProgramaUC =
     !!parseFilter(filters.anoCurricular) &&
     !!parseFilter(filters.anoLectivo) &&
     !!parseFilter(filters.curso) &&
     !!parseFilter(filters.semestre) &&
     !!parseFilter(filters.unidadeCurricular);
-  const { data: programaUcResponse, isLoading } = useQueryDocenteListProgramaUC(
+
+  const {
+    data: programaUcResponse,
+    isLoading,
+    refetch,
+  } = useQueryDocenteListProgramaUC(
     {
       anoCurricular: parseFilter(filters.anoCurricular),
       anoLectivo: parseFilter(filters.anoLectivo),
@@ -84,28 +90,23 @@ export default function DocenteLancamentoProgramaUC() {
       page,
       limit,
     },
-    {
-      enabled: canLoadProgramaUC,
-    },
+    { enabled: canLoadProgramaUC },
   );
 
   const updateFilter = (key: string, value: string) => {
     setFilters((prev) => {
       const newFilters = { ...prev, [key]: value };
-
       if (["curso", "semestre", "anoCurricular"].includes(key)) {
         newFilters.unidadeCurricular = "";
       }
-
       return newFilters;
     });
   };
+
   const updateProgramaUCVisilidade = (programaId: number, status: number) => {
     mutateAsync({
       programaUcId: programaId,
-      payload: {
-        estado: status,
-      },
+      payload: { estado: status },
     });
   };
 
@@ -123,7 +124,6 @@ export default function DocenteLancamentoProgramaUC() {
             Aprovado
           </Badge>
         );
-
       case "Regeitado":
         return (
           <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
@@ -134,9 +134,11 @@ export default function DocenteLancamentoProgramaUC() {
         return <Badge>{status}</Badge>;
     }
   };
+
   const programas = programaUcResponse?.data ?? [];
   const total = programaUcResponse?.total;
   const totalPages = programaUcResponse?.totalPages;
+
   return (
     <>
       <div className="min-h-screen bg-background p-6">
@@ -155,11 +157,12 @@ export default function DocenteLancamentoProgramaUC() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
         <div className="flex justify-between">
           <h1 className="text-3xl font-bold mb-6 text-foreground">
             Lançamento de Programa UC
           </h1>
-          <Button size="sm" onClick={() => openModal()}>
+          <Button size="sm" onClick={openModal}>
             <File className="h-4 w-4 mr-2" />
             Novo Programa
           </Button>
@@ -172,10 +175,12 @@ export default function DocenteLancamentoProgramaUC() {
           <CardContent>
             <div className="grid gap-4 grid-cols-4">
               <AcademicYearSelect
+                disabled={!isDocente}
                 value={filters.anoLectivo}
                 onChangeValue={(v) => updateFilter("anoLectivo", v)}
               />
               <SemestreSelect
+                disabled={!isDocente}
                 value={filters.semestre}
                 onChangeValue={(v) => updateFilter("semestre", v)}
               />
@@ -188,11 +193,13 @@ export default function DocenteLancamentoProgramaUC() {
                 onChangeValue={(v) => updateFilter("curso", v)}
               />
               <AnoCurricularSelect
+                disabled={!isDocente}
                 value={filters.anoCurricular}
                 onChangeValue={(v) => updateFilter("anoCurricular", v)}
                 curso={filters.curso}
               />
               <DocenteCadeiraSelect
+                disabled={!isDocente}
                 params={{
                   anoLectivo: parseFilter(filters.anoLectivo),
                   classeId: parseFilter(filters.anoCurricular),
@@ -206,132 +213,144 @@ export default function DocenteLancamentoProgramaUC() {
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Lista de Programas com UC</CardTitle>
           </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-                <p className="text-muted-foreground">Carregando Horários...</p>
-              </div>
-            ) : programas.length === 0 ? (
-              <div className="text-center py-16 text-muted-foreground">
-                Nenhum Programa encontrada.
-              </div>
-            ) : (
-              <>
-                <div className="rounded-md border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Código</TableHead>
-                        <TableHead>Ano Lectivo</TableHead>
-                        <TableHead>Docente</TableHead>
-                        <TableHead>UC</TableHead>
-                        <TableHead>Data de Lançamento</TableHead>
-                        <TableHead>Data de Validação</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-center">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {programas.map((item) => (
-                        <TableRow key={item.codigo}>
-                          <TableCell>{item.codigo}</TableCell>
-                          <TableCell>{item.anolectivo}</TableCell>
-                          <TableCell>{item.docente}</TableCell>
-                          <TableCell>{item.gradecurricular}</TableCell>
-                          <TableCell>
-                            {" "}
-                            {formatarData(item.datacriacao)}
-                          </TableCell>
-                          <TableCell>
-                            {formatarData(item.dataactualizacao)}
-                          </TableCell>
-                          <TableCell>{getStatusBadge(item.estado)}</TableCell>
-
-                          <TableCell className="text-center flex space-x-2">
-                            <div className="flex space-x-2">
-                              <DownloadFileButton path={item.arquivo} />
-                              {item.codigo_estado == 1 && (
-                                <Button
-                                  variant="outline"
-                                  className="bg-destructive text-white"
-                                  size="icon"
-                                  onClick={() =>
-                                    updateProgramaUCVisilidade(item.codigo, 0)
-                                  }
-                                >
-                                  {isPending ? (
-                                    <Loader2 className="animate-spin" />
-                                  ) : (
-                                    <Trash2 />
-                                  )}
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                {/* Paginação */}
-                <div className="flex items-center justify-between mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    A mostrar {programas.length} de {total} registos
+          {!isDocente ? (
+            <div className="p-4">
+              <RestrictedAccessAlert section="os seus dados profissionais" />
+            </div>
+          ) : (
+            <CardContent>
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+                  <p className="text-muted-foreground">
+                    Carregando Horários...
                   </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      disabled={page === 1}
-                      onClick={() => setPage((p) => p - 1)}
-                    >
-                      Anterior
-                    </Button>
-                    <span>
-                      Página {page} de {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      disabled={page === totalPages}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      Próxima
-                    </Button>
-
-                    <Select
-                      value={String(limit)}
-                      onValueChange={(v) => {
-                        setLimit(Number(v));
-                        setPage(1);
-                      }}
-                    >
-                      <SelectTrigger className="w-20">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10">10</SelectItem>
-                        <SelectItem value="25">25</SelectItem>
-                        <SelectItem value="50">50</SelectItem>
-                        <SelectItem value="100">100</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
-              </>
-            )}
-          </CardContent>
+              ) : programas.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground">
+                  Nenhum Programa encontrada.
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-md border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Código</TableHead>
+                          <TableHead>Ano Lectivo</TableHead>
+                          <TableHead>Docente</TableHead>
+                          <TableHead>UC</TableHead>
+                          <TableHead>Data de Lançamento</TableHead>
+                          <TableHead>Data de Validação</TableHead>
+                          <TableHead>Estado</TableHead>
+                          <TableHead className="text-center">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {programas.map((item) => (
+                          <TableRow key={item.codigo}>
+                            <TableCell>{item.codigo}</TableCell>
+                            <TableCell>{item.anolectivo}</TableCell>
+                            <TableCell>{item.docente}</TableCell>
+                            <TableCell>{item.gradecurricular}</TableCell>
+                            <TableCell>
+                              {formatarData(item.datacriacao)}
+                            </TableCell>
+                            <TableCell>
+                              {formatarData(item.dataactualizacao)}
+                            </TableCell>
+                            <TableCell>{getStatusBadge(item.estado)}</TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex justify-center space-x-2">
+                                <DownloadFileButton path={item.arquivo} />
+                                {item.codigo_estado == 1 && (
+                                  <Button
+                                    variant="outline"
+                                    className="bg-destructive text-white"
+                                    size="icon"
+                                    onClick={() =>
+                                      updateProgramaUCVisilidade(item.codigo, 0)
+                                    }
+                                  >
+                                    {isPending ? (
+                                      <Loader2 className="animate-spin" />
+                                    ) : (
+                                      <Trash2 />
+                                    )}
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-muted-foreground">
+                      A mostrar {programas.length} de {total} registos
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        disabled={page === 1}
+                        onClick={() => setPage((p) => p - 1)}
+                      >
+                        Anterior
+                      </Button>
+                      <span>
+                        Página {page} de {totalPages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        disabled={page === totalPages}
+                        onClick={() => setPage((p) => p + 1)}
+                      >
+                        Próxima
+                      </Button>
+                      <Select
+                        value={String(limit)}
+                        onValueChange={(v) => {
+                          setLimit(Number(v));
+                          setPage(1);
+                        }}
+                      >
+                        <SelectTrigger className="w-20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="25">25</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                          <SelectItem value="100">100</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
+
       <UploadProgramaComUCModal
         docenteId={docenteId}
+        isDocente={isDocente}
         isModalOpen={isOpenModal}
-        payload={filters}
         setIsModalOpen={closeModal}
+        onSuccess={() => {
+          // Só refetch se a query já estiver habilitada (filtros da página preenchidos)
+          if (canLoadProgramaUC) {
+            refetch();
+          }
+        }}
       />
     </>
   );

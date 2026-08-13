@@ -14,6 +14,7 @@ interface CourseSelectProps {
   width?: string;
   label?: string;
   allowedIds?: string[];
+  showDefaultItem?: boolean;
 }
 
 const CourseSelect = ({
@@ -27,6 +28,7 @@ const CourseSelect = ({
   labelMode = "outside",
   showLabel = true,
   allowedIds,
+  showDefaultItem = true,
 }: CourseSelectProps) => {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos(params);
   const id = useId();
@@ -35,7 +37,9 @@ const CourseSelect = ({
     if (!allowedIds || allowedIds.length === 0) return cursos;
     return cursos.filter((c) => allowedIds.includes(c.codigo.toString()));
   }, [cursos, allowedIds]);
-  const defaultSelectItem = [{ label: "Todos", value: "0", key: id }];
+  const defaultSelectItem = showDefaultItem
+    ? [{ label: "Todos", value: "0", key: id }]
+    : [];
 
   return (
     <FormCommandSelect

@@ -33,9 +33,9 @@ import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQueryHorariosDisponiveisInscritosPorUc } from "@/hooks/enrollment/use-query-horarios-disponiveis-por-uc";
 import { useQueryEstadoMatriculaPorHorario } from "@/hooks/registrations/use-query-estado-matriculados-por-horario";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 
 type EstadoMatriculaPorHorarioRow = {
@@ -97,17 +97,8 @@ export default function EstadoMatriculaPorHorario() {
       curso: filters.curso,
     });
 
-  const canLoadUcs = !!filters.curso && !!filters.semestre;
-
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUc } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe:
-        filters.anoCurricular && filters.anoCurricular !== "0"
-          ? filters.anoCurricular
-          : undefined,
-    });
+  const canLoadUcs =
+    !!filters.anoLectivo && !!filters.curso && !!filters.semestre;
 
   const canLoadHorarios =
     !!filters.anoLectivo &&
@@ -430,6 +421,26 @@ export default function EstadoMatriculaPorHorario() {
             </div>
 
             <div className="space-y-2">
+              <GradeCurricularSelect
+                value={filters.unidadeCurricular}
+                onChangeValue={(v) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    unidadeCurricular: v,
+                    horario: "0",
+                  }))
+                }
+                anoLectivo={filters.anoLectivo ? Number(filters.anoLectivo) : undefined}
+                curso={filters.curso ? Number(filters.curso) : undefined}
+                classe={
+                  filters.anoCurricular && filters.anoCurricular !== "0"
+                    ? Number(filters.anoCurricular)
+                    : undefined
+                }
+                semestre={filters.semestre ? Number(filters.semestre) : undefined}
+                disabled={!canLoadUcs}
+              />
+              {/*
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
                 value={filters.unidadeCurricular}
@@ -463,6 +474,7 @@ export default function EstadoMatriculaPorHorario() {
                   ))}
                 </SelectContent>
               </Select>
+              */}
             </div>
 
             <div className="space-y-2">

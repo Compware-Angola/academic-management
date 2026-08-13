@@ -34,13 +34,16 @@ import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
-import PDFActions, { GenericPDFDocument } from "@/components/views/pdf/GenericPDFDocument";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { FilterCandidatoProvaParams } from "@/services/access_exam/fetch-prova-candidatos.service";
 import { useListProvaPorCandidato } from "@/hooks/access_exam/use-prova-por-candidato";
 
 export default function ListaProvaPorCandidatos() {
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   const [filters, setFilters] = useState({
@@ -72,7 +75,7 @@ export default function ListaProvaPorCandidatos() {
         anoLectivo: c.ano_lectivo,
         listaDeProvas: c.lista_de_provas.join(", "),
       })),
-    [candidatos]
+    [candidatos],
   );
 
   const filtrosLabel = [
@@ -91,7 +94,10 @@ export default function ListaProvaPorCandidatos() {
         documentTitle="Lista de Provas por Candidato"
         subtitle="Candidatos e respectivas provas de acesso"
         infoSections={[
-          { title: "Filtros Aplicados", content: filtrosLabel || "Sem filtros" },
+          {
+            title: "Filtros Aplicados",
+            content: filtrosLabel || "Sem filtros",
+          },
         ]}
         mainTable={{
           headers: [
@@ -116,7 +122,10 @@ export default function ListaProvaPorCandidatos() {
           documentTitle: "Lista de Provas por Candidato",
           subtitle: "Candidatos e respectivas provas de acesso",
           infoSections: [
-            { title: "Filtros Aplicados", content: filtrosLabel || "Sem filtros" },
+            {
+              title: "Filtros Aplicados",
+              content: filtrosLabel || "Sem filtros",
+            },
             { title: "Resumo", content: [`Total de registos: ${total}`] },
           ],
           mainTable: {
@@ -164,7 +173,9 @@ export default function ListaProvaPorCandidatos() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Início</Link>
+        <Link to="/" className="hover:text-foreground">
+          Início
+        </Link>
         <span>/</span>
         <span className="font-medium">Exame de Acesso</span>
         <span>/</span>
@@ -174,7 +185,9 @@ export default function ListaProvaPorCandidatos() {
       {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Lista de provas por candidato</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Lista de provas por candidato
+          </h1>
           <p className="text-muted-foreground mt-1">
             Consulta das provas associadas a cada candidato ao exame de acesso
           </p>
@@ -216,29 +229,40 @@ export default function ListaProvaPorCandidatos() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        
-
           <FormSelect
             label="Ano Letivo"
             disabled={isLoadingAcademicYear}
             loading={isLoadingAcademicYear}
             value={filters.codigoAnoLetivo}
-            onChange={(v) => setFilters((prev) => ({ ...prev, codigoAnoLetivo: v, page: 1 }))}
+            onChange={(v) =>
+              setFilters((prev) => ({ ...prev, codigoAnoLetivo: v, page: 1 }))
+            }
             options={academicYear}
-            map={(a) => ({ key: a.codigo, label: a.designacao, value: a.codigo })}
+            map={(a) => ({
+              key: a.codigo,
+              label: a.designacao,
+              value: a.codigo,
+            })}
           />
 
           <FacultySelect
             allOption
             value={filters.codigoFaculdade}
             onChangeValue={(v) =>
-              setFilters((prev) => ({ ...prev, codigoFaculdade: v, codigoCurso: undefined, page: 1 }))
+              setFilters((prev) => ({
+                ...prev,
+                codigoFaculdade: v,
+                codigoCurso: undefined,
+                page: 1,
+              }))
             }
           />
 
           <CourseSelect
             value={filters.codigoCurso}
-            onChangeValue={(v) => setFilters((prev) => ({ ...prev, codigoCurso: v, page: 1 }))}
+            onChangeValue={(v) =>
+              setFilters((prev) => ({ ...prev, codigoCurso: v, page: 1 }))
+            }
           />
 
           <FormSelect
@@ -247,19 +271,34 @@ export default function ListaProvaPorCandidatos() {
             label="Turno"
             value={filters.codigoTurno?.toString() ?? "all"}
             onChange={(v) =>
-              setFilters((prev) => ({ ...prev, codigoTurno: v === "all" ? undefined : Number(v), page: 1 }))
+              setFilters((prev) => ({
+                ...prev,
+                codigoTurno: v === "all" ? undefined : Number(v),
+                page: 1,
+              }))
             }
-            options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
-            map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+            options={[
+              { codigo: "all", designacao: "Todos" },
+              ...(periodos ?? []),
+            ]}
+            map={(p) => ({
+              key: p.codigo.toString(),
+              label: p.designacao,
+              value: p.codigo.toString(),
+            })}
           />
-            <div className="space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="search">Pesquisar</Label>
             <Input
               id="search"
-              placeholder="Nome do candidato..."
+              placeholder="Nome do candidato ou BI..."
               value={filters.search ?? ""}
               onChange={(e) =>
-                setFilters((prev) => ({ ...prev, search: e.target.value || undefined, page: 1 }))
+                setFilters((prev) => ({
+                  ...prev,
+                  search: e.target.value || undefined,
+                  page: 1,
+                }))
               }
             />
           </div>
@@ -276,7 +315,9 @@ export default function ListaProvaPorCandidatos() {
       ) : candidatos.length === 0 ? (
         <div className="text-center py-12 bg-card border rounded-lg">
           <FileCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground mb-2">Nenhum registo encontrado</p>
+          <p className="text-muted-foreground mb-2">
+            Nenhum registo encontrado
+          </p>
           <p className="text-sm text-muted-foreground">
             Não foram encontrados candidatos com os critérios selecionados
           </p>
@@ -303,15 +344,21 @@ export default function ListaProvaPorCandidatos() {
                       <TableCell className="font-mono text-sm font-semibold">
                         {candidato.numero_inscricao}
                       </TableCell>
-                      <TableCell className="font-medium">{candidato.nome}</TableCell>
-                      <TableCell className="text-sm">{candidato.curso}</TableCell>
+                      <TableCell className="font-medium">
+                        {candidato.nome}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {candidato.curso}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {candidato.faculdade}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{candidato.periodo}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm">{candidato.ano_lectivo}</TableCell>
+                      <TableCell className="text-sm">
+                        {candidato.ano_lectivo}
+                      </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {candidato.lista_de_provas.length > 0 ? (
@@ -326,7 +373,9 @@ export default function ListaProvaPorCandidatos() {
                               </Badge>
                             ))
                           ) : (
-                            <span className="text-xs text-muted-foreground">Sem provas</span>
+                            <span className="text-xs text-muted-foreground">
+                              Sem provas
+                            </span>
                           )}
                         </div>
                       </TableCell>
@@ -340,7 +389,9 @@ export default function ListaProvaPorCandidatos() {
           {/* Paginação */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Label htmlFor="items-per-page" className="text-sm">Itens por página:</Label>
+              <Label htmlFor="items-per-page" className="text-sm">
+                Itens por página:
+              </Label>
               <Select
                 value={(filters.limit ?? 10).toString()}
                 onValueChange={handleLimitChange}
@@ -356,8 +407,9 @@ export default function ListaProvaPorCandidatos() {
                 </SelectContent>
               </Select>
               <span className="text-sm text-muted-foreground ml-4">
-                Mostrando {offset + 1} a {Math.min(offset + (filters.limit ?? 10), total)} de{" "}
-                {total} registos
+                Mostrando {offset + 1} a{" "}
+                {Math.min(offset + (filters.limit ?? 10), total)} de {total}{" "}
+                registos
               </span>
             </div>
 

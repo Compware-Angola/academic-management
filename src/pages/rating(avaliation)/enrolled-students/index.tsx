@@ -41,11 +41,11 @@ import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 
 import { useEstudantesInscritos } from "@/hooks/avaliacao/useEstudantesInscritos";
 import { useQueryTipoAvaliacao } from "@/hooks/avaliacao/use-query-tipo-avaliacao";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 // PDF Components
 import PDFActions, {
@@ -107,12 +107,6 @@ export default function EstudantesInscritos() {
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
   const { data: classes = [], isLoading: loadingClasses } =
     useQueryClassFilterByCurso({ curso: filters.curso });
-  const { data: unidadesCurriculares = [], isLoading: loadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: filters.classes,
-      curso: filters.curso,
-      semestre: filters.semestre,
-    });
   const { data: schedules, isLoading: loadingSchedules } = useScheduleQuery({
     anoLectivo: Number(filters.anoLetivo),
     semestre: Number(filters.semestre),
@@ -297,10 +291,7 @@ export default function EstudantesInscritos() {
         ?.designacao || "—";
     const cursoNome =
       cursos.find((c) => c.codigo === Number(filters.curso))?.designacao || "—";
-    const ucNome =
-      unidadesCurriculares.find(
-        (u) => u.pk === Number(filters.unidadeCurricular),
-      )?.descricao || "—";
+    const ucNome = filters.unidadeCurricular || "—";
     const horarioNome =
       schedules?.data?.find((h) => h.codigo === Number(filters.horarioId))
         ?.designacao || "—";
@@ -340,7 +331,7 @@ export default function EstudantesInscritos() {
     semestres,
     cursos,
     classes,
-    unidadesCurriculares,
+    filters.unidadeCurricular,
     schedules,
     tiposAvaliacao,
   ]);
@@ -526,6 +517,23 @@ export default function EstudantesInscritos() {
             loading={loadingClasses}
           />
 
+          <GradeCurricularSelect
+            value={filters.unidadeCurricular}
+            onChangeValue={(v) =>
+              setFilters({ ...filters, unidadeCurricular: v, horarioId: "" })
+            }
+            anoLectivo={filters.anoLetivo ? Number(filters.anoLetivo) : undefined}
+            curso={filters.curso ? Number(filters.curso) : undefined}
+            classe={filters.classes ? Number(filters.classes) : undefined}
+            semestre={filters.semestre ? Number(filters.semestre) : undefined}
+            disabled={
+              !filters.anoLetivo ||
+              !filters.semestre ||
+              !filters.curso ||
+              !filters.classes
+            }
+          />
+          {/*
           <FormSelect
             label="Unidade Curricular"
             value={filters.unidadeCurricular}
@@ -542,6 +550,7 @@ export default function EstudantesInscritos() {
             map={(u) => ({ key: u.codigo, label: u.descricao, value: u.pk })}
             loading={loadingUC}
           />
+          */}
 
           <FormSelect
             label="Horário"

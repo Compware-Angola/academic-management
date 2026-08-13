@@ -36,9 +36,9 @@ import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { useCursos } from "@/hooks/use-cursos";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { useQueryDisciplinaWithFilter } from "@/hooks/discplina/use-query-disciplina-with-filter";
 import { useQueryInscritosPorUc } from "@/hooks/enrollment/use-query-inscritos-por-uc";
 import { useQueryHorariosDisponiveisInscritosPorUc } from "@/hooks/enrollment/use-query-horarios-disponiveis-por-uc";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 
 type InscritoPorUcRow = {
   numero: number;
@@ -92,17 +92,8 @@ export default function InscritosPorUc() {
       curso: filters.curso,
     });
 
-  const canLoadUcs = !!filters.curso && !!filters.semestre;
-
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUc } =
-    useQueryDisciplinaWithFilter({
-      curso: filters.curso,
-      semestre: filters.semestre,
-      classe:
-        filters.anoCurricular && filters.anoCurricular !== "all"
-          ? filters.anoCurricular
-          : undefined,
-    });
+  const canLoadUcs =
+    !!filters.anoLectivo && !!filters.curso && !!filters.semestre;
 
   const { data: horarios = [], isLoading: isLoadingHorarios } =
     useQueryHorariosDisponiveisInscritosPorUc({
@@ -432,6 +423,28 @@ export default function InscritosPorUc() {
             </div>
 
             <div className="space-y-2">
+              <GradeCurricularSelect
+                value={filters.unidadeCurricular}
+                onChangeValue={(v) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    unidadeCurricular: v,
+                    horario: "0",
+                  }))
+                }
+                anoLectivo={
+                  filters.anoLectivo ? Number(filters.anoLectivo) : undefined
+                }
+                curso={filters.curso ? Number(filters.curso) : undefined}
+                classe={
+                  filters.anoCurricular && filters.anoCurricular !== "all"
+                    ? Number(filters.anoCurricular)
+                    : undefined
+                }
+                semestre={filters.semestre ? Number(filters.semestre) : undefined}
+                disabled={!canLoadUcs}
+              />
+              {/*
               <label className="text-sm font-medium">Unidade Curricular</label>
               <Select
                 value={filters.unidadeCurricular}
@@ -465,6 +478,7 @@ export default function InscritosPorUc() {
                   ))}
                 </SelectContent>
               </Select>
+              */}
             </div>
 
             <div className="space-y-2">

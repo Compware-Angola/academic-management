@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { toast } from "sonner";
+import { useQueryGradeCurricularDropDown } from "@/hooks/discplina/use-query-grade-curricular-dropdown";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Roles {
@@ -113,7 +114,9 @@ export default function LaunchNotes() {
     useQueryTipoCandidatura();
   const tiposCandidaturaFiltered = tiposCandidatura.filter((tipo) => {
     if (
-      !hasPermission(PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO.sigla) &&
+      !hasPermission(
+        PermissionTypeDetails.LANCAMENTO_NOTAS_POS_GRADUACAO.sigla,
+      ) &&
       (tipo.sigla === "DTR" || tipo.sigla === "MST")
     ) {
       return false;
@@ -123,11 +126,13 @@ export default function LaunchNotes() {
   const { data: classes = [], isLoading: isLoadingClasses } =
     useQueryClassFilterByCurso({ curso: formData.curso });
   const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      classe: formData.classes,
-      curso: formData.curso,
-      semestre: formData.semestre,
+    useQueryGradeCurricularDropDown({
+      curso: parseFilter(formData.curso),
+      semestre: parseFilter(formData.semestre),
+      classe: parseFilter(formData.classes),
+      anoLectivo: parseFilter(formData.anoLetivo),
     });
+
   // ─── Auth & roles ─────────────────────────────────────────────────────────
   const { user: userData } = useAuth();
   const roles = userData?.roles as Roles | undefined;
@@ -243,7 +248,8 @@ export default function LaunchNotes() {
         curso: Number(formData.curso),
         unidadeCurricular: Number(formData.unidadeCurricular),
         ...(isDocente &&
-          !isDiretorDeCurso && !haveFullAccess() && { docente: Number(info?.[0]?.codigo_docente) }),
+          !isDiretorDeCurso &&
+          !haveFullAccess() && { docente: Number(info?.[0]?.codigo_docente) }),
       },
       { enabled: canLoadTurmas && canOperateInPage },
     );

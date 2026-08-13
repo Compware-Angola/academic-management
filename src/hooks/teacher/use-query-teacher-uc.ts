@@ -6,7 +6,7 @@ export function useQueryTeacherByUC(unidadeCurricular?:string) {
     queryKey: ["teachers-by-uc",unidadeCurricular],
     queryFn: () => fetchTeacherByUC(unidadeCurricular),
     enabled: !!unidadeCurricular,
-   staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
 
   });
 }

@@ -31,6 +31,7 @@ import { parseFilter } from "@/util/parse-filter";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { TeacherSelectList } from "@/components/common/global-selects/TeacherSelector";
+import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
 interface GestaoAfectacaoModalProps {
   isModalOpen: boolean;
   setIsModalOpen: () => void;
@@ -60,6 +61,7 @@ export const GestaoAfectacaoModal = ({
           ...prev,
           tipoCandidatura: v,
           curso: undefined,
+          semestre: undefined,
           anoLectivo: undefined,
           anoCurricular: undefined,
           unidadeCurricular: undefined,
@@ -92,13 +94,14 @@ export const GestaoAfectacaoModal = ({
       return { ...prev, [key]: v };
     });
   };
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
-    useQueryDisciplinaWithFilter({
-      curso: params.curso,
-      semestre: params.semestre,
-      classe: params.anoCurricular,
-    });
-  const canLoadUcs = !!params.curso && !!params.semestre;
+  const isLicenciatura = Number(params.tipoCandidatura) === 1;
+  // const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+  //   useQueryDisciplinaWithFilter({
+  //     curso: params.curso,
+  //     semestre: params.semestre,
+  //     classe: params.anoCurricular,
+  //   });
+  const canLoadUcs = !!params.curso && (!isLicenciatura || !!params.semestre);
 
   const handleSubmit = async () => {
     const payload = {
@@ -198,7 +201,17 @@ export const GestaoAfectacaoModal = ({
             value={params.semestre}
             onChangeValue={(v) => handleChangeInput("semestre", v)}
           />
-          <div className="space-y-2">
+          <GradeCurricularSelect
+            value={params.unidadeCurricular}
+            onChangeValue={(v) => handleChangeInput("unidadeCurricular", v)}
+            curso={parseFilter(params.curso)}
+            semestre={isLicenciatura ? parseFilter(params.semestre) : undefined}
+            classe={parseFilter(params.anoCurricular)}
+            anoLectivo={parseFilter(params.anoLectivo)}
+            enabled={canLoadUcs}
+            disabled={!canLoadUcs}
+          />
+          {/* <div className="space-y-2">
             <label className="text-sm font-medium">Unidade Curricular</label>
             <Select
               value={params.unidadeCurricular}
@@ -227,7 +240,7 @@ export const GestaoAfectacaoModal = ({
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
           <div className="space-y-2">
             <Label>Categoria</Label>
             <FormCommandSelect

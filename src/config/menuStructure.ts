@@ -15,6 +15,7 @@ import {
   BookUser,
   Files,
   BarChart3,
+  Settings,
 } from "lucide-react";
 import { MenuStructure } from "./menu.types";
 import { PermissionTypeDetails } from "@/constants/permission.type";
@@ -258,7 +259,7 @@ export const ingressoStructure: MenuStructure = {
           ],
         },
         {
-          title: "Sem inscrição em curso",
+          title: "Sem confirmação em curso",
           url: "/inscricoes/sem-curso",
           permission: [
             PermissionTypeDetails.LISTAR_ESTUDANTES_SEM_INSCRICOES_CURSO.sigla,
@@ -714,9 +715,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Lançamento do programa da UC",
           url: "/docente/programa",
-          permission: [
-            PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC.sigla,
-          ],
+          permission: [PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC.sigla],
         },
         {
           title: "Validação do programa",
@@ -1057,6 +1056,11 @@ export const finaceStructure: MenuStructure = {
           permission: [PermissionTypeDetails.FACTURAS.sigla],
         },
         {
+          title: "Conciliação de Negociação de Divida",
+          url: "/financas/negociacao-conciliacao",
+          permission: [],
+        },
+        {
           title: "Serviços e Emolumentos",
           url: "/financas/servicos-emolumentos",
           permission: [PermissionTypeDetails.SERVICOS_PRECARIOS.sigla],
@@ -1070,6 +1074,13 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Tipos Credito",
           url: "/financas/credito/tipos",
+          permission: [
+            PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla,
+          ],
+        },
+        {
+          title: "Siglas dos Tipos de Serviços",
+          url: "/financas/siglas-servicos",
           permission: [
             PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla,
           ],
@@ -1103,7 +1114,7 @@ export const finaceStructure: MenuStructure = {
         url: "/financas/contratos-instituicao",
         permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
       },
-    
+
       {
         title: "Rel. Pagamentos Instituições",
         icon: BarChart3,
@@ -1231,6 +1242,23 @@ export const documentStructure: MenuStructure = {
           title: "Validar Documentos",
           url: "/documentos/validar",
           permission: [PermissionTypeDetails.VALIDAR_DOCUMENTO.sigla],
+        },
+      ],
+      permission: [],
+    },
+  ],
+};
+export const configSystemStructure: MenuStructure = {
+  items: [
+    {
+      title: "Configurações do sistema",
+      url: "/configuracoes",
+      icon: Settings,
+      items: [
+        {
+          title: "Documentos & Assinaturas",
+          url: "/configuracoes/documentos",
+          permission: [],
         },
       ],
       permission: [],

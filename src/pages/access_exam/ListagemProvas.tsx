@@ -68,6 +68,7 @@ const EMPTY_FORM: ProvaForm = {
   data: "",
   inicio: "",
   local: "",
+  periodo_id: "",
 };
 
 function parseIds(value: string) {
@@ -160,6 +161,7 @@ export default function ListagemProvas() {
       data: new Date(prova.data_realizacao).toISOString().split("T")[0],
       inicio: prova.inicio,
       local: prova.sala_id.toString(),
+      periodo_id: prova.periodo_id.toString(),
     });
   };
 
@@ -184,10 +186,13 @@ export default function ListagemProvas() {
       !form.duracao ||
       !form.data ||
       !form.inicio ||
-      !form.local
+      !form.local ||
+      !form.periodo_id ||
+      !form.cursos?.trim() ||
+      !form.perguntas?.trim()
     ) {
       toast.error(
-        "Preencha descrição, senha, ano letivo, duração, data, início e o local.",
+        "Preencha descrição, senha, ano letivo, duração, data, início, local, período, curso e pergunta.",
       );
       return null;
     }
@@ -215,7 +220,8 @@ export default function ListagemProvas() {
       cursos: parseIds(form.cursos),
       data: form.data,
       inicio: form.inicio,
-      local: parseIds(form.local),
+      local: Number(form.local),
+      periodo_id: Number(form.periodo_id),
     };
   };
 
@@ -248,7 +254,8 @@ export default function ListagemProvas() {
       cursos: parseIds(form.cursos),
       data: form.data || undefined,
       inicio: form.inicio || undefined,
-      local: form.local || undefined,
+      local: Number(form.local) || undefined,
+      periodo_id: Number(form.periodo_id) || undefined,
     };
   };
 
