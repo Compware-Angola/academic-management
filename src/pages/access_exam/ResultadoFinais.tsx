@@ -148,21 +148,21 @@ export default function ResultadoFinais() {
 
   const pdfData = exportRows.length
     ? {
-        filtros: [
-          filters.codigoAnoLetivo
-            ? `Ano Letivo: ${filters.codigoAnoLetivo}`
-            : null,
-          filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
-          filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+      filtros: [
+        filters.codigoAnoLetivo
+          ? `Ano Letivo: ${filters.codigoAnoLetivo}`
+          : null,
+        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
 
-          filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
-          filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
-        ]
-          .filter(Boolean)
-          .join(" | "),
-        total: exportRows.length,
-        rows: exportRows,
-      }
+        filters.dataInicio ? `Data Início: ${filters.dataInicio}` : null,
+        filters.dataFim ? `Data Fim: ${filters.dataFim}` : null,
+      ]
+        .filter(Boolean)
+        .join(" | "),
+      total: exportRows.length,
+      rows: exportRows,
+    }
     : null;
 
   const pdfContent = pdfData ? (
@@ -196,32 +196,32 @@ export default function ResultadoFinais() {
 
   const excelProps = pdfData
     ? {
-        documentTitle: "Resultado Final",
-        subtitle: "Classificação geral dos candidatos",
-        infoSections: [
-          {
-            title: "Filtros Aplicados",
-            content: pdfData.filtros || "Sem filtros",
-          },
-          { title: "Resumo", content: [`Total de registos: ${total}`] },
-        ],
-        mainTable: {
-          headers: [
-            { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
-            { key: "nome", label: "Nome", width: 35 },
-            { key: "numeroBilhete", label: "BI", width: 20 },
-            { key: "curso", label: "Curso", width: 30 },
-            { key: "faculdade", label: "Faculdade", width: 30 },
-            { key: "sala", label: "Sala", width: 15 },
-            { key: "dataRealizacao", label: "Data Realização", width: 18 },
-            { key: "nota", label: "Nota", width: 10 },
-            { key: "resultado", label: "Resultado", width: 15 },
-          ],
-          rows: pdfData.rows,
+      documentTitle: "Resultado Final",
+      subtitle: "Classificação geral dos candidatos",
+      infoSections: [
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
         },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
-      }
+        { title: "Resumo", content: [`Total de registos: ${total}`] },
+      ],
+      mainTable: {
+        headers: [
+          { key: "numeroInscricao", label: "Nº Inscrição", width: 18 },
+          { key: "nome", label: "Nome", width: 35 },
+          { key: "numeroBilhete", label: "BI", width: 20 },
+          { key: "curso", label: "Curso", width: 30 },
+          { key: "faculdade", label: "Faculdade", width: 30 },
+          { key: "sala", label: "Sala", width: 15 },
+          { key: "dataRealizacao", label: "Data Realização", width: 18 },
+          { key: "nota", label: "Nota", width: 10 },
+          { key: "resultado", label: "Resultado", width: 15 },
+        ],
+        rows: pdfData.rows,
+      },
+      footerNotice: "Documento gerado automaticamente pelo sistema.",
+      primaryColor: "#0D1B48",
+    }
     : null;
 
   const baseFileName = `Pauta_Geral_Exame_${new Date().toISOString().slice(0, 10)}`;
@@ -309,7 +309,7 @@ export default function ResultadoFinais() {
             Atualizar
           </Button>
 
-          <CorrigirProvasModal />
+          {/* <CorrigirProvasModal /> */}
 
           {pdfContent && (
             <PDFActions

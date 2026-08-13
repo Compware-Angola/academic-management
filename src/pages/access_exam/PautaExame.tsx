@@ -6,7 +6,7 @@ import { NotaPrevistaTab } from "./components/NotaPrevistaTab";
 import { PautaGeralTab } from "./components/PautaGeralTab";
 
 
-const NOTA_PREVISTA_ATIVA = true;
+const NOTA_PREVISTA_ATIVA = false;
 
 export default function PautaExame() {
     return (
