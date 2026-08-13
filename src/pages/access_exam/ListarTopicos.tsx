@@ -214,11 +214,13 @@ export default function ListarTopicos() {
             });
             setDialogOpen(false);
           },
-          onError: () => {
-            toast.error(`Erro ao Criar`, {
-              position: "top-right",
-            });
-          },
+          
+          
+          // onError: () => {
+          //   toast.error(`Erro ao Criar`, {
+          //     position: "top-right",
+          //   });
+          // },
         },
       );
     }
