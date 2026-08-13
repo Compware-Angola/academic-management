@@ -116,7 +116,7 @@ export function DisciplinaMultiSelectPicker({ values, onChange, max }: Props) {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">
-                      {d.desginacao}
+                      {`${d.codigo}-${d.desginacao}`}
                     </p>
                     <p className="text-[11px] text-muted-foreground truncate">
                       {d.tipo_unidade_curricular}
@@ -166,7 +166,7 @@ export function DisciplinaMultiSelectPicker({ values, onChange, max }: Props) {
                     {sigla}
                   </span>
                 )}
-                {designacao}
+                {`${id}-${designacao}`}
                 <button
                   type="button"
                   onClick={() => toggle(id, designacao, sigla)}
