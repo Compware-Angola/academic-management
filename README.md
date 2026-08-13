@@ -4,7 +4,6 @@ Bem-vindo(a) ao **Sistema de Gestão Académica** – uma plataforma moderna, in
 
 Este repositório contém o **frontend** da aplicação, desenvolvido com as tecnologias mais atuais do ecossistema React/Next.js.
 
-
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38BDF8?style=flat&logo=tailwind-css)
 ![Shadcn/UI](https://img.shields.io/badge/Shadcn_UI-latest-000000?style=flat)
@@ -29,15 +28,19 @@ Este repositório contém o **frontend** da aplicação, desenvolvido com as tec
 - **Zod** (validação de formulários)
 - **React Hook Form**
 - **TanStack Query** (gestão de estado do servidor)
+
 ## Como rodar o projeto localmente
 
 ### Pré-requisitos
+
 - Node.js 18 ou superior
 - npm, pnpm ou yarn
 
 ### Passos
 
 1. Clona o repositório
+
 ```bash
 git clone https://github.com/Compware-Angola/academic-management.git
 cd academic-management
+```
