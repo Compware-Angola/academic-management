@@ -60,7 +60,13 @@ import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCa
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
 import { ImportUCModal } from "./components/ImportModalUC";
+import {
+  ResultadoAddUCModal,
+  ResultadoUC,
+} from "./components/ResultadoAddUCModal";
 import { useNavigate } from "react-router-dom";
+import { ApiError } from "@/error";
+import { AddUCsToPlanResponse } from "@/services/fetch-gradeCurricularService";
 
 import { cn } from "@/lib/utils";
 import {
@@ -199,6 +205,9 @@ export default function UCManagementPlan() {
 
   const [isDisciplinesOpen, setIsDisciplinesOpen] = useState(false);
 
+  const [resultadoModalOpen, setResultadoModalOpen] = useState(false);
+  const [resultados, setResultados] = useState<ResultadoUC[]>([]);
+
   const { mutate: createUCs, isPending: isCreating } = useAddUCsToPlan();
 
   const toggleDisciplina = (codigo: string) => {
@@ -208,6 +217,59 @@ export default function UCManagementPlan() {
         ? prev.codigos_disciplina.filter((c) => c !== codigo)
         : [...prev.codigos_disciplina, codigo],
     }));
+  };
+
+  const buildResultados = (
+    selectedCodigos: string[],
+    resposta?: Pick<
+      AddUCsToPlanResponse,
+      "adicionadas" | "reativadas" | "falhas"
+    >,
+    motivoFalhaFallback?: string,
+  ): ResultadoUC[] => {
+    const porCodigo = new Map<
+      number,
+      { status: ResultadoUC["status"]; motivo?: string }
+    >();
+    resposta?.adicionadas.forEach((a) =>
+      porCodigo.set(a.codigoDisciplina, { status: "adicionada" }),
+    );
+    resposta?.reativadas.forEach((a) =>
+      porCodigo.set(a.codigoDisciplina, { status: "reativada" }),
+    );
+    resposta?.falhas.forEach((f) =>
+      porCodigo.set(
+        f.codigoDisciplina,
+        f.jaNoPlano
+          ? { status: "jaNoPlano" }
+          : { status: "falha", motivo: f.motivo },
+      ),
+    );
+
+    return selectedCodigos.map((codigo) => {
+      const num = Number(codigo);
+      const disc = disciplines.find((d) => d.codigo === num);
+      const designacao = disc
+        ? `${disc.codigo} – ${disc.desginacao}`
+        : String(num);
+      const resultado = porCodigo.get(num);
+
+      return resultado
+        ? {
+            codigoDisciplina: num,
+            designacao,
+            status: resultado.status,
+            motivo: resultado.motivo,
+          }
+        : {
+            codigoDisciplina: num,
+            designacao,
+            status: "falha" as const,
+            motivo:
+              motivoFalhaFallback ??
+              "Não foi possível confirmar o resultado da operação.",
+          };
+    });
   };
 
   const handleCreateUC = () => {
@@ -235,46 +297,31 @@ export default function UCManagementPlan() {
       },
       {
         onSuccess: (data) => {
-          const totalOk = data.adicionadas.length + data.reativadas.length;
-          const totalJaNoPlano = data.falhas.filter(
-            (f: any) => f.jaNoPlano,
-          ).length;
-          const totalOutrasFalhas = data.falhas.length - totalJaNoPlano;
-
-          if (totalOk > 0 && data.falhas.length === 0) {
-            toast.success(`${totalOk} UC adicionada(s) ao plano com sucesso!`);
-          } else if (totalOk > 0 && data.falhas.length > 0) {
-            toast.warning(
-              `${totalOk} adicionada(s). ${totalJaNoPlano > 0 ? `${totalJaNoPlano} já estava(m) no plano.` : ""} ${
-                totalOutrasFalhas > 0 ? `${totalOutrasFalhas} falharam.` : ""
-              }`.trim(),
-            );
-          } else if (
-            totalOk === 0 &&
-            totalJaNoPlano > 0 &&
-            totalOutrasFalhas === 0
-          ) {
-            toast.info(
-              `Todas as ${totalJaNoPlano} UC selecionada(s) já estavam no plano.`,
-            );
-          } else {
-            toast.error(`Nenhuma UC foi adicionada. Verifique os detalhes.`);
-          }
-
-          if (data.falhas.length > 0) {
-            console.warn("Falhas ao adicionar UC:", data.falhas);
-          }
-
+          setResultados(buildResultados(formData.codigos_disciplina, data));
+          setResultadoModalOpen(true);
           setIsModalOpen(false);
           setFormData({ codigos_disciplina: [], codigo_semestre: "" });
           refetch();
         },
-        onError: (error: any) => {
-          // const backendMessage =
-          //   error?.response?.data?.message ||
-          //   error?.message ||
-          //   "Erro ao adicionar UC ao plano.";
-          // toast.error(backendMessage);
+        onError: (error: Error) => {
+          const apiError = error as ApiError;
+          const falhas = apiError.data?.falhas;
+
+          setResultados(
+            falhas?.length
+              ? buildResultados(formData.codigos_disciplina, {
+                  adicionadas: [],
+                  reativadas: [],
+                  falhas,
+                })
+              : buildResultados(
+                  formData.codigos_disciplina,
+                  undefined,
+                  apiError.message || "Erro ao comunicar com o servidor.",
+                ),
+          );
+          setResultadoModalOpen(true);
+          setFormData({ codigos_disciplina: [], codigo_semestre: "" });
         },
       },
     );
@@ -633,6 +680,12 @@ export default function UCManagementPlan() {
         onOpenChange={(V) => setIsModalImportOpen(false)}
       />
 
+      <ResultadoAddUCModal
+        open={resultadoModalOpen}
+        onOpenChange={setResultadoModalOpen}
+        resultados={resultados}
+      />
+
       {/* Modal de Criação */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-4xl! p-0 overflow-hidden shadow-2xl border-border/40">
@@ -839,13 +892,17 @@ export default function UCManagementPlan() {
                                 key={codigo}
                                 variant="secondary"
                                 className="gap-1.5 pl-2.5 pr-1.5 py-1 text-xs font-medium bg-secondary/80 hover:bg-secondary"
+                                onPointerDown={(e) => e.stopPropagation()}
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 {disc
                                   ? `${disc.codigo} – ${disc.desginacao}`
                                   : codigo}
                                 <X
-                                  className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground rounded-full"
+                                  className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-destructive rounded-full"
+                                  role="button"
+                                  aria-label={`Remover ${disc?.desginacao ?? codigo}`}
+                                  onPointerDown={(e) => e.stopPropagation()}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     toggleDisciplina(codigo);
@@ -906,6 +963,9 @@ export default function UCManagementPlan() {
                                 {isSelected && (
                                   <X
                                     className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive"
+                                    role="button"
+                                    aria-label={`Remover ${disc.desginacao}`}
+                                    onPointerDown={(e) => e.stopPropagation()}
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       toggleDisciplina(codigo);

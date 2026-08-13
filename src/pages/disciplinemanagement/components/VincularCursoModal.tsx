@@ -13,7 +13,16 @@ import { Separator } from "@/components/ui/separator";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
-import { Link2, Plus, Trash2, BookOpen, Loader2 } from "lucide-react";
+import {
+  Link2,
+  Plus,
+  Trash2,
+  BookOpen,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
@@ -47,6 +56,10 @@ interface VincularCursoModalProps {
 
 function novoId() {
   return Math.random().toString(36).slice(2, 10);
+}
+
+function novaRow(): VinculoRow {
+  return { id: novoId(), curso: "", anoCurricular: "", semestre: "" };
 }
 
 function VinculoRowItem({
@@ -122,22 +135,21 @@ export function VincularCursoModal({
   onClose,
   uc,
 }: VincularCursoModalProps) {
-  const [rows, setRows] = useState<VinculoRow[]>([
-    { id: novoId(), curso: "", anoCurricular: "", semestre: "" },
-  ]);
+  const [rows, setRows] = useState<VinculoRow[]>([novaRow()]);
   const [filters, setFilters] = useState<Filtro>({
     anoLectivo: "",
     tipoCandidatura: "",
   });
 
-  const { mutate: criarTroncoComum, isPending } =
-    useMutationCreateTroncoComum();
+  const {
+    mutate: criarTroncoComum,
+    isPending,
+    data: resultado,
+    reset: resetResultado,
+  } = useMutationCreateTroncoComum();
 
   const handleAddRow = () => {
-    setRows((prev) => [
-      ...prev,
-      { id: novoId(), curso: "", anoCurricular: "", semestre: "" },
-    ]);
+    setRows((prev) => [...prev, novaRow()]);
   };
 
   const handleRemoveRow = (id: string) => {
@@ -148,11 +160,20 @@ export function VincularCursoModal({
     setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
   };
 
+  const resetForm = () => {
+    setRows([novaRow()]);
+    setFilters({ anoLectivo: "", tipoCandidatura: "" });
+    resetResultado();
+  };
+
   const handleClose = () => {
     if (isPending) return;
-    setRows([{ id: novoId(), curso: "", anoCurricular: "", semestre: "" }]);
-    setFilters({ anoLectivo: "", tipoCandidatura: "" });
+    resetForm();
     onClose();
+  };
+
+  const handleVincularNovamente = () => {
+    resetForm();
   };
 
   const vinculosValidos = rows.filter(
@@ -182,11 +203,7 @@ export function VincularCursoModal({
       })),
     };
 
-    criarTroncoComum(payload, {
-      onSuccess: () => {
-        handleClose();
-      },
-    });
+    criarTroncoComum(payload);
   };
 
   return (
@@ -198,10 +215,15 @@ export function VincularCursoModal({
               <Link2 className="h-4 w-4" />
             </div>
             <div>
-              <DialogTitle>Vincular à Grade Curricular</DialogTitle>
+              <DialogTitle>
+                {resultado
+                  ? "Resumo da Vinculação"
+                  : "Vincular à Grade Curricular"}
+              </DialogTitle>
               <DialogDescription className="mt-0.5">
-                Associe esta disciplina a um ou mais cursos e respectivo ano
-                curricular.
+                {resultado
+                  ? resultado.message
+                  : "Associe esta disciplina a um ou mais cursos e respectivo ano curricular."}
               </DialogDescription>
             </div>
           </div>
@@ -219,97 +241,186 @@ export function VincularCursoModal({
           </div>
         )}
 
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">
-            Filtros da candidatura
-          </p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <TipoCandidaturaSelect
-              value={filters.tipoCandidatura?.toString()}
-              onChangeValue={(v) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  tipoCandidatura: v,
-                }))
-              }
-            />
-            <AcademicYearsAvailableForOperationSelect
-              label="Ano Letivo"
-              value={filters.anoLectivo}
-              onChangeValue={(v) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  anoLectivo: v,
-                }))
-              }
-              tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
-              onlyConfigurable={false}
-            />
-          </div>
-        </div>
+        {resultado ? (
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg border bg-card p-3 text-center">
+                <p className="text-2xl font-semibold">
+                  {resultado.totalCursos}
+                </p>
+                <p className="text-xs text-muted-foreground">Total</p>
+              </div>
+              <div className="rounded-lg border bg-green-50 p-3 text-center dark:bg-green-950/30">
+                <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
+                  {resultado.totalSucesso}
+                </p>
+                <p className="text-xs text-muted-foreground">Sucesso</p>
+              </div>
+              <div className="rounded-lg border bg-red-50 p-3 text-center dark:bg-red-950/30">
+                <p className="text-2xl font-semibold text-red-600 dark:text-red-400">
+                  {resultado.totalErros}
+                </p>
+                <p className="text-xs text-muted-foreground">Erros</p>
+              </div>
+            </div>
 
-        <Separator />
+            <Separator />
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-muted-foreground">
-              Cursos vinculados
-            </p>
-            <span className="text-xs text-muted-foreground">
-              {vinculosValidos.length} de {rows.length} completo(s)
-            </span>
-          </div>
+            <div className="flex max-h-[320px] flex-col gap-2 overflow-y-auto py-1 pr-1">
+              {resultado.sucesso.map((item) => (
+                <div
+                  key={`sucesso-${item.codigoCurso}-${item.codigoPlanoCurso}`}
+                  className="flex items-start gap-3 rounded-lg border bg-green-50/60 p-3 dark:bg-green-950/20"
+                >
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">
+                      {item.nomeCurso}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Vinculado com sucesso ao plano de curso{" "}
+                      {item.codigoPlanoCurso}
+                    </p>
+                  </div>
+                </div>
+              ))}
 
-          <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto py-1 pr-1">
-            {rows.map((row, index) => (
-              <VinculoRowItem
-                index={index}
-                tipoCandidatura={parseFilter(filters.tipoCandidatura)}
-                key={row.id}
-                row={row}
-                onChange={handleChangeRow}
-                onRemove={() => handleRemoveRow(row.id)}
-                removable={rows.length > 1}
-              />
-            ))}
+              {resultado.erros.map((item) => (
+                <div
+                  key={`erro-${item.codigoCurso}`}
+                  className="flex items-start gap-3 rounded-lg border bg-red-50/60 p-3 dark:bg-red-950/20"
+                >
+                  <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">
+                      {item.nomeCurso}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.motivo}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-fit"
-              onClick={handleAddRow}
-              disabled={isPending}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Curso
-            </Button>
-          </div>
-        </div>
+            <DialogFooter className="items-center sm:justify-between">
+              <span className="text-sm text-muted-foreground">
+                {resultado.totalSucesso} de {resultado.totalCursos} vinculado(s)
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleVincularNovamente}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Vincular Outro
+                </Button>
+                <Button type="button" onClick={handleClose}>
+                  Fechar
+                </Button>
+              </div>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Filtros da candidatura
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <TipoCandidaturaSelect
+                  value={filters.tipoCandidatura?.toString()}
+                  onChangeValue={(v) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      tipoCandidatura: v,
+                    }))
+                  }
+                />
+                <AcademicYearsAvailableForOperationSelect
+                  label="Ano Letivo"
+                  value={filters.anoLectivo}
+                  onChangeValue={(v) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      anoLectivo: v,
+                    }))
+                  }
+                  tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+                  onlyConfigurable={false}
+                />
+              </div>
+            </div>
 
-        <DialogFooter className="items-center sm:justify-between">
-          <span className="text-sm text-muted-foreground">
-            {vinculosValidos.length} vínculo(s) pronto(s)
-          </span>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-            <Button type="button" onClick={handleSubmit} disabled={isPending}>
-              {isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Link2 className="h-4 w-4 mr-2" />
-              )}
-              {isPending ? "A vincular..." : "Vincular"}
-            </Button>
-          </div>
-        </DialogFooter>
+            <Separator />
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Cursos vinculados
+                </p>
+                <span className="text-xs text-muted-foreground">
+                  {vinculosValidos.length} de {rows.length} completo(s)
+                </span>
+              </div>
+
+              <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto py-1 pr-1">
+                {rows.map((row, index) => (
+                  <VinculoRowItem
+                    index={index}
+                    tipoCandidatura={parseFilter(filters.tipoCandidatura)}
+                    key={row.id}
+                    row={row}
+                    onChange={handleChangeRow}
+                    onRemove={() => handleRemoveRow(row.id)}
+                    removable={rows.length > 1}
+                  />
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  onClick={handleAddRow}
+                  disabled={isPending}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Curso
+                </Button>
+              </div>
+            </div>
+
+            <DialogFooter className="items-center sm:justify-between">
+              <span className="text-sm text-muted-foreground">
+                {vinculosValidos.length} vínculo(s) pronto(s)
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={isPending}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isPending}
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Link2 className="h-4 w-4 mr-2" />
+                  )}
+                  {isPending ? "A vincular..." : "Vincular"}
+                </Button>
+              </div>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

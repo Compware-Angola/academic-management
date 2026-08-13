@@ -124,7 +124,11 @@ export interface AddUCsToPlanResponse {
   message: string;
   adicionadas: { codigoDisciplina: number; codigoGrade: number }[];
   reativadas: { codigoDisciplina: number; codigoGrade: number }[];
-  falhas: { codigoDisciplina: number; motivo: string }[];
+  falhas: {
+    codigoDisciplina: number;
+    motivo: string;
+    jaNoPlano?: boolean;
+  }[];
 }
 
 export async function addUCsToPlan(
@@ -133,6 +137,7 @@ export async function addUCsToPlan(
   const response = await axiosNestGa.post(
     `/discipline/plano-curricular/lote`,
     payload,
+    { showError: false },
   );
   return response.data;
 }
