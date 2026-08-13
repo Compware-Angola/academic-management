@@ -36,39 +36,46 @@ const setDefaultValue = (value: string) =>
 
 export default function TipoCredito() {
   const [showDeleted, setShowDeleted] = useState(false);
-  const { mutate: deleteTipoCreditoEducacional, isPending: isDeleting } = useDeleteTipoCreditoEducacional();
+  const { mutate: deleteTipoCreditoEducacional, isPending: isDeleting } =
+    useDeleteTipoCreditoEducacional();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState<string | undefined>(undefined);
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data: creditoEducacionalTipoResponse, isLoading: isLoadingCreditoEducationalTipo } = useQueryFetchCreditoEducacionalTipo({
+  const {
+    data: creditoEducacionalTipoResponse,
+    isLoading: isLoadingCreditoEducationalTipo,
+  } = useQueryFetchCreditoEducacionalTipo({
     search: setDefaultValue(debouncedSearch),
-    deleted: showDeleted
+    deleted: showDeleted,
   });
-  const { mutate: restoreTipoCreditoEducacional, isPending: isRestoring } = useRestoreTipoCreditoEducacional();
+  const { mutate: restoreTipoCreditoEducacional, isPending: isRestoring } =
+    useRestoreTipoCreditoEducacional();
   const creditoEducacional = creditoEducacionalTipoResponse?.data ?? [];
-  const [selectedTipoCredito, setSelectedTipoCredito] = useState<CreditoEducacionalTipo | undefined>(undefined);
+  const [selectedTipoCredito, setSelectedTipoCredito] = useState<
+    CreditoEducacionalTipo | undefined
+  >(undefined);
 
   const handleSelectTipoCredito = (tipoCredito?: CreditoEducacionalTipo) => {
     if (!tipoCredito) {
       setSelectedTipoCredito(undefined);
       setIsModalOpen(false);
-      return
+      return;
     }
     setSelectedTipoCredito(tipoCredito);
     setIsModalOpen(true);
-  }
+  };
 
   const handleOpenModal = () => {
     setSelectedTipoCredito(undefined);
     setIsModalOpen(true);
-  }
+  };
   const handleRestoreTipoCreditoEducacional = (id: number) => {
     restoreTipoCreditoEducacional({ id });
-  }
+  };
   const handleDeleteTipoCreditoEducacional = (id: number) => {
     deleteTipoCreditoEducacional({ id });
-  }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -102,7 +109,9 @@ export default function TipoCredito() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Filtros de Pesquisa</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Filtros de Pesquisa
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -166,27 +175,48 @@ export default function TipoCredito() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {creditoEducacional.map(item => {
+                {creditoEducacional.map((item) => {
                   const isDeleted = !!item.deleteat;
                   return (
                     <TableRow
                       key={item.codigo}
                       className={cn(
                         "transition-all duration-200",
-                        isDeleted && "bg-destructive/5 opacity-75 hover:bg-destructive/10"
+                        isDeleted &&
+                          "bg-destructive/5 opacity-75 hover:bg-destructive/10",
                       )}
                     >
-                      <TableCell className={cn("font-medium", isDeleted && "line-through text-muted-foreground italic")}>
+                      <TableCell
+                        className={cn(
+                          "font-medium",
+                          isDeleted &&
+                            "line-through text-muted-foreground italic",
+                        )}
+                      >
                         {item.designacao}
                       </TableCell>
-                      <TableCell className={cn(isDeleted && "line-through text-muted-foreground italic")}>
+                      <TableCell
+                        className={cn(
+                          isDeleted &&
+                            "line-through text-muted-foreground italic",
+                        )}
+                      >
                         {item.sigla}
                       </TableCell>
                       <TableCell>
                         {isDeleted ? (
-                          <Badge variant="destructive" className="uppercase text-[10px]">Eliminado</Badge>
+                          <Badge
+                            variant="destructive"
+                            className="uppercase text-[10px]"
+                          >
+                            Eliminado
+                          </Badge>
                         ) : (
-                          <Badge variant={item.status === 1 ? "secondary" : "outline"}>
+                          <Badge
+                            variant={
+                              item.status === 1 ? "secondary" : "outline"
+                            }
+                          >
                             {item.status === 1 ? "Ativo" : "Inativo"}
                           </Badge>
                         )}
@@ -199,7 +229,9 @@ export default function TipoCredito() {
                             size="icon"
                             disabled={isRestoring}
                             title="Restaurar item"
-                            onClick={() => handleRestoreTipoCreditoEducacional(item.codigo)}
+                            onClick={() =>
+                              handleRestoreTipoCreditoEducacional(item.codigo)
+                            }
                           >
                             <RotateCcw className="h-4 w-4" />
                           </Button>
@@ -220,7 +252,9 @@ export default function TipoCredito() {
                               size="icon"
                               disabled={isDeleting}
                               title="Eliminar"
-                              onClick={() => handleDeleteTipoCreditoEducacional(item.codigo)}
+                              onClick={() =>
+                                handleDeleteTipoCreditoEducacional(item.codigo)
+                              }
                             >
                               <Trash className="h-4 w-4" />
                             </Button>
@@ -228,7 +262,7 @@ export default function TipoCredito() {
                         )}
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
