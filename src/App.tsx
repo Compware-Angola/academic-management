@@ -73,6 +73,7 @@ import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPa
 import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
 import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
 import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
+import SiglaServico from "./pages/financas/area-financeira/sigla-tipo-servicos";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
@@ -562,8 +563,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC
-                            .sigla,
+                          PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC.sigla,
                         ]}
                       >
                         <DocenteLancamentoProgramaUC />
@@ -1470,6 +1470,19 @@ const App = () => {
                         ]}
                       >
                         <TipoCredito />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="financas/siglas-servicos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL
+                            .sigla,
+                        ]}
+                      >
+                        <SiglaServico />
                       </ProtectedRoute>
                     }
                   />

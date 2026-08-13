@@ -108,6 +108,17 @@ function cleanMathSyntax(math: string): string {
     .trim();
 }
 
+const RAW_MATH_MARKERS =
+  /\\(operatorname|frac|sqrt|lim|sum|int|infty|cdot|times|div|pm|leq|geq|neq|approx|to|rightarrow|log|sin|cos|tan|alpha|beta|theta|pi|left|right)\b|\\:|[\^_]\{/;
+
+function isFullyRawMath(raw: string): boolean {
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("\\")) return false; // só entra aqui quem começa mesmo por um comando LaTeX
+  if (trimmed.includes("$")) return false; // se tem $, deixa o tokenizer normal tratar
+  const outsideText = trimmed.replace(/\\text\{[^{}]*\}/g, " ");
+  return RAW_MATH_MARKERS.test(outsideText); // sobrou algum comando matemático fora do \text{}?
+}
+
 /* ---------------------------------------------------------
    4. Tokenizador: separa PLAIN TEXT / \text{...} / MATH real
    -- Esta é a parte que faltava no ficheiro original. Cerca
@@ -122,6 +133,10 @@ function cleanMathSyntax(math: string): string {
 type Segment = { type: "text" | "math"; content: string };
 
 function tokenize(raw: string): Segment[] {
+  if (isFullyRawMath(raw)) {
+    return [{ type: "math", content: raw.trim() }];
+  }
+
   const segments: Segment[] = [];
   // Captura $$...$$ ou $...$ (math real) OU \text{...} (texto explícito).
   // Tudo o resto é texto simples.

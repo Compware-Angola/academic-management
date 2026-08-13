@@ -715,9 +715,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Lançamento do programa da UC",
           url: "/docente/programa",
-          permission: [
-            PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC.sigla,
-          ],
+          permission: [PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC.sigla],
         },
         {
           title: "Validação do programa",
@@ -1080,6 +1078,13 @@ export const finaceStructure: MenuStructure = {
             PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla,
           ],
         },
+        {
+          title: "Siglas dos Tipos de Serviços",
+          url: "/financas/siglas-servicos",
+          permission: [
+            PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL.sigla,
+          ],
+        },
 
         {
           title: "Instituições - Todas",
@@ -1242,7 +1247,6 @@ export const documentStructure: MenuStructure = {
       permission: [],
     },
   ],
-
 };
 export const configSystemStructure: MenuStructure = {
   items: [
@@ -1256,10 +1260,8 @@ export const configSystemStructure: MenuStructure = {
           url: "/configuracoes/documentos",
           permission: [],
         },
-
       ],
       permission: [],
     },
-  ]
-
-}
+  ],
+};
