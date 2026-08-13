@@ -1,4 +1,10 @@
-import { useState, useMemo, type Dispatch, type SetStateAction } from "react";
+import {
+  useEffect,
+  useState,
+  useMemo,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import {
   Loader2,
   Search,
@@ -15,6 +21,8 @@ import {
   ChevronRight,
   Check,
   X,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -50,7 +58,10 @@ import { FormCommandSelect } from "@/components/common/FormCommandSelect";
 import { useAvailableRooms } from "@/hooks/salas/use-rooms-avaliable";
 import { FormSelect } from "@/components/common/FormSelect";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
-import { LatexText } from "@/components/common/latex-text";
+import { Badge } from "@/components/ui/badge";
+import { LatexText } from "@/util/LatexText";
+
+const TOTAL_COTACAO = 20;
 
 export type ProvaForm = {
   descricao: string;
@@ -151,6 +162,11 @@ function SelectionCounter({
   );
 }
 
+const checkCotacao = (cotacao: string) => {
+  const cotacaoNumber = parseInt(cotacao);
+  return cotacaoNumber != TOTAL_COTACAO;
+};
+
 /* ── componente auxiliar: paginação compacta ────────────────────────────── */
 function CompactPagination({
   page,
@@ -216,6 +232,44 @@ export function ProvaFormDialog({
   const [searchCurso, setSearchCurso] = useState("");
   const { data: todosOsCursos = [], isLoading: isLoadingCursos } = useCursos();
 
+  /* ── cotação acumulada por pergunta selecionada ──────────────────────── */
+  const [cotacoesPorPergunta, setCotacoesPorPergunta] = useState<
+    Record<number, number>
+  >({});
+
+  const cotacao = useMemo(
+    () =>
+      Object.values(cotacoesPorPergunta)
+        .reduce((acc, valor) => acc + valor, 0)
+        .toString(),
+    [cotacoesPorPergunta],
+  );
+
+  const cotacaoNumero = Number(cotacao);
+
+  const cotacaoConfig =
+    cotacaoNumero === 20
+      ? {
+          icon: CheckCircle2,
+          className:
+            "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400 dark:border-green-800",
+          iconClassName: "text-green-600 dark:text-green-400",
+        }
+      : cotacaoNumero > 20
+        ? {
+            icon: AlertTriangle,
+            className:
+              "bg-red-100 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800 animate-pulse",
+            iconClassName: "text-red-600 dark:text-red-400",
+          }
+        : {
+            icon: HelpCircle,
+            className: "bg-muted text-muted-foreground border-border",
+            iconClassName: "text-muted-foreground",
+          };
+
+  const CotacaoIcon = cotacaoConfig.icon;
+
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
   const cursosFiltrados = useMemo(() => {
     const termo = searchCurso.trim().toLowerCase();
@@ -239,8 +293,51 @@ export function ProvaFormDialog({
       limit: 10,
     });
 
-  const perguntas = perguntasResponse?.data ?? [];
+  const perguntas = useMemo(
+    () => perguntasResponse?.data ?? [],
+    [perguntasResponse],
+  );
   const pagination = perguntasResponse?.pagination;
+
+  /* ── todas as perguntas (para cotação real das selecionadas) ─────────── */
+  const { data: todasPerguntasResponse } = usePerguntas(
+    { page: 1, limit: 1000 },
+    { enabled: open },
+  );
+
+  const todasPerguntas = useMemo(
+    () => todasPerguntasResponse?.data ?? [],
+    [todasPerguntasResponse],
+  );
+
+  /* ── sincroniza a cotação acumulada com as perguntas carregadas ─────── */
+  useEffect(() => {
+    setCotacoesPorPergunta((currentMap) => {
+      const idsSelecionados = parseIdValues(form.perguntas);
+      const idsSelecionadosSet = new Set(idsSelecionados);
+      const next = { ...currentMap };
+      let mudou = false;
+
+      for (const id of Object.keys(next)) {
+        if (!idsSelecionadosSet.has(Number(id))) {
+          delete next[Number(id)];
+          mudou = true;
+        }
+      }
+
+      for (const pergunta of [...perguntas, ...todasPerguntas]) {
+        if (
+          idsSelecionadosSet.has(pergunta.id) &&
+          next[pergunta.id] !== pergunta.cotacao
+        ) {
+          next[pergunta.id] = pergunta.cotacao;
+          mudou = true;
+        }
+      }
+
+      return mudou ? next : currentMap;
+    });
+  }, [form.perguntas, perguntas, todasPerguntas]);
 
   const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
     anoLectivo: Number(23),
@@ -291,12 +388,29 @@ export function ProvaFormDialog({
                   {resumoDisciplinas !== 1 ? "s" : ""}
                 </span>
               )}
+
               {resumoPerguntas > 0 && (
-                <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
-                  <HelpCircle className="h-3 w-3" />
-                  {resumoPerguntas} pergunta
-                  {resumoPerguntas !== 1 ? "s" : ""}
-                </span>
+                <>
+                  <Badge
+                    variant="outline"
+                    className={`hidden sm:inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-normal ${cotacaoConfig.className}`}
+                  >
+                    <CotacaoIcon
+                      className={`h-3.5 w-3.5 ${cotacaoConfig.iconClassName}`}
+                    />
+
+                    <span className="font-medium">Cotação da Prova:</span>
+
+                    <span className="font-semibold">
+                      {cotacao} valor{cotacao !== "1" ? "es" : ""}
+                    </span>
+                  </Badge>
+                  <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                    <HelpCircle className="h-3 w-3" />
+                    {resumoPerguntas} pergunta
+                    {resumoPerguntas !== 1 ? "s" : ""}
+                  </span>
+                </>
               )}
             </div>
           </div>
@@ -746,7 +860,12 @@ export function ProvaFormDialog({
                       </div>
 
                       <span className="text-muted-foreground text-xs">
-                        {pergunta.disciplina}
+                        {pergunta.disciplina} -{" "}
+                        <b>
+                          <i>Classificação: </i>
+                        </b>{" "}
+                        {pergunta.cotacao} valor
+                        {pergunta.cotacao !== 1 ? "es" : ""}
                       </span>
                     </div>
                   )}
@@ -821,7 +940,7 @@ export function ProvaFormDialog({
           </Button>
           <Button
             onClick={onSave}
-            disabled={isSaving}
+            disabled={isSaving || checkCotacao(cotacao)}
             className="min-w-[140px]"
           >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
