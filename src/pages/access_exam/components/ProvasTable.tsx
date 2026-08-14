@@ -29,6 +29,11 @@ type ProvasTableProps = {
   onDelete: (prova: ProvaResumo) => void;
 };
 
+function truncateText(value: string, maxLength: number) {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength)}…`;
+}
+
 export function ProvasTable({
   provas,
   isLoading,
@@ -77,8 +82,11 @@ export function ProvasTable({
                   {prova.id}
                 </TableCell>
                 <TableCell>
-                  <div className="font-medium">
-                    {plainTextFromHtml(prova.descricao)}
+                  <div
+                    className="font-medium"
+                    title={plainTextFromHtml(prova.descricao)}
+                  >
+                    {truncateText(plainTextFromHtml(prova.descricao), 30)}
                   </div>
                 </TableCell>
                 <TableCell>{prova.ano_letivo}</TableCell>
