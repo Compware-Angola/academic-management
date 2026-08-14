@@ -50,6 +50,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { usePermission } from "@/auth/permission.helper";
 import { useQueryAdditionalInformation } from "@/hooks/teacher/use-query-teacher-profile";
 import { GradeCurricularSelect } from "@/components/common/global-selects/GradeCurricularSelect";
+import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 export interface Roles {
@@ -165,6 +167,7 @@ export function EditSchedule() {
 
   // ─── Form State ───────────────────────────────────────────────────────────
   const [formData, setFormData] = useState({
+    tipoCandidatura: "",
     anoLetivo: "",
     semestre: "",
     periodo: "",
@@ -427,12 +430,16 @@ export function EditSchedule() {
           )}
 
           <div className="grid md:grid-cols-4 gap-4">
-            <FormSelect
-              label="Ano Letivo"
+            <TipoCandidaturaSelect
+              value={formData.tipoCandidatura}
+              onChangeValue={(v) => setFormData({ ...formData, tipoCandidatura: v })}
+            />
+            <AcademicYearsAvailableForOperationSelect
+              onChangeValue={(v) => setFormData({ ...formData, anoLetivo: v })}
+              tipoCandidaturaId={parseFilter(formData.tipoCandidatura)}
               value={formData.anoLetivo}
-              options={academicYear}
-              map={(a) => ({ key: a.codigo, label: a.designacao, value: String(a.codigo) })}
-              onChange={(v) => setFormData((p) => ({ ...p, anoLetivo: v }))}
+              enableDefaultActiveYear
+              label="Ano Letivo"
             />
 
             <FormSelect
