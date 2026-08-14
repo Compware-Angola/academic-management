@@ -348,7 +348,6 @@ export function VincularCursoModal({
                     }))
                   }
                   tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
-                  onlyConfigurable={false}
                 />
               </div>
             </div>

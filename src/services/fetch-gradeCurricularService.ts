@@ -153,3 +153,35 @@ export async function toggleStatusGradeCurricular({
 
   return data;
 }
+
+// --- DELETAR GRADE CURRICULAR NO PLANO
+
+export interface DeletePlanoCurricularParams {
+  codigoCurso: number;
+  codigoAnoLectivo: number;
+  codigoGrade: number;
+}
+
+export interface DeletePlanoCurricularResponse {
+  message: string;
+  [key: string]: any;
+}
+
+export const deletePlanoCurricularService = async ({
+  codigoCurso,
+  codigoAnoLectivo,
+  codigoGrade,
+}: DeletePlanoCurricularParams): Promise<DeletePlanoCurricularResponse> => {
+  const { data } = await axiosNestGa.delete<DeletePlanoCurricularResponse>(
+    "/discipline/plano-curricular",
+    {
+      params: {
+        codigoCurso,
+        codigoAnoLectivo,
+        codigoGrade,
+      },
+    },
+  );
+
+  return data;
+};

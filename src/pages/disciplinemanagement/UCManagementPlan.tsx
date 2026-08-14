@@ -84,6 +84,8 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Trash2 } from "lucide-react";
+import { useMutationDeletePlanoCurricular } from "@/hooks/discplina/use-delete-grade-plano";
 
 export default function UCManagementPlan() {
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
@@ -181,6 +183,37 @@ export default function UCManagementPlan() {
 
   const { mutate: update, isPending: updating } = useMutationUpdateDiscipline();
   const isGraduation = tipoCandidaturaId === "1";
+  const { mutate: deletePlanoCurricular, isPending: deletingPlanoCurricular } =
+    useMutationDeletePlanoCurricular();
+
+  const handleRemoveGrade = (codigoGrade: number) => {
+    if (!anoLetivoId || !cursoId) {
+      toast.error("Selecione o ano letivo e o curso para remover a grade.");
+      return;
+    }
+
+    deletePlanoCurricular(
+      {
+        codigoCurso: Number(cursoId),
+        codigoAnoLectivo: Number(anoLetivoId),
+        codigoGrade,
+      },
+      {
+        onSuccess: (data) => {
+          toast.success(
+            data.message || "Grade curricular removida do plano com sucesso.",
+          );
+
+          refetch();
+        },
+        onError: (error: Error) => {
+          toast.error(
+            error.message || "Não foi possível remover a grade curricular.",
+          );
+        },
+      },
+    );
+  };
 
   const handleStatusChange = (codigo: number, status: boolean) => {
     update({
@@ -575,6 +608,7 @@ export default function UCManagementPlan() {
                   <TableHead className="w-64">Ano Curricular</TableHead>
                   <TableHead className="w-32">Semestre</TableHead>
                   <TableHead className="w-32">Estado</TableHead>
+                  <TableHead className="w-32 text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -612,6 +646,23 @@ export default function UCManagementPlan() {
                           handleStatusChange(uc.codigo_disciplina, checked);
                         }}
                       />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={deletingPlanoCurricular}
+                          onClick={() =>
+                            handleRemoveGrade(uc.codigo_grade_curricular)
+                          }
+                          title="Remover grade do plano"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
