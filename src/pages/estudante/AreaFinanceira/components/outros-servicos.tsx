@@ -164,6 +164,7 @@ export function OutrosServicosSection({ codigoMatricula, poloId = 1 }: Props) {
   // ---------- Submissão ----------
   const onGerarFactura = () => {
     handleGerarFactura({
+      tipoCandidatura: Number(student?.tipo_canditatura_codigo),
       servicosItens,
       anoLetivo,
       poloId,
