@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 
 type HandleGerarFacturaParams = {
+  tipoCandidatura: number
   servicosItens: ServicoItem[];
   anoLetivo: string | null;
   poloId: number;
@@ -112,6 +113,7 @@ export function useServicosFactura() {
     anoLetivo,
     poloId,
     codigoMatricula,
+    tipoCandidatura,
     onItemStatusChange,
     onSuccess,
   }: HandleGerarFacturaParams) => {
@@ -145,8 +147,9 @@ export function useServicosFactura() {
       const gradesAlunos = itensRecurso.flatMap(
         (item) => item.cadeirasRecursoIds ?? [],
       );
+      console.log("gradesAlunos", gradesAlunos.map(c => ({ ...c, codigoGrade: c.gradeCurricula })))
       try {
-        await inscreverRecurso({ codigoMatricula, gradesAlunos });
+        await inscreverRecurso({ codigoMatricula, gradesAlunos: gradesAlunos.map(c => ({ ...c, codigoGrade: c.gradeCurricula })), tipoCandidatura });
         itensRecurso.forEach((item) => {
           onItemStatusChange(item.codigo, "sucesso");
           codigosSucesso.push(item.codigo);
@@ -167,7 +170,7 @@ export function useServicosFactura() {
         (item) => item.cadeirasRecursoIds ?? [],
       );
       try {
-        await inscreverEpocaEspecial({ codigoMatricula, gradesAlunos });
+        await inscreverEpocaEspecial({ codigoMatricula, gradesAlunos: gradesAlunos.map(c => ({ ...c, codigoGrade: c.gradeCurricula })), tipoCandidatura, });
         itensEpoca.forEach((item) => {
           onItemStatusChange(item.codigo, "sucesso");
           codigosSucesso.push(item.codigo);
