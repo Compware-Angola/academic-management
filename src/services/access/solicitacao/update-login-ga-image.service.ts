@@ -17,3 +17,17 @@ export async function updateLoginGaImage(
 
   return response.data;
 }
+
+export type GAImageResponse = {
+  codigo: number;
+  sigla: "LOGIN_GA ";
+  filename: string;
+};
+
+export async function getGAImage(): Promise<GAImageResponse> {
+  const response = await axiosNestGa.get<GAImageResponse>(
+    "/solicitacoa/aviso/imagem/LOGIN_GA",
+  );
+
+  return response.data;
+}

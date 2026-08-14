@@ -7,6 +7,7 @@ import { toast } from "sonner";
 declare module "axios" {
   export interface AxiosRequestConfig {
     showSuccess?: boolean;
+    showError?: boolean;
   }
 }
 
@@ -56,9 +57,11 @@ axiosNestGa.interceptors.response.use(
   },
   async (error) => {
     if (!error.response) {
-      toast.error("Erro de conexão com o servidor.", {
-        position: "top-right",
-      });
+      if (!error.config?.showError) {
+        toast.error("Erro de conexão com o servidor.", {
+          position: "top-right",
+        });
+      }
 
       throw new ApiError("Erro de conexão com o servidor.", 0, undefined);
     }
@@ -78,12 +81,16 @@ axiosNestGa.interceptors.response.use(
         errorData = parsed;
         message = parsed.message || parsed.error || message;
 
-        toast.error(message, { position: "top-right" });
+        if (!error.config?.showError) {
+          toast.error(message, { position: "top-right" });
+        }
       } catch {
         if (typeof data === "string") {
           message = data.trim() || message;
 
-          toast.error(message, { position: "top-right" });
+          if (!error.config?.showError) {
+            toast.error(message, { position: "top-right" });
+          }
         }
       }
     }

@@ -49,6 +49,7 @@ import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useCursos } from "@/hooks/use-cursos";
 import { ProvaResumo } from "@/services/access_exam/provas.service";
 import { parseFilter } from "@/util/parse-filter";
+import { formatDateForInput } from "@/util/date-formate";
 import { DeleteProvaDialog } from "./components/DeleteProvaDialog";
 import { ProvaDetailsDialog } from "./components/ProvaDetailsDialog";
 import { ProvaFormDialog, type ProvaForm } from "./components/ProvaFormDialog";
@@ -68,6 +69,7 @@ const EMPTY_FORM: ProvaForm = {
   data: "",
   inicio: "",
   local: "",
+  periodo_id: "",
 };
 
 function parseIds(value: string) {
@@ -147,7 +149,6 @@ export default function ListagemProvas() {
   const openEdit = (prova: ProvaResumo) => {
     setCreating(false);
     setEditing(prova);
-    console.log("Prova: ", prova);
     setForm({
       descricao: prova.descricao ?? "",
       senhaProva: "",
@@ -157,9 +158,10 @@ export default function ListagemProvas() {
       perguntas: refsToText(prova.perguntas),
       disciplinas: refsToText(prova.disciplinas),
       cursos: refsToText(prova.cursos),
-      data: new Date(prova.data_realizacao).toISOString().split("T")[0],
-      inicio: prova.inicio,
-      local: prova.sala_id.toString(),
+      data: formatDateForInput(prova.data_realizacao ?? prova.data ?? ""),
+      inicio: prova.inicio ? prova.inicio.slice(0, 5) : "",
+      local: prova.sala_id?.toString() ?? "",
+      periodo_id: prova.periodo_id?.toString() ?? "",
     });
   };
 
@@ -184,10 +186,13 @@ export default function ListagemProvas() {
       !form.duracao ||
       !form.data ||
       !form.inicio ||
-      !form.local
+      !form.local ||
+      !form.periodo_id ||
+      !form.cursos?.trim() ||
+      !form.perguntas?.trim()
     ) {
       toast.error(
-        "Preencha descrição, senha, ano letivo, duração, data, início e o local.",
+        "Preencha descrição, senha, ano letivo, duração, data, início, local, período, curso e pergunta.",
       );
       return null;
     }
@@ -215,7 +220,8 @@ export default function ListagemProvas() {
       cursos: parseIds(form.cursos),
       data: form.data,
       inicio: form.inicio,
-      local: parseIds(form.local),
+      local: Number(form.local),
+      periodo_id: Number(form.periodo_id),
     };
   };
 
@@ -248,7 +254,8 @@ export default function ListagemProvas() {
       cursos: parseIds(form.cursos),
       data: form.data || undefined,
       inicio: form.inicio || undefined,
-      local: form.local || undefined,
+      local: Number(form.local) || undefined,
+      periodo_id: Number(form.periodo_id) || undefined,
     };
   };
 

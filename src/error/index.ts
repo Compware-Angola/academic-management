@@ -1,6 +1,11 @@
 export type ApiErrorResponse = {
   message?: string
   error?: string
+  falhas?: {
+    codigoDisciplina: number
+    motivo: string
+    jaNoPlano?: boolean
+  }[]
 }
 
 export class ApiError extends Error {

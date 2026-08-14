@@ -39,8 +39,9 @@ import {
   FileText,
   TrendingUp,
   Eye,
+  Percent,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useNavigation } from "react-router-dom";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
@@ -55,6 +56,11 @@ import { NegociacaoDividaModal } from "./components/NegociacaoDividaModal";
 import { NegociacaoItem } from "@/services/financas/area-financeira/fetch-negociacao-dividas.service";
 import { Input } from "@/components/ui/input";
 import { NegociacaoFacturasModal } from "./components/NegociacaoFacturasModal";
+import { HasPermission } from "@/components/common/HasPermission";
+import {
+  PermissionType,
+  PermissionTypeDetails,
+} from "@/constants/permission.type";
 
 export default function NegociacaoDivida() {
   //Options
@@ -72,6 +78,7 @@ export default function NegociacaoDivida() {
   const [searchBy, setSearchBy] = useState<"codigoMatricula" | "nome">(
     "codigoMatricula",
   );
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNegociacao, setSelectedNegociacao] =
     useState<NegociacaoItem>(null);
@@ -419,6 +426,7 @@ export default function NegociacaoDivida() {
                     <TableHead>Valor Prestação</TableHead>
                     <TableHead>Valor Restante</TableHead>
                     <TableHead>Facturas</TableHead>
+                    <TableHead>Acções </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -459,6 +467,26 @@ export default function NegociacaoDivida() {
                         >
                           <Eye className="h-4 w-4 mr-2" />
                         </Button>
+                      </TableCell>
+                      <TableCell>
+                        <HasPermission
+                          permission={
+                            PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
+                              .sigla
+                          }
+                        >
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() =>
+                              navigate(
+                                `/financas/conciliacao-divida/${item.id}`,
+                              )
+                            }
+                          >
+                            <Percent />
+                          </Button>
+                        </HasPermission>
                       </TableCell>
                     </TableRow>
                   ))}

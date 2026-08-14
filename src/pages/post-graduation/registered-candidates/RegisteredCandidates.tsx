@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-
-  EyeIcon,
-  Loader2,
-  RefreshCw,
-
-} from "lucide-react";
+import { EyeIcon, Loader2, RefreshCw } from "lucide-react";
 
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FormSelect } from "@/components/common/FormSelect";
@@ -22,22 +16,36 @@ import {
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { parseFilter } from "@/util/parse-filter";
-import { PosGraduationCandidate, PostGraduationCandidateStatus, PostGraduationPaymentStatus } from "@/services/post-graduation/candidates.service";
+import {
+  PosGraduationCandidate,
+  PostGraduationCandidateStatus,
+  PostGraduationPaymentStatus,
+} from "@/services/post-graduation/candidates.service";
 import { useQueryCandidatesPosGraduation } from "@/hooks/post-graduation/use-query-candidates";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CandidateDetailsDialog } from "./candidate-documents-dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type FiltersState = {
   academicYearId: string;
   degreeId: string;
   faculdadeId: string;
   courseId: string;
-  candidateStatus: typeof PostGraduationCandidateStatus[keyof typeof PostGraduationCandidateStatus];
-  paymentStatus: typeof PostGraduationPaymentStatus[keyof typeof PostGraduationPaymentStatus];
+  candidateStatus: (typeof PostGraduationCandidateStatus)[keyof typeof PostGraduationCandidateStatus];
+  paymentStatus: (typeof PostGraduationPaymentStatus)[keyof typeof PostGraduationPaymentStatus];
 };
 const initialFilters: FiltersState = {
   academicYearId: "",
@@ -46,7 +54,6 @@ const initialFilters: FiltersState = {
   faculdadeId: "",
   candidateStatus: PostGraduationCandidateStatus.TODOS,
   paymentStatus: PostGraduationPaymentStatus.PAGO,
-
 };
 
 export function RegisteredCandidates() {
@@ -54,12 +61,15 @@ export function RegisteredCandidates() {
   const [filters, setFilters] = useState<FiltersState>(initialFilters);
   const [limit, setLimit] = useState(10);
 
-
   const [selectedCandidate, setSelectedCandidate] =
-    useState<PosGraduationCandidate | null>(null)
-  const [openDocuments, setOpenDocuments] =
-    useState(false);
-  const { data: candidatesResponse, isFetching: isFetchingCandidates, refetch: refetchCandidates, isLoading: isLoadingCandidates } = useQueryCandidatesPosGraduation({
+    useState<PosGraduationCandidate | null>(null);
+  const [openDocuments, setOpenDocuments] = useState(false);
+  const {
+    data: candidatesResponse,
+    isFetching: isFetchingCandidates,
+    refetch: refetchCandidates,
+    isLoading: isLoadingCandidates,
+  } = useQueryCandidatesPosGraduation({
     codigoTipoCandidatura: parseFilter(filters.degreeId),
     codigoAnoLectivo: parseFilter(filters.academicYearId),
     codigoCurso: parseFilter(filters.courseId),
@@ -68,6 +78,9 @@ export function RegisteredCandidates() {
     page: currentPage,
     limit: limit,
   });
+
+  console.log(candidatesResponse);
+  console.log("Selecionado", selectedCandidate);
   useEffect(() => {
     setCurrentPage(1);
   }, [
@@ -79,10 +92,7 @@ export function RegisteredCandidates() {
     filters.paymentStatus,
   ]);
 
-  function handleFilterChange(
-    field: keyof FiltersState,
-    value: string,
-  ) {
+  function handleFilterChange(field: keyof FiltersState, value: string) {
     setFilters((current) => {
       if (field === "academicYearId") {
         return {
@@ -119,7 +129,6 @@ export function RegisteredCandidates() {
     setCurrentPage(1);
   }
 
-
   const candidates = candidatesResponse?.data ?? [];
 
   const total = candidatesResponse?.total ?? 0;
@@ -139,17 +148,21 @@ export function RegisteredCandidates() {
               onClick={() => refetchCandidates()}
             >
               <RefreshCw
-                className={`mr-2 h-4 w-4 ${isFetchingCandidates ? "animate-spin" : ""
-                  }`}
+                className={`mr-2 h-4 w-4 ${
+                  isFetchingCandidates ? "animate-spin" : ""
+                }`}
               />
               Atualizar
             </Button>
-            <Button size="sm" variant="outline" onClick={() => {
-              setFilters(initialFilters);
-              setCurrentPage(1);
-            }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setFilters(initialFilters);
+                setCurrentPage(1);
+              }}
+            >
               Limpar filtros
-
             </Button>
             {/* <Select
               value={String(limit)}
@@ -171,7 +184,7 @@ export function RegisteredCandidates() {
           </div>
         }
       />
-      < Card >
+      <Card>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <TipoCandidaturaSelect
@@ -188,11 +201,15 @@ export function RegisteredCandidates() {
               disabled={!filters.degreeId}
               tipoCandidaturaId={parseFilter(filters.degreeId) ?? 2}
               value={filters.academicYearId}
-              onChangeValue={(value) => handleFilterChange("academicYearId", value)}
+              onChangeValue={(value) =>
+                handleFilterChange("academicYearId", value)
+              }
             />
             <FacultySelect
               value={filters.faculdadeId}
-              onChangeValue={(value) => handleFilterChange("faculdadeId", value)}
+              onChangeValue={(value) =>
+                handleFilterChange("faculdadeId", value)
+              }
               allOption
             />
             <CourseSelect
@@ -222,7 +239,7 @@ export function RegisteredCandidates() {
             />
           </div>
         </CardContent>
-      </Card >
+      </Card>
       <div className="overflow-x-auto rounded-md border bg-card">
         <Table>
           <TableHeader>
@@ -234,7 +251,7 @@ export function RegisteredCandidates() {
               <TableHead>Natureza</TableHead>
               <TableHead>Curso</TableHead>
               <TableHead>Ano Lectivo</TableHead>
-              <TableHead>Data</TableHead>
+              {/* <TableHead>Data</TableHead> */}
               <TableHead>Estado</TableHead>
               <TableHead>Inscrição Paga</TableHead>
               <TableHead>Ações</TableHead>
@@ -263,53 +280,49 @@ export function RegisteredCandidates() {
             ) : (
               candidates.map((candidate) => (
                 <TableRow key={candidate.codigo_preinscricao}>
-                  <TableCell>
-                    {candidate.codigo_preinscricao}
-                  </TableCell>
+                  <TableCell>{candidate.codigo_preinscricao}</TableCell>
 
                   <TableCell className="font-medium">
                     {candidate.nome_completo}
                   </TableCell>
 
-                  <TableCell>
-                    {candidate.contactos_telefonicos}
-                  </TableCell>
+                  <TableCell>{candidate.contactos_telefonicos}</TableCell>
 
                   <TableCell>
-                    {candidate.sexo}
+                    {candidate.sexo == "1" ? "Masculino" : "Feminino"}
                   </TableCell>
 
-                  <TableCell>
-                    {candidate.candidatura}
-                  </TableCell>
+                  <TableCell>{candidate.candidatura}</TableCell>
 
                   <TableCell className="max-w-xs truncate">
                     {candidate.curso_candidatura}
                   </TableCell>
 
-                  <TableCell>
-                    {candidate.ano_lectivo}
-                  </TableCell>
+                  <TableCell>{candidate.ano_lectivo}</TableCell>
+
+                  {/* <TableCell>
+                    {candidate.data
+                      ? new Date(candidate.data).toLocaleDateString("pt-AO")
+                      : "-"}
+                  </TableCell> */}
 
                   <TableCell>
-                    {candidate.data ? new Date(candidate.data).toLocaleDateString("pt-AO") : "-"}
-                  </TableCell>
-
-                  <TableCell>
-                    <span className={cn(candidate.estado === "Admitido" && "text-green-600", candidate.estado === "Rejeitado" && "text-red-600", candidate.estado === "Pendente" && "text-yellow-600")}>
+                    <span
+                      className={cn(
+                        candidate.estado === "Admitido" && "text-green-600",
+                        candidate.estado === "Rejeitado" && "text-red-600",
+                        candidate.estado === "Pendente" && "text-yellow-600",
+                      )}
+                    >
                       {candidate.estado}
                     </span>
                   </TableCell>
 
                   <TableCell>
                     {candidate.pagamento_realizado ? (
-                      <span className="text-green-600">
-                        Pago
-                      </span>
+                      <span className="text-green-600">Pago</span>
                     ) : (
-                      <span className="text-red-600">
-                        Não Pago
-                      </span>
+                      <span className="text-red-600">Não Pago</span>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
@@ -339,60 +352,58 @@ export function RegisteredCandidates() {
         </Table>
       </div>
 
-      {
-        totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <p className="text-sm text-muted-foreground">
-              Mostrando {candidates.length} de {total} registos
-            </p>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Anterior
-              </Button>
-              <span className="text-sm font-medium">
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Próxima
-              </Button>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {candidates.length} de {total} registos
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              Anterior
+            </Button>
+            <span className="text-sm font-medium">
+              Página {currentPage} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Próxima
+            </Button>
 
-              <Select
-                value={String(limit)}
-                onValueChange={(v) => {
-                  setLimit(Number(v));
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-20 h-9">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              value={String(limit)}
+              onValueChange={(v) => {
+                setLimit(Number(v));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-20 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )
-      }
+        </div>
+      )}
       <CandidateDetailsDialog
         open={openDocuments}
         onOpenChange={setOpenDocuments}
         candidate={selectedCandidate}
       />
-    </div >
+    </div>
   );
 }
 
@@ -407,5 +418,4 @@ const candidateStatus = [
   { value: PostGraduationCandidateStatus.ADMITIDO, label: "Admitido" },
   { value: PostGraduationCandidateStatus.PENDENTE, label: "Pendente" },
   { value: PostGraduationCandidateStatus.REJEITADO, label: "Rejeitado" },
-
 ];

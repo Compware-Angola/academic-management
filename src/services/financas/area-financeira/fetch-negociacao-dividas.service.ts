@@ -52,6 +52,7 @@ export type NegociacaoItem = {
   faculdade: number;
   facturas: NegociacaoItemFactura[];
   rn: number;
+  id: number;
 };
 
 export type ObterNegociacoesResponse = {

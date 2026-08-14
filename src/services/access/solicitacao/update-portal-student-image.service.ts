@@ -17,3 +17,16 @@ export async function updatePortalStudentImage(
 
   return response.data;
 }
+export type PortalStudentImageResponse = {
+  codigo: number;
+  sigla: "PORTAL_ESTUDANTE ";
+  filename: string;
+};
+
+export async function getPortalStudentImage(): Promise<PortalStudentImageResponse> {
+  const response = await axiosNestGa.get<PortalStudentImageResponse>(
+    "/solicitacoa/aviso/imagem/PORTAL_ESTUDANTE",
+  );
+
+  return response.data;
+}

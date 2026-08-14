@@ -1,50 +1,45 @@
 import { axiosNestGa } from "@/lib/axios-nest-ga";
 
-export type GetDisciplineDepartmentPayload = {
+export interface GetDepartmentDisciplineParams {
   departamento: number;
-  classe: number;
-  semestre: number;
   page?: number;
   limit?: number;
-};
+  search?: string;
+}
 
-export type DisciplineDepartment = {
+export interface DepartmentDiscipline {
   codigo_grade: number;
   codigo_disciplina: number;
   unidade_curricular: string;
-  codigo_classe: number;
-  ano_curricular: string;
-  codigo_semestre: number;
-  semestre: string;
   codigo_departamento: number;
   status: number;
-};
+}
 
-export type GetDisciplineDepartmentResponse = {
-  data: DisciplineDepartment[];
+export interface GetDepartmentDisciplineResponse {
+  data: DepartmentDiscipline[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
-};
+}
 
-export async function fetchDepartamentoUC(
-  payload: GetDisciplineDepartmentPayload,
-): Promise<GetDisciplineDepartmentResponse> {
-  const { departamento, classe, semestre, page = 1, limit = 25 } = payload;
-
-  const { data } = await axiosNestGa.get<GetDisciplineDepartmentResponse>(
+export const getDepartmentDisciplinesService = async ({
+  departamento,
+  page = 1,
+  limit = 25,
+  search,
+}: GetDepartmentDisciplineParams): Promise<GetDepartmentDisciplineResponse> => {
+  const { data } = await axiosNestGa.get<GetDepartmentDisciplineResponse>(
     "/discipline/departamento",
     {
       params: {
         departamento,
-        classe,
-        semestre,
         page,
         limit,
+        search,
       },
     },
   );
 
   return data;
-}
+};

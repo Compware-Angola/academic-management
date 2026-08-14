@@ -14,6 +14,7 @@ import { Loader2, Save } from "lucide-react";
 import { useMutationUpdateGradeCurricularHorarioAluno } from "@/hooks/students/use-Mutation-update-grade-curricular-horario-aluno";
 import { useQueryPeriod } from "@/hooks/period/use-query-period";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { HorarioVerInscricaoSelect } from "@/components/common/horario/HorarioSelectVerInscricao";
 
 export type HorarioDetails = {
   codigo: string;
@@ -124,7 +125,7 @@ export const ModalHorario = ({
             </div>
 
             <div className="flex-1">
-              <HorarioSelect
+              {/* <HorarioSelect
                 value={horarioId?.toString()}
                 onChangeValue={(v) => setHorarioId(v ? Number(v) : null)}
                 anoLectivo={horarionDetails?.anoLectivo ?? ""}
@@ -134,6 +135,14 @@ export const ModalHorario = ({
                 estado={horarionDetails?.estado ?? ""}
                 periodo={filters.periodo ?? ""}
                 classes={horarionDetails?.classes ?? ""}
+              /> */}
+               <HorarioVerInscricaoSelect
+                value={horarioId?.toString() ?? ""}
+                onChangeValue={(v) => setHorarioId(v ? Number(v) : null)}
+                anoLectivo={horarionDetails?.anoLectivo ?? ""}
+                curso={horarionDetails?.curso ?? ""}
+                gradeCurricular={horarionDetails?.codigoGradeCurricular ?? ""}
+                periodo={filters.periodo ?? ""}
               />
             </div>
           </div>

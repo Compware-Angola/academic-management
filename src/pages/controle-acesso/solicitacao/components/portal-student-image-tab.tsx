@@ -7,9 +7,12 @@ export function PortalStudentImageTab() {
   const saveImageMutation = useMutationUpdatePortalStudentImage();
 
   const handleUpload = async (file: File) => {
-    const uploadResponse = await uploadFileMutation.mutateAsync(file);
+    const uploadResponse = await uploadFileMutation.mutateAsync({
+      file,
+      options: { folder: "portal-student-image" },
+    });
     const saveResponse = await saveImageMutation.mutateAsync(
-      uploadResponse.file.filename,
+      uploadResponse.key,
     );
 
     return saveResponse.message;
@@ -19,9 +22,7 @@ export function PortalStudentImageTab() {
     <ImageUploadTab
       title="Imagem do Portal do Estudante"
       onUpload={handleUpload}
-      isPending={
-        uploadFileMutation.isPending || saveImageMutation.isPending
-      }
+      isPending={uploadFileMutation.isPending || saveImageMutation.isPending}
     />
   );
 }

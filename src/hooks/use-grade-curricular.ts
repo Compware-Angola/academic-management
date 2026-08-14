@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  addUCToPlan,
+  addUCsToPlan,
   getGradeCurricular,
   getGradeCurricular2,
   GradeCurricularPayload,
@@ -41,13 +41,13 @@ export function useGradeCurricular({
     staleTime: 1000 * 60 * 10,
   });
 }
-export const useAddUCToPlan = () => {
+
+export const useAddUCsToPlan = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: addUCToPlan,
+    mutationFn: addUCsToPlan,
     onSuccess: () => {
-      // Invalida todas as queries de grade curricular
       queryClient.invalidateQueries({ queryKey: ["grade-curricular"] });
     },
   });

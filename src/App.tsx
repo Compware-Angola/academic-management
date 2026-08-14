@@ -73,6 +73,7 @@ import ListarNotasPagamento from "./pages/financas/notas-pagamento/ListarNotasPa
 import PagamentosReferencia from "./pages/financas/area-financeira/PagamentosReferencia";
 import NegociacaoDivida from "./pages/financas/area-financeira/NegociacaoDivida";
 import TipoCredito from "./pages/financas/credito-educacional/tipo-credito";
+import SiglaServico from "./pages/financas/area-financeira/sigla-tipo-servicos";
 import CreateInstituicao from "./pages/financas/credito-educacional/CriarInstituicao";
 import TodasInstituicoes from "./pages/financas/credito-educacional/TodasInstituicoes";
 import AtribuirCredito from "./pages/financas/credito-educacional/AtribuirCredito";
@@ -120,7 +121,7 @@ import AlterarSenhaExame from "./pages/access_exam/AlterarSenhaExame";
 import InscricaoEpocaEspecial from "./pages/access_exam/InscricaoEpocaEspecial";
 
 import HorariosPorCurso from "./pages/access_exam/HorariosPorCurso";
-import PautaGeralExame from "./pages/access_exam/PautaGeralExame";
+
 import CandidatosComESemProva from "./pages/access_exam/CandidatosComESemProva";
 import { ListaPresencaExame } from "./pages/access_exam/ListaPresencaExame";
 import NotificacoesPage from "./pages/notification/Notificacoespage";
@@ -196,6 +197,11 @@ import ContratosInstituicao from "./pages/financas/credito-educacional/instituti
 import AcademicYearPhase from "./pages/academiccalendar/AcademicYearPhaseTable";
 import ImportUCPage from "./pages/disciplinemanagement/ImportUCPage";
 import { ImportSchedules } from "./pages/schedules/ImportSchedule";
+import { ConciliacaoDivida } from "./pages/financas/area-financeira/ConciliacaoDivida";
+import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/ConciliacaoAprovacao";
+import NegociacaoDividaConciliacao from "./pages/financas/area-financeira/NegociacaoDividaConciliacao";
+import PautaExame from "./pages/access_exam/PautaExame";
+import Configuracoes from "./pages/configuracoes/Configuracoes";
 
 const App = () => {
   return (
@@ -557,8 +563,7 @@ const App = () => {
                     element={
                       <ProtectedRoute
                         allowedPermissions={[
-                          PermissionTypeDetails.DOCENTE_LANCAMENTO_PROGRAMA_UC
-                            .sigla,
+                          PermissionTypeDetails.LANCAMENTO_PROGRAMA_UC.sigla,
                         ]}
                       >
                         <DocenteLancamentoProgramaUC />
@@ -616,10 +621,10 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  {/* <Route
-                  path="/exame/lista-candidatos"
-                  element={<CandidateList />}
-                /> */}
+                  <Route
+                    path="/configuracoes/documentos"
+                    element={<Configuracoes />}
+                  />
                   <Route
                     path="/avaliacoes/notas"
                     element={
@@ -1023,7 +1028,7 @@ const App = () => {
                           PermissionTypeDetails.PAUTA_GERAL_EXAME_ACESSO.sigla!,
                         ]}
                       >
-                        <PautaGeralExame />
+                        <PautaExame />
                       </ProtectedRoute>
                     }
                   />
@@ -1436,6 +1441,26 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/financas/negociacao-conciliacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla!,
+                        ]}
+                      >
+                        <NegociacaoDividaConciliacao />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/financas/conciliacao-divida/:id"
+                    element={<ConciliacaoDivida />}
+                  />
+                  <Route
+                    path="/financas/conciliacao-aprovacao/:id"
+                    element={<ConciliacaoAprovacao />}
+                  />
+                  <Route
                     path="financas/credito/tipos"
                     element={
                       <ProtectedRoute
@@ -1445,6 +1470,19 @@ const App = () => {
                         ]}
                       >
                         <TipoCredito />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="financas/siglas-servicos"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_TIPO_CREDITO_EDUCACIONAL
+                            .sigla,
+                        ]}
+                      >
+                        <SiglaServico />
                       </ProtectedRoute>
                     }
                   />

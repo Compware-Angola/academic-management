@@ -24,8 +24,10 @@ type SelectionListProps<T> = {
   isLoading: boolean;
   emptyMessage: string;
   getId: (item: T) => number;
-  getLabel: (item: T) => string;
+  getLabel: (item: T) => React.ReactNode;
   onChange: (value: string) => void;
+  /** Retorna `false` para bloquear a alteração (ex.: validação de cotação). */
+  onBeforeToggle?: (item: T, nextChecked: boolean) => boolean;
 };
 
 export function SelectionList<T>({
@@ -36,6 +38,7 @@ export function SelectionList<T>({
   getId,
   getLabel,
   onChange,
+  onBeforeToggle,
 }: SelectionListProps<T>) {
   const selectedIds = parseIdValues(value);
 
@@ -57,7 +60,7 @@ export function SelectionList<T>({
 
   return (
     <div className="rounded-md border">
-      <ScrollArea className="h-44">
+      <ScrollArea className="h-[50vh] min-h-[300px]">
         <div className="space-y-1 p-2">
           {items.map((item) => {
             const id = getId(item);
@@ -70,11 +73,18 @@ export function SelectionList<T>({
               >
                 <Checkbox
                   checked={checked}
-                  onCheckedChange={(nextChecked) =>
-                    onChange(toggleDelimitedId(value, id, nextChecked === true))
-                  }
+                  onCheckedChange={(nextChecked) => {
+                    const willSelect = nextChecked === true;
+                    if (
+                      onBeforeToggle &&
+                      !onBeforeToggle(item, willSelect)
+                    ) {
+                      return;
+                    }
+                    onChange(toggleDelimitedId(value, id, willSelect));
+                  }}
                 />
-                <span className="leading-5">{getLabel(item)}</span>
+                <div className="min-w-0 flex-1 leading-5">{getLabel(item)}</div>
               </label>
             );
           })}
