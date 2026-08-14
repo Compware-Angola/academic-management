@@ -30,9 +30,6 @@ export function ProvaDetailsDialog({
   isLoading,
   onClose,
 }: ProvaDetailsDialogProps) {
-
-  console.log(provaDetalhe);
-
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogContent className="max-w-[90%]! max-h-[90vh] overflow-y-auto">
@@ -97,17 +94,42 @@ export function ProvaDetailsDialog({
                 <p className="mt-1 text-sm">{provaDetalhe.duracao} min</p>
               </div>
               <div>
+                <Label>Data de realização</Label>
+                <p className="mt-1 text-sm">
+                  {provaDetalhe.data_realizacao
+                    ? formatarData(provaDetalhe.data_realizacao)
+                    : "Sem data"}
+                </p>
+              </div>
+              <div>
+                <Label>Hora de início</Label>
+                <p className="mt-1 text-sm">
+                  {provaDetalhe.inicio
+                    ? provaDetalhe.inicio.slice(0, 5)
+                    : "Sem hora"}
+                </p>
+              </div>
+              <div>
                 <Label>Criada em</Label>
                 <p className="mt-1 text-sm">
                   {formatDateTimePt(provaDetalhe.created_at)}
                 </p>
               </div>
               <div>
-                <Label>Data de realização</Label>
+                <Label>Sala / Local</Label>
                 <p className="mt-1 text-sm">
-                  {provaDetalhe.data_realizacao
-                    ? formatarData(provaDetalhe.data_realizacao)
-                    : "Sem data"}
+                  {provaDetalhe.local ??
+                    (provaDetalhe.sala_id
+                      ? `Sala #${provaDetalhe.sala_id}`
+                      : "Sem sala")}
+                </p>
+              </div>
+              <div>
+                <Label>Período</Label>
+                <p className="mt-1 text-sm">
+                  {provaDetalhe.periodo_id
+                    ? `Período #${provaDetalhe.periodo_id}`
+                    : "Sem período"}
                 </p>
               </div>
             </div>

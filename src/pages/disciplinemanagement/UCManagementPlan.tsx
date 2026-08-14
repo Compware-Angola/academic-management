@@ -898,16 +898,18 @@ export default function UCManagementPlan() {
                                 {disc
                                   ? `${disc.codigo} – ${disc.desginacao}`
                                   : codigo}
-                                <X
-                                  className="h-3 w-3 cursor-pointer text-muted-foreground hover:text-destructive rounded-full"
+                                <span
                                   role="button"
                                   aria-label={`Remover ${disc?.desginacao ?? codigo}`}
+                                  className="flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                                   onPointerDown={(e) => e.stopPropagation()}
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     toggleDisciplina(codigo);
                                   }}
-                                />
+                                >
+                                  <X className="h-3 w-3" />
+                                </span>
                               </Badge>
                             );
                           })

@@ -26,6 +26,8 @@ type SelectionListProps<T> = {
   getId: (item: T) => number;
   getLabel: (item: T) => React.ReactNode;
   onChange: (value: string) => void;
+  /** Retorna `false` para bloquear a alteração (ex.: validação de cotação). */
+  onBeforeToggle?: (item: T, nextChecked: boolean) => boolean;
 };
 
 export function SelectionList<T>({
@@ -36,6 +38,7 @@ export function SelectionList<T>({
   getId,
   getLabel,
   onChange,
+  onBeforeToggle,
 }: SelectionListProps<T>) {
   const selectedIds = parseIdValues(value);
 
@@ -70,9 +73,16 @@ export function SelectionList<T>({
               >
                 <Checkbox
                   checked={checked}
-                  onCheckedChange={(nextChecked) =>
-                    onChange(toggleDelimitedId(value, id, nextChecked === true))
-                  }
+                  onCheckedChange={(nextChecked) => {
+                    const willSelect = nextChecked === true;
+                    if (
+                      onBeforeToggle &&
+                      !onBeforeToggle(item, willSelect)
+                    ) {
+                      return;
+                    }
+                    onChange(toggleDelimitedId(value, id, willSelect));
+                  }}
                 />
                 <div className="min-w-0 flex-1 leading-5">{getLabel(item)}</div>
               </label>
