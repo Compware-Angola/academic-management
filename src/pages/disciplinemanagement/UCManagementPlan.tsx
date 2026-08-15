@@ -18,7 +18,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookText, ChevronsUpDown, DownloadCloud, Plus, X } from "lucide-react";
+import {
+  BookText,
+  ChevronsUpDown,
+  DownloadCloud,
+  Plus,
+  X,
+  Loader2,
+} from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -38,6 +45,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 
 // Hooks
@@ -87,6 +103,11 @@ import {
 import { Trash2 } from "lucide-react";
 import { useMutationDeletePlanoCurricular } from "@/hooks/discplina/use-delete-grade-plano";
 
+interface GradeParaRemover {
+  codigo_grade_curricular: number;
+  descricao_disciplina: string;
+}
+
 export default function UCManagementPlan() {
   const [tipoCandidaturaId, setTipoCandidaturaId] = useState<string>("1");
   const [anoLetivoId, setAnoLetivoId] = useState<string>("");
@@ -128,7 +149,7 @@ export default function UCManagementPlan() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    codigos_disciplina: [],
+    codigos_disciplina: [] as string[],
     codigo_semestre: "",
   });
 
@@ -186,8 +207,36 @@ export default function UCManagementPlan() {
   const { mutate: deletePlanoCurricular, isPending: deletingPlanoCurricular } =
     useMutationDeletePlanoCurricular();
 
-  const handleRemoveGrade = (codigoGrade: number) => {
-    if (!anoLetivoId || !cursoId) {
+  // --- Remoção de grade do plano (com confirmação por toggle) ---
+  const [gradeParaRemover, setGradeParaRemover] =
+    useState<GradeParaRemover | null>(null);
+  const [confirmarRemocao, setConfirmarRemocao] = useState(false);
+
+  const filtrosPrincipaisValidos = !!anoLetivoId && !!cursoId;
+
+  const handleAbrirConfirmacaoRemocao = (uc: GradeParaRemover) => {
+    if (!filtrosPrincipaisValidos) {
+      const faltantes: string[] = [];
+      if (!anoLetivoId) faltantes.push("o ano letivo");
+      if (!cursoId) faltantes.push("o curso");
+      toast.error(
+        `Selecione ${faltantes.join(" e ")} para remover a unidade curricular.`,
+      );
+      return;
+    }
+    setConfirmarRemocao(false);
+    setGradeParaRemover(uc);
+  };
+
+  const handleFecharConfirmacaoRemocao = () => {
+    if (deletingPlanoCurricular) return;
+    setGradeParaRemover(null);
+    setConfirmarRemocao(false);
+  };
+
+  const handleConfirmarRemocao = () => {
+    if (!gradeParaRemover || !confirmarRemocao) return;
+    if (!filtrosPrincipaisValidos) {
       toast.error("Selecione o ano letivo e o curso para remover a grade.");
       return;
     }
@@ -196,20 +245,22 @@ export default function UCManagementPlan() {
       {
         codigoCurso: Number(cursoId),
         codigoAnoLectivo: Number(anoLetivoId),
-        codigoGrade,
+        codigoGrade: gradeParaRemover.codigo_grade_curricular,
       },
       {
         onSuccess: (data) => {
           toast.success(
             data.message || "Grade curricular removida do plano com sucesso.",
           );
-
+          setGradeParaRemover(null);
+          setConfirmarRemocao(false);
           refetch();
         },
         onError: (error: Error) => {
           toast.error(
             error.message || "Não foi possível remover a grade curricular.",
           );
+          // Mantém o dialog aberto para o utilizador tentar novamente
         },
       },
     );
@@ -289,32 +340,38 @@ export default function UCManagementPlan() {
 
       return resultado
         ? {
-            codigoDisciplina: num,
-            designacao,
-            status: resultado.status,
-            motivo: resultado.motivo,
-          }
+          codigoDisciplina: num,
+          designacao,
+          status: resultado.status,
+          motivo: resultado.motivo,
+        }
         : {
-            codigoDisciplina: num,
-            designacao,
-            status: "falha" as const,
-            motivo:
-              motivoFalhaFallback ??
-              "Não foi possível confirmar o resultado da operação.",
-          };
+          codigoDisciplina: num,
+          designacao,
+          status: "falha" as const,
+          motivo:
+            motivoFalhaFallback ??
+            "Não foi possível confirmar o resultado da operação.",
+        };
     });
   };
 
+  // Validação do formulário de criação, com mensagens específicas por campo
+  const validarFormularioCriacao = (): string | null => {
+    if (!modalAnoLetivoId) return "Selecione o ano letivo.";
+    if (!modalCursoId) return "Selecione o curso.";
+    if (!modalClasseId) return "Selecione o ano curricular.";
+    if (formData.codigos_disciplina.length === 0)
+      return "Selecione ao menos uma unidade curricular.";
+    if (isGraduationModal && !formData.codigo_semestre)
+      return "Selecione o semestre.";
+    return null;
+  };
+
   const handleCreateUC = () => {
-    if (!modalAnoLetivoId || !modalCursoId || !modalClasseId) {
-      toast.error("Selecione o ano letivo, o curso e o ano curricular.");
-      return;
-    }
-    if (
-      formData.codigos_disciplina.length === 0 ||
-      (isGraduationModal && !formData.codigo_semestre)
-    ) {
-      toast.error("Preencha todos os campos obrigatórios.");
+    const erroValidacao = validarFormularioCriacao();
+    if (erroValidacao) {
+      toast.error(erroValidacao);
       return;
     }
 
@@ -343,15 +400,15 @@ export default function UCManagementPlan() {
           setResultados(
             falhas?.length
               ? buildResultados(formData.codigos_disciplina, {
-                  adicionadas: [],
-                  reativadas: [],
-                  falhas,
-                })
+                adicionadas: [],
+                reativadas: [],
+                falhas,
+              })
               : buildResultados(
-                  formData.codigos_disciplina,
-                  undefined,
-                  apiError.message || "Erro ao comunicar com o servidor.",
-                ),
+                formData.codigos_disciplina,
+                undefined,
+                apiError.message || "Erro ao comunicar com o servidor.",
+              ),
           );
           setResultadoModalOpen(true);
           setFormData({ codigos_disciplina: [], codigo_semestre: "" });
@@ -451,26 +508,6 @@ export default function UCManagementPlan() {
             />
           </div>
 
-          {/* Curso */}
-          {/* <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Curso</label>
-            {loadingCursos ? (
-              <Skeleton className="h-10 w-full rounded-md" />
-            ) : (
-              <FormCommandSelect
-                value={cursoId}
-                options={cursos}
-                width="w-full"
-                map={(c) => ({
-                  key: c.codigo.toString(),
-                  value: c.codigo.toString(),
-                  label: c.designacao,
-                })}
-                onChange={(v) => setCursoId(v)}
-              />
-            )}
-          </div> */}
-
           <CourseSelect
             label="Curso"
             value={cursoId}
@@ -567,7 +604,6 @@ export default function UCManagementPlan() {
               <BookText className="text-3xl" />
             </div>
 
-            {/* ⬇️ Aqui entra o bloco único, substituindo os 2 <p> antigos */}
             {(() => {
               const filtrosObrigatoriosPreenchidos = !!(
                 anoLetivoId &&
@@ -585,9 +621,8 @@ export default function UCManagementPlan() {
 
                 mensagem = `Selecione ${faltantes.join(", ")} para visualizar as unidades curriculares`;
               } else if (estado !== undefined) {
-                mensagem = `Nenhuma unidade curricular ${
-                  estado === 1 ? "ativa" : "inativa"
-                } encontrada para os filtros selecionados`;
+                mensagem = `Nenhuma unidade curricular ${estado === 1 ? "ativa" : "inativa"
+                  } encontrada para os filtros selecionados`;
               } else {
                 mensagem =
                   "Nenhuma unidade curricular encontrada para os filtros selecionados";
@@ -598,7 +633,6 @@ export default function UCManagementPlan() {
           </div>
         ) : (
           <>
-            {/* resto da tabela */}
             <Table>
               <TableHeader>
                 <TableRow>
@@ -653,12 +687,22 @@ export default function UCManagementPlan() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          disabled={deletingPlanoCurricular}
-                          onClick={() =>
-                            handleRemoveGrade(uc.codigo_grade_curricular)
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
+                          disabled={
+                            deletingPlanoCurricular || !filtrosPrincipaisValidos
                           }
-                          title="Remover grade do plano"
+                          onClick={() =>
+                            handleAbrirConfirmacaoRemocao({
+                              codigo_grade_curricular:
+                                uc.codigo_grade_curricular,
+                              descricao_disciplina: uc.descricao_disciplina,
+                            })
+                          }
+                          title={
+                            !filtrosPrincipaisValidos
+                              ? "Selecione o ano letivo e o curso para remover"
+                              : "Remover grade do plano"
+                          }
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -736,6 +780,68 @@ export default function UCManagementPlan() {
         onOpenChange={setResultadoModalOpen}
         resultados={resultados}
       />
+
+      {/* Confirmação de remoção de grade */}
+      <AlertDialog
+        open={!!gradeParaRemover}
+        onOpenChange={(v) => !v && handleFecharConfirmacaoRemocao()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4 text-destructive" />
+              Remover unidade curricular do plano
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação vai remover{" "}
+              <span className="font-medium text-foreground">
+                {gradeParaRemover?.descricao_disciplina}
+              </span>{" "}
+              do plano curricular deste curso, para o ano letivo e curso
+              selecionados nos filtros. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
+            <Label
+              htmlFor="confirmar-remocao-grade"
+              className="text-sm cursor-pointer"
+            >
+              Confirmo que desejo remover esta unidade curricular
+            </Label>
+            <Switch
+              id="confirmar-remocao-grade"
+              checked={confirmarRemocao}
+              onCheckedChange={setConfirmarRemocao}
+              disabled={deletingPlanoCurricular}
+            />
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={handleFecharConfirmacaoRemocao}
+              disabled={deletingPlanoCurricular}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={!confirmarRemocao || deletingPlanoCurricular}
+              onClick={handleConfirmarRemocao}
+            >
+              {deletingPlanoCurricular ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Removendo...
+                </>
+              ) : (
+                "Remover"
+              )}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Modal de Criação */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
