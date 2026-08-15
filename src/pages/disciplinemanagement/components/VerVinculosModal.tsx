@@ -7,6 +7,15 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import {
     Table,
     TableBody,
     TableCell,
@@ -17,12 +26,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link2Off, BookOpen, X } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Link2Off, BookOpen, X, Loader2 } from "lucide-react";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { TipoCandidaturaSelect } from "@/components/common/global-selects/TipoCandidaturaSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryVinculosGrade } from "@/hooks/depatamento/use-query-vinculos-grade";
+import { useDesvincularUC } from "@/hooks/depatamento/use-desvincular-uc";
+
 
 interface UcResumo {
     codigo_grade: number;
@@ -50,6 +63,15 @@ interface VerVinculosModalProps {
 export function VerVinculosModal({ open, onClose, uc }: VerVinculosModalProps) {
     const [filters, setFilters] = useState<Filtro>(FILTROS_VAZIOS);
 
+    // Estado do dialog de confirmação de desvincular
+    const [vinculoSelecionado, setVinculoSelecionado] = useState<{
+        codigoVinculo: number;
+        nomeCurso: string;
+        anoCurricular: string;
+        codigoSemestre: number;
+    } | null>(null);
+    const [confirmado, setConfirmado] = useState(false);
+
     const temFiltroAtivo =
         !!filters.anoLectivo || !!filters.tipoCandidatura || !!filters.curso;
 
@@ -62,6 +84,13 @@ export function VerVinculosModal({ open, onClose, uc }: VerVinculosModalProps) {
 
     const vinculos = vinculosResponse?.vinculos ?? [];
 
+    const { mutate: desvincular, isPending: isDesvinculando } = useDesvincularUC({
+        onSuccess: () => {
+            setVinculoSelecionado(null);
+            setConfirmado(false);
+        },
+    });
+
     const handleClose = () => {
         setFilters(FILTROS_VAZIOS);
         onClose();
@@ -71,142 +100,237 @@ export function VerVinculosModal({ open, onClose, uc }: VerVinculosModalProps) {
         setFilters(FILTROS_VAZIOS);
     };
 
+    const handleAbrirConfirmacao = (v: (typeof vinculos)[number]) => {
+        setConfirmado(false);
+        setVinculoSelecionado({
+            codigoVinculo: v.codigoVinculo,
+            nomeCurso: v.nomeCurso,
+            anoCurricular: v.anoCurricular,
+            codigoSemestre: v.codigoSemestre,
+        });
+    };
+
+    const handleFecharConfirmacao = () => {
+        if (isDesvinculando) return;
+        setVinculoSelecionado(null);
+        setConfirmado(false);
+    };
+
+    const handleConfirmarDesvinculo = () => {
+        if (!vinculoSelecionado || !confirmado) return;
+        desvincular(vinculoSelecionado.codigoVinculo);
+    };
+
     return (
-        <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-            <DialogContent className="max-w-4xl!">
-                <DialogHeader>
-                    <div className="flex items-center gap-2">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-                            <BookOpen className="h-4 w-4" />
+        <>
+            <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
+                <DialogContent className="max-w-4xl!">
+                    <DialogHeader>
+                        <div className="flex items-center gap-2">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+                                <BookOpen className="h-4 w-4" />
+                            </div>
+                            <div>
+                                <DialogTitle>Vínculos da Disciplina</DialogTitle>
+                                <DialogDescription className="mt-0.5">
+                                    Consulte os cursos e classes onde esta disciplina está vinculada.
+                                </DialogDescription>
+                            </div>
                         </div>
-                        <div>
-                            <DialogTitle>Vínculos da Disciplina</DialogTitle>
-                            <DialogDescription className="mt-0.5">
-                                Consulte os cursos e classes onde esta disciplina está vinculada.
-                            </DialogDescription>
+                    </DialogHeader>
+
+                    {uc && (
+                        <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2">
+                            <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="text-sm font-medium truncate">
+                                {uc.unidade_curricular}
+                            </span>
+                            <Badge variant="outline" className="ml-auto shrink-0">
+                                {uc.codigo_grade}
+                            </Badge>
                         </div>
+                    )}
+
+                    <div className="flex items-end gap-3">
+                        <div className="grid flex-1 grid-cols-3 gap-3">
+                            <TipoCandidaturaSelect
+                                value={filters.tipoCandidatura?.toString()}
+                                onChangeValue={(v) =>
+                                    setFilters({
+                                        ...filters,
+                                        tipoCandidatura: v,
+                                    })
+                                }
+                            />
+                            <AcademicYearsAvailableForOperationSelect
+                                label="Ano Letivo"
+                                value={filters.anoLectivo}
+                                onChangeValue={(v) =>
+                                    setFilters({
+                                        ...filters,
+                                        anoLectivo: v,
+                                    })
+                                }
+                                tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
+                                onlyConfigurable={false}
+                            />
+                            <CourseSelect
+                                params={{
+                                    tipoCandidaturaId: parseFilter(filters.tipoCandidatura) ?? 1,
+                                }}
+                                value={filters.curso}
+                                onChangeValue={(v) =>
+                                    setFilters({
+                                        ...filters,
+                                        curso: v,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={!temFiltroAtivo}
+                            onClick={handleClearFilters}
+                        >
+                            <X className="h-4 w-4 mr-2" />
+                            Limpar Filtros
+                        </Button>
                     </div>
-                </DialogHeader>
 
-                {uc && (
-                    <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2">
-                        <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
-                        <span className="text-sm font-medium truncate">
-                            {uc.unidade_curricular}
-                        </span>
-                        <Badge variant="outline" className="ml-auto shrink-0">
-                            {uc.codigo_grade}
-                        </Badge>
-                    </div>
-                )}
-
-                <div className="flex items-end gap-3">
-                    <div className="grid flex-1 grid-cols-3 gap-3">
-                        <TipoCandidaturaSelect
-                            value={filters.tipoCandidatura?.toString()}
-                            onChangeValue={(v) =>
-                                setFilters({
-                                    ...filters,
-                                    tipoCandidatura: v,
-                                })
-                            }
-                        />
-                        <AcademicYearsAvailableForOperationSelect
-                            label="Ano Letivo"
-                            value={filters.anoLectivo}
-                            onChangeValue={(v) =>
-                                setFilters({
-                                    ...filters,
-                                    anoLectivo: v,
-                                })
-                            }
-                            tipoCandidaturaId={parseFilter(filters.tipoCandidatura) ?? 1}
-                            onlyConfigurable={false}
-                        />
-                        <CourseSelect
-                            params={{
-                                tipoCandidaturaId: parseFilter(filters.tipoCandidatura) ?? 1,
-                            }}
-                            value={filters.curso}
-                            onChangeValue={(v) =>
-                                setFilters({
-                                    ...filters,
-                                    curso: v,
-                                })
-                            }
-                        />
-                    </div>
-
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={!temFiltroAtivo}
-                        onClick={handleClearFilters}
-                    >
-                        <X className="h-4 w-4 mr-2" />
-                        Limpar Filtros
-                    </Button>
-                </div>
-
-                <div className="flex flex-col gap-3 py-1">
-                    {!filters.anoLectivo ? (
-                        <div className="text-center py-14 border rounded-md">
-                            <p className="text-sm text-muted-foreground">
-                                Selecione o ano letivo para ver os vínculos
-                            </p>
-                        </div>
-                    ) : isLoading || isFetching ? (
-                        <div className="space-y-2">
-                            {[...Array(4)].map((_, i) => (
-                                <Skeleton key={i} className="h-10 w-full" />
-                            ))}
-                        </div>
-                    ) : vinculos.length === 0 ? (
-                        <div className="text-center py-14 border rounded-md">
-                            <Link2Off className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                            <p className="text-sm text-muted-foreground">
-                                Nenhum vínculo encontrado para este ano letivo
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="rounded-md border max-h-[420px] overflow-y-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Curso</TableHead>
-                                        <TableHead>Ano Curricular</TableHead>
-                                        <TableHead>Semestre</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {vinculos.map((v, idx) => (
-                                        <TableRow
-                                            key={`${v.codigoCurso}-${v.codigoClasse}-${v.codigoSemestre}-${idx}`}
-                                        >
-                                            <TableCell className="font-medium">
-                                                {v.nomeCurso}
-                                            </TableCell>
-                                            <TableCell>{v.anoCurricular}</TableCell>
-                                            <TableCell>
-                                                <Badge variant="outline">
-                                                    {v.codigoSemestre}º Semestre
-                                                </Badge>
-                                            </TableCell>
+                    <div className="flex flex-col gap-3 py-1">
+                        {!filters.anoLectivo ? (
+                            <div className="text-center py-14 border rounded-md">
+                                <p className="text-sm text-muted-foreground">
+                                    Selecione o ano letivo para ver os vínculos
+                                </p>
+                            </div>
+                        ) : isLoading || isFetching ? (
+                            <div className="space-y-2">
+                                {[...Array(4)].map((_, i) => (
+                                    <Skeleton key={i} className="h-10 w-full" />
+                                ))}
+                            </div>
+                        ) : vinculos.length === 0 ? (
+                            <div className="text-center py-14 border rounded-md">
+                                <Link2Off className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                                <p className="text-sm text-muted-foreground">
+                                    Nenhum vínculo encontrado para este ano letivo
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="rounded-md border max-h-[420px] overflow-y-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Curso</TableHead>
+                                            <TableHead>Ano Curricular</TableHead>
+                                            <TableHead>Semestre</TableHead>
+                                            <TableHead className="w-[1%] text-right">Ação</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    )}
+                                    </TableHeader>
+                                    <TableBody>
+                                        {vinculos.map((v, idx) => (
+                                            <TableRow
+                                                key={`${v.codigoCurso}-${v.codigoClasse}-${v.codigoSemestre}-${idx}`}
+                                            >
+                                                <TableCell className="font-medium">
+                                                    {v.nomeCurso}
+                                                </TableCell>
+                                                <TableCell>{v.anoCurricular}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant="outline">
+                                                        {v.codigoSemestre}º Semestre
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleAbrirConfirmacao(v)}
+                                                    >
+                                                        <Link2Off className="h-4 w-4" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        )}
 
-                    {vinculosResponse && filters.anoLectivo && (
-                        <p className="text-xs text-muted-foreground text-right">
-                            {vinculosResponse.total} vínculo(s) encontrado(s)
-                        </p>
-                    )}
-                </div>
-            </DialogContent>
-        </Dialog>
+                        {vinculosResponse && filters.anoLectivo && (
+                            <p className="text-xs text-muted-foreground text-right">
+                                {vinculosResponse.total} vínculo(s) encontrado(s)
+                            </p>
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Confirmação de desvincular */}
+            <AlertDialog
+                open={!!vinculoSelecionado}
+                onOpenChange={(v) => !v && handleFecharConfirmacao()}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <Link2Off className="h-4 w-4 text-destructive" />
+                            Desvincular unidade curricular
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação vai remover o vínculo desta disciplina com{" "}
+                            <span className="font-medium text-foreground">
+                                {vinculoSelecionado?.nomeCurso}
+                            </span>{" "}
+                            ({vinculoSelecionado?.anoCurricular},{" "}
+                            {vinculoSelecionado?.codigoSemestre}º semestre). Esta ação não
+                            pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
+                        <Label htmlFor="confirmar-desvinculo" className="text-sm cursor-pointer">
+                            Confirmo que desejo remover este vínculo
+                        </Label>
+                        <Switch
+                            id="confirmar-desvinculo"
+                            checked={confirmado}
+                            onCheckedChange={setConfirmado}
+                            disabled={isDesvinculando}
+                        />
+                    </div>
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            onClick={handleFecharConfirmacao}
+                            disabled={isDesvinculando}
+                        >
+                            Cancelar
+                        </AlertDialogCancel>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            disabled={!confirmado || isDesvinculando}
+                            onClick={handleConfirmarDesvinculo}
+                        >
+                            {isDesvinculando ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Desvinculando...
+                                </>
+                            ) : (
+                                "Desvincular"
+                            )}
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }
