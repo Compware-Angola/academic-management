@@ -46,6 +46,7 @@ const loginSchema = z.object({
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
+
 const Login = () => {
   const { setTheme } = useTheme();
 
@@ -53,14 +54,16 @@ const Login = () => {
   const { data: loginGaImage } = useQueryLoginGaImage();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loginBackground, setLoginBackground] = useState(studentsBg);
 
-  const { data: gaImage, isLoading: isLoadingImage } = useGetGAImage();
+  // Imagem dinâmica (banner vindo do backend/S3) — entra com fade por cima do fallback
+  const [dynamicBg, setDynamicBg] = useState<string | null>(null);
+  const [dynamicBgLoaded, setDynamicBgLoaded] = useState(false);
+
+  const { data: gaImage } = useGetGAImage();
 
   const {
     mutate: getFileUrl,
     data: fileUrl,
-    isPending: isLoadingFileUrl,
   } = useGetFileUrl();
 
   // 1. Busca a URL do S3 usando o filename
@@ -72,69 +75,52 @@ const Login = () => {
     });
   }, [gaImage?.filename, getFileUrl]);
 
-  // 2. Quando a URL do S3 estiver disponível, renderiza-a
+  // 2. Único efeito responsável por preparar a imagem de fundo dinâmica.
+  // Prioriza a URL já resolvida do S3; se ainda não existir, tenta construir
+  // a partir do filename. Só troca o visual quando a imagem estiver
+  // totalmente carregada (pré-carregamento evita "flash" de imagem quebrada).
   useEffect(() => {
-    if (!fileUrl?.url) return;
+    const source = fileUrl?.url
+      ? fileUrl.url
+      : buildImageAssets(loginGaImage?.filename);
 
-    let cancelled = false;
+    if (!source) return;
 
-    const image = new Image();
-
-    image.onload = () => {
-      if (!cancelled) {
-        setLoginBackground(fileUrl.url);
-      }
-    };
-
-    image.onerror = () => {
-      if (!cancelled) {
-        setLoginBackground(studentsBg);
-      }
-    };
-
-    image.src = fileUrl.url;
-
-    return () => {
-      cancelled = true;
-    };
-  }, [fileUrl?.url]);
-
-  // Força modo light enquanto a página de login está montada
-  useEffect(() => {
-    setTheme("light");
-  }, [setTheme]);
-
-  useEffect(() => {
-    const imageUrl = buildImageAssets(fileUrl?.url || loginGaImage?.filename);
-
-    if (!imageUrl) {
-      setLoginBackground(fileUrl?.url || studentsBg);
-      return;
-    }
+    setDynamicBgLoaded(false);
 
     let cancelled = false;
     const image = new Image();
 
     image.onload = () => {
-      if (!cancelled) {
-        setLoginBackground(imageUrl);
-      }
+      if (cancelled) return;
+      setDynamicBg(source);
+      // aguarda o próximo frame para garantir que a transição de opacidade anima
+      requestAnimationFrame(() => {
+        if (!cancelled) setDynamicBgLoaded(true);
+      });
     };
 
     image.onerror = () => {
+      // falhou o carregamento: mantém o fallback, não faz nada visível
       if (!cancelled) {
-        setLoginBackground(studentsBg);
+        setDynamicBg(null);
+        setDynamicBgLoaded(false);
       }
     };
 
-    image.src = imageUrl;
+    image.src = source;
 
     return () => {
       cancelled = true;
       image.onload = null;
       image.onerror = null;
     };
-  }, [loginGaImage?.filename]);
+  }, [fileUrl?.url, loginGaImage?.filename]);
+
+  // Força modo light enquanto a página de login está montada
+  useEffect(() => {
+    setTheme("light");
+  }, [setTheme]);
 
   const showEnvLabel = isDevelop || isPrePrd;
   const envDisplay = isDevelop
@@ -157,11 +143,25 @@ const Login = () => {
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
       {/* LEFT — Imagem + Conteúdo */}
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden text-white p-12">
+        {/* Camada base — fallback, sempre visível */}
         <div
           className="pointer-events-none absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${loginBackground})` }}
+          style={{ backgroundImage: `url(${studentsBg})` }}
           aria-hidden
         />
+
+        {/* Camada dinâmica — banner do backend, entra com fade suave quando carrega */}
+        {dynamicBg && (
+          <div
+            className="pointer-events-none absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out"
+            style={{
+              backgroundImage: `url(${dynamicBg})`,
+              opacity: dynamicBgLoaded ? 1 : 0,
+            }}
+            aria-hidden
+          />
+        )}
+
         <div
           className="pointer-events-none absolute inset-0 bg-animated-red opacity-70 mix-blend-multiply"
           aria-hidden
