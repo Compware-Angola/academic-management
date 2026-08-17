@@ -202,6 +202,7 @@ import { ConciliacaoAprovacao } from "./pages/financas/area-financeira/Conciliac
 import NegociacaoDividaConciliacao from "./pages/financas/area-financeira/NegociacaoDividaConciliacao";
 import PautaExame from "./pages/access_exam/PautaExame";
 import Configuracoes from "./pages/configuracoes/Configuracoes";
+import TipoCalendarios from "./pages/academiccalendar/tipo-calendario";
 
 const App = () => {
   return (
@@ -1332,6 +1333,20 @@ const App = () => {
                         ]}
                       >
                         <ActivitiesLecturesLic />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/calendario/tipos-atividades"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla!,
+                          PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO
+                            .sigla!,
+                        ]}
+                      >
+                        <TipoCalendarios />
                       </ProtectedRoute>
                     }
                   />
