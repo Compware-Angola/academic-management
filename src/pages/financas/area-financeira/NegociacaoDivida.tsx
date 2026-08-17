@@ -118,8 +118,13 @@ export default function NegociacaoDivida() {
   } = useQueryNegociacoes(
     {
       codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
-      codigoCurso: parseFilter(filtersApplied.curso),
-      faculdadeId: parseFilter(filtersApplied.faculdade),
+      codigoCurso: filtersApplied.curso === "0"
+        ? null
+        : parseFilter(filtersApplied.curso),
+      faculdadeId:
+        filtersApplied.faculdade === "0"
+          ? null
+          : parseFilter(filtersApplied.faculdade),
       tipoNegociacaoId: parseFilter(filtersApplied.negociacao),
       codigoMatricula:
         searchBy === "codigoMatricula" ? parseFilter(searchTerm) : null,
