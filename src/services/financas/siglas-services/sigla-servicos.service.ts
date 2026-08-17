@@ -4,6 +4,7 @@ export type SiglaTipoServico = {
   codigo: number;
   sigla: string;
   descricao: string;
+  tipo_candidatura: number;
 };
 
 export type DeleteSiglaTipoServicoBody = {
@@ -22,6 +23,7 @@ export type UpdateSiglaTipoServicoBody = {
   codigo: number;
   sigla?: string;
   descricao?: string;
+  tipo_candidatura?: number;
 };
 
 export async function fetchSiglaTipoServicos(
