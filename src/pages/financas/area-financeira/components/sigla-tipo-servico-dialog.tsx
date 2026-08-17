@@ -17,10 +17,16 @@ import {
   useUpdateSiglaTipoServico,
 } from "@/hooks/sigla-tipo-servicos/use-sigla-tipo-servicos";
 import { SiglaTipoServico } from "@/services/financas/siglas-services/sigla-servicos.service";
+import { FormSelect } from "@/components/common/FormSelect";
+import { useQueryTipoCandidatura } from "@/hooks/queries/use-query-tipo-candidatura";
 
 const formSchema = z.object({
   sigla: z.string().min(1, "A sigla é obrigatória").max(50),
   descricao: z.string().min(1, "A descrição é obrigatória").max(200),
+  tipo_candidatura: z.number({
+    required_error: "O tipo de candidatura é obrigatório",
+    invalid_type_error: "Selecione um tipo de candidatura válido",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -45,21 +51,34 @@ export function SiglaTipoServicoDialog({
   const { mutate: updateSiglaTipoServico, isPending: isUpdating } =
     useUpdateSiglaTipoServico();
 
+  const { data: tiposCandidatura = [], isLoading: isLoadingTiposCandidatura } =
+    useQueryTipoCandidatura();
+
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { sigla: "", descricao: "" },
+    defaultValues: {
+      sigla: "",
+      descricao: "",
+      tipo_candidatura: undefined,
+    },
   });
+
+  const tipoCandidaturaValue = watch("tipo_candidatura");
 
   useEffect(() => {
     if (open) {
       reset({
         sigla: selectedSiglaTipoServico?.sigla ?? "",
         descricao: selectedSiglaTipoServico?.descricao ?? "",
+        tipo_candidatura:
+          selectedSiglaTipoServico?.tipo_candidatura ?? undefined,
       });
     }
   }, [open, selectedSiglaTipoServico, reset]);
@@ -70,15 +89,20 @@ export function SiglaTipoServicoDialog({
   };
 
   const onSubmit = (values: FormValues) => {
+    const payload = {
+      ...values,
+      tipo_candidatura: values.tipo_candidatura,
+    };
+
     if (isEditing) {
       updateSiglaTipoServico(
-        { codigo: selectedSiglaTipoServico.codigo, ...values },
+        { codigo: selectedSiglaTipoServico.codigo, ...payload },
         { onSuccess: handleClose },
       );
       return;
     }
 
-    createSiglaTipoServico(values as any, { onSuccess: handleClose });
+    createSiglaTipoServico(payload as any, { onSuccess: handleClose });
   };
 
   const isPending = isCreating || isUpdating;
@@ -91,6 +115,22 @@ export function SiglaTipoServicoDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="min-w-[220px]">
+            <FormSelect
+              label="Tipo de Candidatura"
+              value={String(tipoCandidaturaValue)}
+              onChange={(v) => setValue("tipo_candidatura", Number(v))}
+              options={tiposCandidatura}
+              loading={isLoadingTiposCandidatura}
+              map={(tipo) => ({
+                key: tipo.codigo,
+                label: tipo.designacao,
+                value: tipo.codigo,
+              })}
+              placeholder="Selecione o tipo..."
+            />
+          </div>
+
           <div className="flex flex-col gap-2">
             <Label htmlFor="sigla">Sigla</Label>
             <Input id="sigla" {...register("sigla")} disabled={isEditing} />

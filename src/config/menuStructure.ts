@@ -327,6 +327,14 @@ export const academicStructure: MenuStructure = {
           ],
         },
         {
+          title: "Tipos de Actividades lectivas",
+          url: "/calendario/tipos-atividades",
+          permission: [
+            PermissionTypeDetails.ACTIVIDADES_LECTIVAS.sigla,
+            PermissionTypeDetails.ATIVIDADES_LETIVAS_POS_GRADUACAO.sigla,
+          ],
+        },
+        {
           title: "Prazos",
           url: "/calendario/prazos",
           permission: [

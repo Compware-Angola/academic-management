@@ -10,13 +10,17 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft, Loader2 } from "lucide-react";
-import { useQueryFacturas } from "@/hooks/horario/use-query-invoice";
+import {
+  useQueryFacturas,
+  useQueryFacturaItens,
+} from "@/hooks/horario/use-query-invoice";
 import { PagamentoStatus } from "@/components/common/PagamentoStatus";
 import { formatNumber } from "@/util/format-number";
 import {
   useQueryMyCashRegister,
   useVerifyMyCashRegisterOpeningCode,
 } from "@/hooks/financa/use-cash-register";
+import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
 
 import { formatDate, FormNotaPagamento } from "./components/form";
 import { CashRegisterConfirmationAlert } from "../caixa/components/CashRegisterConfirmationAlert";
@@ -41,6 +45,8 @@ export default function LiquidarNota() {
   );
 
   const factura = facturasResponses?.data?.[0];
+
+  const { data: itens } = useQueryFacturaItens(factura?.codigo);
 
   if (isLoading || isLoadingCashRegister) {
     return (
@@ -133,8 +139,15 @@ export default function LiquidarNota() {
       {myCashRegister && myCashRegister.blocked === "N" && (
         <>
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-lg">Resumo da Nota</CardTitle>
+              <PaymentNoteActions
+                nota={factura}
+                itens={itens?.data || []}
+                showDownload={true}
+                showPrint={true}
+                showliquidarNota={false}
+              />
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
