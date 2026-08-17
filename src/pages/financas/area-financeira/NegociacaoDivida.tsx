@@ -359,7 +359,7 @@ export default function NegociacaoDivida() {
               </div>
             </div>
 
-            <div className="flex items-end">
+            <div className="flex items-end justify-between">
               <Button
                 onClick={() => {
                   setFiltersApplied(filters);
@@ -368,6 +368,36 @@ export default function NegociacaoDivida() {
               >
                 <Search className="h-4 w-4" />
                 Pesquisar
+              </Button>
+
+              <Button
+                variant="default"
+                onClick={() => {
+                  const initialFilters = {
+                    anoLectivo: "23",
+                    curso: "",
+                    estado: "",
+                    faculdade: "",
+                    negociacao: "",
+                  };
+
+                  setFilters(initialFilters);
+                  setFiltersApplied(initialFilters);
+                  setSearchBy("codigoMatricula");
+                  setSearchTerm("");
+                  setPage(1);
+                }}
+                className="hover:text-foreground hover:bg-muted/50"
+                disabled={
+                  !filters.curso &&
+                  !filters.estado &&
+                  !filters.faculdade &&
+                  !filters.negociacao &&
+                  !searchTerm &&
+                  searchBy === "codigoMatricula"
+                }
+              >
+                Limpar filtros
               </Button>
             </div>
           </div>
