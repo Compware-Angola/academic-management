@@ -5,8 +5,21 @@ import PDFActions, {
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
@@ -42,7 +55,8 @@ const INITIAL: Filters = {
 export function CandidatosComProvaTab() {
   const [filters, setFilters] = useState<Filters>(INITIAL);
 
-  const { data: academicYear, isLoading: isLoadingAcademicYear } = useQueryAnoAcademico();
+  const { data: academicYear, isLoading: isLoadingAcademicYear } =
+    useQueryAnoAcademico();
   const { data: periodos, isLoading: isLoadingPeriodos } = useQueryPeriod();
 
   // CORREÇÃO 1: Usar `placeholderData: undefined` para evitar que dados antigos
@@ -79,13 +93,15 @@ export function CandidatosComProvaTab() {
         tipoCandidatura: item.tipo_candidatura,
         estadoProva: Number(item.status_prova) === 1 ? "Aprovado" : "Reprovado",
       })),
-    [candidatos]
+    [candidatos],
   );
 
   const pdfData = exportRows.length
     ? {
         filtros: [
-          filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+          filters.codigoAnoLetivo
+            ? `Ano Letivo: ${filters.codigoAnoLetivo}`
+            : null,
           filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
           filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
           filters.statusProva !== ""
@@ -103,7 +119,10 @@ export function CandidatosComProvaTab() {
       documentTitle="Candidatos com Prova"
       subtitle="Lista de candidatos com prova atribuída"
       infoSections={[
-        { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+        {
+          title: "Filtros Aplicados",
+          content: pdfData.filtros || "Sem filtros",
+        },
         { title: "Resumo", content: [`Total de registos: ${total}`] },
       ]}
       mainTable={{
@@ -129,7 +148,10 @@ export function CandidatosComProvaTab() {
         documentTitle: "Candidatos com Prova",
         subtitle: "Lista de candidatos com prova atribuída",
         infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
           { title: "Resumo", content: [`Total de registos: ${total}`] },
         ],
         mainTable: {
@@ -160,7 +182,6 @@ export function CandidatosComProvaTab() {
 
   return (
     <div className="space-y-4">
-
       <div className="flex justify-end gap-2">
         {pdfContent && (
           <PDFActions
@@ -184,7 +205,8 @@ export function CandidatosComProvaTab() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Filtros</h3>
           <Button variant="ghost" size="sm" onClick={() => setFilters(INITIAL)}>
-            <X className="h-4 w-4 mr-2" />Limpar filtros
+            <X className="h-4 w-4 mr-2" />
+            Limpar filtros
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -194,15 +216,23 @@ export function CandidatosComProvaTab() {
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
               value={filters.codigoAnoLetivo}
-              onChange={(v) => setFilters((p) => ({ ...p, codigoAnoLetivo: v, page: 1 }))}
+              onChange={(v) =>
+                setFilters((p) => ({ ...p, codigoAnoLetivo: v, page: 1 }))
+              }
               options={academicYear}
-              map={(a) => ({ key: a.codigo.toString(), label: a.designacao, value: a.codigo.toString() })}
+              map={(a) => ({
+                key: a.codigo.toString(),
+                label: a.designacao,
+                value: a.codigo.toString(),
+              })}
             />
           </div>
           <div className="space-y-2">
             <CourseSelect
               value={filters.codigoCurso}
-              onChangeValue={(v) => setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))}
+              onChangeValue={(v) =>
+                setFilters((p) => ({ ...p, codigoCurso: v, page: 1 }))
+              }
             />
           </div>
           <div className="space-y-2">
@@ -212,10 +242,21 @@ export function CandidatosComProvaTab() {
               label="Período"
               value={filters.codigoTurno?.toString() ?? "all"}
               onChange={(v) =>
-                setFilters((p) => ({ ...p, codigoTurno: v === "all" ? "" : v, page: 1 }))
+                setFilters((p) => ({
+                  ...p,
+                  codigoTurno: v === "all" ? "" : v,
+                  page: 1,
+                }))
               }
-              options={[{ codigo: "all", designacao: "Todos" }, ...(periodos ?? [])]}
-              map={(p) => ({ key: p.codigo.toString(), label: p.designacao, value: p.codigo.toString() })}
+              options={[
+                { codigo: "all", designacao: "Todos" },
+                ...(periodos ?? []),
+              ]}
+              map={(p) => ({
+                key: p.codigo.toString(),
+                label: p.designacao,
+                value: p.codigo.toString(),
+              })}
             />
           </div>
           <div className="space-y-2">
@@ -223,7 +264,11 @@ export function CandidatosComProvaTab() {
               label="Estado Prova"
               value={filters.statusProva?.toString() ?? "all"}
               onChange={(v) =>
-                setFilters((p) => ({ ...p, statusProva: v === "all" ? "" : v, page: 1 }))
+                setFilters((p) => ({
+                  ...p,
+                  statusProva: v === "all" ? "" : v,
+                  page: 1,
+                }))
               }
               options={[
                 { key: "all", label: "Todos", value: "all" },
@@ -233,18 +278,20 @@ export function CandidatosComProvaTab() {
               map={(item) => item}
             />
           </div>
-                <div className="space-y-2">
-                      <Label>Pesquisar</Label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          className="pl-9"
-                          placeholder="Pesquisar por nome ou BI"
-                          value={filters.search}
-                          onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))}
-                        />
-                      </div>
-                    </div>
+          <div className="space-y-2">
+            <Label>Pesquisar</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Pesquisar por nome ou BI"
+                value={filters.search}
+                onChange={(e) =>
+                  setFilters((p) => ({ ...p, search: e.target.value, page: 1 }))
+                }
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -283,7 +330,10 @@ export function CandidatosComProvaTab() {
             {!showLoading && candidatos.length === 0 && (
               <TableRow>
                 {/* CORREÇÃO 5: colSpan corrigido de 9 para 10 (a tabela tem 10 colunas) */}
-                <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={10}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   Nenhum registo encontrado
                 </TableCell>
               </TableRow>
@@ -295,10 +345,16 @@ export function CandidatosComProvaTab() {
                 // recriar as linhas ao mudar de página, eliminando duplicações
                 // causadas por reutilização de elementos com o mesmo key.
                 <TableRow key={`${filters.page}-${item.codigo}`}>
-                  <TableCell className="font-mono font-semibold">{item.codigo}</TableCell>
+                  <TableCell className="font-mono font-semibold">
+                    {item.codigo}
+                  </TableCell>
                   <TableCell className="font-medium">{item.nome}</TableCell>
                   <TableCell className="text-sm">{item.contato}</TableCell>
-                  <TableCell className="text-sm">{item.sexo}</TableCell>
+                  <TableCell className="text-sm">
+                    {item.sexo === "1" || item.sexo === "Masculino"
+                      ? "Masculino"
+                      : "Feminino"}
+                  </TableCell>
                   <TableCell className="text-sm">{item.curso}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{item.periodo}</Badge>
@@ -307,8 +363,12 @@ export function CandidatosComProvaTab() {
                     {item.hora_inicio} - {item.hora_fim}
                   </TableCell>
                   <TableCell className="text-sm">{item.ano_lectivo}</TableCell>
-                  <TableCell className="text-sm">{item.tipo_candidatura}</TableCell>
-                  <TableCell className="text-sm">{item.data_candidatura}</TableCell>
+                  <TableCell className="text-sm">
+                    {item.tipo_candidatura}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {item.data_candidatura}
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
@@ -333,7 +393,9 @@ export function CandidatosComProvaTab() {
           <span className="text-sm text-muted-foreground">Mostrar</span>
           <Select
             value={filters.limit.toString()}
-            onValueChange={(v) => setFilters((p) => ({ ...p, limit: Number(v), page: 1 }))}
+            onValueChange={(v) =>
+              setFilters((p) => ({ ...p, limit: Number(v), page: 1 }))
+            }
           >
             <SelectTrigger className="w-20">
               <SelectValue />
@@ -345,8 +407,8 @@ export function CandidatosComProvaTab() {
             </SelectContent>
           </Select>
           <span className="text-sm text-muted-foreground ml-2">
-            Mostrando {total === 0 ? 0 : offset + 1} a {Math.min(offset + filters.limit, total)} de{" "}
-            {total} registos
+            Mostrando {total === 0 ? 0 : offset + 1} a{" "}
+            {Math.min(offset + filters.limit, total)} de {total} registos
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -356,7 +418,8 @@ export function CandidatosComProvaTab() {
             onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
             disabled={filters.page === 1 || showLoading}
           >
-            <ChevronLeft className="h-4 w-4" />Anterior
+            <ChevronLeft className="h-4 w-4" />
+            Anterior
           </Button>
           <span className="text-sm">
             Página {filters.page} de {totalPages}
@@ -367,7 +430,8 @@ export function CandidatosComProvaTab() {
             onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
             disabled={filters.page === totalPages || showLoading}
           >
-            Seguinte<ChevronRight className="h-4 w-4" />
+            Seguinte
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
