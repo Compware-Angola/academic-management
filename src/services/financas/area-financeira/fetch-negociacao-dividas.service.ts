@@ -78,7 +78,6 @@ export async function getNegociacoesService(
     limit = 10,
   } = payload;
 
-  console.log('----------------------------', payload)
   const { data } = await axiosNestFinance.get<ObterNegociacoesResponse>(
     "debt-negotiation/list",
     {
