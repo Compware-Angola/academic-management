@@ -464,7 +464,10 @@ export function ConciliacaoDivida() {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-medium">
-                              {item.descricao}
+                              {item.descricao?.replace(
+                                /propina/gi,
+                                "Mensalidade",
+                              )}
                             </p>
                             <div className="flex items-center gap-1.5 shrink-0">
                               {item.mes_designacao && (
@@ -483,10 +486,7 @@ export function ConciliacaoDivida() {
                           </div>
 
                           <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>
-                              {item.quantidade}x{" "}
-                              {formatCurrencyAOA(item.preco_unitario)}
-                            </span>
+                            <span>Preço Unitário</span>
                             <span
                               className={`font-semibold ${
                                 isChanged
@@ -494,7 +494,41 @@ export function ConciliacaoDivida() {
                                   : "text-foreground"
                               }`}
                             >
-                              {formatCurrencyAOA(item.valor_total)}
+                              {item.quantidade}x{" "}
+                              {formatCurrencyAOA(item.preco_unitario)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span className="text-success font-semibold">
+                              Descontos
+                            </span>
+                            <span
+                              className={`font-semibold text-success ${
+                                isChanged
+                                  ? "text-muted-foreground line-through decoration-1"
+                                  : "text-foreground"
+                              }`}
+                            >
+                              -{" "}
+                              {formatCurrencyAOA(
+                                item.desconto_produto > 0
+                                  ? item.desconto_produto
+                                  : item.valor_desconto,
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span className=" font-semibold text-destructive">
+                              Multa
+                            </span>
+                            <span
+                              className={`font-semibold text-red-500 ${
+                                isChanged
+                                  ? "text-muted-foreground line-through decoration-1"
+                                  : "text-foreground"
+                              }`}
+                            >
+                              + {formatCurrencyAOA(item.multa)}
                             </span>
                           </div>
 
