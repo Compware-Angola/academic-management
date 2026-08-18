@@ -88,13 +88,13 @@ const EstudantesMatriculado = () => {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage> Estudantes Matriculados</BreadcrumbPage>
+            <BreadcrumbPage> Estudantes Matriculados </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold mb-6 text-foreground">
-          Estudantes Matriculados
+          Estudantes Matriculados e Confirmação de Matrícula
         </h1>
       </div>
       <Card className="mb-6">
