@@ -5,11 +5,13 @@ import { can } from "@/auth/can";
 type ProtectedRouteProps = {
   allowedPermissions: string[];
   children: React.ReactNode;
+  blockFullAccess?: boolean;
 };
 
 export function ProtectedRoute({
   allowedPermissions,
   children,
+  blockFullAccess = false,
 }: ProtectedRouteProps) {
   const { data: user, isError, isLoading } = useCurrentUser();
 
@@ -26,7 +28,9 @@ export function ProtectedRoute({
   const userPermissions = user?.permissions || [];
 
   const hasAccess = allowedPermissions.some((permission) =>
-    can(userPermissions, permission)
+    can(userPermissions, permission, {
+      blockFullAccess,
+    }),
   );
 
   // 🚫 Sem permissão

@@ -88,6 +88,7 @@ function OriginalItemCard({ item }: { item: ConciliationInvoiceItem }) {
   return (
     <div className="rounded-lg border border-border bg-background p-3 space-y-2">
       <p className="text-sm font-medium">
+        {item.descricao.replace(/propina/gi, "Mensalidade")}
         {item.descricao?.replace(/propina/gi, "Mensalidade")}
         {item.mes_designacao && (
           <span className="ml-1 text-xs text-muted-foreground">

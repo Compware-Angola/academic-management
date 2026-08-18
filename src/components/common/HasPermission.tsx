@@ -4,9 +4,20 @@ import { ReactNode } from "react";
 interface HasPermissionProps {
   permission: string;
   children: ReactNode;
+  blockFullAccess?: boolean;
 }
 
-export const HasPermission = ({ permission, children }: HasPermissionProps) => {
+export const HasPermission = ({
+  permission,
+  children,
+  blockFullAccess = false,
+}: HasPermissionProps) => {
   const { hasPermission } = usePermission();
-  return <>{hasPermission(permission) && children}</>;
+  return (
+    <>
+      {hasPermission(permission, {
+        blockFullAccess,
+      }) && children}
+    </>
+  );
 };

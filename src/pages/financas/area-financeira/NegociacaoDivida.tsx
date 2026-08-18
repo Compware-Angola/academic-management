@@ -505,6 +505,7 @@ export default function NegociacaoDivida() {
                       </TableCell>
                       <TableCell>
                         <HasPermission
+                          blockFullAccess
                           permission={
                             PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
                               .sigla
