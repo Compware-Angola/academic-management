@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,10 @@ import { PeriodoSelect } from "@/components/common/global-selects/PeriodoSelect"
 import { useQueryListEstudantesMatriculados } from "@/hooks/registrations/use-query-estudantes-matriculados";
 import { formatarData } from "@/util/date-formate";
 import { FormSelect } from "@/components/common/FormSelect";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
+import PDFActions, {
+  GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
 
 const EstudantesMatriculado = () => {
   const [page, setPage] = useState(1);
@@ -75,6 +81,105 @@ const EstudantesMatriculado = () => {
   const students = studentsResponse?.data ?? [];
   const total = studentsResponse?.total;
   const totalPages = studentsResponse?.totalPages;
+
+  const pdfData = useMemo(() => {
+    if (!students.length) return null;
+
+    return {
+      filtros:
+        [
+          filters.anoLectivo && `Ano Letivo: ${filters.anoLectivo}`,
+          filters.curso && filters.curso !== "0" && `Curso: ${filters.curso}`,
+          filters.periodo &&
+            filters.periodo !== "all" &&
+            `Período: ${filters.periodo}`,
+          filters.anoCurricular &&
+            filters.anoCurricular !== "all" &&
+            `Ano Curricular: ${filters.anoCurricular}`,
+          filters.tipoEstudante &&
+            filters.tipoEstudante !== "all" &&
+            `Tipo: ${
+              filters.tipoEstudante === "1"
+                ? "Estudante Novo"
+                : "Estudante Antigo"
+            }`,
+        ]
+          .filter(Boolean)
+          .join(" | ") || "Sem filtros",
+
+      total,
+
+      rows: students.map((s) => ({
+        matricula: s.codigomatricula,
+        nome: s.nome,
+        classe: s.classe,
+        telefone: s.telefone,
+        genero: s.genero,
+        curso: s.curso,
+        tipo: s.tipo,
+        dataMatricula: s.datamatricula,
+        anoLectivo: s.anolectivo,
+      })),
+    };
+  }, [students, filters, total]);
+
+  const pdfContent = pdfData ? (
+    <GenericPDFDocument
+      documentTitle="Estudantes Matriculados"
+      subtitle="Lista de estudantes matriculados e confirmação de matrícula"
+      infoSections={[
+        { title: "Filtros Aplicados", content: pdfData.filtros },
+        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+      ]}
+      mainTable={{
+        headers: [
+          { key: "matricula", label: "Matrícula", width: "12%" },
+          { key: "nome", label: "Nome", width: "20%" },
+          { key: "classe", label: "Classe", width: "10%" },
+          { key: "telefone", label: "Telefone", width: "12%" },
+          { key: "genero", label: "Gênero", width: "8%" },
+          { key: "curso", label: "Curso", width: "15%" },
+          { key: "tipo", label: "Tipo", width: "10%" },
+          { key: "dataMatricula", label: "Data Matrícula", width: "13%" },
+          { key: "anoLectivo", label: "Ano Lectivo", width: "10%" },
+        ],
+        rows: pdfData.rows,
+        headerBackground: "#0D1B48",
+      }}
+      footerNotice="Documento gerado automaticamente pelo sistema."
+    />
+  ) : null;
+
+  const excelProps = pdfData
+    ? {
+        documentTitle: "Estudantes Matriculados",
+        subtitle: "Lista de estudantes matriculados e confirmação de matrícula",
+        infoSections: [
+          { title: "Filtros Aplicados", content: pdfData.filtros },
+          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+        ],
+        mainTable: {
+          headers: [
+            { key: "matricula", label: "Matrícula", width: 18 },
+            { key: "nome", label: "Nome", width: 30 },
+            { key: "classe", label: "Classe", width: 15 },
+            { key: "telefone", label: "Telefone", width: 18 },
+            { key: "genero", label: "Gênero", width: 12 },
+            { key: "curso", label: "Curso", width: 25 },
+            { key: "tipo", label: "Tipo", width: 15 },
+            { key: "dataMatricula", label: "Data Matrícula", width: 18 },
+            { key: "anoLectivo", label: "Ano Lectivo", width: 15 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
+    : null;
+
+  const baseFileName = `Estudantes_Matriculados_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
 
   const handleClearFilters = () => {
     setFilters({
@@ -162,7 +267,30 @@ const EstudantesMatriculado = () => {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Estudantes Matriculados</CardTitle>
+
+          <div className="flex justify-between items-center">
+
+            <CardTitle>Estudantes Matriculados</CardTitle>
+            {pdfData && excelProps && (
+              <div className="flex justify-end gap-2">
+                {pdfContent && (
+                  <PDFActions
+                    document={pdfContent}
+                    fileName={`${baseFileName}.pdf`}
+                    showDownload
+                    showPrint
+                  />
+                )}
+
+                <ExcelActions
+                  excelProps={excelProps}
+                  fileName={`${baseFileName}.xlsx`}
+                  showDownload
+                />
+              </div>
+            )}
+
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
