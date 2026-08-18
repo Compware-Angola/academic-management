@@ -42,7 +42,7 @@ const EstudantesMatriculado = () => {
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     periodo: "all",
-    curso: "",
+    curso: "0",
     tipoEstudante: "all",
     anoCurricular: "all",
   });
