@@ -92,7 +92,6 @@ export function PagamentosTable({
     setSelectedServices(services);
     setOpenServicesModal(true);
   }
-
   //MULTA
   const closeMultaModal = () => setAnularMultaModal(false);
   const openMultaModal = (pagId: number) => {
@@ -103,7 +102,7 @@ export function PagamentosTable({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Pagamentos ({payments.length})</CardTitle>
+          <CardTitle>Pagamentos ({total})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
