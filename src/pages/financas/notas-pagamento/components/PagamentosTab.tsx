@@ -42,7 +42,11 @@ type PagamentosTabProps = {
   totalPages: number | undefined;
   onSearch: () => void;
   onVerDetalhes: (pag: PaymentItem) => void;
-  onClear: (clearedFilters: Filters, clearedSearchBy: SearchByType, clearedSearchTerm: string) => void; // ← Novo
+  onClear: (
+    clearedFilters: Filters,
+    clearedSearchBy: SearchByType,
+    clearedSearchTerm: string,
+  ) => void; // ← Novo
 };
 export function PagamentosTab({
   filters,
@@ -61,7 +65,7 @@ export function PagamentosTab({
   totalPages,
   onSearch,
   onVerDetalhes,
-  onClear
+  onClear,
 }: PagamentosTabProps) {
   const exportRows = useMemo(
     () =>

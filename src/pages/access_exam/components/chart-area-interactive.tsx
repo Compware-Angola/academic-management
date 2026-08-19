@@ -34,11 +34,13 @@ const chartConfig = {
 interface ChartAreaInteractiveProps {
   data: InscricaoPorData[] | undefined;
   isLoading: boolean;
+  totalInscricoes?: number;
 }
 
 export function ChartAreaInteractive({
   data,
   isLoading,
+  totalInscricoes,
 }: ChartAreaInteractiveProps) {
   const chartData = React.useMemo(() => {
     if (!data) return [];
@@ -63,10 +65,12 @@ export function ChartAreaInteractive({
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [data]);
 
-  const totalInscricoes = React.useMemo(
+  const totalInscricoesPage = React.useMemo(
     () => chartData.reduce((acc, curr) => acc + curr.subtotal, 0),
     [chartData],
   );
+
+  const totalInscricoesExibir = totalInscricoes ?? totalInscricoesPage;
 
   return (
     <Card className="pt-0">
@@ -80,7 +84,7 @@ export function ChartAreaInteractive({
             Total de Inscrições
           </span>
           <span className="text-2xl sm:text-3xl font-bold text-primary">
-            {totalInscricoes.toLocaleString()}
+            {totalInscricoesExibir.toLocaleString()}
           </span>
         </div>
       </CardHeader>

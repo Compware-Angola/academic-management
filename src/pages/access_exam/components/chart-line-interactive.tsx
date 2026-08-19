@@ -24,12 +24,18 @@ interface ChartLineInteractiveProps {
   isLoading: boolean;
   title?: string;
   description?: string;
+  totalInscricoes?: number;
+  totalPagos?: number;
 }
 
 const chartConfig = {
   subtotal: {
     label: "Inscrições",
     color: "var(--chart-1)",
+  },
+  pagos: {
+    label: "Pagamentos",
+    color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
 
@@ -38,6 +44,8 @@ export function ChartLineInteractive({
   isLoading,
   title = "Estatísticas Diárias",
   description = "Evolução do número de inscrições por dia",
+  totalInscricoes,
+  totalPagos,
 }: ChartLineInteractiveProps) {
   const chartData = React.useMemo(() => {
     if (!data) return [];
@@ -51,15 +59,24 @@ export function ChartLineInteractive({
           originalDate: item.data,
           date: isoDate,
           subtotal: item.subtotal || 0,
+          pagos: item.pagos || 0,
         };
       })
       .sort((a, b) => a.date.localeCompare(b.date)); // strings ISO já ordenam corretamente
   }, [data]);
 
-  const totalInscricoes = React.useMemo(
+  const totalInscricoesPage = React.useMemo(
     () => chartData.reduce((acc, curr) => acc + curr.subtotal, 0),
     [chartData],
   );
+
+  const totalPagosPage = React.useMemo(
+    () => chartData.reduce((acc, curr) => acc + curr.pagos, 0),
+    [chartData],
+  );
+
+  const totalInscricoesExibir = totalInscricoes ?? totalInscricoesPage;
+  const totalPagosExibir = totalPagos ?? totalPagosPage;
 
   if (isLoading) {
     return (
@@ -88,7 +105,16 @@ export function ChartLineInteractive({
             Total de Inscrições
           </span>
           <span className="text-2xl sm:text-3xl font-bold text-primary">
-            {totalInscricoes.toLocaleString()}
+            {totalInscricoesExibir.toLocaleString()}
+          </span>
+        </div>
+
+        <div className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 sm:border-t-0 sm:border-l sm:px-8 sm:py-6">
+          <span className="text-xs text-muted-foreground">
+            Total de Pagamentos
+          </span>
+          <span className="text-2xl sm:text-3xl font-bold text-emerald-600">
+            {totalPagosExibir.toLocaleString()}
           </span>
         </div>
       </CardHeader>
@@ -143,6 +169,17 @@ export function ChartLineInteractive({
               dot={{ r: 4, fill: "var(--color-subtotal)" }}
               activeDot={{ r: 6 }}
               name="Inscrições"
+            />
+
+            <Line
+              dataKey="pagos"
+              type="monotone"
+              stroke="var(--color-pagos)"
+              strokeWidth={3.5}
+              strokeDasharray="6 4"
+              dot={{ r: 4, fill: "var(--color-pagos)" }}
+              activeDot={{ r: 6 }}
+              name="Pagamentos"
             />
           </LineChart>
         </ChartContainer>

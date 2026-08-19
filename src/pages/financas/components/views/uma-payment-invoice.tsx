@@ -234,6 +234,10 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps) {
                 locale: pt,
               })}
             </Text>
+            <Text>
+              <Text style={styles.label}>Curso:</Text>{" "}
+              {nota.curso || nota.curso_candidatura}
+            </Text>
           </View>
 
           <View style={styles.infoRow}>
@@ -241,9 +245,12 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps) {
               <Text style={styles.label}>Ano Lectivo:</Text>{" "}
               {nota.ano_lectivo || "—"}
             </Text>
-            <Text>
-              <Text style={styles.label}>Curso:</Text> {nota.curso || "—"}
-            </Text>
+
+            {!nota.codigo_matricula && (
+              <Text>
+                <Text style={styles.label}>Turno:</Text> {nota.turno}
+              </Text>
+            )}
           </View>
         </View>
 
