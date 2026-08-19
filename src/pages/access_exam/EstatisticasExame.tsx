@@ -26,6 +26,8 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
+  Users,
+  CreditCard,
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -84,6 +86,7 @@ export default function EstatisticasExame() {
       data: item.data,
       laboral: item.qt_diurno,
       posLaboral: item.qt_noturno,
+      pagos: item.pagos ?? 0,
       totalDia: item.total_dia,
     }));
   }, [estatistica]);
@@ -116,14 +119,18 @@ export default function EstatisticasExame() {
           title: "Filtros Aplicados",
           content: pdfData.filtros || "Sem filtros",
         },
-        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+        { title: "Resumo", content: [
+          `Total de registos: ${pdfData.total}`,
+          `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
+        ] },
       ]}
       mainTable={{
         headers: [
-          { key: "data", label: "Data", width: "20%" },
-          { key: "laboral", label: "Laboral (Diurno)", width: "25%" },
-          { key: "posLaboral", label: "Pós-Laboral", width: "25%" },
-          { key: "totalDia", label: "Total por Dia", width: "30%" },
+          { key: "data", label: "Data", width: "18%" },
+          { key: "laboral", label: "Laboral (Diurno)", width: "22%" },
+          { key: "posLaboral", label: "Pós-Laboral", width: "22%" },
+          { key: "pagos", label: "Pagos", width: "18%" },
+          { key: "totalDia", label: "Total por Dia", width: "20%" },
         ],
         rows: pdfData.rows,
         headerBackground: "#0D1B48",
@@ -141,13 +148,17 @@ export default function EstatisticasExame() {
           title: "Filtros Aplicados",
           content: pdfData.filtros || "Sem filtros",
         },
-        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
+        { title: "Resumo", content: [
+          `Total de registos: ${pdfData.total}`,
+          `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
+        ] },
       ],
       mainTable: {
         headers: [
           { key: "data", label: "Data", width: 20 },
           { key: "laboral", label: "Laboral (Diurno)", width: 25 },
           { key: "posLaboral", label: "Pós-Laboral", width: 25 },
+          { key: "pagos", label: "Pagos", width: 20 },
           { key: "totalDia", label: "Total por Dia", width: 25 },
         ],
         rows: pdfData.rows,
@@ -229,6 +240,43 @@ export default function EstatisticasExame() {
             />
           )}
         </div>
+      </div>
+
+      {/* Cartões de resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Users className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Total de Candidatos Inscritos
+              </p>
+              <p className="text-2xl font-bold text-primary">
+                {(estatistica?.data ?? [])
+                  .reduce((acc, item) => acc + (item.total_dia || 0), 0)
+                  .toLocaleString()}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
+              <CreditCard className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Pagamentos Realizados
+              </p>
+              <p className="text-2xl font-bold text-emerald-600">
+                {estatistica?.totalpagos?.toLocaleString() ?? 0}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filtros */}
@@ -363,6 +411,9 @@ export default function EstatisticasExame() {
                     Pós-Laboral
                   </TableHead>
                   <TableHead className="text-center font-semibold">
+                    Pagos
+                  </TableHead>
+                  <TableHead className="text-center font-semibold">
                     Total/Dia
                   </TableHead>
                 </TableRow>
@@ -373,6 +424,9 @@ export default function EstatisticasExame() {
                     <TableRow key={i}>
                       <TableCell>
                         <Skeleton className="h-4 w-24" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Skeleton className="h-4 w-12 mx-auto" />
                       </TableCell>
                       <TableCell className="text-center">
                         <Skeleton className="h-4 w-12 mx-auto" />
@@ -397,6 +451,11 @@ export default function EstatisticasExame() {
                         {item.qt_noturno}
                       </TableCell>
                       <TableCell className="text-center">
+                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-sm font-bold text-emerald-600">
+                          {item.pagos ?? 0}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">
                         <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
                           {item.total_dia}
                         </span>
@@ -419,6 +478,16 @@ export default function EstatisticasExame() {
                       <Skeleton className="h-4 w-12 mx-auto" />
                     ) : (
                       estatistica?.data.reduce((a, b) => a + b.qt_noturno, 0)
+                    )}
+                  </TableCell>
+                  <TableCell className="text-center text-emerald-600">
+                    {isLoadingEstatistica ? (
+                      <Skeleton className="h-4 w-12 mx-auto" />
+                    ) : (
+                      estatistica?.data.reduce(
+                        (a, b) => a + (b.pagos ?? 0),
+                        0,
+                      )
                     )}
                   </TableCell>
                   <TableCell className="text-center text-primary">

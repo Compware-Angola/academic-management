@@ -126,7 +126,9 @@ export function FacturaDetalhesModal({
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Curso</p>
-                  <p className="font-medium">{factura.curso || "—"}</p>
+                  <p className="font-medium">
+                    {factura.curso || factura.curso_candidatura}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Ano Lectivo</p>

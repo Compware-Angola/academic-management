@@ -109,7 +109,7 @@ export const ListaPagamentoModal = ({
               <FileText className="h-5 w-5" />
               Detalhes do Pagamento - {factura?.referencia}
             </DialogTitle>
-            {factura && facturaItens?.data && student && (
+            {factura && facturaItens?.data && (
               <div className="flex flex-wrap gap-2 pt-2">
                 {doc && <PDFActions document={doc} fileName={baseFileName} />}
               </div>
@@ -314,7 +314,9 @@ export const ListaPagamentoModal = ({
                       <TableRow>
                         <TableCell className="font-medium">
                           {item?.descricaoservico}
-                          {item?.mesdescricao && item?.mesid !== 0 && item?.prestacao > 0
+                          {item?.mesdescricao &&
+                          item?.mesid !== 0 &&
+                          item?.prestacao > 0
                             ? `(${item.mesdescricao})`
                             : ""}
                           {item?.cadeiras_recurso_epoca_especial
