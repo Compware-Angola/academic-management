@@ -29,6 +29,7 @@ import {
   ChevronRight,
   CalendarDays,
   Users,
+  CreditCard,
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -88,6 +89,7 @@ export default function EstatisticasDiaria() {
       numero: (currentPage - 1) * filters.limit + index + 1,
       data: item.data,
       subtotal: item.subtotal,
+      pagos: item.pagos ?? 0,
       percentagem: estatisticaDiaria?.data?.length
         ? Math.round(
             (item.subtotal /
@@ -126,14 +128,18 @@ export default function EstatisticasDiaria() {
           title: "Filtros Aplicados",
           content: pdfData.filtros || "Sem filtros",
         },
-        { title: "Resumo", content: [`Total de candidatos: ${pdfData.total}`] },
+        { title: "Resumo", content: [
+          `Total de candidatos: ${pdfData.total}`,
+          `Total de pagamentos: ${estatisticaDiaria?.totalpagos ?? 0}`,
+        ] },
       ]}
       mainTable={{
         headers: [
           { key: "numero", label: "#", width: "8%" },
-          { key: "data", label: "Data", width: "25%" },
-          { key: "subtotal", label: "Subtotal", width: "25%" },
-          { key: "percentagem", label: "Percentagem", width: "25%" },
+          { key: "data", label: "Data", width: "22%" },
+          { key: "subtotal", label: "Subtotal", width: "22%" },
+          { key: "pagos", label: "Pagos", width: "22%" },
+          { key: "percentagem", label: "Percentagem", width: "22%" },
         ],
         rows: pdfData.rows,
         headerBackground: "#0D1B48",
@@ -153,7 +159,10 @@ export default function EstatisticasDiaria() {
           },
           {
             title: "Resumo",
-            content: [`Total de candidatos: ${pdfData.total}`],
+            content: [
+              `Total de candidatos: ${pdfData.total}`,
+              `Total de pagamentos: ${estatisticaDiaria?.totalpagos ?? 0}`,
+            ],
           },
         ],
         mainTable: {
@@ -161,6 +170,7 @@ export default function EstatisticasDiaria() {
             { key: "numero", label: "#", width: 10 },
             { key: "data", label: "Data", width: 25 },
             { key: "subtotal", label: "Subtotal", width: 20 },
+            { key: "pagos", label: "Pagos", width: 20 },
             { key: "percentagem", label: "Percentagem (%)", width: 20 },
           ],
           rows: pdfData.rows,
@@ -247,6 +257,41 @@ export default function EstatisticasDiaria() {
             />
           )}
         </div>
+      </div>
+
+      {/* Cartões de resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <Users className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Total de Candidatos Inscritos
+              </p>
+              <p className="text-2xl font-bold text-primary">
+                {estatisticaDiaria?.totalgeralcandidatos?.toLocaleString() ?? 0}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10">
+              <CreditCard className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Pagamentos Realizados
+              </p>
+              <p className="text-2xl font-bold text-emerald-600">
+                {estatisticaDiaria?.totalpagos?.toLocaleString() ?? 0}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filtros */}
@@ -379,19 +424,22 @@ export default function EstatisticasDiaria() {
                   <TableHead className="text-right font-semibold">
                     Subtotal
                   </TableHead>
+                  <TableHead className="text-right font-semibold">
+                    Pagos
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoadingEstatisticaDiaria ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center">
                       Carregando...
                     </TableCell>
                   </TableRow>
                 ) : estatisticaDiaria?.data?.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={4}
+                      colSpan={5}
                       className="h-24 text-center text-muted-foreground"
                     >
                       Nenhum resultado encontrado
@@ -433,6 +481,11 @@ export default function EstatisticasDiaria() {
                             {item.subtotal}
                           </span>
                         </TableCell>
+                        <TableCell className="text-right">
+                          <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-sm font-bold text-emerald-600">
+                            {item.pagos ?? 0}
+                          </span>
+                        </TableCell>
                       </TableRow>
                     );
                   })
@@ -444,6 +497,11 @@ export default function EstatisticasDiaria() {
                   <TableCell className="text-right text-primary">
                     {(estatisticaDiaria?.data ?? [])
                       .reduce((acc, item) => acc + (item.subtotal || 0), 0)
+                      .toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right text-emerald-600">
+                    {(estatisticaDiaria?.data ?? [])
+                      .reduce((acc, item) => acc + (item.pagos || 0), 0)
                       .toLocaleString()}
                   </TableCell>
                 </TableRow>

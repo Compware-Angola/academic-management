@@ -18,12 +18,14 @@ export type InscricaoPorData = {
   qt_noite: number;
   qt_diurno: number;
   qt_noturno: number;
+  pagos?: number;
   total_dia: number;
 };
 
 export type InscricoesPorDataResponse = {
   data: InscricaoPorData[];
   total: number;
+  totalpagos?: number;
   page: number;
   limit: number;
   totalpages: number;
