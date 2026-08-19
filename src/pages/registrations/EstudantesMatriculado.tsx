@@ -75,6 +75,7 @@ const EstudantesMatriculado = () => {
       limit,
       page,
     });
+  console.log("studentsResponse", studentsResponse)
 
   const statisticsFilters = {
     codigoAnoLectivo: parseFilter(filters.anoLectivo),
@@ -86,6 +87,8 @@ const EstudantesMatriculado = () => {
 
   const { data: statisticsResponse, isLoading: isLoadingStatistics } =
     useQueryEstatisticaEstudantesMatriculados(statisticsFilters);
+
+  console.log("chart data", statisticsResponse)
 
   const students = studentsResponse?.data ?? [];
   const total = studentsResponse?.total;
@@ -349,7 +352,7 @@ const EstudantesMatriculado = () => {
                   <Button
                     variant="outline"
                     disabled={page === totalPages}
-                    onClick={() => setPage((p) => p + 1)}
+                    onClick={() => setPage((p) => p + 742)}
                   >
                     Próxima
                   </Button>
