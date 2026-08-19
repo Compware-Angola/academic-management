@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { PeriodoSelect } from "@/components/common/global-selects/PeriodoSelect";
 import { useQueryListEstudantesMatriculados } from "@/hooks/registrations/use-query-estudantes-matriculados";
+import { useQueryEstatisticaEstudantesMatriculados } from "@/hooks/registrations/use-estatistica-estudantes-matriculados";
 import { formatarData } from "@/util/date-formate";
 import { FormSelect } from "@/components/common/FormSelect";
 import {
@@ -40,6 +41,7 @@ import {
   exportEstudantesMatriculadosExcelService,
 } from "@/services/registrations/export-estudantes-matriculados.service";
 import { toast } from "sonner";
+import { ChartEstudantesMatriculados } from "./components/chart-estudantes-matriculados";
 
 type ExportAction = "pdf" | "print" | "excel";
 
@@ -73,6 +75,17 @@ const EstudantesMatriculado = () => {
       limit,
       page,
     });
+
+  const statisticsFilters = {
+    codigoAnoLectivo: parseFilter(filters.anoLectivo),
+    codigoCurso: parseFilter(filters.curso),
+    periodo: parseFilter(filters.periodo),
+    anoCurricular: parseFilter(filters.anoCurricular),
+    tipoEstudante: parseFilter(filters.tipoEstudante),
+  };
+
+  const { data: statisticsResponse, isLoading: isLoadingStatistics } =
+    useQueryEstatisticaEstudantesMatriculados(statisticsFilters);
 
   const students = studentsResponse?.data ?? [];
   const total = studentsResponse?.total;
@@ -215,6 +228,10 @@ const EstudantesMatriculado = () => {
           </div>
         </CardContent>
       </Card>
+      <ChartEstudantesMatriculados
+        data={statisticsResponse?.data}
+        isLoading={isLoadingStatistics}
+      />
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
