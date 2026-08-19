@@ -1,7 +1,6 @@
-import { useMemo } from "react";
+import { useState } from "react";
 
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
-import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,8 +20,7 @@ import {
 } from "@/components/ui/table";
 
 import { parseFilter } from "@/util/parse-filter";
-import { Loader2, X } from "lucide-react";
-import { useState } from "react";
+import { Download, FileText, Loader2, Printer, X } from "lucide-react";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import {
@@ -37,10 +35,13 @@ import { PeriodoSelect } from "@/components/common/global-selects/PeriodoSelect"
 import { useQueryListEstudantesMatriculados } from "@/hooks/registrations/use-query-estudantes-matriculados";
 import { formatarData } from "@/util/date-formate";
 import { FormSelect } from "@/components/common/FormSelect";
-import ExcelActions from "@/components/views/excel/GenericExcelExport";
-import PDFActions, {
-  GenericPDFDocument,
-} from "@/components/views/pdf/GenericPDFDocument";
+import {
+  exportEstudantesMatriculadosPdfService,
+  exportEstudantesMatriculadosExcelService,
+} from "@/services/registrations/export-estudantes-matriculados.service";
+import { toast } from "sonner";
+
+type ExportAction = "pdf" | "print" | "excel";
 
 const EstudantesMatriculado = () => {
   const [page, setPage] = useState(1);
@@ -52,19 +53,14 @@ const EstudantesMatriculado = () => {
     tipoEstudante: "all",
     anoCurricular: "all",
   });
+  const [exportingAction, setExportingAction] = useState<ExportAction | null>(
+    null,
+  );
+
   const tipoEstudantes = [
-    {
-      key: "all",
-      label: "Todos",
-    },
-    {
-      key: "1",
-      label: "Estudante Novo",
-    },
-    {
-      key: "0",
-      label: "Estudante Antigo",
-    },
+    { key: "all", label: "Todos" },
+    { key: "1", label: "Estudante Novo" },
+    { key: "0", label: "Estudante Antigo" },
   ];
 
   const { data: studentsResponse, isLoading } =
@@ -82,104 +78,62 @@ const EstudantesMatriculado = () => {
   const total = studentsResponse?.total;
   const totalPages = studentsResponse?.totalPages;
 
-  const pdfData = useMemo(() => {
-    if (!students.length) return null;
+  const getExportParams = () => ({
+    codigoAnoLectivo: parseFilter(filters.anoLectivo),
+    codigoCurso: parseFilter(filters.curso),
+    periodo: parseFilter(filters.periodo),
+    anoCurricular: parseFilter(filters.anoCurricular),
+    tipoEstudante: parseFilter(filters.tipoEstudante),
+  });
 
-    return {
-      filtros:
-        [
-          filters.anoLectivo && `Ano Letivo: ${filters.anoLectivo}`,
-          filters.curso && filters.curso !== "0" && `Curso: ${filters.curso}`,
-          filters.periodo &&
-            filters.periodo !== "all" &&
-            `Período: ${filters.periodo}`,
-          filters.anoCurricular &&
-            filters.anoCurricular !== "all" &&
-            `Ano Curricular: ${filters.anoCurricular}`,
-          filters.tipoEstudante &&
-            filters.tipoEstudante !== "all" &&
-            `Tipo: ${
-              filters.tipoEstudante === "1"
-                ? "Estudante Novo"
-                : "Estudante Antigo"
-            }`,
-        ]
-          .filter(Boolean)
-          .join(" | ") || "Sem filtros",
+  const handleExport = async (action: ExportAction) => {
+    if (exportingAction || !total) return;
 
-      total,
+    const printWindow = action === "print" ? window.open("", "_blank") : null;
 
-      rows: students.map((s) => ({
-        matricula: s.codigomatricula,
-        nome: s.nome,
-        classe: s.classe,
-        telefone: s.telefone,
-        genero: s.genero,
-        curso: s.curso,
-        tipo: s.tipo,
-        dataMatricula: s.datamatricula,
-        anoLectivo: s.anolectivo,
-      })),
-    };
-  }, [students, filters, total]);
+    if (action === "print" && !printWindow) {
+      toast.error("O navegador bloqueou a janela de impressão.");
+      return;
+    }
 
-  const pdfContent = pdfData ? (
-    <GenericPDFDocument
-      documentTitle="Estudantes Matriculados"
-      subtitle="Lista de estudantes matriculados e confirmação de matrícula"
-      infoSections={[
-        { title: "Filtros Aplicados", content: pdfData.filtros },
-        { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-      ]}
-      mainTable={{
-        headers: [
-          { key: "matricula", label: "Matrícula", width: "12%" },
-          { key: "nome", label: "Nome", width: "20%" },
-          { key: "classe", label: "Classe", width: "10%" },
-          { key: "telefone", label: "Telefone", width: "12%" },
-          { key: "genero", label: "Gênero", width: "8%" },
-          { key: "curso", label: "Curso", width: "15%" },
-          { key: "tipo", label: "Tipo", width: "10%" },
-          { key: "dataMatricula", label: "Data Matrícula", width: "13%" },
-          { key: "anoLectivo", label: "Ano Lectivo", width: "10%" },
-        ],
-        rows: pdfData.rows,
-        headerBackground: "#0D1B48",
-      }}
-      footerNotice="Documento gerado automaticamente pelo sistema."
-    />
-  ) : null;
+    setExportingAction(action);
 
-  const excelProps = pdfData
-    ? {
-        documentTitle: "Estudantes Matriculados",
-        subtitle: "Lista de estudantes matriculados e confirmação de matrícula",
-        infoSections: [
-          { title: "Filtros Aplicados", content: pdfData.filtros },
-          { title: "Resumo", content: [`Total de registos: ${pdfData.total}`] },
-        ],
-        mainTable: {
-          headers: [
-            { key: "matricula", label: "Matrícula", width: 18 },
-            { key: "nome", label: "Nome", width: 30 },
-            { key: "classe", label: "Classe", width: 15 },
-            { key: "telefone", label: "Telefone", width: 18 },
-            { key: "genero", label: "Gênero", width: 12 },
-            { key: "curso", label: "Curso", width: 25 },
-            { key: "tipo", label: "Tipo", width: 15 },
-            { key: "dataMatricula", label: "Data Matrícula", width: 18 },
-            { key: "anoLectivo", label: "Ano Lectivo", width: 15 },
-          ],
-          rows: pdfData.rows,
-        },
-        footerNotice: "Documento gerado automaticamente pelo sistema.",
-        primaryColor: "#0D1B48",
+    try {
+      const params = getExportParams();
+
+      const { blob, fileName } =
+        action === "excel"
+          ? await exportEstudantesMatriculadosExcelService(params)
+          : await exportEstudantesMatriculadosPdfService(params);
+
+      const downloadUrl = URL.createObjectURL(blob);
+
+      if (action === "print") {
+        printWindow!.location.href = downloadUrl;
+        setTimeout(() => {
+          printWindow!.print();
+          URL.revokeObjectURL(downloadUrl);
+        }, 1000);
+      } else {
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
       }
-    : null;
 
-  const baseFileName = `Estudantes_Matriculados_${new Date()
-    .toISOString()
-    .slice(0, 10)}`;
+      toast.success("Exportação concluída com sucesso.");
+    } catch {
+      printWindow?.close();
+      toast.error(
+        "Não foi possível exportar os estudantes matriculados.",
+      );
+    } finally {
+      setExportingAction(null);
+    }
+  };
 
   const handleClearFilters = () => {
     setFilters({
@@ -189,9 +143,9 @@ const EstudantesMatriculado = () => {
       tipoEstudante: "all",
       anoCurricular: "all",
     });
-
     setPage(1);
   };
+
   return (
     <>
       <Breadcrumb className="mb-4">
@@ -217,11 +171,8 @@ const EstudantesMatriculado = () => {
       <Card className="mb-6">
         <CardHeader>
           <div className="flex justify-between">
-
             <CardTitle>Filtros de Pesquisa</CardTitle>
-            <Button variant="ghost" size="sm"
-              onClick={handleClearFilters}
-            >
+            <Button variant="ghost" size="sm" onClick={handleClearFilters}>
               <X className="h-4 w-4 mr-2" />
               Limpar filtros
             </Button>
@@ -233,7 +184,6 @@ const EstudantesMatriculado = () => {
               value={filters.anoLectivo}
               onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
             />
-
             <CourseSelect
               value={filters.curso}
               onChangeValue={(v) => setFilters({ ...filters, curso: v })}
@@ -267,29 +217,53 @@ const EstudantesMatriculado = () => {
       </Card>
       <Card>
         <CardHeader>
-
           <div className="flex justify-between items-center">
-
             <CardTitle>Estudantes Matriculados</CardTitle>
-            {pdfData && excelProps && (
+            {total !== undefined && total > 0 && (
               <div className="flex justify-end gap-2">
-                {pdfContent && (
-                  <PDFActions
-                    document={pdfContent}
-                    fileName={`${baseFileName}.pdf`}
-                    showDownload
-                    showPrint
-                  />
-                )}
-
-                <ExcelActions
-                  excelProps={excelProps}
-                  fileName={`${baseFileName}.xlsx`}
-                  showDownload
-                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport("pdf")}
+                  disabled={!!exportingAction}
+                >
+                  {exportingAction === "pdf" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileText className="mr-2 h-4 w-4" />
+                  )}
+                  {exportingAction === "pdf" ? "A exportar..." : "Exportar PDF"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport("print")}
+                  disabled={!!exportingAction}
+                >
+                  {exportingAction === "print" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Printer className="mr-2 h-4 w-4" />
+                  )}
+                  {exportingAction === "print" ? "A imprimir..." : "Imprimir"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExport("excel")}
+                  disabled={!!exportingAction}
+                >
+                  {exportingAction === "excel" ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  {exportingAction === "excel"
+                    ? "A exportar..."
+                    : "Exportar Excel"}
+                </Button>
               </div>
             )}
-
           </div>
         </CardHeader>
         <CardContent>
