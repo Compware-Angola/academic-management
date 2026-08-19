@@ -25,6 +25,7 @@ export type InscricaoPorData = {
 export type InscricoesPorDataResponse = {
   data: InscricaoPorData[];
   total: number;
+  totalgeralcandidatos?: number;
   totalpagos?: number;
   page: number;
   limit: number;

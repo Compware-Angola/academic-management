@@ -120,7 +120,7 @@ export default function EstatisticasExame() {
           content: pdfData.filtros || "Sem filtros",
         },
         { title: "Resumo", content: [
-          `Total de registos: ${pdfData.total}`,
+          `Total de candidatos: ${estatistica?.totalgeralcandidatos ?? 0}`,
           `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
         ] },
       ]}
@@ -149,7 +149,7 @@ export default function EstatisticasExame() {
           content: pdfData.filtros || "Sem filtros",
         },
         { title: "Resumo", content: [
-          `Total de registos: ${pdfData.total}`,
+          `Total de candidatos: ${estatistica?.totalgeralcandidatos ?? 0}`,
           `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
         ] },
       ],
@@ -254,9 +254,7 @@ export default function EstatisticasExame() {
                 Total de Candidatos Inscritos
               </p>
               <p className="text-2xl font-bold text-primary">
-                {(estatistica?.data ?? [])
-                  .reduce((acc, item) => acc + (item.total_dia || 0), 0)
-                  .toLocaleString()}
+                {estatistica?.totalgeralcandidatos?.toLocaleString() ?? 0}
               </p>
             </div>
           </CardContent>
@@ -388,6 +386,7 @@ export default function EstatisticasExame() {
       <ChartAreaInteractive
         data={estatistica?.data}
         isLoading={isLoadingEstatistica}
+        totalInscricoes={estatistica?.totalgeralcandidatos}
       />
 
       {/* Tabela + Exportações já incluídas acima */}
@@ -465,7 +464,7 @@ export default function EstatisticasExame() {
               </TableBody>
               <TableFooter>
                 <TableRow className="font-bold">
-                  <TableCell>Totais</TableCell>
+                  <TableCell>Total na Página</TableCell>
                   <TableCell className="text-center text-primary">
                     {isLoadingEstatistica ? (
                       <Skeleton className="h-4 w-12 mx-auto" />
@@ -506,7 +505,8 @@ export default function EstatisticasExame() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Página {filters.page} de {estatistica?.totalpages} —{" "}
-              {estatistica?.total} registos
+              {estatistica?.totalgeralcandidatos?.toLocaleString() || 0}{" "}
+              candidatos no total
             </p>
             <div className="flex gap-2">
               <Button

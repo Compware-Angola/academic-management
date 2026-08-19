@@ -403,6 +403,8 @@ export default function EstatisticasDiaria() {
       <ChartLineInteractive
         data={estatisticaDiaria?.data}
         isLoading={isLoadingEstatisticaDiaria}
+        totalInscricoes={estatisticaDiaria?.totalgeralcandidatos}
+        totalPagos={estatisticaDiaria?.totalpagos}
       />
 
       {/* Tabela */}
