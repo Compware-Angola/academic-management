@@ -242,7 +242,8 @@ function PaymentNoteDocument({ nota, itens }: PaymentNotePDFProps) {
               {nota.ano_lectivo || "—"}
             </Text>
             <Text>
-              <Text style={styles.label}>Curso:</Text> {nota.curso || "—"}
+              <Text style={styles.label}>Curso:</Text>{" "}
+              {nota.curso || nota.curso_candidatura}
             </Text>
           </View>
         </View>
