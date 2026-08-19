@@ -37,6 +37,7 @@ export type Factura = {
   codigo_ano_lectivo?: number;
   curso: string;
   curso_candidatura: string;
+  turno: string;
   polo: string;
   rn: number;
   motivo_anulacao: string | null;
