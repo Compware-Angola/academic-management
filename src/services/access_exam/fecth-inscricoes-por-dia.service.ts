@@ -14,12 +14,14 @@ export type InscricoesPorDiaParams = {
 export type InscricaoPorDia = {
   data: string;
   subtotal: number;
+  pagos?: number;
 };
 
 export type InscricoesPorDiaResponse = {
   data: InscricaoPorDia[];
   total: number;
   totalgeralcandidatos: number;
+  totalpagos?: number;
   page: number;
   limit: number;
   totalpages: number;
