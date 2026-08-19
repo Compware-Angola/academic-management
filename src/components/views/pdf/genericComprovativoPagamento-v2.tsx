@@ -49,6 +49,7 @@ export interface ReceiptData {
   studentId: string;
   course: string;
   program: string; // ex: "Mestrado" | "Licenciatura"
+  turno?: string;
   documentType?: string; // ex: "Comprovativo de Pagamento"
   totalInWords: string;
   totalValue: string;
@@ -288,12 +289,12 @@ export function GenericComprovativoPagamentoPDF({
         <Text style={S.paragraph}>
           {"Recebi de "}
           <Text style={S.bold}>{data.studentName}</Text>
-          {" aluno nº "}
-          <Text style={S.bold}>{data.studentNumber}</Text>
-          {", BI "}
+          {data.studentNumber ? ` aluno nº ${data.studentNumber},` : ","}
+          {" BI "}
           <Text style={S.bold}>{data.studentId}</Text>
-          {" curso de " + data.program + " de "}
+          {" curso de " + (data.program ? data.program + " de " : "")}
           <Text style={S.bold}>{data.course}</Text>
+          {data.turno ? ", turno " + data.turno : ""}
           {" a quantia de "}
           <Text style={S.bold}>{data.totalInWords}</Text>
           {" referente a pagamento à " + header.name + " de:"}
@@ -332,11 +333,13 @@ export function GenericComprovativoPagamentoPDF({
           </View>
         </View>
 
-        {/* ── DECLARAÇÃO ── */}
-        <Text style={S.declaration}>
-          Declara-se, para os devidos efeitos, que o(a) aluno(a) se encontra
-          matriculado(a) nesta Universidade no curso supracitado.
-        </Text>
+        {/* ── DECLARAÇÃO (apenas estudantes com matrícula) ── */}
+        {data.studentNumber && (
+          <Text style={S.declaration}>
+            Declara-se, para os devidos efeitos, que o(a) aluno(a) se encontra
+            matriculado(a) nesta Universidade no curso supracitado.
+          </Text>
+        )}
 
         {/* ── ASSINATURA CENTRADA ── */}
         <View style={S.signatureBlock}>
