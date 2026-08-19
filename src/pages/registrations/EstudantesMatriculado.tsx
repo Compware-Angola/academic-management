@@ -352,7 +352,7 @@ const EstudantesMatriculado = () => {
                   <Button
                     variant="outline"
                     disabled={page === totalPages}
-                    onClick={() => setPage((p) => p + 742)}
+                    onClick={() => setPage((p) => p + 1)}
                   >
                     Próxima
                   </Button>
