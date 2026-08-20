@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 
 import { parseFilter } from "@/util/parse-filter";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
@@ -42,7 +42,7 @@ const EstudantesMatriculado = () => {
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     periodo: "all",
-    curso: "",
+    curso: "0",
     tipoEstudante: "all",
     anoCurricular: "all",
   });
@@ -75,6 +75,18 @@ const EstudantesMatriculado = () => {
   const students = studentsResponse?.data ?? [];
   const total = studentsResponse?.total;
   const totalPages = studentsResponse?.totalPages;
+
+  const handleClearFilters = () => {
+    setFilters({
+      anoLectivo: "23",
+      periodo: "all",
+      curso: "0",
+      tipoEstudante: "all",
+      anoCurricular: "all",
+    });
+
+    setPage(1);
+  };
   return (
     <>
       <Breadcrumb className="mb-4">
@@ -88,18 +100,27 @@ const EstudantesMatriculado = () => {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage> Estudantes Matriculados</BreadcrumbPage>
+            <BreadcrumbPage> Estudantes Matriculados </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
       <div className="flex justify-between">
         <h1 className="text-3xl font-bold mb-6 text-foreground">
-          Estudantes Matriculados
+          Estudantes Matriculados e Confirmação de Matrícula
         </h1>
       </div>
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Filtros de Pesquisa</CardTitle>
+          <div className="flex justify-between">
+
+            <CardTitle>Filtros de Pesquisa</CardTitle>
+            <Button variant="ghost" size="sm"
+              onClick={handleClearFilters}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Limpar filtros
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 grid-cols-3">
