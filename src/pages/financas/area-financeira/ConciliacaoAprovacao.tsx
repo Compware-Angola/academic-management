@@ -7,6 +7,7 @@ import {
   Check,
   CheckCircle2,
   FileText,
+  GitBranch,
   Hash,
   Home,
   Loader2,
@@ -42,6 +43,7 @@ import {
 import type { ConciliationInvoiceItem } from "@/services/financas/conciliacao-divida/fetch-conciliacao-divida";
 import { useValidateConciliation } from "@/hooks/financas/dividas/use-validate-conciliacao-divida";
 import { useConciliationDetails } from "@/hooks/financas/dividas/use-query-conciliacao-divida-details";
+import { ConciliacaoTimelineModal } from "./components/ConciliacaoTimeLine";
 
 const STATUS_LABEL: Record<string, string> = {
   PENDENTE: "Pendente",
@@ -211,6 +213,7 @@ export function ConciliacaoAprovacao() {
   const [rejectReason, setRejectReason] = useState("");
   const [approveOpen, setApproveOpen] = useState(false);
   const [approveNote, setApproveNote] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const pairs = useMemo(() => {
     if (!conciliation) return [];
