@@ -21,8 +21,6 @@ import {
 
 import { parseFilter } from "@/util/parse-filter";
 import { Download, FileText, Loader2, Printer, X } from "lucide-react";
-import { Loader2, X } from "lucide-react";
-import { useState } from "react";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import {
@@ -46,8 +44,7 @@ import { toast } from "sonner";
 import { ChartEstudantesMatriculados } from "./components/chart-estudantes-matriculados";
 
 type ExportAction = "pdf" | "print" | "excel";
-
-const EstudantesMatriculado = () => {
+export default function EstudantesMatriculado() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filters, setFilters] = useState({
@@ -77,7 +74,6 @@ const EstudantesMatriculado = () => {
       limit,
       page,
     });
-  console.log("studentsResponse", studentsResponse)
 
   const statisticsFilters = {
     codigoAnoLectivo: parseFilter(filters.anoLectivo),
@@ -90,7 +86,7 @@ const EstudantesMatriculado = () => {
   const { data: statisticsResponse, isLoading: isLoadingStatistics } =
     useQueryEstatisticaEstudantesMatriculados(statisticsFilters);
 
-  console.log("chart data", statisticsResponse)
+  console.log("chart data", statisticsResponse);
 
   const students = studentsResponse?.data ?? [];
   const total = studentsResponse?.total;
@@ -145,9 +141,7 @@ const EstudantesMatriculado = () => {
       toast.success("Exportação concluída com sucesso.");
     } catch {
       printWindow?.close();
-      toast.error(
-        "Não foi possível exportar os estudantes matriculados.",
-      );
+      toast.error("Não foi possível exportar os estudantes matriculados.");
     } finally {
       setExportingAction(null);
     }
@@ -164,9 +158,6 @@ const EstudantesMatriculado = () => {
     setPage(1);
   };
 
-
-    setPage(1);
-  };
   return (
     <>
       <Breadcrumb className="mb-4">
@@ -193,12 +184,10 @@ const EstudantesMatriculado = () => {
         <CardHeader>
           <div className="flex justify-between">
             <CardTitle>Filtros de Pesquisa</CardTitle>
-            <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+            <Button variant="ghost" size="sm" onClick={handleClearFilters} />
 
             <CardTitle>Filtros de Pesquisa</CardTitle>
-            <Button variant="ghost" size="sm"
-              onClick={handleClearFilters}
-            >
+            <Button variant="ghost" size="sm" onClick={handleClearFilters}>
               <X className="h-4 w-4 mr-2" />
               Limpar filtros
             </Button>
@@ -392,5 +381,4 @@ const EstudantesMatriculado = () => {
       </Card>
     </>
   );
-};
-export { EstudantesMatriculado };
+}

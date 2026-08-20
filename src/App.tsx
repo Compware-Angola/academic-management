@@ -141,7 +141,6 @@ import LancarNotaManual from "./pages/access_exam/LancarNotaManual";
 
 import DocenteSubstitutoList from "./pages/schedules/Docentesubstitutolist";
 import { InscricaoSemUc } from "./pages/registrations/InscricaoSemUc";
-import { EstudantesMatriculado } from "./pages/registrations/EstudantesMatriculado";
 import { EstatisticaDeEstudantesAprovadosEReprovados } from "./pages/registrations/Estatisticas";
 import { SemInscricaoCurso } from "./pages/registrations/SemInscricaoCurso";
 import PagamentoMensal from "./pages/financas/area-financeira/PagamentoMensal";
@@ -203,6 +202,7 @@ import NegociacaoDividaConciliacao from "./pages/financas/area-financeira/Negoci
 import PautaExame from "./pages/access_exam/PautaExame";
 import Configuracoes from "./pages/configuracoes/Configuracoes";
 import TipoCalendarios from "./pages/academiccalendar/tipo-calendario";
+import EstudantesMatriculado from "./pages/registrations/EstudantesMatriculado";
 
 const App = () => {
   return (
