@@ -203,22 +203,30 @@ export function CertidaoDocument({
             <Image style={s.logo} src={logoSrc || logoDefault} />
           </View>
 
-          <Text style={s.nomeInstituicao}>Universidade Metodista de Angola</Text>
-          <Text style={s.decretoText}>(Aprovada pelo Decreto nº 30/07 de 07/05)</Text>
+          <Text style={s.nomeInstituicao}>
+            Universidade Metodista de Angola
+          </Text>
+          <Text style={s.decretoText}>
+            (Aprovada pelo Decreto nº 30/07 de 07/05)
+          </Text>
 
           <Text style={s.titulo}>Certidão</Text>
 
           <View style={s.corpoWrap}>
             <Text style={s.corpoTexto}>
-              {"Para os devidos efeitos, a Universidade Metodista de Angola certifica que o Senhor "}
+              {
+                "Para os devidos efeitos, a Universidade Metodista de Angola certifica que "
+              }
+              {dados?.sexo === "Masculino" ? "o Senhor " : "a Senhora "}
               <Text style={s.bold}>{dados?.nome_completo}</Text>
-              {", filho de "}
+              {dados?.sexo === "Masculino" ? " filho de " : " filha de "}{" "}
               {dados?.pai}
               {" e de "}
               {dados?.mae}
               {", titular do Bilhete de Identidade nº "}
               <Text style={s.bold}>{dados?.bi}</Text>
-              {", matriculado nesta Instituição sob o número de estudante "}
+              {dados?.sexo === "Masculino" ? ", matriculado " : ", matriculada"}
+              {" nesta Instituição sob o número de estudante "}
               <Text style={s.bold}>{dados?.codigo_matricula}</Text>
               {`, ${dados?.status_lectivo2?.toLowerCase() === "activo" ? "frequenta" : "frequentou"} o `}
               {dados?.classe}
@@ -242,7 +250,8 @@ export function CertidaoDocument({
 
           <View style={s.notaWrap}>
             <Text style={s.notaTexto}>
-              A presente certidão vai assinada e autenticada com o carimbo a óleo, em uso nesta
+              A presente certidão vai assinada e autenticada com o carimbo a
+              óleo, em uso nesta
               {"\n"}Instituição.
             </Text>
           </View>
@@ -268,10 +277,12 @@ export function CertidaoDocument({
         <View style={s.rodapeWrap}>
           <View style={s.rodapeSeparador} />
           <Text style={s.rodapeLinha1}>
-            UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) - Rua Nossa Senhora da Muxima, nº 10 -8º Andar - Luanda
+            UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) - Rua
+            Nossa Senhora da Muxima, nº 10 -8º Andar - Luanda
           </Text>
           <Text style={s.rodapeLinha2}>
-            www.uma.co.ao | E-mail: geral@uma.co.ao | Tel: (244) 222 338 984 /(244) 222 332 905 / Fax: (244) 222 339 572
+            www.uma.co.ao | E-mail: geral@uma.co.ao | Tel: (244) 222 338 984
+            /(244) 222 332 905 / Fax: (244) 222 339 572
           </Text>
         </View>
 
@@ -287,7 +298,7 @@ interface GerarCertidaoProps {
   dados: StudentClassInfo;
   cargoDiretor: string;
   nomeDiretor: string;
-  codigo_validacao:string;
+  codigo_validacao: string;
   logoSrc?: string;
   bgSrc?: string;
   borduraSrc?: string;
