@@ -1066,6 +1066,7 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Conciliação de Negociação de Divida",
           url: "/financas/negociacao-conciliacao",
+          blockFullAccess: true,
           permission: [
             PermissionTypeDetails.LISTAR_APROVACAO_CONCILIACAO_DIVIDA.sigla,
           ],
