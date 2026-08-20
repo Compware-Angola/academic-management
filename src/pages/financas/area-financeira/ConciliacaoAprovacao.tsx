@@ -7,6 +7,7 @@ import {
   Check,
   CheckCircle2,
   FileText,
+  GitBranch,
   Hash,
   Home,
   Loader2,
@@ -42,6 +43,7 @@ import {
 import type { ConciliationInvoiceItem } from "@/services/financas/conciliacao-divida/fetch-conciliacao-divida";
 import { useValidateConciliation } from "@/hooks/financas/dividas/use-validate-conciliacao-divida";
 import { useConciliationDetails } from "@/hooks/financas/dividas/use-query-conciliacao-divida-details";
+import { ConciliacaoTimelineModal } from "./components/ConciliacaoTimeLine";
 
 const STATUS_LABEL: Record<string, string> = {
   PENDENTE: "Pendente",
@@ -88,7 +90,8 @@ function OriginalItemCard({ item }: { item: ConciliationInvoiceItem }) {
   return (
     <div className="rounded-lg border border-border bg-background p-3 space-y-2">
       <p className="text-sm font-medium">
-        {item.descricao}
+        {item.descricao.replace(/propina/gi, "Mensalidade")}
+        {item.descricao?.replace(/propina/gi, "Mensalidade")}
         {item.mes_designacao && (
           <span className="ml-1 text-xs text-muted-foreground">
             ({item.mes_designacao})
@@ -101,6 +104,19 @@ function OriginalItemCard({ item }: { item: ConciliationInvoiceItem }) {
         <span className="text-muted-foreground">Preço Unitário</span>
         <span className="text-right font-medium">
           {formatCurrencyAOA(item.preco_unitario)}
+        </span>
+        <span className="text-success font-medium">Desconto</span>
+        <span className="text-right text-success font-medium">
+          -
+          {formatCurrencyAOA(
+            item.desconto_produto > 0
+              ? item.desconto_produto
+              : item.valor_desconto,
+          )}
+        </span>
+        <span className="text-red-500 font-medium">Multa</span>
+        <span className="text-right text-red-500 font-medium">
+          + {formatCurrencyAOA(item.multa)}
         </span>
       </div>
       <Separator />
@@ -131,7 +147,7 @@ function ConciliatedItemCard({
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium">
-          {proposta.descricao}
+          {proposta.descricao?.replace(/propina/gi, "Mensalidade")}
           {proposta.mes_designacao && (
             <span className="ml-1 text-xs text-muted-foreground">
               ({proposta.mes_designacao})
@@ -197,6 +213,7 @@ export function ConciliacaoAprovacao() {
   const [rejectReason, setRejectReason] = useState("");
   const [approveOpen, setApproveOpen] = useState(false);
   const [approveNote, setApproveNote] = useState("");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const pairs = useMemo(() => {
     if (!conciliation) return [];

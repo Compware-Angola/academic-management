@@ -7,6 +7,9 @@ export interface DebtNegotiationConciliationItem {
   preco_unitario: number;
   valor_total: number;
   mes_designacao: string;
+  valor_desconto: number;
+  multa: number;
+  desconto_produto: number;
 }
 
 export interface DebtNegotiationInvoiceconciliation {
