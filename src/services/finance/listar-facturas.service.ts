@@ -35,8 +35,9 @@ export type Factura = {
   n_operacao_bancaria: string;
   n_operacao_bancaria2: string;
   codigo_ano_lectivo?: number;
-
   curso: string;
+  curso_candidatura: string;
+  turno: string;
   polo: string;
   rn: number;
   motivo_anulacao: string | null;
@@ -48,6 +49,7 @@ export type Factura = {
   data_banco: string | null;
   nome_utilizador_pagamento: string | null;
   forma_pagamento: string | null;
+  candidatura: string;
 };
 
 /* ---------- RESPONSE ITEM ---------- */
