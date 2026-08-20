@@ -21,6 +21,15 @@ import {
   useVerifyMyCashRegisterOpeningCode,
 } from "@/hooks/financa/use-cash-register";
 import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
+import {
+  defaultHeaderComprovativoPagamentoV2,
+  GenericComprovativoPagamentoPDF,
+  PDFActions,
+} from "@/components/views/pdf/genericComprovativoPagamento-v2";
+import { createPaymentItem } from "@/util/export-payment";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { useQueryListPayments } from "@/hooks/financas/area-financeira/use-query-pagamentos";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 
 import { formatDate, FormNotaPagamento } from "./components/form";
 import { CashRegisterConfirmationAlert } from "../caixa/components/CashRegisterConfirmationAlert";
@@ -43,10 +52,50 @@ export default function LiquidarNota() {
     },
     !!codigo,
   );
-
+  console.log(facturasResponses);
   const factura = facturasResponses?.data?.[0];
 
   const { data: itens } = useQueryFacturaItens(factura?.codigo);
+
+  const { data: student } = useStudentDetail(factura?.codigo_matricula);
+
+  const { data: academicYear } = useQueryAnoAcademico();
+
+  const activeYearCodigo = academicYear?.find(
+    (a) => a.estado.toLocaleLowerCase() === "activo",
+  )?.codigo;
+
+  const { data: paymentResponse, isLoading: isLoadingPayment } =
+    useQueryListPayments(
+      {
+        anoLectivo: factura?.codigo_ano_lectivo ?? activeYearCodigo,
+        codigoFactura: factura?.codigo,
+        limit: 1,
+      },
+      {
+        enabled: !!factura && factura.estado === 1,
+      },
+    );
+
+  const pagamentoItem = paymentResponse?.data?.[0];
+
+  const isCandidate = !factura?.codigo_matricula;
+
+  const baseFileName = `Detalhes_Pagamento_${factura?.codigo || codigo}_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
+
+  const doc = (
+    <GenericComprovativoPagamentoPDF
+      header={defaultHeaderComprovativoPagamentoV2}
+      data={createPaymentItem({
+        facturaItems: itens?.data ?? [],
+        payment: pagamentoItem,
+        student: student,
+        factura: factura,
+      })}
+    />
+  );
 
   if (isLoading || isLoadingCashRegister) {
     return (
@@ -141,13 +190,19 @@ export default function LiquidarNota() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-lg">Resumo da Nota</CardTitle>
-              <PaymentNoteActions
-                nota={factura}
-                itens={itens?.data || []}
-                showDownload={true}
-                showPrint={true}
-                showliquidarNota={false}
-              />
+              {factura.estado === 1 ? (
+                itens?.data && !isLoadingPayment ? (
+                  <PDFActions document={doc} fileName={baseFileName} />
+                ) : null
+              ) : (
+                <PaymentNoteActions
+                  nota={factura}
+                  itens={itens?.data || []}
+                  showDownload={true}
+                  showPrint={true}
+                  showliquidarNota={false}
+                />
+              )}
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -160,9 +215,11 @@ export default function LiquidarNota() {
                   <p className="font-medium">{factura.nome_aluno}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Matrícula</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isCandidate ? "Nº de Candidato" : "Matrícula"}
+                  </p>
                   <p className="font-medium font-mono">
-                    {factura.codigo_matricula}
+                    {factura.codigo_matricula || "—"}
                   </p>
                 </div>
                 <div>
@@ -173,7 +230,9 @@ export default function LiquidarNota() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Curso</p>
-                  <p className="font-medium">{factura.curso}</p>
+                  <p className="font-medium">
+                    {factura.curso || factura.curso_candidatura}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Campus</p>
