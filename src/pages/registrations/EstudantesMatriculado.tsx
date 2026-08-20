@@ -45,8 +45,7 @@ import { toast } from "sonner";
 import { ChartEstudantesMatriculados } from "./components/chart-estudantes-matriculados";
 
 type ExportAction = "pdf" | "print" | "excel";
-
-const EstudantesMatriculado = () => {
+export default function EstudantesMatriculado() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [filters, setFilters] = useState({
@@ -378,5 +377,4 @@ const EstudantesMatriculado = () => {
       </Card>
     </>
   );
-};
-export { EstudantesMatriculado };
+}
