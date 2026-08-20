@@ -220,12 +220,12 @@ export default function SiglaTipoServicos() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-2">
+      {/* <div className="flex gap-2">
         <Button className="gap-2" onClick={handleOpenModal}>
           <Plus className="h-4 w-4" />
           Nova Sigla
         </Button>
-      </div>
+      </div> */}
 
       <div
         id="results-section"
@@ -265,7 +265,7 @@ export default function SiglaTipoServicos() {
                     <TableHead>Sigla</TableHead>
                     <TableHead>Descrição</TableHead>
                     <TableHead>Tipo de Candidatura</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    {/* <TableHead className="text-right">Ações</TableHead> */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -278,7 +278,7 @@ export default function SiglaTipoServicos() {
                       <TableCell>
                         {getTipoCandidaturaLabel(item.tipo_candidatura)}
                       </TableCell>
-                      <TableCell className="text-right space-x-2">
+                      {/* <TableCell className="text-right space-x-2">
                         <Button
                           className="h-8 w-8"
                           variant="outline"
@@ -300,7 +300,7 @@ export default function SiglaTipoServicos() {
                         >
                           <Trash className="h-4 w-4" />
                         </Button>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>

@@ -24,6 +24,8 @@ interface ChartLineInteractiveProps {
   isLoading: boolean;
   title?: string;
   description?: string;
+  totalInscricoes?: number;
+  totalPagos?: number;
 }
 
 const chartConfig = {
@@ -42,6 +44,8 @@ export function ChartLineInteractive({
   isLoading,
   title = "Estatísticas Diárias",
   description = "Evolução do número de inscrições por dia",
+  totalInscricoes,
+  totalPagos,
 }: ChartLineInteractiveProps) {
   const chartData = React.useMemo(() => {
     if (!data) return [];
@@ -61,15 +65,18 @@ export function ChartLineInteractive({
       .sort((a, b) => a.date.localeCompare(b.date)); // strings ISO já ordenam corretamente
   }, [data]);
 
-  const totalInscricoes = React.useMemo(
+  const totalInscricoesPage = React.useMemo(
     () => chartData.reduce((acc, curr) => acc + curr.subtotal, 0),
     [chartData],
   );
 
-  const totalPagos = React.useMemo(
+  const totalPagosPage = React.useMemo(
     () => chartData.reduce((acc, curr) => acc + curr.pagos, 0),
     [chartData],
   );
+
+  const totalInscricoesExibir = totalInscricoes ?? totalInscricoesPage;
+  const totalPagosExibir = totalPagos ?? totalPagosPage;
 
   if (isLoading) {
     return (
@@ -98,7 +105,7 @@ export function ChartLineInteractive({
             Total de Inscrições
           </span>
           <span className="text-2xl sm:text-3xl font-bold text-primary">
-            {totalInscricoes.toLocaleString()}
+            {totalInscricoesExibir.toLocaleString()}
           </span>
         </div>
 
@@ -107,7 +114,7 @@ export function ChartLineInteractive({
             Total de Pagamentos
           </span>
           <span className="text-2xl sm:text-3xl font-bold text-emerald-600">
-            {totalPagos.toLocaleString()}
+            {totalPagosExibir.toLocaleString()}
           </span>
         </div>
       </CardHeader>
