@@ -1460,8 +1460,10 @@ const App = () => {
                     path="/financas/negociacao-conciliacao"
                     element={
                       <ProtectedRoute
+                        blockFullAccess
                         allowedPermissions={[
-                          PermissionTypeDetails.LISTAR_NEGOCIACAO_DIVIDA.sigla!,
+                          PermissionTypeDetails
+                            .LISTAR_APROVACAO_CONCILIACAO_DIVIDA.sigla!,
                         ]}
                       >
                         <NegociacaoDividaConciliacao />
@@ -1470,11 +1472,31 @@ const App = () => {
                   />
                   <Route
                     path="/financas/conciliacao-divida/:id"
-                    element={<ConciliacaoDivida />}
+                    element={
+                      <ProtectedRoute
+                        blockFullAccess
+                        allowedPermissions={[
+                          PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
+                            .sigla!,
+                        ]}
+                      >
+                        <ConciliacaoDivida />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/financas/conciliacao-aprovacao/:id"
-                    element={<ConciliacaoAprovacao />}
+                    element={
+                      <ProtectedRoute
+                        blockFullAccess
+                        allowedPermissions={[
+                          PermissionTypeDetails
+                            .LISTAR_APROVACAO_CONCILIACAO_DIVIDA.sigla!,
+                        ]}
+                      >
+                        <ConciliacaoAprovacao />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="financas/credito/tipos"

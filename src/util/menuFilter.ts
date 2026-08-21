@@ -5,15 +5,24 @@ export const useFilterMenuByPermission = (items: any[]) => {
 
   const filterItems = (menuItems: any[]): any[] => {
     return menuItems
-      .map(item => {
+      .map((item) => {
         // Filtra os submenus recursivamente
-        const filteredSubItems = item.items ? filterItems(item.items) : undefined;
+        const filteredSubItems = item.items
+          ? filterItems(item.items)
+          : undefined;
 
         // Verifica se o item atual tem permissão
-        const isAllowed = !item.permission || hasPermission(item.permission);
+        const isAllowed =
+          !item.permission ||
+          hasPermission(item.permission, {
+            blockFullAccess: !!item.blockFullAccess,
+          });
 
         // Retorna o item apenas se tiver permissão ou algum submenu visível
-        if (!isAllowed && (!filteredSubItems || filteredSubItems.length === 0)) {
+        if (
+          !isAllowed &&
+          (!filteredSubItems || filteredSubItems.length === 0)
+        ) {
           return null;
         }
 

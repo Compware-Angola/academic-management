@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/table";
 
 import { parseFilter } from "@/util/parse-filter";
-import { Download, FileText, Loader2, Printer, X } from "lucide-react";
+import { Download, FileText, Printer } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { AnoCurricularSelect } from "@/components/common/global-selects/AnoCurricularSelect";
 import {
@@ -85,8 +86,6 @@ export default function EstudantesMatriculado() {
 
   const { data: statisticsResponse, isLoading: isLoadingStatistics } =
     useQueryEstatisticaEstudantesMatriculados(statisticsFilters);
-
-  console.log("chart data", statisticsResponse);
 
   const students = studentsResponse?.data ?? [];
   const total = studentsResponse?.total;
@@ -183,9 +182,6 @@ export default function EstudantesMatriculado() {
       <Card className="mb-6">
         <CardHeader>
           <div className="flex justify-between">
-            <CardTitle>Filtros de Pesquisa</CardTitle>
-            <Button variant="ghost" size="sm" onClick={handleClearFilters} />
-
             <CardTitle>Filtros de Pesquisa</CardTitle>
             <Button variant="ghost" size="sm" onClick={handleClearFilters}>
               <X className="h-4 w-4 mr-2" />
