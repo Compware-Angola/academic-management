@@ -625,6 +625,11 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO.sigla,
           ],
         },
+        {
+          title: "Inscrições em Avaliação",
+          url: "/avaliacoes/inscricao-avaliacao",
+          permission: [],
+        },
 
         {
           title: "Pauta geral",

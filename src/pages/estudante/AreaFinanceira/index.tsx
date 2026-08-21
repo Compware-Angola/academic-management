@@ -8,6 +8,7 @@ import {
   Package,
   BanknoteIcon,
   Activity,
+  User2,
 } from "lucide-react";
 
 import { Resumo } from "./components/resumo";
@@ -17,6 +18,7 @@ import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { DividasSection } from "./components/dividas-geral";
 import { HistoryAccountMovimentSection } from "./components/history-account-moviment";
+import { InscricoesAvaliacaoSection } from "./components/Inscricoesavaliacaosection";
 
 type AreaFinanceiraProps = {
   value?: string;
@@ -79,6 +81,15 @@ export function AreaFinanceira({
               <span className="hidden md:inline">Negociação de Dívidas</span>
             </TabsTrigger>
           }
+          {
+            <TabsTrigger
+              className="w-full justify-start gap-2"
+              value="inscricoes-avaliacao"
+            >
+              <User2 className="h-4 w-4" />
+              <span className="hidden md:inline">Inscrições Em Avaliações</span>
+            </TabsTrigger>
+          }
         </TabsList>
 
         {/* min-w-0 é essencial aqui: sem isto, um item flex por defeito não
@@ -94,12 +105,12 @@ export function AreaFinanceira({
           {hasPermission(
             PermissionTypeDetails.HISTORICO_MOVIMENTACOES_ESTUDANTE.sigla,
           ) && (
-              <TabsContent value="historico-movimentacoes">
-                <HistoryAccountMovimentSection
-                  codigoMatricula={codigoMatricula}
-                />
-              </TabsContent>
-            )}
+            <TabsContent value="historico-movimentacoes">
+              <HistoryAccountMovimentSection
+                codigoMatricula={codigoMatricula}
+              />
+            </TabsContent>
+          )}
 
           {hasPermission(PermissionTypeDetails.GERAR_MENSALIDADES.sigla) && (
             <TabsContent value="mensalidades">
@@ -115,6 +126,11 @@ export function AreaFinanceira({
           {
             <TabsContent value="dividas">
               <DividasSection codigoMatricula={codigoMatricula} />
+            </TabsContent>
+          }
+          {
+            <TabsContent value="inscricoes-avaliacao">
+              <InscricoesAvaliacaoSection codigoMatricula={codigoMatricula} />
             </TabsContent>
           }
         </Card>
