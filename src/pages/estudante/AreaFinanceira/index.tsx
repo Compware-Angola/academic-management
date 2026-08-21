@@ -81,7 +81,9 @@ export function AreaFinanceira({
               <span className="hidden md:inline">Negociação de Dívidas</span>
             </TabsTrigger>
           }
-          {
+          {hasPermission(
+            PermissionTypeDetails.INSCRICAO_EM_AVALIACOES.sigla,
+          ) && (
             <TabsTrigger
               className="w-full justify-start gap-2"
               value="inscricoes-avaliacao"
@@ -89,7 +91,7 @@ export function AreaFinanceira({
               <User2 className="h-4 w-4" />
               <span className="hidden md:inline">Inscrições Em Avaliações</span>
             </TabsTrigger>
-          }
+          )}
         </TabsList>
 
         {/* min-w-0 é essencial aqui: sem isto, um item flex por defeito não
@@ -128,11 +130,13 @@ export function AreaFinanceira({
               <DividasSection codigoMatricula={codigoMatricula} />
             </TabsContent>
           }
-          {
+          {hasPermission(
+            PermissionTypeDetails.INSCRICAO_EM_AVALIACOES.sigla,
+          ) && (
             <TabsContent value="inscricoes-avaliacao">
               <InscricoesAvaliacaoSection codigoMatricula={codigoMatricula} />
             </TabsContent>
-          }
+          )}
         </Card>
       </Tabs>
     </TabsContent>

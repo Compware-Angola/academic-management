@@ -628,7 +628,7 @@ export const academicStructure: MenuStructure = {
         {
           title: "Inscrições em Avaliação",
           url: "/avaliacoes/inscricao-avaliacao",
-          permission: [],
+          permission: [PermissionTypeDetails.INSCRICAO_EM_AVALIACOES.sigla],
         },
 
         {

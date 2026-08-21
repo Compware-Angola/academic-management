@@ -296,6 +296,7 @@ export enum PermissionType {
   ANULAR_MULTA = "ANULAR_MULTA",
   LISTAR_CONCILIACAO_DIVIDA = "LISTAR_CONCILIACAO_DIVIDA",
   LISTAR_APROVACAO_CONCILIACAO_DIVIDA = "LISTAR_APROVACAO_CONCILIACAO_DIVIDA",
+  INSCRICAO_EM_AVALIACOES = "INSCRICAO_EM_AVALIACOES",
 }
 
 export const PermissionTypeDetails = {
@@ -1425,6 +1426,10 @@ export const PermissionTypeDetails = {
   LISTAR_APROVACAO_CONCILIACAO_DIVIDA: {
     designacao: "Aprovação Conciliacão de Divida",
     sigla: "aprov_conc_div",
+  },
+  INSCRICAO_EM_AVALIACOES: {
+    designacao: "Inscrições em Avaliações",
+    sigla: "insc_avaliacoes",
   },
 } as const;
 

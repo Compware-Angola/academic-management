@@ -1886,7 +1886,15 @@ const App = () => {
                   />
                   <Route
                     path="/avaliacoes/inscricao-avaliacao"
-                    element={<RegistrationForEvaluationList />}
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSCRICAO_EM_AVALIACOES.sigla!,
+                        ]}
+                      >
+                        <RegistrationForEvaluationList />
+                      </ProtectedRoute>
+                    }
                   />
                   <Route
                     path="/inscricoes/estudantes/listagem/geral"
