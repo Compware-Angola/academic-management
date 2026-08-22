@@ -10,9 +10,8 @@ import {
   XCircle,
   Clock,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
   Filter,
+  GitBranch,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConciliacaoTimelineModal } from "./components/ConciliacaoTimeLine";
 
 // Helper para formatação monetária (AOA)
 const formatCurrency = (val?: number) => {
@@ -67,6 +67,8 @@ const formatCurrency = (val?: number) => {
 export default function NegociacaoDividaConciliacao() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [openTimeLineModal, setOpenTimeLineModal] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 400);
   const navigate = useNavigate();
@@ -81,6 +83,10 @@ export default function NegociacaoDividaConciliacao() {
     faculdade: "",
     curso: "",
   });
+  const onOpenModalTimeline = (itemId: number) => {
+    setSelectedId(itemId);
+    setOpenTimeLineModal(true);
+  };
 
   const queryFilters = {
     page,
@@ -397,17 +403,26 @@ export default function NegociacaoDividaConciliacao() {
                           : "-"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            navigate(
-                              `/financas/conciliacao-aprovacao/${item.id}`,
-                            );
-                          }}
-                        >
-                          Analisar
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              navigate(
+                                `/financas/conciliacao-aprovacao/${item.id}`,
+                              );
+                            }}
+                          >
+                            Analisar
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => onOpenModalTimeline(item.id)}
+                          >
+                            <GitBranch />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -462,6 +477,12 @@ export default function NegociacaoDividaConciliacao() {
           </div>
         </div>
       </div>
+
+      <ConciliacaoTimelineModal
+        conciliationId={selectedId}
+        open={openTimeLineModal}
+        onOpenChange={(open) => setOpenTimeLineModal(false)}
+      />
     </div>
   );
 }

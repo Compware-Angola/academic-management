@@ -80,7 +80,7 @@ export default function EstatisticasExame() {
   });
 
   // ==================== EXPORTAÇÕES ====================
-
+  console.log(estatistica?.filtros);
   const exportRows = useMemo(() => {
     return (estatistica?.data ?? []).map((item) => ({
       data: item.data,
@@ -93,21 +93,23 @@ export default function EstatisticasExame() {
 
   const pdfData = exportRows.length
     ? {
-      filtros: [
-        filters.codigoAnoLetivo
-          ? `Ano Letivo: ${filters.codigoAnoLetivo}`
-          : null,
-        filters.codigoFaculdade
-          ? `Faculdade: ${filters.codigoFaculdade}`
-          : null,
-        filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
-        filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
-      ]
-        .filter(Boolean)
-        .join(" | "),
-      total: estatistica?.total ?? 0,
-      rows: exportRows,
-    }
+        filtros: [
+          filters.codigoAnoLetivo
+            ? `Ano Letivo: ${estatistica?.filtros?.anolectivo}`
+            : null,
+          filters.codigoFaculdade
+            ? `Faculdade: ${estatistica?.filtros?.faculdade}`
+            : null,
+          filters.codigoCurso ? `Curso: ${estatistica?.filtros?.curso}` : null,
+          filters.codigoTurno
+            ? `Período: ${estatistica?.filtros?.turno}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        total: estatistica?.total ?? 0,
+        rows: exportRows,
+      }
     : null;
 
   const pdfContent = pdfData ? (
@@ -119,10 +121,13 @@ export default function EstatisticasExame() {
           title: "Filtros Aplicados",
           content: pdfData.filtros || "Sem filtros",
         },
-        { title: "Resumo", content: [
-          `Total de candidatos: ${estatistica?.totalgeralcandidatos ?? 0}`,
-          `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
-        ] },
+        {
+          title: "Resumo",
+          content: [
+            `Total de candidatos: ${estatistica?.totalgeralcandidatos ?? 0}`,
+            `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
+          ],
+        },
       ]}
       mainTable={{
         headers: [
@@ -141,31 +146,34 @@ export default function EstatisticasExame() {
 
   const excelProps = pdfData
     ? {
-      documentTitle: "Estatísticas do Exame de Acesso",
-      subtitle: "Inscrições por data, turno e curso",
-      infoSections: [
-        {
-          title: "Filtros Aplicados",
-          content: pdfData.filtros || "Sem filtros",
-        },
-        { title: "Resumo", content: [
-          `Total de candidatos: ${estatistica?.totalgeralcandidatos ?? 0}`,
-          `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
-        ] },
-      ],
-      mainTable: {
-        headers: [
-          { key: "data", label: "Data", width: 20 },
-          { key: "laboral", label: "Laboral (Diurno)", width: 25 },
-          { key: "posLaboral", label: "Pós-Laboral", width: 25 },
-          { key: "pagos", label: "Pagos", width: 20 },
-          { key: "totalDia", label: "Total por Dia", width: 25 },
+        documentTitle: "Estatísticas do Exame de Acesso",
+        subtitle: "Inscrições por data, turno e curso",
+        infoSections: [
+          {
+            title: "Filtros Aplicados",
+            content: pdfData.filtros || "Sem filtros",
+          },
+          {
+            title: "Resumo",
+            content: [
+              `Total de candidatos: ${estatistica?.totalgeralcandidatos ?? 0}`,
+              `Total de pagamentos: ${estatistica?.totalpagos ?? 0}`,
+            ],
+          },
         ],
-        rows: pdfData.rows,
-      },
-      footerNotice: "Documento gerado automaticamente pelo sistema.",
-      primaryColor: "#0D1B48",
-    }
+        mainTable: {
+          headers: [
+            { key: "data", label: "Data", width: 20 },
+            { key: "laboral", label: "Laboral (Diurno)", width: 25 },
+            { key: "posLaboral", label: "Pós-Laboral", width: 25 },
+            { key: "pagos", label: "Pagos", width: 20 },
+            { key: "totalDia", label: "Total por Dia", width: 25 },
+          ],
+          rows: pdfData.rows,
+        },
+        footerNotice: "Documento gerado automaticamente pelo sistema.",
+        primaryColor: "#0D1B48",
+      }
     : null;
 
   const baseFileName = `Estatisticas_Exame_Acesso_${new Date().toISOString().slice(0, 10)}`;
@@ -420,47 +428,47 @@ export default function EstatisticasExame() {
               <TableBody>
                 {isLoadingEstatistica
                   ? Array.from({ length: filters.limit }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        <Skeleton className="h-4 w-24" />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Skeleton className="h-4 w-12 mx-auto" />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Skeleton className="h-4 w-12 mx-auto" />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Skeleton className="h-4 w-12 mx-auto" />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Skeleton className="h-6 w-16 mx-auto rounded-full" />
-                      </TableCell>
-                    </TableRow>
-                  ))
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-4 w-24" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-4 w-12 mx-auto" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-4 w-12 mx-auto" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-4 w-12 mx-auto" />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Skeleton className="h-6 w-16 mx-auto rounded-full" />
+                        </TableCell>
+                      </TableRow>
+                    ))
                   : estatistica?.data.map((item, index) => (
-                    <TableRow key={index} className="hover:bg-muted/30">
-                      <TableCell className="font-mono font-medium">
-                        {item.data}
-                      </TableCell>
-                      <TableCell className="text-center font-semibold text-primary">
-                        {item.qt_diurno}
-                      </TableCell>
-                      <TableCell className="text-center font-semibold">
-                        {item.qt_noturno}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-sm font-bold text-emerald-600">
-                          {item.pagos ?? 0}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
-                          {item.total_dia}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      <TableRow key={index} className="hover:bg-muted/30">
+                        <TableCell className="font-mono font-medium">
+                          {item.data}
+                        </TableCell>
+                        <TableCell className="text-center font-semibold text-primary">
+                          {item.qt_diurno}
+                        </TableCell>
+                        <TableCell className="text-center font-semibold">
+                          {item.qt_noturno}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-sm font-bold text-emerald-600">
+                            {item.pagos ?? 0}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-bold text-primary">
+                            {item.total_dia}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
               </TableBody>
               <TableFooter>
                 <TableRow className="font-bold">
@@ -483,10 +491,7 @@ export default function EstatisticasExame() {
                     {isLoadingEstatistica ? (
                       <Skeleton className="h-4 w-12 mx-auto" />
                     ) : (
-                      estatistica?.data.reduce(
-                        (a, b) => a + (b.pagos ?? 0),
-                        0,
-                      )
+                      estatistica?.data.reduce((a, b) => a + (b.pagos ?? 0), 0)
                     )}
                   </TableCell>
                   <TableCell className="text-center text-primary">

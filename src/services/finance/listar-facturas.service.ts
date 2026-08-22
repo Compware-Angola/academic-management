@@ -49,6 +49,7 @@ export type Factura = {
   data_banco: string | null;
   nome_utilizador_pagamento: string | null;
   forma_pagamento: string | null;
+  candidatura: string;
 };
 
 /* ---------- RESPONSE ITEM ---------- */

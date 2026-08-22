@@ -104,13 +104,17 @@ export default function EstatisticasDiaria() {
     ? {
         filtros: [
           filters.codigoAnoLetivo
-            ? `Ano Letivo: ${filters.codigoAnoLetivo}`
+            ? `Ano Letivo: ${estatisticaDiaria?.filtros?.anolectivo}`
             : null,
           filters.codigoFaculdade
-            ? `Faculdade: ${filters.codigoFaculdade}`
+            ? `Faculdade: ${estatisticaDiaria?.filtros?.faculdade}`
             : null,
-          filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
-          filters.codigoTurno ? `Período: ${filters.codigoTurno}` : null,
+          filters.codigoCurso
+            ? `Curso: ${estatisticaDiaria?.filtros?.curso}`
+            : null,
+          filters.codigoTurno
+            ? `Período: ${estatisticaDiaria?.filtros?.turno}`
+            : null,
         ]
           .filter(Boolean)
           .join(" | "),
@@ -123,15 +127,19 @@ export default function EstatisticasDiaria() {
     <GenericPDFDocument
       documentTitle="Estatísticas Diárias - Exame de Acesso"
       subtitle="Número de candidatos por dia de inscrição"
+      orientation="vertical"
       infoSections={[
         {
           title: "Filtros Aplicados",
           content: pdfData.filtros || "Sem filtros",
         },
-        { title: "Resumo", content: [
-          `Total de candidatos: ${pdfData.total}`,
-          `Total de pagamentos: ${estatisticaDiaria?.totalpagos ?? 0}`,
-        ] },
+        {
+          title: "Resumo",
+          content: [
+            `Total de candidatos: ${pdfData.total}`,
+            `Total de pagamentos: ${estatisticaDiaria?.totalpagos ?? 0}`,
+          ],
+        },
       ]}
       mainTable={{
         headers: [

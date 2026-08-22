@@ -325,6 +325,9 @@ export interface ConciliationInvoiceItem {
   preco_unitario: number;
   valor_total: number;
   mes_designacao: string | null;
+  valor_desconto: number;
+  multa: number;
+  desconto_produto: number;
 }
 
 export interface ConciliationInvoice {

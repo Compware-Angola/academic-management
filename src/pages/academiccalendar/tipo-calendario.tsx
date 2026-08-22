@@ -117,12 +117,12 @@ export default function TipoCalendarios() {
         </CardContent>
       </Card>
 
-      <div className="flex gap-2">
+      {/* <div className="flex gap-2">
         <Button className="gap-2" onClick={handleOpenModal}>
           <Plus className="h-4 w-4" />
           Novo Tipo de Calendário
         </Button>
-      </div>
+      </div> */}
 
       <div className="bg-card border rounded-lg p-6 shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
@@ -150,7 +150,7 @@ export default function TipoCalendarios() {
                   <TableHead>Sigla</TableHead>
                   <TableHead>Designação</TableHead>
                   <TableHead>Ativo p/ Aluno</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  {/* <TableHead className="text-right">Ações</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -167,7 +167,7 @@ export default function TipoCalendarios() {
                         {item.ativoParaAluno === 1 ? "Sim" : "Não"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right space-x-2">
+                    {/* <TableCell className="text-right space-x-2">
                       <Button
                         className="h-8 w-8"
                         variant="outline"
@@ -177,7 +177,7 @@ export default function TipoCalendarios() {
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>

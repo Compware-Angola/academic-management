@@ -24,7 +24,8 @@ export function useQueryListEstudantesMatriculados(
     limit,
   } = payload;
 
-  const defaultEnabled = !!codigoAnoLectivo && !!codigoCurso;
+  const defaultEnabled = !!codigoAnoLectivo;
+  // const defaultEnabled = !!codigoAnoLectivo && !!codigoCurso;
 
   return useQuery<ListEstudantesMatriculadosResponse>({
     queryKey: [
