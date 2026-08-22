@@ -385,12 +385,12 @@ export default function AcademicYearPhase() {
       toast.info("Este ano já é o Ano Lectivo Activo.");
       return;
     }
-    if (!janelaAtivacaoOk) {
-      toast.error(
-        `Só é possível activar este Ano Lectivo a partir de ${JANELA_ATIVACAO_DIAS} dias antes do início do 1.º semestre.`,
-      );
-      return;
-    }
+    // if (!janelaAtivacaoOk) {
+    //   toast.error(
+    //     `Só é possível activar este Ano Lectivo a partir de ${JANELA_ATIVACAO_DIAS} dias antes do início do 1.º semestre.`,
+    //   );
+    //   return;
+    // }
     setConfirmAtivar(true);
   };
 
@@ -721,7 +721,7 @@ export default function AcademicYearPhase() {
                   <Button
                     className="w-full"
                     onClick={solicitarAtivar}
-                    disabled={anoAtual.estado !== "USAVEL" || !janelaAtivacaoOk}
+                    disabled={anoAtual.estado !== "USAVEL"}
                   >
                     <Power className="h-4 w-4 mr-2" />
                     Definir como Ano Activo
@@ -731,7 +731,7 @@ export default function AcademicYearPhase() {
                       Apenas Anos Lectivos Usáveis podem ser activados.
                     </p>
                   )}
-                  {anoAtual.estado === "USAVEL" && !janelaAtivacaoOk && (
+                  {/* {anoAtual.estado === "USAVEL" && !janelaAtivacaoOk && (
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <CalendarClock className="h-3.5 w-3.5" />
                       Só pode ser activado entre {JANELA_ATIVACAO_DIAS} dias
@@ -740,7 +740,7 @@ export default function AcademicYearPhase() {
                         anoAtual.primeiroSemestre.dataInicio,
                       ).toLocaleDateString("pt-AO")}
                     </p>
-                  )}
+                  )} */}
                 </>
               )}
             </div>
