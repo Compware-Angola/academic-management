@@ -492,22 +492,6 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.GESTAO_UNIDADE_CURRICULAR_PLANO.sigla,
           ],
         },
-        {
-          title: "Fórmula por unidade curricular",
-          url: "/plano/formula-uc",
-          permission: [
-            PermissionTypeDetails.DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
-            PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO.sigla,
-          ],
-        },
-        {
-          title: "Definir unidade curricular com oral",
-          url: "/plano/formula-oral",
-          permission: [
-            PermissionTypeDetails.DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
-            PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO.sigla,
-          ],
-        },
       ],
 
       permission: [],
@@ -624,6 +608,11 @@ export const academicStructure: MenuStructure = {
             PermissionTypeDetails.LISTA_PRESENCA.sigla,
             PermissionTypeDetails.LISTA_PRESENCA_POS_GRADUACAO.sigla,
           ],
+        },
+        {
+          title: "Inscrições em Avaliação",
+          url: "/avaliacoes/inscricao-avaliacao",
+          permission: [PermissionTypeDetails.INSCRICAO_EM_AVALIACOES.sigla],
         },
 
         {
@@ -1066,7 +1055,10 @@ export const finaceStructure: MenuStructure = {
         {
           title: "Conciliação de Negociação de Divida",
           url: "/financas/negociacao-conciliacao",
-          permission: [],
+          blockFullAccess: true,
+          permission: [
+            PermissionTypeDetails.LISTAR_APROVACAO_CONCILIACAO_DIVIDA.sigla,
+          ],
         },
         {
           title: "Serviços e Emolumentos",

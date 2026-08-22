@@ -2,12 +2,8 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 
 export interface AddGradeCurricularPlanoMassaItem {
   codigoGradeCurricular: number;
-  pesoPrimeiraFreq: number;
-  pesoSegundaFreq: number;
-  pesoPratica: number;
-  notaMinPrimeiraFreq: number;
-  notaMinSegundaFreq: number;
-  notaMinPratica: number;
+  temOral?: boolean;
+  temPratica?: boolean;
 }
 
 export interface AddGradeCurricularPlanoMassaPayload {

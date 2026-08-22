@@ -411,6 +411,9 @@ export default function NegociacaoDivida() {
       <Card>
         <CardHeader className="space-y-2">
           {/* Exportações */}
+          <div className="flex justify-between items-center">
+
+          <CardTitle>Lista de Negociação de Divida</CardTitle>
           {pdfData && excelProps && (
             <div className="flex justify-end gap-2">
               {pdfContent && (
@@ -430,7 +433,7 @@ export default function NegociacaoDivida() {
             </div>
           )}
 
-          <CardTitle>Lista de Negociação de Divida</CardTitle>
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -505,6 +508,7 @@ export default function NegociacaoDivida() {
                       </TableCell>
                       <TableCell>
                         <HasPermission
+                          blockFullAccess
                           permission={
                             PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
                               .sigla

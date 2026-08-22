@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -11,11 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -61,22 +57,10 @@ interface ImportUCPageProps {
   onSuccess?: () => void;
 }
 
-type EditableField =
-  | "peso_primeira_freq"
-  | "peso_segunda_freq"
-  | "peso_pratica"
-  | "nota_min_primeira_freq"
-  | "nota_min_segunda_freq"
-  | "nota_min_pratica";
-
-type FieldOverrides = Partial<Record<EditableField, number | undefined>>;
-
-const MAX_TOTAL_PESO = 101;
-const PESO_FIELDS: EditableField[] = [
-  "peso_primeira_freq",
-  "peso_segunda_freq",
-  "peso_pratica",
-];
+type ItemOverrides = {
+  temOral?: boolean;
+  temPratica?: boolean;
+};
 
 const statusBadge = (status: number) => {
   const map: Record<number, string> = {
@@ -90,93 +74,27 @@ const statusBadge = (status: number) => {
   );
 };
 
-function getSomaPesos(merged: Partial<GradeCurricularItem>) {
-  return (
-    (merged.peso_primeira_freq ?? 0) +
-    (merged.peso_segunda_freq ?? 0) +
-    (merged.peso_pratica ?? 0)
-  );
-}
-
-// 1ª e 2ª frequência são obrigatórias e a soma dos pesos nunca pode atingir 150%
-function getItemValidationError(
-  merged: Partial<GradeCurricularItem>,
-): string | null {
-  if (merged.peso_primeira_freq == null || merged.peso_segunda_freq == null) {
-    return "1ª e 2ª frequência são obrigatórias";
-  }
-  if (getSomaPesos(merged) >= MAX_TOTAL_PESO) {
-    return `A soma dos pesos não pode atingir ${MAX_TOTAL_PESO}%`;
-  }
-  return null;
-}
-
-function NumberField({
-  label,
-  value,
-  onChange,
-  required,
-  invalid,
-}: {
-  label: string;
-  value: number | undefined;
-  onChange: (value: number | undefined) => void;
-  required?: boolean;
-  invalid?: boolean;
-}) {
-  return (
-    <div>
-      <p className="text-[11px] text-muted-foreground">
-        {label}
-        {required && <span className="text-destructive"> *</span>}
-      </p>
-      <Input
-        type="number"
-        inputMode="decimal"
-        placeholder="—"
-        value={value ?? ""}
-        onChange={(e) => {
-          const raw = e.target.value;
-          onChange(raw === "" ? undefined : Number(raw));
-        }}
-        onClick={(e) => e.stopPropagation()}
-        className={cn(
-          "h-8 mt-0.5",
-          invalid && "border-destructive focus-visible:ring-destructive",
-        )}
-      />
-    </div>
-  );
-}
-
 function DisciplinaImportCard({
   item,
   selected,
   onToggle,
   overrides,
-  onFieldChange,
+  onOverrideChange,
 }: {
   item: GradeCurricularItem;
   selected: boolean;
   onToggle: () => void;
-  overrides: FieldOverrides;
-  onFieldChange: (field: EditableField, value: number | undefined) => void;
+  overrides: ItemOverrides;
+  onOverrideChange: (field: keyof ItemOverrides, value: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
-
-  // Valores efectivos = item original, sobrepostos pelo que o utilizador editou
-  const merged = { ...item, ...overrides };
-  const somaPesos = getSomaPesos(merged);
-  const validationError = getItemValidationError(merged);
+  const temOral = overrides.temOral ?? Boolean(item.tem_oral);
+  const temPratica = overrides.temPratica ?? Boolean(item.tem_pratica);
 
   return (
     <Card
       className={cn(
         "p-4 transition-all hover:shadow-md cursor-pointer",
         selected && "border-primary ring-1 ring-primary/30",
-        selected &&
-        validationError &&
-        "border-destructive ring-1 ring-destructive/30",
       )}
       onClick={onToggle}
     >
@@ -221,97 +139,41 @@ function DisciplinaImportCard({
             {statusBadge(item.status)}
           </div>
 
-          {selected && validationError && (
-            <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-destructive">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-              {validationError}
-            </div>
-          )}
-
-          <Collapsible open={open} onOpenChange={setOpen} className="mt-3">
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 -ml-2 text-xs"
-                onClick={(e) => e.stopPropagation()}
+          <div
+            className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <Switch
+                id={`tem-oral-${item.codigo_grade_curricular}`}
+                checked={temOral}
+                onCheckedChange={(checked) =>
+                  onOverrideChange("temOral", checked)
+                }
+              />
+              <Label
+                htmlFor={`tem-oral-${item.codigo_grade_curricular}`}
+                className="text-xs cursor-pointer"
               >
-                {open ? (
-                  <ChevronDown className="h-3.5 w-3.5 mr-1" />
-                ) : (
-                  <ChevronRight className="h-3.5 w-3.5 mr-1" />
-                )}
-                {open ? "Ocultar" : "Mostrar"} pesos e notas mínimas
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent
-              className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="rounded-md border p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold uppercase text-muted-foreground">
-                    Pesos
-                  </p>
-                  <span
-                    className={cn(
-                      "text-xs font-medium",
-                      somaPesos === 100
-                        ? "text-success"
-                        : somaPesos >= MAX_TOTAL_PESO
-                          ? "text-destructive"
-                          : "text-amber-600",
-                    )}
-                  >
-                    Total: {somaPesos}%
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <NumberField
-                    label="1ª Freq."
-                    value={merged.peso_primeira_freq}
-                    onChange={(v) => onFieldChange("peso_primeira_freq", v)}
-                    required
-                    invalid={merged.peso_primeira_freq == null}
-                  />
-                  <NumberField
-                    label="2ª Freq."
-                    value={merged.peso_segunda_freq}
-                    onChange={(v) => onFieldChange("peso_segunda_freq", v)}
-                    required
-                    invalid={merged.peso_segunda_freq == null}
-                  />
-                  <NumberField
-                    label="Prática"
-                    value={merged.peso_pratica}
-                    onChange={(v) => onFieldChange("peso_pratica", v)}
-                  />
-                </div>
-              </div>
-              <div className="rounded-md border p-3">
-                <p className="text-xs font-semibold uppercase text-muted-foreground mb-2">
-                  Notas mínimas
-                </p>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <NumberField
-                    label="1ª Freq."
-                    value={merged.nota_min_primeira_freq}
-                    onChange={(v) => onFieldChange("nota_min_primeira_freq", v)}
-                  />
-                  <NumberField
-                    label="2ª Freq."
-                    value={merged.nota_min_segunda_freq}
-                    onChange={(v) => onFieldChange("nota_min_segunda_freq", v)}
-                  />
-                  <NumberField
-                    label="Prática"
-                    value={merged.nota_min_pratica}
-                    onChange={(v) => onFieldChange("nota_min_pratica", v)}
-                  />
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+                Ativar Oral
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id={`tem-pratica-${item.codigo_grade_curricular}`}
+                checked={temPratica}
+                onCheckedChange={(checked) =>
+                  onOverrideChange("temPratica", checked)
+                }
+              />
+              <Label
+                htmlFor={`tem-pratica-${item.codigo_grade_curricular}`}
+                className="text-xs cursor-pointer"
+              >
+                Ativar Prática
+              </Label>
+            </div>
+          </div>
         </div>
       </div>
     </Card>
@@ -504,7 +366,7 @@ export default function ImportUCPage() {
   const resetState = () => {
     setSelected(new Set());
     setExpandedGroups(new Set());
-    setFieldOverrides({});
+    setItemOverrides({});
     setImportResult(null);
     setResultDialogOpen(false);
     refetch();
@@ -517,14 +379,14 @@ export default function ImportUCPage() {
     setTipoCandidatura('');
     setSelected(new Set());
     setExpandedGroups(new Set());
-    setFieldOverrides({});
+    setItemOverrides({});
     setImportResult(null);
     setResultDialogOpen(false);
   };
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
-  const [fieldOverrides, setFieldOverrides] = useState<
-    Record<number, FieldOverrides>
+  const [itemOverrides, setItemOverrides] = useState<
+    Record<number, ItemOverrides>
   >({});
   const [resultDialogOpen, setResultDialogOpen] = useState(false);
   const [importResult, setImportResult] =
@@ -537,20 +399,10 @@ export default function ImportUCPage() {
     if (items.length > 0) {
       setSelected(new Set(items.map((i) => i.codigo_disciplina)));
       setExpandedGroups(new Set(items.map((i) => i.codigo_classe)));
-
-      const defaults: Record<number, FieldOverrides> = {};
-      items.forEach((item) => {
-        const overrides: FieldOverrides = {};
-        if (item.peso_primeira_freq == null) overrides.peso_primeira_freq = 50;
-        if (item.peso_segunda_freq == null) overrides.peso_segunda_freq = 50;
-        if (Object.keys(overrides).length > 0) {
-          defaults[item.codigo_disciplina] = overrides;
-        }
-      });
-      setFieldOverrides(defaults);
+      setItemOverrides({});
     } else {
       setSelected(new Set());
-      setFieldOverrides({});
+      setItemOverrides({});
     }
   }, [gradeResponse]);
 
@@ -585,31 +437,12 @@ export default function ImportUCPage() {
       return next;
     });
 
-  const handleFieldChange = (
+  const handleOverrideChange = (
     codigo: number,
-    field: EditableField,
-    value: number | undefined,
+    field: keyof ItemOverrides,
+    value: boolean,
   ) => {
-    const item = items.find((i) => i.codigo_disciplina === codigo);
-
-    if (item && (PESO_FIELDS as string[]).includes(field)) {
-      const currentOverrides = fieldOverrides[codigo] ?? {};
-      const merged = { ...item, ...currentOverrides };
-      const others = PESO_FIELDS.filter((f) => f !== field).reduce(
-        (sum, f) => sum + (merged[f] ?? 0),
-        0,
-      );
-
-      if (value !== undefined && others + value >= MAX_TOTAL_PESO) {
-        const clamped = Math.max(0, MAX_TOTAL_PESO - 1 - others);
-        toast.warning(
-          `A soma dos pesos não pode atingir ${MAX_TOTAL_PESO}%. Valor ajustado para ${clamped}%.`,
-        );
-        value = clamped;
-      }
-    }
-
-    setFieldOverrides((prev) => ({
+    setItemOverrides((prev) => ({
       ...prev,
       [codigo]: { ...prev[codigo], [field]: value },
     }));
@@ -620,16 +453,6 @@ export default function ImportUCPage() {
     [items, selected],
   );
 
-  const invalidSelectedItems = useMemo(
-    () =>
-      selectedItems.filter((item) => {
-        const overrides = fieldOverrides[item.codigo_disciplina] ?? {};
-        const merged = { ...item, ...overrides };
-        return !!getItemValidationError(merged);
-      }),
-    [selectedItems, fieldOverrides],
-  );
-
   const handleImport = async () => {
     if (selectedItems.length === 0) {
       toast.warning("Selecione pelo menos uma disciplina para importar.");
@@ -637,12 +460,6 @@ export default function ImportUCPage() {
     }
     if (!anoLectivoDestino) {
       toast.warning("Selecione o ano lectivo de destino.");
-      return;
-    }
-    if (invalidSelectedItems.length > 0) {
-      toast.error(
-        `${invalidSelectedItems.length} disciplina(s) com pesos inválidos. Verifique a 1ª/2ª frequência e o total de pesos.`,
-      );
       return;
     }
     if (anoLectivoDestino === anoLectivo) {
@@ -655,16 +472,11 @@ export default function ImportUCPage() {
         codigoCurso: parseFilter(curso?.toString()),
         codigoAnoLectivo: parseFilter(anoLectivoDestino?.toString()),
         itens: selectedItems.map((item) => {
-          const overrides = fieldOverrides[item.codigo_disciplina] ?? {};
-          const merged = { ...item, ...overrides };
+          const overrides = itemOverrides[item.codigo_disciplina] ?? {};
           return {
             codigoGradeCurricular: item.codigo_grade_curricular,
-            pesoPrimeiraFreq: merged.peso_primeira_freq as number,
-            pesoSegundaFreq: merged.peso_segunda_freq as number,
-            pesoPratica: merged.peso_pratica ?? 0,
-            notaMinPrimeiraFreq: merged.nota_min_primeira_freq ?? 0,
-            notaMinSegundaFreq: merged.nota_min_segunda_freq ?? 0,
-            notaMinPratica: merged.nota_min_pratica ?? 0,
+            temOral: overrides.temOral ?? Boolean(item.tem_oral),
+            temPratica: overrides.temPratica ?? Boolean(item.tem_pratica),
           };
         }),
       };
@@ -818,12 +630,6 @@ export default function ImportUCPage() {
                 </span>{" "}
                 de {items.length} selecionada{items.length !== 1 ? "s" : ""}
               </span>
-              {invalidSelectedItems.length > 0 && (
-                <span className="flex items-center gap-1 font-medium text-destructive">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  {invalidSelectedItems.length} com pesos inválidos
-                </span>
-              )}
             </div>
           </div>
 
@@ -883,10 +689,10 @@ export default function ImportUCPage() {
                                     toggleOne(item.codigo_disciplina)
                                   }
                                   overrides={
-                                    fieldOverrides[item.codigo_disciplina] ?? {}
+                                    itemOverrides[item.codigo_disciplina] ?? {}
                                   }
-                                  onFieldChange={(field, value) =>
-                                    handleFieldChange(
+                                  onOverrideChange={(field, value) =>
+                                    handleOverrideChange(
                                       item.codigo_disciplina,
                                       field,
                                       value,
@@ -915,7 +721,6 @@ export default function ImportUCPage() {
             isLoading ||
             items.length === 0 ||
             selected.size === 0 ||
-            invalidSelectedItems.length > 0 ||
             !anoLectivoDestino
           }
         >

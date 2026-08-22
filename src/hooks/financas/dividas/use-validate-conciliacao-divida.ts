@@ -21,11 +21,11 @@ export const useValidateConciliation = () => {
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["conciliation-details", variables.id],
+        queryKey: ["conciliation-details"],
       });
 
       queryClient.invalidateQueries({
-        queryKey: ["conciliation"],
+        queryKey: ["conciliacao-dividas"],
       });
       toast({
         title: "Conciliação de Divida",

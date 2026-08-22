@@ -19,6 +19,8 @@ import {
   Search,
   LockOpen,
   SendHorizonal,
+  Sigma,
+  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -64,6 +66,7 @@ import {
 
 import { toast } from "sonner";
 import { useQueryGradeCurricularDropDown } from "@/hooks/discplina/use-query-grade-curricular-dropdown";
+import { GradeCurricularDropDown } from "@/services/disciplina/fetch-grade-curricular-dropdown";
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface Roles {
@@ -87,6 +90,20 @@ export interface Roles {
 
 // ─── Componente principal ─────────────────────────────────────────────────────
 
+const initialFormData = {
+  tipoCandidatura: "",
+  anoLetivo: "",
+  semestre: "",
+  periodo: "",
+  curso: "",
+  unidadeCurricular: "",
+  horarioId: "",
+  classes: "",
+  tipoAvaliacao: "",
+  tipoProva: "",
+  search: "",
+};
+
 export default function LaunchNotes() {
   const { haveFullAccess, hasPermission } = usePermission();
 
@@ -94,19 +111,7 @@ export default function LaunchNotes() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const [formData, setFormData] = useState({
-    tipoCandidatura: "",
-    anoLetivo: "",
-    semestre: "",
-    periodo: "",
-    curso: "",
-    unidadeCurricular: "",
-    horarioId: "",
-    classes: "",
-    tipoAvaliacao: "",
-    tipoProva: "",
-    search: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
   const { data: cursos, isLoading: loadingCursos } = useCursos({
     tipoCandidaturaId: parseFilter(formData.tipoCandidatura),
   });
@@ -132,6 +137,14 @@ export default function LaunchNotes() {
       classe: parseFilter(formData.classes),
       anoLectivo: parseFilter(formData.anoLetivo),
     });
+
+  const selectedUnidadeCurricular = useMemo(
+    () =>
+      unidadesCurriculares.find(
+        (u) => u.pk === Number(formData.unidadeCurricular),
+      ),
+    [unidadesCurriculares, formData.unidadeCurricular],
+  );
 
   // ─── Auth & roles ─────────────────────────────────────────────────────────
   const { user: userData } = useAuth();
@@ -184,14 +197,14 @@ export default function LaunchNotes() {
 
       const filteredClasses = allowedClassIds?.length
         ? classes.filter((c) =>
-          allowedClassIds?.includes(c?.codigo?.toString()),
-        )
+            allowedClassIds?.includes(c?.codigo?.toString()),
+          )
         : classes;
 
       const filteredUnidadesCurriculares = allowedGradeIds?.length
         ? unidadesCurriculares.filter((g) =>
-          allowedGradeIds?.includes(g?.pk?.toString()),
-        )
+            allowedGradeIds?.includes(g?.pk?.toString()),
+          )
         : unidadesCurriculares;
 
       return {
@@ -565,6 +578,15 @@ export default function LaunchNotes() {
   const handleCursoChange = useCallback((v: string) => {
     setFormData((prev) => ({ ...prev, curso: v }));
   }, []); // ← sem dependências, estável para sempre
+
+  // ─── Limpar filtros ───────────────────────────────────────────────────────
+  const hasActiveFilters = Object.values(formData).some((v) => v !== "");
+
+  const handleClearFilters = () => {
+    setFormData(initialFormData);
+    setPage(1);
+    setLocalStudents([]);
+  };
   // ─── PDF ──────────────────────────────────────────────────────────────────
   const pdfData = useMemo(() => {
     if (!localStudents.length) return null;
@@ -699,6 +721,12 @@ export default function LaunchNotes() {
           )}
         </div>
       </div>
+
+      {/* Banner informativo da fórmula de avaliação */}
+      <EvaluationFormulaBanner
+        unidadeCurricular={selectedUnidadeCurricular}
+        isLoading={isLoadingUC && !!formData.unidadeCurricular}
+      />
 
       {/* Filtros */}
       <div className="bg-card border rounded-lg p-6">
@@ -890,9 +918,9 @@ export default function LaunchNotes() {
             </div>
           </div>
 
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <Button
-              className="w-full"
+              className="flex-1 min-w-0"
               disabled={
                 loadingNoteRelease ||
                 !formData.tipoCandidatura ||
@@ -912,6 +940,23 @@ export default function LaunchNotes() {
               <RefreshCw className="h-5 w-5 mr-2" />
               Listar
             </Button>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0"
+                  disabled={!hasActiveFilters || loadingNoteRelease}
+                  onClick={handleClearFilters}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Limpar filtros</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
@@ -1144,15 +1189,26 @@ export default function LaunchNotes() {
                             type="number"
                             min="0"
                             max="20"
-                            step="0.5"
+                            step="1"
                             value={student.nota ?? ""}
-                            onChange={(e) =>
-                              handleNotaChange(
-                                student.codigo_grade_aluno,
-                                "nota",
-                                e.target.value,
-                              )
-                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+
+                              // permite vazio (para poder apagar) e apenas dígitos inteiros
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNotaChange(
+                                  student.codigo_grade_aluno,
+                                  "nota",
+                                  value,
+                                );
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              // bloqueia teclas de ponto, vírgula, "e" (notação científica)
+                              if ([".", ",", "e", "E", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             className="w-24 mx-auto text-center"
                             placeholder="0-20"
                             disabled={isLocked || isRefetching}
@@ -1274,6 +1330,74 @@ function teacherHasPermissionToLaunchNotes(
   return now >= start && now <= end;
 }
 
+// ─── EvaluationFormulaBanner ────────────────────────────────────────────────────
+
+interface EvaluationFormulaBannerProps {
+  unidadeCurricular?: GradeCurricularDropDown;
+  isLoading: boolean;
+}
+
+const EvaluationFormulaBanner: React.FC<EvaluationFormulaBannerProps> = ({
+  unidadeCurricular,
+  isLoading,
+}) => {
+  // Oracle devolve booleanos como true/1 — mesma verificação usada no backend.
+  const isFlagActive = (value: unknown) => value === true || value === 1;
+
+  const hasPratica = isFlagActive(unidadeCurricular?.tem_pratica);
+  const hasOral = isFlagActive(unidadeCurricular?.tem_oral);
+
+  let formula = "Média Aritmética: (1ª Frequência + 2ª Frequência) / 2";
+  let recurso =
+    "Nota mínima de 10 valores no Recurso (nota seca) para aprovação.";
+  let extra: string | null = null;
+
+  if (hasPratica) {
+    formula = "Média Aritmética: (1ª Frequência + 2ª Frequência + Prática) / 3";
+    extra =
+      "A Prática é obrigatória: se não for lançada, entra como 0 no cálculo.";
+    recurso =
+      "Recurso é nota seca (mínimo 10 valores) — a Prática não volta a ser considerada.";
+  } else if (hasOral) {
+    formula = "Média Aritmética: (1ª Frequência + 2ª Frequência + Oral) / 3";
+    extra =
+      "A Prova Oral é obrigatória: se não for lançada, entra como 0 no cálculo.";
+    recurso =
+      "Recurso: Média Aritmética (Recurso + Oral de Recurso) / 2 — a Oral é sempre obrigatória, mesmo no Recurso.";
+  }
+
+  return (
+    <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900 rounded-lg p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300">
+          <Sigma className="h-4 w-4" />
+        </div>
+        <div className="text-sm">
+          <p className="font-semibold text-indigo-900 dark:text-indigo-200">
+            Fórmula de avaliação aplicável
+          </p>
+          {isLoading ? (
+            <p className="text-indigo-700 dark:text-indigo-300 mt-1">
+              A verificar fórmula da Unidade Curricular...
+            </p>
+          ) : unidadeCurricular ? (
+            <div className="text-indigo-800 dark:text-indigo-300 mt-1 space-y-0.5">
+              <p>{formula}</p>
+              {extra && <p className="opacity-90">{extra}</p>}
+              <p className="opacity-90">{recurso}</p>
+            </div>
+          ) : (
+            <p className="text-indigo-700 dark:text-indigo-300 mt-1">
+              Selecione a Unidade Curricular para ver a fórmula de cálculo
+              aplicável (Geral, com Prática ou com Prova Oral).
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── StatusBanner ─────────────────────────────────────────────────────────────
 
 interface StatusBannerProps {
@@ -1315,8 +1439,9 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
-        }. Contacte a administração.`,
+      content: `Não existe período definido para ${
+        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+      }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",

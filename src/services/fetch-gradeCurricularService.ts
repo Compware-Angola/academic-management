@@ -41,6 +41,8 @@ export type GradeCurricularItem = {
   codigo_semestre: number;
   designacao_semestre: string;
 
+  codigo_plano_curricular_grade: number | null;
+
   peso_primeira_freq: number | null;
   peso_segunda_freq: number | null;
   peso_pratica: number | null;
@@ -49,7 +51,22 @@ export type GradeCurricularItem = {
   nota_min_segunda_freq: number | null;
   nota_min_pratica: number | null;
 
+  tem_oral: number | boolean | null;
+  tem_pratica: number | boolean | null;
+
   status: number;
+};
+
+export type UpdateTemOralTemPraticaPayload = {
+  codigo: number;
+  temOral?: boolean;
+  temPratica?: boolean;
+};
+
+export type PlanoGradeExtras = {
+  codigo: number;
+  tem_oral: number | boolean;
+  tem_pratica: number | boolean;
 };
 
 export type GradeCurricularResponse = {
@@ -118,6 +135,8 @@ export interface AddUCsToPlanPayload {
   codigoCurso: number;
   codigoClasse: number;
   codigoSemestre?: number;
+  temOral?: boolean;
+  temPratica?: boolean;
 }
 
 export interface AddUCsToPlanResponse {
@@ -149,6 +168,19 @@ export async function toggleStatusGradeCurricular({
   const { data } = await axiosNestGa.patch<GradeCurricularItem2>(
     `/discipline/grade-curricular/${codigo}/status`,
     { status },
+  );
+
+  return data;
+}
+
+export async function updateTemOralTemPratica({
+  codigo,
+  temOral,
+  temPratica,
+}: UpdateTemOralTemPraticaPayload): Promise<PlanoGradeExtras> {
+  const { data } = await axiosNestGa.patch<PlanoGradeExtras>(
+    `/discipline/plano-curricular-grade/${codigo}`,
+    { temOral, temPratica },
   );
 
   return data;

@@ -17,11 +17,19 @@ export type InscricaoPorDia = {
   pagos?: number;
 };
 
+export type FiltrosDesignacoes = {
+  curso: string | null;
+  faculdade: string | null;
+  turno: string | null;
+  anolectivo: string | null;
+};
+
 export type InscricoesPorDiaResponse = {
   data: InscricaoPorDia[];
   total: number;
   totalgeralcandidatos: number;
   totalpagos?: number;
+  filtros: FiltrosDesignacoes;
   page: number;
   limit: number;
   totalpages: number;

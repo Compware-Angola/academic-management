@@ -16,6 +16,15 @@ import {
 } from "@/components/ui/table";
 import { useQueryFacturaItens } from "@/hooks/horario/use-query-invoice";
 import { PaymentNoteActions } from "@/pages/financas/components/views/uma-payment-invoice";
+import {
+  defaultHeaderComprovativoPagamentoV2,
+  GenericComprovativoPagamentoPDF,
+  PDFActions,
+} from "@/components/views/pdf/genericComprovativoPagamento-v2";
+import { createPaymentItem } from "@/util/export-payment";
+import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { useQueryListPayments } from "@/hooks/financas/area-financeira/use-query-pagamentos";
+import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { usePermission } from "@/auth/permission.helper";
 import { PermissionTypeDetails } from "@/constants/permission.type";
 import { StatusBadge } from "./status-badge";
@@ -50,6 +59,46 @@ export function FacturaDetalhesModal({
         ? factura.cadeiras_recurso_epoca_especial.split(" , ")
         : [],
     [factura?.cadeiras_recurso_epoca_especial],
+  );
+
+  const { data: student } = useStudentDetail(factura?.codigo_matricula);
+
+  const { data: academicYear } = useQueryAnoAcademico();
+
+  const activeYearCodigo = academicYear?.find(
+    (a) => a.estado.toLocaleLowerCase() === "activo",
+  )?.codigo;
+
+  const {
+    data: paymentResponse,
+    isLoading: isLoadingPayment,
+  } = useQueryListPayments(
+    {
+      anoLectivo: factura?.codigo_ano_lectivo ?? activeYearCodigo,
+      codigoFactura: factura?.codigo,
+      limit: 1,
+    },
+    {
+      enabled: !!factura && factura.estado === 1,
+    },
+  );
+
+  const pagamentoItem = paymentResponse?.data?.[0];
+
+  const baseFileName = `Detalhes_Pagamento_${factura?.codigo || ""}_${new Date()
+    .toISOString()
+    .slice(0, 10)}`;
+
+  const doc = (
+    <GenericComprovativoPagamentoPDF
+      header={defaultHeaderComprovativoPagamentoV2}
+      data={createPaymentItem({
+        facturaItems: itens?.data ?? [],
+        payment: pagamentoItem,
+        student: student,
+        factura: factura,
+      })}
+    />
   );
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -290,15 +339,21 @@ export function FacturaDetalhesModal({
 
             {/* Ações */}
             <div className="flex justify-end pt-2">
-              <PaymentNoteActions
-                nota={factura}
-                itens={itens?.data || []}
-                showDownload={true}
-                showPrint={true}
-                showliquidarNota={hasPermission(
-                  PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla,
-                )}
-              />
+              {factura.estado === 1 ? (
+                itens?.data && !isLoadingPayment ? (
+                  <PDFActions document={doc} fileName={baseFileName} />
+                ) : null
+              ) : (
+                <PaymentNoteActions
+                  nota={factura}
+                  itens={itens?.data || []}
+                  showDownload={true}
+                  showPrint={true}
+                  showliquidarNota={hasPermission(
+                    PermissionTypeDetails.LIQUIDAR_NOTA_PAGAMENTO.sigla,
+                  )}
+                />
+              )}
             </div>
           </div>
         )}
