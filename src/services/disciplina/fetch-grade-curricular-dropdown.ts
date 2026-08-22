@@ -4,6 +4,8 @@ export type GradeCurricularDropDown = {
   pk: number;
   descricao: string;
   codigo: string;
+  tem_pratica?: boolean | number | null;
+  tem_oral?: boolean | number | null;
 };
 
 type FilterGradeCurricularDropDownParams = {

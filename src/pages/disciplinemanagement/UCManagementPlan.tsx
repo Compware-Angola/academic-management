@@ -25,6 +25,7 @@ import {
   Plus,
   X,
   Loader2,
+  Info,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -62,7 +63,9 @@ import { useCursos } from "@/hooks/use-cursos";
 import {
   useAddUCsToPlan,
   useGradeCurricular,
+  useUpdateTemOralTemPratica,
 } from "@/hooks/use-grade-curricular";
+import { GradeCurricularItem } from "@/services/fetch-gradeCurricularService";
 import { useDisciplines } from "@/hooks/study_plan/use-query-disciplines";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuerySemestres } from "@/hooks/semestre/use-query-semestres";
@@ -151,6 +154,8 @@ export default function UCManagementPlan() {
   const [formData, setFormData] = useState({
     codigos_disciplina: [] as string[],
     codigo_semestre: "",
+    tem_oral: false,
+    tem_pratica: false,
   });
 
   const hasActiveFilters =
@@ -273,6 +278,22 @@ export default function UCManagementPlan() {
     });
   };
 
+  // --- Detalhes do plano (Oral / Prática) ---
+  const [detalheCodigoGrade, setDetalheCodigoGrade] = useState<number | null>(
+    null,
+  );
+
+  const { mutate: updateTemOralTemPratica, isPending: updatingPlanoExtras } =
+    useUpdateTemOralTemPratica();
+
+  const handleAbrirDetalhes = (uc: GradeCurricularItem) => {
+    setDetalheCodigoGrade(uc.codigo_grade_curricular);
+  };
+
+  const handleFecharDetalhes = () => {
+    setDetalheCodigoGrade(null);
+  };
+
   useEffect(() => {
     setClasseId("");
     setPage(1);
@@ -283,7 +304,12 @@ export default function UCManagementPlan() {
     setModalAnoLetivoId("");
     setModalCursoId("");
     setModalClasseId("");
-    setFormData({ codigos_disciplina: [], codigo_semestre: "" });
+    setFormData({
+      codigos_disciplina: [],
+      codigo_semestre: "",
+      tem_oral: false,
+      tem_pratica: false,
+    });
     setIsModalOpen(true);
   };
 
@@ -384,13 +410,20 @@ export default function UCManagementPlan() {
           : 1,
         codigoClasse: Number(modalClasseId),
         codigoCurso: Number(modalCursoId),
+        temOral: formData.tem_oral,
+        temPratica: formData.tem_pratica,
       },
       {
         onSuccess: (data) => {
           setResultados(buildResultados(formData.codigos_disciplina, data));
           setResultadoModalOpen(true);
           setIsModalOpen(false);
-          setFormData({ codigos_disciplina: [], codigo_semestre: "" });
+          setFormData({
+            codigos_disciplina: [],
+            codigo_semestre: "",
+            tem_oral: false,
+            tem_pratica: false,
+          });
           refetch();
         },
         onError: (error: Error) => {
@@ -411,7 +444,12 @@ export default function UCManagementPlan() {
               ),
           );
           setResultadoModalOpen(true);
-          setFormData({ codigos_disciplina: [], codigo_semestre: "" });
+          setFormData({
+            codigos_disciplina: [],
+            codigo_semestre: "",
+            tem_oral: false,
+            tem_pratica: false,
+          });
         },
       },
     );
@@ -420,6 +458,46 @@ export default function UCManagementPlan() {
   const grades = gradeResponses?.data ?? [];
   const total = gradeResponses?.total;
   const totalPages = gradeResponses?.totalPages;
+
+  const ucDetalhe: GradeCurricularItem | null =
+    grades.find((g) => g.codigo_grade_curricular === detalheCodigoGrade) ??
+    null;
+
+  const handleToggleOral = (checked: boolean) => {
+    if (!ucDetalhe?.codigo_plano_curricular_grade) {
+      toast.error("Não foi possível identificar o registo do plano.");
+      return;
+    }
+    // Oral e Prática são mutuamente exclusivas: activar uma desactiva a outra.
+    if (checked && Boolean(ucDetalhe.tem_pratica)) {
+      toast.info("Prática desativada automaticamente", {
+        description:
+          "Uma UC não pode ter Oral e Prática activas ao mesmo tempo.",
+      });
+    }
+    updateTemOralTemPratica({
+      codigo: ucDetalhe.codigo_plano_curricular_grade,
+      temOral: checked,
+    });
+  };
+
+  const handleTogglePratica = (checked: boolean) => {
+    if (!ucDetalhe?.codigo_plano_curricular_grade) {
+      toast.error("Não foi possível identificar o registo do plano.");
+      return;
+    }
+    // Oral e Prática são mutuamente exclusivas: activar uma desactiva a outra.
+    if (checked && Boolean(ucDetalhe.tem_oral)) {
+      toast.info("Oral desativada automaticamente", {
+        description:
+          "Uma UC não pode ter Oral e Prática activas ao mesmo tempo.",
+      });
+    }
+    updateTemOralTemPratica({
+      codigo: ucDetalhe.codigo_plano_curricular_grade,
+      temPratica: checked,
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -682,7 +760,17 @@ export default function UCManagementPlan() {
                       />
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-center">
+                      <div className="flex justify-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:bg-accent hover:text-foreground"
+                          onClick={() => handleAbrirDetalhes(uc)}
+                          title="Ver detalhes do plano"
+                        >
+                          <Info className="h-4 w-4" />
+                        </Button>
                         <Button
                           type="button"
                           variant="ghost"
@@ -843,6 +931,130 @@ export default function UCManagementPlan() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Detalhes do plano (Oral / Prática) */}
+      <Dialog
+        open={!!ucDetalhe}
+        onOpenChange={(v) => !v && handleFecharDetalhes()}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              Detalhes do Plano
+            </DialogTitle>
+            <DialogDescription>
+              Informações da unidade curricular no plano curricular e
+              configuração das avaliações de excepção.
+            </DialogDescription>
+          </DialogHeader>
+
+          {ucDetalhe && (
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border p-4">
+                <div className="col-span-2 space-y-0.5">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Unidade Curricular
+                  </p>
+                  <p className="text-sm font-medium">
+                    {ucDetalhe.codigo_disciplina} –{" "}
+                    {ucDetalhe.descricao_disciplina}
+                  </p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Curso
+                  </p>
+                  <p className="text-sm">{ucDetalhe.descricao_curso}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Ano Curricular
+                  </p>
+                  <p className="text-sm">{ucDetalhe.descricao_classe}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Semestre
+                  </p>
+                  <p className="text-sm">{ucDetalhe.designacao_semestre}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Estado
+                  </p>
+                  <Badge variant={ucDetalhe.status === 1 ? "default" : "secondary"}>
+                    {ucDetalhe.status === 1 ? "Activa" : "Inactiva"}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-foreground">
+                  Avaliações de Excepção
+                </h4>
+
+                {!ucDetalhe.codigo_plano_curricular_grade ? (
+                  <p className="text-sm text-muted-foreground">
+                    Não foi possível localizar o registo do plano para esta
+                    unidade curricular.
+                  </p>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
+                      <div className="space-y-0.5">
+                        <Label
+                          htmlFor="ativar-oral"
+                          className="text-sm cursor-pointer"
+                        >
+                          Ativar Oral
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          A disciplina passa a exigir prova oral (Aguarda
+                          Oral / Oral de Recurso).
+                        </p>
+                      </div>
+                      <Switch
+                        id="ativar-oral"
+                        checked={Boolean(ucDetalhe.tem_oral)}
+                        onCheckedChange={handleToggleOral}
+                        disabled={updatingPlanoExtras}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
+                      <div className="space-y-0.5">
+                        <Label
+                          htmlFor="ativar-pratica"
+                          className="text-sm cursor-pointer"
+                        >
+                          Ativar Prática
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          A disciplina passa a exigir componente prática
+                          (Aguarda Nota da Prática).
+                        </p>
+                      </div>
+                      <Switch
+                        id="ativar-pratica"
+                        checked={Boolean(ucDetalhe.tem_pratica)}
+                        onCheckedChange={handleTogglePratica}
+                        disabled={updatingPlanoExtras}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleFecharDetalhes}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Modal de Criação */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-4xl! p-0 overflow-hidden shadow-2xl border-border/40">
@@ -992,6 +1204,50 @@ export default function UCManagementPlan() {
                   </Select>
                 </div>
               )}
+            </div>
+
+            {/* Avaliações de excepção — aplicadas a todas as UCs seleccionadas abaixo */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
+                <div className="space-y-0.5">
+                  <Label
+                    htmlFor="modal-tem-oral"
+                    className="text-sm cursor-pointer"
+                  >
+                    Ativar Oral
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Exige prova oral para estas UCs.
+                  </p>
+                </div>
+                <Switch
+                  id="modal-tem-oral"
+                  checked={formData.tem_oral}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, tem_oral: checked })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
+                <div className="space-y-0.5">
+                  <Label
+                    htmlFor="modal-tem-pratica"
+                    className="text-sm cursor-pointer"
+                  >
+                    Ativar Prática
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Exige componente prática para estas UCs.
+                  </p>
+                </div>
+                <Switch
+                  id="modal-tem-pratica"
+                  checked={formData.tem_pratica}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, tem_pratica: checked })
+                  }
+                />
+              </div>
             </div>
 
             {/* Divisor sutil para separar o contexto das disciplinas */}

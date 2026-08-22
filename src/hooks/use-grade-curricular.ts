@@ -6,6 +6,7 @@ import {
   GradeCurricularPayload,
   GradeCurricularResponse,
   toggleStatusGradeCurricular,
+  updateTemOralTemPratica,
 } from "@/services/fetch-gradeCurricularService";
 import { toast } from "sonner";
 
@@ -94,6 +95,21 @@ export const useToggleStatusGradeCurricular = () => {
       // Invalida todas as queries de grade curricular
       queryClient.invalidateQueries({ queryKey: ["grade-curricular"] });
       toast.success("Estado actualizado!");
+    },
+  });
+};
+
+export const useUpdateTemOralTemPratica = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTemOralTemPratica,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["grade-curricular"] });
+      toast.success("Configuração do plano actualizada!");
+    },
+    onError: () => {
+      toast.error("Não foi possível actualizar a configuração do plano.");
     },
   });
 };

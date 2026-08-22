@@ -33,8 +33,6 @@ import UCManagementPlan from "./pages/disciplinemanagement/UCManagementPlan";
 import GradeCurso from "./pages/disciplinemanagement/GradeCurso";
 import UcDepartmentManagement from "./pages/disciplinemanagement/UcDepartmentManagement";
 import ControlNotes from "./pages/rating(avaliation)/control";
-import FormulaUC from "./pages/rating(avaliation)/formula-uc";
-import FormulaOral from "./pages/rating(avaliation)/formula-oral";
 import ScheduleListEliminated from "./pages/schedules/ScheduleListEliminated";
 import SchedulesByUC from "./pages/schedules/SchedulesByUC";
 import TeacherSchedules from "./pages/schedules/TeacherSchedules";
@@ -655,21 +653,6 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/plano/formula-uc"
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails
-                            .DEFINIR_FORMULA_UNIDADE_CURRICULAR.sigla!,
-                          PermissionTypeDetails.DEFINIR_FORMULA_UC_POS_GRADUACAO
-                            .sigla!,
-                        ]}
-                      >
-                        <FormulaUC />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
                     path="/avaliacoes/presenca"
                     element={
                       <ProtectedRoute
@@ -737,21 +720,6 @@ const App = () => {
                         ]}
                       >
                         <ValidationTeacherAgenda />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/plano/formula-oral"
-                    element={
-                      <ProtectedRoute
-                        allowedPermissions={[
-                          PermissionTypeDetails
-                            .DEFINIR_UNIDADE_CURRICULAR_COM_ORAL.sigla!,
-                          PermissionTypeDetails.DEFINIR_UC_ORAL_POS_GRADUACAO
-                            .sigla!,
-                        ]}
-                      >
-                        <FormulaOral />
                       </ProtectedRoute>
                     }
                   />
