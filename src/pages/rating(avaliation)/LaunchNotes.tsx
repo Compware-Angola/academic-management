@@ -197,14 +197,14 @@ export default function LaunchNotes() {
 
       const filteredClasses = allowedClassIds?.length
         ? classes.filter((c) =>
-          allowedClassIds?.includes(c?.codigo?.toString()),
-        )
+            allowedClassIds?.includes(c?.codigo?.toString()),
+          )
         : classes;
 
       const filteredUnidadesCurriculares = allowedGradeIds?.length
         ? unidadesCurriculares.filter((g) =>
-          allowedGradeIds?.includes(g?.pk?.toString()),
-        )
+            allowedGradeIds?.includes(g?.pk?.toString()),
+          )
         : unidadesCurriculares;
 
       return {
@@ -1189,15 +1189,26 @@ export default function LaunchNotes() {
                             type="number"
                             min="0"
                             max="20"
-                            step="0.5"
+                            step="1"
                             value={student.nota ?? ""}
-                            onChange={(e) =>
-                              handleNotaChange(
-                                student.codigo_grade_aluno,
-                                "nota",
-                                e.target.value,
-                              )
-                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+
+                              // permite vazio (para poder apagar) e apenas dígitos inteiros
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNotaChange(
+                                  student.codigo_grade_aluno,
+                                  "nota",
+                                  value,
+                                );
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              // bloqueia teclas de ponto, vírgula, "e" (notação científica)
+                              if ([".", ",", "e", "E", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
                             className="w-24 mx-auto text-center"
                             placeholder="0-20"
                             disabled={isLocked || isRefetching}
@@ -1342,8 +1353,7 @@ const EvaluationFormulaBanner: React.FC<EvaluationFormulaBannerProps> = ({
   let extra: string | null = null;
 
   if (hasPratica) {
-    formula =
-      "Média Aritmética: (1ª Frequência + 2ª Frequência + Prática) / 3";
+    formula = "Média Aritmética: (1ª Frequência + 2ª Frequência + Prática) / 3";
     extra =
       "A Prática é obrigatória: se não for lançada, entra como 0 no cálculo.";
     recurso =
@@ -1429,8 +1439,9 @@ const StatusBanner: React.FC<StatusBannerProps> = ({
     NOT_DEFINED: {
       className: "bg-red-50 border border-red-200 text-red-700",
       title: "Nenhum prazo configurado",
-      content: `Não existe período definido para ${gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
-        }. Contacte a administração.`,
+      content: `Não existe período definido para ${
+        gradesPrompt?.tipo_avaliacao_nome || "esta avaliação"
+      }. Contacte a administração.`,
     },
     OUT_OF_PERIOD: {
       className: "bg-amber-50 border border-amber-300 text-amber-800",

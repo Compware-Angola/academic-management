@@ -86,6 +86,8 @@ export function InscricoesAvaliacaoSection({
     estadoFactura: parseFilter(filters.estadoFactura),
     codigoAnoLectivo: parseFilter(filters.anoLectivo),
     codigoSemestre: parseFilter(filters.semestre),
+    codigoClasse: parseFilter(filters.anoCurricular),
+    tipoAvaliacao: parseFilter(filters.tipoAvaliacao),
   });
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
@@ -193,7 +195,9 @@ export function InscricoesAvaliacaoSection({
             setFilters({ ...filters, tipoAvaliacao: v });
             setPage(1);
           }}
-          options={tipoAvaliacao}
+          options={tipoAvaliacao.filter((t) =>
+            ["R", "EE", "M"].includes(t.sigla),
+          )}
           map={(u) => ({
             key: u.codigo,
             label: u.designacao,
