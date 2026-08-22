@@ -3,7 +3,7 @@ import PDFActions, {
 } from "@/components/views/pdf/GenericPDFDocument";
 import ExcelActions from "@/components/views/excel/GenericExcelExport";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -89,6 +89,14 @@ export default function RegistrationForEvaluationList() {
 
   const { data: tipoAvaliacao = [], isLoading: isLoadingTipoAvaliacao } =
     useQueryTipoAvaliacao();
+
+  useEffect(() => {
+    if (formData.tiposAvaliacao) return;
+    const recurso = tipoAvaliacao.find((t) => t.sigla === "R");
+    if (recurso) {
+      setFormData((prev) => ({ ...prev, tiposAvaliacao: String(recurso.codigo) }));
+    }
+  }, [tipoAvaliacao, formData.tiposAvaliacao]);
   const { data: scheduleResponse, isLoading: loadingSchedule } =
     useQuerySchedulesByUc(
       {
@@ -258,7 +266,9 @@ export default function RegistrationForEvaluationList() {
               onChange={(v) => {
                 updateFilter("tiposAvaliacao", v);
               }}
-              options={tipoAvaliacao}
+              options={tipoAvaliacao.filter((t) =>
+                ["R", "EE", "M"].includes(t.sigla),
+              )}
               map={(u) => ({
                 key: u.codigo,
                 label: u.designacao,
