@@ -25,6 +25,7 @@ export const paymentSchema = z.discriminatedUnion("forma_pagamento", [
       .string({ message: "Caixa obrigatória" })
       .min(1, "Caixa obrigatória"),
     corrente: z.string().min(1, "Corrente obrigatória"),
+    usar_reserva: z.boolean().optional().default(false),
   }),
 
   z.object({
@@ -56,6 +57,8 @@ export const paymentSchema = z.discriminatedUnion("forma_pagamento", [
       .string({ message: "Caixa obrigatória" })
       .min(1, "Caixa obrigatória"),
     corrente: z.string().min(1, "Corrente obrigatória"),
+    usar_reserva: z.boolean().default(false),
+    valor_reserva_utilizado: z.number().optional(),
   }),
 ]);
 

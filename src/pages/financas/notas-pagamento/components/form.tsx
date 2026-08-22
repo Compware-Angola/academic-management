@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Save, Loader2, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryFacturas } from "@/hooks/horario/use-query-invoice";
 import { FORMA_PAGAMENTO, validarPagamento } from "../validator";
@@ -27,6 +28,7 @@ import { Form } from "@/components/ui/form";
 import { SelectFormField } from "@/components/selectFormField";
 import { InputFormField } from "@/components/inputFormField";
 import { TextareaFormField } from "@/components/TextareaFormField";
+import { useQueryReservaEstudante } from "@/hooks/financas/alunos/use-query-reserva";
 
 export const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("pt-AO");
@@ -62,6 +64,13 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
     useQueryMyCashRegister();
   const { data: academicYear, isLoading: isLoadingAcademicYear } =
     useQueryAnoAcademico();
+
+  const codigoEstudante = factura?.codigo_matricula;
+
+  const { data: reserva, isLoading: isLoadingReserva } =
+    useQueryReservaEstudante(codigoEstudante);
+  const valorReserva = reserva?.saldo ?? 0;
+
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -76,12 +85,59 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
           ?.codigo.toString() || "",
       caixa_id: myCashRegister?.id.toString() ?? "",
       corrente: "",
+      usar_reserva: false,
     },
   });
   const formaPagamentoValue = form.watch("forma_pagamento");
+  const usarReserva = form.watch("usar_reserva");
+  const valorDepositado = form.watch("valor_depositado");
   const { mutate, isPending } = useCreatePayment();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Valor que falta cobrir considerando só o que foi digitado na forma de pagamento (TPA/Cash)
+  const valorFaltante = Math.max(
+    factura.valor_pagar - Number(valorDepositado || 0),
+    0,
+  );
+
+  // Quanto será efetivamente retirado da reserva: no máximo o que falta, no máximo o que existe em reserva
+  const valorUsadoReserva = usarReserva
+    ? Math.min(valorFaltante, valorReserva)
+    : 0;
+
+  // A reserva marcada não é suficiente para cobrir o que falta
+  const reservaInsuficiente = usarReserva && valorReserva < valorFaltante;
+
+  // Total efetivamente coberto: valor depositado (TPA/Cash) + valor retirado da reserva
+  const valorTotalCoberto = Number(valorDepositado || 0) + valorUsadoReserva;
+
+  const valorEmFalta = Math.max(factura.valor_pagar - valorTotalCoberto, 0);
+
+  // Só habilita o botão se o total cobrir o valor a pagar E a reserva usada for suficiente
+  const cobreValorTotal =
+    valorTotalCoberto >= factura.valor_pagar && !reservaInsuficiente;
+
+  // Ao marcar "usar reserva", avisa de imediato se a reserva não cobre o que falta
+  const handleUsarReservaChange = (checked: boolean) => {
+    form.setValue("usar_reserva", checked, { shouldValidate: true });
+    if (checked) {
+      const faltante = Math.max(
+        factura.valor_pagar - Number(valorDepositado || 0),
+        0,
+      );
+      if (valorReserva < faltante) {
+        toast({
+          description: `A reserva (${formatNumber(
+            valorReserva,
+          )}) não é suficiente para cobrir o valor em falta (${formatNumber(
+            faltante,
+          )}). Ajuste o valor depositado.`,
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   const onSubmit = (data: PaymentForm) => {
     const pagamento = {
@@ -112,8 +168,11 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
           : undefined,
       statusMovimento: 0,
       infoAdicional: data.observacao,
-      corrente: 1,
-      feitoComReserva: "N",
+      corrente: Number(data.corrente),
+      feitoComReserva: data.usar_reserva ? "Y" : "N",
+      valorReservaUtilizado: data.usar_reserva
+        ? valorUsadoReserva
+        : 0,
       anoLectivo: Number(data.ano_lectivo),
     };
     const resultadoValidacao = validarPagamento(
@@ -124,6 +183,14 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
     if (!resultadoValidacao.valid) {
       toast({
         description: resultadoValidacao.message,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!cobreValorTotal) {
+      toast({
+        description:
+          "O valor depositado, mesmo somando a reserva, não cobre o valor a pagar.",
         variant: "destructive",
       });
       return;
@@ -241,7 +308,10 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
                   <InputFormField
                     control={form.control}
                     name="valor_depositado"
-                    label="Valor Depositado *"
+                    label={`Valor Depositado (${formaPagamentos?.find(
+                      (f) => f.codigo.toString() === formaPagamentoValue,
+                    )?.descricao ?? "forma selecionada"
+                      }) *`}
                     placeholder="Digite o valor"
                   />
                 </div>
@@ -252,7 +322,7 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
                   name="ano_lectivo"
                   label="Ano Letivo"
                   placeholder="Selecione o ano letivo"
-                  disabled
+
                   items={
                     academicYear?.map((year) => {
                       return {
@@ -272,6 +342,120 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* NOVO: Card de Reserva do Estudante */}
+          <Card>
+            <CardHeader className="flex! space-x-2 flex-row! items-center">
+              <Wallet className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">Reserva do Estudante</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isLoadingReserva ? (
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  A verificar valor em reserva...
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Valor em Reserva
+                    </p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                      {formatNumber(valorReserva)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="usar_reserva"
+                      checked={usarReserva}
+                      disabled={valorReserva <= 0}
+                      onCheckedChange={(checked) =>
+                        handleUsarReservaChange(checked === true)
+                      }
+                    />
+                    <Label htmlFor="usar_reserva" className="cursor-pointer">
+                      Usar reserva para cobrir o que falta
+                    </Label>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      Valor Retirado da Reserva
+                    </p>
+                    <p className="text-2xl font-bold text-primary">
+                      {formatNumber(valorUsadoReserva)}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      {valorEmFalta > 0 ? "Falta Cobrir" : "Situação"}
+                    </p>
+                    <p
+                      className={`text-2xl font-bold ${valorEmFalta > 0 ? "text-red-600" : "text-green-600"
+                        }`}
+                    >
+                      {valorEmFalta > 0
+                        ? formatNumber(valorEmFalta)
+                        : "Cobre a factura"}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {!isLoadingReserva && usarReserva && valorUsadoReserva > 0 && (
+                <div className="rounded-lg border bg-muted/40 p-4">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+                    Resumo da Reserva após Utilização
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Saldo Atual</p>
+                      <p className="text-base font-semibold text-gray-800 dark:text-gray-100">
+                        {formatNumber(valorReserva)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">A Retirar Agora</p>
+                      <p className="text-base font-semibold text-primary">
+                        - {formatNumber(valorUsadoReserva)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Saldo Restante</p>
+                      <p
+                        className={`text-base font-semibold ${valorReserva - valorUsadoReserva > 0
+                            ? "text-green-600"
+                            : "text-gray-800 dark:text-gray-100"
+                          }`}
+                      >
+                        {formatNumber(valorReserva - valorUsadoReserva)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!isLoadingReserva && reservaInsuficiente && (
+                <p className="text-sm text-red-600 font-medium">
+                  A reserva disponível ({formatNumber(valorReserva)}) não é
+                  suficiente para cobrir o valor em falta (
+                  {formatNumber(valorFaltante)}). Não é possível liquidar a
+                  nota enquanto isto não for ajustado.
+                </p>
+              )}
+
+              {!isLoadingReserva && !reservaInsuficiente && valorEmFalta > 0 && (
+                <p className="text-sm text-red-600">
+                  O valor depositado
+                  {usarReserva ? " somado ao valor retirado da reserva " : " "}
+                  ainda não cobre o valor a pagar da factura.
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -383,11 +567,11 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
                     items={
                       myCashRegister
                         ? [
-                            {
-                              label: myCashRegister.name,
-                              value: myCashRegister.id.toString(),
-                            },
-                          ]
+                          {
+                            label: myCashRegister.name,
+                            value: myCashRegister.id.toString(),
+                          },
+                        ]
                         : []
                     }
                   />
@@ -448,7 +632,7 @@ export function FormNotaPagamento({ factura }: { factura: Factura }) {
           <Button
             type="submit"
             className="gap-2"
-            disabled={isPending || isFacturaPago}
+            disabled={isPending || isFacturaPago || !cobreValorTotal}
           >
             {isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
