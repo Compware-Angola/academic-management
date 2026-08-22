@@ -262,7 +262,14 @@ export function ConciliacaoTimelineModal({
                     <p className="text-xs text-muted-foreground">
                       {formatarData(conciliation.facturaOriginal.data)}
                     </p>
-                    <p className={`text-2xl font-bold text-muted-foreground mt-2 ${conc}`}>
+                    <p
+                      className={`text-2xl font-bold text-muted-foreground mt-2 ${
+                        conciliation.facturaOriginal.estado ===
+                        InvoiceEnum.ANULADO
+                          ? "line-through text-muted-foreground"
+                          : ""
+                      }`}
+                    >
                       {formatCurrencyAOA(totalOriginal)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -308,7 +315,14 @@ export function ConciliacaoTimelineModal({
                     <p className="text-xs text-muted-foreground">
                       {formatarData(conciliation.facturaPropostaAlteracao.data)}
                     </p>
-                    <p className="text-2xl font-bold text-primary mt-2">
+                    <p
+                      className={`text-2xl font-bold text-primary mt-2 ${
+                        conciliation.facturaPropostaAlteracao.estado ===
+                        InvoiceEnum.ANULADO
+                          ? "line-through text-muted-foreground"
+                          : ""
+                      }`}
+                    >
                       {formatCurrencyAOA(totalConciliado)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">

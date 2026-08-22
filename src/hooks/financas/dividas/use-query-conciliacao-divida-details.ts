@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useConciliationDetails = (id?: number) => {
   return useQuery<ConciliationDetails>({
-    queryKey: ["conciliation-details", id],
+    queryKey: ["conciliation-details"],
     queryFn: () => getConciliationDetails(id!),
     enabled: !!id,
   });
