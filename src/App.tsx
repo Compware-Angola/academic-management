@@ -201,6 +201,7 @@ import PautaExame from "./pages/access_exam/PautaExame";
 import Configuracoes from "./pages/configuracoes/Configuracoes";
 import TipoCalendarios from "./pages/academiccalendar/tipo-calendario";
 import EstudantesMatriculado from "./pages/registrations/EstudantesMatriculado";
+import RegistrationForEvaluationList from "./pages/rating(avaliation)/RegistrationForEvaluation";
 
 const App = () => {
   return (
@@ -1848,6 +1849,18 @@ const App = () => {
                         ]}
                       >
                         <InscritosPorUc />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/avaliacoes/inscricao-avaliacao"
+                    element={
+                      <ProtectedRoute
+                        allowedPermissions={[
+                          PermissionTypeDetails.INSCRICAO_EM_AVALIACOES.sigla!,
+                        ]}
+                      >
+                        <RegistrationForEvaluationList />
                       </ProtectedRoute>
                     }
                   />
