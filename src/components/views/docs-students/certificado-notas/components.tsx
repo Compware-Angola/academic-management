@@ -128,16 +128,19 @@ const Legend = () => (
 const FooterBar = () => (
   <View style={styles.footerBar} fixed>
     <Text
+      style={styles.footerPage}
       render={({ pageNumber, totalPages }) =>
         `Página ${pageNumber} de ${totalPages}`
       }
     />
 
-    <Text>
+    <Image style={styles.footerImage} src="/rod.png" />
+
+    <Text style={styles.footerText}>
       UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) — Rua Nossa
       Senhora da Muxima, nº 10, 8º Andar, Luanda{"\n"}
-      www.uma.co.ao | geral@uma.co.ao | Tel: (244) 222 338 984 / (244) 222 332
-      905 | Fax: (244) 222 339 572
+      www.uma.co.ao | geral@uma.co.ao | Tel: (244) 222 338 984 / (244) 222
+      332 905 | Fax: (244) 222 339 572
     </Text>
   </View>
 );
@@ -169,49 +172,43 @@ const ServicoAcademicos = () => {
 const Assinatura = ({
   codigoValidacao,
   diretora,
+  reitor,
 }: {
   codigoValidacao: string;
   diretora: string;
+  reitor?: string;
 }) => (
-  <View
-    style={{
-      width: "50%",
-      marginTop: 20,
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 10,
-    }}
-  >
-    <Text>Código de Validação: {codigoValidacao}</Text>
-    <Text
-      style={{
-        textAlign: "justify",
-      }}
-    >
+  <View style={styles.assinaturaWrap}>
+    <Text style={styles.assinaturaCodigo}>
+      Código de Validação: {codigoValidacao}
+    </Text>
+    <Text style={styles.assinaturaAtestado}>
       Atesto a conformidade desta certidão, que vai por mim assinada e timbrada
       com o selo branco da Instituição, com a ficha do cadastro académico e
       outros documentos escolares do estudante acima indicado arquivados nestes
       serviços.
     </Text>
 
-    <Text
-      style={{
-        fontWeight: "bold",
-        marginTop: 30,
-      }}
-    >
-      Directora dos Serviços Académicos
-    </Text>
-    <View
-      style={{
-        width: "100%",
-        height: 1,
-        marginTop: 10,
-        backgroundColor: "black",
-      }}
-    />
-    <Text>Margarida da Silva Rodrigues</Text>
+    <View style={styles.assinaturaRow}>
+      <View style={styles.assinaturaCol}>
+        <Text style={styles.assinaturaCargo}>
+          Directora dos Serviços Académicos
+        </Text>
+        <View style={styles.assinaturaLinha} />
+        <Text style={styles.assinaturaNome}>
+          <Text style={styles.titulo}>Lic.</Text> {diretora}
+        </Text>
+      </View>
+
+      <View style={styles.assinaturaCol}>
+        <Text style={styles.assinaturaCargo}>O Reitor</Text>
+        <View style={styles.assinaturaLinha} />
+        <Text style={styles.assinaturaNome}>
+          <Text style={styles.titulo}>Prof. Dr.</Text>{" "}
+          {reitor ?? "Tiago Caungo Mutombo"}
+        </Text>
+      </View>
+    </View>
   </View>
 );
 
@@ -251,6 +248,7 @@ export const PDFDocumentStudent = (props: PDFDocumentStudentProps) => {
     borduraSrc,
     codigoValidacao,
     diretora,
+    reitor,
   } = props;
   const logo = logoSrc || "/logo_uma.png";
   const bg = bgSrc || "/logo_bg.png";
@@ -272,7 +270,11 @@ export const PDFDocumentStudent = (props: PDFDocumentStudentProps) => {
         <TabelaDisciplinas data={notas} />
         <Legend />
         <ServicoAcademicos />
-        <Assinatura codigoValidacao={codigoValidacao} diretora={diretora} />
+        <Assinatura
+          codigoValidacao={codigoValidacao}
+          diretora={diretora}
+          reitor={reitor}
+        />
         <FooterBar />
       </Page>
     </Document>
