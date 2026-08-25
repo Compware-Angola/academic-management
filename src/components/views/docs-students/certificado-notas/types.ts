@@ -30,6 +30,7 @@ export type GerarCertidaoProps = {
   onBeforeDownload: (onReady: (codigo: string) => void) => void;
   isGeneratingCode?: boolean;
   diretora: string;
+  reitor?: string;
 };
 
 export type PDFDocumentStudentProps = {
@@ -40,6 +41,7 @@ export type PDFDocumentStudentProps = {
   borduraSrc?: string;
   codigoValidacao: string;
   diretora: string;
+  reitor?: string;
 };
 
 export type GradeCurricularDuplicada = {

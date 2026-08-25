@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
     fontFamily: "Helvetica",
     backgroundColor: COR.branco,
     paddingTop: 22,
-    paddingBottom: 50,
+    paddingBottom: 110,
     paddingHorizontal: 28,
     fontSize: 8.5,
     color: COR.preto,
@@ -19,11 +19,12 @@ export const styles = StyleSheet.create({
 
   watermark: {
     position: "absolute",
-    top: "28%",
-    left: "15%",
-    width: "70%",
-    height: "40%",
+    top: "25%",
+    left: "18.75%",
+    width: "62.5%",
+    height: "50%",
     opacity: 0.05,
+    objectFit: "contain",
   },
 
   logoWrap: {
@@ -149,13 +150,29 @@ export const styles = StyleSheet.create({
 
   footerBar: {
     position: "absolute",
-    bottom: 0,
+    bottom: 15,
     left: 0,
     right: 0,
-    padding: "5 28",
+    paddingHorizontal: 28,
+    flexDirection: "column",
     fontSize: 6.5,
     color: COR.preto,
+  },
+  footerPage: {
+    textAlign: "right",
+    fontSize: 6.5,
+    marginBottom: 4,
+  },
+  footerImage: {
+    width: "100%",
+    height: 20,
+    objectFit: "contain",
+  },
+  footerText: {
     textAlign: "center",
+    fontSize: 6.5,
+    marginTop: 4,
+    marginBottom: 4,
   },
 
   validationWrap: {
@@ -196,6 +213,55 @@ export const styles = StyleSheet.create({
     fontFamily: "Helvetica-Oblique",
     marginTop: 8,
     lineHeight: 1.5,
+  },
+
+  assinaturaWrap: {
+    width: "100%",
+    marginTop: 20,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  assinaturaCodigo: {
+    fontSize: 10,
+  },
+  assinaturaAtestado: {
+    fontSize: 8,
+    color: "#444",
+    textAlign: "justify",
+    lineHeight: 1.5,
+  },
+  assinaturaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    width: "100%",
+    marginTop: 20,
+  },
+  assinaturaCol: {
+    width: "45%",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  assinaturaCargo: {
+    fontFamily: "Helvetica-Bold",
+    fontSize: 10,
+    textAlign: "center",
+  },
+  assinaturaLinha: {
+    width: 150,
+    height: 1,
+    marginTop: 20,
+    marginBottom: 5,
+    backgroundColor: "black",
+  },
+  assinaturaNome: {
+    fontSize: 10,
+    textAlign: "center",
+  },
+  titulo: {
+    fontFamily: "Helvetica-Bold",
   },
 
   pageLabel: {},
