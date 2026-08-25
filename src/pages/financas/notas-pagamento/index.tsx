@@ -46,8 +46,11 @@ export default function ListarPagamentos() {
     factura: "",
     dataInicio: "",
     dataFim: "",
+    tipoServico: "",
   });
   const [filtersApplied, setFiltersApplied] = useState(filters);
+
+  console.log(filters);
 
   const [searchBy, setSearchBy] = useState<SearchByType>("codigoMatricula");
   const [searchByApplied, setSearchByApplied] =
@@ -73,6 +76,7 @@ export default function ListarPagamentos() {
     anoLectivo: parseFilter(filtersApplied.anoLectivo),
     codigoFactura: parseFilter(filtersApplied.factura),
     estado: parseFilter(filtersApplied.estado),
+    tipoServico: filtersApplied.tipoServico,
 
     // Só envia as datas se elas existirem
     ...(filtersApplied.dataInicio && { dataInicio: filtersApplied.dataInicio }),
