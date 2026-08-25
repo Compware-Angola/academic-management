@@ -16,6 +16,7 @@ export const GerarCertificadoNotas = (props: GerarCertidaoProps) => {
     bgSrc,
     borduraSrc,
     diretora,
+    reitor,
     logoSrc,
   } = props;
   const nomeArquivo = `certificado_nota_${estudante.nome.replace(
@@ -27,6 +28,7 @@ export const GerarCertificadoNotas = (props: GerarCertidaoProps) => {
   const buildDocumento = (codigo: string) => (
     <PDFDocumentStudent
       diretora={diretora}
+      reitor={reitor}
       estudante={estudante}
       notas={notas}
       logoSrc={logoSrc}
