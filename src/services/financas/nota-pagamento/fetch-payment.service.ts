@@ -9,6 +9,7 @@ export type ListPaymentsPayload = {
   dataInicio?: string;
   dataFim?: string;
   estado?: number;
+  tipoServico?: string;
   nome?: string;
   page?: number;
   limit?: number;
@@ -38,7 +39,6 @@ export type PaymentItem = {
   curso: string;
   codigo_factura: number;
   servicos?: string;
-
 };
 
 export type ListPaymentsResponse = {
@@ -62,6 +62,7 @@ export async function getListPaymentsService(
     nome,
     dataInicio,
     dataFim,
+    tipoServico,
     page = 1,
     limit = 25,
   } = payload;
@@ -78,6 +79,7 @@ export async function getListPaymentsService(
         dataInicio,
         dataFim,
         estado,
+        tipoServico,
         nome,
         page,
         limit,
