@@ -172,7 +172,6 @@ export function InscricoesSection({
               <AcademicYearsAvailableForOperationSelect
                 enableDefaultSelectItem={false}
                 onlyConfigurable={false}
-
                 enableDefaultActiveYear={false}
                 value={filter.anoLetivo}
                 onChangeValue={(v) => setFilter({ ...filter, anoLetivo: v })}
@@ -205,7 +204,6 @@ export function InscricoesSection({
               ]}
               map={(e) => ({ key: e.value, label: e.label, value: e.value })}
             />
-
           </div>
 
           {isDisciplinasLoading ? (
@@ -286,10 +284,7 @@ export function InscricoesSection({
                                 aria-label="Editar"
                                 title="Editar"
                                 className="cursor-pointer"
-                                disabled={
-                                  disc.estado_codigo !==
-                                  StatusDisciplina.EM_CURSO
-                                }
+                                disabled={disc.nota !== 0}
                                 onClick={() => {
                                   openModalHorario({
                                     codigo: disc.codigo?.toString(),
@@ -299,7 +294,8 @@ export function InscricoesSection({
                                     codigoGradeCurricular:
                                       disc?.codigo_grade_curricular?.toString(),
                                     estado: "3",
-                                    periodo: student?.periodo_codigo?.toString(),
+                                    periodo:
+                                      student?.periodo_codigo?.toString(),
                                     classes: disc?.codigo_classe?.toString(),
                                     disciplina: disc?.disciplina,
                                   });
@@ -308,7 +304,7 @@ export function InscricoesSection({
                                 <Pencil className="h-4 w-4" />
                               </Button>
                               {StatusDisciplina.ELIMINADO ===
-                                disc.estado_codigo ? (
+                              disc.estado_codigo ? (
                                 <Button
                                   onClick={() =>
                                     handleRestoreGradeCurricularAluno(
@@ -336,7 +332,7 @@ export function InscricoesSection({
                                   size="icon"
                                   disabled={
                                     disc.estado_codigo ===
-                                    StatusDisciplina.FEZ_COM_SUCESSO ||
+                                      StatusDisciplina.FEZ_COM_SUCESSO ||
                                     loadingId === disc.codigo
                                   }
                                 >
@@ -430,4 +426,3 @@ export function InscricoesSection({
     </TabsContent>
   );
 }
-
