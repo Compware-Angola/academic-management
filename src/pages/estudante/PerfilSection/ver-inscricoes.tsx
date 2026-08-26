@@ -284,7 +284,7 @@ export function InscricoesSection({
                                 aria-label="Editar"
                                 title="Editar"
                                 className="cursor-pointer"
-                                disabled={disc.nota !== 0}
+                                disabled={disc.nota > 0}
                                 onClick={() => {
                                   openModalHorario({
                                     codigo: disc.codigo?.toString(),
