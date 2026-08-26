@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import PDFActions, {
+    GenericPDFDocument,
+} from "@/components/views/pdf/GenericPDFDocument";
+import ExcelActions from "@/components/views/excel/GenericExcelExport";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,6 +79,95 @@ export function NotaPrevistaTab() {
     const total = data?.total ?? 0;
     const totalPages = data?.totalpages ?? 1;
     const offset = (filters.page - 1) * filters.limit;
+
+    const exportRows = useMemo(
+        () =>
+            candidatos.map((item) => ({
+                numeroInscricao: item.numero_inscricao,
+                nome: item.nome,
+                numeroBilhete: item.numero_bilhete,
+                curso: item.curso,
+                sala: item.sala,
+                dataRealizacao: item.data_realizacao,
+                horaInicio: item.hora_inicio,
+                notaPrevista: item.nota_prevista,
+                resultadoPrevisto: item.resultado_previsto,
+            })),
+        [candidatos]
+    );
+
+    const pdfData = exportRows.length
+        ? {
+            filtros: [
+                filters.codigoAnoLetivo ? `Ano Letivo: ${filters.codigoAnoLetivo}` : null,
+                filters.codigoCurso ? `Curso: ${filters.codigoCurso}` : null,
+                filters.codigoSala ? `Sala: ${filters.codigoSala}` : null,
+                filters.dataRealizacao ? `Data Realização: ${filters.dataRealizacao}` : null,
+                filters.horaInicio ? `Hora Início: ${filters.horaInicio}` : null,
+                filters.search ? `Pesquisa: ${filters.search}` : null,
+            ]
+                .filter(Boolean)
+                .join(" | "),
+            total: exportRows.length,
+            rows: exportRows,
+        }
+        : null;
+
+    const pdfContent = pdfData ? (
+        <GenericPDFDocument
+            documentTitle="Nota Prevista do Exame de Acesso"
+            subtitle="Nota prevista dos candidatos"
+            infoSections={[
+                { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+                { title: "Resumo", content: [`Total de registos: ${total}`] },
+            ]}
+            mainTable={{
+                headers: [
+                    { key: "numeroInscricao", label: "Nº Inscrição", width: "12%" },
+                    { key: "nome", label: "Nome", width: "20%" },
+                    { key: "numeroBilhete", label: "BI", width: "14%" },
+                    { key: "curso", label: "Curso", width: "16%" },
+                    { key: "sala", label: "Sala", width: "10%" },
+                    { key: "dataRealizacao", label: "Data", width: "12%" },
+                    { key: "horaInicio", label: "Hora", width: "8%" },
+                    { key: "notaPrevista", label: "Nota Prevista", width: "8%" },
+                    { key: "resultadoPrevisto", label: "Resultado Previsto", width: "12%" },
+                ],
+                rows: pdfData.rows,
+                headerBackground: "#0D1B48",
+            }}
+            footerNotice="Documento gerado automaticamente pelo sistema."
+        />
+    ) : null;
+
+    const excelProps = pdfData
+        ? {
+            documentTitle: "Nota Prevista do Exame de Acesso",
+            subtitle: "Nota prevista dos candidatos",
+            infoSections: [
+                { title: "Filtros Aplicados", content: pdfData.filtros || "Sem filtros" },
+                { title: "Resumo", content: [`Total de registos: ${total}`] },
+            ],
+            mainTable: {
+                headers: [
+                    { key: "numeroInscricao", label: "Nº Inscrição", width: 14 },
+                    { key: "nome", label: "Nome", width: 30 },
+                    { key: "numeroBilhete", label: "BI", width: 20 },
+                    { key: "curso", label: "Curso", width: 25 },
+                    { key: "sala", label: "Sala", width: 15 },
+                    { key: "dataRealizacao", label: "Data Realização", width: 18 },
+                    { key: "horaInicio", label: "Hora Início", width: 12 },
+                    { key: "notaPrevista", label: "Nota Prevista", width: 14 },
+                    { key: "resultadoPrevisto", label: "Resultado Previsto", width: 18 },
+                ],
+                rows: pdfData.rows,
+            },
+            footerNotice: "Documento gerado automaticamente pelo sistema.",
+            primaryColor: "#0D1B48",
+        }
+        : null;
+
+    const baseFileName = `Nota_Prevista_Exame_${new Date().toISOString().slice(0, 10)}`;
 
     useEffect(() => {
         setEditableRows(
@@ -315,6 +408,24 @@ export function NotaPrevistaTab() {
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Atualizar
                 </Button>
+
+                {pdfContent && (
+                    <PDFActions
+                        document={pdfContent}
+                        fileName={`${baseFileName}.pdf`}
+                        showDownload
+                        showPrint
+                    />
+                )}
+
+                {excelProps && (
+                    <ExcelActions
+                        excelProps={excelProps}
+                        fileName={`${baseFileName}.xlsx`}
+                        showDownload
+                    />
+                )}
+
                 <Button
                     variant="outline"
                     size="sm"
