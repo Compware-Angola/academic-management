@@ -62,6 +62,30 @@ import {
   PermissionTypeDetails,
 } from "@/constants/permission.type";
 
+// TODO: ajustar estes códigos para os valores reais do enum de estado de factura no backend
+const ESTADOS_FACTURA_PENDENTE = [0, 1];
+
+/**
+ * Verifica se a negociação possui alguma factura pendente,
+ * seja através do campo factura_estado da própria negociação,
+ * seja percorrendo o array de facturas associadas.
+ */
+function possuiFacturaPendente(item: NegociacaoItem): boolean {
+  if (
+    item.factura_estado !== null &&
+    item.factura_estado !== undefined &&
+    ESTADOS_FACTURA_PENDENTE.includes(item.factura_estado)
+  ) {
+    return true;
+  }
+
+  return (
+    item.facturas?.some((factura) =>
+      ESTADOS_FACTURA_PENDENTE.includes(factura.estado),
+    ) ?? false
+  );
+}
+
 export default function NegociacaoDivida() {
   //Options
   const searchOptions = [
@@ -118,9 +142,8 @@ export default function NegociacaoDivida() {
   } = useQueryNegociacoes(
     {
       codigoAnoLectivo: parseFilter(filtersApplied.anoLectivo),
-      codigoCurso: filtersApplied.curso === "0"
-        ? null
-        : parseFilter(filtersApplied.curso),
+      codigoCurso:
+        filtersApplied.curso === "0" ? null : parseFilter(filtersApplied.curso),
       faculdadeId:
         filtersApplied.faculdade === "0"
           ? null
@@ -412,27 +435,25 @@ export default function NegociacaoDivida() {
         <CardHeader className="space-y-2">
           {/* Exportações */}
           <div className="flex justify-between items-center">
+            <CardTitle>Lista de Negociação de Divida</CardTitle>
+            {pdfData && excelProps && (
+              <div className="flex justify-end gap-2">
+                {pdfContent && (
+                  <PDFActions
+                    document={pdfContent}
+                    fileName={`${baseFileName}.pdf`}
+                    showDownload
+                    showPrint
+                  />
+                )}
 
-          <CardTitle>Lista de Negociação de Divida</CardTitle>
-          {pdfData && excelProps && (
-            <div className="flex justify-end gap-2">
-              {pdfContent && (
-                <PDFActions
-                  document={pdfContent}
-                  fileName={`${baseFileName}.pdf`}
+                <ExcelActions
+                  excelProps={excelProps}
+                  fileName={`${baseFileName}.xlsx`}
                   showDownload
-                  showPrint
                 />
-              )}
-
-              <ExcelActions
-                excelProps={excelProps}
-                fileName={`${baseFileName}.xlsx`}
-                showDownload
-              />
-            </div>
-          )}
-
+              </div>
+            )}
           </div>
         </CardHeader>
 
@@ -496,36 +517,38 @@ export default function NegociacaoDivida() {
                       </TableCell>
                       <TableCell className="text-center">
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="outline"
                           onClick={() => {
                             setOpenModal(true);
                             setSelectedNegociacao(item);
                           }}
                         >
-                          <Eye className="h-4 w-4 mr-2" />
+                          <Eye />
                         </Button>
                       </TableCell>
                       <TableCell>
-                        <HasPermission
-                          blockFullAccess
-                          permission={
-                            PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
-                              .sigla
-                          }
-                        >
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            onClick={() =>
-                              navigate(
-                                `/financas/conciliacao-divida/${item.id}`,
-                              )
+                        {possuiFacturaPendente(item) && (
+                          <HasPermission
+                            blockFullAccess
+                            permission={
+                              PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
+                                .sigla
                             }
                           >
-                            <Percent />
-                          </Button>
-                        </HasPermission>
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              onClick={() =>
+                                navigate(
+                                  `/financas/conciliacao-divida/${item.id}`,
+                                )
+                              }
+                            >
+                              <Percent />
+                            </Button>
+                          </HasPermission>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
