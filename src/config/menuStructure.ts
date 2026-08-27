@@ -166,6 +166,10 @@ export const ingressoStructure: MenuStructure = {
           url: "/exame/admitidos",
           permission: [PermissionTypeDetails.LISTA_CANDIDATOS_ADMITIDOS.sigla],
         },
+        {
+          title: "Pré-Inscritos",
+          url: "/exame/pre-inscritos",
+        },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
         {

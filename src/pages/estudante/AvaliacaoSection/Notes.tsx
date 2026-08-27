@@ -24,7 +24,11 @@ import {
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryStudentNotes } from "@/hooks/students/use-query-student-notes";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 
@@ -70,12 +74,10 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
           <AcademicYearsAvailableForOperationSelect
             enableDefaultSelectItem={false}
             onlyConfigurable={false}
-
             enableDefaultActiveYear={false}
             value={anoLetivo}
             onChangeValue={(v) => setAnoLetivo(v)}
             tipoCandidaturaId={Number(student?.tipo_canditatura_codigo)}
-
           />
         </div>
         <div className="py-6">
@@ -111,6 +113,7 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
                       <TableHead className="text-center">Exame</TableHead>
                       <TableHead className="text-center">Recurso</TableHead>
                       <TableHead className="text-center">Oral</TableHead>
+                      <TableHead className="text-center">Oral Rec</TableHead>
                       <TableHead className="text-center">P</TableHead>
                       <TableHead className="text-center">EE</TableHead>
                       <TableHead className="text-center">OEE</TableHead>
@@ -124,11 +127,13 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
                     {pautas.map((pauta) => (
                       <TableRow key={pauta.codigoGradeAluno}>
                         {/* 👇 mantém teu row igual */}
-                        <TableCell className="truncate max-w-[200px]" aria-label={pauta.unidadeCurricular}>
+                        <TableCell
+                          className="truncate max-w-[200px]"
+                          aria-label={pauta.unidadeCurricular}
+                        >
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span>{pauta.unidadeCurricular}</span>
-
                             </TooltipTrigger>
                             <TooltipContent>
                               <span>{pauta.unidadeCurricular}</span>
@@ -151,6 +156,9 @@ const Notes = ({ codigoMatricula, value }: NotesProps) => {
                         </TableCell>
                         <TableCell className="text-center">
                           {pauta.notaOr || "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {pauta.notaOrRec || "-"}
                         </TableCell>
                         <TableCell className="text-center">
                           {pauta.notaPra || "-"}

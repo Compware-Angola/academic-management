@@ -1,4 +1,3 @@
-
 import {
   Page,
   Text,
@@ -149,7 +148,6 @@ const baseStyles = StyleSheet.create({
     borderLeftColor: "#2563EB",
     paddingLeft: 6,
     marginBottom: 16,
-
   },
 
   infoRow: {
@@ -171,7 +169,6 @@ const baseStyles = StyleSheet.create({
     color: "#222",
     textAlign: "left",
   },
-
 });
 
 // ──────────────────────────────────────────────
@@ -202,7 +199,7 @@ interface GenericPDFProps {
     period: string;
     totalSubject: number;
     totalPlan: number;
-  }
+  };
 }
 
 // ──────────────────────────────────────────────
@@ -238,7 +235,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
     },
   };
 
-  console.log(infoSections)
+  console.log(infoSections);
   return (
     <Document>
       <Page
@@ -289,9 +286,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
 
             <View style={baseStyles.infoRow}>
               <Text style={baseStyles.infoLabel}>Código de Matrícula:</Text>
-              <Text style={baseStyles.infoValue}>
-                {student.enrolmemntCode}
-              </Text>
+              <Text style={baseStyles.infoValue}>{student.enrolmemntCode}</Text>
             </View>
 
             <View style={baseStyles.infoRow}>
@@ -306,9 +301,7 @@ export function GenericPDFDocument(props: GenericPDFProps) {
 
             <View style={baseStyles.infoRow}>
               <Text style={baseStyles.infoLabel}>Total de Disciplinas:</Text>
-              <Text style={baseStyles.infoValue}>
-                {student.totalSubject}
-              </Text>
+              <Text style={baseStyles.infoValue}>{student.totalSubject}</Text>
             </View>
 
             {/* <View style={baseStyles.infoRow}>
@@ -319,9 +312,6 @@ export function GenericPDFDocument(props: GenericPDFProps) {
             </View> */}
           </View>
         )}
-
-
-
 
         {children}
 
