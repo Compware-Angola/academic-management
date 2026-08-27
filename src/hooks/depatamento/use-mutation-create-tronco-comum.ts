@@ -21,6 +21,9 @@ export const useMutationCreateTroncoComum = () => {
       queryClient.invalidateQueries({
         queryKey: ["departamento-uc"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["vinculos-grade"],
+      });
 
       toast({
         title: "Sucesso!",
