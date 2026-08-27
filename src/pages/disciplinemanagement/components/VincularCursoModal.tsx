@@ -10,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { FormSelect } from "@/components/common/FormSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
@@ -22,6 +24,8 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  Mic,
+  FlaskConical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SemestreSelect } from "@/components/common/global-selects/SemestreSelect";
@@ -46,6 +50,8 @@ interface VinculoRow {
   curso: string;
   anoCurricular: string;
   semestre: string;
+  temOral: boolean;
+  temPratica: boolean;
 }
 
 interface VincularCursoModalProps {
@@ -59,7 +65,14 @@ function novoId() {
 }
 
 function novaRow(): VinculoRow {
-  return { id: novoId(), curso: "", anoCurricular: "", semestre: "" };
+  return {
+    id: novoId(),
+    curso: "",
+    anoCurricular: "",
+    semestre: "",
+    temOral: false,
+    temPratica: false,
+  };
 }
 
 function VinculoRowItem({
@@ -81,51 +94,113 @@ function VinculoRowItem({
     useQueryClassFilterByCurso({ curso: row.curso });
 
   return (
-    <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-3 transition-colors hover:bg-muted/50">
-      <div className="mt-2.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-medium text-primary">
-        {index + 1}
+    <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 transition-colors hover:bg-muted/50">
+      <div className="flex items-start gap-3">
+        <div className="mt-2.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-medium text-primary">
+          {index + 1}
+        </div>
+
+        <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
+          <CourseSelect
+            params={{
+              tipoCandidaturaId: tipoCandidatura,
+            }}
+            value={row.curso}
+            onChangeValue={(v) =>
+              onChange({ ...row, curso: v, anoCurricular: "" })
+            }
+          />
+
+          <FormSelect
+            label={"Ano Curricular"}
+            value={row.anoCurricular}
+            disabled={isLoadingAnos || !row.curso}
+            loading={isLoadingAnos}
+            onChange={(v) => onChange({ ...row, anoCurricular: v })}
+            options={anosCurriculares}
+            map={(c) => ({
+              key: c.codigo,
+              label: c.designacao,
+              value: c.codigo,
+            })}
+          />
+          <SemestreSelect
+            onChangeValue={(v) => onChange({ ...row, semestre: v })}
+            value={row.semestre}
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
+          disabled={!removable}
+          onClick={onRemove}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
-        <CourseSelect
-          params={{
-            tipoCandidaturaId: tipoCandidatura,
-          }}
-          value={row.curso}
-          onChangeValue={(v) =>
-            onChange({ ...row, curso: v, anoCurricular: "" })
-          }
-        />
+      <Separator />
 
-        <FormSelect
-          label={"Ano Curricular"}
-          value={row.anoCurricular}
-          disabled={isLoadingAnos || !row.curso}
-          loading={isLoadingAnos}
-          onChange={(v) => onChange({ ...row, anoCurricular: v })}
-          options={anosCurriculares}
-          map={(c) => ({
-            key: c.codigo,
-            label: c.designacao,
-            value: c.codigo,
-          })}
-        />
-        <SemestreSelect
-          onChangeValue={(v) => onChange({ ...row, semestre: v })}
-          value={row.semestre}
-        />
+      <div className="grid grid-cols-1 gap-3 pl-8 sm:grid-cols-2">
+        <div className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Mic className="h-4 w-4 text-muted-foreground shrink-0" />
+            <div className="space-y-0.5">
+              <Label
+                htmlFor={`row-tem-oral-${row.id}`}
+                className="text-sm cursor-pointer"
+              >
+                Prova Oral
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Exige prova oral para esta UC.
+              </p>
+            </div>
+          </div>
+          <Switch
+            id={`row-tem-oral-${row.id}`}
+            checked={row.temOral}
+            onCheckedChange={(checked) =>
+              onChange({
+                ...row,
+                temOral: checked,
+                temPratica: checked ? false : row.temPratica,
+              })
+            }
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2">
+          <div className="flex items-center gap-2">
+            <FlaskConical className="h-4 w-4 text-muted-foreground shrink-0" />
+            <div className="space-y-0.5">
+              <Label
+                htmlFor={`row-tem-pratica-${row.id}`}
+                className="text-sm cursor-pointer"
+              >
+                Prova Prática
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Exige prova prática para esta UC.
+              </p>
+            </div>
+          </div>
+          <Switch
+            id={`row-tem-pratica-${row.id}`}
+            checked={row.temPratica}
+            onCheckedChange={(checked) =>
+              onChange({
+                ...row,
+                temPratica: checked,
+                temOral: checked ? false : row.temOral,
+              })
+            }
+          />
+        </div>
       </div>
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="mt-0.5 shrink-0 text-muted-foreground hover:text-destructive"
-        disabled={!removable}
-        onClick={onRemove}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
     </div>
   );
 }
@@ -200,6 +275,8 @@ export function VincularCursoModal({
         codigoCurso: Number(r.curso),
         codigoClasse: Number(r.anoCurricular),
         codigoSemestre: Number(r.semestre),
+        temOral: r.temOral,
+        temPratica: r.temPratica,
       })),
     };
 
@@ -364,7 +441,7 @@ export function VincularCursoModal({
                 </span>
               </div>
 
-              <div className="flex max-h-[300px] flex-col gap-3 overflow-y-auto py-1 pr-1">
+              <div className="flex max-h-[360px] flex-col gap-3 overflow-y-auto py-1 pr-1">
                 {rows.map((row, index) => (
                   <VinculoRowItem
                     index={index}
