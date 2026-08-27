@@ -4,6 +4,8 @@ export interface TroncoComumCursoPayload {
   codigoSemestre: number;
   codigoCurso: number;
   codigoClasse: number;
+  temOral?: boolean;
+  temPratica?: boolean;
 }
 
 export interface CreateTroncoComumPayload {
