@@ -143,6 +143,7 @@ export type DisciplinaMatricula = {
   estado: string;
   codigo_classe: number;
   estado_codigo: number;
+  nota: number;
 };
 
 export type DisciplinasResponse = {
