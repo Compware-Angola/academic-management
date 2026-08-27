@@ -149,6 +149,7 @@ import ListarEstudantesPorEstadoMatricula from "./pages/registrations/ListarEstu
 import ListagemColisoesIsentas from "./pages/registrations";
 
 import Admitidos from "./pages/access_exam/Admitidos";
+import PreInscritos from "./pages/access_exam/PreInscritos";
 import EstatisticasDiaria from "./pages/access_exam/EstatisticasDiaria";
 import EstatisticasExame from "./pages/access_exam/EstatisticasExame";
 import ResultadoFinais from "./pages/access_exam/ResultadoFinais";
@@ -829,6 +830,10 @@ const App = () => {
                   />
                   {/* EXAME ACESSO */}
                   <Route path="/exame/admitidos" element={<Admitidos />} />
+                  <Route
+                    path="/exame/pre-inscritos"
+                    element={<PreInscritos />}
+                  />
                   <Route
                     path="/exame/topicos"
                     element={
