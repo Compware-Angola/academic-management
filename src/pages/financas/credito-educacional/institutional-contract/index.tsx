@@ -39,9 +39,13 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Download,
+  FileText,
   Home,
+  Loader2,
   Pencil,
   Plus,
+  Printer,
   Search,
   Trash,
   X,
@@ -60,6 +64,11 @@ import { Switch } from "@/components/ui/switch";
 import { useToggleContractEstado } from "@/hooks/financas/credito-educacional/use-mutation-switch";
 import { formatCurrency } from "@/util/finance-format";
 import { useDeleteInstitutionalContract } from "@/hooks/financas/credito-educacional/use-delete-contract";
+import {
+  exportContratoBolsaExcelService,
+  exportContratoBolsaPdfService,
+} from "@/services/financas/credito-educacional/institutional-contract/export-contract.service";
+import { toast } from "sonner";
 
 function StatusBadge({ dataFim }: { dataFim: string }) {
   const { status, diasRestantes } = getStatus(dataFim);
@@ -81,6 +90,7 @@ function StatusBadge({ dataFim }: { dataFim: string }) {
     </Badge>
   );
 }
+type ExportAction = "pdf" | "print" | "excel";
 
 export default function ContratosInstituicao() {
   const [instituicaoId, setInstituicaoId] = useState<string>("all");
@@ -90,6 +100,9 @@ export default function ContratosInstituicao() {
   const [modalOpen, setModalOpen] = useState(false);
   const [situacao, setSituacao] = useState<string>("");
   const [estado, setEstado] = useState<string>("");
+  const [exportingAction, setExportingAction] = useState<ExportAction | null>(
+    null,
+  );
   const [contratoEmEdicao, setContratoEmEdicao] =
     useState<InstitutionalContract | null>(null);
 
@@ -143,6 +156,56 @@ export default function ContratosInstituicao() {
   const openEditModal = (c: InstitutionalContract) => {
     setContratoEmEdicao(c);
     setModalOpen(true);
+  };
+  const handleExport = async (action: ExportAction) => {
+    if (exportingAction || total === 0) return;
+
+    const printWindow = action === "print" ? window.open("", "_blank") : null;
+
+    if (action === "print" && !printWindow) {
+      toast.error("O navegador bloqueou a janela de impressão.");
+      return;
+    }
+
+    setExportingAction(action);
+
+    try {
+      const filters = {
+        codigoInstituicao: parseFilter(instituicaoId),
+        situacao: parseFilter(situacao),
+        estado: parseFilter(estado),
+      };
+
+      const { blob, fileName } =
+        action === "excel"
+          ? await exportContratoBolsaExcelService(filters)
+          : await exportContratoBolsaPdfService(filters);
+
+      const downloadUrl = URL.createObjectURL(blob);
+
+      if (action === "print") {
+        printWindow!.location.href = downloadUrl;
+        setTimeout(() => {
+          printWindow!.print();
+          URL.revokeObjectURL(downloadUrl);
+        }, 1000);
+      } else {
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(downloadUrl);
+      }
+
+      toast.success("Exportação concluída com sucesso.");
+    } catch {
+      printWindow?.close();
+      toast.error("Não foi possível exportar os estudantes com crédito.");
+    } finally {
+      setExportingAction(null);
+    }
   };
 
   return (
@@ -312,6 +375,49 @@ export default function ContratosInstituicao() {
             aos bolseiros.
           </AlertDescription>
         </Alert>
+      )}
+      {total > 0 && (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("pdf")}
+            disabled={!!exportingAction}
+          >
+            {exportingAction === "pdf" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FileText className="mr-2 h-4 w-4" />
+            )}
+            {exportingAction === "pdf" ? "A exportar..." : "Exportar PDF"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("print")}
+            disabled={!!exportingAction}
+          >
+            {exportingAction === "print" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Printer className="mr-2 h-4 w-4" />
+            )}
+            {exportingAction === "print" ? "A imprimir..." : "Imprimir"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("excel")}
+            disabled={!!exportingAction}
+          >
+            {exportingAction === "excel" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            {exportingAction === "excel" ? "A exportar..." : "Exportar Excel"}
+          </Button>
+        </div>
       )}
 
       <Card>

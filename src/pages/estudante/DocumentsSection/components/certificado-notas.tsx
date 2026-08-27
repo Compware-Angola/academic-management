@@ -10,6 +10,7 @@ import { useGetNotas } from "@/hooks/students/use-get-notas";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 
 import { parseFilter } from "@/util/parse-filter";
+import { useQueryListarCargosAdministrativo } from "@/hooks/controle-acesso/use-query-listar-cargos-administrativos";
 
 type Props = {
   codigoMatricula: number;
@@ -27,6 +28,12 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
     first: "1",
     last: "",
   });
+
+const { data: cargos = [], isLoading: isLoadingCargos } =
+    useQueryListarCargosAdministrativo({
+      tipoCargoId: Number(1),
+    });
+  const reitor = cargos[0];
 
   const { data: student, isLoading: isLoadingStudent } =
     useStudentDetail(codigoMatricula);
@@ -94,6 +101,7 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
         isGeneratingCode={isGeneratingCode}
         onBeforeDownload={handleExportar}
         diretora="Margarida da Silva Rodrigues"
+        reitor={reitor?.utilizadorNome ?? "Tiago Caungo Mutombo"}
       />
     );
   }

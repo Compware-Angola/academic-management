@@ -166,6 +166,10 @@ export const ingressoStructure: MenuStructure = {
           url: "/exame/admitidos",
           permission: [PermissionTypeDetails.LISTA_CANDIDATOS_ADMITIDOS.sigla],
         },
+        {
+          title: "Pré-Inscritos",
+          url: "/exame/pre-inscritos",
+        },
         // { title: "Admitidos sem matrícula", url: "/exame/sem-matricula" },
         // { title: "Sem prova marcada", url: "/exame/sem-prova" },
         {
@@ -1108,13 +1112,15 @@ export const finaceStructure: MenuStructure = {
           url: "/financas/credito/atribuir",
           permission: [PermissionTypeDetails.ATRIBUICAO_BOLSA_DESCONTO.sigla],
         },
-        /*
-      {
-        title: "Contratos - Instituição",
-        url: "/financas/contratos-instituicao",
-        permission: [PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla],
-      },
 
+        {
+          title: "Contratos - Instituição",
+          url: "/financas/contratos-instituicao",
+          permission: [
+            PermissionTypeDetails.CONTROLE_CONTRATO_INSTITUICAO.sigla,
+          ],
+        },
+        /*
       {
         title: "Rel. Pagamentos Instituições",
         icon: BarChart3,

@@ -23,6 +23,7 @@ type Filters = {
   factura: string;
   dataInicio: string;
   dataFim: string;
+  tipoServico: string;
 };
 
 type PagamentosTabProps = {
