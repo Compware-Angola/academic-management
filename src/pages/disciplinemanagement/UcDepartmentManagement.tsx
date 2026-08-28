@@ -37,6 +37,8 @@ import { CreateUcModal } from "./components/CreateUcModal";
 import { VincularCursoModal } from "./components/VincularCursoModal";
 import { VerVinculosModal } from "./components/VerVinculosModal";
 import { Card, CardContent } from "@/components/ui/card";
+import { AtivarOralPraticaModal } from "./components/AtivarOralPraticaModal"; // ajusta o caminho conforme onde criaste o ficheiro
+import { SlidersHorizontal } from "lucide-react"; // ícone extra para o novo botão
 
 export default function UcDepartmentManagement() {
   const [openModal, setOpenModal] = useState(false);
@@ -49,6 +51,10 @@ export default function UcDepartmentManagement() {
     unidade_curricular: string;
   } | null>(null);
   const [ucParaVerVinculos, setUcParaVerVinculos] = useState<{
+    codigo_grade: number;
+    unidade_curricular: string;
+  } | null>(null);
+  const [ucParaOralPratica, setUcParaOralPratica] = useState<{
     codigo_grade: number;
     unidade_curricular: string;
   } | null>(null);
@@ -197,6 +203,19 @@ export default function UcDepartmentManagement() {
                           variant="ghost"
                           size="sm"
                           onClick={() =>
+                            setUcParaOralPratica({
+                              codigo_grade: uc.codigo_grade,
+                              unidade_curricular: uc.unidade_curricular,
+                            })
+                          }
+                        >
+                          <SlidersHorizontal className="h-4 w-4 mr-2" />
+                          Oral/Prática
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
                             setUcParaVerVinculos({
                               codigo_grade: uc.codigo_grade,
                               unidade_curricular: uc.unidade_curricular,
@@ -285,6 +304,11 @@ export default function UcDepartmentManagement() {
         open={!!ucParaVerVinculos}
         onClose={() => setUcParaVerVinculos(null)}
         uc={ucParaVerVinculos}
+      />
+      <AtivarOralPraticaModal
+        open={!!ucParaOralPratica}
+        onClose={() => setUcParaOralPratica(null)}
+        codigoGrade={ucParaOralPratica?.codigo_grade ?? 0}
       />
     </div>
   );
