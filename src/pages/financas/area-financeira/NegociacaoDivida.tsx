@@ -63,7 +63,7 @@ import {
 } from "@/constants/permission.type";
 
 // TODO: ajustar estes códigos para os valores reais do enum de estado de factura no backend
-const ESTADOS_FACTURA_PENDENTE = [0, 1];
+const ESTADOS_FACTURA_PENDENTE = [0];
 
 /**
  * Verifica se a negociação possui alguma factura pendente,
