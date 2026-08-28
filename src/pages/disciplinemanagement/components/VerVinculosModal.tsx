@@ -315,16 +315,6 @@ export function VerVinculosModal({ open, onClose, uc }: VerVinculosModalProps) {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="text-muted-foreground hover:bg-accent hover:text-foreground"
-                              onClick={() => handleAbrirDetalhes(v)}
-                              title="Ver detalhes do plano"
-                            >
-                              <Info className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
                               className="text-destructive hover:text-destructive hover:bg-destructive/10"
                               onClick={() => handleAbrirConfirmacao(v)}
                               title="Desvincular"
@@ -346,107 +336,6 @@ export function VerVinculosModal({ open, onClose, uc }: VerVinculosModalProps) {
               </p>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Detalhes do plano (Oral / Prática) */}
-      <Dialog
-        open={!!vinculoDetalhe}
-        onOpenChange={(v) => !v && handleFecharDetalhes()}
-      >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Info className="h-4 w-4 text-muted-foreground" />
-              Detalhes do Plano
-            </DialogTitle>
-            <DialogDescription>
-              Informações do vínculo e configuração das avaliações de excepção.
-            </DialogDescription>
-          </DialogHeader>
-
-          {vinculoDetalhe && (
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border p-4">
-                <div className="col-span-2 space-y-0.5">
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Curso
-                  </p>
-                  <p className="text-sm font-medium">
-                    {vinculoDetalhe.nomeCurso}
-                  </p>
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Ano Curricular
-                  </p>
-                  <p className="text-sm">{vinculoDetalhe.anoCurricular}</p>
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Semestre
-                  </p>
-                  <Badge variant="outline">
-                    {vinculoDetalhe.codigoSemestre}º Semestre
-                  </Badge>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-foreground">
-                  Avaliações de Excepção
-                </h4>
-
-                <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
-                  <div className="space-y-0.5">
-                    <Label
-                      htmlFor="vinculo-ativar-oral"
-                      className="text-sm cursor-pointer"
-                    >
-                      Ativar Oral
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      Este vínculo passa a exigir prova oral (Aguarda Oral /
-                      Oral de Recurso).
-                    </p>
-                  </div>
-                  <Switch
-                    id="vinculo-ativar-oral"
-                    checked={vinculoDetalhe.temOral}
-                    onCheckedChange={handleToggleOral}
-                    disabled={updatingPlanoExtras}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
-                  <div className="space-y-0.5">
-                    <Label
-                      htmlFor="vinculo-ativar-pratica"
-                      className="text-sm cursor-pointer"
-                    >
-                      Ativar Prática
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      Este vínculo passa a exigir componente prática (Aguarda
-                      Nota da Prática).
-                    </p>
-                  </div>
-                  <Switch
-                    id="vinculo-ativar-pratica"
-                    checked={vinculoDetalhe.temPratica}
-                    onCheckedChange={handleTogglePratica}
-                    disabled={updatingPlanoExtras}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={handleFecharDetalhes}>
-              Fechar
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
