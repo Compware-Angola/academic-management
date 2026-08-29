@@ -40,6 +40,9 @@ import {
   type ConciliacaoDividaErrorResponse,
   type ConciliacaoDividaResultItem,
 } from "./components/ConciliacaoResultModal";
+// ALTERADO: enum de estado da factura + badge de estado, para controlar edição por factura
+import { InvoiceEnum } from "@/enums/invoice.enum";
+import { InvoiceStatusBadge } from "@/components/common/Invoice-status-badge";
 
 const NEGOTIATION_TYPE_LABEL: Record<number, string> = {
   1: "Total",
@@ -71,6 +74,36 @@ function formatDate(value?: string | null) {
   const date = new Date(value);
   if (isNaN(date.getTime())) return value;
   return date.toLocaleDateString("pt-AO");
+}
+
+// ALTERADO: apenas facturas PENDENTE (0) podem ser editadas na conciliação.
+// Facturas PAGO ficam com estilo verde + risco, ANULADO com estilo vermelho + risco,
+// e nos dois casos o input fica desativado.
+function isFacturaEditavel(estado: number) {
+  return estado === InvoiceEnum.PENDENTE;
+}
+
+function getFacturaEstadoStyle(estado: number) {
+  switch (estado) {
+    case InvoiceEnum.PAGO:
+      return {
+        cardClass: "border-green-300 bg-green-50/60",
+        textClass: "line-through decoration-1 text-green-700/70",
+        badgeClass: "bg-green-100 text-green-800",
+      };
+    case InvoiceEnum.ANULADO:
+      return {
+        cardClass: "border-red-300 bg-red-50/60",
+        textClass: "line-through decoration-1 text-red-700/70",
+        badgeClass: "bg-red-100 text-red-800",
+      };
+    default:
+      return {
+        cardClass: "",
+        textClass: "",
+        badgeClass: "",
+      };
+  }
 }
 
 // ALTERADO: bloco de aviso seguindo o modelo do EnrollmentStandardTimeframe,
@@ -169,6 +202,7 @@ export function ConciliacaoDivida() {
     setNegotiatedValues((prev) => new Map(prev).set(key, value));
   };
 
+  // ALTERADO: só considera para totais/edição os itens de facturas editáveis (estado PENDENTE)
   const allItems = useMemo(
     () =>
       negotiation?.facturas.flatMap((factura) =>
@@ -214,6 +248,8 @@ export function ConciliacaoDivida() {
       codigoNegociacaoDivida: Number(id),
       descricao: observation.trim(),
       invoices: negotiation.facturas
+        // ALTERADO: facturas não editáveis (pagas/anuladas) nunca entram no payload
+        .filter((factura) => isFacturaEditavel(factura.estado))
         .map((factura) => ({
           invoiceId: factura.codigo,
           itens: factura.itens
@@ -430,146 +466,188 @@ export function ConciliacaoDivida() {
                 </p>
               </div>
             ) : (
-              negotiation.facturas.map((factura) => (
-                <div key={factura.codigo} className="space-y-2">
-                  <div className="flex items-center justify-between px-1">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      {factura.descricao} · Ref. {factura.referencia}
-                    </p>
-                    <Badge
-                      variant="outline"
-                      className="text-muted-foreground border-border bg-muted/40 text-[10px]"
-                    >
-                      Vence {formatDate(factura.data_vencimento)}
-                    </Badge>
-                  </div>
+              negotiation.facturas.map((factura) => {
+                // ALTERADO: define se a factura é editável e o estilo visual conforme o estado
+                const editavel = isFacturaEditavel(factura.estado);
+                const estadoStyle = getFacturaEstadoStyle(factura.estado);
 
-                  <div className="space-y-2">
-                    {factura.itens.map((item) => {
-                      const key = itemKey(factura.codigo, item.codigo);
-                      const error = itemErrors.get(key);
-                      const value =
-                        negotiatedValues.get(key) ?? item.valor_total;
-                      const isChanged = value !== item.valor_total;
-                      const itemDiscount = item.valor_total - value;
+                return (
+                  <div key={factura.codigo} className="space-y-2">
+                    <div className="flex items-center justify-between px-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {factura.descricao} · Ref. {factura.referencia}
+                        </p>
+                        {/* ALTERADO: badge de estado da factura junto ao cabeçalho */}
+                        <InvoiceStatusBadge status={factura.estado} />
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className="text-muted-foreground border-border bg-muted/40 text-[10px]"
+                      >
+                        Vence {formatDate(factura.data_vencimento)}
+                      </Badge>
+                    </div>
 
-                      return (
-                        <div
-                          key={key}
-                          className={`rounded-lg border p-3 space-y-2 transition-colors ${
-                            isChanged
-                              ? "border-amber-300 bg-amber-50/60"
-                              : "border-border hover:border-primary/30"
-                          }`}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm font-medium">
-                              {item.descricao?.replace(
-                                /propina/gi,
-                                "Mensalidade",
-                              )}
-                            </p>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {item.mes_designacao && (
-                                <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground border-border bg-muted/40">
-                                  {item.mes_designacao}
-                                </span>
-                              )}
-                              {/* ALTERADO: badge "Alterado" por item, com o valor do desconto */}
-                              {isChanged && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium">
-                                  <TrendingDown className="h-3 w-3" />-
-                                  {formatCurrencyAOA(itemDiscount)}
-                                </span>
+                    <div className="space-y-2">
+                      {factura.itens.map((item) => {
+                        const key = itemKey(factura.codigo, item.codigo);
+                        const error = itemErrors.get(key);
+                        const value =
+                          negotiatedValues.get(key) ?? item.valor_total;
+                        const isChanged = value !== item.valor_total;
+                        const itemDiscount = item.valor_total - value;
+
+                        return (
+                          <div
+                            key={key}
+                            className={`rounded-lg border p-3 space-y-2 transition-colors ${
+                              !editavel
+                                ? estadoStyle.cardClass
+                                : isChanged
+                                  ? "border-amber-300 bg-amber-50/60"
+                                  : "border-border hover:border-primary/30"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p
+                                className={`text-sm font-medium ${
+                                  !editavel ? estadoStyle.textClass : ""
+                                }`}
+                              >
+                                {item.descricao?.replace(
+                                  /propina/gi,
+                                  "Mensalidade",
+                                )}
+                              </p>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {item.mes_designacao && (
+                                  <span className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium text-muted-foreground border-border bg-muted/40">
+                                    {item.mes_designacao}
+                                  </span>
+                                )}
+                                {/* ALTERADO: badge "Alterado" por item, com o valor do desconto */}
+                                {editavel && isChanged && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium">
+                                    <TrendingDown className="h-3 w-3" />-
+                                    {formatCurrencyAOA(itemDiscount)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span
+                                className={
+                                  !editavel ? estadoStyle.textClass : ""
+                                }
+                              >
+                                Preço Unitário
+                              </span>
+                              <span
+                                className={`font-semibold ${
+                                  !editavel
+                                    ? estadoStyle.textClass
+                                    : isChanged
+                                      ? "text-muted-foreground line-through decoration-1"
+                                      : "text-foreground"
+                                }`}
+                              >
+                                {item.quantidade}x{" "}
+                                {formatCurrencyAOA(item.preco_unitario)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span
+                                className={`font-semibold ${
+                                  !editavel
+                                    ? estadoStyle.textClass
+                                    : "text-success"
+                                }`}
+                              >
+                                Descontos
+                              </span>
+                              <span
+                                className={`font-semibold ${
+                                  !editavel
+                                    ? estadoStyle.textClass
+                                    : isChanged
+                                      ? "text-muted-foreground line-through decoration-1"
+                                      : "text-success"
+                                }`}
+                              >
+                                -{" "}
+                                {formatCurrencyAOA(
+                                  item.desconto_produto > 0
+                                    ? item.desconto_produto
+                                    : item.valor_desconto,
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                              <span
+                                className={`font-semibold ${
+                                  !editavel
+                                    ? estadoStyle.textClass
+                                    : "text-destructive"
+                                }`}
+                              >
+                                Multa
+                              </span>
+                              <span
+                                className={`font-semibold ${
+                                  !editavel
+                                    ? estadoStyle.textClass
+                                    : isChanged
+                                      ? "text-muted-foreground line-through decoration-1"
+                                      : "text-red-500"
+                                }`}
+                              >
+                                + {formatCurrencyAOA(item.multa)}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">
+                                Valor Negociado (AOA)
+                              </Label>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={item.valor_total}
+                                step={0.01}
+                                value={value}
+                                disabled={!editavel}
+                                onChange={(e) =>
+                                  setItemValue(
+                                    factura.codigo,
+                                    item.codigo,
+                                    item.valor_total,
+                                    e.target.value,
+                                  )
+                                }
+                                // ALTERADO: input destaca-se quando editado; fica desativado e sem
+                                // destaque quando a factura não é editável (paga/anulada)
+                                className={`h-8 text-sm bg-background disabled:opacity-70 disabled:cursor-not-allowed ${
+                                  editavel && isChanged
+                                    ? "border-amber-400 focus-visible:ring-amber-400/40"
+                                    : ""
+                                }`}
+                              />
+                              {error && (
+                                <p className="text-xs text-red-600 flex items-center gap-1">
+                                  <AlertCircle className="h-3 w-3 shrink-0" />
+                                  {error}
+                                </p>
                               )}
                             </div>
                           </div>
-
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>Preço Unitário</span>
-                            <span
-                              className={`font-semibold ${
-                                isChanged
-                                  ? "text-muted-foreground line-through decoration-1"
-                                  : "text-foreground"
-                              }`}
-                            >
-                              {item.quantidade}x{" "}
-                              {formatCurrencyAOA(item.preco_unitario)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span className="text-success font-semibold">
-                              Descontos
-                            </span>
-                            <span
-                              className={`font-semibold text-success ${
-                                isChanged
-                                  ? "text-muted-foreground line-through decoration-1"
-                                  : "text-foreground"
-                              }`}
-                            >
-                              -{" "}
-                              {formatCurrencyAOA(
-                                item.desconto_produto > 0
-                                  ? item.desconto_produto
-                                  : item.valor_desconto,
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-xs text-muted-foreground">
-                            <span className=" font-semibold text-destructive">
-                              Multa
-                            </span>
-                            <span
-                              className={`font-semibold text-red-500 ${
-                                isChanged
-                                  ? "text-muted-foreground line-through decoration-1"
-                                  : "text-foreground"
-                              }`}
-                            >
-                              + {formatCurrencyAOA(item.multa)}
-                            </span>
-                          </div>
-
-                          <div className="space-y-1">
-                            <Label className="text-xs text-muted-foreground">
-                              Valor Negociado (AOA)
-                            </Label>
-                            <Input
-                              type="number"
-                              min={0}
-                              max={item.valor_total}
-                              step={0.01}
-                              value={value}
-                              onChange={(e) =>
-                                setItemValue(
-                                  factura.codigo,
-                                  item.codigo,
-                                  item.valor_total,
-                                  e.target.value,
-                                )
-                              }
-                              // ALTERADO: input destaca-se visualmente quando o valor foi editado
-                              className={`h-8 text-sm bg-background ${
-                                isChanged
-                                  ? "border-amber-400 focus-visible:ring-amber-400/40"
-                                  : ""
-                              }`}
-                            />
-                            {error && (
-                              <p className="text-xs text-red-600 flex items-center gap-1">
-                                <AlertCircle className="h-3 w-3 shrink-0" />
-                                {error}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
 
             <div className="space-y-2 pt-2">
@@ -615,7 +693,7 @@ export function ConciliacaoDivida() {
                 <div className="flex items-center justify-between text-xs text-amber-700">
                   <span className="flex items-center gap-1">
                     <Percent className="h-3 w-3" />
-                    Diferença de <a href="mailto:"></a>
+                    Diferença
                   </span>
                   <span className="font-medium">
                     -{formatCurrencyAOA(totals.discount)} (
