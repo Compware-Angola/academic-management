@@ -141,66 +141,6 @@ function VinculoRowItem({
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
-
-      <Separator />
-
-      <div className="grid grid-cols-1 gap-3 pl-8 sm:grid-cols-2">
-        <div className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2">
-          <div className="flex items-center gap-2">
-            <Mic className="h-4 w-4 text-muted-foreground shrink-0" />
-            <div className="space-y-0.5">
-              <Label
-                htmlFor={`row-tem-oral-${row.id}`}
-                className="text-sm cursor-pointer"
-              >
-                Prova Oral
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Exige prova oral para esta UC.
-              </p>
-            </div>
-          </div>
-          <Switch
-            id={`row-tem-oral-${row.id}`}
-            checked={row.temOral}
-            onCheckedChange={(checked) =>
-              onChange({
-                ...row,
-                temOral: checked,
-                temPratica: checked ? false : row.temPratica,
-              })
-            }
-          />
-        </div>
-
-        <div className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="h-4 w-4 text-muted-foreground shrink-0" />
-            <div className="space-y-0.5">
-              <Label
-                htmlFor={`row-tem-pratica-${row.id}`}
-                className="text-sm cursor-pointer"
-              >
-                Prova Prática
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Exige prova prática para esta UC.
-              </p>
-            </div>
-          </div>
-          <Switch
-            id={`row-tem-pratica-${row.id}`}
-            checked={row.temPratica}
-            onCheckedChange={(checked) =>
-              onChange({
-                ...row,
-                temPratica: checked,
-                temOral: checked ? false : row.temOral,
-              })
-            }
-          />
-        </div>
-      </div>
     </div>
   );
 }
@@ -275,8 +215,8 @@ export function VincularCursoModal({
         codigoCurso: Number(r.curso),
         codigoClasse: Number(r.anoCurricular),
         codigoSemestre: Number(r.semestre),
-        temOral: r.temOral,
-        temPratica: r.temPratica,
+        temOral: false,
+        temPratica: false,
       })),
     };
 

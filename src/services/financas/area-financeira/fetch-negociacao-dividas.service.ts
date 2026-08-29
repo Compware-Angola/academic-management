@@ -37,6 +37,7 @@ export interface NegociacaoItemFactura {
 export type NegociacaoItem = {
   codigo_matricula: number;
   codigo_factura: number;
+  factura_estado: number | null;
   nome: string;
   curso: string;
   valor_divida: number;
