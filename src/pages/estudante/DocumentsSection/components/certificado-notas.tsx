@@ -8,6 +8,7 @@ import { GerarCertificadoNotas } from "@/components/views/docs-students/certific
 import { useGenerateDocumentCode } from "@/hooks/documents/use-generate-code";
 import { useGetNotas } from "@/hooks/students/use-get-notas";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
+import { useStudentClassInfo } from "@/hooks/students/use-query-students-class-info";
 
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryListarCargosAdministrativo } from "@/hooks/controle-acesso/use-query-listar-cargos-administrativos";
@@ -29,7 +30,7 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
     last: "",
   });
 
-const { data: cargos = [], isLoading: isLoadingCargos } =
+  const { data: cargos = [], isLoading: isLoadingCargos } =
     useQueryListarCargosAdministrativo({
       tipoCargoId: Number(1),
     });
@@ -37,6 +38,13 @@ const { data: cargos = [], isLoading: isLoadingCargos } =
 
   const { data: student, isLoading: isLoadingStudent } =
     useStudentDetail(codigoMatricula);
+
+  const { data: studentClassInfo } = useStudentClassInfo(
+    {
+      numeroDeMatricula: codigoMatricula,
+    },
+    !!codigoMatricula,
+  );
 
   const { data: notas, isLoading: isLoadingNotas } = useGetNotas({
     codigoMatricula,
@@ -70,10 +78,17 @@ const { data: cargos = [], isLoading: isLoadingCargos } =
 
   const estudanteFormatado = {
     nome: student?.nome_completo ?? "",
-    codigoMatricula: student?.codigo_matricula,
-    dataNascimento: formatDate(student?.data_nascimento),
+    codigoMatricula: student?.codigo_matricula ?? 0,
+    dataNascimento: formatDataExtenso(student?.data_nascimento),
     curso: student?.curso,
     bi: student?.bi ?? "",
+    sexo: student?.sexo ?? "",
+    pai: student?.pai ?? "",
+    mae: student?.mae ?? "",
+    naturalidade: student?.naturalidade ?? "",
+    dataConclusao: formatDate(studentClassInfo?.data_conclusao),
+    notaObtida: studentClassInfo?.nota_obtida ?? "",
+    grau: student?.grau ?? "Licenciatura",
   };
 
   function renderContent() {
@@ -196,4 +211,16 @@ function formatDate(date?: string) {
     month: "2-digit",
     year: "numeric",
   }).format(new Date(date));
+}
+
+function formatDataExtenso(date?: string) {
+  if (!date) return "";
+
+  const formatada = new Intl.DateTimeFormat("pt-PT", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
+
+  return formatada.charAt(0).toUpperCase() + formatada.slice(1);
 }

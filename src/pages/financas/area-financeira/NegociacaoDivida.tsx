@@ -219,7 +219,6 @@ export default function NegociacaoDivida() {
           { key: "prestacoes", label: "Prestações", width: "8%" },
           { key: "valorDivida", label: "Valor Dívida", width: "10%" },
           { key: "primeiraPrestacao", label: "1ª Prestação", width: "10%" },
-          { key: "valorPrestacao", label: "Valor Prest.", width: "10%" },
           { key: "valorRestante", label: "Restante", width: "10%" },
         ],
         rows: pdfData.rows,
@@ -246,7 +245,6 @@ export default function NegociacaoDivida() {
             { key: "prestacoes", label: "Prestações", width: 15 },
             { key: "valorDivida", label: "Valor Dívida", width: 20 },
             { key: "primeiraPrestacao", label: "1ª Prestação", width: 20 },
-            { key: "valorPrestacao", label: "Valor Prestação", width: 20 },
             { key: "valorRestante", label: "Valor Restante", width: 20 },
           ],
           rows: pdfData.rows,
@@ -481,8 +479,8 @@ export default function NegociacaoDivida() {
                     <TableHead>Mês final</TableHead>
                     <TableHead>Valor Divida</TableHead>
                     <TableHead>1ª Prestações a pagar</TableHead>
-
-                    <TableHead>Valor Prestação</TableHead>
+                    {/* 
+                    <TableHead>Valor Prestação</TableHead> */}
                     <TableHead>Valor Restante</TableHead>
                     <TableHead>Facturas</TableHead>
                     <TableHead>Acções </TableHead>
@@ -509,9 +507,9 @@ export default function NegociacaoDivida() {
                         </Badge>
                       </TableCell>
 
-                      <TableCell>
+                      {/* <TableCell>
                         <Badge> {formatNumber(item.valor_prestacao)} kz</Badge>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         <Badge> {formatNumber(item.valor_restante)} kz</Badge>
                       </TableCell>

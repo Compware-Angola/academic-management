@@ -63,6 +63,18 @@ export const styles = StyleSheet.create({
     },
   },
 
+  descricaoWrap: {
+    marginVertical: 10,
+  },
+  descricao: {
+    fontSize: 10,
+    lineHeight: 1.6,
+    textAlign: "justify" as const,
+  },
+  descricaoBold: {
+    fontFamily: "Helvetica-Bold",
+  },
+
   institution: {
     fontSize: 7.5,
     color: COR.azul,
