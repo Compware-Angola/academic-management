@@ -24,21 +24,37 @@ const s = StyleSheet.create({
     fontSize: 11,
     backgroundColor: "#FFFFFF",
     position: "relative",
+    paddingBottom: 110,
   },
   bgWatermark: {
     position: "absolute",
     top: "25%",
-    left: "20%",
-    width: "60%",
-    height: "45%",
-    opacity: 0.1,
+    left: "18.75%",
+    width: "62.5%",
+    height: "50%",
+    opacity: 0.05,
+    objectFit: "contain",
   },
-  borduraRodape: {
+  footerBar: {
     position: "absolute",
-    bottom: 0,
+    bottom: 15,
     left: 0,
     right: 0,
-    height: 28,
+    paddingHorizontal: 28,
+    flexDirection: "column",
+    fontSize: 6.5,
+    color: COR.preto,
+  },
+  footerImage: {
+    width: "100%",
+    height: 20,
+    objectFit: "contain",
+  },
+  footerText: {
+    textAlign: "center",
+    fontSize: 6.5,
+    marginTop: 4,
+    marginBottom: 4,
   },
   content: {
     marginTop: 30,
@@ -71,7 +87,7 @@ const s = StyleSheet.create({
   },
   titulo: {
     fontFamily: "Helvetica-Bold",
-    fontSize: 26,
+    fontSize: 18,
     color: COR.preto,
     textTransform: "uppercase" as const,
     textAlign: "center" as const,
@@ -119,50 +135,38 @@ const s = StyleSheet.create({
     textAlign: "center" as const,
     color: COR.preto,
   },
-  assinaturaWrap: {
+  assinaturaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    width: "100%",
     marginTop: 70,
-    alignItems: "center" as const,
   },
-  cargoDiretora: {
+  assinaturaCol: {
+    width: "45%",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  assinaturaCargo: {
     fontFamily: "Helvetica-Bold",
     fontSize: 11,
-    textAlign: "center" as const,
+    textAlign: "center",
     color: COR.preto,
-    marginBottom: 22,
   },
-  linhaAssinatura: {
+  assinaturaLinha: {
     width: 220,
-    borderBottomWidth: 1,
-    borderBottomColor: COR.preto,
-    marginBottom: 6,
+    height: 1,
+    marginTop: 20,
+    marginBottom: 5,
+    backgroundColor: "black",
   },
-  nomeDiretora: {
+  assinaturaNome: {
     fontSize: 11,
-    textAlign: "center" as const,
+    textAlign: "center",
     color: COR.preto,
   },
-  rodapeWrap: {
-    position: "absolute",
-    bottom: 34,
-    left: 50,
-    right: 50,
-  },
-  rodapeSeparador: {
-    borderTopWidth: 0.5,
-    borderTopColor: COR.azul,
-    marginBottom: 5,
-  },
-  rodapeLinha1: {
+  prefixoAssinatura: {
     fontFamily: "Helvetica-Bold",
-    fontSize: 7.5,
-    color: COR.azul,
-    textAlign: "center" as const,
-  },
-  rodapeLinha2: {
-    fontSize: 7.5,
-    color: COR.cinzaClaro,
-    textAlign: "center" as const,
-    marginTop: 2,
   },
 });
 
@@ -182,7 +186,7 @@ export function CertidaoDocument({
   dados,
   cargoDiretor,
   nomeDiretor,
-   cargoReitor,
+  cargoReitor,
   nomeReitor,
   codigo_validacao,
   logoSrc,
@@ -191,118 +195,129 @@ export function CertidaoDocument({
 }: CartaConclusaoDocumentProps) {
   const logoDefault = "/logo_uma.png";
   const bgDefault = "/logo_bg.png";
-  const borduraDefault = "/bordura_africana.png";
-const formatDate = (date?: string) => {
-  if (!date) return "";
+  const borduraDefault = "/rod.png";
 
-  const d = new Date(date);
+  const masculino = dados?.sexo?.toLowerCase() === "masculino";
+  const tratamento = masculino ? "o Senhor" : "a Senhora";
+  const filiacao = masculino ? "filho" : "filha";
 
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
+  const formatDate = (date?: string) => {
+    if (!date) return "";
 
-  return `${day}/${month}/${year}`;
-};
-return (
-  <Document
-    title={`Certidão de Conclusão - ${dados?.nome_completo}`}
-    author="Universidade Metodista de Angola"
-    subject="Certidão de Conclusão"
-  >
-    <Page size="A4" style={s.page}>
-      <Image style={s.bgWatermark} src={bgSrc || bgDefault} />
+    const d = new Date(date);
 
-      <View style={s.content}>
-        <View style={s.logoWrap}>
-          <Image style={s.logo} src={logoSrc || logoDefault} />
-        </View>
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
 
-      
+    return `${day}/${month}/${year}`;
+  };
 
-        <Text style={s.titulo}>Certificado</Text>
+  const formatDataExtenso = (date?: string) => {
+    if (!date) return "";
 
-        <View style={s.corpoWrap}>
-          <Text style={s.corpoTexto}>
-            {"A Directora dos Serviços Académicos da Universidade Metodista de Angola certifica que o Senhor "}
-            <Text style={s.bold}>{dados?.nome_completo}</Text>
-            {", filho de "}
-            {dados?.pai}
-            {" e de "}
-            {dados?.mae}
-            {", titular do Bilhete de Identidade nº "}
-            <Text style={s.bold}>{dados?.bi}</Text>
-            {", concluiu nesta Universidade, no dia "}
-          <Text style={s.bold}>
-  {formatDate(dados?.data_conclusao)}
-</Text>
-            {" e nos termos da legislação aplicável, "}
-            <Text style={s.bold}>
-              {dados?.grau || "Licenciatura"}
+    return new Date(date).toLocaleDateString("pt-AO", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+  return (
+    <Document
+      title={`Carta de Conclusão - ${dados?.nome_completo}`}
+      author="Universidade Metodista de Angola"
+      subject="Carta de Conclusão"
+    >
+      <Page size="A4" style={s.page}>
+        <Image style={s.bgWatermark} src={bgSrc || bgDefault} fixed />
+
+        <View style={s.content}>
+          <View style={s.logoWrap}>
+            <Image style={s.logo} src={logoSrc || logoDefault} />
+          </View>
+
+          <Text style={s.titulo}>Carta de Conclusão</Text>
+
+          <View style={s.corpoWrap}>
+            <Text style={s.corpoTexto}>
+              {"Eu, "}
+              {nomeReitor}
+              {", Reitor da Universidade Metodista de Angola certifico que "}
+              {tratamento} <Text style={s.bold}>{dados?.nome_completo}</Text>
+              {", "}
+              {filiacao}
+              {" de "}
+              {dados?.pai}
+              {" e de "}
+              {dados?.mae}
+              {", titular do Bilhete de Identidade nº "}
+              <Text style={s.bold}>{dados?.bi}</Text>
+              {", concluiu nesta Universidade, no dia "}
+              <Text style={s.bold}>{formatDate(dados?.data_conclusao)}</Text>
+              {" e nos termos da legislação aplicável, "}
+              <Text style={s.bold}>{dados?.grau || "Licenciatura"}</Text>
+              {" em "}
+              <Text style={s.bold}>{dados?.curso}</Text>
+              {", curso aprovado pelo Decreto Executivo "}
+              <Text style={s.bold}>{"60/11 de 13 de Abril"}</Text>
+              {", com a classificação final de "}
+              <Text style={s.bold}>{dados?.nota_obtida}</Text>
+              {" Valores."}
             </Text>
-            {" em "}
-            <Text style={s.bold}>{dados?.curso}</Text>
-            {", curso aprovado pelo Decreto Executivo "}
-            <Text style={s.bold}>
-              { "Executivo 60/11 de 13 de Abril"}
+          </View>
+
+          <View style={s.validacaoWrap}>
+            <Text style={s.validacaoTexto}>
+              Código de Validação: {codigo_validacao}
             </Text>
-            {", com a classificação final de "}
-            <Text style={s.bold}>
-              { dados?.nota_obtida}
+          </View>
+
+          <View style={s.notaWrap}>
+            <Text style={s.notaTexto}>
+              A presente carta vai assinada e autenticada com o carimbo a selo
+              branco, em uso nesta Instituição.
             </Text>
-            {" Valores."}
+          </View>
+
+          <View style={s.dataWrap}>
+            <Text style={s.dataTexto}>
+              Universidade Metodista de Angola, em Luanda, aos{" "}
+              {formatDataExtenso(dados?.data_conclusao)}
+            </Text>
+          </View>
+
+          <View style={s.assinaturaRow}>
+            <View style={s.assinaturaCol}>
+              <Text style={s.assinaturaCargo}>O {cargoReitor}</Text>
+              <View style={s.assinaturaLinha} />
+              <Text style={s.assinaturaNome}>
+                <Text style={s.prefixoAssinatura}>Prof. Dr.</Text> {nomeReitor}
+              </Text>
+            </View>
+
+            <View style={s.assinaturaCol}>
+              <Text style={s.assinaturaCargo}>A {cargoDiretor}</Text>
+              <View style={s.assinaturaLinha} />
+              <Text style={s.assinaturaNome}>
+                <Text style={s.prefixoAssinatura}>Lic.</Text> {nomeDiretor}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={s.footerBar} fixed>
+          <Image style={s.footerImage} src={borduraSrc || borduraDefault} />
+
+          <Text style={s.footerText}>
+            UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) — Rua
+            Nossa Senhora da Muxima, nº 10, 8º Andar, Luanda{"\n"}
+            www.uma.co.ao | geral@uma.co.ao | Tel: (244) 222 338 984 / (244) 222
+            332 905 | Fax: (244) 222 339 572
           </Text>
         </View>
-
-        <View style={s.validacaoWrap}>
-          <Text style={s.validacaoTexto}>
-            Código de Validação: {codigo_validacao}
-          </Text>
-        </View>
-
-        <View style={s.notaWrap}>
-          <Text style={s.notaTexto}>
-           O presente certificado vai assinado e autenticado com o carimbo a selo branco, em uso nesta Instituição.
-            
-          </Text>
-        </View>
-
-        <View style={s.dataWrap}>
-          <Text style={s.dataTexto}>
-            Universidade Metodista de Angola, em Luanda, aos{" "}
-            {new Date().toLocaleDateString("pt-AO", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </Text>
-        <View style={s.assinaturaWrap}>
-          <Text style={s.cargoDiretora}>{cargoReitor}</Text>
-          <View style={s.linhaAssinatura} />
-          <Text style={s.nomeDiretora}>{nomeReitor}</Text>
-        </View>
-        
-        </View>
-          <View style={s.assinaturaWrap}>
-          <Text style={s.cargoDiretora}>{cargoDiretor}</Text>
-          <View style={s.linhaAssinatura} />
-          <Text style={s.nomeDiretora}>{nomeDiretor}</Text>
-        </View>     
-      </View>
-
-      <View style={s.rodapeWrap}>
-        <View style={s.rodapeSeparador} />
-        <Text style={s.rodapeLinha1}>
-          UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) - Rua Nossa Senhora da Muxima, nº 10 - 8º Andar - Luanda
-        </Text>
-        <Text style={s.rodapeLinha2}>
-          www.uma.co.ao | E-mail: geral@uma.co.ao | Tel: (244) 222 338 984 /(244) 222 332 905 / Fax: (244) 222 339 572
-        </Text>
-      </View>
-
-      <Image style={s.borduraRodape} src={borduraSrc || borduraDefault} />
-    </Page>
-  </Document>
-);
+      </Page>
+    </Document>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -313,7 +328,7 @@ interface GerarCartaConclusaoProps {
   nomeDiretor: string;
   cargoReitor: string;
   nomeReitor: string;
-  codigo_validacao:string;
+  codigo_validacao: string;
   logoSrc?: string;
   bgSrc?: string;
   borduraSrc?: string;
@@ -348,7 +363,7 @@ export function GerarCartaConclusao({
       dados={dados}
       cargoDiretor={cargoDiretor}
       nomeDiretor={nomeDiretor}
-         cargoReitor={cargoReitor}
+      cargoReitor={cargoReitor}
       nomeReitor={nomeReitor}
       codigo_validacao={codigo}
       logoSrc={logoSrc}
