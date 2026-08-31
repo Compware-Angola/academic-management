@@ -77,7 +77,7 @@ export function CartaConclusaoSection({ codigoMatricula }: Props) {
                 showDownload={true}
                 logoSrc="/logo_uma.png"
                 bgSrc="/logo_bg.png"
-                borduraSrc="/bordura_africana.png"
+                borduraSrc="/rod.png"
                 isGeneratingCode={isGeneratingCode}
                 onBeforeDownload={handleExportar}
               />

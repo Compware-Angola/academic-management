@@ -69,19 +69,17 @@ export function FacturaDetalhesModal({
     (a) => a.estado.toLocaleLowerCase() === "activo",
   )?.codigo;
 
-  const {
-    data: paymentResponse,
-    isLoading: isLoadingPayment,
-  } = useQueryListPayments(
-    {
-      anoLectivo: factura?.codigo_ano_lectivo ?? activeYearCodigo,
-      codigoFactura: factura?.codigo,
-      limit: 1,
-    },
-    {
-      enabled: !!factura && factura.estado === 1,
-    },
-  );
+  const { data: paymentResponse, isLoading: isLoadingPayment } =
+    useQueryListPayments(
+      {
+        anoLectivo: factura?.codigo_ano_lectivo ?? activeYearCodigo,
+        codigoFactura: factura?.codigo,
+        limit: 1,
+      },
+      {
+        enabled: !!factura && factura.estado === 1,
+      },
+    );
 
   const pagamentoItem = paymentResponse?.data?.[0];
 
@@ -233,6 +231,10 @@ export function FacturaDetalhesModal({
                 <div>
                   <p className="text-sm text-muted-foreground">Estado</p>
                   <StatusBadge status={factura.estado} />
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Descrição</p>
+                  <p>{factura.descricao} </p>
                 </div>
               </div>
             </div>

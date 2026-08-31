@@ -17,6 +17,13 @@ export type Student = {
   bi: string;
   dataNascimento: string;
   curso: string;
+  sexo?: string;
+  pai?: string;
+  mae?: string;
+  naturalidade?: string;
+  dataConclusao?: string;
+  notaObtida?: string;
+  grau?: string;
 };
 
 export type GerarCertidaoProps = {
