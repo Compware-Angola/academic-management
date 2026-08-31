@@ -5,11 +5,21 @@ import {
   View,
   Document,
   StyleSheet,
-  Image,
+  Font,
   pdf,
 } from "@react-pdf/renderer";
 import { Button } from "@/components/ui/button";
 import { Download, Printer, Loader2 } from "lucide-react";
+import fontVivace from "@/assets/english-111-vivace.otf";
+import fontVivaceBold from "@/assets/english-111-vivace-bold.otf";
+
+Font.register({
+  family: "English111 Vivace BT",
+  fonts: [
+    { src: fontVivace, fontWeight: 400 },
+    { src: fontVivaceBold, fontWeight: 700 },
+  ],
+});
 
 type DiplomaData = {
   codigoMatricula: number;
@@ -43,33 +53,19 @@ const COR = {
 
 const s = StyleSheet.create({
   page: {
-    fontFamily: "Times-Roman",
+    fontFamily: "English111 Vivace BT",
     fontSize: 12,
     backgroundColor: "#FFFFFF",
     position: "relative",
   },
-  bgWatermark: {
-    position: "absolute",
-    top: "22%",
-    left: "18%",
-    width: "64%",
-    height: "50%",
-    opacity: 0.08,
-  },
-  borduraRodape: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 26,
-  },
   content: {
-    marginTop: 35,
+    marginTop: 140,
     marginBottom: 55,
     marginHorizontal: 65,
     flexGrow: 1,
   },
   topoTexto: {
+    fontFamily: "Helvetica",
     fontSize: 9,
     textAlign: "center",
     color: COR.cinzaClaro,
@@ -77,7 +73,7 @@ const s = StyleSheet.create({
     lineHeight: 1.4,
   },
   titulo: {
-    fontFamily: "Times-Bold",
+    fontFamily: "English111 Vivace BT",
     fontSize: 34,
     textAlign: "center",
     color: COR.preto,
@@ -95,7 +91,8 @@ const s = StyleSheet.create({
     color: COR.preto,
   },
   bold: {
-    fontFamily: "Times-Bold",
+    fontFamily: "English111 Vivace BT",
+    fontWeight: "bold",
   },
   dataWrap: {
     marginTop: 50,
@@ -120,7 +117,7 @@ const s = StyleSheet.create({
     width: 180,
     borderBottomWidth: 1,
     borderBottomColor: COR.preto,
-    marginBottom: 6,
+    marginVertical: 6,
   },
   assinaturaTexto: {
     fontSize: 11,
@@ -132,31 +129,8 @@ const s = StyleSheet.create({
     marginTop: 24,
     textAlign: "center",
     fontSize: 11,
-    fontFamily: "Times-Bold",
+    fontFamily: "English111 Vivace BT",
     color: COR.dourado,
-  },
-  rodapeWrap: {
-    position: "absolute",
-    bottom: 34,
-    left: 45,
-    right: 45,
-  },
-  rodapeSeparador: {
-    borderTopWidth: 0.5,
-    borderTopColor: COR.azul,
-    marginBottom: 5,
-  },
-  rodapeLinha1: {
-    fontFamily: "Helvetica-Bold",
-    fontSize: 7.5,
-    color: COR.azul,
-    textAlign: "center",
-  },
-  rodapeLinha2: {
-    fontSize: 7.5,
-    color: COR.cinzaClaro,
-    textAlign: "center",
-    marginTop: 2,
   },
 });
 
@@ -167,15 +141,7 @@ interface DiplomaDocumentProps {
   borduraSrc?: string;
 }
 
-export function DiplomaDocument({
-  dados,
-  logoSrc,
-  bgSrc,
-  borduraSrc,
-}: DiplomaDocumentProps) {
-  const bgDefault = "/logo_bg.png";
-  const borduraDefault = "/bordura_africana.png";
-
+export function DiplomaDocument({ dados }: DiplomaDocumentProps) {
   return (
     <Document
       title={`Diploma - ${dados?.nomeAluno}`}
@@ -183,7 +149,6 @@ export function DiplomaDocument({
       subject="Diploma"
     >
       <Page size="A4" style={s.page}>
-        <Image style={s.bgWatermark} src={bgSrc || bgDefault} />
         <View style={s.content}>
           <Text style={s.topoTexto}>
             Autorizado em Conselho de Ministros, pelo Decreto nº 33/97 de Maio,
@@ -194,27 +159,26 @@ export function DiplomaDocument({
 
           <View style={s.corpoWrap}>
             <Text style={s.corpoTexto}>
-              Eu, <Text style={s.bold}>{dados.reitor || "Reitor da Universidade"}</Text>,
-              Reitor da Universidade Metodista de Angola, faço saber que{" "}
+              Eu, {dados.reitor || "Reitor da Universidade"}, Reitor da
+              Universidade Metodista de Angola, faço saber que{" "}
               <Text style={s.bold}>{dados.nomeAluno}</Text>, filho de{" "}
-              <Text style={s.bold}>{dados.nomePai}</Text> e de{" "}
-              <Text style={s.bold}>{dados.nomeMae}</Text>, natural de{" "}
-              <Text style={s.bold}>{dados.naturalidade}</Text>, nascido aos{" "}
-              <Text style={s.bold}>{dados.dataNascimento}</Text>, titular do/a{" "}
-              <Text style={s.bold}>{dados.nomeDocumento}</Text> Nº{" "}
-              <Text style={s.bold}>{dados.bilhete}</Text>, concluiu aos{" "}
-              <Text style={s.bold}>{dados.dataConclusao}</Text> a{" "}
-              <Text style={s.bold}>{dados.nivelAcademico}</Text> em{" "}
-              <Text style={s.bold}>{dados.curso}</Text>, com a classificação final de{" "}
+              {dados.nomePai} e de {dados.nomeMae}, natural de{" "}
+              {dados.naturalidade}, nascido aos{" "}
+              {capitalizarMeses(dados.dataNascimento)}, titular do{" "}
+              {dados.nomeDocumento} Nº {dados.bilhete}, concluiu aos{" "}
+              {capitalizarMeses(dados.dataConclusao)} a {dados.nivelAcademico}{" "}
+              em <Text style={s.bold}>{dados.curso}</Text>, com a classificação
+              final de{" "}
               <Text style={s.bold}>
                 {dados.notaFinal} ({capitalizarPrimeira(dados.notaFinalExtenso)})
-              </Text>.
+              </Text>
+              .
             </Text>
           </View>
 
           <View style={s.corpoWrap}>
             <Text style={s.corpoTexto}>
-              E para que conste, mandámos passar o presente Diploma, que outorga
+              E para que conste, mandámos passar o presente Diploma que outorga
               os direitos e prerrogativas de acordo com aquele título, em
               conformidade com a lei vigente, que vai assinado e autenticado com
               selo branco desta Universidade.
@@ -223,27 +187,35 @@ export function DiplomaDocument({
 
           <View style={s.dataWrap}>
             <Text style={s.dataTexto}>
-              Universidade Metodista de Angola, aos {dados.dataEmissaoDocumento}
+              Universidade Metodista de Angola, aos{" "}
+              {capitalizarMeses(dados.dataEmissaoDocumento)}
             </Text>
           </View>
 
           <View style={s.assinaturaWrap}>
             <View style={s.assinaturaBox}>
-              <View style={s.linhaAssinatura} />
               <Text style={s.assinaturaTexto}>O Reitor</Text>
+              <View style={s.linhaAssinatura} />
+              <Text style={s.assinaturaTexto}>
+                Prof. Dr. {dados.reitor || "Tiago Caungo Mutombo"}
+              </Text>
             </View>
 
             <View style={s.assinaturaBox}>
+              <Text style={s.assinaturaTexto}>
+                A Directora dos Serviços Académicos
+              </Text>
               <View style={s.linhaAssinatura} />
               <Text style={s.assinaturaTexto}>
-                A Directora dos Serviços{"\n"}Académicos
+                Lic. Margarida da Silva Rodrigues
               </Text>
             </View>
           </View>
 
-          {dados.viaDiploma ? <Text style={s.viaTexto}>{dados.viaDiploma}</Text> : null}
+          {dados.viaDiploma ? (
+            <Text style={s.viaTexto}>{dados.viaDiploma}</Text>
+          ) : null}
         </View>
-
       </Page>
     </Document>
   );
@@ -260,9 +232,6 @@ interface GerarDiplomaPdfProps {
 
 export function GerarDiplomaPdf({
   dados,
-  logoSrc,
-  bgSrc,
-  borduraSrc,
   showDownload = true,
   showPrint = false,
 }: GerarDiplomaPdfProps) {
@@ -271,14 +240,7 @@ export function GerarDiplomaPdf({
 
   const nomeArquivo = `Diploma_${dados?.nomeAluno?.replace(/\s+/g, "_")}.pdf`;
 
-  const buildDocumento = () => (
-    <DiplomaDocument
-      dados={dados}
-      logoSrc={logoSrc}
-      bgSrc={bgSrc}
-      borduraSrc={borduraSrc}
-    />
-  );
+  const buildDocumento = () => <DiplomaDocument dados={dados} />;
 
   const handleDownload = async () => {
     try {
@@ -327,8 +289,7 @@ export function GerarDiplomaPdf({
         >
           {isDownloading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              A gerar PDF...
+              <Loader2 className="h-4 w-4 animate-spin" />A gerar PDF...
             </>
           ) : (
             <>
@@ -348,8 +309,7 @@ export function GerarDiplomaPdf({
         >
           {isPrinting ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              A preparar...
+              <Loader2 className="h-4 w-4 animate-spin" />A preparar...
             </>
           ) : (
             <>
@@ -366,6 +326,30 @@ export function GerarDiplomaPdf({
 function capitalizarPrimeira(texto: string) {
   if (!texto) return "";
   return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+const MESES = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+];
+
+function capitalizarMeses(texto: string) {
+  if (!texto) return "";
+
+  return MESES.reduce((resultado, mes) => {
+    const regex = new RegExp(`\\b${mes}\\b`, "gi");
+    return resultado.replace(regex, mes.charAt(0).toUpperCase() + mes.slice(1));
+  }, texto);
 }
 
 export default GerarDiplomaPdf;

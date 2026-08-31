@@ -92,7 +92,7 @@ const BlocoFinal = ({
       <View style={styles.sigBlock}>
         <View style={styles.sigLine} />
         <Text style={styles.sigName}>{diretora}</Text>
-        <Text style={styles.sigRole}>Directora dos Serviços Académicos</Text>
+        <Text style={styles.sigRole}>A Directora dos Serviços Académicos</Text>
       </View>
     </View>
   </>
@@ -139,8 +139,8 @@ const FooterBar = () => (
     <Text style={styles.footerText}>
       UNIVERSIDADE METODISTA DE ANGOLA (Decreto nº 30/07 de 07/05) — Rua Nossa
       Senhora da Muxima, nº 10, 8º Andar, Luanda{"\n"}
-      www.uma.co.ao | geral@uma.co.ao | Tel: (244) 222 338 984 / (244) 222
-      332 905 | Fax: (244) 222 339 572
+      www.uma.co.ao | geral@uma.co.ao | Tel: (244) 222 338 984 / (244) 222 332
+      905 | Fax: (244) 222 339 572
     </Text>
   </View>
 );
@@ -191,6 +191,15 @@ const Assinatura = ({
 
     <View style={styles.assinaturaRow}>
       <View style={styles.assinaturaCol}>
+        <Text style={styles.assinaturaCargo}>O Reitor</Text>
+        <View style={styles.assinaturaLinha} />
+        <Text style={styles.assinaturaNome}>
+          <Text style={styles.titulo}>Prof. Dr.</Text>{" "}
+          {reitor ?? "Tiago Caungo Mutombo"}
+        </Text>
+      </View>
+
+      <View style={styles.assinaturaCol}>
         <Text style={styles.assinaturaCargo}>
           Directora dos Serviços Académicos
         </Text>
@@ -199,42 +208,44 @@ const Assinatura = ({
           <Text style={styles.titulo}>Lic.</Text> {diretora}
         </Text>
       </View>
-
-      <View style={styles.assinaturaCol}>
-        <Text style={styles.assinaturaCargo}>O Reitor</Text>
-        <View style={styles.assinaturaLinha} />
-        <Text style={styles.assinaturaNome}>
-          <Text style={styles.titulo}>Prof. Dr.</Text>{" "}
-          {reitor ?? "Tiago Caungo Mutombo"}
-        </Text>
-      </View>
     </View>
   </View>
 );
 
-const InfoStudent = ({ value, title }: { value: string; title: string }) => {
-  return (
-    <View style={styles.studentInfo}>
-      <Text style={styles.studentInfo.title}>{title}:</Text>
-      <Text style={styles.studentInfo.value}>{value}</Text>
-    </View>
-  );
-};
-
 const InfoEstudanteSection = ({ estudante }: { estudante: Student }) => {
+  const masculino = estudante.sexo?.toLowerCase() === "masculino";
+  const tratamento = masculino ? "o Senhor" : "a Senhora";
+  const filiacao = masculino ? "Filho" : "Filha";
+  const nascimento = masculino ? "nascido" : "nascida";
+  const matriculado = masculino ? "matriculado" : "matriculada";
+
   return (
-    <View>
-      <InfoStudent title="Nome" value={estudante.nome} />
-      <InfoStudent
-        title="Número"
-        value={estudante.codigoMatricula.toString()}
-      />
-      <InfoStudent title="B.I" value={estudante.bi} />
-      <InfoStudent
-        title="Data de Nascimento"
-        value={estudante.dataNascimento}
-      />
-      <InfoStudent title="Licenciatura em" value={estudante.curso} />
+    <View style={styles.descricaoWrap}>
+      <Text style={styles.descricao}>
+        A Universidade Metodista de Angola certifica que{" "}
+        <Text style={styles.descricaoBold}>
+          {tratamento} {estudante.nome}
+        </Text>
+        , {filiacao} de <Text style={styles.descricao}>{estudante.pai}</Text> e
+        de <Text style={styles.descricao}>{estudante.mae}</Text>, {nascimento}{" "}
+        em <Text style={styles.descricao}>{estudante.naturalidade}</Text>, aos{" "}
+        <Text style={styles.descricaoBold}>{estudante.dataNascimento}</Text>,
+        titular do Bilhete de Identidade nº{" "}
+        <Text style={styles.descricaoBold}>{estudante.bi}</Text>, {matriculado}{" "}
+        sob o nº{" "}
+        <Text style={styles.descricaoBold}>{estudante.codigoMatricula}</Text>,
+        concluiu nesta Universidade, no dia{" "}
+        <Text style={styles.descricao}>{estudante.dataConclusao}</Text>, nos
+        termos da legislação aplicável,{" "}
+        <Text style={styles.descricao}>{estudante.grau || "Licenciatura"}</Text>{" "}
+        em
+        <Text style={styles.descricaoBold}>{estudante.curso}</Text>, curso
+        aprovado pelo Decreto Executivo 60/11 de 13 de Abril, com a
+        classificação final de{" "}
+        <Text style={styles.descricaoBold}>
+          {estudante.notaObtida} valores.
+        </Text>
+      </Text>
     </View>
   );
 };
