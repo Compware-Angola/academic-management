@@ -221,8 +221,8 @@ export default function CreateSchedule() {
 
     const filteredCursos = allowedCursoIds.length
       ? (cursos ?? []).filter((c) =>
-        allowedCursoIds.includes(c.codigo?.toString()),
-      )
+          allowedCursoIds.includes(c.codigo?.toString()),
+        )
       : (cursos ?? []);
 
     const filteredClasses = allowedClassIds.length
@@ -298,15 +298,15 @@ export default function CreateSchedule() {
     {
       cursoSigla: formData.curso
         ? gerarSiglaCurso(
-          cursos?.find((c) => c.codigo.toString() === formData.curso)
-            ?.designacao || "",
-        )
+            cursos?.find((c) => c.codigo.toString() === formData.curso)
+              ?.designacao || "",
+          )
         : undefined,
       ano: formData.classes,
       codigoUC: formData.unidadeCurricular
         ? unidadesCurriculares.find(
-          (c) => c.pk.toString() === formData.unidadeCurricular,
-        )?.codigo || ""
+            (c) => c.pk.toString() === formData.unidadeCurricular,
+          )?.codigo || ""
         : "",
       periodo: Number(formData.periodo),
       anoLectivo: Number(formData.anoLetivo),
@@ -549,28 +549,26 @@ export default function CreateSchedule() {
               }
             />
 
-            {/* <FormSelect
+            <FormSelect
               disabled={isLoadingAcademicYear}
               loading={isLoadingAcademicYear}
               label="Ano Letivo"
               value={formData.anoLetivo}
               onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
-              options={academicYear?.filter(
-                (ay) => ay.estado.toLowerCase() === "activo",
-              )}
+              options={academicYear}
               map={(a) => ({
                 key: a.codigo,
                 label: a.designacao,
                 value: a.codigo,
               })}
-            /> */}
-            <AcademicYearsAvailableForOperationSelect
+            />
+            {/* <AcademicYearsAvailableForOperationSelect
               onChangeValue={(v) => setFormData({ ...formData, anoLetivo: v })}
               tipoCandidaturaId={parseFilter(formData.tipoCandidatura)}
               value={formData.anoLetivo}
               enableDefaultActiveYear
               label="Ano Letivo"
-            />
+            /> */}
             <FormSelect
               disabled={isLoadingSemestres}
               loading={isLoadingSemestres}

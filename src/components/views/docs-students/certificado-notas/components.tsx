@@ -238,8 +238,7 @@ const InfoEstudanteSection = ({ estudante }: { estudante: Student }) => {
         <Text style={styles.descricao}>{estudante.dataConclusao}</Text>, nos
         termos da legislação aplicável,{" "}
         <Text style={styles.descricao}>{estudante.grau || "Licenciatura"}</Text>{" "}
-        em
-        <Text style={styles.descricaoBold}>{estudante.curso}</Text>, curso
+        em <Text style={styles.descricaoBold}>{estudante.curso}</Text>, curso
         aprovado pelo Decreto Executivo 60/11 de 13 de Abril, com a
         classificação final de{" "}
         <Text style={styles.descricaoBold}>

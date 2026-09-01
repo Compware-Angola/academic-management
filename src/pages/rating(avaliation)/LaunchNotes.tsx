@@ -1050,9 +1050,7 @@ export default function LaunchNotes() {
                   </p>
                 </div>
               </div>
-
               <div className="h-9 w-px bg-border" />
-
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
                   ✓
@@ -1064,7 +1062,7 @@ export default function LaunchNotes() {
                   <p className="text-xs text-muted-foreground">Com nota</p>
                 </div>
               </div>
-
+              Lançar notas de avaliações por UC
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
                   ⚠
