@@ -191,32 +191,57 @@ export function EditSchedule() {
 
   // ─── Queries ──────────────────────────────────────────────────────────────
   const { data: cursos = [], isLoading: loadingCursos } = useCursos();
-  const { data: classes = [], isLoading: isLoadingClasses } = useQueryClassFilterByCurso({ curso: formData.curso });
-  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } = useQueryDisciplinaWithFilter({
-    curso: formData.curso,
-    classe: formData.classes,
-    semestre: formData.semestre,
-  });
+  const { data: classes = [], isLoading: isLoadingClasses } =
+    useQueryClassFilterByCurso({ curso: formData.curso });
+  const { data: unidadesCurriculares = [], isLoading: isLoadingUC } =
+    useQueryDisciplinaWithFilter({
+      curso: formData.curso,
+      classe: formData.classes,
+      semestre: formData.semestre,
+    });
 
-  const { data: rawInfo, isPending: loadingInfo } = useQueryAdditionalInformation(isDirector, formData.anoLetivo);
+  const { data: rawInfo, isPending: loadingInfo } =
+    useQueryAdditionalInformation(isDirector, formData.anoLetivo);
   const info = useMemo(() => rawInfo, [JSON.stringify(rawInfo)]);
 
   const { filteredCursos, filteredClasses, allowedCursoIds } = useMemo(() => {
     if (!isDirector || !info || loadingInfo) {
-      return { filteredCursos: cursos, filteredClasses: classes, allowedCursoIds: undefined };
+      return {
+        filteredCursos: cursos,
+        filteredClasses: classes,
+        allowedCursoIds: undefined,
+      };
     }
 
-    const allowedCursoIds = Array.from(new Set(info.map((item: any) => item?.codigo_curso?.toString()).filter(Boolean)));
-    const allowedClassIds = Array.from(new Set(info.map((item: any) => item?.codigo_classe?.toString()).filter(Boolean)));
+    const allowedCursoIds = Array.from(
+      new Set(
+        info.map((item: any) => item?.codigo_curso?.toString()).filter(Boolean),
+      ),
+    );
+    const allowedClassIds = Array.from(
+      new Set(
+        info
+          .map((item: any) => item?.codigo_classe?.toString())
+          .filter(Boolean),
+      ),
+    );
 
     return {
-      filteredCursos: allowedCursoIds.length ? cursos.filter((c) => allowedCursoIds.includes(c.codigo?.toString())) : cursos,
-      filteredClasses: allowedClassIds.length ? classes.filter((c) => allowedClassIds.includes(c?.codigo?.toString())) : classes,
+      filteredCursos: allowedCursoIds.length
+        ? cursos.filter((c) => allowedCursoIds.includes(c.codigo?.toString()))
+        : cursos,
+      filteredClasses: allowedClassIds.length
+        ? classes.filter((c) => allowedClassIds.includes(c?.codigo?.toString()))
+        : classes,
       allowedCursoIds,
     };
   }, [isDirector, info, cursos, classes]);
 
-  const { data: initialDataSchedule, isLoading, isError } = useQueryScheduleDetails(scheduleId);
+  const {
+    data: initialDataSchedule,
+    isLoading,
+    isError,
+  } = useQueryScheduleDetails(scheduleId);
 
   const canEditThisSchedule = useMemo(() => {
     if (!isDirector) return true;
@@ -227,19 +252,22 @@ export function EditSchedule() {
   const canOperate = canOperateInPage && canEditThisSchedule;
 
   const { data: academicYear } = useQueryAnoAcademico();
-  const activeAcademicYear = academicYear?.find((year) => year.estado.toLowerCase() === "activo");
+  const activeAcademicYear = academicYear?.find(
+    (year) => year.estado.toLowerCase() === "activo",
+  );
   const activeAcademicYearId = activeAcademicYear?.codigo;
 
   const { data: scheduleCreationPrompt } = useQueryScheduleCreationPrompt(
     activeAcademicYearId!,
-    Number(formData.semestre)
+    Number(formData.semestre),
   );
 
   const { data: semestres = [] } = useQuerySemestres();
   const { data: periodos = [] } = useQueryPeriod();
   const { data: modalidade = [] } = useQueryModalidade();
   const { data: tipoDeSalas = [] } = useQueryTipoDeSalas();
-  const { data: teachers = [], isLoading: isLoadingTeacher } = useQueryTeacherByUC(formData.unidadeCurricular);
+  const { data: teachers = [], isLoading: isLoadingTeacher } =
+    useQueryTeacherByUC(formData.unidadeCurricular);
   const { data: salas, isLoading: isLoadingSala } = useAvailableRooms({
     anoLectivo: Number(formData.anoLetivo),
     tipoAula: Number(formData?.tipoAula),
@@ -257,22 +285,35 @@ export function EditSchedule() {
     horarioId: scheduleId,
   });
 
-  const ocupadasSet = useMemo(() => mapOcupacaoPorChave(aulasOcupadas), [aulasOcupadas]);
+  const ocupadasSet = useMemo(
+    () => mapOcupacaoPorChave(aulasOcupadas),
+    [aulasOcupadas],
+  );
 
   const { data: designacao } = useNextScheduleDesignation(
     {
-      cursoSigla: formData.curso ? gerarSiglaCurso(cursos.find((c) => c.codigo.toString() === formData.curso)?.designacao || "") : undefined,
+      cursoSigla: formData.curso
+        ? gerarSiglaCurso(
+            cursos.find((c) => c.codigo.toString() === formData.curso)
+              ?.designacao || "",
+          )
+        : undefined,
       ano: formData.classes,
       anoLectivo: Number(formData.anoLetivo),
-      codigoUC: formData.unidadeCurricular ? unidadesCurriculares.find((c) => c.pk.toString() === formData.unidadeCurricular)?.codigo || "" : "",
+      codigoUC: formData.unidadeCurricular
+        ? unidadesCurriculares.find(
+            (c) => c.pk.toString() === formData.unidadeCurricular,
+          )?.codigo || ""
+        : "",
       periodo: Number(formData.periodo),
     },
-    initialDataSchedule ?
-      initialDataSchedule?.cursoId?.toString() !== formData.curso ||
-      initialDataSchedule?.unidadeCurricularId?.toString() !== formData.unidadeCurricular ||
-      initialDataSchedule?.semestre?.toString() !== formData.semestre ||
-      initialDataSchedule?.periodo?.toString() !== formData.periodo
-      : false
+    initialDataSchedule
+      ? initialDataSchedule?.cursoId?.toString() !== formData.curso ||
+          initialDataSchedule?.unidadeCurricularId?.toString() !==
+            formData.unidadeCurricular ||
+          initialDataSchedule?.semestre?.toString() !== formData.semestre ||
+          initialDataSchedule?.periodo?.toString() !== formData.periodo
+      : false,
   );
 
   // ─── Efeitos ──────────────────────────────────────────────────────────────
@@ -283,8 +324,15 @@ export function EditSchedule() {
   useEffect(() => {
     if (!initialDataSchedule) return;
     const mapped = mapScheduleToFormData(initialDataSchedule);
-    setFormData((prev) => ({ ...prev, ...mapped, docente: mapped.docente || "" }));
-    setPendingSelects({ classes: mapped.classes, unidadeCurricular: mapped.unidadeCurricular });
+    setFormData((prev) => ({
+      ...prev,
+      ...mapped,
+      docente: mapped.docente || "",
+    }));
+    setPendingSelects({
+      classes: mapped.classes,
+      unidadeCurricular: mapped.unidadeCurricular,
+    });
     setAulas(mapBackendAulasToGrid(initialDataSchedule.aulas));
   }, [initialDataSchedule]);
 
@@ -298,19 +346,32 @@ export function EditSchedule() {
 
   useEffect(() => {
     if (!pendingSelects.unidadeCurricular || isLoadingUC) return;
-    if (unidadesCurriculares.some((u) => String(u.pk) === pendingSelects.unidadeCurricular)) {
-      setFormData((prev) => ({ ...prev, unidadeCurricular: pendingSelects.unidadeCurricular! }));
+    if (
+      unidadesCurriculares.some(
+        (u) => String(u.pk) === pendingSelects.unidadeCurricular,
+      )
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        unidadeCurricular: pendingSelects.unidadeCurricular!,
+      }));
       setPendingSelects((p) => ({ ...p, unidadeCurricular: undefined }));
     }
   }, [unidadesCurriculares, isLoadingUC, pendingSelects.unidadeCurricular]);
 
   // ─── Validação ────────────────────────────────────────────────────────────
-  const isFormComplete = requiredFields.every((f) => !isBlank(formData[f.key as keyof typeof formData]));
+  const isFormComplete = requiredFields.every(
+    (f) => !isBlank(formData[f.key as keyof typeof formData]),
+  );
 
   const validateForm = () => {
     for (const field of requiredFields) {
       if (isBlank(formData[field.key as keyof typeof formData])) {
-        toast({ variant: "destructive", title: "Campo obrigatório", description: `Preencha: ${field.label}` });
+        toast({
+          variant: "destructive",
+          title: "Campo obrigatório",
+          description: `Preencha: ${field.label}`,
+        });
         return false;
       }
     }
@@ -347,8 +408,10 @@ export function EditSchedule() {
   };
 
   const shouldCheckDeadline = !!formData.anoLetivo && !!formData.semestre;
-  const isWithinPeriod = isPrivilegedUser || (scheduleCreationPrompt?.is_in_prazo ?? false);
-  const isBlockedByDeadline = !isPrivilegedUser && shouldCheckDeadline && !isWithinPeriod;
+  const isWithinPeriod =
+    isPrivilegedUser || (scheduleCreationPrompt?.is_in_prazo ?? false);
+  const isBlockedByDeadline =
+    !isPrivilegedUser && shouldCheckDeadline && !isWithinPeriod;
 
   // ─── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -383,7 +446,9 @@ export function EditSchedule() {
         <div className="text-center py-12 bg-card border rounded-lg">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">A carregar informações...</p>
+            <p className="text-sm text-muted-foreground">
+              A carregar informações...
+            </p>
           </div>
         </div>
       )}
@@ -391,7 +456,11 @@ export function EditSchedule() {
       {!canOperate && !loadingInfo && !canEditThisSchedule && (
         <div className="text-center py-12 bg-card border rounded-lg">
           <div className="flex flex-col items-center gap-3">
-            <Lottie animationData={BlockDocument} loop style={{ width: 300, height: 300 }} />
+            <Lottie
+              animationData={BlockDocument}
+              loop
+              style={{ width: 300, height: 300 }}
+            />
             <p className="text-sm text-muted-foreground">
               {isDirector && !canEditThisSchedule
                 ? "Este horário pertence a um curso ao qual você não tem acesso."
@@ -405,8 +474,14 @@ export function EditSchedule() {
       {canOperate && isBlockedByDeadline && !loadingInfo && (
         <div className="text-center py-12 bg-card border rounded-lg">
           <div className="flex flex-col items-center gap-3">
-            <Lottie animationData={BlockDocument} loop style={{ width: 300, height: 300 }} />
-            <p className="text-sm text-muted-foreground">A edição de horários está bloqueada fora do prazo definido.</p>
+            <Lottie
+              animationData={BlockDocument}
+              loop
+              style={{ width: 300, height: 300 }}
+            />
+            <p className="text-sm text-muted-foreground">
+              A edição de horários está bloqueada fora do prazo definido.
+            </p>
           </div>
         </div>
       )}
@@ -419,7 +494,8 @@ export function EditSchedule() {
             <>
               {!shouldCheckDeadline ? (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-800 text-sm">
-                  Selecione o <strong>Ano Letivo</strong> e o <strong>Semestre</strong> para verificar o prazo.
+                  Selecione o <strong>Ano Letivo</strong> e o{" "}
+                  <strong>Semestre</strong> para verificar o prazo.
                 </div>
               ) : isWithinPeriod ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-800 text-sm">
@@ -432,21 +508,40 @@ export function EditSchedule() {
           <div className="grid md:grid-cols-4 gap-4">
             <TipoCandidaturaSelect
               value={formData.tipoCandidatura}
-              onChangeValue={(v) => setFormData({ ...formData, tipoCandidatura: v })}
+              onChangeValue={(v) =>
+                setFormData({ ...formData, tipoCandidatura: v })
+              }
             />
-            <AcademicYearsAvailableForOperationSelect
+
+            <FormSelect
+              label="Ano Letivo"
+              value={formData.anoLetivo}
+              onChange={(v) => setFormData({ ...formData, anoLetivo: v })}
+              options={academicYear}
+              map={(a) => ({
+                key: a.codigo,
+                label: a.designacao,
+                value: a.codigo,
+              })}
+            />
+
+            {/* <AcademicYearsAvailableForOperationSelect
               onChangeValue={(v) => setFormData({ ...formData, anoLetivo: v })}
               tipoCandidaturaId={parseFilter(formData.tipoCandidatura)}
               value={formData.anoLetivo}
               enableDefaultActiveYear
               label="Ano Letivo"
-            />
+            /> */}
 
             <FormSelect
               label="Semestre"
               value={formData.semestre}
               options={semestres}
-              map={(s) => ({ key: s.codigo, label: s.designacao, value: String(s.codigo) })}
+              map={(s) => ({
+                key: s.codigo,
+                label: s.designacao,
+                value: String(s.codigo),
+              })}
               onChange={(v) => setFormData((p) => ({ ...p, semestre: v }))}
             />
 
@@ -454,14 +549,25 @@ export function EditSchedule() {
               label="Período"
               value={formData.periodo}
               options={periodos}
-              map={(p) => ({ key: p.codigo, label: p.designacao, value: String(p.codigo) })}
+              map={(p) => ({
+                key: p.codigo,
+                label: p.designacao,
+                value: String(p.codigo),
+              })}
               onChange={(v) => setFormData((p) => ({ ...p, periodo: v }))}
             />
 
             <CourseSelectTestIsaac
               value={formData.curso}
               disabled={formData.anoLetivo === "" || formData.semestre === ""}
-              onChangeValue={(v) => setFormData((p) => ({ ...p, curso: v, classes: "", unidadeCurricular: "" }))}
+              onChangeValue={(v) =>
+                setFormData((p) => ({
+                  ...p,
+                  curso: v,
+                  classes: "",
+                  unidadeCurricular: "",
+                }))
+              }
               allowedIds={allowedCursoIds}
               cursos={filteredCursos}
               isLoading={loadingCursos}
@@ -472,8 +578,18 @@ export function EditSchedule() {
               value={formData.classes}
               options={filteredClasses}
               loading={isLoadingClasses}
-              map={(c) => ({ key: c.codigo, label: c.designacao, value: String(c.codigo) })}
-              onChange={(v) => setFormData((p) => ({ ...p, classes: v, unidadeCurricular: "" }))}
+              map={(c) => ({
+                key: c.codigo,
+                label: c.designacao,
+                value: String(c.codigo),
+              })}
+              onChange={(v) =>
+                setFormData((p) => ({
+                  ...p,
+                  classes: v,
+                  unidadeCurricular: "",
+                }))
+              }
             />
 
             {/* Componente antigo mantido como referencia, conforme solicitado.
@@ -501,7 +617,11 @@ export function EditSchedule() {
               label="Modalidade"
               value={formData.modalidade}
               options={modalidade}
-              map={(m) => ({ key: m.pkModalidade, label: m.designacao, value: String(m.pkModalidade) })}
+              map={(m) => ({
+                key: m.pkModalidade,
+                label: m.designacao,
+                value: String(m.pkModalidade),
+              })}
               onChange={(v) => setFormData((p) => ({ ...p, modalidade: v }))}
             />
 
@@ -510,7 +630,9 @@ export function EditSchedule() {
               value={formData.apenasPrimeiroAno}
               options={onlyFirstYear}
               map={(o) => ({ key: o.value, label: o.label, value: o.value })}
-              onChange={(v) => setFormData((p) => ({ ...p, apenasPrimeiroAno: v }))}
+              onChange={(v) =>
+                setFormData((p) => ({ ...p, apenasPrimeiroAno: v }))
+              }
             />
 
             <div className="space-y-1 md:col-span-2">
@@ -523,7 +645,9 @@ export function EditSchedule() {
               <Input
                 type="number"
                 value={formData.capacidade}
-                onChange={(e) => setFormData((p) => ({ ...p, capacidade: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, capacidade: e.target.value }))
+                }
               />
             </div>
 
@@ -538,13 +662,21 @@ export function EditSchedule() {
 
             <div>
               <Label>Tipo de Aula</Label>
-              <Select value={formData.tipoAula} onValueChange={(v) => setFormData((p) => ({ ...p, tipoAula: v }))}>
+              <Select
+                value={formData.tipoAula}
+                onValueChange={(v) =>
+                  setFormData((p) => ({ ...p, tipoAula: v }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Escolha o tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   {tipoDeSalas.map((tipo) => (
-                    <SelectItem key={tipo.pkTipoAula} value={tipo.pkTipoAula.toString()}>
+                    <SelectItem
+                      key={tipo.pkTipoAula}
+                      value={tipo.pkTipoAula.toString()}
+                    >
                       {tipo.designacao}
                     </SelectItem>
                   ))}
@@ -581,10 +713,17 @@ export function EditSchedule() {
           )}
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(-1)}
+            >
               <X className="mr-2 h-4 w-4" /> Cancelar
             </Button>
-            <Button type="submit" disabled={!isFormComplete || updateSchedule.isPending}>
+            <Button
+              type="submit"
+              disabled={!isFormComplete || updateSchedule.isPending}
+            >
               {updateSchedule.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> A guardar...
