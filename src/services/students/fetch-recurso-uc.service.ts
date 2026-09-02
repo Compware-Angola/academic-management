@@ -46,7 +46,8 @@ export type ResultadoAluno = {
 
 export type InscricaoRecursoPayload = {
   codigoMatricula: number;
-  tipoCandidatura: number
+  tipoCandidatura: number;
+  anoLetivo: number;
   gradesAlunos: GradeRecursoAluno[];
 };
 
@@ -67,10 +68,12 @@ export async function inscreverRecurso({
   codigoMatricula,
   tipoCandidatura,
   gradesAlunos,
+  anoLetivo,
 }: InscricaoRecursoPayload) {
   const response = await axiosNestGa.post(
-    `students/provas/recurso/${codigoMatricula}/${tipoCandidatura}`,
-    { gradesAlunos }, // body direto, sem wrapper
+    `students/provas/recurso/${codigoMatricula}/${tipoCandidatura}/${anoLetivo}`,
+    { gradesAlunos },
+    // body direto, sem wrapper
   );
   return response.data;
 }
@@ -88,17 +91,42 @@ export async function getCadeirasEspecial({
 
 export type InscricaoEpocaEspecialPayload = {
   codigoMatricula: number;
-  tipoCandidatura: number
+  tipoCandidatura: number;
+  anoLetivo: number;
   gradesAlunos: GradeRecursoAluno[];
 };
 
+export async function getCadeirasMelhoria({
+  anoLetivo,
+  matricula,
+}: BaseParams) {
+  const response = await axiosNestGa.get<ResultadoAluno>(
+    `students/provas/melhoria/${anoLetivo}/${matricula}`,
+  );
+
+  return response?.data?.cadeiras;
+}
 export async function inscreverEpocaEspecial({
   tipoCandidatura,
   codigoMatricula,
   gradesAlunos,
+  anoLetivo,
 }: InscricaoEpocaEspecialPayload) {
   const response = await axiosNestGa.post(
-    `students/provas/epoca-especial/${codigoMatricula}/${tipoCandidatura}`,
+    `students/provas/epoca-especial/${codigoMatricula}/${tipoCandidatura}/${anoLetivo}`,
+    { gradesAlunos },
+  );
+  return response.data;
+}
+
+export async function inscreverEpocaMelhoria({
+  tipoCandidatura,
+  codigoMatricula,
+  gradesAlunos,
+  anoLetivo,
+}: InscricaoEpocaEspecialPayload) {
+  const response = await axiosNestGa.post(
+    `students/provas/melhoria/${codigoMatricula}/${tipoCandidatura}/${anoLetivo}`,
     { gradesAlunos },
   );
   return response.data;

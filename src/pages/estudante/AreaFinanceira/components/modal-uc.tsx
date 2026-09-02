@@ -18,10 +18,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
   useQueryCadeirasEpocaEspecial,
+  useQueryCadeirasMelhoria,
   useQueryCadeirasRecuros,
 } from "@/hooks/students/use-recursos-UC";
 import { ServicoItem } from "./servicos.types";
 import { Cadeira } from "@/services/students/fetch-recurso-uc.service";
+import { getTipoFluxoServico, TipoFluxoServico } from "./const";
 
 interface ModalCadeirasRecursoProps {
   open: boolean;
@@ -43,23 +45,33 @@ export function ModalCadeirasRecurso({
   const [selecionadas, setSelecionadas] = useState<Set<string | number>>(
     new Set(),
   );
-  const isRecurso = servico?.sigla == "IaEdRurso";
+  const tipoFluxo = servico
+    ? getTipoFluxoServico(servico.sigla)
+    : TipoFluxoServico.NORMAL;
 
   const recursoQuery = useQueryCadeirasRecuros(
     { anoLetivo, matricula },
-    { enabled: isRecurso },
+    { enabled: tipoFluxo === TipoFluxoServico.RECURSO },
   );
 
   const epocaEspecialQuery = useQueryCadeirasEpocaEspecial(
     { anoLetivo, matricula },
-    { enabled: !isRecurso },
+    { enabled: tipoFluxo === TipoFluxoServico.EPOCA_ESPECIAL },
   );
 
-  const {
-    data: cadeiras = [],
-    isLoading,
-    isError,
-  } = isRecurso ? recursoQuery : epocaEspecialQuery;
+  const melhoriaQuery = useQueryCadeirasMelhoria(
+    { anoLetivo, matricula },
+    { enabled: tipoFluxo === TipoFluxoServico.MELHORIA_NOTAS },
+  );
+
+  const queryAtiva =
+    tipoFluxo === TipoFluxoServico.RECURSO
+      ? recursoQuery
+      : tipoFluxo === TipoFluxoServico.EPOCA_ESPECIAL
+        ? epocaEspecialQuery
+        : melhoriaQuery;
+
+  const { data: cadeiras = [], isLoading, isError } = queryAtiva;
   const totalSelecionadas = selecionadas.size;
   const todasSelecionadas =
     cadeiras.length > 0 && selecionadas.size === cadeiras.length;
