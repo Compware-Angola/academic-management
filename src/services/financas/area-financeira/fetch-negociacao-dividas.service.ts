@@ -52,6 +52,7 @@ export type NegociacaoItem = {
   faculdade_id: number;
   faculdade: number;
   facturas: NegociacaoItemFactura[];
+  estado: number;
   rn: number;
   id: number;
 };
@@ -96,4 +97,8 @@ export async function getNegociacoesService(
   );
 
   return data;
+}
+
+export async function deleteNegociacaoService(id: number): Promise<void> {
+  await axiosNestFinance.delete(`debt-negotiation/${id}`);
 }
