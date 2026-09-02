@@ -3,9 +3,11 @@
 import {
   ObterNegociacoesPayload,
   ObterNegociacoesResponse,
+  deleteNegociacaoService,
   getNegociacoesService,
 } from "@/services/financas/area-financeira/fetch-negociacao-dividas.service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useQueryNegociacoes = (
   filters: ObterNegociacoesPayload,
@@ -46,5 +48,24 @@ export const useQueryNegociacoes = (
     retry: 2,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+  });
+};
+
+export const useDeleteNegociacao = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => deleteNegociacaoService(id),
+    onSuccess: () => {
+      toast.success("Negociação de dívida eliminada com sucesso!");
+      queryClient.invalidateQueries({
+        queryKey: ["negociacoes"],
+      });
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao eliminar negociação de dívida", {
+        description: error.message || "Tente novamente mais tarde.",
+      });
+    },
   });
 };
