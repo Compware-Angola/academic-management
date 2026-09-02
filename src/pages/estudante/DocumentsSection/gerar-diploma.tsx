@@ -15,10 +15,7 @@ type GerarDiplomaProps = {
   codigoMatricula: number;
 };
 
-export function GerarDiploma({
-  value,
-  codigoMatricula,
-}: GerarDiplomaProps) {
+export function GerarDiploma({ value, codigoMatricula }: GerarDiplomaProps) {
   const [segundaViaDiploma, setSegundaViaDiploma] = useState(false);
   const [dataEmissao, setDataEmissao] = useState(
     new Date().toISOString().split("T")[0],
@@ -71,42 +68,37 @@ export function GerarDiploma({
                 value={dataEmissao}
                 onChange={(e) => setDataEmissao(e.target.value)}
               />
-              <Button type="button" size="icon" variant="outline">
-                <CalendarDays className="h-4 w-4" />
-              </Button>
             </div>
           </div>
 
           <div>
-            <Button
-              onClick={onSubmit}
-              disabled={isPending}
-              className="gap-2"
-            >
+            <Button onClick={onSubmit} disabled={isPending} className="gap-2">
               <GraduationCap className="h-4 w-4" />
               {isPending ? "Gerando..." : "Gerar Diploma"}
             </Button>
           </div>
 
           {data?.data ? (
-  <div className="space-y-4">
-    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-      <p className="font-medium text-sm">Dados do diploma carregados com sucesso.</p>
-      <p className="text-sm text-muted-foreground mt-1">
-        O documento já está pronto para exportação.
-      </p>
-    </div>
+            <div className="space-y-4">
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+                <p className="font-medium text-sm">
+                  Dados do diploma carregados com sucesso.
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  O documento já está pronto para exportação.
+                </p>
+              </div>
 
-    <GerarDiplomaPdf
-      dados={data.data}
-      bgSrc="/logo_bg.png"
-      borduraSrc="/bordura_africana.png"
-      showDownload={true}
-      showPrint={false}
-    />
-    <DiplomaPreview data={data.data} />
-  </div>
-) : null}
+              <GerarDiplomaPdf
+                dados={data.data}
+                bgSrc="/logo_bg.png"
+                borduraSrc="/bordura_africana.png"
+                showDownload={true}
+                showPrint={false}
+              />
+              <DiplomaPreview data={data.data} />
+            </div>
+          ) : null}
         </div>
       </Card>
     </TabsContent>

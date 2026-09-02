@@ -9,6 +9,10 @@ import { useGenerateDocumentCode } from "@/hooks/documents/use-generate-code";
 import { useGetNotas } from "@/hooks/students/use-get-notas";
 import { useStudentDetail } from "@/hooks/students/use-query-students";
 import { useStudentClassInfo } from "@/hooks/students/use-query-students-class-info";
+import {
+  useCursoBasePorCodigoMatricula,
+  useCursoEspecialidadePorCodigoMatricula,
+} from "@/hooks/cursos/especialidade";
 
 import { parseFilter } from "@/util/parse-filter";
 import { useQueryListarCargosAdministrativo } from "@/hooks/controle-acesso/use-query-listar-cargos-administrativos";
@@ -38,6 +42,17 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
 
   const { data: student, isLoading: isLoadingStudent } =
     useStudentDetail(codigoMatricula);
+
+  const { data: especialidades = [] } =
+    useCursoEspecialidadePorCodigoMatricula(codigoMatricula);
+
+  const { data: cursoBase } = useCursoBasePorCodigoMatricula(codigoMatricula);
+
+  const cursos = [
+    cursoBase?.codigo?.toString(),
+    student?.curso_codigo?.toString(),
+    ...especialidades.map((especialidade) => especialidade.codigo.toString()),
+  ].filter((curso): curso is string => !!curso);
 
   const { data: studentClassInfo } = useStudentClassInfo(
     {
@@ -135,7 +150,7 @@ export function CertificadoNotas({ codigoMatricula }: Props) {
       </div>
 
       <RangeSelectors
-        curso={student?.curso_codigo?.toString()}
+        cursos={cursos}
         anoCurricular={anoCurricular}
         setAnoCurricular={setAnoCurricular}
       />
@@ -159,18 +174,18 @@ function Header() {
 }
 
 function RangeSelectors({
-  curso,
+  cursos,
   anoCurricular,
   setAnoCurricular,
 }: {
-  curso?: string;
+  cursos: (string | number)[];
   anoCurricular: { first: string; last: string };
   setAnoCurricular: (value: { first: string; last: string }) => void;
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <AnoCurricularSelect
-        curso={curso}
+        curso={cursos}
         value={anoCurricular.first}
         label="Do"
         onChangeValue={(value) =>
@@ -178,7 +193,7 @@ function RangeSelectors({
         }
       />
       <AnoCurricularSelect
-        curso={curso}
+        curso={cursos}
         value={anoCurricular.last}
         label="Até"
         onChangeValue={(value) =>
