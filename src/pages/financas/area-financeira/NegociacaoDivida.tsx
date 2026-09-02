@@ -40,6 +40,7 @@ import {
   TrendingUp,
   Eye,
   Percent,
+  Trash2,
 } from "lucide-react";
 import { Link, useNavigate, useNavigation } from "react-router-dom";
 import { useState } from "react";
@@ -47,12 +48,16 @@ import { Badge } from "@/components/ui/badge";
 import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { FormSelect } from "@/components/common/FormSelect";
 import { parseFilter } from "@/util/parse-filter";
-import { useQueryNegociacoes } from "@/hooks/financas/area-financeira/use-query-negociacao-divida";
+import {
+  useDeleteNegociacao,
+  useQueryNegociacoes,
+} from "@/hooks/financas/area-financeira/use-query-negociacao-divida";
 import { formatNumber } from "@/util/format-number";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { StatCard } from "@/components/common/StatCard";
 import { NegociacaoDividaModal } from "./components/NegociacaoDividaModal";
+import { NegociacaoDeleteModal } from "./components/NegociacaoDeleteModal";
 import { NegociacaoItem } from "@/services/financas/area-financeira/fetch-negociacao-dividas.service";
 import { Input } from "@/components/ui/input";
 import { NegociacaoFacturasModal } from "./components/NegociacaoFacturasModal";
@@ -86,6 +91,13 @@ function possuiFacturaPendente(item: NegociacaoItem): boolean {
   );
 }
 
+const FACTURA_ESTADO_DELETADA = 0;
+const FACTURA_ESTADO_ACTIVA = 1;
+
+function isFacturaActiva(item: NegociacaoItem): boolean {
+  return item.estado === FACTURA_ESTADO_ACTIVA;
+}
+
 export default function NegociacaoDivida() {
   //Options
   const searchOptions = [
@@ -106,6 +118,10 @@ export default function NegociacaoDivida() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedNegociacao, setSelectedNegociacao] =
     useState<NegociacaoItem>(null);
+  const [negociacaoParaEliminar, setNegociacaoParaEliminar] =
+    useState<NegociacaoItem>(null);
+  const { mutate: deleteNegociacao, isPending: isDeletingNegociacao } =
+    useDeleteNegociacao();
   const [filters, setFilters] = useState({
     anoLectivo: "23",
     curso: "",
@@ -482,6 +498,7 @@ export default function NegociacaoDivida() {
                     {/* 
                     <TableHead>Valor Prestação</TableHead> */}
                     <TableHead>Valor Restante</TableHead>
+                    <TableHead>Estado</TableHead>
                     <TableHead>Facturas</TableHead>
                     <TableHead>Acções </TableHead>
                   </TableRow>
@@ -513,6 +530,17 @@ export default function NegociacaoDivida() {
                       <TableCell>
                         <Badge> {formatNumber(item.valor_restante)} kz</Badge>
                       </TableCell>
+                      <TableCell>
+                        {isFacturaActiva(item) ? (
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                            Activa
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+                            Anulada
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-center">
                         <Button
                           size="icon"
@@ -526,27 +554,46 @@ export default function NegociacaoDivida() {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        {possuiFacturaPendente(item) && (
-                          <HasPermission
-                            blockFullAccess
-                            permission={
-                              PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
-                                .sigla
-                            }
-                          >
-                            <Button
-                              size="icon"
-                              variant="destructive"
-                              onClick={() =>
-                                navigate(
-                                  `/financas/conciliacao-divida/${item.id}`,
-                                )
+                        <div className="flex items-center gap-2">
+                          {possuiFacturaPendente(item) && (
+                            <HasPermission
+                              blockFullAccess
+                              permission={
+                                PermissionTypeDetails.LISTAR_CONCILIACAO_DIVIDA
+                                  .sigla
                               }
                             >
-                              <Percent />
-                            </Button>
-                          </HasPermission>
-                        )}
+                              <Button
+                                size="icon"
+                                variant="destructive"
+                                onClick={() =>
+                                  navigate(
+                                    `/financas/conciliacao-divida/${item.id}`,
+                                  )
+                                }
+                              >
+                                <Percent />
+                              </Button>
+                            </HasPermission>
+                          )}
+                          {isFacturaActiva(item) && (
+                            <HasPermission
+                              blockFullAccess
+                              permission={
+                                PermissionTypeDetails.ANULAR_CONCILIACAO_DIVIDA
+                                  .sigla
+                              }
+                            >
+                              <Button
+                                size="icon"
+                                variant="destructive"
+                                onClick={() => setNegociacaoParaEliminar(item)}
+                              >
+                                <Trash2 />
+                              </Button>
+                            </HasPermission>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -604,6 +651,18 @@ export default function NegociacaoDivida() {
         isOpen={openModal}
         onClose={closeModal}
         selectedNegociacao={selectedNegociacao}
+      />
+      <NegociacaoDeleteModal
+        isOpen={!!negociacaoParaEliminar}
+        negociacao={negociacaoParaEliminar}
+        isLoading={isDeletingNegociacao}
+        onClose={() => setNegociacaoParaEliminar(null)}
+        onConfirm={() => {
+          if (!negociacaoParaEliminar) return;
+          deleteNegociacao(negociacaoParaEliminar.id, {
+            onSuccess: () => setNegociacaoParaEliminar(null),
+          });
+        }}
       />
     </div>
   );
