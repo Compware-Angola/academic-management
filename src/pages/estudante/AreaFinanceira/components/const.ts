@@ -2,15 +2,19 @@ export enum TipoFluxoServico {
   NORMAL = "NORMAL",
   RECURSO = "RECURSO",
   EPOCA_ESPECIAL = "EPOCA_ESPECIAL",
+  MELHORIA_NOTAS = "MELHORIA_NOTAS",
 }
 
 const SIGLAS_RECURSO = ["IaEdRurso"]; // <- ajuste para os valores reais do seu projeto
 const SIGLAS_EPOCA_ESPECIAL = ["IeEEF"]; // <- idem
+const SIGLAS_EPOCA_MELHORIA_NOTAS = ["IaEdMdN"]; // <- idem
 
 export function getTipoFluxoServico(sigla: string): TipoFluxoServico {
   if (SIGLAS_RECURSO.includes(sigla)) return TipoFluxoServico.RECURSO;
   if (SIGLAS_EPOCA_ESPECIAL.includes(sigla))
     return TipoFluxoServico.EPOCA_ESPECIAL;
+  if (SIGLAS_EPOCA_MELHORIA_NOTAS.includes(sigla))
+    return TipoFluxoServico.MELHORIA_NOTAS;
   return TipoFluxoServico.NORMAL;
 }
 
