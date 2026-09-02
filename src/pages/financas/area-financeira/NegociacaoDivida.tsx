@@ -580,7 +580,7 @@ export default function NegociacaoDivida() {
                             <HasPermission
                               blockFullAccess
                               permission={
-                                PermissionTypeDetails.ANULAR_CONCILIACAO_DIVIDA
+                                PermissionTypeDetails.ANULAR_NEGOCIACAO_DIVIDA
                                   .sigla
                               }
                             >
