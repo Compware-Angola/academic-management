@@ -1,7 +1,9 @@
 import {
   getCadeirasEspecial,
+  getCadeirasMelhoria,
   getCadeirasRecurso,
   inscreverEpocaEspecial,
+  inscreverEpocaMelhoria,
   inscreverRecurso,
   InscricaoEpocaEspecialPayload,
   InscricaoRecursoPayload,
@@ -113,6 +115,34 @@ export const useMutateInscricaoEpocaEspecial = () => {
       inscreverEpocaEspecial(dados),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cadeiras-epoca-especial"] });
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["facturas"] });
+    },
+  });
+};
+
+export function useQueryCadeirasMelhoria(
+  { anoLetivo, matricula }: Props,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: ["cadeiras-melhoria", anoLetivo, matricula],
+    queryFn: () =>
+      getCadeirasMelhoria({
+        anoLetivo: anoLetivo!,
+        matricula: matricula!,
+      }),
+    enabled: !!anoLetivo && !!matricula,
+  });
+}
+
+export const useMutateInscricaoMelhoria = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (dados: InscricaoEpocaEspecialPayload) =>
+      inscreverEpocaMelhoria(dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cadeiras-melhoria"] });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       queryClient.invalidateQueries({ queryKey: ["facturas"] });
     },

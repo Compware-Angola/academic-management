@@ -150,20 +150,23 @@ export function ActivityModal({
             </Select>
           </div>
           <div className="space-y-2">
-            {/* <FormSelect
+            <FormSelect
               label="Ano Lectivo"
               value={form.codigo_ano_lectivo?.toString() || ""}
               onChange={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
-              options={anosLetivos?.filter(
-                (ay) => ay.estado.toLowerCase() === "activo",
-              )}
+              options={
+                anosLetivos
+                //   ?.filter(
+                //   (ay) => ay.estado.toLowerCase() === "activo",
+                // )
+              }
               map={(a) => ({
                 key: a.codigo,
                 label: a.designacao,
                 value: a.codigo,
               })}
-            /> */}
-            <AcademicYearsAvailableForOperationSelect
+            />
+            {/* <AcademicYearsAvailableForOperationSelect
               disabled={!!editId}
               onChangeValue={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
               value={form.codigo_ano_lectivo?.toString() || ""}
@@ -172,7 +175,7 @@ export function ActivityModal({
               )}
               enableDefaultActiveYear={!editId}
               label="Ano Letivo"
-            />
+            /> */}
           </div>
 
           {/* Tipo de Calendário */}

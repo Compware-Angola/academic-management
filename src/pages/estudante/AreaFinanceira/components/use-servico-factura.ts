@@ -4,11 +4,12 @@ import { ServicoItem } from "./servicos.types";
 import {
   useMutateInscricaoRecuro,
   useMutateInscricaoEpocaEspecial,
+  useMutateInscricaoMelhoria,
 } from "@/hooks/students/use-recursos-UC";
 import { toast } from "sonner";
 
 type HandleGerarFacturaParams = {
-  tipoCandidatura: number
+  tipoCandidatura: number;
   servicosItens: ServicoItem[];
   anoLetivo: string | null;
   poloId: number;
@@ -25,6 +26,7 @@ const LABEL_FLUXO: Record<TipoFluxoServico, string> = {
   [TipoFluxoServico.NORMAL]: "outros serviços",
   [TipoFluxoServico.RECURSO]: "inscrição em recurso",
   [TipoFluxoServico.EPOCA_ESPECIAL]: "inscrição em época especial",
+  [TipoFluxoServico.MELHORIA_NOTAS]: "inscrição em melhoria de notas",
 };
 
 export function useServicosFactura() {
@@ -36,6 +38,11 @@ export function useServicosFactura() {
     mutateAsync: inscreverEpocaEspecial,
     isPending: isInscrevendoEpocaEspecial,
   } = useMutateInscricaoEpocaEspecial();
+
+  const {
+    mutateAsync: inscreverMelhoria,
+    isPending: isInscrevendoMelhoria,
+  } = useMutateInscricaoMelhoria();
 
   const validarSelecaoUC = (itens: ServicoItem[]): ServicoItem | null => {
     return (
@@ -57,6 +64,7 @@ export function useServicosFactura() {
         [TipoFluxoServico.NORMAL]: [] as ServicoItem[],
         [TipoFluxoServico.RECURSO]: [] as ServicoItem[],
         [TipoFluxoServico.EPOCA_ESPECIAL]: [] as ServicoItem[],
+        [TipoFluxoServico.MELHORIA_NOTAS]: [] as ServicoItem[],
       },
     );
   };
@@ -147,9 +155,20 @@ export function useServicosFactura() {
       const gradesAlunos = itensRecurso.flatMap(
         (item) => item.cadeirasRecursoIds ?? [],
       );
-      console.log("gradesAlunos", gradesAlunos.map(c => ({ ...c, codigoGrade: c.gradeCurricula })))
+      console.log(
+        "gradesAlunos",
+        gradesAlunos.map((c) => ({ ...c, codigoGrade: c.gradeCurricula })),
+      );
       try {
-        await inscreverRecurso({ codigoMatricula, gradesAlunos: gradesAlunos.map(c => ({ ...c, codigoGrade: c.gradeCurricula })), tipoCandidatura });
+        await inscreverRecurso({
+          codigoMatricula,
+          gradesAlunos: gradesAlunos.map((c) => ({
+            ...c,
+            codigoGrade: c.gradeCurricula,
+          })),
+          tipoCandidatura,
+          anoLetivo: parseInt(anoLetivo),
+        });
         itensRecurso.forEach((item) => {
           onItemStatusChange(item.codigo, "sucesso");
           codigosSucesso.push(item.codigo);
@@ -170,7 +189,15 @@ export function useServicosFactura() {
         (item) => item.cadeirasRecursoIds ?? [],
       );
       try {
-        await inscreverEpocaEspecial({ codigoMatricula, gradesAlunos: gradesAlunos.map(c => ({ ...c, codigoGrade: c.gradeCurricula })), tipoCandidatura, });
+        await inscreverEpocaEspecial({
+          codigoMatricula,
+          gradesAlunos: gradesAlunos.map((c) => ({
+            ...c,
+            codigoGrade: c.gradeCurricula,
+          })),
+          tipoCandidatura,
+          anoLetivo: parseInt(anoLetivo),
+        });
         itensEpoca.forEach((item) => {
           onItemStatusChange(item.codigo, "sucesso");
           codigosSucesso.push(item.codigo);
@@ -182,6 +209,38 @@ export function useServicosFactura() {
         );
         falhas.push({
           nome: LABEL_FLUXO[TipoFluxoServico.EPOCA_ESPECIAL],
+          erro: msg,
+        });
+      }
+    }
+
+    // --- Grupo MELHORIA DE NOTAS ---
+    if (grupos[TipoFluxoServico.MELHORIA_NOTAS].length > 0) {
+      const itensMelhoria = grupos[TipoFluxoServico.MELHORIA_NOTAS];
+      const gradesAlunos = itensMelhoria.flatMap(
+        (item) => item.cadeirasRecursoIds ?? [],
+      );
+      try {
+        await inscreverMelhoria({
+          codigoMatricula,
+          gradesAlunos: gradesAlunos.map((c) => ({
+            ...c,
+            codigoGrade: c.gradeCurricula,
+          })),
+          tipoCandidatura,
+          anoLetivo: parseInt(anoLetivo),
+        });
+        itensMelhoria.forEach((item) => {
+          onItemStatusChange(item.codigo, "sucesso");
+          codigosSucesso.push(item.codigo);
+        });
+      } catch (error) {
+        const msg = "Falha ao inscrever em melhoria de notas.";
+        itensMelhoria.forEach((item) =>
+          onItemStatusChange(item.codigo, "erro", msg),
+        );
+        falhas.push({
+          nome: LABEL_FLUXO[TipoFluxoServico.MELHORIA_NOTAS],
           erro: msg,
         });
       }
@@ -233,6 +292,9 @@ export function useServicosFactura() {
   return {
     handleGerarFactura,
     isPending:
-      isCriandoFactura || isInscrevendoRecurso || isInscrevendoEpocaEspecial,
+      isCriandoFactura ||
+      isInscrevendoRecurso ||
+      isInscrevendoEpocaEspecial ||
+      isInscrevendoMelhoria,
   };
 }
