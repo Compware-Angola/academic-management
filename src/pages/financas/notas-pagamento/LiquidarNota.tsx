@@ -248,6 +248,10 @@ export default function LiquidarNota() {
                   <p className="text-sm text-muted-foreground">Estado</p>
                   <PagamentoStatus status={factura.estado} />
                 </div>
+                <div className="col-span-2 md:col-span-4">
+                  <p className="text-sm text-muted-foreground">Descrição</p>
+                  <p> {factura.descricao}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
