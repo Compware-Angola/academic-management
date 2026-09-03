@@ -515,6 +515,7 @@ export default function Deadlines() {
               /> */}
               <AcademicYearsAvailableForOperationSelect
                 disabled={isEditing ? true : false}
+                onlyConfigurable={false}
                 onChangeValue={(v) => setForm({ ...form, anoletivo: v })}
                 tipoCandidaturaId={parseFilter(form.tipoCandidaturaId)}
                 value={form.anoletivo}

@@ -94,7 +94,9 @@ export default function AddMarkingAssessmentModal({
   const tipoCandidaturaFiltered = useMemo(() => {
     return tipoCandidatura.filter((tipo) => {
       if (
-        !hasPermission(PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla) &&
+        !hasPermission(
+          PermissionTypeDetails.MARCAR_PROVA_POS_GRADUACAO.sigla,
+        ) &&
         (tipo.sigla === "DTR" || tipo.sigla === "MST")
       ) {
         return false;
@@ -367,6 +369,7 @@ export default function AddMarkingAssessmentModal({
               }
               tipoCandidaturaId={tipoCandidaturaId ?? 1}
               disabled={!filters.tipoCandidatura}
+              onlyConfigurable={false}
             />
 
             {/* Semestre */}
@@ -465,7 +468,9 @@ export default function AddMarkingAssessmentModal({
             <GradeCurricularSelect
               value={filters.unidadeCurricular}
               disabled={!filters.curso || !filters.semestre}
-              onChangeValue={(v) => setFilters({ ...filters, unidadeCurricular: v })}
+              onChangeValue={(v) =>
+                setFilters({ ...filters, unidadeCurricular: v })
+              }
               curso={parseFilter(filters.curso)}
               semestre={parseFilter(filters.semestre)}
               classe={parseFilter(filters.anoCurricular)}

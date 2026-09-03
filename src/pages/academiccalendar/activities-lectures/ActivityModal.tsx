@@ -150,7 +150,7 @@ export function ActivityModal({
             </Select>
           </div>
           <div className="space-y-2">
-            <FormSelect
+            {/* <FormSelect
               label="Ano Lectivo"
               value={form.codigo_ano_lectivo?.toString() || ""}
               onChange={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
@@ -165,8 +165,8 @@ export function ActivityModal({
                 label: a.designacao,
                 value: a.codigo,
               })}
-            />
-            {/* <AcademicYearsAvailableForOperationSelect
+            /> */}
+            <AcademicYearsAvailableForOperationSelect
               disabled={!!editId}
               onChangeValue={(v) => setForm({ ...form, codigo_ano_lectivo: v })}
               value={form.codigo_ano_lectivo?.toString() || ""}
@@ -175,7 +175,8 @@ export function ActivityModal({
               )}
               enableDefaultActiveYear={!editId}
               label="Ano Letivo"
-            /> */}
+              onlyConfigurable={false}
+            />
           </div>
 
           {/* Tipo de Calendário */}
