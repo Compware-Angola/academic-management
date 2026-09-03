@@ -1,11 +1,10 @@
-import { useQueryClassFilterByCurso } from "@/hooks/classes/use-query-disciplina-with-filter";
+import { useQueryClassesByCursos } from "@/hooks/classes/use-query-classes-by-cursos";
 import { FormSelect } from "../FormSelect";
-import { useQueryAnoAcademico } from "@/hooks/queries/use-query-ano-academico";
 import { useId } from "react";
 
 interface AnoCurricularSelectProps {
   value: string;
-  curso: string;
+  curso?: string | (string | number)[];
   onChangeValue: (v: string) => void;
   disabled?: boolean;
   enableDefaultSelectItem?: boolean;
@@ -19,8 +18,9 @@ const AnoCurricularSelect = ({
   enableDefaultSelectItem,
   label = "Ano Curricular",
 }: AnoCurricularSelectProps) => {
+  const cursos = Array.isArray(curso) ? curso : curso ? [curso] : [];
   const { data: classes = [], isLoading: isLoadingClasses } =
-    useQueryClassFilterByCurso({ curso });
+    useQueryClassesByCursos(cursos);
 
   const id = useId();
   const defaultSelectItem = enableDefaultSelectItem
