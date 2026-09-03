@@ -135,7 +135,7 @@ export function InscricoesUC({
         <CardContent className="space-y-6">
           <div className="grid grid-cols-3 items-end  gap-4">
             <AcademicYearSelect
-              onlyActive
+              // onlyActive
               value={anoLetivo ?? ""}
               onChangeValue={(v) => setAnoLetivo(v)}
             />

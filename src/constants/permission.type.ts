@@ -295,7 +295,7 @@ export enum PermissionType {
   ANULAR_PAGAMENTO = "ANULAR_PAGAMENTO",
   ANULAR_MULTA = "ANULAR_MULTA",
   LISTAR_CONCILIACAO_DIVIDA = "LISTAR_CONCILIACAO_DIVIDA",
-  ANULAR_CONCILIACAO_DIVIDA = "ANULAR_CONCILIACAO_DIVIDA",
+  ANULAR_NEGOCIACAO_DIVIDA = "ANULAR_NEGOCIACAO_DIVIDA",
   LISTAR_APROVACAO_CONCILIACAO_DIVIDA = "LISTAR_APROVACAO_CONCILIACAO_DIVIDA",
   INSCRICAO_EM_AVALIACOES = "INSCRICAO_EM_AVALIACOES",
 }
@@ -1424,8 +1424,8 @@ export const PermissionTypeDetails = {
     designacao: "Conciliacão de Divida",
     sigla: "conc_div",
   },
-  ANULAR_CONCILIACAO_DIVIDA: {
-    designacao: "Anular Conciliacão de Divida",
+  ANULAR_NEGOCIACAO_DIVIDA: {
+    designacao: "Anular Negociação de Divida",
     sigla: "anul_conc_div",
   },
   LISTAR_APROVACAO_CONCILIACAO_DIVIDA: {
