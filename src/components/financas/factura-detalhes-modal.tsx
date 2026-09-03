@@ -111,6 +111,21 @@ export function FacturaDetalhesModal({
                 </span>
               )}
             </div>
+            {factura?.descricao === "Negociação de Dívida - Entrada 50%" && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-full text-red-800 text-xs font-medium shadow-sm  animate-bounce">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                1ª Parcela da Negociação de Dívida (50%)
+              </div>
+            )}
+
+            {factura?.descricao?.includes(
+              "Negociação de Dívida - Saldo Restante",
+            ) && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-full text-red-800 text-xs font-medium shadow-sm  animate-bounce">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                2ª Parcela da Negociação de Dívida (50%)
+              </div>
+            )}
             {factura && <StatusBadge status={factura.estado} />}
           </DialogTitle>
         </DialogHeader>
