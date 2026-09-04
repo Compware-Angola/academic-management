@@ -67,20 +67,20 @@ export function DiplomaPreview({ data }: DiplomaPreviewProps) {
         ref={diplomaRef}
         className="diploma-preview bg-white text-[#111111] w-full max-w-[900px] mx-auto border shadow-sm"
       >
-        <div className="px-16 py-14 min-h-[1100px] flex flex-col">
+        <div className="px-16 pt-[240px] pb-[55px] min-h-[1100px] flex flex-col">
           <p
-            className="text-[9px] text-center mb-4 text-[#777777] leading-[1.4]"
+            className="text-[8px] text-center mb-1 font-bold text-[#111111] leading-[1.4]"
             style={{ fontFamily: "Helvetica, sans-serif" }}
           >
             Autorizado em Conselho de Ministros, pelo Decreto nº 33/97 de Maio,
             publicado no Diário da República 1ª Série nº 55
           </p>
 
-          <h1 className="text-[34px] text-center mb-7 tracking-[1px]">
+          <h1 className="text-[34px] text-center mb-[18px] tracking-[1px]">
             Diploma
           </h1>
 
-          <div className="text-[15px] leading-[2] text-justify">
+          <div className="text-[16px] leading-[2] text-justify">
             <p>
               Eu, {data.reitor || "Reitor da Universidade"}, Reitor da
               Universidade Metodista de Angola, faço saber que{" "}
@@ -96,7 +96,7 @@ export function DiplomaPreview({ data }: DiplomaPreviewProps) {
               .
             </p>
 
-            <p className="mt-6">
+            <p className="mt-2">
               E para que conste, mandámos passar o presente Diploma que outorga
               os direitos e prerrogativas de acordo com aquele título, em
               conformidade com a lei vigente, que vai assinado e autenticado com
@@ -112,26 +112,26 @@ export function DiplomaPreview({ data }: DiplomaPreviewProps) {
 
             <div className="grid grid-cols-2 gap-16 items-start mt-[85px]">
               <div className="text-center">
-                <p className="text-[11px] leading-[1.5]">O Reitor</p>
-                <div className="border-t border-[#111111] w-[180px] mx-auto my-[6px]" />
-                <p className="text-[11px] leading-[1.5]">
+                <p className="text-[11px] leading-[2.5]">O Reitor</p>
+                <div className="border-t border-[#111111] w-[180px] mx-auto my-[10px]" />
+                <p className="text-[11px] leading-[2.5]">
                   Prof. Dr. {data.reitor || "Tiago Caungo Mutombo"}
                 </p>
               </div>
 
               <div className="text-center">
-                <p className="text-[11px] leading-[1.5]">
+                <p className="text-[11px] leading-[2.5]">
                   A Directora dos Serviços Académicos
                 </p>
-                <div className="border-t border-[#111111] w-[180px] mx-auto my-[6px]" />
-                <p className="text-[11px] leading-[1.5]">
+                <div className="border-t border-[#111111] w-[180px] mx-auto my-[10px]" />
+                <p className="text-[11px] leading-[2.5]">
                   Lic. Margarida da Silva Rodrigues
                 </p>
               </div>
             </div>
 
             {data.viaDiploma ? (
-              <p className="text-center text-[11px] mt-6 text-[#8B6B2E]">
+              <p className="text-center text-[11px] mt-3 text-[#8B6B2E]">
                 {data.viaDiploma}
               </p>
             ) : null}
