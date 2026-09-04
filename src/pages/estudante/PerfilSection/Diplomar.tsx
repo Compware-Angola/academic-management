@@ -85,6 +85,7 @@ export function Diplomar({ value, codigoMatricula }: DiplomarProps) {
       diplomarAluno({
         codigoMatricula,
         imprimeCartaConclusao: false,
+        dataConclusao: dataActa,
         dataActa,
         fileName: uploaded?.key ?? null, // guardamos o key, não o filename
       });

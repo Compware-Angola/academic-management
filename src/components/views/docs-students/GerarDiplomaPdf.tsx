@@ -59,17 +59,18 @@ const s = StyleSheet.create({
     position: "relative",
   },
   content: {
-    marginTop: 140,
+    marginTop: 240,
     marginBottom: 55,
     marginHorizontal: 65,
     flexGrow: 1,
   },
   topoTexto: {
     fontFamily: "Helvetica",
-    fontSize: 9,
+    fontSize: 6,
     textAlign: "center",
-    color: COR.cinzaClaro,
-    marginBottom: 18,
+    color: COR.preto,
+    marginBottom: 10,
+    fontWeight: "bold",
     lineHeight: 1.4,
   },
   titulo: {
@@ -77,15 +78,15 @@ const s = StyleSheet.create({
     fontSize: 34,
     textAlign: "center",
     color: COR.preto,
-    marginBottom: 28,
+    marginBottom: 18,
     letterSpacing: 1,
   },
   corpoWrap: {
-    marginTop: 25,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 5,
   },
   corpoTexto: {
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 2,
     textAlign: "justify",
     color: COR.preto,
@@ -95,11 +96,11 @@ const s = StyleSheet.create({
     fontWeight: "bold",
   },
   dataWrap: {
-    marginTop: 50,
+    marginTop: 20,
     alignItems: "center",
   },
   dataTexto: {
-    fontSize: 12,
+    fontSize: 14,
     color: COR.preto,
     textAlign: "center",
   },
@@ -117,16 +118,16 @@ const s = StyleSheet.create({
     width: 180,
     borderBottomWidth: 1,
     borderBottomColor: COR.preto,
-    marginVertical: 6,
+    marginVertical: 10,
   },
   assinaturaTexto: {
-    fontSize: 11,
+    fontSize: 12,
     textAlign: "center",
     color: COR.preto,
-    lineHeight: 1.5,
+    lineHeight: 2.5,
   },
   viaTexto: {
-    marginTop: 24,
+    marginTop: 12,
     textAlign: "center",
     fontSize: 11,
     fontFamily: "English111 Vivace BT",
@@ -170,7 +171,8 @@ export function DiplomaDocument({ dados }: DiplomaDocumentProps) {
               em <Text style={s.bold}>{dados.curso}</Text>, com a classificação
               final de{" "}
               <Text style={s.bold}>
-                {dados.notaFinal} ({capitalizarPrimeira(dados.notaFinalExtenso)})
+                {dados.notaFinal} ({capitalizarPrimeira(dados.notaFinalExtenso)}
+                )
               </Text>
               .
             </Text>

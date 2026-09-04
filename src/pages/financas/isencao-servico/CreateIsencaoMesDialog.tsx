@@ -1,4 +1,3 @@
-import { AcademicYearSelect } from "@/components/common/global-selects/AcademicYearSelect";
 import { CourseSelect } from "@/components/common/global-selects/CourseSelect";
 import { FacultySelect } from "@/components/common/global-selects/FacultySelect";
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,7 @@ import { InvoiceStatusBadge } from "@/components/common/Invoice-status-badge";
 import { InvoiceEnum } from "@/enums/invoice.enum";
 import { EnrollmentStudentSelect } from "@/components/common/global-selects/EnrollmentStudentSelect";
 import { useMutationCreateIsencaoMensalidade } from "@/hooks/financas/isencao-servico/use-mutation-create-isencao-mensalidade";
+import { AcademicYearsAvailableForOperationSelect } from "@/components/common/global-selects/AcademicYearsAvailableForOperation";
 type CreateIsencaoServicoDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -139,10 +139,14 @@ export function CreateIsencaoMesDialog({
           </div>
         </DialogHeader>
         <div className="grid grid-cols-3 gap-4">
-          <AcademicYearSelect
+          <AcademicYearsAvailableForOperationSelect
             value={filters.anoLectivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLectivo: v })}
+            onlyConfigurable={false}
+            label="Ano Letivo"
+            enableDefaultActiveYear
           />
+
           <FacultySelect
             value={filters.faculdade}
             onChangeValue={(v) => setFilters({ ...filters, faculdade: v })}

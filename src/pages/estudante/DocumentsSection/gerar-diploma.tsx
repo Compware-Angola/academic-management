@@ -31,7 +31,6 @@ export function GerarDiploma({ value, codigoMatricula }: GerarDiplomaProps) {
     handleGerarDiploma({
       codigoMatricula,
       segundaViaDiploma,
-      dataConclusao: dataEmissao,
     });
   }
 
