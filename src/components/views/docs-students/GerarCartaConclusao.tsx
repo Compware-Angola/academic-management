@@ -89,7 +89,6 @@ const s = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
     fontSize: 18,
     color: COR.preto,
-    textTransform: "uppercase" as const,
     textAlign: "center" as const,
     letterSpacing: 4,
     marginBottom: 20,
@@ -282,7 +281,7 @@ export function CertidaoDocument({
           <View style={s.dataWrap}>
             <Text style={s.dataTexto}>
               Universidade Metodista de Angola, em Luanda, aos{" "}
-              {formatDataExtenso(dados?.data_conclusao)}
+              {formatDataExtenso(new Date().toISOString())}.
             </Text>
           </View>
 
