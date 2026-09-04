@@ -3,7 +3,6 @@ import { axiosNestGa } from "@/lib/axios-nest-ga";
 export type GerarDiplomaPayload = {
   codigoMatricula: number;
   segundaViaDiploma?: boolean;
-  dataConclusao?: string;
 };
 
 export type GerarDiplomaResponse = {
