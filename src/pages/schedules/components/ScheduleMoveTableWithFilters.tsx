@@ -137,22 +137,22 @@ export const ScheduleMoveTableWithFilters = ({
             disabled
             value={filters.tipoCandidatura}
             placeholder="Tipo de Candidatura"
-            onChangeValue={() => { }}
+            onChangeValue={() => {}}
           />
 
           <AcademicYearSelect
             enableDefaultActiveYear
-            onlyActive
+            // onlyActive
             disabled
             tipoCandidaturaId={parseFilter(filters.tipoCandidatura)}
             value={filters.anoLetivo}
-            onChangeValue={() => { }}
+            onChangeValue={() => {}}
           />
 
           <SemestreSelect
             value={filters.semestre}
             disabled
-            onChangeValue={() => { }}
+            onChangeValue={() => {}}
           />
 
           <CourseSelect
@@ -161,14 +161,14 @@ export const ScheduleMoveTableWithFilters = ({
               tipoCandidaturaId: parseFilter(filters.tipoCandidatura),
             }}
             value={filters.curso}
-            onChangeValue={() => { }}
+            onChangeValue={() => {}}
           />
 
           <AnoCurricularSelect
             value={filters.anoCurricular}
             disabled={!!course === false}
             curso={course}
-            onChangeValue={() => { }}
+            onChangeValue={() => {}}
           />
 
           {/* <SelectUnidadeCurricularWithFilter
@@ -184,7 +184,7 @@ export const ScheduleMoveTableWithFilters = ({
           <GradeCurricularSelect
             placeholder="Unidade Curricular"
             value={filters.unidadeCurricular}
-            onChangeValue={() => { }}
+            onChangeValue={() => {}}
             curso={parseFilter(filters.curso)}
             semestre={parseFilter(filters.semestre)}
             classe={parseFilter(filters.anoCurricular)}
@@ -243,11 +243,13 @@ export const ScheduleMoveTableWithFilters = ({
               {tableData.map((horario) => (
                 <TableRow
                   key={horario.codigo}
-                  className={`cursor-pointer transition-colors ${horarioOrigemId === horario.codigo ? "bg-primary/10" : ""
-                    } ${originScheduleId === horario.codigo
+                  className={`cursor-pointer transition-colors ${
+                    horarioOrigemId === horario.codigo ? "bg-primary/10" : ""
+                  } ${
+                    originScheduleId === horario.codigo
                       ? "line-through opacity-50 cursor-not-allowed"
                       : ""
-                    }`}
+                  }`}
                   onClick={() => handleSelecionarHorarioOrigem(horario.codigo)}
                 >
                   <TableCell>

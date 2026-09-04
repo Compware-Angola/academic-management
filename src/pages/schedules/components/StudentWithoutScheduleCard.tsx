@@ -211,7 +211,7 @@ export const StudentWithoutScheduleCard = ({
 
           <AcademicYearSelect
             enableDefaultActiveYear
-            onlyActive
+            // onlyActive
             tipoCandidaturaId={parseFilter(filters.tipoCandidatura)}
             value={filters.anoLetivo}
             onChangeValue={(v) => setFilters({ ...filters, anoLetivo: v })}
